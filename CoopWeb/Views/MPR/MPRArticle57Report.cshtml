@@ -1,0 +1,159 @@
+﻿
+<script src="~/Scripts/AngularFramework/MPRArticle57Report.js?v=@DateTime.Today.Ticks"></script>
+<link href="~/Scripts/google_hindi/google_transliteration.css" rel="stylesheet" />
+<script src="~/Scripts/xlsx.full.min.js"></script>
+
+<style>
+    .inputapi-transliterate-indic-suggestion-menu {
+        z-index: 99999 !important;
+        display: block;
+    }
+
+    .table > tbody > tr > td, .table > tbody > tr > th, .table > tfoot > tr > td, .table > tfoot > tr > th, .table > thead > tr > td {
+        padding: 1px;
+        padding-right: 5px;
+        padding-left: 5px;
+    }
+</style>
+
+<div ng-app="MPRArticle57ReportMod">
+    <div ng-controller="MPRArticle57ReportCnt">
+
+        <div class="col-md-12">
+            <h3 class="citizen-dash-head ng-binding" style="margin-top:0px;">धारा 57(1) के अंतर्गत लंबित जांचों की प्रगति का विवरण</h3>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#">  {{translation.Home}}</a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;"> {{translation.New}} </span>
+                        <i class="fa fa-angle-right"> </i>
+                        <span style="margin: 0 5px;"> Article 57 Report List </span>
+                    </li> 
+                </ul>
+            </div>
+        </div>
+
+        <div style="margin-top:30px;padding-top:30px">
+            <div class="col-md-12">
+                <div class="citizen-dash-head" style="overflow: hidden;">
+                    <div class="table-dropdown" id="search-filter" style="margin-bottom: 5px;">
+                        <div class="col-lg-12" style="margin-bottom: 5px; padding-left: 0;">
+                            <input type="hidden" id="hdnRoleId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).RoleId)" />
+                            <input type="hidden" id="hdnDistrictId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DistrictId)" />
+
+                            @*<div class="col-md-2 ">
+                                <label>{{ translation.DistrictHeading}}</label>
+                                <select name="DISTRICT_ID" ng-model="DISTRICT_ID" id="ddrDistrictId" class="form-control" ng-init="DISTRICT_ID='0'">
+                                    <option value="0">{{translation.SelectOption}}</option>
+                                    <option ng-repeat="district in DistrictList" value="{{district.DISTRICT_ID}}">
+                                        {{_language =='en-us' ?  district.DISTRICT_ENG : district.DISTRICT_MANGAL}}
+                                    </option>
+                                </select>
+                            </div>*@
+
+                            @*<div class="col-md-2">
+                                    <label for="search">{{translation.ItemPerPage}}:</label>
+                                    <input type="number" min="1" max="1000" class="form-control" ng-model="pageSize">
+                                </div>*@
+
+                            <div class="col-md-4 margin-Top20">
+                                <label>&nbsp;</label><br>
+                                @*<button type="button" ng-click="searchRequest(GetSocietyLocationList)" class="btn btn-primary dev-btn ng-binding">{{translation.Search}}</button>*@
+                                @*<button type="button" ng-click="ClearSearch()" class="btn btn-primary dev-btn ng-binding">{{translation.Clear}}</button>*@
+                                @*<button type="button" ng-click="exportAllToExcel()" class="btn btn-success dev-btn">
+                                    <i class="fa fa-file-excel-o"></i> Export Excel
+                                </button>*@
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div style="overflow-x: auto;">
+                        <table class="table table-responsive devtable" ng-if="MPRArticle57ReportList.length > 0">
+                            <thead>
+                                <tr>
+                                    <th rowspan="2">#</th>
+                                    <th rowspan="2">कार्यालय का नाम</th>
+                                    <th rowspan="2">वर्ष के प्रारंभ में बकाया जांचे</th>
+                                    <th rowspan="2">गत माह तक प्राप्त जांचे</th>
+                                    <th rowspan="2">माह में प्राप्त जांचे</th>
+                                    <th rowspan="2">माह तक कुल जांचे</th>
+                                    <th rowspan="2">गत माह तक निस्तारित जांचे</th>
+                                    <th rowspan="2">माह में निस्तारित जांचे</th>
+                                    <th rowspan="2">कुल निस्तारित जांचे</th>
+                                    <th rowspan="2">माह के अन्त में शेष जांचे</th>
+                                    <th colspan="2">माह के अन्त में शेष जांचे में से</th>
+                                    <th colspan="4">लंबित जांचों की अवधि</th> 
+                                </tr>
+                                <tr>
+                                    <th>धारा 57(1) के अंतर्गत प्राप्त रिपोर्ट</th>
+                                    <th>धारा 57(1) के अंतर्गत जांच परिणाम जारी होने शेष है</th>
+
+                                    <th>एक वर्ष से कम</th>
+                                    <th>एक वर्ष से तीन वर्ष</th>
+                                    <th>तीन वर्ष से पांच वर्ष</th>
+                                    <th>पांच वर्ष से अधिक</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="item in MPRArticle57ReportList track by $index">
+                                    <td>{{$index + 1}}</td>
+                                    <td>{{item.DISTRICT_ENG}}</td>
+
+                                    <td>{{item.InYearPendingCase}}</td>
+                                    <td>{{item.LastMonthCaseReceived}}</td>
+                                    <td>{{item.InMonthCaseReceived}}</td>
+                                    <td>{{item.TotalReceived}}</td>
+
+                                    <td>{{item.LastMonthCaseDisposed}}</td>
+                                    <td>{{item.InMonthCaseDisposed}}</td>
+                                    <td>{{item.TotalDisposed}}</td>
+                                    <td>{{item.TotalPending}}</td>
+                                    <td>{{item.NoCaseReport}}</td>
+                                    <td>{{item.NoPendingCaseReport}}</td>
+
+                                    <td>{{item.No1YearPending}}</td>
+                                    <td>{{item.No1to3YearPending}}</td>
+                                    <td>{{item.No3to5YearPending}}</td>
+                                    <td>{{item.No5YearPending}}</td>
+                                </tr>
+                            </tbody>
+                            <tfoot>
+                                <tr class="total-row">
+                                    <td colspan="2">योग (Total)</td>
+                                    <td>{{InYearPendingCase}}</td>
+                                    <td>{{LastMonthCaseReceived}}</td>
+                                    <td>{{InMonthCaseReceived}}</td>
+                                    <td>{{TotalReceived}}</td>
+                                    <td>{{LastMonthCaseDisposed}}</td>
+                                    <td>{{InMonthCaseDisposed}}</td>
+                                    <td>{{TotalDisposed}}</td>
+                                    <td>{{TotalPending}}</td>
+
+                                    <td>{{NoCaseReport}}</td>
+                                    <td>{{NoPendingCaseReport}}</td>
+                                    <td>{{No1YearPending}}</td>
+                                    <td>{{No1to3YearPending}}</td>
+                                    <td>{{No3to5YearPending}}</td>
+                                    <td>{{No5YearPending}}</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                     
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+
+

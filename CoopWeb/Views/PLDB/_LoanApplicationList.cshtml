@@ -1,0 +1,145 @@
+﻿
+@{Layout = null;}
+
+<div ng-show="divLoanApplicationList" class="table-responsive citizen-dash-head">
+    <input type="hidden" id="hdnLevelId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).LevelId)" />
+    <input type="hidden" id="hdnPLDBId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).PLDBId)" />
+    <input type="hidden" id="hdnPLDBBrancchId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).PLDBBrancchId)" />
+
+    <div class="table-dropdown" id="search-filter" style="margin-bottom: 10px;">
+        <div class="col-lg-2" ng-if="ShowPLDB">
+            <label for="search" class="ng-binding">{{translation.PLDB}}:</label>
+            <select ng-model="MemberRegistration.PLDB_ID" name="pldb_id" id="ddlDistrict" class="form-control" ng-init="MemberRegistration.PLDB_ID=''" ng-change="PLDBBranchList('0')">
+                <option value="">{{translation.SelectOption}}</option>
+                <option ng-repeat="itemPLDB in PLDB | orderBy:'PldbId'" value="{{itemPLDB.PldbId}}">
+                    {{itemPLDB.PLDBName}}
+                </option>
+            </select>
+        </div>
+
+        <div class="col-lg-2" ng-if="ShowBranch">
+            <label for="search" class="ng-binding">{{translation.Branch}}:</label>
+            <select name="branch_id" ng-model="MemberRegistration.BLOCK_ID" id="ddlblock" class="form-control" ng-init="MemberRegistration.Branch_ID=''">
+                <option value="" disabled>{{translation.SelectOption}}</option>
+                <option ng-repeat="itemBlock in PLDBBranches | orderBy:'BLOCK_ENG'" value="{{itemBlock.BLOCK_ID}}">
+                    {{_language =='en-us' ?  itemBlock.BLOCK_ENG : itemBlock.BLOCK_MANGAL}}
+                </option>
+            </select>
+        </div>
+
+        <div class="col-lg-2">
+            <label for="search" class="ng-binding">{{translation.Status}}:</label>
+            <select id="ddlStatus" name="status" ng-model="MemberRegistration.StatusId" class="form-control" ng-init="MemberRegistration.StatusId=''">
+                <option value="">{{translation.SelectOption}}</option>
+                <option ng-repeat="item in ProcessStatus | orderBy:'ProceesStatusTextHi'" value="{{item.status_id}}">
+                    {{_language =='en-us' ?  item.ProceesStatusTextEn : item.ProceesStatusTextHi}}
+                </option>
+            </select>
+        </div>
+
+        <div class="col-lg-2">
+            <label for="search" class="ng-binding">{{translation.Search}}:</label>
+            <input ng-model="q" name="SearchText" id="search" class="form-control" placeholder={{translation.filttertext}} autocomplete="off">
+        </div>
+        <div class="col-md-2">
+            <label>&nbsp;</label><br>
+            <button type="button" ng-click="searchRequest(GetLoanApplicationList)" class="btn btn-primary dev-btn ng-binding">{{translation.Search}}</button>
+            <button type="button" ng-click="ClearSearch()" class="btn btn-primary dev-btn ng-binding">{{translation.RESET}}</button>
+        </div>
+    </div>
+
+    <table id="example" class="table devtable" style="border:1px solid rgb(222, 221, 221); float: left;">
+        <thead>
+            <tr>
+                <th>
+                    #
+                </th>
+                <th>
+                    {{translation.ApplicationNo}}
+                </th>
+                <th>
+                    {{translation.PLDB}}
+                </th>
+                <th>
+                    {{translation.Branch}}
+                </th>
+                <th>
+                    {{translation.MemberName}}
+                </th>
+                <th>
+                    {{translation.MembershipNo}}
+                </th>
+
+                <th>{{translation.Type}}</th>
+                <th>{{translation.Sector}}</th>
+                <th>{{translation.Scheme}}</th>
+                <th>{{translation.PurposeOfLoan}}</th>
+                <th>{{translation.LoanType}}</th>
+                <th>{{translation.EstimatedTotalAmount}}</th>
+                <th>{{translation.LoanAmountApplied}}</th>
+                <th>{{translation.ApprovedAmount}}</th>
+                <th>{{translation.DisbursedAmount}}</th>
+
+                <th>
+                    {{translation.SubmissionDate}}
+                </th>
+                <th>
+                    {{translation.Status}}
+                </th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="item in LoanApplicationList">
+                <td>{{(((DataPagingDetails.PageNumber - 1) * DataPagingDetails.PageSize) + 1)+$index}}</td>
+                <td>{{item.application_no}}</td>
+                <td>{{item.PLDBName}}</td>
+                <td>{{_language =='en-us' ?  item.BLOCK_ENG : item.BLOCK_MANGAL}}</td>
+                <td>{{item.MemberName}}</td>
+                <td>{{item.MembershipNo}}</td>
+                <td>{{_language =='en-us' ?  item.Farming_NonFarming : item.Farming_NonFarming}}</td>
+                <td>{{_language =='en-us' ?  item.sector_name_en : item.sector_name_hi}}</td>
+                <td>{{_language =='en-us' ?  item.scheme_name_en : item.scheme_name_hi}}</td>
+                <td>{{_language =='en-us' ?  item.purpose_name_en : item.purpose_name_hi}}</td>
+                <td>{{_language =='en-us' ?  item.loan_type_en : item.loan_type_hi}}</td>
+                <td>{{item.estimated_total_amount}}</td>
+                <td>{{item.loan_amount_applied}}</td>
+                <td>{{item.loan_amount_applied}}</td>
+                <td>{{item.amount_disbursed}}</td>
+                <td>{{item.FormatedDate}}</td>
+                <td>{{_language =='en-us' ?  item.ProceesStatusTextEn : item.ProceesStatusTextHi}}</td>
+                <td class="add-more-td">
+                    <a title="{{translation.ShowDetails}}" ng-click="ApplicationEdit(item)"><i class="fa fa-info-circle infoicon-edit"></i></a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div ng-if="DataPagingDetails.TotalPages>1" class="dataTables_paginate paging_simple_numbers" id="dataTables-example_paginate">
+        <div class="dataTables_info" id="dataTables-example_info" role="status" aria-live="polite">
+            Total Records: {{DataPagingDetails.TotalRecords}}
+        </div>
+        <ul class="pagination pagination_1" style="margin-left: 10px !important;">
+            <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« First</span></li>
+            <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« Previous</span></li>
+
+            <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest('1',GetLoanApplicationList)" style="cursor: pointer;">
+                <span>«First</span>
+            </li>
+            <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest(DataPagingDetails.PageNumber-1,GetLoanApplicationList)" style="cursor:pointer;">
+                <span>« Previous</span>
+            </li>
+            <li class="{{n==DataPagingDetails.PageNumber?'active':''}}" style="{{n==DataPagingDetails.PageNumber?'':'cursor: pointer'}}" ng-repeat="n in PagingRange(DataPagingDetails.StartPageNumber,DataPagingDetails.EndPageNumber,DataPagingDetails.TotalPages)" ng-click="pageRequest(n,GetLoanApplicationList)"><span>{{n}}</span></li>
+            <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Next</span></li>
+            <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Last</span></li>
+            <li ng-if="DataPagingDetails.PageNumber!= DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.PageNumber+1,GetLoanApplicationList)" style="cursor:pointer;">
+                <span>Next »</span>
+            </li>
+            <li ng-if="DataPagingDetails.PageNumber != DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.TotalPages,GetLoanApplicationList)" style="cursor:pointer;">
+                <span>Last »</span>
+            </li>
+        </ul>
+    </div>
+
+</div>
+

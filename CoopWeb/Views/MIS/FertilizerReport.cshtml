@@ -1,0 +1,418 @@
+﻿@{
+    ViewBag.Title = "Fertilizer Report (State-District Wise)";
+}
+
+
+<script type="text/javascript">
+    var tableToExcel = (function () {
+        var uri = 'data:application/vnd.ms-excel;base64,'
+            , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>'
+            , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) }
+            , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
+        return function (table, name) {
+            if (!table.nodeType) table = document.getElementById(table)
+            var ctx = { worksheet: name || 'Worksheet', table: table.innerHTML }
+            window.location.href = uri + base64(format(template, ctx))
+        }
+    })()
+</script>
+
+<script src="~/Scripts/AngularFramework/FertilizerReport.js"></script>
+
+<div ng-app="FertilizerReportMod" ng-controller="FertilizerReportCnt">
+
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <h3 class="citizen-dash-head">{{translation.FertilizerReport}} </h3>
+    </div>
+
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="devpage-breadcrumb">
+            <ul class="page-breadcrumb">
+                <li class="dev-page-br">
+                    <i class="fa fa-home"> </i>
+                    <a href="#"> {{translation.MIS}} </a>
+                    <i class="fa fa-angle-right"> </i>
+                </li>
+                <li style="float: left">
+                    <span style="margin: 0 5px;"> {{translation.FertilizerReport}} </span>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="table-responsive citizen-dash-head">
+            <div class="col-lg-12">
+                <div class="col-lg-2">{{ translation.FilterType}}</div>
+                <div class="col-lg-4">
+                    <input name="rdoReportType" type="radio" ng-model="Fertilizer.FilterType" value="1" ng-checked="1" ng-change="FilterTypeChanged()" /> &nbsp; {{ translation.ByOpeningBalance}}
+                    <input name="rdoReportType" type="radio" ng-model="Fertilizer.FilterType" value="2" ng-change="FilterTypeChanged()" /> &nbsp; {{ translation.BySales}}
+                </div>
+            </div>
+            <div class="col-lg-12" style="margin-top:30px;">
+                <div class="col-lg-2">{{ translation.District}}</div>
+                <div class="col-lg-4">
+                    <select ng-model="Fertilizer.DISTRICT_ID" id="ddlDistrict" class="form-control" ng-init="Fertilizer.DISTRICT_ID='0'">
+                        <option value="0">{{translation.SelectOption}}</option>
+                        <option ng-repeat="itemDist in DistrictList | orderBy:'DISTRICT_ENG'" value="{{itemDist.DISTRICT_ID}}">
+                            {{_language =='en-us' ?  itemDist.DISTRICT_ENG : itemDist.DISTRICT_MANGAL}}
+                        </option>
+                    </select>
+                </div>
+                <div class="col-lg-2">{{ translation.DealerNature}}</div>
+                <div class="col-lg-4">
+                    <select ng-model="Fertilizer.NatureId" class="form-control" ng-init="Fertilizer.NatureId='0'">
+                        @*FertilizerType*@
+                        <option value="0">{{translation.SelectOption}}</option>
+                        <option ng-repeat="item in DealerNatures | orderBy:'NatureId'" value="{{item.NatureId}}">
+                            {{_language =='en-us' ?  item.DealerNatureEn : item.DealerNatureEn}}
+                        </option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="col-lg-12" style="margin-top:30px;">
+                <div class="col-lg-2" ng-show="Fertilizer.FilterType=='1'">{{ translation.Date}}</div>
+                <div class="col-lg-4" ng-show="Fertilizer.FilterType=='1'">
+                    <input name="FertilizerDateOn" id="txtFertilizerDateOn" class="form-control devcalender SetCalender" disabled="disabled" ng-model="Fertilizer.DateOn" />
+                </div>
+
+                <div class="col-lg-2" ng-show="Fertilizer.FilterType=='2'">{{ translation.YEAR}}</div>
+                <div class="col-lg-4" ng-show="Fertilizer.FilterType=='2'">
+                    <select ng-model="Fertilizer.FertilizerYear" id="ddlTransactionYear" class="form-control" ng-init="Fertilizer.FertilizerYear='0'" ng-change="GetRetailerMonthList()">
+                        <option value="0">{{translation.SelectOption}}</option>
+                        <option ng-repeat="fertilizerYear in RetailerTransactionYear" value="{{fertilizerYear}}">
+                            {{_language =='en-us' ?  fertilizerYear : fertilizerYear}}
+                        </option>
+                    </select>
+                </div>
+
+                <div class="col-lg-2" ng-show="Fertilizer.FilterType=='2'">{{ translation.Month}}</div>
+                <div class="col-lg-4" ng-show="Fertilizer.FilterType=='2'">
+                    <select ng-model="Fertilizer.FertilizerMonth" id="ddlblock" class="form-control" ng-init="Fertilizer.FertilizerMonth='0'">
+                        <option value="0">{{translation.SelectOption}}</option>
+                        <option ng-repeat="fertilizerMonth in RetailerTransactionMonth" value="{{fertilizerMonth.MonthId}}">
+                            {{_language =='en-us' ?  fertilizerMonth.Month_En : fertilizerMonth.Month_Hi}}
+                        </option>
+                    </select>
+                </div>
+            </div>
+
+
+
+
+            <div class="col-lg-12" style="margin-top:30px;">
+                <div class="col-lg-12">
+                    <center>
+                        <button type="button" class="btn btn-primary dev-btn" ng-click="GetFertilizerData()">{{translation.Submit}}</button>
+                        <button type="button" class="btn btn-primary dev-btn" ng-click="Reset()">{{translation.Clear}}</button>
+                    </center>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" ng-show="divStateData">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <h3 class="citizen-dash-head">{{translation.OpeningStockInRajasthan}} ({{ReportHeader}}) <i style="float:right" onclick="tableToExcel('tbl1', 'Data')" class="fa fa-file-excel-o" aria-hidden="true"></i> <a href="javascript:void(0)" style="float:right; font-size:12px" class="btn btn-primary dev-btn ng-binding">{{translation.QuantityUnit}}</a></h3>
+        </div>
+        <div class="table-responsive citizen-dash-head">
+            <table id="tbl1" class="table devtable" style="margin-top: 30px;border:1px solid rgb(222, 221, 221); float: left;">
+                <thead>
+                    <tr>
+                        <th>
+                            {{translation.SRNO}}
+                        </th>
+                        <th>
+                            {{translation.State}}
+                        </th>
+                        <th ng-repeat="item in FertilizerFinalData.Fertilizerheads" ng-if="_language==='en-us'">
+                            {{item}}
+                        </th>
+
+                        <th ng-repeat="item in FertilizerFinalData.FertilizerheadsHi" ng-if="_language!=='en-us'">
+                            {{item}}
+                        </th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <tr>
+                        <td>{{$index+1}}</td>
+                        <td><a ng-click="ShowDistrictData()">{{translation.Rajasthan}}</a></td>
+                        <td ng-repeat="item in StateData.Balance track by $index">{{item}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+
+    <div ng-show="divDistrictWiseFertilizer">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <h3 class="citizen-dash-head">{{translation.FertilizerForDistrict}} ({{ReportHeader}})  <i style="float:right" onclick="tableToExcel('tbl2', 'Data')" class="fa fa-file-excel-o" aria-hidden="true"></i>  <a ng-click="BackToState('divDistrictWisePACS')" style="float:right; font-size:12px" class="btn btn-primary dev-btn ng-binding">{{translation.Back}}</a></h3>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="table-responsive citizen-dash-head">
+                <table id="tbl2" class="table devtable" style="margin-top: 30px;border:1px solid rgb(222, 221, 221); float: left;">
+                    <thead>
+                        <tr>
+                            <th>
+                                {{translation.SRNO}}
+                            </th>
+                            <th>
+                                {{translation.District}}
+                            </th>
+                            <th ng-repeat="item in FertilizerFinalData.Fertilizerheads" ng-if="_language==='en-us'">
+                                {{item}}
+                            </th>
+
+                            <th ng-repeat="item in FertilizerFinalData.FertilizerheadsHi" ng-if="_language!=='en-us'">
+                                {{item}}
+                            </th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr dir-paginate="item in FertilizerFinalData.data | filter: q | orderBy:colsort:reverseSort | itemsPerPage: 1000">
+                            <td>{{$index+1}}</td>
+                            <td> <a href="javascript:void(0)" ng-click="GetFertilizerRetailerDetailTransaction(item.DistrictId)"> {{ _language === 'en-us'? item.DistrictNameEn : item.DistrictNameHi}} </a> </td>
+                            <td ng-repeat="item2 in item.Balance track by $index">{{item2}}</td>
+                        </tr>
+                    </tbody>
+
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" ng-show="divStateDataRetailerTransaction">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <h3 class="citizen-dash-head">{{translation.SalesStockInRajasthan}} ({{ReportHeader2}})  <i style="float:right" onclick="tableToExcel('tbl3', 'Data')" class="fa fa-file-excel-o" aria-hidden="true"></i>  <a href="javascript:void(0)" style="float:right; font-size:12px" class="btn btn-primary dev-btn ng-binding">{{translation.QuantityUnit}}</a></h3>
+        </div>
+        <div class="table-responsive citizen-dash-head">
+            <table id="tbl3" class="table devtable" style="margin-top: 30px;border:1px solid rgb(222, 221, 221); float: left;">
+                <thead>
+                    <tr>
+                        <th>
+                            {{translation.SRNO}}
+                        </th>
+                        <th>
+                            {{translation.State}}
+                        </th>
+                        <th>
+                            {{translation.TotalTransaction}}
+                        </th>
+                        <th>
+                            {{translation.TotalSold}}
+                        </th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <tr dir-paginate="item in StateFertilizeTransactionData | filter: q | orderBy:colsort:reverseSort | itemsPerPage: 1000">
+                        <td>{{$index+1}}</td>
+                        <td><a ng-click="ShowFertilizerTransactionDistrictData()">{{translation.Rajasthan}}</a></td>
+                        <td>{{item.TotalTransaction}}</td>
+                        <td>{{item.TotalSale}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div ng-show="divDistrictWiseRetailerTransaction">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <h3 class="citizen-dash-head">{{translation.FertilizerTransactionForDistrict}} ({{ReportHeader2}})  <i style="float:right" onclick="tableToExcel('tbl4', 'Data')" class="fa fa-file-excel-o" aria-hidden="true"></i>  <a ng-click="BackToStateForTransaction()" style="float:right; font-size:12px" class="btn btn-primary dev-btn ng-binding">{{translation.Back}}</a></h3>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="table-responsive citizen-dash-head">
+                <table id="tbl4" class="table devtable" style="margin-top: 30px;border:1px solid rgb(222, 221, 221); float: left;">
+                    <thead>
+                        <tr>
+                            <th>
+                                {{translation.SRNO}}
+                            </th>
+                            <th>
+                                {{translation.District}}
+                            </th>
+                            <th>
+                                {{translation.TotalTransaction}}
+                            </th>
+                            <th>
+                                {{translation.TotalSold}}
+                            </th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr dir-paginate="item in DistrictFertilizeTransactionData | filter: q | orderBy:colsort:reverseSort | itemsPerPage: 1000">
+                            <td>{{$index+1}}</td>
+                            <td> <a href="javascript:void(0)" ng-click="GetRetailerDetails(item.DistrictId)"> {{ _language=='en-us'? item.DISTRICT_ENG : item.DISTRICT_MANGAL}} </a> </td>
+                            <td>{{item.TransactionCount}}</td>
+                            <td>{{item.QuantitySold}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div ng-show="divRetailerFertilizerTransData">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <h3 class="citizen-dash-head">{{translation.RetailerDetail}} ({{ReportHeader}})  <i style="float:right" onclick="tableToExcel('tbl5', 'Data')" class="fa fa-file-excel-o" aria-hidden="true"></i>  <a ng-click="BackToDistricteForTransactionRetailer()" style="float:right; font-size:12px" class="btn btn-primary dev-btn ng-binding">{{translation.Back}}</a></h3>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+
+
+
+            <div class="table-responsive citizen-dash-head">
+
+                <div class="col-md-12 dev-search-form">
+                    <div class="col-xs-4">
+                        <label for="search">{{translation.Search}}:</label>
+                        <input ng-model="q" id="search" class="form-control" placeholder={{translation.filttertext}} autocomplete="off">
+                    </div>
+                    <div class="col-xs-4">
+                        <label for="search">{{translation.ItemPerPage}}:</label>
+                        <input type="number" min="1" max="100" class="form-control" ng-model="pageSize">
+                    </div>
+                </div>
+                <br>
+
+                <table id="tbl5" class="table devtable" style="margin-top: 30px;border:1px solid rgb(222, 221, 221); float: left;">
+                    <thead>
+                        <tr>
+                            <th>
+                                {{translation.SRNO}}
+                            </th>
+                            <th>
+                                {{translation.RetailerName}}
+                            </th>
+                            <th>
+                                {{translation.BlockHeading}}
+                            </th>
+                            <th>
+                                {{translation.MobileNo}}
+                            </th>
+                            <th ng-repeat="item in retailerTransactionDetail.Fertilizerheads" ng-if="_language==='en-us'">
+                                {{item}}
+                            </th>
+
+                            <th ng-repeat="item in retailerTransactionDetail.FertilizerheadsHi" ng-if="_language!=='en-us'">
+                                {{item}}
+                            </th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr dir-paginate="item in retailerTransactionDetail.data | filter: q | orderBy:colsort:reverseSort | itemsPerPage: 1000" current-page="currentPage" pagination-id="RetailerOnePAgination">
+                            <td>{{$index+1}}</td>
+                            <td> {{ _language=='en-us'? item.RetailerName : item.RetailerName}}</td>
+                            <td>{{item.BlockName}}</td>
+                            <td>{{item.MobileNumber}}</td>
+                            <td ng-repeat="item2 in item.Balance track by $index"> {{item2}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <br />
+                <div class="col-md-12">
+                    <div class="text-center">
+                        <dir-pagination-controls boundary-links="true" pagination-id="RetailerOnePAgination" on-page-change="pageChangeHandler(newPageNumber)" template-url="/dirPagination.tpl.html"></dir-pagination-controls>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <h5 class="dev-page"> {{translation.Page}}: {{ currentPage }} </h5>
+                </div>
+            </div>
+
+
+
+        </div>
+    </div>
+          
+    <div ng-show="divRetailerData">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <h3 class="citizen-dash-head">{{translation.RetailerDetail}} ({{ReportHeader2}})  <i style="float:right" onclick="tableToExcel('tbl6', 'Data')" class="fa fa-file-excel-o" aria-hidden="true"></i> <a ng-click="BackToDistricteForTransaction()" style="float:right; font-size:12px" class="btn btn-primary dev-btn ng-binding">{{translation.Back}}</a></h3>
+
+           
+                
+           
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+
+            <div class="table-responsive citizen-dash-head">
+
+                <div class="col-md-12 dev-search-form">
+                    <div class="col-xs-4">
+                        <label for="search">{{translation.Search}}:</label>
+                        <input ng-model="q" id="search" class="form-control" placeholder={{translation.filttertext}} autocomplete="off">
+                    </div>
+                    <div class="col-xs-4">
+                        <label for="search">{{translation.ItemPerPage}}:</label>
+                        <input type="number" min="1" max="100" class="form-control" ng-model="pageSize">
+                    </div>
+                </div>
+                <br>
+
+                <table id="tbl6" class="table devtable" style="margin-top: 30px;border:1px solid rgb(222, 221, 221); float: left;">
+                    <thead>
+                        <tr>
+                            <th>
+                                {{translation.SRNO}}
+                            </th>
+                            <th>
+                               {{translation.RetailerName}}
+                            </th>
+                            <th>
+                                {{translation.BlockHeading}}
+                            </th>
+                            <th>
+                                {{translation.MobileNo}}
+                            </th>
+                            <th>
+                                {{translation.TotalTransaction}}
+                            </th>
+                            <th>
+                                {{translation.TotalSold}}
+                            </th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr dir-paginate="item in RetailerDetailsData | filter: q | orderBy:colsort:reverseSort | itemsPerPage: 1000" current-page="currentPage" pagination-id="RetailerOnePAgination2">
+                            <td>{{$index+1}}</td>
+                            <td> {{ _language=='en-us'? item.RetailerName : item.RetailerName}}</td>
+                            <td>{{item.BlockName}}</td>
+                            <td>{{item.Mobile}}</td>
+                            <td>{{item.TransactionCount}}</td>
+                            <td>{{item.QuantitySold}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <br />
+                <div class="col-md-12">
+                    <div class="text-center">
+                        <dir-pagination-controls boundary-links="true" pagination-id="RetailerOnePAgination2" on-page-change="pageChangeHandler(newPageNumber)" template-url="/dirPagination.tpl.html"></dir-pagination-controls>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <h5 class="dev-page"> {{translation.Page}}: {{ currentPage }} </h5>
+                </div>
+            </div>
+
+
+
+        </div>
+    </div>
+
+
+    <div class="se-pre-con"></div>
+</div>
+
+
+

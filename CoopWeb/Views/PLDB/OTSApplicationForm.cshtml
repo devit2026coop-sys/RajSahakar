@@ -1,0 +1,1135 @@
+﻿@{
+    ViewBag.Title = "OTS 2025-26 Application Form";
+}
+<script src="~/Scripts/AngularFramework/OTSApplicationForm.js?v=1.11"></script>
+<script src="~/Scripts/jquery.unobtrusive-ajax.min.js"></script>
+<script type="text/javascript">
+
+    function OnBegin() {
+        $('#preloader').show();
+    }
+
+    function isNumber(evt) {
+        var iKeyCode = (evt.which) ? evt.which : evt.keyCode
+        if (iKeyCode != 46 && iKeyCode > 31 && (iKeyCode < 48 || iKeyCode > 57))
+            return false;
+
+        return true;
+    }
+    function ValidateAlpha(evt) {
+        var keyCode = (evt.which) ? evt.which : evt.keyCode
+        if ((keyCode < 65 || keyCode > 90) && (keyCode < 97 || keyCode > 123) && keyCode != 32)
+
+            return false;
+        return true;
+    };
+
+    function isAlphaNumeric(e) { // Alphanumeric only
+        var k;
+        document.all ? k = e.keycode : k = e.which;
+        return ((k > 47 && k < 58) || (k > 64 && k < 91) || (k > 96 && k < 123) || k == 0 || k == 32 || k == 44);
+    }
+
+
+    $(document).ready(function () {
+        $("select").on("change", function () {
+            $(this).removeClass("notValid");
+        });
+
+
+        $(".expandDetails").click(function () {
+            var panl_id = $(this).attr("dat-val");
+            if ($(this).hasClass("fa-plus-circle")) {
+                $(this).removeClass("fa-plus-circle").addClass("fa-minus-circle")
+            } else {
+                $(this).addClass("fa-plus-circle").removeClass("fa-minus-circle")
+            }
+            $("#" + panl_id).slideToggle("slow");
+        });
+        var date = (new Date()).getDate() + '/' + ((new Date()).getMonth() + 1) + '/' + ((new Date()).getFullYear()).toString();
+
+        $('.devcalender').datepicker({
+            showOn: "both",
+            changeMonth: true,
+            buttonImage: "../images/calender.png",
+            changeYear: true,
+            dateFormat: "dd/mm/yy",
+            // minDate: '0'
+            yearRange: "c-10:c+0"
+        });
+
+    });
+    function validateInput(input, maxLength, maxDecimalPlaces) {
+        let value = input.value;
+        if (value) {
+            // Check for decimal places
+            let parts = value.split('.');
+            if (parts.length > 1 && parts[1].length > maxDecimalPlaces) {
+                value = parseFloat(value).toFixed(maxDecimalPlaces);
+                input.value = value;
+            }
+
+            // Check for overall length (excluding decimal point and decimal places)
+            let integerPartLength = parts[0].length;
+            let totalLength = integerPartLength + (parts[1] ? parts[1].length : 0);
+            if (totalLength > maxLength) {
+                input.value = input.value.slice(0, maxLength);
+            }
+        }
+    }
+    function DateCheck() {
+
+        return true;
+    }
+
+</script>
+
+<style>
+    label {
+        display: inline-block;
+        width: 100% !important;
+        margin-bottom: 5px;
+        font-weight: 700;
+        text-transform: capitalize;
+    }
+
+    .zoom {
+        transition: transform .2s; /* Animation */
+        margin: 0 auto;
+    }
+
+        .zoom:hover {
+            padding-left: 30px;
+            transform: scale(2.5); /* (150% zoom - Note: if the zoom is too large, it will go outside of the viewport) */
+        }
+
+
+    ul.pagination {
+        margin: 3px 0 0 0 !important;
+    }
+
+    .dataTables_info {
+        float: left;
+        margin-top: 10px;
+    }
+
+    span.mad {
+        color: red;
+    }
+
+
+    .table-responsive .form-group {
+        margin-bottom: 0px;
+        margin-top: 10px;
+    }
+
+        .table-responsive .form-group .heading-hr {
+            margin-bottom: 0px;
+        }
+</style>
+
+<style>
+    @@media print {
+
+        .profile-d1 {
+            color: #000 !important;
+            background: #fff !important;
+            border-radius: 5px !important;
+            margin-bottom: 20px !important;
+        }
+
+        .profile-d1-hr {
+            font-size: 17px !important;
+            background: #025e63 !important;
+            padding: 10px 15px !important;
+            color: #fff !important;
+            border-radius: 4px !important;
+        }
+
+        .dev-spancon {
+            font-size: 13px !important;
+            color: #424242 !important;
+            font-weight: 500 !important;
+        }
+
+        label {
+            color: #025e63 !important;
+            font-size: 14px !important;
+        }
+
+        .devtable thead tr th {
+            background: #64c0c5 !important;
+            color: #fff !important;
+        }
+
+        .col-lg-12, .col-md-12, .col-sm-12, .col-xs-12 {
+            display: block !important;
+            width: auto !important;
+            height: auto !important;
+            overflow: visible !important;
+        }
+
+        .table-responsive {
+            display: block !important;
+            width: auto !important;
+            height: auto !important;
+            overflow: visible !important;
+        }
+
+        .table > tbody > tr > td, .table > tbody > tr > th, .table > tfoot > tr > td, .table > tfoot > tr > th, .table > thead > tr > td, .table > thead > tr > th {
+            border-top: unset !important;
+        }
+
+        .main-header {
+            display: none !important;
+        }
+
+        .sidebar {
+            display: none !important;
+        }
+
+        .dev-toggle-bg {
+            display: none !important;
+        }
+
+        .printhideth {
+            display: none !important;
+        }
+
+        .copydev {
+            display: none !important;
+        }
+
+        .print {
+            display: none !important;
+        }
+
+        .devpage-breadcrumb {
+            display: none !important;
+        }
+
+        .visible-print {
+            display: block !important;
+        }
+
+        table.visible-print {
+            display: table !important;
+        }
+
+        tr.visible-print {
+            display: table-row !important;
+        }
+
+        th.visible-print,
+        td.visible-print {
+            display: table-cell !important;
+        }
+    }
+</style>
+
+<style>
+    @@media print {
+        .visible-print {
+            display: block !important
+        }
+
+        table.visible-print {
+            display: table !important
+        }
+
+        tr.visible-print {
+            display: table-row !important
+        }
+
+        td.visible-print, th.visible-print {
+            display: table-cell !important
+        }
+    }
+
+    .visible-print-block {
+        display: none !important
+    }
+
+    @@media print {
+        .visible-print-block {
+            display: block !important
+        }
+    }
+
+    .visible-print-inline {
+        display: none !important
+    }
+
+    @@media print {
+        .visible-print-inline {
+            display: inline !important
+        }
+    }
+
+    .visible-print-inline-block {
+        display: none !important
+    }
+
+    @@media print {
+        .visible-print-inline-block {
+            display: inline-block !important
+        }
+    }
+
+    @@media print {
+        .hidden-print {
+            display: none !important
+        }
+    }
+
+    .profile-d1 {
+        color: #000;
+        background: #fff;
+        border-radius: 5px;
+        margin-bottom: 20px;
+    }
+
+    .profile-d1-hr {
+        font-size: 17px;
+        background: #025e63;
+        padding: 10px 15px;
+        color: #fff;
+        border-radius: 4px;
+    }
+
+    .dev-spancon {
+        font-size: 13px;
+        color: #424242;
+        font-weight: 500;
+    }
+
+    label {
+        color: #025e63;
+        font-size: 14px;
+    }
+
+    .devtable thead tr th {
+        background: #64c0c5;
+        color: #fff;
+    }
+
+    .table > tbody > tr > td, .table > tbody > tr > th, .table > tfoot > tr > td, .table > tfoot > tr > th, .table > thead > tr > td, .table > thead > tr > th {
+        border-top: unset;
+    }
+</style>
+
+
+<style>
+    a > i.fa.fa-plus-circle {
+        font-size: 25px;
+        cursor: pointer;
+    }
+
+    a:hover > i.fa.fa-plus-circle {
+        font-size: 26px;
+        cursor: pointer;
+    }
+
+    a > i.fa.fa-eye {
+        font-size: 25px;
+        cursor: pointer;
+    }
+
+    a:hover > i.fa.fa-eye {
+        font-size: 26px;
+        cursor: pointer;
+    }
+
+    .add-more {
+    }
+
+    .thCenter {
+        text-align: center !important;
+    }
+
+    .thverticalMiddle {
+        vertical-align: middle !important;
+    }
+
+    .notValid {
+        border: solid 1px red !important
+    }
+
+    .rowdeleteBtn {
+        color: #fff !important;
+        font-weight: bold !important;
+        font-size: 18px !important;
+    }
+</style>
+
+
+
+<script language=javascript>
+    //var name1 = $name1;
+    //var name2 = $name2;
+    var X;
+    var multical = "false";
+    if (multical == "false") {
+        var convfactor1 = 6.1772;
+    }
+    else {
+        var convfactor1 = "6.1772";
+    }
+    var convfactor2 = 0.161885643981;
+</script>
+
+
+<div ng-app="LoanApplicationMod">
+    <div ng-controller="LoanApplicationCnt">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <h4 class="citizen-dash-head">OTS 2025-26 Loan Application</h4>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#"> {{translation.PLDB}} </a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;">OTS 2025-26 Loan Application</span>
+                    </li>
+
+                </ul>
+
+            </div>
+        </div>
+
+
+        <div class="col-lg-12">
+            <div class="table-responsive citizen-dash-head">
+                <div id="divUserRegistration1">
+                    <div class="row"><div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 " style="text-align:right">   <button id="backbtn" ng-click="BackToPage()" class="btn  btn-primary">Back </button></div></div>
+
+                    <div class="dev-masters" name="MyUserForm">
+
+                        <div ng-show="!IsSubmiApplication">
+                            <input type="hidden" id="hdnUserlevel" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).LevelId)" />
+                            <input type="hidden" id="hdnUserType" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).UserType.ToUpper())" />
+                            <input type="hidden" id="hdnPLDBId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).PLDBId)" />
+                            <input type="hidden" id="hdnBranchId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).PLDBBrancchId)" />
+                        </div>
+                        <div ng-show="PLDBMemberDatail=true">
+                            <div class="form-group col-md-12">
+                                <h5 class="heading-hr ng-binding"> {{translation.ApplicantDetails}} </h5>
+                            </div>
+                            <div class="form-group col-md-12">
+                                <div class="row">
+                                    <div class="col-lg-4 form-group">
+                                        <label for="PLDB.Name">{{translation.ApplicantName}}<span class="error">*</span></label>
+                                        <input type="text" id="PLDB.Name" class="form-control applicant-name" placeholder="{{translation.ApplicantName}}" ng-model="PLDB.ApplicantName" autocomplete="off" required>
+                                    </div>
+                                    <div class="col-lg-4 form-group">
+                                        <label for="PLDB.FatherHusbandName">{{translation.FarmerFatherHusbandName}}<span class="error">*</span></label>
+                                        <input type="text" id="PLDB.FatherHusbandName" class="form-control father-name" placeholder="{{translation.FarmerFatherHusbandName}}" ng-model="PLDB.FatherHusbandName" autocomplete="off" required onKeyPress="return ValidateAlpha(event);" maxlength="50">
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-4 form-group">
+                                        <label for="ddlCategory">{{translation.CategoryEN}}<span class="error">*</span></label>
+                                        <select id="ddlCategory" ng-model="PLDB.CategoryId" class="form-control caste-category" ng-init="PLDB.CategoryId='0'">
+                                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                                            <option ng-repeat="item in CategoryList | orderBy:'CODEID'" value="{{item.CODEID}}">
+                                                {{_language =='en-us' ?  item.CODENAME : item.CODENAME_MANGAL}}
+                                            </option>
+                                        </select>
+                                    </div>
+                                    <div class="col-lg-4 form-group">
+                                        <label for="PLDB.Gender">{{translation.GenderHeading}}:@*<span class="error">*</span>*@</label>
+                                        <label for="sdfs" class="help-block-gender" style="width:40% !important;">
+                                            <input type="radio" id="sdfs" name="Gender" value="M" ng-model="PLDB.Gender" class="gender">{{translation.GenderMale}}
+                                        </label>
+                                        <label for="sdf" class="help-block-gender" style="width:40% !important;">
+                                            <input type="radio" id="sdf" value="F" name="Gender" ng-model="PLDB.Gender" class="gender">{{translation.GenderFeMale}}
+                                        </label>
+                                    </div>
+
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-4  form-group">
+                                        <label for="txtJanAadharNumber">{{translation.JanAadharNumberDetail}}:@*<span class="error">*</span>*@</label>
+                                        <input type="text" id="txtJanAadharNumber" ng-model="PLDB.JanAadharNumber" ng-value="PLDB.JanAadharNumber" placeholder="{{translation.JanAadharNumber}}" onpaste="return false;" ondrop="return false;" ng-minlength="10" maxlength="10" onkeypress="return event.charCode >= 48 && event.charCode <= 57" class="form-control janaadharno" />
+                                    </div>
+                                    <div class="col-lg-4 form-group">
+                                        <label for="PLDB.MobileNo">{{translation.MobileNo}} <span class="error">*</span></label>
+                                        <input type="text" class="form-control mobileno" placeholder="{{translation.MobileNo}}" id="PLDB.MobileNo" ng-model="PLDB.MobileNo" autocomplete="off" required maxlength="10" min="10" onkeypress='return event.charCode >= 48 && event.charCode <= 57'>
+                                    </div>
+                                    <div class="col-md-4 form-group">
+                                        <label for="LoanAccNo">{{translation.LoanAccNo}}:<span class="error">*</span></label>
+                                        <input type="text" disabled id="LoanAccNo" ng-model="PLDB.LoanAccNo" ng-value="PLDB.NoOfLoaneeBen" placeholder="{{translation.LoanAccNo}}" ng-minlength="4" maxlength="20" onkeypress="return event.charCode >= 48 && event.charCode <= 57" class="form-control" />
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-4 form-group">
+                                        <label for="NoOfLoaneeBeneficiary">{{translation.NoOfLoaneeBen}}:@*<span class="error">*</span>*@</label>
+                                        <input type="text" id="NoOfLoaneeBeneficiary" ng-model="PLDB.NoOfLoanBen" ng-value="PLDB.NoOfLoanBen" placeholder="{{translation.NoOfLoaneeBen}}" ng-minlength="4" maxlength="4" onkeypress="return event.charCode >= 48 && event.charCode <= 57" class="form-control" />
+                                    </div>
+
+                                    <div class="col-md-4 form-group">
+                                        <label for="OtherPropertyDetails">{{translation.OtherPropertyDetails}}:@*<span class="error">*</span>*@</label>
+                                        <input type="text" id="OtherPropertyDetails" ng-model="PLDB.OtherPropertyDetails" ng-value="PLDB.OtherPropertyDetails" placeholder="{{translation.OtherPropertyDetails}}" class="form-control" />
+                                    </div>
+                                    <div class="col-md-4 form-group">
+                                        <label for="CurrentDlcValue">{{translation.CurrentDlcValue}}:@*<span class="error">*</span>*@</label>
+                                        <input type="text" id="CurrentDlcValue" ng-model="PLDB.CurrentDlcValueOfProperty" ng-value="PLDB.CurrentDlcValueOfProperty" placeholder="{{translation.CurrentDlcValue}}" class="form-control" oninput="validateInput(this,12, 2)" onKeyPress="return isNumber(event);" />
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-4  form-group">
+                                        <label for="PLDB.IsLandMortgaged">{{translation.IslandMortgaged}}:@*<span class="error">*</span>*@</label>
+                                        <label for="IslandMortgageds" class="help-block-gender" style="width:40% !important;">
+                                            <input type="radio" id="IslandMortgageds" name="landMortgaged" value="Y" ng-model="PLDB.IsLandMortgaged">{{translation.Yes}}
+                                        </label>
+                                        <label for="IslandMortgaged" class="help-block-gender" style="width:40% !important;">
+                                            <input type="radio" id="IslandMortgaged" value="N" name="landMortgaged" ng-model="PLDB.IsLandMortgaged">{{translation.No}}
+                                        </label>
+                                    </div>
+
+                                    <div class="col-md-4 form-group" ng-show="PLDB.IsLandMortgaged=='Y' || PLDB.LandMortgagedland!=0 || PLDB.LandMortgagedland!=''">
+                                        <label for="txtlandMortgaged">{{translation.landMortgaged}}:@*<span class="error">*</span>*@</label>
+                                        <input type="text" id="txtlandMortgaged" ng-model="PLDB.LandMortgagedland" ng-value="PLDB.LandMortgagedland" placeholder="{{translation.landMortgaged}}" onpaste="return false;" ondrop="return false;" ng-minlength="10" maxlength="10" onkeypress="return event.charCode >= 48 && event.charCode <= 57" class="form-control" />
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div id="PLDB">
+                                <div class="form-group col-md-12">
+                                    <h5 class="heading-hr ng-binding"> {{translation.PLDB}}</h5>
+                                </div>
+                                <div class="col-lg-12 form-group">
+                                    <div class="row">
+                                        <div class="col-lg-4 form-group">
+                                            <label for="ddlDistrict">{{ translation.PLDB}} <span class="error">*</span></label>
+                                            <select ng-if="PLDB" ng-show="IsShowPLDB" ng-model="PLDB.PLDB_Id" ng-disabled="IsSubmiApplication" id="ddlDistrict" class="form-control" ng-init="PLDB.PLDB_Id='0'" ng-change="PLDBBranchList('0')">
+                                                <option value="0" disabled>{{translation.SelectOption}}</option>
+                                                <option ng-repeat="itemPLDB in PLDBList | orderBy:'PldbId' track by itemPLDB.PldbId " value="{{itemPLDB.PldbId}}">
+                                                    {{itemPLDB.PLDBName}}
+                                                </option>
+                                            </select>
+                                            <input ng-if="LoanMembers[0].IsValidate || !IsShowPLDB" class="form-control" type="text" disabled value="{{GetNameFromList(PLDBList,PLDB.PLDB_Id,'PLDB')}}" />
+                                        </div>
+                                        <div class="col-lg-4 form-group">
+                                            <label for="ddlblock">{{ translation.Branch}} <span class="error">*</span></label>
+                                            <select ng-show="!LoanMembers[0].IsValidate&&IsShowBranch" ng-model="PLDB.Branch_ID" ng-disabled="IsSubmiApplication" id="ddlblock" class="form-control" ng-init="PLDB.Branch_ID='0'" ng-change="GetGramPanchayatData()">
+                                                <option value="0" disabled>{{translation.SelectOption}}</option>
+                                                <option ng-repeat="itemBlock in PLDBBranches | orderBy:'BLOCK_ENG'" value="{{itemBlock.BLOCK_ID}}">
+                                                    {{_language =='en-us' ?  itemBlock.BLOCK_ENG : itemBlock.BLOCK_MANGAL}}
+                                                </option>
+                                            </select>
+                                            <input ng-if="LoanMembers[0].IsValidate||!IsShowBranch" class="form-control" type="text" disabled value="{{GetNameFromList(PLDBBranches,PLDB.Branch_ID,'Branch')}}" />
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div id="Nominee">
+                                <div class="form-group col-md-12">
+                                    <h5 class="heading-hr ng-binding"> {{translation.Nominee}}</h5>
+                                </div>
+                                <div class="form-group col-md-12">
+                                    <div class="row">
+                                        <div class="col-lg-4 form-group">
+                                            <label for="PLDB.NomineeName">{{translation.NomineeNameWithFatherName}} <span class="error">*</span></label>
+                                            <input type="text" name="Business" class="form-control nominee-name" placeholder="{{translation.NomineeNameWithFatherName}}" id="PLDB.NomineeName" ng-model="PLDB.NomineeName" autocomplete="off">
+                                        </div>
+
+                                        <div class="col-md-4  form-group">
+                                            <label for="txtNoJanAadharNumber">{{translation.Nominee}} {{translation.JanAadharNumberDetail}}:@*<span class="error">*</span>*@</label>
+                                            <input type="text" id="txtNoJanAadharNumber" ng-model="PLDB.NomineeJanAadharNumber" ng-value="PLDB.NomineeJanAadharNumber" placeholder="{{translation.JanAadharNumber}}" onpaste="return false;" ondrop="return false;" ng-minlength="10" maxlength="10" onkeypress="return event.charCode >= 48 && event.charCode <= 57" class="form-control nominee-janaadhar" />
+                                        </div>
+                                        <div class="col-lg-4 form-group">
+                                            <label for="PLDB.NomineeMobileNo">{{translation.Nominee}} {{translation.MobileNo}} <span class="error">*</span></label>
+                                            <input type="text" class="form-control nominee-mobile" placeholder="{{translation.MobileNo}}" id="PLDB.NomineeMobileNo" ng-model="PLDB.NomineeMobileNo" autocomplete="off" required maxlength="10" min="10" onkeypress='return event.charCode >= 48 && event.charCode <= 57'>
+                                        </div>
+
+                                    </div>
+
+
+
+                                </div>
+
+                            </div>
+
+
+
+
+
+
+
+                            <!--<div id="BankAccountDetail">
+                            <div class="col-lg-12 form-group">
+                                <h4 class="heading-hr ng-binding">{{translation.BankAccountDetails}}<a ng-show="IsSubmiApplication" href="javascript:void(0);" dat-val="panal_6" class="fa fa-plus-circle expandDetails" style="float:right;font-size: 25px;"></a></h4>
+                            </div>
+                            <div class="col-lg-12  clspanal" id="panal_6">
+                                <div class="table-responsive">
+                                    <table class="table devtable" id="tblLoanAmountDetail">
+                                        <thead>
+                                            <tr>
+                                                <th>{{translation.SRNO}}</th>-->
+                            @*<th rowspan="3" class="thverticalMiddle">आवेदक</th>*@
+                            <!--<th>{{translation.BankName}}</th>
+                            <th>{{translation.BankAccountNo}}</th>
+                            <th>{{translation.AccountType}}</th>
+                            <th>{{translation.DateOfOpenAccount}}</th>
+                            <th>{{translation.LoanFacility}}</th>-->
+                            @*<th></th>*@
+                            <!--</tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="item in PLDB.BankDetails" ng-if="!item.IsDelete">
+                                    <td>{{$index+1}}</td>-->
+                            @*<td>
+                                    <select ng-model="item.Member" id="GuarantorPropertyUnitOfArea" placeholder="{{translation.GuarantorPropertyUnitOfArea}}" class="form-control" ng-init="GuarantorPropertyUnitOfArea=''" ng-change="">
+                                        <option value="">{{translation.SelectOption}}</option>
+                                        <option ng-repeat="itm in LoanMembers" value="{{itm.MembershipNumber}}">
+                                            {{_language =='en-us' ?  itm.Name : itm.Name}}({{itm.MembershipNumber}})
+                                        </option>
+                                    </select>
+                                </td>*@
+                            <!--<td>
+
+                            <select ng-model="item.BankId" id="txtBankName" class="form-control" ng-init="item.BankId=''" ng-change="LoadSector(item.SchemeId,$index)">
+                                <option value="">{{translation.SelectOption}}</option>
+                                <option ng-repeat="itm in BankList" value="{{itm.BankId}}">
+                                    {{_language =='en-us' ?  itm.BankName : itm.BankName}}
+                                </option>
+                            </select>-->
+                            @*<input type="text" id="txtBankName_{{$index}}" class="form-control" name="BankName" placeholder="{{translation.BankName}}" ng-model="item.BankName" onkeypress='return ValidateAlpha(event);' autocomplete="off" ng-change="ChooseDefaultMember($index)" />*@
+
+                            <!--</td>
+                            <td>
+                                <input type="text" id="txtAccountNo_{{$index}}" name="AccountType" class="form-control" placeholder="खाता संख्या" ng-model="item.AccountNo" onkeypress='' autocomplete="off">
+                            </td>
+                            <td>
+                                <input type="text" id="txtAccountType_{{$index}}" name="AccountType" class="form-control" placeholder="{{translation.AccountType}}" ng-model="item.AccountType" onkeypress='' autocomplete="off">
+                            </td>
+                            <td>
+
+                                <input name="DateOfOpenAccount" type="date" id="DateOfOpenAccount_{{$index}}" dat-val="1" class="form-control" placeholder="dd/MM/yyyy" ng-model="item.DateOfOpenAccount" autocomplete="off" onKeyPress="return isNumber(event);" size=10 maxlength=10 onkeyup="this.value=this.value.replace(/^(\d\d)(\d)$/g,'$1/$2').replace(/^(\d\d\/\d\d)(\d+)$/g,'$1/$2').replace(/[^\d\/]/g,'')" />-->
+                            @*<input type="text" id="DateOfOpenAccount" name="DateOfOpenAccount" class="form-control" placeholder="{{translation.DateOfOpenAccount}}" ng-model="item.DateOfOpenAccount" onKeyPress="">*@
+                            <!--</td>
+                            <td>
+                                <input type="text" id="txtLoanFacility_{{$index}}" name="LoanFacility" class="form-control" placeholder="{{translation.LoanFacility}}" title="{{item.LoanFacility}}" ng-model="item.LoanFacility" autocomplete="off" onKeyPress="return ValidateAlpha(event);">
+                            </td>-->
+                            @*<td style="text-align: right !important">
+                                    <i class="fa fa-trash clsShowHide btn btn btn-xs btn-danger tooltips rowdeleteBtn" id="Remove_8" ng-if="LoadBankDetails.length>1" ng-click="RemoveLoadBankDetailsRow($index)" style=""></i>
+                                </td>*@
+                            <!--</tr>
+                            </tbody>-->
+                            @*<tfoot>
+                                    <tr>
+                                        <td colspan="5"></td>
+                                        <td colspan="2" style="text-align:right;cursor:pointer;" ng-click="AddBankDetail()"><i class="fa fa-plus" title="Add New"></i>{{translation.Add}}</td>
+                                    </tr>
+                                </tfoot>*@
+                            <!--</table>
+                                    </div>
+                                </div>
+                            </div>-->
+                            <div id="LoanType">
+                                <div class="col-lg-12 form-group">
+                                    <h4 class="heading-hr ng-binding">{{ translation.LoanDetailsAndType}}<a ng-show="IsSubmiApplication" href="javascript:void(0);" dat-val="panal_1" class="fa fa-plus-circle expandDetails" style="float:right;font-size: 25px;"></a></h4>
+                                </div>
+
+                                <div class="col-lg-12  clspanal">
+                                    <div class="table-responsive">
+                                        <table class="table devtable" id="tblLoanAmountDetail">
+                                            <thead>
+                                                <tr>
+
+                                                    @*<th style="text-align:center">{{translation.Type}}</th>*@
+                                                    <th style="text-align:center">{{translation.Sector}}</th>
+                                                    @*<th style="text-align:center">{{translation.Scheme}}</th>*@
+                                                    <th style="text-align:center">{{translation.PurposeOfLoan}}</th>
+                                                    @*<th style="text-align:center">{{translation.LoanType}}</th>*@
+                                                    <th style="text-align:center">{{translation.LoanSanctionAmt}}</th>
+                                                    <th style="text-align:center">{{translation.DateOfSanction}}</th>
+                                                    <th style="text-align:center">{{translation.rateofintrest}}</th>
+                                                    <th style="text-align:center">{{translation.DateOfFirstDisbursement}}</th>
+
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>
+                                                        <div style="width:100%">
+                                                            <select ng-model="PLDB.SectorId" id="sector_id" class="form-control" ng-init="PLDB.SectorId='0'" ng-change="GetSchemeMasterBySector(item.SectorId,$index)">
+                                                                <option value="0" selected="selected">{{translation.SelectOption}}</option>
+                                                                <option ng-repeat="itm in LoanSectorList" value="{{itm.sector_id}}">
+                                                                    {{_language =='en-us' ?  itm.sector_name_en : itm.sector_name_hi}}
+                                                                </option>
+                                                            </select>
+                                                        </div>
+                                                    </td>
+
+                                                    <td>
+                                                        <div style="width:100%">
+                                                            <select ng-model="PLDB.PurposeOfLoan" class="form-control" ng-init="PLDB.PurposeOfLoan='0'" ng-change="LoadPurposeByShemeId()">
+                                                                <option value="0">{{translation.SelectOption}}</option>
+                                                                <option ng-repeat="itm in item.PurposeOfLoanList" value="{{itm.purpose_id}}">
+                                                                    {{_language =='en-us' ?  itm.purpose_name_en : itm.purpose_name_hi}}
+                                                                </option>
+                                                            </select>
+                                                        </div>
+                                                    </td>
+
+                                                    <td>
+                                                        <input type="text" id="LoanSanctionAmt " name="LoanSanctionAmt" class="form-control" placeholder="{{translation.LoanSanctionAmt}}" ng-model="PLDB.LoanSanctionAmt" maxlength="10" autocomplete="off" onKeyPress="return isNumber(event);">
+                                                    </td>
+                                                    <td>
+                                                        <input name="DateOfSanction" id="txtDateOfSanction" class="form-control devcalender" placeholder="{{translation.DateOfSanction}}" ng-model="PLDB.DateOfSanction" autocomplete="off" onchange="DateCheck()" />
+
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" name="" class="form-control" placeholder="{{translation.rateofintrest}}" ng-model="PLDB.RateOfInterest" maxlength="10" autocomplete="off" onKeyPress="return isNumber(event);">
+                                                    </td>
+                                                    <td>
+                                                        <input class="form-control devcalender" ng-model="PLDB.DateOfFirstDisbursement" autocomplete="off" onchange="DateCheck()">
+                                                    </td>
+
+
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                            </div>
+
+
+                            <div id="Od">
+                                <div class="col-lg-12 form-group">
+                                    <h4 class="heading-hr ng-binding">{{translation.OD_1_7}} {{translation.OD_31_3}}<a ng-show="IsSubmiApplication" href="javascript:void(0);" dat-val="panel_od" class="fa fa-plus-circle expandDetails" style="float:right;font-size: 25px;"></a></h4>
+                                </div>
+                                <div class="col-lg-12 clspanal" id="panel_od">
+                                    <div class="table-responsive">
+                                        <table class="table devtable" id="tblPreLoanDetails">
+                                            <thead>
+                                                <tr>
+
+                                                    <th colspan="6" style="text-align:center">{{translation.OD_1_7}}</th>
+                                                    <th colspan="5" style="text-align:center">{{translation.OD_31_3}}</th>
+                                                </tr>
+
+                                                <tr>
+                                                    <th rowspan="3" class="thverticalMiddle" style="text-align:center">{{translation.DateOfOD}}</th>
+                                                    <th rowspan="3" class="thverticalMiddle" style="text-align:center">{{translation.ODPrincipal}}</th>
+                                                    <th rowspan="3" class="thverticalMiddle" style="text-align:center">{{translation.InsurancePremium}}</th>
+                                                    <th rowspan="3" class="thverticalMiddle" style="text-align:center">{{translation.ODInterest}}</th>
+                                                    <th rowspan="3" class="thverticalMiddle" style="text-align:center">{{translation.PenalInterest}}</th>
+                                                    <th rowspan="3" class="thverticalMiddle" style="text-align:center">{{translation.ODTotal}}</th>
+
+
+                                                    <th rowspan="3" class="thverticalMiddle" style="text-align:center">{{translation.ODPrincipal}}</th>
+                                                    <th rowspan="3" class="thverticalMiddle" style="text-align:center">{{translation.InsurancePremium}}</th>
+                                                    <th rowspan="3" class="thverticalMiddle" style="text-align:center">{{translation.ODInterest}}</th>
+                                                    <th rowspan="3" class="thverticalMiddle" style="text-align:center">{{translation.PenalInterest}}</th>
+                                                    <th rowspan="3" class="thverticalMiddle" style="text-align:center">{{translation.ODTotal}}</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>
+                                                        <input class="form-control devcalender" ng-model="PLDB.DateOfOD" autocomplete="off" onchange="DateCheck()">
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" id="ODPrincipal" name="ODPrincipal" class="form-control " placeholder="{{translation.ODPrincipal}}" ng-model="PLDB.ODPrincipal" autocomplete="off" oninput="validateInput(this,12, 2)" onKeyPress="return isNumber(event);">
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" id="InsurancePremium" name="InsurancePremium" class="form-control" placeholder="{{translation.InsurancePremium}}" maxlength="9" ng-model="PLDB.ODInsurancePremium" oninput="validateInput(this,12, 2)" autocomplete="off" onKeyPress="return isNumber(event);">
+                                                    </td>
+
+                                                    <td>
+                                                        <input type="text" id="ODInterest" name="ODInterest" class="form-control" maxlength="9" placeholder="{{translation.ODInterest}}" ng-model="PLDB.ODInterest" autocomplete="off" oninput="validateInput(this,12, 2)" onKeyPress="return isNumber(event);">
+                                                    </td>
+
+                                                    <td>
+                                                        <input type="text" name="PenalInterest" id="PenalInterest" class="form-control" placeholder="{{translation.PenalInterest}}" maxlength="9" ng-model="PLDB.ODPenalInterast" autocomplete="off" oninput="validateInput(this,12, 2)" onKeyPress="return isNumber(event);">
+                                                    </td>
+
+                                                    <td>
+
+                                                        <input type="text" id="ODTotal" name="ODTotal" class="form-control" placeholder="{{translation.ODTotal}}" disabled ng-model="PLDB.ODTotal" maxlength="2" onKeyPress="return isNumber(event);" autocomplete="off">
+                                                    </td>
+
+
+                                                    <!--NOD-->
+
+                                                    <td>
+                                                        <input type="text" id="OutODPrincipal" name="OutODPrincipal" class="form-control" placeholder="{{translation.ODPrincipal}}" ng-model="PLDB.NODPrincipal" autocomplete="off" oninput="validateInput(this,12, 2)" onKeyPress="return isNumber(event);">
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" id="OutInsurancePremium" name="OutInsurancePremium" class="form-control" placeholder="{{translation.InsurancePremium}}" maxlength="9" ng-model="PLDB.NODInsurancePremium" oninput="validateInput(this,12, 2)" autocomplete="off" onKeyPress="return isNumber(event);">
+                                                    </td>
+
+                                                    <td>
+                                                        <input type="text" id="OutODInterest" name="OutODInterest" class="form-control" maxlength="9" placeholder="{{translation.ODInterest}}" ng-model="PLDB.NODInterest" autocomplete="off" oninput="validateInput(this,12, 2)" onKeyPress="return isNumber(event);">
+                                                    </td>
+
+                                                    <td>
+                                                        <input type="text" name="OutPenalInterest" id="OutPenalInterest" class="form-control" placeholder="{{translation.PenalInterest}}" maxlength="9" ng-model="PLDB.NODPenalInterest" autocomplete="off" oninput="validateInput(this,12, 2)" onKeyPress="return isNumber(event);">
+                                                    </td>
+
+                                                    <td>
+                                                        <input type="text" id="OutODTotal" name="OutODTotal" class="form-control" placeholder="{{translation.ODTotal}}" disabled ng-model="PLDB.NODTotal" maxlength="2" autocomplete="off" onKeyPress="return isNumber(event);">
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <div id="CurrentDemand">
+                                <div class="col-lg-12 form-group">
+                                    <h4 class="heading-hr ng-binding">{{translation.CurrentDemandCD}}<a ng-show="IsSubmiApplication" href="javascript:void(0);" dat-val="panel_od_31" class="fa fa-plus-circle expandDetails" style="float:right;font-size: 25px;"></a></h4>
+                                </div>
+                                <div class="col-lg-12 clspanal" id="panel_od_31">
+                                    <div class="table-responsive">
+                                        <table class="table devtable">
+                                            <thead>
+                                                <tr>
+
+                                                    <th rowspan="3" class="thverticalMiddle" style="text-align:center">{{translation.Principal}}</th>
+                                                    <th rowspan="3" class="thverticalMiddle" style="text-align:center">{{translation.Interest}}</th>
+                                                    <th rowspan="3" class="thverticalMiddle" style="text-align:center">{{translation.CDPenalInterest}}</th>
+                                                    <th rowspan="3" class="thverticalMiddle" style="text-align:center">{{translation.TotalInterest}}</th>
+                                                    <th rowspan="3" class="thverticalMiddle" style="text-align:center">{{translation.CDTotal}}</th>
+                                                    <th rowspan="3" class="thverticalMiddle" style="text-align:center">{{translation.PrincipalOutstandingODNOD}}</th>
+                                                    <th rowspan="3" class="thverticalMiddle" style="text-align:center">{{translation.TotalLoanOutstanding}}</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+
+                                                    <td>
+                                                        <input type="text" id="CdPrincipal" name="CdPrincipal" class="form-control" placeholder="{{translation.Principal}}" ng-model="PLDB.CDPrincipal" autocomplete="off" oninput="validateInput(this,12, 2)" onKeyPress="return isNumber(event);">
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" id="CdInterest" name="CdInterest" class="form-control" placeholder="{{translation.Interest}}" maxlength="9" ng-model="PLDB.CDInterest" oninput="validateInput(this,12, 2)" autocomplete="off" onKeyPress="return isNumber(event);">
+                                                    </td>
+
+                                                    <td>
+                                                        <input type="text" id="CDPenalInterest" name="CDPenalInterest" class="form-control" maxlength="9" placeholder="{{translation.CDPenalInterest}}" ng-model="PLDB.CDPenalInterest" autocomplete="off" oninput="validateInput(this,12, 2)" onKeyPress="return isNumber(event);">
+                                                    </td>
+
+                                                    <td>
+                                                        <input type="text" name="CDTotalInterest" id="CDTotalInterest" class="form-control" placeholder="{{translation.TotalInterest}}" maxlength="9" disabled ng-model="PLDB.CDTotalInterest" autocomplete="off" oninput="validateInput(this,12, 2)" onKeyPress="return isNumber(event);">
+                                                    </td>
+
+                                                    <td>
+                                                        <input type="text" id="CDTotal" name="CDTotal" class="form-control" placeholder="{{translation.CDTotal}}" disabled ng-model="PLDB.CDTotal" maxlength="2" autocomplete="off" onKeyPress="return isNumber(event);">
+                                                    </td>
+
+
+                                                    <td>
+                                                        <input type="text" id="PrincipalOutstandingODNOD" name="PrincipalOutstandingODNOD" class="form-control" placeholder="{{translation.PrincipalOutstandingODNOD}}" ng-model="PLDB.PrincipalOutstandingODNOD" maxlength="2" autocomplete="off" onKeyPress="return isNumber(event);">
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" id="TotalLoanOutstanding" name="TotalLoanOutstanding" class="form-control" placeholder="{{translation.TotalLoanOutstanding}}" ng-model="PLDB.TotalLoanOutstanding" maxlength="2" autocomplete="off" onKeyPress="return isNumber(event);">
+                                                    </td>
+
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="detailsofcasesunderact103">
+                                <div class="col-lg-12 form-group">
+                                    <h4 class="heading-hr ng-binding">{{translation.detailsofcasesunderact103}}<a ng-show="IsSubmiApplication" href="javascript:void(0);" class="fa fa-plus-circle expandDetails" style="float:right;font-size: 25px;"></a></h4>
+                                </div>
+                                <div class="col-lg-12 clspanal">
+                                    <div class="table-responsive">
+                                        <table class="table devtable">
+                                            <thead>
+                                                <tr>
+
+
+                                                    <th rowspan="3" class="thverticalMiddle" style="text-align:center">{{translation.resolutiondate}}</th>
+                                                    <th rowspan="3" class="thverticalMiddle" style="text-align:center">{{translation.principaloutstanding}}</th>
+                                                    <th rowspan="3" class="thverticalMiddle" style="text-align:center">{{translation.totalinterestasonresolutiondate}}</th>
+                                                    <th rowspan="3" class="thverticalMiddle" style="text-align:center">{{translation.totaloutstandingasonresolutiondate}}</th>
+                                                    <th rowspan="3" class="thverticalMiddle" style="text-align:center">{{translation.interestfromresolutionto30062024}}</th>
+                                                    <th rowspan="3" class="thverticalMiddle" style="text-align:center">{{translation.interestfrom30062024to31032025}}</th>
+                                                    <th rowspan="3" class="thverticalMiddle" style="text-align:center">{{translation.totalrecoverableamount}}</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+
+                                                    <td>
+                                                        <input class="form-control devcalender" placeholder="{{translation.resolutiondate}}" ng-model="PLDB.DateOfSettlement" autocomplete="off">
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" class="form-control" placeholder="{{translation.principaloutstanding}}" ng-model="PLDB.PrincipalOutstandingAsOnDateSettlement" autocomplete="off" oninput="validateInput(this,12, 2)" onKeyPress="return isNumber(event);">
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" class="form-control" placeholder="{{translation.totalinterestasonresolutiondate}}" ng-model="PLDB.TotalInterestAsOnDateSettlement" autocomplete="off" oninput="validateInput(this,12, 2)" onKeyPress="return isNumber(event);">
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" disabled class="form-control" placeholder="{{translation.totaloutstanding}}" ng-model="PLDB.TotalLoanOutstandingAsOnDateSettlement" autocomplete="off">
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" class="form-control" placeholder="{{translation.interestfromresolutionto30062024}}" ng-model="PLDB.InterestFromSettlementPre" autocomplete="off" oninput="validateInput(this,12, 2)" onKeyPress="return isNumber(event);">
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" class="form-control" placeholder="{{translation.interestfrom30062024to31032025}}" ng-model="PLDB.InterestFromSettlement" autocomplete="off" oninput="validateInput(this,12, 2)" onKeyPress="return isNumber(event);">
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" class="form-control" placeholder="{{translation.totalrecoverableamount}}" ng-model="PLDB.TotalAmount" autocomplete="off" disabled>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="detailsofcasesunderact103">
+                                <div class="col-lg-12 form-group">
+                                    <h4 class="heading-hr ng-binding">{{translation.detailsofcasesunderact103}}<a ng-show="IsSubmiApplication" href="javascript:void(0);" class="fa fa-plus-circle expandDetails" style="float:right;font-size: 25px;"></a></h4>
+                                </div>
+                                <div class="col-lg-12 clspanal">
+                                    <div class="table-responsive">
+                                        <table class="table devtable">
+                                            <thead>
+
+                                                <tr>
+                                                    <th colspan="2" style="text-align:center">{{translation.legalactionsstagescompleted}}</th>
+                                                    <th colspan="2" style="text-align:center">{{translation.niact138}}</th>
+                                                </tr>
+                                                <tr>
+                                                    <th style="text-align:center">{{translation.date}}</th>
+                                                    <th style="text-align:center">{{translation.action}}</th>
+                                                    <th style="text-align:center">{{translation.legalactiontakeyn}}</th>
+                                                    <th style="text-align:center">{{translation.currentstatusofcase}}</th>
+                                                </tr>
+
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+
+                                                    <td>
+                                                        <input class="form-control devcalender" ng-model="PLDB.LegalActionStageCompletedDate" autocomplete="off" onchange="DateCheck()">
+                                                    </td>
+                                                    <td>
+                                                        <select class="form-control" ng-model="PLDB.LegalActionStageCompletedAction">
+                                                            <option value="Notice 99">नोटिस 99</option>
+                                                            <option value="Order 99">आदेश 99</option>
+                                                            <option value="Order 100">आदेश 100</option>
+                                                        </select>
+                                                    </td>
+                                                    <td>
+                                                        <select class="form-control" ng-model="PLDB.IsNiActLegalActionTaken" ng-init="PLDB.IsNiActLegalActionTaken='Y'">
+                                                            <option value="Y">{{translation.Yes}}</option>
+                                                            <option value="N">{{translation.No}}</option>
+                                                        </select>
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" class="form-control" ng-model="PLDB.CurrentStatusOfNiActCaseNotice" placeholder="नोटिस/सुनवाई">
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="PermanentAddress" ng-show="IsAddressEditAble=true">
+
+                                <div class="form-group col-md-12">
+                                    <h5 class="heading-hr ng-binding"> {{translation.PermanatAddress}}</h5>
+                                </div>
+                                <input type="hidden" name="name" ng-model="Pldb.EMitraTransactionId" />
+                                <input type="hidden" class="form-control" name="HouseBuildingNo" ng-model="Pldb.ActId" placeholder="{{translation.HouseBuildingNo}}" autocomplete="off" ng-disabled="allDisable">
+
+                                <div class="form-group col-md-12">
+                                    @*<div class="row">
+                                            <div class="form-group col-md-6">
+                                                <label for="Pldb.HouseBuildingNo">{{ translation.HouseBuildingNo}}<span class="error">*</span></label>
+                                                <input type="text" class="form-control" name="HouseBuildingNo" id="Pldb.HouseBuildingNo" ng-model="PLDB.PermanentAddress.HouseBuildingNo" placeholder="{{translation.HouseBuildingNo}}" autocomplete="off" ng-disabled="allDisable" ng-change="sanitizeInput('SocietyRegisteredOffice.HouseBuildingNo')">
+                                            </div>
+                                            <div class="form-group col-md-6">
+                                                <label for="Pldb.LaneStreetName">{{ translation.LaneStreetName}}<span class="error">*</span></label>
+                                                <input type="text" class="form-control" name="LaneStreetName" id="Pldb.LaneStreetName" ng-model="PLDB.PermanentAddress.LaneStreetName" placeholder="{{translation.LaneStreetName}}" autocomplete="off" ng-disabled="allDisable">
+                                            </div>
+                                        </div>*@
+
+                                    <div class="row">
+
+                                        <div class="form-group col-md-6">
+                                            <label for="">{{ translation.District}}<span class="error">*</span></label>
+                                            <select ng-model="PLDB.DistrictId" class="form-control" ng-init="PLDB.DistrictId='0'" ng-disabled="allDisable" ng-change="ResetDataForAddress(1,2)">
+                                                <option value="0" disabled>{{translation.SelectOption}}</option>
+                                                <option ng-repeat="item in DistrictList" value="{{item.DISTRICT_ID}}">
+                                                    {{_language =='en-us' ?  item.DISTRICT_ENG : item.DISTRICT_MANGAL}}
+                                                </option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group col-md-6">
+                                            <div class="form-check form-check-inline col-md-4" style="padding: 0;">
+                                                <label class="form-check-label" for="inlineRadio1">{{translation.UrbanRural}}</label>
+                                            </div>
+                                            <div>
+
+                                                <div class="col-lg-4">
+                                                    <label for="" class="help-block-gender" style="width:40% !important;">
+                                                        <input type="radio" id="sdfs" name="Rurals" value="true" disabled ng-model="PLDB.IsRural" ng-change="RuralUrbanBlock(true)" ng-disabled="allDisable">{{translation.Urban}}
+                                                    </label>
+                                                    <label for="" class="help-block-gender" style="width:40% !important;">
+                                                        <input type="radio" id="sdf" value="false" name="Rural" disabled ng-model="PLDB.IsRural" ng-change="RuralUrbanBlock(false)" ng-disabled="allDisable">{{translation.Rural}}
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row" ng-show="RuralDiv">
+                                        <div class="form-group col-md-6">
+                                            <label for="">{{ translation.BlockHeading}} </label>
+                                            <select ng-model="PLDB.BlockId" id="ddlblocki" class="form-control" ng-init="PLDB.BlockId='0'" ng-change="GramPanchayatList(1)" ng-disabled="allDisable">
+                                                <option value="0" disabled>{{translation.SelectOption}}</option>
+                                                <option ng-repeat="item in Blocksdata | orderBy:'BLOCK_ENG'" value="{{item.BLOCK_ID}}">
+                                                    {{_language =='en-us' ?  item.BLOCK_ENG : item.BLOCK_MANGAL}}
+                                                </option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group col-md-6">
+                                            <label for="">{{ translation.GramPanchayatHeading}}</label>
+
+                                            <select ng-model="PLDB.GpId" id="ddlGP" class="form-control" ng-init="PLDB.GpId='0'" ng-change="VillageList(1)" ng-disabled="allDisable">
+                                                <option value="0" disabled>{{translation.SelectOption}}</option>
+                                                <option ng-repeat="item in GramPanchayats | orderBy:'GramPanchayats'" value="{{item.GP_ID}}">
+                                                    {{_language =='en-us' ?  item.GP_ENG : item.GP_MANGAL}}
+                                                </option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group col-md-6">
+                                            <label for="">{{translation.Village}}</label>
+
+                                            <select ng-model="PLDB.VId" id="ddlVillage" class="form-control" ng-init="PLDB.VId='0'" ng-disabled="allDisable">
+                                                <option value="0" disabled>{{translation.SelectOption}}</option>
+                                                <option ng-repeat="item in Villages | orderBy:'VILLAGE_ENG'" value="{{item.VILLAGE_ID}}">
+                                                    {{_language =='en-us' ?  item.VILLAGE_ENG : item.VILLAGE_MANGAL}}
+                                                </option>
+                                            </select>
+                                        </div>
+
+                                    </div>
+                                    <div class="row" ng-show="UrbanDiv">
+                                        <div class="form-group col-md-6">
+                                            <label for="">{{translation.City}}<span class="error">*</span></label>
+                                            <select ng-model="PLDB.CITY_ID" class="form-control" ng-change="GetWardList(1)" ng-init="PLDB.CITY_ID='0'" ng-disabled="allDisable">
+                                                <option value="0" disabled>{{translation.SelectOption}}</option>
+                                                <option ng-repeat="item in CityListdata" value="{{item.CITY_ID}}">
+                                                    {{_language =='en-us' ?  item.CITY_ENG : item.CITY_MANGAL}}
+                                                </option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group col-md-6">
+                                            <label for="">{{translation.Ward}}<span class="error">*</span></label>
+                                            <select ng-model="PLDB.WARD_ID" class="form-control" ng-init="PLDB.WARD_ID='0'" ng-disabled="allDisable">
+                                                <option value="0" disabled>{{translation.SelectOption}}</option>
+                                                <option ng-repeat="item in Ward" value="{{item.WARD_ID}}">
+                                                    {{_language =='en-us' ?  item.WARD_ENG : item.WARD_MANGAL}}
+                                                </option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+
+                                        <div class="form-group col-md-6">
+                                            <label for="Tehsil">{{ translation.Tehsil}}<span class="error">*</span></label>
+                                            <input type="text" class="form-control" name="Tehsil" id="Tehsil" ng-model="PLDB.TehsilName" ng-disabled="allDisable" placeholder="{{translation.VidhanSabhaArea}}" autocomplete="off">
+                                        </div>
+                                        <div class="form-group col-md-6">
+                                            <label for="VidhanSabha">{{ translation.VidhanSabhaArea}}<span class="error">*</span></label>
+                                            <input type="text" class="form-control" name="VidhanSabha" id="VidhanSabha" ng-model="PLDB.VidhanSabha" ng-disabled="allDisable" placeholder="{{translation.VidhanSabhaArea}}" autocomplete="off">
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                            </div>
+                            <br />
+                            <div id="otherDetails" style="display:none;">
+                                <div class="form-group col-md-12">
+                                    <h5 class="heading-hr ng-binding"> Pending level for mortgage details under 103 cases</h5>
+                                </div>
+                                <div class="form-group col-md-12">
+                                    <div class="row">
+                                        <div class="form-group col-md-3">
+                                            <label for="PendingLevel">Pending level of cases under 103</label>
+                                            <select id="PendingLevel" ng-model="PLDB.PendingLevelId" class="form-control pending-level" ng-disabled="allDisable">
+                                                <option value="0" disabled>{{translation.SelectOption}}</option>
+                                                <option ng-repeat="li in PendingLevelList track by li.OtsPendingLevelId" value="{{li.OtsPendingLevelId}}" ng-selected="li.OtsPendingLevelId==PLDB.PendingLevelId">
+                                                    {{li.Name}}
+                                                </option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group col-md-3" ng-show="PLDB.PendingLevelId==6">
+                                            <label for="MutationNo">Mutation No.</label>
+                                            <input type="text" class="form-control mutation-no" id="MutationNo" ng-model="PLDB.MutationNo" ng-disabled="allDisable" placeholder="Mutation No." autocomplete="off">
+                                        </div>
+                                        <div class="form-group col-md-3" ng-show="PLDB.PendingLevelId==6">
+                                            <label for="MutationDate">Mutation Date</label>
+                                            <input type="date" class="form-control mutation-date" id="MutationDate" ng-model="PLDB.MutationDate" ng-disabled="allDisable" placeholder="Mutation Date" autocomplete="off">
+                                        </div>
+                                    </div>
+                                    <div class="row" ng-show="{{PLDB.IsNormalCase==0}}">
+                                        <div class="col-md-12">
+                                            <br />
+                                            <label>
+                                                If land not mortaged, than pending level
+                                            </label>
+                                        </div>
+                                        <div class="form-group col-md-3">
+                                            <label for="MLPendingLevel">Pending level of cases under 103</label>
+                                            <select id="MLPendingLevel" ng-model="PLDB.LandMortgagedPendingLevelId" class="form-control ml-pending-level" ng-disabled="allDisable">
+                                                <option value="0" disabled>{{translation.SelectOption}}</option>
+                                                <option ng-repeat="li in MLPendingLevelList" value="{{li.OtsPendingLevelId}}">
+                                                    {{li.Name}}
+                                                </option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group col-md-3" ng-show="PLDB.LandMortgagedPendingLevelId==6">
+                                            <label for="MLMutationNo">Mutation No.</label>
+                                            <input type="text" class="form-control ml-mutation-no" id="MLMutationNo" ng-model="PLDB.LandMortgagedMutationNo" ng-disabled="allDisable" placeholder="Mutation No." autocomplete="off">
+                                        </div>
+                                        <div class="form-group col-md-3" ng-show="PLDB.LandMortgagedPendingLevelId==6">
+                                            <label for="MLMutationDate">Mutation Date</label>
+                                            <input type="date" class="form-control ml-mutation-date" id="MLMutationDate" ng-model="PLDB.LandMortgagedMutationDate" ng-disabled="allDisable" placeholder="Mutation Date" autocomplete="off">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-12" style="margin-top: 25px;    border-top: 1px solid darkgray;    padding-top: 10px; background-color: white; padding-bottom: 10px;">
+                            <center>
+                                <a class="btn btn-primary dev-btn" style="text-transform: capitalize;" ng-if="IsSubmiApplication==true" href="javascript:void(0);" ng-click="ShowLoanApplication()">{{ translation.Back}}</a>
+                                @if (((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).RoleId == 10188 ||
+                                    ((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).RoleId == 10064 || 
+                                    ((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).RoleId == 10189)
+                                {
+                                    <button type="submit" class="btn btn-success" ng-if="IsSubmiApplication==false" ng-click="Save_PLDBForm(true)">&nbsp;&nbsp;{{translation.Submit}} </button>
+                                }
+                            </center>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="FormPost">
+</div>
+
+

@@ -1,0 +1,132 @@
+﻿@{
+    ViewBag.Title = "NCD District Wise Report";
+}
+
+<script src="~/Scripts/AngularFramework/NCDDistrictWiseReport.js?v=@DateTime.Now.Ticks"></script>
+<script type="text/javascript" src="~/Scripts/jqueryuitimepicker.js"></script>
+<link href="~/Content/Stylesheets/jqueryuitimepicker.css" rel="stylesheet" />
+<script src="~/Scripts/xlsx.full.min.js"></script>
+
+
+<script type="text/javascript">
+    var tableToExcel = (function () {
+        var uri = 'data:application/vnd.ms-excel;base64,'
+            , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>'
+            , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) }
+            , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
+        return function (table, name) {
+            if (!table.nodeType) table = document.getElementById(table)
+            var ctx = { worksheet: name || 'Worksheet', table: table.innerHTML }
+            window.location.href = uri + base64(format(template, ctx))
+        }
+    })()
+
+
+    function exportToExcel(tableId, fileName) {
+        // Clone table
+        var originalTable = document.getElementById(tableId);
+        var table = originalTable.cloneNode(true);
+
+        // Remove footer
+        var tfoot = table.querySelector("tfoot");
+        if (tfoot) {
+            tfoot.remove();
+        }
+
+        // Create workbook
+        var wb = XLSX.utils.table_to_book(table, { sheet: "Sheet1" });
+
+        // Export
+        XLSX.writeFile(wb, fileName + ".xlsx");
+    }
+
+</script>
+<div ng-app="ncdDistrictMod" ng-controller="ncdDistrictCtrl" ng-cloak="">
+    <input type="hidden" id="hdnDistrictId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DistrictId)" />
+    <div class="container-fluid citizen-dash-head">
+        <div class="panel panel-default">
+            <div class="panel-heading flexEqualCenter">
+                <b>
+                    <i class="fa fa-th-list"></i>&nbsp; NCD District Wise Report
+                </b>
+            </div>
+            <div class="panel-body">
+                <div class="row mb-4">
+                    <div class="col-md-3 mt-2">
+                        <label for="Filter">Filter</label>
+                        <select name="sectorOperationcode" ng-model="search.reportType" class="form-control" ng-change="GetNCDDistrictWiseReport(search.reportType)">
+                            <option value="{{li.reportType}}" ng-repeat="li in reportTypeList">{{li.actionType}}</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-3 mt-2 p-2">
+                        <br />
+                        <button type="button" class="btn btn-primary dev-btn ng-binding" ng-click="GetNCDDistrictWiseReport(search.reportType)">Search</button>
+                        <button type="button" class="btn btn-primary dev-btn ng-binding" ng-click="ClearSearch()">Reset</button>
+                        @*<button type="button" class="btn btn-primary dev-btn" ng-click="exportToExcel()"> Export to Excel </button>*@
+                        <input type="button" class="btn btn-primary dev-btn" onclick="exportToExcel('tblExportData', 'Get NCD District Wise' )" value="Export to Excel">
+
+                    </div>
+                </div>
+                <table id="tblExportData" class="table table-responsive devtable mb-2">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width:60px;">Sr.No</th>
+                            <th class="text-center" ng-if="search.reportType == 1 || search.reportType == 2">District Name</th>
+                            <th class="text-center" ng-if="search.reportType != 1">Society Registration</th>
+                            <th class="text-center" ng-if="search.reportType == 1">Total</th>
+                            <th class="text-center" ng-if="search.reportType != 1">Society Name</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="item in getPagedData() track by $index"
+                            ng-style="item.DistrictName == 'Grand Total' && {'font-weight':'bold','color':'black'}">
+
+                            <td>
+                                <span ng-hide="item.DistrictName == 'Grand Total'">
+                                    {{$index + 1 + ((currentPage - 1) * pageSize)}}
+                                </span>
+                            </td>
+
+                            <td ng-if="search.reportType == 1 || search.reportType == 2">
+                                {{item.DistrictName}}
+                            </td>
+
+                            <td ng-if="search.reportType == 1">
+                                {{item.Total | number}}
+                            </td>
+
+                            <td ng-if="search.reportType != 1">
+                                {{item.RegistrationNo}}
+                            </td>
+
+                            <td ng-if="search.reportType != 1">
+                                {{item.SocietyName}}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="text-right mt-2" ng-if="totalPages > 1" style="margin:15px!important">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item" ng-class="{disabled: currentPage == 1}">
+                        <a class="page-link" href="javascript:void(0)" ng-click="goToPage(1)"> « First  </a>
+                    </li>
+                    <li class="page-item" ng-class="{disabled: currentPage == 1}">
+                        <a class="page-link" href="javascript:void(0)" ng-click="previousPage()"> « Previous </a>
+                    </li>
+                    <li class="page-item" ng-repeat="page in getPages()" ng-class="{active: currentPage == page}">
+                        <a class="page-link" href="javascript:void(0)" ng-click="goToPage(page)">  {{page}} </a>
+                    </li>
+                    <li class="page-item" ng-class="{disabled: currentPage == totalPages}">
+                        <a class="page-link" href="javascript:void(0)" ng-click="nextPage()">  Next » </a>
+                    </li>
+                    <li class="page-item" ng-class="{disabled: currentPage == totalPages}">
+                        <a class="page-link" href="javascript:void(0)" ng-click="goToPage(totalPages)">
+                            Last »
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>

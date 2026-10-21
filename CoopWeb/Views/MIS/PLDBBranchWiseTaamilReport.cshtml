@@ -1,0 +1,154 @@
+﻿
+<style>
+    .flexEqualCenter {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    a.backBtn {
+        padding: 3px 5px;
+        background: rgb(99,205,219);
+        color: #fff;
+        border: 0px;
+        outline: none;
+        display: inline-block;
+        text-decoration: none;
+    }
+
+        a.backBtn i {
+            display: inline-block;
+            margin-right: 5px;
+        }
+</style>
+<script src="~/Scripts/AngularFramework/PLDBBranchWiseTaamilReport.js?v=1.2"></script>
+<div ng-app="BeneficiaryListMod" ng-controller="BeneficiaryListCnt" ng-cloak="">
+    <div class="container-fluid citizen-dash-head">
+        <input type="hidden" id="hdnDistrictId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DistrictId)" />
+        <input type="hidden" id="hdnPldbId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).PLDBId)" />
+        <input type="hidden" id="hdnPldbBranchId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).PLDBBrancchId)" />
+
+        <div class="panel panel-default">
+            <div class="panel-heading flexEqualCenter">
+                <b><i class="fa fa-th-list"></i>&nbsp; PLDB Branch Wise Taamil Summary</b>
+                <div class="text-right"><button ng-click="BackToPage()" class="btn btn-primary dev-btn">Back To List</button></div>
+            </div>
+
+            <div class="panel-body">
+                <input type="hidden" id="hdnDistrictId" ng-model="search.LoanDistrictId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DistrictId)" />
+                @*<div class="row">
+                    <div class="col-md-6 form-group">
+                        <label class="help-block-gender">
+                            <input type="radio" id="PldbDistrictWiseSummary" name="ReportType" ng-value="1" ng-model="ReportType" ng-change="ReportTypeChange() " selected> District Wise
+                        </label>
+                        <label class="help-block-gender">
+                            <input type="radio" id="PldbBankWiseSummary" ng-value="2" name="ReportType" ng-model="ReportType" ng-change="ReportTypeChange()"> Bank Wise
+                        </label>
+                        <label class="help-block-gender">
+                            <input type="radio" id="PldbBankWiseTaamilSummary" name="ReportType" ng-value="3" ng-model="ReportType" ng-change="ReportTypeChange()"> Bank Wise Taamil
+                        </label>
+
+                        <label class="help-block-gender">
+                            <input type="radio" id="PldbBranchWiseTaamilSummary" name="ReportType" ng-value="4" ng-model="ReportType" ng-change="GetPldbDistrictWiseSummary(0)"> Branch Wise Taamil
+                        </label>
+                    </div>
+                    <div class="col-md-6 form-group">
+                    </div>
+                </div>*@
+
+
+                <div class="row">
+                    @*<div class="col-md-2 form-group" ng-show="false">
+                        <label>{{ translation.District}}<span class="error">*</span></label>
+                        <select id="DISTRICT_ID" ng-model="search.DISTRICT_ID" class="form-control" ng-init="search.DISTRICT_ID='0'" ng-change="PLDBListData(0)">
+                            <option value="0">{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in DistrictList" value="{{item.DISTRICT_ID}}">
+                                {{_language =='en-us' ?  item.DISTRICT_ENG : item.DISTRICT_MANGAL}}
+                            </option>
+                        </select>
+                    </div>*@
+
+                    <div class="col-lg-2 margin-Top20" style="padding-left: 10px; padding-bottom: 10px;" id="ddlPLDBID" ng-show="true">
+                        <label for="PLDB_ID">{{_language =='en-us' ? 'Primary Bank': 'प्राथमिक बैंक' }} </label>
+                        <select id="PLDB_ID" name="PLDB_ID" ng-model="search.PLDB_ID" class="form-control" ng-init="PLDB_ID='0'" ng-change="GetPldbBranchWiseTaamilSummary('0')">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="itemPLDB in PLDBList  track by itemPLDB.PldbId " value="{{itemPLDB.PldbId}}">
+                                {{itemPLDB.PLDBName}}
+                            </option>
+                        </select>
+                    </div>
+                    @*<div class="col-lg-2 margin-Top20" style="padding-left: 0;" id="ddlPldbBranchID" ng-show="false">
+                        <label for="PLDB_Branch_ID">{{ translation.Branch}}</label>
+                        <select ng-model="search.PLDB_Branch_ID" name="PLDB_Branch_ID" id="PLDB_Branch_ID" class="form-control" ng-init="PLDB_Branch_ID='0'" ng-change="GetPldbDistrictWiseSummary('0')">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="itemBlock in PLDBBranches " value="{{itemBlock.BLOCK_ID}}">
+                                {{_language =='en-us' ?  itemBlock.BLOCK_ENG : itemBlock.BLOCK_MANGAL}}
+                            </option>
+                        </select>
+                    </div>*@
+                </div>
+
+
+                <div class="table-responsive devtable">
+                    <table class="table table-hover table-striped table-bordered mb-0">
+                        <thead>
+                            <tr>
+                                <th rowspan="2" style="text-align:center" width="60">{{translation.SRNO}} </th>
+                                <th rowspan="2" style="text-align:center">{{_language =='en-us' ? 'Branch Name': 'शाखा का नाम' }}</th>
+
+                                <th rowspan="2" style="text-align:center">{{_language =='en-us' ? 'Number of eligible borrowers':'पात्र ऋणियों की संख्या '}}</th>
+                                <th colspan="3" style="text-align:center">{{_language =='en-us'?'Recovered Amount':'योजनागृत पात्र अवधिपार राशि'}}</th>
+
+                                <th rowspan="2" style="text-align:center">{{_language =='en-us'?'Number of notices served':'तामील कराये गए नोटिस की संख्या '}}</th>
+                                <th colspan="3" style="text-align:center">{{_language =='en-us'?'Notice served on borrowers eligible for overdue amount under the scheme':'नोटिस तामील ऋणियो में योजनागृत पात्र अवधिपार राशि '}}</th>
+
+                            </tr>
+                            <tr>
+                                <th style="text-align:center">{{_language =='en-us'?'Recoverable From The Debtor':'ऋणी से वसूली योग्य '}}</th>
+                                <th style="text-align:center">{{_language =='en-us'?'Amount of relief paid':'राहत राशि '}}</th>
+                                <th style="text-align:center">{{translation.Yog}}</th>
+
+                                <th style="text-align:center">{{_language =='en-us'?'Recoverable From The Debtor':'ऋणी से वसूली योग्य '}}</th>
+                                <th style="text-align:center">{{_language =='en-us'?'Amount of relief paid':'राहत राशि '}}</th>
+                                <th style="text-align:center">{{translation.Yog}}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="item in GetPldbSummary">
+                                <td>{{$index+1}}.</td>
+                                <td align="center"><a href="" ng-click="PldbBranchNameChange(item)">{{item.BranchName_En}}</a></td>
+
+                                <td align="center">{{item.TotalApplication}}</td>
+                                <td align="center">{{item.RemainingAmt}}</td>
+                                <td align="center">{{item.ReliefAmount}}</td>
+                                <td align="center">{{item.Yog}}</td>
+
+                                <td align="center">{{item.TotalTaamil}}</td>
+                                <td align="center">{{item.TaamilRemainingAmt}}</td>
+                                <td align="center">{{item.TaamilReliefAmount}}</td>
+                                <td align="center">{{item.TaamilYog}}</td>
+                            </tr>
+                        </tbody>
+                        <tfoot ng-show="GetPldbSummary!=null">
+                            <tr ng-repeat="item in TotalGetPldbSummary">
+                                <td colspan="{{(ReportType==1 && search.PLDB_Branch_ID>0) ?5 :ReportType==1 ? 3:2}}" align="right"><b>Total</b></td>
+                                <td align="center"><b>{{item.TotalApplication}}</b></td>
+                                <td align="center"><b>{{item.TotalRemainingAmt}}</b></td>
+                                <td align="center"><b>{{item.TotalReliefAmount}}</b></td>
+                                <td align="center"><b>{{item.TotalYog}}</b></td>                                
+
+                                <td align="center"><b>{{item.TotalTaamil}}</b></td>
+                                <td align="center"><b>{{item.TotalTaamilRemainingAmt}}</b></td>
+                                <td align="center"><b>{{item.TotalTaamilReliefAmount}}</b></td>
+                                <td align="center"><b>{{item.TotalTaamilYog}}</b></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+
+                <div class="clearfix"></div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,318 @@
+﻿
+<script src="~/Scripts/AngularFramework/AuditorAssignmentByDepartment.js?v=1.1"></script>
+<div ng-app="AuditorAssignByDepart">
+    <div ng-controller="AuditorAssignByDepartCnt">
+        <div class="col-md-12">
+            <h3 class="citizen-dash-head">{{translation.AuditorAssignmentByDepartment}}</h3>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#"> {{translation.Home}} </a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+
+                        <i class="fa fa-angle-right"> </i>
+                        <span style="margin: 0 5px;"> {{translation.AuditorAssignmentByDepartment}} </span>
+                    </li>
+
+                </ul>
+            </div>
+        </div>
+        <div class="dev-popup-body modal fade" id="myModal" role="dialog">
+            <div class="modal-dialog">
+                <!-- Modal content-->
+                <div class="modal-content citizen-dash-head">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        @*<h4 class="modal-title"> {{translation.AddOffice}} </h4>*@
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group col-md-6">
+                            <label>{{translation.EnterOTP}}</label>
+                            <input type="text" class="form-control" name="OTP" ng-bind="OTP" ng-model="OTP" placeholder={{translation.EnterOTP}} autocomplete="off" /><br />
+                            <button type="submit" class="btn btn-primary" ng-click="VerifyOTP()">{{translation.Submit}}</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12">
+            <div class="table-responsive citizen-dash-head" style="overflow: hidden;">
+
+                <div class="col-lg-12 ">
+                    <h5 class="heading-hr ng-binding"> {{translation.SocietyListOfAuditorRequest}} </h5>
+                </div>
+                <div class="col-lg-12 ">
+                    <div class="table-dropdown">
+                        <div class="col-md-1" style="padding-left: 0;">
+                            <label for="search">{{translation.Search}}:</label>
+                        </div>
+                        <div class="col-md-3" style="padding-left: 0;">
+                            <input ng-model="q" id="search" class="form-control" placeholder={{translation.filttertext}} autocomplete="off">
+                        </div>
+                        <div class="col-md-2" style="padding-left: 0;">
+                            <label for="search">{{translation.ItemPerPage}}:</label>
+                        </div>
+                        <div class="col-md-4" style="padding-left: 0;">
+                            <input type="number" min="1" max="100" class="form-control" ng-model="pageSize">
+                        </div>
+                        <div class="col-md-2" style="padding-left: 0;">
+                        </div>
+                        <div class="col-md-12" style="padding-left: 0;padding-top: 10px;">
+                            <label style="margin-right: 15px;">{{translation.AuditBy}}</label>
+
+                            <input class="form-check-input" type="radio" name="inlineRadioOptions1" value="true" ng-model="AuditBy" ng-change="SetAuditType(1)" ng-checked="1">
+                            <label class="form-check-label option_value" style="margin-right: 15px;">{{translation.ByEmpanelledAgency}}</label>
+
+                            <input class="form-check-input" type="radio" name="inlineRadioOptions1" value="false" ng-model="AuditBy" ng-change="SetAuditType(0)">
+                            <label class="form-check-label option_value" style="margin-right: 15px;">{{translation.ByDepartment}} ({{translation.Requested}})</label>
+
+                            <input class="form-check-input" type="radio" name="inlineRadioOptions1" value="All" ng-model="AuditBy" ng-change="SetAuditType(2)">
+                            <label class="form-check-label option_value" style="margin-right: 15px;">{{translation.ByDepartment}} ({{translation.NotRequested}})</label>
+                        </div>
+                    </div>
+                </div>
+
+
+
+                <div class="col-lg-12 ">
+                    <table class="table devtable" style="margin-top: 30px;" id="a">
+                        <thead>
+                            <tr>
+                                <th>
+                                    {{translation.SRNO}}
+                                </th>
+                                <th ng-click="sortData('SocietyName')">
+                                    {{translation.SocietyName}}
+                                    <div ng-class="getSortClass('SubClassNameEn')"></div>
+                                </th>
+                                <th>
+                                    {{translation.FincialYearHeading}}
+                                </th>
+                                <th>
+                                    {{translation.AuditType}}
+                                </th>
+                                <th>
+                                    {{translation.District}}
+                                </th>
+                                <th ng-show="IsByEmpanelledFlag">
+                                    {{translation.AuditorData}}
+                                </th>
+                                <th>
+                                    {{translation.Approvable}}
+                                </th>
+                        </thead>
+
+                        <tbody>
+                            <tr dir-paginate="Class in GetAllAuditorAssignmentByDepartmentdata | filter:q | orderBy:colsort:reverseSort | itemsPerPage: pageSize" current-page="currentPage" pagination-id="SubclassPagination">
+                                <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                                <td>{{ Class.SocietyName }}{{ Class.SocietyID }}</td>
+                                <td>{{ Class.FIN_YEAR_NAME }}</td>
+                                <td ng-show="Class.IsFirm == 0">{{  translation.Firm }}</td>
+                                <td ng-show="Class.IsFirm == 1">{{ translation.Individual}}</td>
+                                <td ng-show="Class.IsFirm == 2">{{ translation.ByDepartment }}</td>
+                                <td ng-show="Class.IsFirm == 3">Pending</td>
+                                <td>{{ _language == 'en-us' ?  Class.DISTRICT_ENG : Class.DISTRICT_MANGAL }}</td>
+                                <td ng-show="IsByEmpanelledFlag">{{ Class.FirmName }}</td>
+                                <td>
+                                    <input type="checkbox" name="Accept" ng-model="Class.IsChecked" id="{{Class.Id}}" ng-change="ShowInspacotrDiv(Class.Id,Class.InspectorName, Class.AuditorId , Class.IsFirm,Class.AuditorAssignFilePath,Class.SocietyID);GetInspactorName(Class.DISTRICT_ID)" />
+                                </td>
+
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col-lg-12 ">
+                    <div ng-show="showdiv">
+                        <div class="col-lg-2">
+                            <label>{{translation.Inspector}}</label>
+                        </div>
+                        <div class="col-lg-4">
+                            <select class="form-control" ng-model="Inspector" ng-init="Inspector='0'">
+                                <option value="0" disabled>{{translation.SelectOption}}</option>
+                                <option ng-repeat="item in InspactorNameData" value="{{item.UserId}}">
+                                    {{item.OfficerNameEn}}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                    <div ng-show="showdivRedio">
+                        <div class="col-lg-2">
+                            <label>{{translation.SetRequestStatus}}</label>
+                        </div>
+                        <div class="col-lg-4">
+                            <input class="form-check-input" type="radio" name="rbRequestStatus" value="1" ng-model="RequestStatus" ng-checked="1">
+                            <label class="form-check-label option_value" style="margin-right: 15px;">{{translation.Approve}}</label>
+
+                            <input class="form-check-input" type="radio" name="rbRequestStatus" value="2" ng-model="RequestStatus">
+                            <label class="form-check-label option_value">{{translation.Rejection}}</label>
+                        </div>
+                    </div>
+                </div>
+                <div ng-show="ShowEmpanelledCADataOld">
+                    <div class="col-lg-12 ">
+                        <div class="col-lg-2">
+                            <label>{{translation.AuditType}}</label>
+                        </div>
+                        <div class="col-lg-4">
+                            <input class="form-check-input setEnable" type="radio" name="inlineRadioOptions2Old" value="0" ng-model="IsFirm" ng-change="GetAuditorData()">
+                            <label class="form-check-label option_value" for="inlineRadio1Old" style="margin-right: 15px;">{{translation.Firm}}</label>
+
+                            <input class="form-check-input setEnable" type="radio" name="inlineRadioOptions2Old" id="inlineRadio3Old" value="1" ng-model="IsFirm" ng-change="GetAuditorData()">
+                            <label class="form-check-label option_value">{{translation.Individual}}</label>
+                        </div>
+                        <div class="col-lg-2">
+                            <label>{{translation.AuditorData}}</label>
+                        </div>
+                        <div class="col-lg-4">
+                            <select class="form-control setEnable" ng-model="AuditorId" ng-init="AuditorId='0'">
+                                <option value="0" disabled>{{translation.SelectOption}}</option>
+                                <option ng-repeat="item in AuditorList" value="{{item.AuditorId}}">
+                                    {{_language =='en-us' ?  item.FirmName : item.FirmName}}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div ng-show="ShowDepartmentDataOld">
+                    <div class="col-lg-12 ">
+                        <div class="col-lg-2">
+                            <label ng-show="InspectorName.lenth>0 ||InspectorName!=''">{{translation.Inspector}}/{{translation.Auditor}}</label>
+                        </div>
+                        <div class="col-lg-4">
+                            <span ng-show="InspectorName.lenth>0||InspectorName!=''" name="InsName" ng-model="InspectorName">{{InspectorName}}</span>
+                        </div>
+                        <div class="col-lg-2">
+                        </div>
+                        <div class="col-lg-4">
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+
+            <div class="form-group col-md-12">
+                <div class="dev-align-btn">
+                    <button type="submit" class="btn btn-primary dev-btn" ng-show="AuditBy!='All'" ng-disabled="MyUserForm.$invalid" ng-click="SaveAuditAssignbydeprt(1)">{{translation.Submit}}</button>
+                    <button type="submit" class="btn btn-primary dev-btn" ng-show="AuditBy=='All'" ng-disabled="MyUserForm.$invalid" ng-click="SaveAuditAssignbydeprtNotReqst(2)">{{translation.Submit}}</button>
+                    <a class="btn btn-primary dev-btn" style="text-transform:capitalize;" href="../User/DashBoard"> Back</a>
+                </div>
+
+            </div>
+
+            <div class="col-md-10">
+                <div class="text-center">
+                    <dir-pagination-controls boundary-links="true" pagination-id="SubclassPagination" on-page-change="pageChangeHandler(newPageNumber)" template-url="/dirPagination.tpl.html"></dir-pagination-controls>
+                </div>
+            </div>
+
+
+        </div>
+        <div class="col-md-12">
+            <br /><br />
+                  <div class="table-responsive citizen-dash-head" style="overflow: hidden;">
+                    
+                      <h5 class="heading-hr ng-binding"> {{translation.SocietyListOfAuditorAppointed}} </h5>
+                  
+                      <div class="table-dropdown">
+                          <div class="col-md-4" style="padding-left: 0;">
+                              <label for="search">{{translation.Search}}:</label>
+                              <input ng-model="A" id="search" class="form-control" placeholder={{translation.filttertext}} autocomplete="off">
+                          </div>
+                          <div class="col-md-2" style="padding-left: 0;">
+                              <label for="search">{{translation.ItemPerPage}}:</label>
+                              <input type="number" min="1" max="100" class="form-control" ng-model="pageSizeT">
+                          </div>
+                          <div class="col-md-6" style="padding-top: 27px;">
+                              <label>{{translation.AuditBy}}</label>
+
+                              <input class="form-check-input" type="radio" name="inlineRadioOptions" value="true" ng-model="AuditByT" ng-change="SetAuditTypeT(true)" ng-checked="1">
+                              <label class="form-check-label option_value" style="margin-right: 15px;">{{translation.ByEmpanelledAgency}}</label>
+
+                              <input class="form-check-input" type="radio" name="inlineRadioOptions" value="false" ng-model="AuditByT" ng-change="SetAuditTypeT(false)">
+                              <label class="form-check-label option_value">{{translation.ByDepartment}}</label>
+                          </div>
+                      </div>
+
+                          <table class="table devtable">
+                              <caption>
+                                  <h2>{{translate.TehsilHeading}}</h2>
+                              </caption>
+                              <thead>
+                                  <tr>
+                                      <th>
+                                          {{translation.SRNO}}
+                                      </th>
+                                      <th>
+                                          {{translation.SocietyName}}
+                                      </th>
+                                      <th>
+                                          {{translation.FincialYearHeading}}
+                                      </th>
+                                      <th>
+                                          {{translation.AuditBy}}
+                                      </th>
+                                      <th>
+                                          {{translation.AuditType}}
+                                      </th>
+                                      <th>
+                                          {{translation.District}}
+                                      </th>
+                                      <th>
+                                          {{translation.Order}}
+                                      </th>
+
+                                      <th>
+                                          {{translation.Order}}   {{translation.File}}
+                                      </th>
+                                      <th>
+                                          {{translation.RequestStatus}}
+                                      </th>
+                                      @*<th>
+                            {{translation.View}}
+                        </th>*@
+                                  </tr>
+                              </thead>
+                              <tbody>
+                                  <tr dir-paginate="items in AssignedAuditor | filter:A | orderBy:colsort:reverseSort | itemsPerPage: pageSizeT" current-page="currentPageT" pagination-id="AuditorPagination">
+                                      <td>{{$index+1}}</td>
+                                      <td>{{ items.SocietyName }}</td>
+                                      <td>{{ items.FIN_YEAR_NAME }}</td>
+                                      <td>{{ items.IsEmpanelledCA == 'True' ? translation.ByEmpanelledAgency : translation.ByDepartment}}</td>
+                                      <td ng-show="items.IsFirm == 0">{{  translation.Firm }}</td>
+                                      <td ng-show="items.IsFirm == 1">{{ translation.Individual}}</td>
+                                      <td ng-show="items.IsFirm == 2">{{ translation.ByDepartment }}</td>
+                                      <td>{{ _language == 'en-us' ?  items.DISTRICT_ENG : items.DISTRICT_MANGAL }}</td>
+                                      @*<td>{{ items.FirmName }}{{ items.IsEmpanelledCA }}{{ items.AuditerAssignByDapt }}</td>*@
+                                      <td ng-show="items.IsEmpanelledCA == 'True'">{{ items.FirmName  }}</td>
+                                      <td ng-show="items.IsEmpanelledCA == 'False'">{{ items.AuditerAssignByDapt }}</td>
+                                      <td> <a ng-show="items.AuditorAssignFilePath!=''" href="{{items.AuditorAssignFilePath}}" target="_blank" style="color:#505050;" class="fa fa-download"></a></td>
+                                      <td>{{ items.RequestStatusText }}</td>
+                                      @*<td placeholder={{translation.Download}}><i class="fa fa-download" placeholder={{translation.Download}} ng-click="GenPDF(items.Id)"></i></td>*@
+                                  </tr>
+                              </tbody>
+                          </table>
+                          <div id="DivPrintData" style="display:block">
+
+                          </div>
+                          <div class="col-md-10">
+                              <div class="text-center">
+                                  <dir-pagination-controls boundary-links="true" pagination-id="AuditorPagination" on-page-change="pageChangeHandler(newPageNumber)" template-url="/dirPagination.tpl.html"></dir-pagination-controls>
+                              </div>
+                          </div>
+                  </div>
+        </div>
+    </div>
+</div>
+<div class="se-pre-con"></div>
+<div id="stop" class="scrollTop">
+    <span><a href=""><i class="fa fa-arrow-up">Top</i></a></span>
+</div>
+
+
+

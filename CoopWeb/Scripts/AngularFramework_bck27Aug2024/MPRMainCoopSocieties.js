@@ -1,0 +1,518 @@
+﻿var societyDistrictwise = angular.module("MPRMainCoopSocietiesmodule", ['angularUtils.directives.dirPagination']);
+societyDistrictwise.controller("MPRMainCoopSocietiesCount", function ($scope, $http) {
+    $scope.currentPage = 1;
+    $scope.pageSize = 100;
+    $scope.DistrictId = 0;
+
+    $scope.Coop = {
+        DataId: "0",
+        DistrictId: "0",
+        Year: ""
+        ,NoOfSocieties_Apex:"0"
+        ,Membership_Apex:"0"
+        ,ShareCapital_Apex:"0"
+        ,Reserve_Apex:"0"
+        ,Deposits_Apex:"0"
+        ,Borrowing_Apex:"0"
+        , WorkingCapital_Apex: "0"
+        ,NoOfSocieties_CCBs:"0"
+        ,Membership_CCBs:"0"
+        ,ShareCapital_CCBs:"0"
+        ,Reserve_CCBs:"0"
+        ,Deposits_CCBs:"0"
+        ,Borrowing_CCBs:"0"
+        , WorkingCapital_CCBs: "0"
+        ,NoOfSocieties_UB:"0"
+        ,Membership_UB:"0"
+        ,ShareCapital_UB:"0"
+        ,Reserve_UB:"0"
+        ,Deposits_UB:"0"
+        ,Borrowing_UB:"0"
+        , WorkingCapital_UB: "0"
+        ,NoOfSocieties_Agri:"0"
+        ,Membership_Agri:"0"
+        ,ShareCapital_Agri:"0"
+        ,Reserve_Agri:"0"
+        ,Deposits_Agri:"0"
+        ,Borrowing_Agri:"0"
+        , WorkingCapital_Agri: "0"
+        ,NoOfSocieties_PLDB:"0"
+        ,Membership_PLDB:"0"
+        ,ShareCapital_PLDB:"0"
+        ,Reserve_PLDB:"0"
+        ,Deposits_PLDB:"0"
+        ,Borrowing_PLDB:"0"
+        , WorkingCapital_PLDB: "0"
+       
+     }
+
+    //GET Financial Year
+    $scope.GetFinancialYearList = function () {
+        $http.get(SiteUrl + "/Master/GetMasterData/?MasterType=FINANCIALYEAR&MasterCode=-1").
+            success(function (data, status) {
+                $scope.FinancialYearList = data;
+            }).
+            error(function (data, status) {
+                $scope.FinancialYearList = [];
+            });
+    };
+
+    $scope.OnPageLoad = function () {
+       
+        $scope._language = _language;
+        if (_language == 'en-us') {
+           
+            $http.get(SiteUrl + "/Translations/Translation_HI.json").
+                success(function (data, status) {
+                    $scope.translation = data;
+                }).
+                error(function (data, status) {
+                    alert("Error while translation");
+                });
+        }
+        else {
+            $http.get(SiteUrl + "/Translations/Translation_EN.json").
+                success(function (data, status) {
+                    $scope.translation = data;
+                }).
+                error(function (data, status) {
+                    alert("Error while translation");
+                });
+        };
+       
+    };
+  
+    $scope.MainCooperativeSocieties = function () {       
+        if ($scope.MainCooperativeSocietiesValidation()) {           
+            var data = {
+                Year: $("#txtFromMonth").val(),
+                NoOfSocieties_Apex      :$scope.Coop.nos_Ap,
+                Membership_Apex         :$scope.Coop.Mem_Ap,
+                ShareCapital_Apex       :$scope.Coop.SC_Ap,
+                Reserve_Apex            :$scope.Coop.Re_Ap,
+                Deposits_Apex           :$scope.Coop.De_Ap,
+                Borrowing_Apex          :$scope.Coop.Bo_Ap,
+                WorkingCapital_Apex     :$scope.Coop.Wc_Ap,
+                NoOfSocieties_CCBs      :$scope.Coop.nos_CC,
+                Membership_CCBs         :$scope.Coop.Mem_CC,
+                ShareCapital_CCBs       :$scope.Coop.SC_CC ,
+                Reserve_CCBs            :$scope.Coop.Re_CC ,
+                Deposits_CCBs           :$scope.Coop.De_CC ,
+                Borrowing_CCBs          :$scope.Coop.Bo_CC ,
+                WorkingCapital_CCBs     :$scope.Coop.Wc_CC ,
+                NoOfSocieties_UB        :$scope.Coop.nos_UB,
+                Membership_UB           :$scope.Coop.Mem_UB,
+                ShareCapital_UB         :$scope.Coop.SC_UB ,
+                Reserve_UB              :$scope.Coop.Re_UB ,
+                Deposits_UB             :$scope.Coop.De_UB ,
+                Borrowing_UB            :$scope.Coop.Bo_UB ,
+                WorkingCapital_UB       :$scope.Coop.Wc_UB ,
+                NoOfSocieties_Agri      :$scope.Coop.nos_Ag,
+                Membership_Agri         :$scope.Coop.Mem_Ag,
+                ShareCapital_Agri       :$scope.Coop.SC_Ag ,
+                Reserve_Agri            :$scope.Coop.Re_Ag ,
+                Deposits_Agri           :$scope.Coop.De_Ag ,
+                Borrowing_Agri          :$scope.Coop.Bo_Ag ,
+                WorkingCapital_Agri: $scope.Coop.Wc_Ag,
+                NoOfSocieties_PLDB      :$scope.Coop.nos_PLDB,
+                Membership_PLDB         :$scope.Coop.Mem_PLDB,
+                ShareCapital_PLDB       :$scope.Coop.SC_PLDB ,
+                Reserve_PLDB            :$scope.Coop.Re_PLDB ,
+                Deposits_PLDB           :$scope.Coop.De_PLDB ,
+                Borrowing_PLDB          :$scope.Coop.Bo_PLDB ,
+<<<<<<< .mine
+                WorkingCapital_PLDB: $scope.Coop.Wc_PLDB,
+                NoOfSocieties_House: $scope.Coop.nos_house
+                , Membership_House: $scope.Coop.Mem_house,
+                ShareCapital_House: $scope.Coop.SC_house
+                , Reserve_House: $scope.Coop.Re_house
+                , Deposits_House: $scope.Coop.De_house
+                , Borrowing_House: $scope.Coop.Bo_house
+                , WorkingCapital_House: $scope.Coop.Wc_house,
+                NoOfSocieties_indsociety: $scope.Coop.nos_IS
+                , Membership_indsociety: $scope.Coop.Mem_IS,
+                ShareCapital_indsociety: $scope.Coop.SC_IS
+                , Reserve_indsociety: $scope.Coop.Re_IS
+                , Deposits_indsociety: $scope.Coop.De_IS
+                , Borrowing_indsociety: $scope.Coop.Bo_IS
+                , WorkingCapital_indsociety: $scope.Coop.Wc_IS,
+                NoOfSocieties_labourcontract: $scope.Coop.nos_LC
+                , Membership_labourcontract: $scope.Coop.Mem_LC,
+                ShareCapital_labourcontract: $scope.Coop.SC_LC
+                , Reserve_labourcontract: $scope.Coop.Re_LC
+                , Deposits_labourcontract: $scope.Coop.De_LC
+                , Borrowing_labourcontract: $scope.Coop.Bo_LC
+                , WorkingCapital_labourcontract: $scope.Coop.Wc_LC,
+                NoOfSocieties_Marketing: $scope.Coop.nos_mark
+                , Membership_Marketing: $scope.Coop.Mem_mark,
+                ShareCapital_Marketing: $scope.Coop.SC_mark
+                , Reserve_Marketing: $scope.Coop.Re_mark
+                , Deposits_Marketing: $scope.Coop.De_mark
+                , Borrowing_Marketing: $scope.Coop.Bo_mark
+                , WorkingCapital_Marketing: $scope.Coop.Wc_mark,
+                NoOfSocieties_MilkSupply: $scope.Coop.nos_MS
+                , Membership_MilkSupply: $scope.Coop.Mem_MS,
+                ShareCapital_MilkSupply: $scope.Coop.SC_MS
+                , Reserve_MilkSupply: $scope.Coop.Re_MS
+                , Deposits_MilkSupply: $scope.Coop.De_MS
+                , Borrowing_MilkSupply: $scope.Coop.Bo_MS
+                , WorkingCapital_MilkSupply: $scope.Coop.Wc_MS,
+                NoOfSocieties_MilkUnion: $scope.Coop.nos_MU
+                , Membership_MilkUnion: $scope.Coop.Mem_MU,
+                ShareCapital_MilkUnion: $scope.Coop.SC_MU
+                , Reserve_MilkUnion: $scope.Coop.Re_MU
+                , Deposits_MilkUnion: $scope.Coop.De_MU
+                , Borrowing_MilkUnion: $scope.Coop.Bo_MU
+                , WorkingCapital_MilkUnion: $scope.Coop.Wc_MU,
+                NoOfSocieties_Othersociety: $scope.Coop.nos_OS
+                , Membership_Othersociety: $scope.Coop.Mem_OS,
+                ShareCapital_Othersociety: $scope.Coop.SC_OS
+                , Reserve_Othersociety: $scope.Coop.Re_OS
+                , Deposits_Othersociety: $scope.Coop.De_OS
+                , Borrowing_Othersociety: $scope.Coop.Bo_OS
+                , WorkingCapital_Othersociety: $scope.Coop.Wc_OS,
+                NoOfSocieties_PrimaryBhander: $scope.Coop.nos_PB
+                , MembershipPrimaryBhandery: $scope.Coop.Mem_PB,
+                ShareCapital_PrimaryBhander: $scope.Coop.SC_PB
+                , Reserve_PrimaryBhander: $scope.Coop.Re_PB
+                , Deposits_PrimaryBhander: $scope.Coop.De_PB
+                , Borrowing_PrimaryBhander: $scope.Coop.Bo_PB
+                , WorkingCapital_PrimaryBhander: $scope.Coop.Wc_PB,
+                NoOfSocieties_WholesaleBhander: $scope.Coop.nos_WB
+                , MembershipPWholesaleBhander: $scope.Coop.Mem_WB,
+                ShareCapital_WholesaleBhander: $scope.Coop.SC_WB
+                , Reserve_WholesaleBhander: $scope.Coop.Re_WB
+                , Deposits_WholesaleBhander: $scope.Coop.De_WB
+                , Borrowing_WholesaleBhander: $scope.Coop.Bo_WB
+                , WorkingCapital_WholesaleBhander: $scope.Coop.Wc_WB,   
+            }
+
+=======
+                WorkingCapital_PLDB: $scope.Coop.Wc_PLDB,
+                NoOfSocieties_House: $scope.Coop.nos_house
+                , Membership_House: $scope.Coop.Mem_house,
+                ShareCapital_House: $scope.Coop.SC_house
+                , Reserve_House: $scope.Coop.Re_house
+                , Deposits_House: $scope.Coop.De_house
+                , Borrowing_House: $scope.Coop.Bo_house
+                , WorkingCapital_House: $scope.Coop.Wc_house,
+                NoOfSocieties_indsociety: $scope.Coop.nos_IS
+                , Membership_indsociety: $scope.Coop.Mem_IS,
+                ShareCapital_indsociety: $scope.Coop.SC_IS
+                , Reserve_indsociety: $scope.Coop.Re_IS
+                , Deposits_indsociety: $scope.Coop.De_IS
+                , Borrowing_indsociety: $scope.Coop.Bo_IS
+                , WorkingCapital_indsociety: $scope.Coop.Wc_IS,
+                NoOfSocieties_labourcontract: $scope.Coop.nos_LC
+                , Membership_labourcontract: $scope.Coop.Mem_LC,
+                ShareCapital_labourcontract: $scope.Coop.SC_LC
+                , Reserve_labourcontract: $scope.Coop.Re_LC
+                , Deposits_labourcontract: $scope.Coop.De_LC
+                , Borrowing_labourcontract: $scope.Coop.Bo_LC
+                , WorkingCapital_labourcontract: $scope.Coop.Wc_LC,
+                NoOfSocieties_Marketing: $scope.Coop.nos_mark
+                , Membership_Marketing: $scope.Coop.Mem_mark,
+                ShareCapital_Marketing: $scope.Coop.SC_mark
+                , Reserve_Marketing: $scope.Coop.Re_mark
+                , Deposits_Marketing: $scope.Coop.De_mark
+                , Borrowing_Marketing: $scope.Coop.Bo_mark
+                , WorkingCapital_Marketing: $scope.Coop.Wc_mark,
+                NoOfSocieties_MilkSupply: $scope.Coop.nos_MS
+                , Membership_MilkSupply: $scope.Coop.Mem_MS,
+                ShareCapital_MilkSupply: $scope.Coop.SC_MS
+                , Reserve_MilkSupply: $scope.Coop.Re_MS
+                , Deposits_MilkSupply: $scope.Coop.De_MS
+                , Borrowing_MilkSupply: $scope.Coop.Bo_MS
+                , WorkingCapital_MilkSupply: $scope.Coop.Wc_MS,
+                NoOfSocieties_MilkUnion: $scope.Coop.nos_MU
+                , Membership_MilkUnion: $scope.Coop.Mem_MU,
+                ShareCapital_MilkUnion: $scope.Coop.SC_MU
+                , Reserve_MilkUnion: $scope.Coop.Re_MU
+                , Deposits_MilkUnion: $scope.Coop.De_MU
+                , Borrowing_MilkUnion: $scope.Coop.Bo_MU
+                , WorkingCapital_MilkUnion: $scope.Coop.Wc_MU,
+                NoOfSocieties_Othersociety: $scope.Coop.nos_OS
+                , Membership_Othersociety: $scope.Coop.Mem_OS,
+                ShareCapital_Othersociety: $scope.Coop.SC_OS
+                , Reserve_Othersociety: $scope.Coop.Re_OS
+                , Deposits_Othersociety: $scope.Coop.De_OS
+                , Borrowing_Othersociety: $scope.Coop.Bo_OS
+                , WorkingCapital_Othersociety: $scope.Coop.Wc_OS,
+                NoOfSocieties_PrimaryBhander: $scope.Coop.nos_PB
+                , MembershipPrimaryBhandery: $scope.Coop.Mem_PB,
+                ShareCapital_PrimaryBhander: $scope.Coop.SC_PB
+                , Reserve_PrimaryBhander: $scope.Coop.Re_PB
+                , Deposits_PrimaryBhander: $scope.Coop.De_PB
+                , Borrowing_PrimaryBhander: $scope.Coop.Bo_PB
+                , WorkingCapital_PrimaryBhander: $scope.Coop.Wc_PB,
+                NoOfSocieties_WholesaleBhander: $scope.Coop.nos_WB
+                , MembershipPWholesaleBhander: $scope.Coop.Mem_WB,
+                ShareCapital_WholesaleBhander: $scope.Coop.SC_WB
+                , Reserve_WholesaleBhander: $scope.Coop.Re_WB
+                , Deposits_WholesaleBhander: $scope.Coop.De_WB
+                , Borrowing_WholesaleBhander: $scope.Coop.Bo_WB
+                , WorkingCapital_WholesaleBhander: $scope.Coop.Wc_WB,   
+            }            
+>>>>>>> .r595
+            $(".se-pre-con").fadeIn("slow");
+            $http.post(SiteUrl + "/MIS/SaveMainCoopSocieties", JSON.stringify({ _Model: data })).
+                success(function (data, status) {
+                    // alert("DataValue "+data);
+                    $(".se-pre-con").fadeOut("slow");
+                    var message = '';
+                    if (data > 0) {
+                        message = _language == 'en-us' ? 'Data Save Successfully\n' : 'डेटा सहेजा गया है\n';
+                    }
+                    else if (data == -1) {
+                        message = _language == 'en-us' ? 'Data Update successfully\n' : 'डेटा सफलतापूर्वक अपडेट किया गया है\n';
+                    }
+                    else if (data == -2) {
+                        message = _language == 'en-us' ? 'Duplicate Eentry\n' : 'डुप्लिकेट प्रविष्टि\n';
+                    }
+                    else if (data == -3) {
+                        message = _language == 'en-us' ? 'Data Delete Successfully\n' : 'डेटा सफलतापूर्वक हटाएं\n';
+
+                    }
+                    else {
+                        message = _language == 'en-us' ? 'Some Error  is Occured \n' : 'कुछ त्रुटि हुई है\n';
+                    }
+                    alert(message);
+                    window.location.reload();
+
+                    if (data.Status) {
+                        $scope.ClearLiquidationForm();
+                    }
+                }).
+                error(function (data, status) {
+                    alert("Error while Liquidation Data insert");
+                });
+        }
+
+    };
+
+    //validateAddForm 
+    $scope.MainCooperativeSocietiesValidation = function () {
+        var message = $scope._language == 'en-us' ? 'Validate  following :: ' : 'निम्नलिखित मान्य करें :';
+
+        if ($("#txtFromMonth").val() == undefined || $("#txtFromMonth").val() == '') {
+            message += $scope._language == 'en-us' ? '\n <br /> Please Select Financial Year' : '\n <br /> कृपया Financial Year का चयन करे |';
+        }
+
+        if ($scope.Coop.nos_Ap == undefined || $scope.Coop.nos_Ap == '0' ||
+            $scope.Coop.Mem_Ap == undefined || $scope.Coop.Mem_Ap == '0' ||
+            $scope.Coop.SC_Ap == undefined || $scope.Coop.SC_Ap == '0' ||
+            $scope.Coop.Re_Ap == undefined || $scope.Coop.Re_Ap == '0' ||
+            $scope.Coop.De_Ap == undefined || $scope.Coop.De_Ap == '0' ||
+            $scope.Coop.Bo_Ap == undefined || $scope.Coop.Bo_Ap == '0' ||
+            $scope.Coop.Wc_Ap  == undefined || $scope.Coop.Wc_Ap == '0'                       
+            
+            ) {
+            message += $scope._language == 'en-us' ? '\n <br /> Please Fill All Entry For Apex Bank' : '\n <br /> कृपया  एपेक्स बैंक के लिए सभी फ़ील्ड दर्ज करें  दर्ज करें|';
+        }
+        if ($scope.Coop.nos_CC == undefined || $scope.Coop.nos_CC  == '0' ||
+            $scope.Coop.Mem_CC == undefined || $scope.Coop.Mem_CC  == '0' ||
+            $scope.Coop.SC_CC  == undefined || $scope.Coop.SC_CC  == '0' ||
+            $scope.Coop.Re_CC  == undefined || $scope.Coop.Re_CC  == '0' ||
+            $scope.Coop.De_CC  == undefined || $scope.Coop.De_CC  == '0' ||
+            $scope.Coop.Bo_CC  == undefined || $scope.Coop.Bo_CC  == '0' ||
+            $scope.Coop.Wc_CC  == undefined || $scope.Coop.Wc_CC  == '0'
+
+
+        ) {
+            message += $scope._language == 'en-us' ? '\n <br /> Please Fill All Entry For CCBs' : '\n <br /> कृपया  CCBs के लिए सभी फ़ील्ड दर्ज करें  दर्ज करें|';
+        }
+        if ($scope.Coop.nos_UB == undefined || $scope.Coop.nos_UB  == '0' ||
+            $scope.Coop.Mem_UB  == undefined || $scope.Coop.Mem_UB  == '0' ||
+            $scope.Coop.SC_UB  == undefined  || $scope.Coop.SC_UB  == '0' ||
+            $scope.Coop.Re_UB  == undefined  || $scope.Coop.Re_UB  == '0' ||
+            $scope.Coop.De_UB  == undefined  || $scope.Coop.De_UB  == '0' ||
+            $scope.Coop.Bo_UB  == undefined  || $scope.Coop.Bo_UB  == '0' ||
+            $scope.Coop.Wc_UB  == undefined  || $scope.Coop.Wc_UB  == '0'
+
+
+        ) {
+            message += $scope._language == 'en-us' ? '\n <br /> Please Fill All Entry For Urban Banks' : '\n <br /> कृपया  Urban Banks के लिए सभी फ़ील्ड दर्ज करें  दर्ज करें|';
+        }
+        if ($scope.Coop.nos_Ag == undefined || $scope.Coop.nos_Ag  == '0' ||
+            $scope.Coop.Mem_Ag == undefined || $scope.Coop.Mem_Ag  == '0' ||
+            $scope.Coop.SC_Ag  == undefined || $scope.Coop.SC_Ag  == '0' ||
+            $scope.Coop.Re_Ag  == undefined || $scope.Coop.Re_Ag  == '0' ||
+            $scope.Coop.De_Ag  == undefined || $scope.Coop.De_Ag  == '0' ||
+            $scope.Coop.Bo_Ag  == undefined || $scope.Coop.Bo_Ag  == '0' ||
+            $scope.Coop.Wc_Ag  == undefined || $scope.Coop.Wc_Ag  == '0'
+
+
+        ) {
+            message += $scope._language == 'en-us' ? '\n <br /> Please Fill All Entry For Agri. PACS & LAMPS' : '\n <br /> कृपया  Agri. PACS & LAMPS के लिए सभी फ़ील्ड दर्ज करें  दर्ज करें|';
+        }
+        if ($scope.Coop.nos_PLDB == undefined || $scope.Coop.nos_PLDB  == '0' ||
+            $scope.Coop.Mem_PLDB == undefined || $scope.Coop.Mem_PLDB  == '0' ||
+            $scope.Coop.SC_PLDB  == undefined || $scope.Coop.SC_PLDB  == '0' ||
+            $scope.Coop.Re_PLDB  == undefined || $scope.Coop.Re_PLDB  == '0' ||
+            $scope.Coop.De_PLDB  == undefined || $scope.Coop.De_PLDB  == '0' ||
+            $scope.Coop.Bo_PLDB  == undefined || $scope.Coop.Bo_PLDB  == '0' ||
+            $scope.Coop.Wc_PLDB == undefined || $scope.Coop. Wc_PLDB== '0'
+
+
+        ) {
+            message += $scope._language == 'en-us' ? '\n <br /> Please Fill All Entry For PLDB' : '\n <br /> कृपया  PLDB के लिए सभी फ़ील्ड दर्ज करें  दर्ज करें|';
+        }
+        if ($scope.Coop.nos_house == undefined || $scope.Coop.nos_house == '0' ||
+            $scope.Coop.Mem_house == undefined || $scope.Coop.Mem_house == '0' ||
+            $scope.Coop.SC_house == undefined || $scope.Coop.SC_house == '0' ||
+            $scope.Coop.Re_house == undefined || $scope.Coop.Re_house == '0' ||
+            $scope.Coop.De_house == undefined || $scope.Coop.De_house == '0' ||
+            $scope.Coop.Bo_house == undefined || $scope.Coop.Bo_house == '0' ||
+            $scope.Coop.Wc_house == undefined || $scope.Coop.Wc_house == '0'
+
+
+        ) {
+            message += $scope._language == 'en-us' ? '\n <br /> Please Fill All Entry For Houseing' : '\n < br /> कृपया  Houseing के लिए सभी फ़ील्ड दर्ज करें | ';
+        }
+
+        if ($scope.Coop.nos_IS == undefined || $scope.Coop.nos_IS == '0' ||
+            $scope.Coop.Mem_IS == undefined || $scope.Coop.Mem_IS == '0' ||
+            $scope.Coop.SC_IS == undefined || $scope.Coop.SC_IS == '0' ||
+            $scope.Coop.Re_IS == undefined || $scope.Coop.Re_IS == '0' ||
+            $scope.Coop.De_IS == undefined || $scope.Coop.De_IS == '0' ||
+            $scope.Coop.Bo_IS == undefined || $scope.Coop.Bo_IS == '0' ||
+            $scope.Coop.Wc_IS == undefined || $scope.Coop.Wc_IS == '0'
+
+
+        ) {
+            message += $scope._language == 'en-us' ? '\n <br /> Please Fill All Entry For industrial society' : '\n < br /> कृपया  industrial society के लिए सभी फ़ील्ड दर्ज करें | ';
+        }
+
+        if ($scope.Coop.nos_LC == undefined || $scope.Coop.nos_LC == '0' ||
+            $scope.Coop.Mem_LC == undefined || $scope.Coop.Mem_LC == '0' ||
+            $scope.Coop.SC_LC == undefined || $scope.Coop.SC_LC == '0' ||
+            $scope.Coop.Re_LC == undefined || $scope.Coop.Re_LC == '0' ||
+            $scope.Coop.De_LC == undefined || $scope.Coop.De_LC == '0' ||
+            $scope.Coop.Bo_LC == undefined || $scope.Coop.Bo_LC == '0' ||
+            $scope.Coop.Wc_LC == undefined || $scope.Coop.Wc_LC == '0'
+
+
+        ) {
+            message += $scope._language == 'en-us' ? '\n <br /> Please Fill All Entry For labour contract' : '\n < br /> कृपया  labour contract के लिए सभी फ़ील्ड दर्ज करें | ';
+        }
+
+
+        if ($scope.Coop.nos_mark == undefined || $scope.Coop.nos_mark == '0' ||
+            $scope.Coop.Mem_mark == undefined || $scope.Coop.Mem_mark == '0' ||
+            $scope.Coop.SC_mark == undefined || $scope.Coop.SC_mark == '0' ||
+            $scope.Coop.Re_mark == undefined || $scope.Coop.Re_mark == '0' ||
+            $scope.Coop.De_mark == undefined || $scope.Coop.De_mark == '0' ||
+            $scope.Coop.Bo_mark == undefined || $scope.Coop.Bo_mark == '0' ||
+            $scope.Coop.Wc_mark == undefined || $scope.Coop.Wc_mark == '0'
+
+
+        ) {
+            message += $scope._language == 'en-us' ? '\n <br /> Please Fill All Entry For Marketing' : '\n < br /> कृपया  Marketing के लिए सभी फ़ील्ड दर्ज करें | ';
+        }
+
+        if ($scope.Coop.nos_MS == undefined || $scope.Coop.nos_MS == '0' ||
+            $scope.Coop.Mem_MS == undefined || $scope.Coop.Mem_MS == '0' ||
+            $scope.Coop.SC_MS == undefined || $scope.Coop.SC_MS == '0' ||
+            $scope.Coop.Re_MS == undefined || $scope.Coop.Re_MS == '0' ||
+            $scope.Coop.De_MS == undefined || $scope.Coop.De_MS == '0' ||
+            $scope.Coop.Bo_MS == undefined || $scope.Coop.Bo_MS == '0' ||
+            $scope.Coop.Wc_MS == undefined || $scope.Coop.Wc_MS == '0'
+
+
+        ) {
+            message += $scope._language == 'en-us' ? '\n <br /> Please Fill All Entry For Milk Supply' : '\n < br /> कृपया  Milk Supply के लिए सभी फ़ील्ड दर्ज करें | ';
+        }
+
+        if ($scope.Coop.nos_MU == undefined || $scope.Coop.nos_MU == '0' ||
+            $scope.Coop.Mem_MU == undefined || $scope.Coop.Mem_MU == '0' ||
+            $scope.Coop.SC_MU == undefined || $scope.Coop.SC_MU == '0' ||
+            $scope.Coop.Re_MU == undefined || $scope.Coop.Re_MU == '0' ||
+            $scope.Coop.De_MU == undefined || $scope.Coop.De_MU == '0' ||
+            $scope.Coop.Bo_MU == undefined || $scope.Coop.Bo_MU == '0' ||
+            $scope.Coop.Wc_MU == undefined || $scope.Coop.Wc_MU == '0'
+
+
+        ) {
+            message += $scope._language == 'en-us' ? '\n <br /> Please Fill All Entry For Milk Union' : '\n < br /> कृपया  Milk Union के लिए सभी फ़ील्ड दर्ज करें | ';
+        }
+
+        if ($scope.Coop.nos_OS == undefined || $scope.Coop.nos_OS == '0' ||
+            $scope.Coop.Mem_OS == undefined || $scope.Coop.Mem_OS == '0' ||
+            $scope.Coop.SC_OS == undefined || $scope.Coop.SC_OS == '0' ||
+            $scope.Coop.Re_OS == undefined || $scope.Coop.Re_OS == '0' ||
+            $scope.Coop.De_OS == undefined || $scope.Coop.De_OS == '0' ||
+            $scope.Coop.Bo_OS == undefined || $scope.Coop.Bo_OS == '0' ||
+            $scope.Coop.Wc_OS == undefined || $scope.Coop.Wc_OS == '0'
+
+
+        ) {
+            message += $scope._language == 'en-us' ? '\n <br /> Please Fill All Entry For Other society' : '\n < br /> कृपया  Other society के लिए सभी फ़ील्ड दर्ज करें | ';
+        }
+
+        if ($scope.Coop.nos_PB == undefined || $scope.Coop.nos_PB == '0' ||
+            $scope.Coop.Mem_PB == undefined || $scope.Coop.Mem_PB == '0' ||
+            $scope.Coop.SC_PB == undefined || $scope.Coop.SC_PB == '0' ||
+            $scope.Coop.Re_PB == undefined || $scope.Coop.Re_PB == '0' ||
+            $scope.Coop.De_PB == undefined || $scope.Coop.De_PB == '0' ||
+            $scope.Coop.Bo_PB == undefined || $scope.Coop.Bo_PB == '0' ||
+            $scope.Coop.Wc_PB == undefined || $scope.Coop.Wc_PB == '0'
+
+
+        ) {
+            message += $scope._language == 'en-us' ? '\n <br /> Please Fill All Entry For Primary Bhandar' : '\n < br /> कृपया  Primary Bhandar के लिए सभी फ़ील्ड दर्ज करें | ';
+        }
+        if ($scope.Coop.nos_WB == undefined || $scope.Coop.nos_WB == '0' ||
+            $scope.Coop.Mem_WB == undefined || $scope.Coop.Mem_WB == '0' ||
+            $scope.Coop.SC_WB == undefined || $scope.Coop.SC_WB == '0' ||
+            $scope.Coop.Re_WB == undefined || $scope.Coop.Re_WB == '0' ||
+            $scope.Coop.De_WB == undefined || $scope.Coop.De_WB == '0' ||
+            $scope.Coop.Bo_WB == undefined || $scope.Coop.Bo_WB == '0' ||
+            $scope.Coop.Wc_WB == undefined || $scope.Coop.Wc_WB == '0'
+
+
+        ) {
+            message += $scope._language == 'en-us' ? '\n <br /> Please Fill All Entry For Wholesale Bhandar' : '\n < br /> कृपया  Wholesale Bhandar के लिए सभी फ़ील्ड दर्ज करें | ';
+        }
+
+        if (message.length > 23) {
+            ShowModelAlert("Cooperative Movement In Rajasthan Form", message);
+            return false;
+        }
+        return true;
+
+    }
+
+    $scope.showEntryForm = function () {
+
+        $scope.EntryForm = 1;
+        $scope.dataList = 0;
+
+
+    }
+    $scope.back = function () {
+        $scope.EntryForm = 0;
+        $scope.dataList = 1;
+    }    
+
+    $scope.GridData = function () {
+        $(".se-pre-con").fadeIn("slow");
+        $scope.CoopMain = [];
+        $http.post(SiteUrl + "/MIS/GetMainCoopSocietyData?DistrictId=" + 0 + "&Year=" + $("#FY").val()).
+            success(function (data, status) {
+                $(".se-pre-con").fadeOut("slow");
+                $scope.CoopMain = data;
+                
+            }).
+            error(function (data, status) {
+                alert("Error while fetching Year Target Data");
+            });
+    } 
+ 
+    $scope.dataList = 1;
+
+    $scope.GridData();
+
+    $scope.GetFinancialYearList();
+
+    $scope.OnPageLoad();
+});

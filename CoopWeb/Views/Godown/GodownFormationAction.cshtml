@@ -1,0 +1,275 @@
+﻿<style>
+    .modal.modalTxtW {
+        color: #000 !important;
+    }
+
+        .modal.modalTxtW .modal-title {
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        .modal.modalTxtW .modal-header .close {
+            margin-top: -24px;
+            opacity: 1;
+        }
+
+        .modal.modalTxtW table thead {
+            color: #012f31;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .modal.modalTxtW .modal-dialog {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+</style>
+<script src="~/Scripts/AngularFramework/GodownFormationAction.js?v=@DateTime.Now.Ticks"></script>
+<script src="~/Scripts/AngularFramework/commonEsign.js?v=@DateTime.Now.Ticks"></script>
+<div ng-app="GodownFormationActionModule" ng-cloak="">
+    <div ng-controller="GodownFormationActionCont">
+        <div class="col-md-12">
+            <h3 class="citizen-dash-head ng-binding" style="margin-top:20px;">Godown Formation Action</h3>
+        </div>
+
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#" class="ng-binding">Home</a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;" class="ng-binding"> Godown </span>
+                        <i class="fa fa-angle-right"> </i>
+                        <span style="margin: 0 5px;" class="ng-binding"> Godown Formation Action </span>
+                    </li>
+
+                </ul>
+            </div>
+        </div>
+
+
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-lui">
+                    <div class="row">
+                    </div>
+                </div>
+                <div class="table-wrap table-responsive" id="DivRecord">
+                    <div class="row mb-4 mt-4" style=" display: flex; align-items: end; flex-wrap: wrap;">
+                        <div class="col-md-2">
+                            <label>Search:</label>
+                            <input type="text" class="form-control" ng-model="SearchText" placeholder="Search by Application No or Society Name" />
+                        </div>
+
+                        <div class="col-md-6 mt-5">
+                            <button type="button" class="btn btn-primary dev-btn" ng-click="GETGodownFormationList(SearchText)">  Search  </button>
+                            <button type="button" class="btn btn-primary dev-btn" ng-click="ClearSearch()">  Clear  </button>
+                        </div>
+                        <div class="col-md-4 text-right mt-4">
+                            @*<button type="submit" class="btn btn-primary dev-btn" ng-click="RedirectToESPportal(21)">Esign Process</button>*@
+                            <button type="submit" ng-show="IsProposalSubmission" class="btn btn-primary dev-btn  " id="btnSearchExposureVisit" ng-click="RedirectToFormation()">Add Formation</button>
+                        </div>
+                    </div>
+
+                    <table class="table table-responsive devtable" id="tblgetsuport">
+                        <thead>
+                            <tr>
+                                <th>Select</th>
+                                <th>Application No.</th>
+                                <th>Society Name</th>
+                                <th>Pacs Manager Name</th>
+                                <th>Gram Panchayat</th>
+                                <th>Block</th>
+                                <th>District</th>
+                                <th>CCB Name</th>
+                                <th>CCB Branch Name</th>
+                                <th>View Formation</th>
+                                <th>View Documents</th>
+                                <th>Status</th>
+                                <th ng-if="IsASAvailable">AS Details</th>
+                                <th ng-if="IsFSAvailable">FS Details</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr dir-paginate="item in GETGodownFormationListData | filter: q | orderBy:colsort:reverseSort  | itemsPerPage: pageSize" current-page="currentPage" pagination-id="GETGodownFormationListDataPagination">
+                                <td><input type="radio" name="SelectedApplication" ng-model="$parent.SelectedApplicationId" ng-value="item.Applicationid" ng-change="CheckSelection(item)" /></td>
+                                <td>{{ item.ApplicationNo }}</td>
+                                <td>{{ item.SocietyName  }}</td>
+                                <td>{{ item.PacsManagerName  }}</td>
+                                <td>{{ item.GramPanchayat  }}</td>
+                                <td>{{ item.Block  }}</td>
+                                <td>{{ item.District  }}</td>
+                                <td>{{ item.CCBName }}</td>
+                                <td>{{ item.BranchName }}</td>
+                                <td><a ng-href="{{item.ViewFormation}}" download> <i class="fa fa-download text-primary"></i> </a></td>
+                                <td><a href="javascript:void(0)" ng-click="ViewDocuments(item.Applicationid)"> <i class="fa fa-eye text-success"></i> </a> </td>
+                                <td>{{ item.Status  }}</td>
+                                <!-- AS -->
+                                <td ng-if="IsASAvailable">
+                                    <a ng-if="item.ASGeneratePath" href="../Content/GodownDocument/{{item.ASGeneratePath}}" target="_blank" title="View AS File">
+                                        <i class="fa fa-file text-success"></i>
+                                    </a>
+                                </td>
+
+                                <!-- FS -->
+                                <td ng-if="IsFSAvailable">
+                                    <a ng-if="item.FSGeneratePath" href="../Content/GodownDocument/{{item.FSGeneratePath}}" target="_blank" title="View FS File">
+                                        <i class="fa fa-file text-success"></i>
+                                    </a>
+                                </td>
+                                <td>
+                                    <a ng-show="item.IsEsignStage <= 0" href="../GoDown/AddGoDownForm?eId={{item.EncProposalId}}&mode=e" title="Edit"> <i class="fa fa-edit text-primary"></i></a>
+                                    &nbsp;&nbsp;
+                                    <a href="../GoDown/AddGoDownForm?eId={{item.EncProposalId}}&mode=v" title="View">  <i class="fa fa-eye text-success"></i></a>
+                                    &nbsp;&nbsp;
+                                    <a ng-show="item.IsEsignStage <= 0" ng-click="DeleteGodown(item.Applicationid)" title="Delete">  <i class="fa fa-trash text-danger"></i> </a>
+                                    &nbsp;&nbsp;
+                                    <a ng-click="ViewTrail(item.Applicationid)" title="View Trail">
+                                        <i class="fa fa-history text-info"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="row">
+                    <div class="col-sm">
+                        <nav class="pagination-wrap  justify-content-end mb-25" aria-label="Page navigation example">
+                            <nav class="text-right p-4 pagination-wrap d-inline-block mr-40 mt-15 __web-inspector-hide-shortcut__" aria-label="Page navigation example">
+                                <ul class="pagination">
+                                    <dir-pagination-controls boundary-links="true" pagination-id="GETGodownFormationListDataPagination" on-page-change="pageChangeHandler(newPageNumber)" template-url="/dirPagination.tpl.html"></dir-pagination-controls>
+                                </ul>
+                            </nav>
+                        </nav>
+                    </div>
+                </div>
+
+                <div class="text-center mb-4">
+                    @*<a class="btn btn-primary dev-btn" ng-show="SelectedItem.ASGenerate == true && SelectedItem.ASGeneratePath != null" target="_blank" href="../Content/GodownDocument/{{SelectedItem.ASGeneratePath}}"> View PDF  </a>*@
+                    <!-- AS Esign PDF -->
+                    @*<button type="submit" ng-show="IsEsignbyPacsManager" class="btn btn-primary dev-btn" id="btnEsignbyPacsManager" ng-click="UpdateAction('Esign by Pacs Manager')">Esign by Pacs Manager</button>*@
+                    @*<button type="submit" ng-show="IsEsignbyPacsManager" class="btn btn-primary dev-btn" id="btnEsignbyPacsManager" ng-click="UpdateAction('Esign by Pacs Manager')">Esign by Pacs Manager</button>*@
+                    @*<button type="submit" ng-show="IsEsignbyPresident" class="btn btn-primary dev-btn" id="btnEsignbyPresident" ng-click="UpdateAction('Esign by President')">Esign by President</button>*@
+                    @*<button type="submit" ng-show="IsEsignbyPresident" class="btn btn-primary dev-btn" id="btnEsignbyPresident" ng-click="UpdateAction('Esign by President')">Esign by President</button>
+                        <button type="submit" ng-show="IsEsignbyBranchManager" class="btn btn-primary dev-btn" id="btnEsignbyBranchManager" ng-click="UpdateAction('Esign by Branch Manager')">Esign by Branch Manager</button>*@
+                    @*<button type="submit" ng-show="IsApproveNforward" class="btn btn-primary dev-btn" id="btnApproveNforward" ng-click="UpdateAction(NextStatusId)"> {{btnText}}</button>*@
+                    <button type="submit" ng-show="IsApproveNforward" class="btn btn-primary dev-btn" id="btnApproveNforward" ng-click="RedirectToESPportal(NextStatusId)"> {{btnText}}</button>
+                    @*<button type="submit" ng-show="IsApproveNforwardIS" class="btn btn-primary dev-btn" id="btnApproveNforwardIS" ng-click="UpdateAction('Approve & Forward Inspector Processing')">Approve & Forward Inspector Processing</button>
+                        <button type="submit" ng-show="IsRevert" class="btn btn-primary dev-btn" id="btnRevert" ng-click="UpdateAction('Revert')">Revert</button>*@
+                </div>
+            </div>
+
+            <!-- Document Modal Start -->
+            <div class="modal modalTxtW  fade" id="DocumentModal" tabindex="-1">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+
+                        <div class="modal-header">
+                            <h4 class="modal-title">Uploaded Documents</h4>
+                            <button type="button" class="close" data-dismiss="modal">
+                                &times;
+                            </button>
+                        </div>
+
+                        <div class="modal-body">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Document Name</th>
+                                        <th>View</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="doc in UploadedDocuments">
+                                        <td>{{doc.DocumentName}}</td>
+                                        <td>
+                                            <a ng-href="/Content/Godowns/Doc/{{doc.FilePath}}" target="_blank">
+                                                <i class="fa fa-eye text-primary"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" id="asGenerateModal" tabindex="-1" role="dialog">
+                <div class="modal-dialog modal-sm">
+                    <div class="modal-content">
+
+                        <div class="modal-header">
+                            <h4 class="modal-title">Action</h4>
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        </div>
+
+                        <div class="modal-body text-center">
+                            <button type="button" class="btn btn-info m-2" ng-click="ViewDocument()">
+                                View Document
+                            </button>
+
+                            <button type="button" class="btn btn-success m-2" ng-click="GenerateOTP()">
+                                Generate OTS
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" id="TrailModal">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4>Application Trail</h4>
+                        </div>
+
+                        <div class="modal-body">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Action</th>
+                                        <th>Role</th>
+                                        <th>User</th>
+                                        <th>Remarks</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="x in TrailList">
+                                        <td>{{x.ActionName}}</td>
+                                        <td>{{x.RoleName}}</td>
+                                        <td>{{x.ActionBy}}</td>
+                                        <td>{{x.Remarks}}</td>
+                                        <td>{{x.CreatedOn}}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $("#ckbCheckAll").click(function () {
+            $(".checkBoxClass").prop('checked', $(this).prop('checked'));
+        });
+
+        $(".checkBoxClass").change(function () {
+            if (!$(this).prop("checked")) {
+                $("#ckbCheckAll").prop("checked", false);
+            }
+        });
+    });
+</script>

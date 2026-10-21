@@ -1,0 +1,1853 @@
+﻿@{
+
+    Layout = "~/Views/Shared/_CitizenLayout.cshtml";
+}
+
+
+<script src="~/Scripts/AngularFramework/AmendmentSociety.js?id=0"></script>
+
+<script>
+    function myFunctionsdsdsd() {
+        confirm("Press a button!");
+    }
+    function getCapturedData(fpData) {
+        alert(JSON.stringify(fpData));
+        alert(fpData);
+        $("#hdnFP").val(fpData.fpResult);
+        //$("#<%= btn_Member_BIOOTP.ClientID %>").click();
+    }
+    $(function () {
+        $('.hide-show').show();
+        $('.hide-show span').addClass('show')
+
+        $('.hide-show span').click(function () {
+            if ($(this).hasClass('show')) {
+                $(this).text('Hide');
+                $('input[name="login[password]"]').attr('type', 'text');
+                $(this).removeClass('show');
+            } else {
+                $(this).text('Show');
+                $('input[name="login[password]"]').attr('type', 'password');
+                $(this).addClass('show');
+            }
+        });
+
+        $('form button[type="submit"]').on('click', function () {
+            $('.hide-show span').text('Show').addClass('show');
+            $('.hide-show').parent().find('input[name="login[password]"]').attr('type', 'password');
+        });
+    });
+</script>
+
+<script type="text/javascript">
+    function ValidateAlpha(evt) {
+        var keyCode = (evt.which) ? evt.which : evt.keyCode
+        if ((evt.which == 8 || evt.keyCode == 8 || evt.charCode == 8))
+            return true;
+
+        if (((keyCode < 65 || keyCode > 90) && (keyCode < 97 || keyCode > 123) && keyCode != 32))
+            return false;
+        return true;
+    };
+
+    function AlphaNumericOnly(control) {
+        var letterNumber = /^[0-9a-zA-Z]+$/;
+        if ($(control).val().match(letterNumber)) {
+            return true;
+        }
+
+        return true;
+    }
+</script>
+<style type="text/css">
+    .show {
+        display: block;
+        float: right;
+        margin-left: -27px;
+        margin-top: -19px;
+        margin-right: 11px;
+        position: relative;
+        z-index: 2;
+    }
+
+
+
+</style>
+<div ng-app="UserSocietyMappingValidModule">
+    <input type="hidden" id="hdnFP" />
+    <div ng-controller="UserSocietyMappingValidCont">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <h3 class="citizen-dash-head">{{translation.UserSocietyMappingValid}}<a target="_blank" style="float:right; font-size:12px" href="~/Content/UserManual/SocietyProffilling_manual.pdf">उपयोगकर्ता पुस्तिका</a></h3>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="../Citizen/Index"> {{translation.Home}} </a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+
+                        <span style="margin: 0 5px;">{{translation.UserSocietyMappingValid}} </span>
+                    </li>
+
+                </ul>
+            </div>
+        </div>
+        <div class="form-group col-md-6" hidden>
+            <input type="text" class="form-control" ng-model="SocietyRegistration.txn">
+        </div>
+        <table class="table table-responsive devtable" ng-show="Showgride">
+            <thead>
+                <tr>
+                    <th>
+                        {{translation.SRNO}}
+                    </th>
+                    <th>
+                        {{translation.SocietyName}}
+
+                    </th>
+                    <th>
+                        {{translation.Act}}
+                    </th>
+                    <th>
+                        {{translation.SocietyRegistrationNo}}
+
+                    </th>
+                    <th>
+                        {{translation.SocietyTyped}}
+                    </th>
+                    <th>
+                        {{translation.CEOName}}
+                    </th>
+                    @*
+                        <th>
+                            {{translation.ContactNo}}
+                        </th>*@
+
+                </tr>
+            </thead>
+            <tbody>
+                <tr dir-paginate="items in SocietyRegdata | filter:q | orderBy:colsort:reverseSort | itemsPerPage: pageSize" current-page="currentPage" pagination-id="statePagination">
+                    <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                    <td>{{ items.SocietyName }}</td>
+                    <td>{{ items.ActNameEn }}</td>
+                    <td>{{ items.RegistrationNo }}</td>
+                    <td>{{ items.TypeameEng }}</td>
+                    <td>{{ items.Name }}</td>
+                    @*
+                        <td>{{ items.ContactNo }}</td>*@
+
+
+                </tr>
+            </tbody>
+        </table>
+        <div class="col-md-12">
+            <div class="citizen-dash-head">
+                <div class="table-dropdown">
+
+                    <div class="col-lg-12 form-group" ng-show="GetSocietyDetails">
+                        <div class="col-md-4" style="margin-top:10px;">
+                            <label>
+                                {{translation.District}} :
+                            </label>
+                            <select class="form-control" ng-model="ddlDistrct" ng-change="BlockList()" ng-options="_language == 'en-us' ?  item.DISTRICT_ENG : item.DISTRICT_MANGAL for item in Districts">
+                                <option value="" disabled>{{translation.SelectOption}}-</option>
+                            </select>
+                        </div>                     
+                        <div class="col-lg-4" style="margin-top:10px;">
+                            <label style="color:black">Please enter your society Registration No/Society Name/BRN :</label>
+                            <input ng-disabled="disableTxtRegNo" type="text" name="SocietyName" class="form-control" ng-model="SocietyRegistration.SocietyRegistrationNo" placeholder="{{translation.SocietyRegistrationNo}}" autocomplete="off">
+                            <input ng-hide="true" type="text" name="SocietyName" class="form-control" ng-model="MemberRegistration.RegNo" autocomplete="off">
+                        </div>
+                        <div class="col-md-4" style="margin-top:10px;">
+                            <label>&nbsp;</label>
+                            <button style="margin-top: 25px;" type="submit" class="btn btn-primary dev-btn" ng-click="GetSocityDataForOtp();" ng-disabled="SocietyRegistration.SocietyRegistrationNo==undefined || SocietyRegistration.SocietyRegistrationNo==''">{{translation.GetSocieties}}</button>
+                        </div>
+                    </div>
+                    <div id="dvProfiling" ng-show="IsSearchResult">
+                        <table class="table table-responsive devtable" ng-show="showSoceitygride">
+                            <thead>
+                                <tr>
+                                    <th>Select</th>
+                                    <th>
+                                        {{translation.SRNO}}
+                                    </th>
+                                    <th>
+                                        {{translation.SocietyName}}
+
+                                    </th>
+                                    <th>
+                                        {{translation.Act}}
+                                    </th>
+                                    <th>
+                                        {{translation.SocietyRegistrationNo}}
+
+                                    </th>
+                                    <th>
+                                        {{translation.SocietyTyped}}
+                                    </th>
+                                    <th>
+                                        {{translation.CEOName}}
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr dir-paginate="items in SocietyRegdata | filter:q | orderBy:colsort:reverseSort | itemsPerPage: pageSize" current-page="currentPage" pagination-id="statePagination">
+                                    <td><input type="checkbox" name="name" ng-click="SelectSocietyForVerify(items,$index)" ng-model="items.ischecked" value="{{ items.SocietyID }}" /> </td>
+                                    <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                                    <td>{{ items.SocietyName }}</td>
+                                    <td>{{ items.ActNameEn }}</td>
+                                    <td>{{ items.RegistrationNo }}</td>
+                                    <td>{{ items.TypeameEng }}</td>
+                                    <td>{{ items.Name }}</td>
+                                </tr>
+
+                            </tbody>
+                        </table>
+                    </div>
+                  
+
+                    <div id="dvProfiling" ng-show="IsShowProfiling">
+                        <div class="container">
+                            <div class="row smpl-step" style="border-bottom: 0; min-width: 500px;">
+                                <div class="col-xs-3 smpl-step-step complete">
+                                    <div class="text-center smpl-step-num">Step 1</div>
+                                    <div class="progress">
+                                        <div class="progress-bar"></div>
+                                    </div>
+                                    <a class="smpl-step-icon"><i class="fa fa-user" style="font-size: 60px; padding-left: 12px; padding-top: 3px; color: black;"></i></a>
+                                    <div class="smpl-step-info text-center">Registe User via control panel.</div>
+                                </div>
+
+                                <div class="col-xs-3 smpl-step-step complete">
+                                    <div class="text-center smpl-step-num">Step 2</div>
+                                    <div class="progress">
+                                        <div class="progress-bar"></div>
+                                    </div>
+                                    <a class="smpl-step-icon"><i class="fa fa-dollar" style="font-size: 60px; padding-left: 18px; padding-top: 5px; color: black;"></i></a>
+                                    <div class="smpl-step-info text-center">Process Payment and fill out all required fields.</div>
+                                </div>
+                                <div class="col-xs-3 smpl-step-step active">
+                                    <div class="text-center smpl-step-num">Step 3</div>
+                                    <div class="progress">
+                                        <div class="progress-bar"></div>
+                                    </div>
+                                    <a class="smpl-step-icon"><i class="fa fa-repeat" style="font-size: 60px; padding-left: 7px; padding-top: 7px; color: black;"></i></a>
+                                    <div class="smpl-step-info text-center">Confirm Data entered in step 2.</div>
+                                </div>
+                                <div class="col-xs-3 smpl-step-step disabled">
+                                    <div class="text-center smpl-step-num">Step 4</div>
+                                    <div class="progress">
+                                        <div class="progress-bar"></div>
+                                    </div>
+                                    <a class="smpl-step-icon"><i class="fa fa-download" style="font-size: 60px; padding-left: 8px; padding-top: 4px; color: black; opacity: 0.3;"></i></a>
+                                    <div class="smpl-step-info text-center">Download product after receiving confirmation email.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <form role="form">
+                            <div class="tab-content">
+                                <div class="tab-pane active" role="tabpanel" id="step1" style="padding-top:0px;">
+
+                                    <label ng-hide="true" ng-model="EMitraTransactionId"></label>
+                                    <label ng-hide="true" id="lbltemp"></label>
+                                    <label ng-hide="true" id="lblFeeCalculate"></label>
+
+                                    <div class="col-lg-12 form-group">
+                                        <span class="error">
+                                            {{translation.RegProffillingIns}}
+                                        </span>
+                                    </div>
+                                    @*BASCI DETAILS*@
+                                    <div class="col-lg-12 form-group">
+                                        <div class="col-lg-2">{{ translation.Act}}<span class="error">*</span></div>
+                                        <div class="col-lg-4">
+                                            <select ng-model="SocietyRegistration.ActId" class="form-control form-control" ng-change="showHideDiv()" ng-init="SocietyRegistration.ActId='0'" ng-disabled="SocietyAct">
+                                                <option value="0" disabled>{{translation.SelectOption}}</option>
+                                                <option ng-repeat="item in ActList" value="{{item.ActId}}">
+                                                    {{_language =='en-us' ?  item.ActNameEn : item.ActNameHi}}
+                                                </option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12 form-group" ng-show="CheckBRN">
+                                        <div class="col-lg-2">{{ translation.ApplicationType}}<span class="error">*</span></div>
+                                        <div class="col-lg-8">
+                                            <div class="col-lg-4">
+                                                <label class="help-block-gender mt-radio"><input type="radio" name="SocietyRegistration" value="true" ng-model="SocietyRegistration.IsNewRegistration" ng-change="CheckRegOrProfileing()" ng-disabled="all">{{translation.SocietyRegistarion}} </label>
+                                            </div>
+                                            <div class="col-lg-4">
+                                                <label class="help-block-gender mt-radio"><input type="radio" name="SocietyRegistration" value="false" ng-model="SocietyRegistration.IsNewRegistration" ng-change="CheckRegOrProfileing()" ng-disabled="all">{{translation.SocietyProfiling}}</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div ng-show="divBrn">
+                                        <div class="col-lg-12 form-group">
+                                            <div class="col-lg-2">{{ translation.BRN}}<span class="error">*</span></div>
+                                            <div class="col-lg-4">
+                                                <input type="text" id="txtBrn" name="BRN" class="form-control" ng-model="SocietyRegistration.BRN" placeholder="{{translation.BRN}}" onkeypress='return event.charCode >= 48 && event.charCode <= 57' autocomplete="off" maxlength="16" ng-change="NotNullBRN()" ng-disabled="txtBrndisabled">
+                                            </div>
+                                            <div ng-if="divBrnbtn">
+                                                <button type="submit" class="btn btn-primary dev-btn" ng-disabled="ShowValidateBtn" ng-click="BrnDetails()">Validate</button>
+                                                <a class="btn btn-primary dev-btn" target="_blank" href="http://br.raj.nic.in/BRNApply.aspx#!"><span>Generate BRN </span></a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div ng-show="divOtherSocietys">
+                                        <div class="col-lg-12 form-group">
+                                            <div ng-show="IsProfiling">
+                                                <div class="col-lg-2">{{ translation.SocietyRegistrationNo}}<span class="error">*</span></div>
+                                                <div class="col-lg-4">
+                                                    <input type="text" name="RegistrationNo" class="form-control" style="padding-top:0px;" ng-model="SocietyRegistration.RegistrationNo" placeholder="{{translation.SocietyRegistrationNo}}" onKeyPress="return ValidateAlphaNumericAndSlash(event);" autocomplete="off" ng-disabled="txtRegistrationNo">
+
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-2">{{ translation.SocietyName}}<span class="error">*</span></div>
+                                            <div class="col-lg-4">
+                                                <input type="text" name="SocietyName" ng-disabled="IsSocietyNamedisabled" class="form-control" ng-model="SocietyRegistration.SocietyName" placeholder="{{translation.ProposedSocietyName}}" autocomplete="off" onKeyPress="return ValidateAlpha(event);" ng-readonly="txtSocietyName">
+                                            </div>
+                                        </div>
+
+                                        <div class="col-lg-12 form-group" ng-show="IsProfiling">
+                                            <div class="col-lg-2">{{ translation.RegistrationDate}} <span class="error">*</span></div>
+                                            <div class="col-lg-4">
+                                                <input name="RegistrationDate" id="txtRegistrationDate" class="form-control devcalender" disabled="disabled" placeholder="{{translation.RegistrationDate}}" ng-model="SocietyRegistration.RegistrationDate" autocomplete="off" />
+                                            </div>
+                                            <div class="col-lg-2">{{ translation.ElectionDate}} <span class="error">*</span></div>
+                                            <div class="col-lg-4">
+                                                <input name="ElectionDate" id="txtElectionDate" class="form-control devcalender" disabled="disabled" placeholder="{{translation.ElectionDate}}" ng-model="SocietyRegistration.ElectionDate" autocomplete="off" onchange="DateCheck()" />
+                                            </div>
+
+                                        </div>
+
+                                        <div>
+                                            <div class="col-lg-12 form-group">
+                                                <div class="col-lg-2">{{ translation.SocietyType}}<span class="error">*</span></div>
+                                                <div class="col-lg-4">
+                                                    <select ng-model="SocietyRegistration.SocietyTypeId" class="form-control" ng-init="SocietyRegistration.SocietyTypeId='0'" ng-change="Levelofficedata(1)">
+                                                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                                                        <option ng-repeat="itemAct in SocietyTypeList" value="{{itemAct.SocietyTypeId}}">
+                                                            {{_language =='en-us' ?  itemAct.TypeameEng : itemAct.TypeNameHin}}
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                                <div ng-show="Act2001">
+                                                    <div class="col-lg-2" ng-class="{ 'has-error' : SocietyProfileForm.MobileNo.$invalid && !SocietyProfileForm.MobileNo.$pristine }">{{ translation.SocietyClass}}<span class="error">*</span></div>
+                                                    <div class="col-lg-4">
+                                                        <select ng-model="SocietyRegistration.ClassId" class="form-control" ng-init="SocietyRegistration.ClassId='0'" ng-change="GetSubClass();GetSocietyCategory();">
+                                                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                                                            <option ng-repeat="itemClass in SocietyClassList" value="{{itemClass.ClassId}}">
+                                                                {{_language =='en-us' ?  itemClass.ClassNameEn : itemClass.ClassNameHi}}
+                                                            </option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div ng-show="showhideBylaws">
+                                            <div class="col-lg-12 form-group">
+                                                <div class="col-lg-2" ng-class="{ 'has-error' : SocietyProfileForm.email.$invalid && !SocietyProfileForm.email.$pristine }">{{ translation.SocietySubClass}}<span class="error">*</span></div>
+                                                <div class="col-lg-4">
+                                                    <select ng-model="SocietyRegistration.SubClassId" class="form-control" ng-init="SocietyRegistration.SubClassId='0'" ng-change="GetSocietyCategory()">
+                                                        <option value="0">{{translation.SelectOption}}</option>
+                                                        <option ng-repeat="itemSubCls in SocietySubClassList" value="{{itemSubCls.SubClassId}}">
+                                                            {{_language =='en-us' ?  itemSubCls.SubClassNameEn : itemSubCls.SubClassNameHi}}
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-lg-2" ng-class="{ 'has-error' : SocietyProfileForm.MobileNo.$invalid && !SocietyProfileForm.MobileNo.$pristine }">{{ translation.SocietyCategory}}<span class="error">*</span></div>
+                                                <div class="col-lg-4">
+                                                    <select ng-model="SocietyRegistration.SocietyCategoryId" class="form-control" ng-init="SocietyRegistration.SocietyCategoryId='0'">
+                                                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                                                        <option ng-repeat="itemCat in SocietyCategoryList" value="{{itemCat.CategoryId}}">
+                                                            {{_language =='en-us' ?  itemCat.CategoryNameEn : itemCat.CategoryNameHi}}
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-lg-12 form-group" ng-show="Act2001">
+                                            <div class="col-lg-2">{{ translation.NOB}} <span class="error">*</span></div>
+                                            <div class="col-lg-4">
+                                                <input type="text" name="NOB" class="form-control" ng-model="SocietyRegistration.NoOfBranches" placeholder="{{translation.NOB}}" onkeypress='return ((event.charCode >= 48 && event.charCode <= 57)|| event.which ==8 || event.keyCode ==8 || event.charCode==8)' autocomplete="off">
+                                            </div>
+                                        </div>
+
+                                        <div class="col-lg-12 form-group">
+                                            <div class="col-lg-2">{{ translation.MajorActivity}} <span class="error">*</span></div>
+                                            <div class="col-lg-4">
+                                                <select ng-model="SocietyRegistration.MajorActivityId" class="form-control" ng-init="SocietyRegistration.MajorActivityId='0'" ng-change="GetActivity()">
+                                                    <option value="0" disabled>{{translation.SelectOption}}</option>
+                                                    <option ng-repeat="itemClass in MajorActivityList" value="{{itemClass.MajorActivityId}}">
+                                                        {{_language =='en-us' ?  itemClass.MajorActivityNameEn : itemClass.MajorActivityNameHi}}
+                                                    </option>
+                                                </select>
+                                            </div>
+                                            <div class="col-lg-2">{{ translation.Activity}} <span class="error">*</span></div>
+                                            <div class="col-lg-4">
+                                                <select ng-model="SocietyRegistration.ActivityId" class="form-control" ng-init="SocietyRegistration.ActivityId='0'" ng-change="GetBusiness()">
+                                                    <option value="0" disabled>{{translation.SelectOption}}</option>
+                                                    <option ng-repeat="itemClass in ActivityList" value="{{itemClass.ActivityId}}">
+                                                        {{_language =='en-us' ?  itemClass.ActivityNameEn : itemClass.ActivityNameHi}}
+                                                    </option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-lg-12 form-group">
+                                            <div class="col-lg-2">{{ translation.Business}} <span class="error">*</span></div>
+                                            <div class="col-lg-4">
+                                                <select ng-model="SocietyRegistration.BusinessId" class="form-control" ng-init="SocietyRegistration.BusinessId='0'">
+                                                    <option value="0" disabled>{{translation.SelectOption}}</option>
+                                                    <option ng-repeat="itemClass in BusinessList" value="{{itemClass.BusinessId}}">
+                                                        {{_language =='en-us' ?  itemClass.BusinessNameEn : itemClass.BusinessNameHi}}
+                                                    </option>
+                                                </select>
+                                            </div>
+
+                                        </div>
+
+                                        <div class="col-lg-12 form-group" ng-show="Act2001">
+                                            <div class="col-lg-2">{{ translation.Liability}} <span class="error">*</span></div>
+                                            <div class="col-lg-4">
+                                                <select ng-model="SocietyRegistration.LiablityId" class="form-control" ng-init="SocietyRegistration.LiablityId='1'">
+                                                    <option value="0" disabled>{{translation.SelectOption}}</option>
+                                                    <option ng-repeat="itemClass in LiabilityTypeList" value="{{itemClass.LiablityId}}">
+                                                        {{_language =='en-us' ?  itemClass.LiablityNameEn : itemClass.LiablityNameHi}}
+                                                    </option>
+                                                </select>
+                                            </div>
+                                            <div ng-show="SocietyRegistration.LiablityId==1">
+                                                <div class="col-lg-2">{{ translation.LTDSocietyLiablityMember}} <span class="error">*</span></div>
+                                                <div class="col-lg-4">
+                                                    <input name="LiablityMember" id="txtLiablityofMember" class="form-control devcalender" onkeypress='return ((event.charCode >= 48 && event.charCode <= 57)|| event.which ==8 || event.keyCode ==8 || event.charCode==8)'
+                                                           placeholder="{{translation.LiabiltyMemberplaceholder}}" ng-model="SocietyRegistration.MemberLiablity" autocomplete="off" />
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-lg-12 form-group">
+                                            <div class="col-lg-2">{{ translation.MembersApplyingForTheSociety}} <span class="error">*</span></div>
+                                            <div class="col-lg-4">
+                                                <input name="LiablityMember" id="txtTotalNumberOfMembers" class="form-control devcalender" onkeypress='return ((event.charCode >= 48 && event.charCode <= 57)|| event.which ==8 || event.keyCode ==8 || event.charCode==8)'
+                                                       onchange="EntrenceFeeCalculate(this.value)" placeholder="{{translation.MembersApplyingForTheSociety}}" ng-model="SocietyRegistration.TotalNumberOfMembers" autocomplete="off" />
+                                            </div>
+                                            <div ng-show="Act2001">
+                                                <div class="col-lg-2">{{ translation.EntranceFeesCollected}} <span class="error">*</span></div>
+                                                <div class="col-lg-4">
+                                                    <input name="LiablityMember" id="txtEntranceFees" disabled class="form-control devcalender" placeholder="{{translation.EntranceFeesCollected}}" ng-model="SocietyRegistration.EntranceFeesCollected" autocomplete="off" />
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-lg-12 form-group">
+                                            <div class="col-lg-2">{{ translation.GeneralMeetingDate}} <span class="error">*</span></div>
+                                            <div class="col-lg-4">
+                                                <input name="ElectionDate" id="txtAGMDate" class="form-control devcalender" disabled="disabled" placeholder="{{translation.GeneralMeetingDate}}" ng-model="SocietyRegistration.AGMDate" autocomplete="off" onchange="DateCheck()" />
+                                            </div>
+                                            <div class="col-lg-2">{{ translation.GeneralMeetingParticipant}} <span class="error">*</span></div>
+                                            <div class="col-lg-4">
+                                                <input name="AGMParticipant" id="txtNoOfMemberInAGM" class="form-control devcalender" onkeypress='return ((event.charCode >= 48 && event.charCode <= 57)|| event.which ==8 || event.keyCode ==8 || event.charCode==8)'
+                                                       placeholder="{{translation.GeneralMeetingParticipant}}" ng-model="SocietyRegistration.NoOfMemberInAGM" autocomplete="off" onchange="CheckMembervalidetion()" />
+                                            </div>
+                                        </div>
+
+                                        <div class="col-lg-12 form-group" ng-show="Act2001">
+
+                                            <div class="col-lg-2">{{ translation.OneShareValue}} <span class="error">*</span></div>
+                                            <div class="col-lg-4">
+                                                <input name="OneShareValue" class="form-control devcalender" onkeypress='return ((event.charCode >= 48 && event.charCode <= 57)|| event.which ==8 || event.keyCode ==8 || event.charCode==8)'
+                                                       placeholder="{{translation.OneShareValue}}" ng-model="SocietyRegistration.SingleShareValue" autocomplete="off" />
+                                            </div>
+                                            <div class="col-lg-2">{{ translation.PaidUpShareCapital}} <span class="error">*</span></div>
+                                            <div class="col-lg-4">
+                                                <input name="PaidUpShareCapital" class="form-control devcalender" onkeypress='return ((event.charCode >= 48 && event.charCode <= 57)|| event.which ==8 || event.keyCode ==8 || event.charCode==8)'
+                                                       placeholder="{{translation.PaidUpShareCapital}}" ng-model="SocietyRegistration.PaidUpShareCapital" autocomplete="off" />
+                                            </div>
+                                        </div>
+
+                                        <div class="col-lg-12 form-group" ng-disabled="now">
+                                            <div>
+                                                <div class="col-lg-2">{{ translation.IsWorkscopeState}} <span class="error">*</span></div>
+                                                <div class="col-lg-4">
+                                                    <select id="static" ng-model="SocietyRegistration.WorkScopeLevel_ID" class="form-control" ng-init="SocietyRegistration.WorkScopeLevel_ID='0'" ng-change="Levelofficedata()">
+                                                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                                                        <option value="1">{{translation.State}}</option>
+                                                        <option value="2">{{translation.Division}}</option>
+                                                        <option value="3">{{translation.District}}</option>
+                                                        <option value="4">{{translation.BlockHeading}}</option>
+                                                        <option value="5">{{translation.GramPanchayat}}</option>
+                                                        <option value="6">{{translation.Village}}</option>
+                                                        <option value="7">{{translation.CityHeading}}</option>
+                                                        <option value="8">{{translation.WardHeading}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div ng-show="RuralurbanDiv">
+                                                <div class="col-lg-2">{{ translation.UrbanRural}} <span class="error">*</span></div>
+                                                <div class="col-lg-4">
+                                                    <label class="help-block-gender" style="width:40% !important;"><input type="radio" id="ISrurl" name="Rural" value="true" ng-model="SocietyRegistration.Rural" ng-click="LeveldataonUrban(1)">{{translation.Rural}} </label>
+                                                    <label class="help-block-gender" style="width:40% !important;"> <input type="radio" id="ISUrban" value="false" name="Rural" ng-model="SocietyRegistration.Rural" ng-click="LeveldataonUrban(2)">{{translation.Urban}}</label>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-lg-12 form-group" ng-show="DivisionDiv">
+
+                                            <div class="col-lg-2">{{ translation.DivisionHeading}} <span class="error">*</span></div>
+                                            <div class="col-lg-4">
+                                                <select ng-model="SocietyRegistration.DIVISION_ID" id="ddlDivision" name="division" ng-change="GetSocietyDistrictList()" class="form-control" ng-init="SocietyRegistration.DIVISION_ID ='0'">
+                                                    <option value="0" disabled>{{translation.SelectOption}}</option>
+                                                    <option ng-repeat="itemDivs in Divisions" value="{{itemDivs.DIVISION_ID}}">
+                                                        {{_language =='en-us' ?  itemDivs.DIVISION_ENG : itemDivs.DIVISION_MANGAL}}
+                                                    </option>
+                                                </select>
+                                            </div>
+                                            <div ng-show="DistrictDiv">
+                                                <div class="col-lg-2">{{ translation.District}} <span class="error">*</span></div>
+                                                <div class="col-lg-4">
+                                                    <select ng-model="SocietyRegistration.DISTRICT_ID" id="ddlDistrict" class="form-control" ng-init="SocietyRegistration.DISTRICT_ID='0'" ng-change="BlockList()">
+                                                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                                                        <option ng-repeat="itemDist in AreaDistrictList | orderBy:'DISTRICT_ENG'" value="{{itemDist.DISTRICT_ID}}">
+                                                            {{_language =='en-us' ?  itemDist.DISTRICT_ENG : itemDist.DISTRICT_MANGAL}}
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-lg-12 form-group" ng-show="BlockruralDiv">
+                                            <div ng-show="PsDiv">
+                                                <div class="col-lg-2">{{ translation.BlockHeading}} <span class="error">*</span></div>
+                                                <div class="col-lg-4">
+                                                    <select ng-model="SocietyRegistration.BLOCK_ID" id="ddlblocki" class="form-control" ng-init="SocietyRegistration.BLOCK_ID='0'" ng-change="GramPanchayatListForBasicD()">
+                                                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                                                        <option ng-repeat="itemBlock in Blocks | orderBy:'BLOCK_ENG'" value="{{itemBlock.BLOCK_ID}}">
+                                                            {{_language =='en-us' ?  itemBlock.BLOCK_ENG : itemBlock.BLOCK_MANGAL}}
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div ng-show="GPDiv">
+                                                <div class="col-lg-2">{{ translation.GramPanchayatHeading}} <span class="error">*</span></div>
+                                                <div class="col-lg-4">
+                                                    <select ng-model="SocietyRegistration.GP_ID" id="ddlGP" class="form-control" ng-init="SocietyRegistration.GP_ID='0'" ng-change="GetVillageForBasic()">
+                                                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                                                        <option ng-repeat="itemGP in AreaGramPanchayats | orderBy:'GramPanchayats'" value="{{itemGP.GP_ID}}">
+                                                            {{_language =='en-us' ?  itemGP.GP_ENG : itemGP.GP_MANGAL}}
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-lg-12 form-group" ng-show="VillageDiv">
+                                            <div>
+                                                <div class="col-lg-2">{{ translation.Village}} <span class="error">*</span></div>
+                                                <div class="col-lg-4">
+                                                    <select ng-model="SocietyRegistration.VILLAGE_ID" id="ddlVillage" class="form-control" ng-init="SocietyRegistration.VILLAGE_ID='0'">
+                                                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                                                        <option ng-repeat="itemVil in AreaVillages | orderBy:'VILLAGE_ENG'" value="{{itemVil.VILLAGE_ID}}">
+                                                            {{_language =='en-us' ?  itemVil.VILLAGE_ENG : itemVil.VILLAGE_MANGAL}}
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div ng-show="UrbanDivRadio">
+                                            <div class="col-lg-12 form-group">
+                                                <div class="col-lg-2">
+                                                    {{translation.City}}<span class="error">*</span>
+                                                </div>
+                                                <div class="form-group col-md-4">
+                                                    <select ng-model="SocietyRegistration.CITY_ID" class="form-control" id="ddlCity" ng-change="GetWardListbySociety()" ng-init="SocietyRegistration.CITY_ID='0'">
+                                                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                                                        <option ng-repeat="itemCity in CityList" value="{{itemCity.CITY_ID}}">
+                                                            {{_language =='en-us' ?  itemCity.CITY_ENG : itemCity.CITY_MANGAL}}
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                                <div ng-show="DivRadioWard">
+                                                    <div>
+                                                        <div class="col-lg-2">
+                                                            {{translation.Ward}}<span class="error">*</span>
+                                                        </div>
+                                                        <div class="form-group col-md-4">
+                                                            <select ng-model="SocietyRegistration.WARD_ID" id="ddlward" class="form-control" ng-init="SocietyRegistration.WARD_ID='0'">
+                                                                <option value="0" disabled>{{translation.SelectOption}}</option>
+                                                                <option ng-repeat="itemWard in Ward" value="{{itemWard.WARD_ID}}">
+                                                                    {{_language =='en-us' ?  itemWard.WARD_ENG : itemWard.WARD_MANGAL}}
+                                                                </option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div ng-show="divSportsSocietys">
+                                        <div class="col-lg-12 form-group">
+                                            <h5 class="heading-hr ng-binding">  {{translation.SportAssociationDetails}}</h5>
+                                        </div>
+                                        <div class="col-lg-12 form-group">
+                                            <div>
+                                                <div class="col-lg-2">{{translation.ApplicationType}} <span class="error">*</span></div>
+                                                <div class="col-lg-8">
+                                                    <label class="help-block-gender" style="width:40% !important;"><input type="radio" name="RegistrationProfile" value="true" ng-model="SocietyRegistration.IsSportsNewRegistration" ng-click="Profiling()">{{translation.SocietyRegistarion}} </label>
+                                                    <label class="help-block-gender" style="width:40% !important;"> <input type="radio" name="RegistrationProfile" value="false" ng-model="SocietyRegistration.IsSportsNewRegistration" ng-click="Profiling()">{{translation.SocietyProfiling}}</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-12 form-group">
+                                            <div>
+                                                <div class="col-lg-2">{{ translation.TypeOfAssociation}} <span class="error">*</span></div>
+                                                <div class="col-lg-8">
+                                                    <label class="help-block-gender" style="width:40% !important;"><input type="radio" name="StatLevel" id="StateLevel" value="Yes" ng-model="SocietyRegistration.IsStatLevel" ng-click="LevelOfSportsAcademy()">{{translation.StateLevelAssociation}} </label>
+                                                    <label class="help-block-gender" style="width:40% !important;"> <input type="radio" name="StatLevel" id="DistrictLevel" value="No" ng-model="SocietyRegistration.IsStatLevel" ng-click="LevelOfSportsAcademy()">{{translation.DistrictLevelAssociation}}</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-12 form-group" ng-show="DistrictDiv">
+
+                                            <div ng-show="District">
+                                                <div class="col-lg-2">{{ translation.DistrictCouncil}} <span class="error">*</span></div>
+                                                <div class="col-lg-4">
+                                                    <select ng-model="SocietyRegistration.DISTRICT_ID" ng-disabled="IsSportsDistrictdisabled" id="ddlDistrict" class="form-control" ng-init="SocietyRegistration.DISTRICT_ID='0'" ng-change="BlockList()">
+                                                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                                                        <option ng-repeat="itemDis in DistrictList | orderBy:'DISTRICT_ENG'" value="{{itemDis.DISTRICT_ID}}">
+                                                            {{_language =='en-us' ?  itemDis.DISTRICT_ENG : itemDis.DISTRICT_MANGAL}}
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-2">{{ translation.Sport}} <span class="error">*</span></div>
+                                            <div class="col-lg-4">
+                                                <select ng-model="SocietyRegistration.AssociationId" id="ddlgame" class="form-control" ng-init="SocietyRegistration.AssociationId='0'" ng-change="ShowDivSportSocietyName();">
+                                                    <option value="0" disabled>{{translation.SelectOption}}</option>
+                                                    <option ng-repeat="itemSAso in SportAssociationList | orderBy:'SportNameEn'" value="{{itemSAso.AssociationIdStr}}">
+                                                        {{_language =='en-us' ?  itemSAso.SportNameEn : itemSAso.SportNameHi}}
+                                                    </option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-12 form-group" ng-show="divSportSocietyName">
+
+                                            <div class="col-lg-2">{{ translation.SportSocietyName}}<span class="error">*</span></div>
+
+                                            <div class="col-lg-4">
+                                                <input type="text" name="Sport Association Name" id="txtSportSocietyName" class="form-control" ng-model="SocietyRegistration.SocietyName" onKeyPress="return ValidateAlpha(event);" placeholder="{{translation.SportSocietyName}}">
+                                            </div>
+                                            <div ng-show="IsProfiling">
+                                                <div class="col-lg-2">{{ translation.SocietyRegistrationNo}}<span class="error">*</span></div>
+                                                <div class="col-lg-4">
+                                                    <input type="text" name="RegistrationNo" class="form-control" ng-model="SocietyRegistration.RegistrationNo" placeholder="{{translation.SocietyRegistrationNo}}" onKeyPress="return ValidateAlphaNumericAndSlash(event);" autocomplete="off" ng-readonly="all">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div ng-show="IsProfiling">
+                                            <div class="col-lg-12 form-group">
+                                                <div class="col-lg-2">{{ translation.RegistrationDate}} <span class="error">*</span></div>
+                                                <div class="col-lg-4">
+                                                    <input name="RegistrationDate" id="txtSportRegistrationDate" class="form-control devcalender " disabled="disabled" placeholder="{{translation.RegistrationDate}}" ng-model="SocietyRegistration.RegistrationDate" autocomplete="off" />
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-12 form-group">
+                                                <div class="col-lg-2">{{ translation.AGM}} <span class="error">*</span></div>
+                                                <div class="col-lg-4">
+                                                    <input name="AgmDate" id="txtSportAgmDate" class="form-control devcalender" disabled="disabled" placeholder="{{translation.AGM}}" ng-model="SocietyRegistration.AgmDate" autocomplete="off" onchange="DateCheck()" />
+                                                </div>
+                                                <div class="col-lg-2">{{ translation.ElectionDate}} <span class="error">*</span></div>
+                                                <div class="col-lg-4">
+                                                    <input name="ElectionDate" id="txtSportElectionDate" style="display:inline;" class="form-control devcalender" disabled="disabled" placeholder="{{translation.ElectionDate}}" ng-model="SocietyRegistration.ElectionDate" autocomplete="off" onchange="DateCheck()" /> &nbsp;
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+                                        <div class="col-lg-12 form-group">
+                                            <h5 class="heading-hr ng-binding">  {{LevelLitle}}</h5>
+                                        </div>
+                                        <div class="col-lg-12 form-group">
+                                            <div ng-show="RuralurbanDiv">
+                                                <div class="col-lg-2">{{ translation.UrbanRural}} <span class="error">*</span></div>
+                                                <div class="col-lg-4">
+                                                    <label class="help-block-gender" style="width:40% !important;"><input type="radio" id="IsSportsRural" name="Rural" value="true" ng-model="SocietyRegistration.Ruraltwo" ng-change="SportsRural()">{{translation.Rural}} </label>
+                                                    <label class="help-block-gender" style="width:40% !important;"> <input type="radio" id="IsSportsRural2" value="false" name="Rural" ng-model="SocietyRegistration.Ruraltwo" ng-change="SportsRural()">{{translation.Urban}}</label>
+                                                </div>
+                                            </div>
+                                            <div ng-show="SportSocietyCityType">
+                                                <div class="col-lg-2">{{ translation.CityType}}<span class="error">*</span></div>
+                                                <div class="col-lg-4">
+                                                    <select id="staticalltwo" ng-model="SocietyRegistration.CityTypes" class="form-control" ng-init="SocietyRegistration.CityTypes='0'" ng-change="GetCityList()">
+                                                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                                                        <option value="1">{{translation.NagarParisad}}</option>
+                                                        <option value="2">{{translation.NagarPalika}}</option>
+                                                        <option value="3">{{translation.NagarNigam}}</option>
+
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div ng-show="UrbanForSportSocietyNew">
+                                            <div class="col-lg-12 form-group">
+                                                <div class="col-lg-2">
+                                                    {{translation.City}}<span class="error">*</span>
+                                                </div>
+                                                <div class="form-group col-md-4">
+                                                    <select ng-model="SocietyRegistration.CITY_ID" class="form-control" id="ddlCity" ng-change="GetWardListbySociety()" ng-init="SocietyRegistration.CITY_ID='0'">
+                                                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                                                        <option ng-repeat="itemCit in CityList" value="{{itemCit.CITY_ID}}">
+                                                            {{_language =='en-us' ?  itemCit.CITY_ENG : itemCit.CITY_MANGAL}}
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-lg-2">
+                                                    {{translation.Ward}}<span class="error">*</span>
+                                                </div>
+                                                <div class="form-group col-md-4">
+                                                    <select ng-model="SocietyRegistration.WARD_ID" id="ddlward" class="form-control" ng-init="SocietyRegistration.WARD_ID='0'">
+                                                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                                                        <option ng-repeat="itemWd in Ward" value="{{itemWd.WARD_ID}}">
+                                                            {{_language =='en-us' ?  itemWd.WARD_ENG : itemWd.WARD_MANGAL}}
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div ng-show="RuralForSportSociety">
+                                            <div class="col-lg-12 form-group">
+                                                <div>
+                                                    <div class="col-lg-2">{{ translation.BlockHeading}} <span class="error">*</span></div>
+                                                    <div class="col-lg-4">
+                                                        <select ng-model="SocietyRegistration.BLOCK_ID" id="ddlblockitwo" class="form-control" ng-init="SocietyRegistration.BLOCK_ID='0'" ng-change="GramPanchayatListForBasicD()">
+                                                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                                                            <option ng-repeat="itemBlk in Blocks | orderBy:'BLOCK_ENG'" value="{{itemBlk.BLOCK_ID}}">
+                                                                {{_language =='en-us' ?  itemBlk.BLOCK_ENG : itemBlk.BLOCK_MANGAL}}
+                                                            </option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <div class="col-lg-2">{{ translation.GramPanchayatHeading}} <span class="error">*</span></div>
+                                                    <div class="col-lg-4">
+                                                        <select ng-model="SocietyRegistration.GP_ID" id="ddlGP" class="form-control" ng-init="SocietyRegistration.GP_ID='0'" ng-change="GetVillageForBasic()">
+                                                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                                                            <option ng-repeat="itemGP in AreaGramPanchayats | orderBy:'GramPanchayats'" value="{{itemGP.GP_ID}}">
+                                                                {{_language =='en-us' ?  itemGP.GP_ENG : itemGP.GP_MANGAL}}
+                                                            </option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-12 form-group">
+                                                <div>
+                                                    <div class="col-lg-2">{{ translation.Village}} <span class="error">*</span></div>
+                                                    <div class="col-lg-4">
+                                                        <select ng-model="SocietyRegistration.VILLAGE_ID" id="ddlVillage" class="form-control" ng-init="SocietyRegistration.VILLAGE_ID='0'">
+                                                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                                                            <option ng-repeat="itemVil in AreaVillages | orderBy:'VILLAGE_ENG'" value="{{itemVil.VILLAGE_ID}}">
+                                                                {{_language =='en-us' ?  itemVil.VILLAGE_ENG : itemVil.VILLAGE_MANGAL}}
+                                                            </option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-lg-12 form-group" ng-show="Districtt">
+                                            <div class="col-lg-2">{{ translation.DistrictCouncil}} <span class="error">*</span></div>
+                                            <div class="col-lg-4">
+                                                <select ng-model="SocietyRegistration.DISTRICT_ID" id="ddlDistricttwo" class="form-control" ng-init="SocietyRegistration.DISTRICT_ID='0'" ng-change="BlockList()">
+                                                    <option value="0" disabled>{{translation.SelectOption}}</option>
+                                                    <option ng-repeat="itemDistr in DistrictList | orderBy:'DISTRICT_ENG'" value="{{itemDistr.DISTRICT_ID}}">
+                                                        {{_language =='en-us' ?  itemDistr.DISTRICT_ENG : itemDistr.DISTRICT_MANGAL}}
+                                                    </option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-12 form-group">
+                                            <br />
+                                        </div>
+                                        <div ng-show="PrimaryBodyDetails">
+                                            <div class="col-lg-12 form-group" ng-show="PrimaryBodyName">
+                                                <div class="col-lg-2">{{ translation.PrimaryBodyName}}<span class="error">*</span></div>
+                                                <div class="col-lg-4">
+                                                    <input type="text" name="RegistrationNo" class="form-control" ng-model="SocietyRegistration.PrimaryBodyName" placeholder="{{translation.PrimaryBodyName}}" autocomplete="off" onKeyPress="return ValidateAlpha(event);">
+                                                </div>
+
+                                            </div>
+
+                                            <div class="col-lg-12 form-group">
+                                                <div class="col-lg-2">{{ translation.CEOName}} <span class="error">*</span></div>
+                                                <div class="col-lg-4">
+                                                    <input type="text" name="SocietyName" class="form-control" ng-model="SocietyRegistration.PrimaryBodyCEOName" placeholder="{{translation.CEOName}}" autocomplete="off" onKeyPress="return ValidateAlpha(event);">
+                                                </div>
+                                                <div class="col-lg-2">{{ translation.MobileNo}}<span class="error">*</span></div>
+                                                <div class="col-lg-4">
+                                                    <input type="text" class="form-control" ng-model="SocietyRegistration.PrimaryBodyCEOMobileNo" placeholder="{{translation.MobileNo}}" maxlength="10" minlength="10" onkeypress='return event.charCode >= 48 && event.charCode <= 57' autocomplete="off">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group col-md-12">
+                                            <div class="dev-align-btn">
+                                                <button type="button" ng-show="AddMoreForSportShow" name="SocietyRegistration.btnadd" class="btn btn-primary dev-btn" ng-click="AddMoreForSportSociety()">Add More</button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group col-md-12" ng-show="Addmore">
+                                        <div class="dev-align-btn">
+                                            <button type="button" name="SocietyRegistration.btnadd" class="btn btn-primary dev-btn" ng-click="Addmorebtn(true)">Add More</button>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12 form-group" ng-show="grid">
+                                        <h5 class="heading-hr ng-binding">  {{translation.SocietyOperationArea}}</h5>
+                                    </div>
+                                    <div class="col-lg-12" ng-show="grid">
+                                        <div class="col-lg-12 table-responsive">
+                                            <table class="table devtable">
+                                                <caption>
+
+                                                </caption>
+                                                <thead>
+                                                    <tr>
+                                                        <th>
+                                                            {{translation.SRNO}}
+                                                        </th>
+                                                        <th>
+                                                            {{translation.StateHeading}}
+                                                        </th>
+                                                        <th>
+                                                            {{translation.Division}}
+                                                        </th>
+                                                        <th>
+                                                            {{translation.District}}
+                                                        </th>
+
+                                                        <th>
+                                                            {{translation.BlockHeading}}
+                                                        </th>
+                                                        <th>
+                                                            {{translation.GramPanchayatHeading}}
+                                                        </th>
+                                                        <th>
+                                                            {{translation.Village}}
+                                                        </th>
+
+                                                        <th>
+                                                            {{translation.CityHeading}}
+                                                        </th>
+                                                        <th>
+                                                            {{translation.Ward}}
+                                                        </th>
+
+                                                        <th>
+                                                            {{translation.Delete}}
+                                                        </th>
+
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="myTable">
+                                                    <tr ng-repeat="items in lstSocietyWorkScope">
+                                                        <td>{{$index+1}}</td>
+                                                        <td>{{ items.STATE_Name }}</td>
+                                                        <td>{{ items.DIVISION_Name }}</td>
+                                                        <td>{{ items.DISTRICT_ENG }}</td>
+                                                        <td>{{ items.BLOCK_Name }}</td>
+                                                        <td>{{items.GP_ID_Name}}</td>
+                                                        <td>{{ items.VILLAGE_Name }}</td>
+                                                        <td>{{ items.CITY_Name }}</td>
+                                                        <td>{{ items.WARD_Name }}</td>
+
+                                                        <td><i class="fa fa-trash btn btn btn-xs btn-danger tooltips" id="Remove_1" onclick="Removetr(this)" ng-click="RemoveRowFromList(items)"></i></td>
+                                                    </tr>
+
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12" ng-show="grid">
+                                        <div class="col-lg-3">
+                                            <label>{{translation.AreaOfOperation}}</label>
+                                        </div>
+                                        <div class="col-lg-4">
+                                            <textarea type="text" name="AreaOfOperation" class="form-control" id="AreaOfOperation" ng-model="SocietyRegistration.AreaOfOperation" maxlength="500"></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12" ng-show="gridtwo">
+                                        <div class="col-lg-12 table-responsive">
+                                            <table id="SportsAssoCEOtbl" class="table devtable">
+                                                <thead>
+                                                    <tr>
+                                                        <th>
+                                                            {{translation.SRNO}}
+                                                        </th>
+                                                        <th>
+                                                            {{translation.StateHeading}}
+                                                        </th>
+                                                        <th ng-show="LevelDistricshow">
+                                                            {{translation.Gameassoiation}}
+                                                        </th>
+                                                        <th>
+                                                            {{translation.District}}
+                                                        </th>
+
+                                                        <th ng-show="LevelDistricsHide">
+                                                            {{translation.BlockHeading}}
+                                                        </th>
+                                                        <th ng-show="LevelDistricsHide">
+                                                            {{translation.GramPanchayatHeading}}
+                                                        </th>
+                                                        <th ng-show="LevelDistricsHide">
+                                                            {{translation.Village}}
+                                                        </th>
+                                                        <th ng-show="LevelDistricsHide">
+                                                            {{translation.CityType}}
+                                                        </th>
+                                                        <th ng-show="LevelDistricsHide">
+                                                            {{translation.CityHeading}}
+                                                        </th>
+                                                        <th ng-show="LevelDistricsHide">
+                                                            {{translation.Ward}}
+                                                        </th>
+                                                        <th ng-show="primarydiv">
+                                                            {{translation.PrimaryBodyName}}
+                                                        </th>
+                                                        <th>
+                                                            {{translation.PrimaryBodyCEOName}}
+                                                        </th>
+                                                        <th>
+                                                            {{translation.MobileNo}}
+                                                        </th>
+                                                        <th>
+                                                            {{translation.Delete}}
+                                                        </th>
+
+                                                    </tr>
+                                                </thead>
+
+                                                <tbody id="myTable">
+                                                    <tr ng-repeat="items in lstSocietyWorkScope">
+                                                        <td>{{$index+1}}</td>
+                                                        <td>{{_language =='en-us' ?  "Rajasthan" : "राजस्थान"}}</td>
+                                                        <td ng-show="LevelDistricshow">{{translation.DistirctLevel}} {{_language =='en-us' ?  items.DISTRICT_ENG : items.DISTRICT_ENG}} {{ items.SportsAssociationName}} {{ translation.Gameassoiation}}</td>
+                                                        <td>{{items.DISTRICT_ENG}}</td>
+                                                        <td ng-show="LevelDistricsHide">{{ items.BLOCK_Name }}</td>
+                                                        <td ng-show="LevelDistricsHide">{{items.GP_ID_Name}}</td>
+                                                        <td ng-show="LevelDistricsHide">{{ items.VILLAGE_Name }}</td>
+                                                        <td ng-show="LevelDistricsHide">{{ items.CityTypes_Name }}</td>
+                                                        <td ng-show="LevelDistricsHide">{{ items.CITY_Name }}</td>
+                                                        <td ng-show="LevelDistricsHide">{{ items.WARD_Name }}</td>
+                                                        <td ng-show="primarydiv">{{ items.SportsAssociationName }}</td>
+                                                        <td>{{ items.DirectorName }}</td>
+                                                        <td>{{ items.MobileNo }}</td>
+                                                        <td><i class="fa fa-trash btn btn btn-xs btn-danger tooltips" id="Remove{{$index+1}}" onclick="Removetr(this)" ng-click="RemoveRowFromList(items)"></i></td>
+                                                    </tr>
+
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    @*State Sport Council*@
+                                    <div ng-show="AffiliatedByRSSC">
+                                        <div class="col-lg-12 form-group" ng-show="dsdsd">
+                                            <div>
+                                                <div class="col-lg-2">{{ translation.AffiliatedByRSSC}}<span class="error">*</span></div>
+                                                <div class="col-lg-4">
+                                                    <label class="help-block-gender" style="width:40% !important;"><input type="radio" name="rbRSSC" id="IsAffiliatedByRSSCYes" value="Yes" ng-model="SocietyRegistration.IsAffiliatedByRSSC" ng-click="ShowRegDateAndNoForRSSCAffiliation()">{{translation.Yes}} </label>
+                                                    <label class="help-block-gender" style="width:40% !important;"> <input type="radio" name="rbRSSC" id="IsAffiliatedByRSSCNo" value="No" ng-model="SocietyRegistration.IsAffiliatedByRSSC" ng-click="ShowRegDateAndNoForRSSCAffiliation()">{{translation.No}}</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div ng-show="ShowRegDateAndNoForRSSCAffiliationYes">
+                                            <div class="col-lg-12 form-group">
+                                                <div class="col-lg-2">{{ translation.AffiliationNumber}} <span class="error">*</span></div>
+                                                <div class="col-lg-4">
+                                                    <input type="text" name=AffiliationNumber class="form-control" ng-model="SocietyRegistration.RSSCRegNo" placeholder="{{translation.AffiliationNumber}}" autocomplete="off" onKeyPress="return ValidateAlphaNumericAndSlash(event);">
+                                                </div>
+                                                <div class="col-lg-2">{{ translation.AffiliationDate}}<span class="error">*</span></div>
+                                                <div class="col-lg-4">
+                                                    <input type="text" name="AffiliationDate" id="txtDateRSSC" class="form-control devcalender" disabled="disabled" ng-model="SocietyRegistration.RSSCAffiliatedDate" placeholder="{{ translation.AffiliationDate}}" autocomplete="off">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    @*District Council*@
+                                    <div ng-show="AffiliationByDLSC">
+                                        <div class="col-lg-12 form-group">
+                                            <div>
+                                                <div class="col-lg-2">{{ translation.AffiliationByDLSC}} <span class="error">*</span></div>
+                                                <div class="col-lg-4">
+                                                    <label class="help-block-gender" style="width:40% !important;"><input type="radio" name="rbDLSC" id="IsAffiliatedByDLSCYes" value="Yes" ng-model="SocietyRegistration.IsAffiliatedByDLSC" ng-click="ShowRegDateAndNoForDLSCffiliation()">{{translation.Yes}} </label>
+                                                    <label class="help-block-gender" style="width:40% !important;"> <input type="radio" name="rbDLSC" id="IsAffiliatedByDLSCNo" value="No" ng-model="SocietyRegistration.IsAffiliatedByDLSC" ng-click="ShowRegDateAndNoForDLSCffiliation()">{{translation.No}}</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div ng-show="AffiliationByDLSCYes">
+                                            <div class="col-lg-12 form-group">
+                                                <div class="col-lg-2">{{ translation.AffiliationNumber}} <span class="error">*</span></div>
+                                                <div class="col-lg-4">
+                                                    <input type="text" name=AffiliationNumber class="form-control" ng-model="SocietyRegistration.DLSCRegNo" placeholder="{{translation.AffiliationNumber}}" autocomplete="off" onKeyPress="return ValidateAlphaNumericAndSlash(event);">
+                                                </div>
+                                                <div class="col-lg-2">{{ translation.AffiliationDate}}<span class="error">*</span></div>
+                                                <div class="col-lg-4">
+                                                    <input type="text" name="AffiliationDate" id="txtDateDLSCDistrict" class="form-control devcalender clsDate" disabled="disabled" ng-model="SocietyRegistration.DLSCAffiliatedDate" placeholder="{{ translation.AffiliationDate}}" autocomplete="off">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    @*State Council*@
+                                    <div ng-show="AffiliationBySLSC">
+                                        <div class="col-lg-12 form-group">
+                                            <div>
+                                                <div class="col-lg-2">{{ translation.AffiliationBySLSC}} <span class="error">*</span></div>
+                                                <div class="col-lg-4">
+                                                    <label class="help-block-gender" style="width:40% !important;"><input type="radio" name="rbDLSC" id="IsAffiliatedBySLSCYes" value="Yes" ng-model="SocietyRegistration.IsAffiliatedBySLSC" ng-click="ShowRegDateAndNoForSLSCffiliation()">{{translation.Yes}} </label>
+                                                    <label class="help-block-gender" style="width:40% !important;"> <input type="radio" name="rbDLSC" id="IsAffiliatedBySLSCNo" value="No" ng-model="SocietyRegistration.IsAffiliatedBySLSC" ng-click="ShowRegDateAndNoForSLSCffiliation()">{{translation.No}}</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div ng-show="AffiliationBySLSCYes">
+                                            <div class="col-lg-12 form-group">
+                                                <div class="col-lg-2">{{ translation.AffiliationNumber}} <span class="error">*</span></div>
+                                                <div class="col-lg-4">
+                                                    <input type="text" name=AffiliationNumber class="form-control" ng-model="SocietyRegistration.DLSCRegNo" placeholder="{{translation.AffiliationNumber}}" autocomplete="off" onKeyPress="return ValidateAlphaNumericAndSlash(event);">
+                                                </div>
+                                                <div class="col-lg-2">{{ translation.AffiliationDate}}<span class="error">*</span></div>
+                                                <div class="col-lg-4">
+                                                    <input type="text" name="AffiliationDate" id="txtDateSLSCState" class="form-control devcalender clsDate" disabled="disabled" ng-model="SocietyRegistration.DLSCAffiliatedDate" placeholder="{{ translation.AffiliationDate}}" autocomplete="off">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    @*Olympic Council*@
+                                    <div ng-show="IsOlympicCouncilApproved">
+                                        <div class="col-lg-12 form-group">
+                                            <div>
+                                                <div class="col-lg-2">{{OlympicCouncilType}}<span class="error">*</span></div>
+                                                <div class="col-lg-4">
+                                                    <label class="help-block-gender" style="width:40% !important;"><input type="radio" name="rbSOC" id="IsAffiliatedBySOCYes" value="Yes" ng-model="SocietyRegistration.IsAffiliatedBySOC" ng-click="ShowRegDateAndNoForSOCAffiliation()">{{translation.Yes}} </label>
+                                                    <label class="help-block-gender" style="width:40% !important;"> <input type="radio" name="rbSOC" id="IsAffiliatedBySOCNo" value="No" ng-model="SocietyRegistration.IsAffiliatedBySOC" ng-click="ShowRegDateAndNoForSOCAffiliation()">{{translation.No}}</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div ng-show="ShowRegDateAndNoForAffiliationBySOCYes">
+                                            <div class="col-lg-12 form-group">
+                                                <div class="col-lg-2">{{ translation.AffiliationNumber}} <span class="error">*</span></div>
+                                                <div class="col-lg-4">
+                                                    <input type="text" name=AffiliationNumber class="form-control" ng-model="SocietyRegistration.SOCRegNo" placeholder="{{translation.AffiliationNumber}}" autocomplete="off" onKeyPress="return ValidateAlphaNumericAndSlash(event);">
+                                                </div>
+                                                <div class="col-lg-2">{{ translation.AffiliationDate}}<span class="error">*</span></div>
+                                                <div class="col-lg-4">
+                                                    <input type="text" name="AffiliationDate" id="txtDateSOC" class="form-control devcalender" disabled="disabled" ng-model="SocietyRegistration.SOCAffiliatedDate" placeholder="{{ translation.AffiliationDate}}" autocomplete="off">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    @*State Sport Council*@
+                                    <div ng-show="AffiliationBySLSA">
+                                        <div class="col-lg-12 form-group">
+                                            <div>
+                                                <div class="col-lg-2">{{ translation.AffiliationBySLSA}}<span class="error">*</span></div>
+                                                <div class="col-lg-4">
+                                                    <label class="help-block-gender" style="width:40% !important;"><input type="radio" name="rbRSSC" id="IsAffiliationBySLSAYes" value="Yes" ng-model="SocietyRegistration.IsAffiliationBySLSA" ng-click="ShowRegDateAndNoForSLSAffiliation()">{{translation.Yes}} </label>
+                                                    <label class="help-block-gender" style="width:40% !important;"> <input type="radio" name="rbRSSC" id="IsAffiliationBySLSANo" value="No" ng-model="SocietyRegistration.IsAffiliationBySLSA" ng-click="ShowRegDateAndNoForSLSAffiliation()">{{translation.No}}</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div ng-show="ShowRegDateAndNoForSLSAAffiliationYes">
+                                            <div class="col-lg-12 form-group">
+                                                <div class="col-lg-2">{{ translation.AffiliationNumber}} <span class="error">*</span></div>
+                                                <div class="col-lg-4">
+                                                    <input type="text" name=AffiliationNumber class="form-control" ng-model="SocietyRegistration.SLSARegNo" placeholder="{{translation.AffiliationNumber}}" autocomplete="off" onKeyPress="return ValidateAlphaNumericAndSlash(event);">
+                                                </div>
+                                                <div class="col-lg-2">{{ translation.AffiliationDate}}<span class="error">*</span></div>
+                                                <div class="col-lg-4">
+                                                    <input type="text" name="AffiliationDate" id="txtDateSLSA" class="form-control devcalender" disabled="disabled" ng-model="SocietyRegistration.SLSAAffiliatedDate" placeholder="{{ translation.AffiliationDate}}" autocomplete="off">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12" ng-show="Act1958" ng-if="false">
+                                        <div class="col-lg-12 form-group">
+                                            <h5 class="heading-hr ng-binding">
+                                                <label class="checkbox-inline">
+                                                    <input style="width: 20px;height: 20px;margin-top:0px;" ng-model="SocietyAmendment.IsAmendment" ng-disabled="allDisable" type="checkbox" value=""><label style="padding-left: 5px;">Amendment in society </label>
+                                                </label>
+                                            </h5>
+                                        </div>
+                                        <div class="col-lg-12 table-responsive" ng-show="SocietyAmendment.IsAmendment" ng-if="false">
+                                            <div class="col-lg-3 form-group">
+                                                <label class="checkbox-inline">
+                                                    <input style="        width: 20px;
+        height: 20px;
+
+        margin-top: 0px;
+" ng-model="SocietyAmendment.ChangeByeLaws" ng-disabled="allDisable" type="checkbox" value=""><label style="font-size: 15px;padding-left: 5px;">Change in ByLaws(Section 12)</label>
+                                                </label>
+                                            </div>
+                                            <div class="col-lg-3 form-group">
+                                                <label class="checkbox-inline">
+                                                    <input style="        width: 20px;
+        height: 20px;
+
+        margin-top: 0px;
+" ng-model="SocietyAmendment.ChangeName" ng-disabled="allDisable" type="checkbox" value=""><label style="font-size: 15px;padding-left: 5px;">Change in Society Name(Section 12A)</label>
+                                                </label>
+                                            </div>
+                                            <div class="col-lg-3 form-group">
+                                                <label class="checkbox-inline">
+                                                    <input style="        width: 20px;
+        height: 20px;
+
+        margin-top: 0px;
+" ng-model="SocietyAmendment.ChaneAddress" ng-disabled="allDisable" type="checkbox" value=""><label style="font-size: 15px;padding-left: 5px;">
+                                                        Change in Society Address(Section 12)
+                                                    </label>
+                                                </label>
+                                            </div>
+                                            <div class="col-lg-3 form-group">
+                                                <label class="checkbox-inline">
+                                                    <input style="width: 20px;height: 20px;" ng-model="SocietyAmendment.ChaneExecutiveMember" ng-disabled="allDisable" type="checkbox" value=""><label style="font-size: 15px;padding-left: 5px;">
+                                                        Change in Executive(Section 4 & 4A)
+                                                    </label>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-12 form-group" ng-show="SocietyAmendment.IsAmendment  && Act1958" ng-if="false">
+
+                                        <h5 class="heading-hr ng-binding">Amendment Documents</h5>
+
+                                        <div class="table-responsive">
+                                            <table class="table devtable" style="">
+                                                <thead>
+                                                    <tr>
+                                                        @*
+                                        <th>
+                                            {{translation.SRNO}}
+                                        </th>*@
+                                                        <th>{{translation.Document}}</th>
+                                                        <th>{{translation.File}}</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="item in AmendmentDocuments">
+                                                        @*
+                                        <td>{{$index+1}}</td>*@
+                                                        <td>{{item.Name}}<span class="error">*</span></td>
+                                                        <td>
+                                                            <div class="col-lg-12" ng-show="!IsFileUpload(item.FileId)">
+                                                                <input type="file" accept="application/pdf" dat-val="nocheck" ng-model="SocietyAmendment.flResoloutionNotice" id="{{item.FileId}}" ng-click="AddFile(1,1)" validfile />
+                                                            </div>
+                                                            <div class="col-lg-12" ng-if="IsFileUpload(item.FileId)">
+                                                                <a href="javascript:void(1);" ng-if="GetFileUploaded(item.FileId)!=''"><i class="fa fa-check-circle-o" style="font-size: 18px;margin-right: 5px;    color: #20cc20;"></i></a>
+                                                                <a href="~/Content/SocietyProfiling/{{SocietyDirectoryFile}}/{{GetFileUploaded(item.FileId)}}" ng-if="GetFileUploaded(item.FileId)!=''" target="_blank"><i class="fa fa-eye-slash" style="font-size: 18px;margin-right: 5px;font-weight: bold"></i>View File</a>
+                                                                <a href="javascript:void(1);" ng-if="GetFileUploaded(item.FileId)==''" ng-click="UploadFile(item.FileId,1,1,item.FileId)"><i class="fa fa-upload" style="font-size: 18px;margin-right: 5px;font-weight: bold"></i>Upload File</a>
+                                                                <a href="javascript:void(1);" ng-if="IsFileUpload(item.FileId)" ng-click="ChangeFile(item.FileId)"><i class="fa fa-undo" style="font-size: 18px;margin-right: 5px;font-weight: bold"></i>Change File</a>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="col-lg-12" ng-show="showrulesfile">
+                                        <div class="col-lg-12 form-group">
+                                            <h5 class="heading-hr ng-binding">  {{translation.AttachmentList}}</h5>
+                                        </div>
+                                        <div class="col-lg-12 table-responsive">
+                                            <table class="table devtable">
+                                                <thead>
+                                                    <tr>
+                                                        <th>
+                                                            {{translation.Certificate}}
+                                                        </th>
+
+                                                        <th>
+                                                            {{translation.File}}
+                                                        </th>
+                                                        <th>
+                                                            {{translation.Sample}}
+                                                        </th>
+                                                        <th>
+                                                            {{translation.Fileview}}
+                                                        </th>
+
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @*Member List*@
+                                                    <tr ng-show="IsProfiling">
+                                                        <td>
+                                                            <div class="col-lg-8">{{ translation.RegistrationCertificate}}<span class="error">*</span></div>
+                                                        </td>
+                                                        <td>
+                                                            <div class="col-lg-8">
+                                                            </div>
+                                                            <div class="col-lg-8">
+                                                                <input type="file" filetype='pdf' name="File" id="flRegistrationCertificateFile" class="form-control" ng-model="SocietyRegistration.RegistrationCertificateFile" onchange="angular.element(this).scope().UploadRegistrationCertificateFile(this.files)">
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            @*<a target="_blank" href="~/Content/SocietyExcel/MEMBERLIST.xlsx"><i class="fa fa-download"></i></a>*@
+                                                        </td>
+                                                        <td>
+                                                            <a style="color:#505050;" target="_blank" href="{{SocietyDetailsData.BasicDetails.RegistrationCertificateFile }}" ng-show="SocietyDetailsData.BasicDetails.RegistrationCertificateFile.length>0"><i class="fa fa-eye"></i></a>
+                                                        </td>
+                                                    </tr>
+                                                    @*
+                                    <tr ng-show="Act2001">
+                                        <td>
+                                            2
+                                        </td>
+                                        <td>
+                                            <div class="col-lg-8">{{ translation.RulesAndRegulation}} 5MB<span class="error">*</span></div>
+                                        </td>
+                                        <td>
+                                            <div class="col-lg-8">
+                                                <input type="file" filetype='pdf' checkmaxsize="2048" name="File" id="flRulesAndRegulation" class="form-control" ng-model="SocietyRegistration.RulesAndRegulationFile" onchange="angular.element(this).scope().UploadRulesAndRegulationFile(this.files)">
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <a href="~/Content/SocietyProfiling/rulesandregulation.pdf"><i class="fa fa-download"></i></a>
+                                        </td>
+                                        <td>
+                                            <a style="color:#505050;" target="_blank" href="{{ SocietyDetailsData.BasicDetails.RulesAndRegulationFile}}"><i class="fa fa-eye"></i></a>
+
+                                        </td>
+                                    </tr>*@
+                                                    <tr ng-show="Act2001">
+                                                        <td>
+                                                            <div class="col-lg-8">{{ translation.Bylaws}} (2 MB)<span class="error">*</span></div>
+                                                        </td>
+                                                        <td>
+                                                            <div class="col-lg-8">
+                                                                <input type="file" name="File" filetype='pdf' checkmaxsize="2048" id="flBylawsFile" class="form-control" ng-disabled={{SocietyRegistration.ActId=='3'}} ng-model="SocietyRegistration.BylawsFile" onchange="angular.element(this).scope().UploadBylawsFile(this.files)">
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            @*<a target="_blank" href="~/Content/SocietyProfiling/rulesandregulation.pdf"><i class="fa fa-download"></i></a>*@
+                                                        </td>
+                                                        <td>
+                                                            <a style="color:#505050;" target="_blank" href="{{ SocietyDetailsData.BasicDetails.BylawsFile}}" ng-show="SocietyDetailsData.BasicDetails.BylawsFile.length>0"><i class="fa fa-eye"></i></a>
+                                                        </td>
+                                                    </tr>
+                                                    <tr ng-show="Act2001">
+                                                        <td>
+                                                            <div class="col-lg-8">{{ translation.UploadMembersList}}<span class="error">*</span></div>
+                                                        </td>
+                                                        <td>
+                                                            <div class="col-lg-8">
+                                                                <input type="file" name="File" filetype='excel' id="flMembersListExcelFile" class="form-control" ng-disabled={{SocietyRegistration.ActId=='3'}} ng-model="SocietyRegistration.MembersListExcelFile" onchange="angular.element(this).scope().UploadMembersListExcelFile(this.files)">
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <a target="_blank" href="~/Content/SocietyExcel/MemberList.xlsx"><i class="fa fa-download"></i></a>
+                                                        </td>
+                                                        <td>
+                                                            <a style="color:#505050;" target="_blank" href="{{ SocietyDetailsData.BasicDetails.MemberListFile}}" ng-show="SocietyDetailsData.BasicDetails.MemberListFile.length>0"><i class="fa fa-eye"></i></a>
+                                                        </td>
+                                                    </tr>
+                                                    <tr ng-show="Act2001">
+                                                        <td>
+                                                            <div class="col-lg-8">{{ translation.CooperativesList}}(.xlsx)<span class="error">*</span></div>
+                                                        </td>
+                                                        <td>
+                                                            <div class="col-lg-8">
+                                                                <input type="file" name="File" filetype='excel' checkmaxsize="5120" id="flCooperativesListFile" class="form-control" ng-disabled={{SocietyRegistration.ActId=='3'}} ng-model="SocietyRegistration.DLSCFileName" onchange="angular.element(this).scope().UploadCooperativesListFile(this.files)">
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <a target="_blank" href="~/Content/SocietyExcel/Unit.xlsx"><i class="fa fa-download"></i></a>
+                                                        </td>
+                                                        <td>
+                                                            <a style="color:#505050;" target="_blank" href="{{ SocietyDetailsData.BasicDetails.DLSCFileName}}" ng-show="SocietyDetailsData.BasicDetails.DLSCFileName.length>0"><i class="fa fa-eye"></i></a>
+                                                        </td>
+                                                    </tr>
+                                                    <tr ng-show="Act2001">
+                                                        <td>
+                                                            <div class="col-lg-8">{{ translation.SocietyWorkPlanEconomicViability}} 1MB<span class="error">*</span></div>
+                                                        </td>
+                                                        <td>
+                                                            <div class="col-lg-8">
+                                                                <input type="file" name="File" filetype='pdf' id="flWorkPlanEconomicViabilityFile" class="form-control" ng-disabled={{SocietyRegistration.ActId=='3'}} ng-model="SocietyRegistration.WorkPlanEconomicViabilityFile" onchange="angular.element(this).scope().UploadWorkPlanEconomicViabilityFile(this.files)">
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            @*<a target="_blank" href="~/Content/SocietyProfiling/rulesandregulation.pdf"><i class="fa fa-download"></i></a>*@
+                                                        </td>
+                                                        <td>
+                                                            <a style="color:#505050;" target="_blank" href="{{ SocietyDetailsData.BasicDetails.WorkPlanEcoViabilityFile}}" ng-show="SocietyDetailsData.BasicDetails.WorkPlanEcoViabilityFile.length>0"><i class="fa fa-eye"></i></a>
+                                                        </td>
+                                                    </tr>
+                                                    <tr ng-show="Act2001">
+                                                        <td>
+                                                            <div class="col-lg-8">{{ translation.GeneralMeetingProcedure}} 1MB<span class="error">*</span></div>
+                                                        </td>
+                                                        <td>
+                                                            <div class="col-lg-8">
+                                                                <input type="file" name="File" filetype='pdf' id="flGeneralMeetingProcedureFile" class="form-control" ng-disabled={{SocietyRegistration.ActId=='3'}} ng-model="SocietyRegistration.GeneralMeetingProcedure" onchange="angular.element(this).scope().UploadGeneralMeetingProcedureFile(this.files)">
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            @*<a target="_blank" href="~/Content/SocietyProfiling/rulesandregulation.pdf"><i class="fa fa-download"></i></a>*@
+                                                        </td>
+                                                        <td>
+                                                            <a style="color:#505050;" target="_blank" href="{{ SocietyDetailsData.BasicDetails.GeneralMeetingProcedure}}" ng-show="SocietyDetailsData.BasicDetails.GeneralMeetingProcedure.length>0"><i class="fa fa-eye"></i></a>
+                                                        </td>
+                                                    </tr>
+                                                    <tr ng-show="Act2001">
+                                                        <td>
+                                                            <div class="col-lg-8">{{ translation.BalanceSheetUpload}}<span class="error">*</span></div>
+                                                        </td>
+                                                        <td>
+                                                            <div class="col-lg-8">
+                                                                <input type="file" name="File" filetype='excel' id="flBalanceSheetUploadExcelFile" class="form-control" ng-disabled={{SocietyRegistration.ActId=='3'}} ng-model="SocietyRegistration.BalanceSheetExcelUpload" onchange="angular.element(this).scope().UploadBalanceSheetExcelFile(this.files)">
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <a target="_blank" href="~/Content/SocietyExcel/UploadBalanceSheet.xlsx"><i class="fa fa-download"></i></a>
+                                                        </td>
+                                                        <td>
+                                                            <a style="color:#505050;" target="_blank" href="{{SocietyDetailsData.BasicDetails.BalanceSheetExcelUpload}}" ng-show="SocietyDetailsData.BasicDetails.BalanceSheetExcelUpload.length>0"><i class="fa fa-eye"></i></a>
+                                                        </td>
+                                                    </tr>
+
+                                                    <tr ng-show="Act1958">
+                                                        <td>
+                                                            <div class="col-lg-6">{{ translation.UploadObjects}}<span class="error">*</span></div>
+                                                        </td>
+                                                        <td>
+                                                            <div class="col-lg-8">
+                                                                <input type="file" filetype='pdf' checkmaxsize="5120" name="file" id="file1" class="form-control" ng-model="SocietyRegistration.ObjectsFile" onchange="angular.element(this).scope().UploadObjectsFile(this.files)">
+                                                            </div>
+
+                                                        </td>
+                                                        <td>
+                                                            <a target="_blank" href="~/Content/SocietyProfiling/Objects.pdf"><i class="fa fa-download"></i></a>
+                                                        </td>
+                                                        <td>
+                                                            <a style="color:#505050;" target="_blank" href="{{ SocietyDetailsData.BasicDetails.ObjectsFile}}" ng-show="SocietyDetailsData.BasicDetails.ObjectsFile.length>0"><i class="fa fa-eye"></i></a>
+                                                        </td>
+                                                    </tr>
+                                                    <tr ng-show="Act1958">
+                                                        <td>
+                                                            <div class="col-lg-8">{{ translation.RulesAndRegulation}} (2 MB)<span class="error">*</span></div>
+                                                        </td>
+                                                        <td>
+                                                            <div class="col-lg-8">
+                                                                <input type="file" filetype='pdf' checkmaxsize="2048" name="File" id="flRulesAndRegulation" class="form-control" ng-model="SocietyRegistration.RulesAndRegulationFile" onchange="angular.element(this).scope().UploadRulesAndRegulationFile(this.files)">
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <a target="_blank" href="~/Content/SocietyProfiling/rulesandregulation.pdf"><i class="fa fa-download"></i></a>
+                                                        </td>
+                                                        <td>
+                                                            <a style="color:#505050;" target="_blank" href="{{ SocietyDetailsData.BasicDetails.RulesAndRegulationFile}}" ng-show="SocietyDetailsData.BasicDetails.RulesAndRegulationFile.length>0"><i class="fa fa-eye"></i></a>
+                                                        </td>
+                                                    </tr>
+                                                    <tr ng-show="Act1958">
+                                                        <td>
+                                                            <div class="col-lg-8">{{ translation.UploadMembersList}} (1 MB)<span class="error">*</span></div>
+                                                        </td>
+                                                        <td>
+                                                            <div class="col-lg-8">
+                                                                <input type="file" name="File" filetype='excel' id="flMembersListExcelFile" class="form-control" ng-disabled={{SocietyRegistration.ActId=='3'}} ng-model="SocietyRegistration.MembersListExcelFile" onchange="angular.element(this).scope().UploadMembersListExcelFile(this.files)">
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <a target="_blank" href="~/Content/SocietyExcel/MemberList.xlsx"><i class="fa fa-download"></i></a>
+                                                        </td>
+                                                        <td>
+                                                            <a style="color:#505050;" target="_blank" href="{{ SocietyDetailsData.BasicDetails.MemberListFile}}" ng-show="SocietyDetailsData.BasicDetails.MemberListFile.length>0"><i class="fa fa-eye"></i></a>
+                                                        </td>
+                                                    </tr>
+
+                                                    <tr ng-show="Act1958 && SocietyRegistration.IsNewRegistration=='false'">
+                                                        <td>
+                                                            <div class="col-lg-8">{{translation.UploadOldExecutiveCommittee}} (1 MB)<span class="error">*</span></div>
+                                                        </td>
+                                                        <td>
+                                                            <div class="col-lg-8">
+                                                                <input type="file" name="File" accept="application/pdf,image/*" id="flOldExecutiveCommittee" class="form-control" ng-disabled={{SocietyRegistration.ActId=='3'}} ng-model="SocietyRegistration.OldExecutiveCommittee" onchange="angular.element(this).scope().UploadOldExecutiveCommitteeFile(this.files)">
+                                                            </div>
+                                                        </td>
+                                                        <td></td>
+                                                        <td>
+                                                            <a style="color:#505050;" target="_blank" href="{{ SocietyDetailsData.BasicDetails.OldExecutiveCommittee}}" ng-show="SocietyDetailsData.BasicDetails.OldExecutiveCommittee.length>0"><i class="fa fa-eye"></i></a>
+                                                        </td>
+                                                    </tr>
+
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12" ng-show="SportsAttechments">
+                                        <div class="col-lg-12 form-group">
+
+                                            <h5 class="heading-hr ng-binding">  {{translation.SportsCouncilCertificate}}</h5>
+                                        </div>
+                                        <div class="col-lg-12 table-responsive">
+                                            <table class="table devtable">
+                                                <thead>
+                                                    <tr>
+                                                        <th>
+                                                            {{translation.SportsCouncilCertificate}}
+                                                        </th>
+
+                                                        <th>
+                                                            {{translation.File}}
+                                                        </th>
+                                                        <th>
+                                                            {{translation.Sample}}
+                                                        </th>
+                                                        <th>
+                                                            {{translation.Fileview}}
+                                                        </th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @*Regi certi*@
+                                                    <tr ng-show="IsProfiling">
+                                                        <td>
+                                                            <div class="col-lg-8">{{ translation.RegistrationCertificate}}<span class="error">*</span></div>
+                                                        </td>
+                                                        <td>
+                                                            <div class="col-lg-8">
+                                                            </div>
+                                                            <div class="col-lg-8">
+                                                                <input type="file" filetype='pdf' name="File" id="flRegistrationCertificateFile" class="form-control" ng-model="SocietyRegistration.RegistrationCertificateFile" onchange="angular.element(this).scope().UploadRegistrationCertificateFile(this.files)">
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            @*<a target="_blank" href="~/Content/SocietyExcel/MEMBERLIST.xlsx"><i class="fa fa-download"></i></a>*@
+                                                        </td>
+                                                        <td>
+                                                            <a style="color:#505050;" target="_blank" href="{{SocietyDetailsData.BasicDetails.RegistrationCertificateFile }}" ng-show="SocietyDetailsData.BasicDetails.RegistrationCertificateFile.length>0"><i class="fa fa-eye"></i></a>
+                                                        </td>
+                                                    </tr>
+                                                    @*Member List*@
+                                                    <tr>
+                                                        <td>
+                                                            <div class="col-lg-8">{{ translation.UploadMembersList}}<span class="error">*</span></div>
+                                                        </td>
+                                                        <td>
+                                                            <div class="col-lg-8">
+                                                                <input type="file" filetype='excel' name="File" id="flMemberListFile" class="form-control" ng-model="SocietyRegistration.MemberListFile" onchange="angular.element(this).scope().UploadMembersListExcelFile(this.files)">
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <a target="_blank" href="~/Content/SocietyExcel/SportsMemberList.xlsx"><i class="fa fa-download"></i></a>
+                                                        </td>
+                                                        <td>
+                                                            <a style="color:#505050;" target="_blank" href="{{ SocietyDetailsData.BasicDetails.MemberListFile}}" ng-show="SocietyDetailsData.BasicDetails.MemberListFile.length>0"><i class="fa fa-eye"></i></a>
+                                                        </td>
+                                                    </tr>
+                                                    @*Bylaws*@
+                                                    <tr>
+                                                        <td>
+                                                            <div class="col-lg-8">{{ translation.Bylaws}}(2 MB)<span class="error">*</span></div>
+                                                        </td>
+                                                        <td>
+                                                            <div class="col-lg-8">
+                                                                <input type="file" name="File" filetype='pdf' checkmaxsize="2048" id="flBylawsFile" class="form-control" ng-disabled={{SocietyRegistration.ActId=='3'}} ng-model="SocietyRegistration.BylawsFile" onchange="angular.element(this).scope().UploadBylawsFile(this.files)">
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <a target="_blank" href="~/Content/SocietyProfiling/rulesandregulation.pdf"><i class="fa fa-download"></i></a>
+                                                        </td>
+                                                        <td>
+                                                            <a style="color:#505050;" target="_blank" href="{{ SocietyDetailsData.BasicDetails.BylawsFile}}" ng-show="SocietyDetailsData.BasicDetails.BylawsFile.length>0"><i class="fa fa-eye"></i></a>
+                                                        </td>
+                                                    </tr>
+                                                    @*State Level Sports Council Affiliation*@
+                                                    <tr ng-show="LevelState">
+                                                        <td>
+                                                            <div class="col-lg-8">{{ translation.SLSCAffiliationCertificates}}<span class="error">*</span></div>
+                                                        </td>
+                                                        <td>
+                                                            <div class="col-lg-8">
+                                                                <input type="file" filetype='pdf' name="File" id="flRSSCFileName" class="form-control" ng-model="SocietyRegistration.RSSCFileName" onchange="angular.element(this).scope().UploadRSSCFileName(this.files)">
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <a target="_blank" href="~/Content/SocietyProfiling/rulesandregulation.pdf"><i class="fa fa-download"></i></a>
+                                                        </td>
+                                                        <td>
+                                                            <a style="color:#505050;" target="_blank" href="{{ SocietyDetailsData.BasicDetails.RSSCFileName}}" ng-show="SocietyDetailsData.BasicDetails.RSSCFileName.length>0"><i class="fa fa-eye"></i></a>
+                                                        </td>
+                                                    </tr>
+                                                    @*District Level Sports Council*@
+                                                    <tr ng-show="FileDLSC">
+                                                        <td>
+                                                            <div class="col-lg-8">{{translation.DLSCAffiliationCertificates}}<span class="error">*</span></div>
+                                                        </td>
+                                                        <td>
+                                                            <div class="col-lg-8">
+                                                                <input type="file" filetype='pdf' name="File" id="flDLSCFileName" class="form-control" ng-model="SocietyRegistration.DLSCFileName" onchange="angular.element(this).scope().UploadDLSCFileName(this.files)">
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <a target="_blank" href="~/Content/SocietyProfiling/rulesandregulation.pdf"><i class="fa fa-download"></i></a>
+                                                        </td>
+                                                        <td>
+                                                            <a style="color:#505050;" target="_blank" href="{{ SocietyDetailsData.BasicDetails.DLSCFileName}}" ng-show="SocietyDetailsData.BasicDetails.DLSCFileName.length>0"><i class="fa fa-eye"></i></a>
+                                                        </td>
+                                                    </tr>
+                                                    @*State/District Olympic Council*@
+                                                    <tr ng-show="IsAffiliatedBySOC">
+                                                        <td>
+                                                            <div class="col-lg-8">{{SocietyRegistration.IsStatLevel==='Yes' ? translation.SOCAffiliationCertificate:translation.DOCAffiliationCertificates}}<span class="error">*</span></div>
+                                                        </td>
+                                                        <td>
+                                                            <div class="col-lg-8">
+                                                                <input type="file" filetype='pdf' name="File" id="flSOCFileName" class="form-control" ng-model="SocietyRegistration.SOCFileName" onchange="angular.element(this).scope().UploadSOCFileName(this.files)">
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <a target="_blank" href="~/Content/SocietyProfiling/rulesandregulation.pdf"><i class="fa fa-download"></i></a>
+                                                        </td>
+                                                        <td>
+                                                            <a style="color:#505050;" target="_blank" href="{{ SocietyDetailsData.BasicDetails.SOCFileName}}" ng-show="SocietyDetailsData.BasicDetails.SOCFileName.length>0"><i class="fa fa-eye"></i></a>
+                                                        </td>
+                                                    </tr>
+                                                    @*State Level Sports Association*@
+                                                    <tr ng-show="FileSLSA">
+                                                        <td>
+                                                            <div class="col-lg-8">{{ translation.SLSAffiliationCertificates}}<span class="error">*</span></div>
+                                                        </td>
+                                                        <td>
+                                                            <div class="col-lg-8">
+                                                                <input type="file" filetype='pdf' name="File" id="flSLSAFileName" class="form-control" ng-model="SocietyRegistration.SLSAFileName" onchange="angular.element(this).scope().UploadSLSAFileName(this.files)">
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <a target="_blank" href="~/Content/SocietyProfiling/rulesandregulation.pdf"><i class="fa fa-download"></i></a>
+                                                        </td>
+                                                        <td>
+                                                            <a style="color:#505050;" target="_blank" href="{{ SocietyDetailsData.BasicDetails.SLSAFileName}}" ng-show="SocietyDetailsData.BasicDetails.SLSAFileName.length>0"><i class="fa fa-eye"></i></a>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                             
+                                <div class="form-group col-md-12" ng-show="ShowSubmitBtn">
+                                    <div class="dev-align-btn">
+                                        <button ng-if="IsPermanentSave==0" type="submit" class="btn btn-primary SaveSocietyInfo" ng-click="SaveSocietyProfiling(0)">{{ translation.PayPartialSubmit}}</button>
+                                        <button ng-if="IsPermanentSave==0" type="submit" class="btn btn-success SaveSocietyInfo" ng-click="SaveSocietyProfiling(1)">{{ translation.Submit}}</button>
+                                        <button type="button" class="btn btn-primary dev-btn" ng-click="ClearSocietyDetailsForm()">{{ translation.Clear}}</button>
+                                        <a class="btn btn-primary dev-btn" style="text-transform:capitalize;" ng-click="BackClipk()">{{ translation.Back}}</a>
+
+                                    </div>
+                                </div>
+
+                            </div>
+                        </form>
+                    </div>
+                    <div id="dvProfiling" ng-show="IsShowAmendment">
+
+                    </div>
+                    <div ng-show="divAADHARVerificationStep_1">
+                        <div class="col-lg-12 form-group">
+                            <div class="col-lg-2"><label>{{translation.AADHARNo}}</label><span class="error">*</span></div>
+                            <div class="col-lg-4">
+                                <input type="text" class="form-control" placeholder="{{translation.AADHARNo}}" ng-model="MemberRegistration.AADHARNo" disabled="disabled" autocomplete="off" required onkeypress='return event.charCode >= 48 && event.charCode <= 57' min="1" maxlength="12">
+                            </div>
+
+                            <div class="col-lg-4">
+                                <button type="button" class="btn btn-success ng-binding" ng-click="VerifyAADHARNo_Step_1_2()">&nbsp;&nbsp;{{translation.SendOTP}}</button>
+                            </div>
+                            <div class="col-lg-2">&nbsp;</div>
+                        </div>
+                    </div>
+
+                    <div ng-show="divAADHARVerificationStep_2">
+                        <div class="col-lg-12 form-group">
+                            <div class="col-lg-2"><label>{{translation.EnterOTP}}</label><span class="error">*</span></div>
+                            <div class="col-lg-4">
+                                <input type="text" class="form-control" placeholder="{{translation.EnterOTP}}" ng-model="MemberRegistration.EnterOTP" autocomplete="off" required onkeypress='return event.charCode >= 48 && event.charCode <= 57' min="6" maxlength="6">
+                            </div>
+
+                            <div class="col-lg-4">
+                                <button type="button" class="btn btn-success ng-binding" ng-click="VerifyAADHARNo_Step_2_2()">&nbsp;&nbsp;{{translation.OtpVeryfication}}</button>
+                            </div>
+                            <div class="col-lg-2"><button type="button" class="btn btn-success ng-binding" ng-click="ResendOtp()" ng-disabled="isDisabled">&nbsp;&nbsp;{{translation.ReSendOTP}}</button></div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" ng-show="Showgride2">
+                        <div class="citizen-dash-head">
+                            <div class="col-lg-12 form-group">
+                                <h4 class="heading-hr ng-binding">  <label>{{translation.ApplicantDetails}}</label></h4>
+                            </div>
+
+                            <div class="col-lg-12 form-group">
+                                <div class="col-lg-2"><label>{{translation.Name}}</label></div>
+                                <div class="col-lg-4">
+                                    {{MemberRegistration.Name}}
+                                </div>
+                                <div class="col-lg-2"><label>{{translation.FatherHusbandName}}</label></div>
+                                <div class="col-lg-4">
+                                    {{MemberRegistration.FatherName}}
+                                </div>
+                            </div>
+
+                            <div class="col-lg-12 form-group">
+                                <div class="col-lg-2"><label>{{translation.AADHARNo}}</label></div>
+                                <div class="col-lg-4">
+                                    {{MemberRegistration.AADHARNo}}
+                                </div>
+                                <div class="col-lg-2"><label>{{translation.DOB}}</label></div>
+                                <div class="col-lg-4">
+                                    {{MemberRegistration.DOB}}
+                                </div>
+                            </div>
+
+                            <div class="col-lg-12 form-group">
+                                <div class="col-lg-2"><label>{{translation.Gender}}</label></div>
+                                <div class="col-lg-4">
+                                    {{MemberRegistration.Gender ==='M' ? translation.GenderMale : translation.GenderFeMale}}
+                                </div>
+                                <div class="col-lg-2"><label>{{translation.Photo}}</label></div>
+                                <div class="col-lg-4">
+                                    <img src="{{MemberRegistration.Photo}}" alt="Userphoto" width="100" height="100" />
+                                </div>
+                            </div>
+
+                            <div class="col-lg-12 form-group">
+                                <h4 class="heading-hr ng-binding"><label>  {{translation.OtherDetails}}</label></h4>
+                            </div>
+
+                            @*<div class="col-lg-12 form-group">
+                                    <div class="col-lg-2"><label>{{translation.Act}}</label></div>
+                                    <div class="col-lg-4">
+                                        <select id="ddlCategory" ng-model="MemberRegistration.ActId" class="form-control" ng-init="MemberRegistration.ActId='0'" ng-disabled="IsActdisabled">
+                                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                                            <option ng-repeat="item in Acts | orderBy:'ActNameHi'" value="{{item.ActId}}">
+                                                {{_language =='en-us' ?  item.ActNameEn : item.ActNameHi}}
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>*@
+                            <div class="col-lg-12 form-group">
+                                <div class="col-lg-2"><label>{{translation.MobileNo}}</label></div>
+                                <div class="col-lg-4">
+                                    <input type="text" class="form-control" placeholder="{{translation.MobileNo}}" ng-model="MemberRegistration.MobileNo" autocomplete="off" required onkeypress='return event.charCode >= 48 && event.charCode <= 57' min="10" maxlength="10">
+                                </div>
+                                <div class="col-lg-2"><label>{{translation.Category}}</label></div>
+                                <div class="col-lg-4">
+                                    <select id="ddlCategory" ng-model="MemberRegistration.CategoryId" class="form-control" ng-init="MemberRegistration.CategoryId='0'">
+                                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                                        <option ng-repeat="item in CategoryList | orderBy:'CODEID'" value="{{item.CODEID}}">
+                                            {{_language =='en-us' ?  item.CODENAME : item.CODENAME_MANGAL}}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-lg-12 form-group">
+                                <div class="col-lg-2"><label>{{translation.PostHeading}}</label></div>
+                                <div class="col-lg-4">
+                                    <input type="text" class="form-control" placeholder="{{translation.PostHeading}}" ng-model="MemberRegistration.PostName" autocomplete="off" onKeyPress="return ValidateAlpha(event);" maxlength="40">
+                                </div>
+                                <div class="col-lg-2"><label>{{translation.Occupation}}</label></div>
+                                <div class="col-lg-4">
+                                    <input type="text" class="form-control" placeholder="{{translation.Occupation}}" ng-model="MemberRegistration.Occupation" autocomplete="off" onKeyPress="return ValidateAlpha(event);" maxlength="40">
+                                </div>
+                            </div>
+
+                            <div class="col-lg-12 form-group">
+                                <center>
+                                    <button type="button" class="btn btn-primary dev-btn" ng-click="InsertSocietyMappingRequest()"> <i class="fa fa-edit"></i> {{translation.Submit}}</button>
+                                </center>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" ng-show="Showgride3">
+                        <div class="citizen-dash-head">
+                            <div class="col-lg-12 form-group heading-hr ng-binding">
+                                <input type="hidden" id="hdnSSOID" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).SSOID)" />
+
+                                <h3>मै शपथ पूर्वक यहाँ घोषणा करता हु</h3><br /><br />
+
+                                <input class="form-check-input" type="checkbox" name="SelfAcceptence" id="ChkAcceptence" value="" ng-model="AAAcceptence">
+                                यह कि में समिति ({{SocietyNameForDecalre}}) का निर्वाचित अध्यक्ष हु तथा मेरे द्वारा इस समिति को राजसहाकर पोर्टल पर मैप किया जा रहा है। <br /><br />
+                                मै यहाँ सत्यापित करता हु की उक्त समिति की समस्त जानकारी मेरे पास उपलब्ध है।<br /><br />
+                                मै यहाँ शपथ पूर्वक कहता हु की मेरे द्वारा कोई भी गलत जानकारी अथवा मिथ्य तथ्य इस पोर्टल पर दर्ज नहीं करवाए गए है।<br /><br />
+                                यदि कोई जानकारी गलत पाई जाती है तो सहकारिता विभाग मेरे विरुद्ध आवश्यक कानूनी कर्यवाही आईटी एक्ट एवं अन्य सपठित अधिनियमों के अंतर्गत कर्यवाही करने में
+                                स्वतंत्र होगा।<br /><br />
+                            </div>
+                            <div class="col-lg-12 form-group">
+                                <center>
+                                    <button ng-disabled="!AAAcceptence" type="button" class="btn btn-primary dev-btn" ng-click="SubmitCitizonSocietyForMap()"> <i class="fa fa-edit"></i> {{translation.Submit}}</button>
+                                </center>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+        <div class="col-md-12" ng-show="Showgride">
+            <div class="citizen-dash-head">
+                <div class="table-dropdown">
+                    <div class="col-lg-12 form-group">
+
+                        <div id="DivOTPStatus" class="alert alert-success" ng-show="OTPStatus">
+                            <strong>{{OTPStatusMsg}}</strong>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-12 form-group" ng-show="getotp">
+                        <div class="col-lg-2">
+                            <label style="color:black">{{translation.EnterOTP}} :</label>
+                        </div>
+                        <div class="col-lg-2">
+                            <input class="form-control" required name="login[password]" type="password" ng-model="SocietyRegistration.EnterOTP" placeholder="{{translation.EnterOTP}}" autocomplete="off" onkeypress="return event.charCode >= 48 && event.charCode <= 57">
+                            <div class="hide-show"><span class="fa fa-eye-slash"></span></div>
+                        </div>
+                        <div class="col-lg-2">
+                            <button type="submit" class="btn btn-primary dev-btn" ng-show="showResendBtn" ng-click="funChekvalidOTP()">{{ translation.ReSendOTP}}</button>
+                        </div>
+                        <div class="col-lg-6">
+                        </div>
+                    </div>
+
+                    <div ng-hide="DivMsg">
+                        {{translation.MappingProcessTitle}}
+                    </div>
+                    <br /><br />
+                    <div class="col-lg-12">
+                        <div class="col-lg-6" ng-show="IsOTPSended">
+                            <button type="submit" style="float:right" class="btn btn-primary dev-btn" ng-click="MatchOtpApproved();">{{ translation.Approvedmap}}</button>
+                        </div>
+                        <div class="col-lg-6">
+                            <button type="submit" id="abc" style="float:left" class="btn btn-primary dev-btn" ng-click="GenrateOTP();">{{textchange=='true' ? 'Send OTP':'Resend OTP'}}</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        @*<div class="form-group col-md-12">
+            <div class="dev-align-btn">
+
+                <a class="btn btn-primary dev-btn" style="text-transform:capitalize;" href="../Citizen/Index"> Back</a>
+            </div>
+        </div>*@
+    </div>
+    @Html.Partial("_AadhaarValidation")
+    <div class="se-pre-con"></div>
+    <div id="stop" class="scrollTop">
+        <span><a href=""><i class="fa fa-arrow-up">Top</i></a></span>
+    </div>
+</div>
+<style>
+    .smpl-step {
+        margin-top: 40px;
+    }
+
+    .smpl-step {
+        border-bottom: solid 1px #e0e0e0;
+        padding: 0 0 10px 0;
+    }
+
+        .smpl-step > .smpl-step-step {
+            padding: 0;
+            position: relative;
+        }
+
+            .smpl-step > .smpl-step-step .smpl-step-num {
+                font-size: 17px;
+                margin-top: -20px;
+                margin-left: 47px;
+            }
+
+            .smpl-step > .smpl-step-step .smpl-step-info {
+                font-size: 14px;
+                padding-top: 27px;
+            }
+
+            .smpl-step > .smpl-step-step > .smpl-step-icon {
+                position: absolute;
+                width: 70px;
+                height: 70px;
+                display: block;
+                background: #5CB85C;
+                top: 45px;
+                left: 50%;
+                margin-top: -35px;
+                margin-left: -15px;
+                border-radius: 50%;
+            }
+
+            .smpl-step > .smpl-step-step > .progress {
+                position: relative;
+                border-radius: 0px;
+                height: 8px;
+                box-shadow: none;
+                margin-top: 37px;
+            }
+
+                .smpl-step > .smpl-step-step > .progress > .progress-bar {
+                    width: 0px;
+                    box-shadow: none;
+                    background: #428BCA;
+                }
+
+            .smpl-step > .smpl-step-step.complete > .progress > .progress-bar {
+                width: 100%;
+            }
+
+            .smpl-step > .smpl-step-step.active > .progress > .progress-bar {
+                width: 50%;
+            }
+
+            .smpl-step > .smpl-step-step:first-child.active > .progress > .progress-bar {
+                width: 0%;
+            }
+
+            .smpl-step > .smpl-step-step:last-child.active > .progress > .progress-bar {
+                width: 100%;
+            }
+
+            .smpl-step > .smpl-step-step.disabled > .smpl-step-icon {
+                background-color: #f5f5f5;
+            }
+
+                .smpl-step > .smpl-step-step.disabled > .smpl-step-icon:after {
+                    opacity: 0;
+                }
+
+            .smpl-step > .smpl-step-step:first-child > .progress {
+                left: 50%;
+                width: 50%;
+            }
+
+            .smpl-step > .smpl-step-step:last-child > .progress {
+                width: 50%;
+            }
+
+            .smpl-step > .smpl-step-step.disabled a.smpl-step-icon {
+                pointer-events: none;
+            }
+</style>

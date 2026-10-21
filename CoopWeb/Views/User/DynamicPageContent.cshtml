@@ -1,0 +1,167 @@
+﻿<script src="~/Scripts/AngularFramework/DynamicPageContent.js"></script>
+@*<script src="~/ckeditor/ckeditor.js"></script>*@
+
+<script src="http://code.jquery.com/jquery-migrate-1.2.1.js"></script>
+<link href="~/Cleditor/Content/cleditor/jquery.cleditor.css" rel="stylesheet" />
+<script src="~/Cleditor/Scripts/jquery.cleditor.js"></script>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+       
+        var options = {
+            width: 992,
+            height: 200
+        };
+
+        var editor = $("#editor").cleditor(options)[0];
+        var editor = $("#editor1").cleditor(options)[0];
+    });
+
+</script>
+
+
+<style>
+    .has-error {
+        border: #F00;
+    }
+</style>
+<div ng-app="DynamicPageContentAction" ng-controller="DynamicPageContentAction">
+
+
+    <div class="col-md-12">
+        <h3 class="citizen-dash-head">{{ translation.DynamicPageContentAction }}</h3>
+        <hr style="margin: 0;">
+    </div>
+
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="devpage-breadcrumb">
+            <ul class="page-breadcrumb">
+                <li class="dev-page-br">
+                    <i class="fa fa-home"> </i>
+                    <a href="#"> {{ translation.Home }}  </a>
+                    <i class="fa fa-angle-right"> </i>
+                </li>
+                <li style="float: left">
+                    <span style="margin: 0 5px;"> {{ translation.New }}  </span>
+                    <i class="fa fa-angle-right"> </i>
+                    <span style="margin: 0 5px;"> {{ translation.DynamicPageContentAction }}  </span>
+                </li>
+
+            </ul>
+        </div>
+    </div>
+    <div class="citizen-dash-head" ng-show="DivAddContent">
+
+        <form>
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="margin-top: -20px;">
+                <h3 class="citizen-dash-head">{{ translation.DynamicPageContentAction }}</h3>
+            </div>
+            <div class="col-lg-12 form-group">
+                <div class="col-lg-2">{{ translation.Pages }}</div>
+                <div class="col-lg-10">                   
+                    <select ng-model="PageContent.PageId" class="form-control" id="DDLPageId" ng-init="PageContent.PageId='0'" >
+                        <option ng-repeat="item in PageListData" value="{{item.PageId}}">
+                            {{ _language =='en-us' ? item.PageName : item.PageName }}
+                        </option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-lg-12 form-group">
+                <div class="col-lg-2">{{ translation.PagesContentEn }}</div>
+                <div class="col-lg-10">
+                    <textarea id="editor" rows="6" cols="131" style="margin: 0px; width: 992px; height: 116px;" ng-model="PageContent.PageDescEn"></textarea>
+
+                </div>
+                @*<script>
+                    CKEDITOR.replace("txtPageContent");
+
+                    </script>*@
+            </div>
+            <div class="col-lg-12 form-group">
+                <div class="col-lg-2">{{translation.PagesContentHi}}</div>
+                <div class="col-lg-10">
+                    <textarea id="editor1" rows="6" cols="131" style="margin: 0px; width: 992px; height: 116px;" ng-model="PageContent.PageDescHi"></textarea>
+                </div>
+                @*<script>
+                    CKEDITOR.replace("txtPageContentHindi");
+                    </script>*@
+
+            </div>
+            <div class="form-group">
+                <div class="dev-menu-btn">
+                    <button type="submit" class="btn btn-primary" ng-click="SaveDynamicPage()" style="margin-right:15px;">{{translation.Submit}}</button>
+                    <button type="submit" class="btn btn-primary" ng-click="ClearDynamicPage()">{{translation.Clear}}</button>
+                    <a class="btn btn-primary dev-btn" style="text-transform:capitalize;" ng-click="BackToPage()"> Back</a>
+                    <input type="hidden" ng-model="PageContent.PageId" />
+                </div>
+            </div>
+        </form>
+    </div>
+
+
+    <div class="col-md-12" ng-show="DivPageContent">
+        <div class="citizen-dash-head">
+            <div class="table-dropdown">
+                <div class="col-md-4">
+                    <label for="search">{{translation.Search}}:</label>
+                    <input ng-model="q" id="search" class="form-control" placeholder={{translation.filttertext}} autocomplete="off">
+                </div>
+                <div class="col-md-4">
+                    <label for="search">{{translation.ItemPerPage}}:</label>
+                    <input type="number" min="1" max="100" class="form-control" ng-model="pageSize">
+                </div>
+            </div>
+            <div class="col-md-12 dev-search-form">
+
+            </div><div class="col-md-12 dev-search-form">
+
+            </div>
+            <div class="col-md-12">
+                <div class="table-responsive citizen-dash-head">
+                    <table class="table devtable">
+                        <thead>
+                            <tr>
+                                <th>
+                                    {{translation.SRNO}}
+                                </th>
+                                <th>
+                                    {{translation.PageName}}
+                                </th>
+                                <th>{{translation.Edit}}</th>
+                                <th>{{translation.Delete}}</th>
+                            </tr>
+                        </thead>
+                        <tbody id="myTable">
+                            <tr dir-paginate="Item in DynamicPageContentData | filter: q | orderBy:colsort:reverseSort | itemsPerPage: pageSize" current-page="currentPage" pagination-id="MenuActionPagination">
+                                <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                                <td>{{ Item.PageName }}</td>
+                                <td>
+                                    <i class="fa fa-edit" ng-click="update(Item)"></i>
+                                </td>
+                                <td>
+                                    <i class="fa fa-trash" ng-click="SetStatus(Item.PageId,2)"></i>
+
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-10">
+            <div class="text-center">
+                <dir-pagination-controls boundary-links="true" pagination-id="MenuActionPagination" on-page-change="pageChangeHandler(newPageNumber)" template-url="/dirPagination.tpl.html"></dir-pagination-controls>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <h5 class="dev-page"> {{translation.Page}}: {{ currentPage }} </h5>
+        </div>
+
+    </div>
+
+    <div id="stop" class="scrollTop">
+        <span><a href=""><i class="fa fa-arrow-up">Top</i></a></span>
+    </div>
+</div>
+

@@ -1,0 +1,388 @@
+﻿<script src="~/Scripts/AngularFramework/Grievance.js?v=4"></script>
+<div class="hk-pg-wrapper" ng-app="GrievanceModule">
+    <div ng-controller="GrievanceCont">
+
+        <input type="hidden" id="HdnRoleName" value="@ViewBag.RoleName" />
+        <!-- Breadcrumb -->
+        <nav class="hk-breadcrumb" aria-label="breadcrumb">
+            <ol class="breadcrumb breadcrumb-light bg-transparent">
+                <li class="breadcrumb-item"><a href="#"><i class="glyphicon glyphicon-th"></i></a></li>
+                <li class="breadcrumb-item">{{translation.Grievance}}</li>
+                <li class="breadcrumb-item active" aria-current="page">{{translation.Grievance}}</li>
+            </ol>
+        </nav>
+        <!-- /Breadcrumb -->
+        <!-- Container -->
+        <div class="container">
+            <div class="row">
+                <div class="col-xl-12">
+                    <div class="card" ng-if="RoleName == 'Grievance Helpdesk'">
+                        <div class="card-header bg-white border-bottom">
+                            <label class="w-100p">{{translation.Type}} <sup class="text-red">*</sup>: </label>
+                            <div class="custom-control custom-radio d-inline-flex  ml-5 ">
+                                <input class="custom-control-input" type="radio" ng-model="Grievance.Type" id="RBNew" name="Type" value="New" checked>
+                                <label class="custom-control-label" for="RBNew">New</label>
+                            </div>
+                            <div class="custom-control custom-radio d-inline-flex  ml-5 ">
+                                <input class="custom-control-input" type="radio" ng-model="Grievance.Type" id="RBAssigned" name="Type" value="AssignedToDeveloper">
+                                <label class="custom-control-label" for="RBAssigned">Assigned To Developer</label>
+                            </div>
+                            <div class="custom-control custom-radio d-inline-flex  ml-5 ">
+                                <input class="custom-control-input" type="radio" ng-model="Grievance.Type" id="RBDisposed" name="Type" value="DisposedByDeveloper">
+                                <label class="custom-control-label" for="RBDisposed">Disposed By Developer</label>
+                            </div>
+                            <div class="custom-control custom-radio d-inline-flex  ml-5 ">
+                                <input class="custom-control-input" type="radio" ng-model="Grievance.Type" id="RBClosed" name="Type" value="DispodedByBA">
+                                <label class="custom-control-label" for="RBClosed">Dispoded By Grievance Cell</label>
+                            </div>
+                        </div>
+                        <div class="card-header bg-white">
+                            <label class="w-100p">{{translation.SelectMobileApp}}:</label>
+                            <div class="custom-control custom-radio d-inline-flex ml-5">
+                                <input class="custom-control-input" type="radio" id="RB1" name="rbRSSC" value="1" ng-model="Grievance.IssueFrom" ng-change="GetCategories()">
+                                <label class="custom-control-label" for="RB1"> {{translation.Mobileapp}} </label>
+                            </div>
+                            <div class="custom-control custom-radio d-inline-flex  ml-5 ">
+                                <input class="custom-control-input" type="radio" id="RB2" name="rbRSSC" value="2" ng-model="Grievance.IssueFrom" ng-change="GetCategories()">
+                                <label class="custom-control-label" for="RB2"> {{translation.WebPortal}} </label>
+                            </div>
+                        </div>
+                        <div class="card-body col-sm mb-0">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <label>{{translation.Category}} :</label>
+                                    <select class="form-control" id="ddlGrievanceCategory" ng-model="Grievance.CategoryId" ng-init="Grievance.CategoryId = '0'">
+                                        <option value="0" disabled selected>{{translation.SelectOption}}</option>
+                                        <option ng-repeat="item in Categories" value="{{item.AgriLovValuesId}}">
+                                            {{_language =='en-us' ?  item.AgriLovEn : item.AgriLovHi}}
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label id="lblDepartment">{{translation.DepartmentHeading}} :</label>
+                                    <select class="form-control" id="ddldepartment" ng-model="Grievance.Department" ng-init="Grievance.Department='0'" ng-change="GetModule()">
+                                        <option value="0" selected="selected" disabled>{{translation.SelectOption}}</option>
+                                        <option ng-repeat="item in Departments" value="{{item.DeptEn}}">
+                                            {{_language =='en-us' ?  item.DeptEn : item.DeptHi}}
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label id="lblDepartment">{{translation.ModuleHeading}} :</label>
+                                    <select class="form-control" id="ddlmodule" ng-model="Grievance.ModuleId" ng-init="Grievance.ModuleId='0'">
+                                        <option value="0" selected="selected" disabled>{{translation.SelectOption}}</option>
+                                        <option ng-repeat="item in Modules" value="{{item.ModuleId}}">
+                                            {{_language =='en-us' ?  item.ModuleNameEn : item.ModuleNameHi}}
+                                        </option>
+                                    </select>
+                                </div>
+
+
+                                <div class="col-md-4">
+                                    <label>{{translation.ComplainNo}} </label>
+                                    <input type="text" class="form-control" ng-model="Grievance.ComplainNo" />
+                                </div>
+
+                                <div class="col-md-4">
+                                    <button type="button" class="btn btn-primary dev-btn mt-20" ng-click="GetGrievanceList()">{{translation.Search}}</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card" ng-if="RoleName == 'Developer'"> @*Developer*@
+                        <div class="card-body col-sm mb-0">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <label>{{translation.Developer}} </label>
+                                    <select class="form-control" id="ddlGrievanceDeveloper" ng-model="Grievance.DeveloperId" ng-init="Grievance.DeveloperId = '0'">
+                                        <option value="0" selected>All Developer</option>
+                                        @Html.Action("GetDeveloperList", "Grievance")
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label>{{translation.ModuleHeading}} :</label>
+                                    <select class="form-control" id="ddlmodule" ng-model="Grievance.ModuleId" ng-init="Grievance.ModuleId='0'">
+                                        <option value="0" selected="selected">All Module</option>
+                                        <option ng-repeat="item in Modules" value="{{item.ModuleId}}">
+                                            {{_language =='en-us' ?  item.ModuleNameEn : item.ModuleNameHi}}
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label>Issue Related :</label>
+                                    <select class="form-control" id="ddlIssueRelated" ng-model="Grievance.GrievanceIssueRelatedId" ng-init="Grievance.GrievanceIssueRelatedId='0'">
+                                        <option value="0" selected="selected">All Issues</option>
+                                        <option ng-repeat="item in IssueRelatedList" value="{{item.GrievanceIssueRelatedId}}">
+                                            {{_language =='en-us' ?  item.GrievanceIssueAgriLovEn : item.GrievanceIssueAgriLovHi}}
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="col-lg-4" id="ddlGrivCategory">
+                                    <label>Grievance Category </label>
+                                    <select class="form-control " ng-model="Grievance.GrivanceCategoryid" ng-init="Grievance.GrivanceCategoryid= '0'" id="ddlGrivCategory" ng-change="GetGrivanceSubCategoryList()">
+                                        <option value="0" selected="selected" >{{translation.SelectOption}}</option>
+                                        <option ng-repeat="item in GrivanceCategoryList" value="{{item.GrivencecategoryId}}">
+                                            {{_language =='en-us' ?  item.GrivenceCategoryName : item.GrivenceCategoryName}}
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="col-lg-4" id="ddlGrivsubCategory">
+                                    <label>Grievance Sub Category</label>
+                                    <select class="form-control " ng-model="Grievance.GrivanceSubCategoryid" ng-init="Grievance.GrivanceSubCategoryid= '0'" id="ddlGrivsubCategory">
+                                        <option value="0" selected="selected" >{{translation.SelectOption}}</option>
+                                        <option ng-repeat="item in GrivanceSubCategoryList" value="{{item.GrievanceSubCategoryMasterId}}">
+                                            {{_language =='en-us' ?  item.GrivenceSubCategoryName : item.GrivenceSubCategoryName}}
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label>{{translation.ComplainNo}} </label>
+                                    <input type="text" class="form-control" ng-model="Grievance.ComplainNo" />
+                                </div>
+
+                                <div class="col-md-4">
+                                    <button type="button" class="btn btn-primary dev-btn mt-20" ng-click="GetGrievanceList()">{{translation.Search}}</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card" id="DivListRecord">
+                        <div class="card-body col-sm row mb-0">
+                            <div class="col-md-4">
+                                <label for="search">{{translation.Search}}:</label>
+                                <input ng-model="q" id="search" class="form-control" placeholder={{translation.filttertext}} autocomplete="off">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="search">{{translation.ItemPerPage}}:</label>
+                                <input type="number" min="1" max="100" class="form-control" ng-model="pageSize">
+                            </div>
+                        </div>
+
+                        <div class="table-wrap table-responsive" style="overflow-y:auto; max-height:750px">
+                            <table class="table table-bordered" id="tblgetsuport">
+                                <thead style="position:sticky; top:0px; z-index:9;">
+                                    <tr>
+                                        <th></th>
+                                        <th>{{translation.SRNO}}</th>
+                                        <th>{{translation.ComplainNo}}</th>
+                                        <th>{{translation.District}}</th>
+                                        <th>{{translation.Date}}</th>
+                                        <th>{{translation.Subject}}</th>
+                                        <th>{{translation.vivran}}</th>
+                                        <th>{{translation.UserMobileNo}}</th>
+                                        <th>{{translation.ApplicationNo}}</th>
+                                        <th>{{translation.SelectMobileApp}}</th>
+                                        <th>{{translation.Category}}</th>
+                                        <th>{{translation.ModuleHeading}}</th>
+                                        <th>{{translation.Priority}}</th>
+                                        <th>{{translation.Status}}</th>
+                                        <th>{{translation.AssigendTo}}</th>
+                                        <th>{{translation.Attachment}}</th>
+                                        <th>{{translation.SSOID}}</th>
+                                        <th>{{translation.Mobile}}</th>
+                                        <th>Issue Related TO</th>
+                                        <th>Griveance Category </th>
+                                        <th>Griveance  Sub Category</th>
+                                        <th>{{translation.OicRemark}}</th>
+                                        <th>{{translation.OicFile}}</th>
+
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr dir-paginate="item in GrievanceList | filter: q | orderBy:colsort:reverseSort  | itemsPerPage: pageSize" current-page="currentPage" pagination-id="GrievancePagination" style="color:red;" ng-style="{'color': getRowTextColor(item)}">
+                                        <td>
+                                            <button type="button" ng-if="item.IsAssignedToBA" data-toggle="modal" data-target="#GrievanceRemarkModal" class="btn btn-primary btn-sm ng-binding mt-5" ng-click="SetModalValues(item.GrievanceId,item.DeveloperId,item.Remark,item.IsAssignedToBA,item.IsAssignedToDeveloper,item.IsDispodedByDeveloper,item.IsDispodedByBA,item.ReopenByBA,item.Priority)">Assign</button>
+                                            <button type="button" ng-if="item.IsAssignedToDeveloper && RoleName != 'Grievance Helpdesk'" data-toggle="modal" data-target="#GrievanceRemarkModal" class="btn btn-primary btn-sm ng-binding mt-5" ng-click="SetModalValues(item.GrievanceId,item.DeveloperId,item.Remark,item.IsAssignedToBA,item.IsAssignedToDeveloper,item.IsDispodedByDeveloper,item.IsDispodedByBA,item.ReopenByBA,item.Priority)">Dispose</button>
+                                            @*<button type="button" ng-if="item.IsDispodedByDeveloper" data-toggle="modal" data-target="#GrievanceRemarkModal" class="btn btn-primary btn-sm ng-binding mt-5" ng-click="SetModalValues(item.GrievanceId,item.DeveloperId,item.Remark,item.IsAssignedToBA,item.IsAssignedToDeveloper,item.IsDispodedByDeveloper,item.IsDispodedByBA,item.ReopenByBA,item.Priority)">Action</button>*@
+                                            <button type="button" ng-if="item.IsDispodedByDeveloper  && RoleName != 'Grievance Helpdesk' && RoleName != 'Developer'" data-toggle="modal" data-target="#GrievanceRemarkModal" class="btn btn-primary btn-sm ng-binding mt-5" ng-click="SetModalValues(item.GrievanceId,item.DeveloperId,item.Remark,item.IsAssignedToBA,item.IsAssignedToDeveloper,item.IsDispodedByDeveloper,item.IsDispodedByBA,item.ReopenByBA,item.Priority)">Action</button>
+                                            <button type="button" data-toggle="modal" data-target="#GrievanceTrailModal" ng-click="GetGrievanceTrail(item.GrievanceId)" class="btn btn-primary btn-sm ng-binding mt-5">View Trail</button>
+                                        </td>
+                                        <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                                        <td>{{item.ComplainNo}}</td>
+                                        <td>{{item.DISTRICT_ENG}}</td>
+                                        @*<td>{{item.CreateDate}}</td>*@
+                                        <td>
+                                            {{item.CreateDate}}<br>
+                                            <span ng-if="item.Remark_by_OIC !=='' && item.Remark_by_OIC !=null" style="white-space:nowrap">(OIC Mark Date : {{item.OICMarkdate}})</span>
+                                        </td>
+                                        <td>{{item.Subject}}</td>
+                                        <td>{{item.Description}}</td>
+                                        <td>{{item.UserMobileNo}}</td>
+                                        <td>{{item.ApplicationId}}</td>
+                                        <td>{{_language =='en-us' ?  item.IssueFromEn : item.IssueFromHi}}</td>
+                                        <td>{{_language =='en-us' ?  item.AgriLovEn : item.AgriLovHi }}</td>
+                                        <td>{{_language =='en-us' ?  item.ModuleEn : item.ModuleHi }}</td>
+                                        <td>{{item.Priority}}</td>
+                                        <td>{{item.Status}}</td>
+                                        <td><span ng-if="item.IsAssignedToDeveloper">{{_language =='en-us' ?  item.AssignedToEn : item.AssignedToHi }}</span></td>
+                                        <td>
+                                            <a ng-if="item.Attachment != null && item.Attachment!=''" href="~/ContentNew/Grievance/{{item.Attachment}}" target="_blank">View</a>
+                                        </td>
+                                        <td>{{item.SSOId}}</td>
+                                        <td>{{item.Mobile}}</td>
+                                        <td>{{_language =='en-us' ?  item.IssueRelatedTO : item.IssueRelatedTO}}</td>
+                                        <td>{{item.GrivenceCategoryName}}</td>
+                                        <td>{{item.GrivenceSubCategoryName}}</td>
+                                        <td>{{item.Remark_by_OIC}}</td>
+                                        <td>
+                                            <a ng-if="item.Attachment_OIC != null && item.Attachment_OIC!=''" href="~/ContentNew/Grievance/{{item.Attachment_OIC}}" target="_blank">View</a>
+                                        </td>
+
+                                    </tr>
+                                    @*&& RoleName != 'Developer'*@
+                                    
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm">
+                                <nav class="pagination-wrap  justify-content-end mb-25" aria-label="Page navigation example">
+                                    <nav class="pagination-wrap d-inline-block mr-40 mt-15 __web-inspector-hide-shortcut__" aria-label="Page navigation example">
+                                        <ul class="pagination">
+                                            <dir-pagination-controls boundary-links="true" pagination-id="GrievancePagination" on-page-change="pageChangeHandler(newPageNumber)" template-url="/dirPagination.tpl.html"></dir-pagination-controls>
+                                            <li class="page-item"><a class="page-link" href="#">{{translation.Page}}: {{ currentPage }}</a></li>
+                                        </ul>
+                                    </nav>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card pa-20" id="DivListNoRecord">No Record Found!!</div>
+                </div>
+            </div>
+        </div>
+        <div id="GrievanceTrailModal" class="modal fade" role="dialog">
+            <div class="modal-dialog modal-dialog-centered" style="max-width: 700px;">
+                <!-- Modal content-->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Grievance Trail (Complain No.:{{ComplainNo}})</h4>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="card" id="DivTrailRecord">
+                            <div class="table-wrap table-responsive">
+                                <table class="table table-bordered" id="tblgetsuport">
+                                    <thead>
+                                        <tr>
+                                            <th>{{translation.SRNO}}</th>
+                                            <th>{{translation.Date}}</th>
+                                            <th>{{translation.Remark}}</th>
+                                            <th>{{translation.Attachment}}</th>
+                                            <th>{{translation.Status}}</th>
+                                            <th>{{translation.Aging}}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="item in GrievanceTrail">
+                                            <td>{{$index+1}}</td>
+                                            <td>{{item.CreateDate}}</td>
+                                            <td>{{item.Remark}}</td>
+                                            <td><a ng-if="item.Attachment != null && item.Attachment!=''" href="~/ContentNew/Grievance/{{item.Attachment}}" target="_blank">View</a></td>
+                                            <td>{{item.Status}}</td>
+                                            <td>{{item.Days}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="card pa-20" id="DivTrailNoRecord">No Record Found!!</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="GrievanceRemarkModal" class="modal fade" role="dialog">
+            <div class="modal-dialog modal-dialog-centered">
+                <!-- Modal content-->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Grievance Action</h4>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+                    <div class="modal-body" id="DivGrievance">
+                        <div class="row">
+                            <div class="col-lg-12" ng-show="IsAssignedToBA">
+                                <input type="radio" id="CloseBA" ng-model="Grievance.ActionBA" name="ActionBA" value="Close" ng-change="ChangeActionValueBA(Grievance.ActionBA)">
+                                <label for="CloseBA">Close</label>
+                                <input type="radio" id="AssignToDeveloper" ng-model="Grievance.ActionBA" name="ActionBA" value="AssignToDeveloper" ng-change="ChangeActionValueBA(Grievance.ActionBA)">
+                                <label for="AssignToDeveloper">Assign To Developer</label><br>
+                            </div>
+
+                            <div class="col-lg-12" id="ddlDeveloperBA" >
+                                <label>Developer</label>
+                                <select class="form-control" ng-model="Grievance.Developer" ng-init="Grievance.Developer = '0'" id="ddlDeveloperBA" ng-disabled="IsDisbaled">
+                                    <option value="0" disabled selected>--Select--</option>
+                                    @Html.Action("GetDeveloperList", "Grievance")
+                                </select>
+                            </div>
+                            <div class="col-lg-12" id="ddlPriorityBA">
+                                <label>Priority</label>
+                                <select class="form-control" ng-model="Grievance.Priority" ng-init="Grievance.Priority = '0'" id="ddlPriorityBA" ng-disabled="IsDisbaled">
+                                    <option value="0" disabled selected>{{translation.SelectOption}}</option>
+                                    <option value="High">High</option>
+                                    <option value="Medium">Medium</option>
+                                    <option value="Low">Low</option>
+                                </select>
+                            </div>                           
+                            <div class="col-lg-12" ng-show="IsDispodedByDeveloper">
+                                <label>Developer {{translation.Remark}} :</label>
+                                <label>{{DeveloperRemark}}</label>
+                            </div>
+                            <div class="col-lg-12" ng-show="IsDispodedByDeveloper">
+                                <input type="radio" id="Close" ng-model="Grievance.Action" name="Action" value="Close" ng-change="ChangeActionValue(Grievance.Action)">
+                                <label for="Close">Close</label>
+                                <input type="radio" id="Reopen" ng-model="Grievance.Action" name="Action" value="Reopen" ng-change="ChangeActionValue(Grievance.Action)">
+                                <label for="Reopen">Reopen</label><br>
+                            </div>
+                            <div class="col-lg-12">
+                                <label>{{translation.Remark}}</label>
+                                <textarea class="form-control" ng-model="Grievance.Remark" id="txtRemarks"></textarea>
+                            </div>
+                            <div class="col-md-12">
+                                <label class="col-form-label font-weight-500 w-100 font-16">{{translation.Attachment}} ({{translation.ifany}})</label>
+                                <div class="fileinput fileinput-new input-group mt-10" data-provides="fileinput">
+                                    <div style="display:none;" id="AttachedDocfile">
+                                        <span>
+                                            <i onchange="angular.element(this).scope().fileCheck(this);"></i><span id="AttachedDocName"> XFileY.pdf </span>
+                                        </span> <i class="fa fa-close text-red" onclick="angular.element(this).scope().fileRemove(this.id);" id="AttachedDoc"></i>
+                                        <span class="btn btn-linkt" data-container="body" data-toggle="popover" data-placement="right"><i class="fa fa-eye text-green"></i><span id="AttachedDoc" onclick="angular.element(this).scope().filePreview(this.id);" data-toggle="modal" data-target="#ModelPopupView1">{{translation.View}}</span> </span>
+                                    </div>
+
+                                    <span class=" btn btn-info btn-md btn-file" id="AttachedDocinput">
+                                        <span class="fileinput-new"> <i class="fa fa-upload"></i>{{translation.Attachment}}</span><span class="fileinput-exists">Change</span>
+                                        <input type="file" name="..." onchange="angular.element(this).scope().FileforUpload(this, this.id)" id="AttachedDocFileInput">
+                                        <a href="#" class="btn btn-secondary fileinput-exists" data-dismiss="fileinput">{{translation.Remove}}</a>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" ng-show="IsAssignedToBA" ng-click="AssignToDeveloper()" class="btn btn-primary ng-binding mt-5">Submit</button>
+                        <button type="button" ng-show="IsAssignedToDeveloper || ReopenByBA" ng-click="DisposeGrievance()" class="btn btn-primary ng-binding mt-5">Submit</button>
+                        <button type="button" ng-show="IsDispodedByDeveloper" ng-click="FinalAction()" class="btn btn-primary ng-binding mt-5">Submit</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="dev-popup-body modal fade" id="ModelPopupView1" role="dialog" data-backdrop="static" data-keyboard="false">
+            <div class="modal-dialog">
+                <!-- Modal content-->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title"> {{translation.Attachment}} </h4>
+                        <button type="button" class="close" data-dismiss="modal" id="btnClose">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <div style="clear:both">
+                            <iframe id="viewerdocumentname" frameborder="0" scrolling="no" width="400" height="600"></iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

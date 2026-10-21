@@ -1,0 +1,138 @@
+﻿<script src="~/Scripts/AngularFramework/ResizeFile.js"></script>
+
+<div ng-app="ApexBankSocietyDetailMod" ng-controller="ApexBankSocietyDetailCont">
+
+    <div class="col-md-12">
+        <h3 class="citizen-dash-head">{{ translation.ApexBankSocietyDetail}}</h3>
+    </div>
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="devpage-breadcrumb">
+            <ul class="page-breadcrumb">
+                <li class="dev-page-br">
+                    <i class="fa fa-home"> </i>
+                    <a href="../Citizen/Index"> {{translation.Home}} </a>
+                    <i class="fa fa-angle-right"> </i>
+                </li>
+                <li style="float: left">
+                    <span style="margin: 0 5px;">{{translation.ApexBankSocietyDetail}} </span>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+
+    <div class="col-md-12">
+        <div class="table-responsive citizen-dash-head">
+            <div class="table-dropdown">
+                <div class="col-md-4" style="padding-left: 0;">
+                    <label for="search">{{translation.Search}}:</label>
+                    <input ng-model="q" id="search" class="form-control" placeholder={{translation.filttertext}} autocomplete="off">
+                </div>
+
+                <div class="col-md-4">
+                    <label for="search">{{translation.ItemPerPage}}:</label>
+                    <input type="number" min="1" max="100" class="form-control" onkeypress='return event.charCode >= 48 && event.charCode <= 57' ng-model="pageSize">
+                </div>
+            </div>
+            <div class="table-responsive citizen-dash-head">
+                <div class="col-md-4">
+                    <label>
+                        {{translation.DistrictHeading}} :
+                    </label>
+
+                    <select ng-model="DistrictId" class="form-control" ng-init="DistrictId='0'" ng-change="DashboardData()">
+                        <option value="0">{{translation.SelectOption}}</option>
+                        <option ng-repeat="item in Districts" value="{{item.DISTRICT_ID}}">
+                            {{_language =='en-us' ?  item.DISTRICT_MANGAL: item.DISTRICT_ENG}}
+                        </option>
+                    </select>
+                </div>
+
+            </div>
+            <table id="example" class="table devtable" style="margin-top: 30px;border:1px solid rgb(222, 221, 221); float: left;">
+                <thead>
+                    <tr>
+                        <th>
+                            {{translation.SRNO}}
+                        </th>
+
+                        <th ng-click="sortData('SocietyName')">
+                            {{translation.SocietyName}}
+                            <div ng-class="getSortClass('SocietyName')"></div>
+                        </th>
+                        <th ng-click="sortData('RegistrationNo')">
+                            {{translation.SocietyRegistrationNo}}
+                            <div ng-class="getSortClass('RegistrationNo')"></div>
+                        </th>                       
+                        <th ng-click="sortData('DISTRICT_ENG')">
+                            BylawsFile                            
+                        </th>
+                        <th>
+                            ObjectsFile
+                        </th>
+                        <th>
+                            RulesRegulationFileSize
+                        </th>
+                        <th>
+                            IsFileResize
+                        </th>
+                        <th>
+                            {{translation.Actions}}
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr dir-paginate="item in TableDataFileResize | filter: q | orderBy:colsort:reverseSort | itemsPerPage: pageSize" current-page="currentPage" pagination-id="SocietyIdForTbl">
+                        <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                        <td>{{item.SocietyName}}</td>
+                        <td>{{item.RegistrationNo}}</td>
+                        <td><a ng-show="item.IsFileResize>0" download style="color:#505050;" ><i data-target="#myModal" ng-hide="item.BylawsFile==''" data-toggle="modal" ng-click="SetDir(item.SocietyDirectory)" class="fa fa-info-circle infoicon-edit"></i></a><a target="_blank" href="{{'../Content/SocietyProfiling/'+item.SocietyDirectory+'/'+item.BylawsFile}}" download>{{item.BylawsFileSize}}</a>  </td>
+                        <td><a ng-show="item.IsFileResize>0" style="color:#505050;" ><i data-target="#myModal" ng-hide="item.ObjectsFile==''" data-toggle="modal" ng-click="SetDir(item.SocietyDirectory)" class="fa fa-info-circle infoicon-edit"></i></a> <a target="_blank" href="{{'../Content/SocietyProfiling/'+item.SocietyDirectory+'/'+item.ObjectsFile}}" download>{{item.ObjectsFileSize}} </a> </td>
+                        <td><a ng-show="item.IsFileResize>0" style="color:#505050;" ><i data-target="#myModal" ng-hide="item.RulesRegulationFile==''" data-toggle="modal" ng-click="SetDir(item.SocietyDirectory)"  class="fa fa-info-circle infoicon-edit"></i></a><a target="_blank" href="{{'../Content/SocietyProfiling/'+item.SocietyDirectory+'/'+item.RulesRegulationFile}}" download>{{item.RulesRegulationFileSize}}</a>  </td>
+                        <td>{{item.IsFileResize}}  </td>
+                        <td class="add-more-td">
+                            <a title="{{translation.ShowDetails}}" ng-click="ShowDetails(item.SocietyIdENC)"><i class="fa fa-eye"></i></a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="dev-popup-body modal fade" id="myModal" data-backdrop="static" role="dialog">
+                <div class="modal-dialog">
+                    <!-- Modal content-->
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" ng-click="ClearUnitForm()">&times;</button>
+                            <h4 class="modal-title"> {{translation.AddUnit}} </h4>
+                        </div>
+                        <div class="modal-body">
+                            <form class="dev-search-form" style="overflow: hidden; margin-bottom: 35px;" name="UnitForm">
+                                <div >
+                                    <div class="col-lg-4">
+                                        <h4 class="modal-title"> Directory NAME </h4>
+                                    </div>
+                                </div>
+                                <div>                                                                  
+                                        <div class="col-lg-4">                                           
+                                            <input type="file" filetype="Upload" name="SUBDIR" class="form-control" ng-model="Directory.DirectoryFile" onchange="angular.element(this).scope().UploadFile(this.files)" placeholder="{{translation.SUBDIR}}" autocomplete="off">
+                                        </div>                                   
+                                </div>
+                                <div class="col-md-4">
+                                    <button type="submit" class="btn btn-primary" ng-disabled="UnitForm.$invalid" ng-click="UploadFileOnServer()">{{translation.Submit}}</button>
+                                    <button type="submit" class="btn btn-primary" ng-click="ClearUnitForm()">{{translation.Clear}}</button>
+                                    <input type="hidden" ng-model="UnitMaster.UnitId" />
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="col-md-2">
+                <h5 class="dev-page"> {{translation.Page}}: {{ currentPage }} </h5>
+            </div>
+        </div>
+    </div>
+
+</div>

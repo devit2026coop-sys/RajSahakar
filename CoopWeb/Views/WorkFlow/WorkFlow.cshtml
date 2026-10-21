@@ -1,0 +1,237 @@
+﻿<script src="~/Scripts/AngularFramework/WorkFlow.js"></script>
+
+<div ng-app="WorkFlowMod" ng-controller="WorkFlowCont" ng-cloak="">
+        <div class="col-md-12">
+            <h3 class="citizen-dash-head">{{translation.WorkFlow}}</h3>
+            <hr style="margin: 0;">
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#"> {{translation.Home}} </a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;"> {{translation.WorkFlow}} </span>
+                    </li>
+
+                </ul>
+            </div>
+        </div>
+    <div class="col-md-12">
+        <div class="dev-search-form citizen-dash-head">
+            <div class="form-group col-md-4">
+                <label>{{translation.MenueHeading}}</label>
+                <select ng-model="WorkFlow.MenuId" class="form-control" ng-init="WorkFlow.MenuId='0'">
+                    <option value="0" disabled>{{translation.SelectOption}}</option>
+                    <option ng-repeat="item in WorkFlowMenus" value="{{item.MenuId}}">
+                        {{_language =='en-us' ?  item.MenuNameEn : item.MenuNameHi}}
+                    </option>
+                </select>
+            </div>
+
+            <div class="form-group col-md-4">
+                <label>{{translation.RoleHeading}}</label>
+                <select ng-model="WorkFlow.RoleId" class="form-control" ng-init="WorkFlow.RoleId='0'">
+                    <option value="0" disabled>{{translation.SelectOption}}</option>
+                    <option ng-repeat="item in WorkFlowRoleRoles" value="{{item.RoleID}}">
+                        {{_language =='en-us' ?  item.RoleName_EN : item.RoleName_HI}}
+                    </option>
+                </select>
+            </div>
+
+            <div class="form-group col-md-4">
+                <label>{{translation.IsActive}}</label>
+                <div class="form-control"><input type="checkbox" ng-model="WorkFlow.IsActive" /></div>
+            </div>
+            <div class="form-group col-md-3">
+                <label>{{translation.ExecutionAction}}</label>
+                <select ng-model="WorkFlow.ActionID" class="form-control" onchange="selectNextUserGroup(this)" ng-init="WorkFlow.ActionID='0'">
+                    <option value="0" disabled selected>{{translation.SelectOption}}</option>
+                    <option ng-repeat="item in WorkFlowExecution" value="{{item.LovValuesId}}">
+                        {{_language =='en-us' ?  item.LovCode : item.Lovdescription}}
+                    </option>
+                </select>
+            </div>
+
+            <div class="form-group col-md-3">
+                <label>{{translation.NextUserGroup}}</label>
+                <select ng-model="WorkFlow.NextRoleId" class="form-control" id="ddlNextRole" ng-init="WorkFlow.NextRoleId='0'">
+                    <option value="0" disabled>{{translation.SelectOption}}</option>
+                    <option ng-repeat="item in WorkFlowRoleRoles" value="{{item.RoleID}}">
+                        {{_language =='en-us' ?  item.RoleName_EN : item.RoleName_HI}}
+                    </option>
+                </select>
+            </div>
+
+            <div class="form-group col-md-3" ng-class="{ 'has-error' : workflow.LevelNo.$invalid && !workflow.LevelNo.$pristine }">
+                <label>{{translation.LevelNo}}</label>
+                <input type="text" class="form-control" name="LevelNo" ng-model="WorkFlow.LevelNo" placeholder="{{translation.LevelNo}}" maxlength="2" ng-minlength="1" onkeypress='return event.charCode >= 48 && event.charCode <= 57' ng-required="true" autocomplete="off">
+                <label ng-show="workflow.LevelNo.$error.required && !workflow.LevelNo.$pristine" class="help-block">{{translation.LevelNo}} - {{translation.Required}}</label>
+            </div>
+
+            <div class="form-group col-md-3">
+                <label>{{translation.IsActive}}</label>
+                <div class="form-control"><input type="checkbox" ng-model="WorkFlow.IsActive1" /></div>
+                <input type="hidden" ng-bind="WorkFlow.WorkFlowConfig" value="WorkFlow.WorkFlowConfig" />
+            </div>
+        </div>
+        <div class="form-group col-md-12">
+            <div class="dev-align-btn">
+                <button type="submit" class="btn btn-primary dev-btn" ng-disabled="workflow.$invalid" ng-click="SaveWorkFlow()">{{translation.Submit}}</button>
+                <button type="button" class="btn btn-primary dev-btn" ng-click="ClearForm()">{{translation.Clear}}</button>
+            </div>
+        </div>
+    </div>
+        </form>
+        <div class="" ng-show="DivWorkflow">
+            <div class="col-md-12 dev-search-form">
+                <div class="col-md-2">
+                    <h4> {{translation.SRNO}} </h4>
+                </div>
+                <div class="col-md-4">
+                    <label for="search">{{translation.Search}}:</label>
+                    <input ng-model="q" id="search" class="form-control" placeholder="Filter text" autocomplete="off">
+                </div>
+                <div class="col-md-4">
+                    <label for="search">{{translation.ItemPerPage}}:</label>
+                    <input type="number" min="1" max="100" class="form-control" ng-model="pageSize">
+                </div>
+            </div>
+
+
+            <div class="col-md-12">
+                <div class="table-responsive">
+                    <table class="table dev-table" style="margin-top: 30px;">
+                        <thead>
+                            <tr>
+                                <th>
+                                    {{translation.SRNO}}
+                                </th>
+
+                                <th ng-click="sortData('MenuNameEn')">
+                                    {{translation.MenueHeading}}
+                                    <div ng-class="getSortClass('MenuNameEn')"></div>
+                                </th>
+
+
+                                <th ng-click="sortData('RoleName_EN')">
+                                    {{translation.RoleHeading}}
+                                    <div ng-class="getSortClass('RoleName_EN')"></div>
+                                </th>
+
+                                <th ng-click="sortData('LovCode')">
+                                    {{translation.ExecutionAction}}
+                                    <div ng-class="getSortClass('LovCode')"></div>
+                                </th>
+
+                                <div class="col-md-12">
+                                    <div class="table-responsive">
+                                        <table class="table dev-table" style="margin-top: 30px;">
+                                            <thead>
+                                                <tr>
+                                                    <th>
+                                                        {{translation.SRNO}}
+                                                    </th>
+
+
+                                                    <th ng-click="sortData('LovCode')">
+                                                        {{translation.NextUserGroup}}
+                                                        <div ng-class="getSortClass('LovCode')"></div>
+                                                    </th>
+
+                                                    <th ng-click="sortData('Level')">
+                                                        {{translation.LevelNo}}
+                                                        <div ng-class="getSortClass('Level')"></div>
+                                                    </th>
+                                                    <th>
+                                                        {{translation.Action}}
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr dir-paginate="item in WorkFlowDataList | filter: q | orderBy:colsort:reverseSort | itemsPerPage: pageSize" current-page="currentPage" pagination-id="workFlowConfigurationPagination">
+                                                    <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                                                    <td>{{ language == 'en-us' ? item.MenuNameEn : item.MenuNameHi }}</td>
+                                                    <td>{{ language == 'en-us' ? item.RoleName_EN : item.RoleName_HI }}</td>
+                                                    <td>{{ language == 'en-us' ? item.LovCode : item.Lovdescription }}</td>
+                                                    <td>{{ language == 'en-us' ? item.NextRoleEn : item.NextRoleHi }}</td>
+                                                    <td>{{ item.Level }}</td>
+                                                    <td>
+                                                        <div class="dev-action">
+                                                            <label class="switch">
+                                                                <input type="checkbox" ng-checked="item.IsActive == 1" ng-click="SetStatus(item.WorkFlowConfig,item.IsActive)">
+                                                                <span class="slider round"></span>
+                                                            </label>
+
+                                                    <th ng-click="sortData('MenuNameEn')">
+                                                        {{translation.MenueHeading}}
+                                                        <div ng-class="getSortClass('MenuNameEn')"></div>
+                                                    </th>
+
+
+
+                                                    <th ng-click="sortData('RoleName_EN')">
+                                                        {{translation.RoleHeading}}
+                                                        <div ng-class="getSortClass('RoleName_EN')"></div>
+                                                    </th>
+
+                                                    <th ng-click="sortData('LovCode')">
+                                                        {{translation.ExecutionAction}}
+                                                        <div ng-class="getSortClass('LovCode')"></div>
+                                                    </th>
+
+
+                                                    <th ng-click="sortData('LovCode')">
+                                                        {{translation.NextUserGroup}}
+                                                        <div ng-class="getSortClass('LovCode')"></div>
+                                                    </th>
+
+                                                    <th ng-click="sortData('Level')">
+                                                        {{translation.LevelNo}}
+                                                        <div ng-class="getSortClass('Level')"></div>
+                                                    </th>
+                                                    <th>
+                                                        {{translation.Action}}
+                                                    </th>
+                                                </tr>
+                        </thead>
+                        <tbody>
+                            <tr dir-paginate="item in WorkFlowDataList | filter: q | orderBy:colsort:reverseSort | itemsPerPage: pageSize" current-page="currentPage" pagination-id="workFlowConfigurationPagination">
+                                <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                                <td>{{ language == 'en-us' ? item.MenuNameEn : item.MenuNameHi }}</td>
+                                <td>{{ language == 'en-us' ? item.RoleName_EN : item.RoleName_HI }}</td>
+                                <td>{{ language == 'en-us' ? item.LovCode : item.Lovdescription }}</td>
+                                <td>{{ language == 'en-us' ? item.NextRoleEn : item.NextRoleHi }}</td>
+                                <td>{{ item.Level }}</td>
+                                <td>
+                                    <div class="dev-action">
+                                        <label class="switch">
+                                            <input type="checkbox" ng-checked="item.IsActive == 1" ng-click="SetStatus(item.WorkFlowConfig,item.IsActive)">
+                                            <span class="slider round"></span>
+                                        </label>
+
+                                        <i class="fa fa-edit" ng-click="Update(item)"></i>
+
+                                        <i class="fa fa-trash" ng-click="SetStatus(item.WorkFlowConfig,2)" onclick="ConfirmDelete()"></i>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="col-md-12">
+                <div class="text-center">
+                    <dir-pagination-controls boundary-links="true" pagination-id="workFlowConfigurationPagination" on-page-change="pageChangeHandler(newPageNumber)" template-url="/dirPagination.tpl.html"></dir-pagination-controls>
+                </div>
+            </div>
+        </div>
+    <div class="se-pre-con"></div>
+    </div>
+
+  
+

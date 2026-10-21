@@ -1,0 +1,311 @@
+﻿
+<script src="~/Scripts/AngularFramework/DairySocietyRegisterDistWise.js?id=3"></script>
+<script src="~/Scripts/jquery-1.11.3.min.js"></script>
+<script type="text/javascript" src="~/Scripts/jqueryuitimepicker.js"></script>
+<link href="~/Content/Stylesheets/jqueryuitimepicker.css" rel="stylesheet" />
+
+<script type="text/javascript">
+    var tableToExcel = (function () {
+        var uri = 'data:application/vnd.ms-excel;base64,'
+            , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>'
+            , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) }
+            , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
+        return function (table, name) {
+            if (!table.nodeType) table = document.getElementById(table)
+            var ctx = { worksheet: name || 'Worksheet', table: table.innerHTML }
+            window.location.href = uri + base64(format(template, ctx))
+        }
+    })()
+
+    $(document).ready(function () {
+
+        $('.SetCalender').datepicker({
+            showOn: "both",
+            changeMonth: true,
+            buttonImage: "../images/calender.png",
+            changeYear: true,
+            dateFormat: "dd/mm/yy",
+            //minDate: (new Date()).getDate() + '/' + ((new Date()).getMonth()+1) + '/' + ((new Date()).getFullYear()).toString(),
+            //defaultDate: (new Date()).getDate() + '/' + ((new Date()).getMonth() + 1) + '/' + ((new Date()).getFullYear()).toString(),
+        });
+
+
+    });
+
+</script>
+<style>
+    .NewMemberdob input {
+        float: left;
+        width: 90%;
+    }
+
+    .NewMemberdob button {
+        float: left;
+    }
+
+    .margin-Top20 {
+        margin-top: 5px;
+    }
+
+    .listCount ul {
+        margin: auto !important;
+    }
+</style>
+<div ng-app="SocietyRegisterDistWiseMod">
+    <div ng-controller="SocietyRegisterDistWiseCnt">
+        <div class="col-md-12">
+            <h3 class="citizen-dash-head">{{translation.SocietyRegisterReport}}</h3>
+            <hr style="margin: 0;">
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <input type="hidden" id="DivisionId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DivisionId)" />
+            <input type="hidden" id="hdnActId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).ActId)" />
+            <input type="hidden" id="hdnDistrictId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DistrictId)" />
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#"> {{translation.MIS}}</a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;"> {{translation.SocietyRegisterReport}} </span>
+                    </li>
+                    <li style="float: right;" id="divAddBtn">
+                        &nbsp;
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="table-responsive citizen-dash-head">
+
+                <div>
+                    <div class="table-dropdown">
+                        <div class="col-md-2 margin-Top20">
+                            <label for="search" class="ng-binding">{{translation.Act}}:</label>
+                            <select ng-model="ActId" class="form-control" ng-init="ActId='0'" ng-change="GetSocietyTypeList()" id="ddrActId" disabled>
+                                <option value="0">{{translation.All}}</option>
+                                <option ng-repeat="item in Actlist" value="{{item.ActId}}">
+                                    {{_language =='en-us' ?  item.ActNameEn : item.ActNameHi}}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-2 margin-Top20">
+                            <label for="search" class="ng-binding">{{translation.SocietyType}}:</label>
+                            <select ng-model="SocietyTypeId" class="form-control" ng-init="SocietyTypeId='0'" disabled>
+                                <option value="0">{{translation.All}}</option>
+                                <option ng-repeat="item in Typelist" value="{{item.SocietyTypeId}}">
+                                    {{_language =='en-us' ?  item.TypeameEng : item.TypeNameHin}}
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-2 margin-Top20">
+                            @*<label for="search" class="ng-binding">{{translation.DivisionHeading}}:</label>
+                            <select ng-model="DIVISION_ID" class="form-control" id="ddlDivision" ng-init="DIVISION_ID='0'" style="">
+                                <option value="0">{{translation.All}}</option>
+                                <option ng-repeat="item in Divisions" value="{{item.DIVISION_ID}}">
+                                    {{_language =='en-us' ?  item.DIVISION_ENG : item.DIVISION_MANGAL}}
+                                </option>
+                            </select>*@
+                            <label>{{ translation.DistrictHeading}}</label>
+                            <select name="DISTRICT_ID" ng-model="DISTRICT_ID" id="ddrDistrictId" class="form-control" ng-init="DISTRICT_ID='0'">
+                                <option value="0">{{translation.SelectOption}}</option>
+                                <option ng-repeat="district in DistrictList" value="{{district.DISTRICT_ID}}">
+                                    {{_language =='en-us' ?  district.DISTRICT_ENG : district.DISTRICT_MANGAL}}
+                                </option>
+                            </select>
+                        </div>
+
+
+
+                        @*<div class="col-md-3 margin-Top20">
+                            <div class="col-md-4">
+                                <label for="search" class="ng-binding">{{translation.SocietyType}}:</label>
+                            </div>
+                            <div class="col-md-8">
+                                <input type="radio" name="SocietyRegistration" id="isOnline" value="1" ng-model="IsOnline" class="form-group"> {{translation.Online}}
+
+                                <input type="radio" name="SocietyRegistration" id="isOffline" value="0" ng-model="IsOnline" class="form-group">{{translation.Offline}}
+                            </div>
+                        </div>*@
+
+                        <div class="col-lg-2" style="text-align:left;margin-top:5px;padding-top:5px" ng-hide="true">
+                            <label for="search">{{translation.Date}}:</label>
+                        </div>
+                        <div class="col-lg-4" style="text-align:center;margin-top:5px;padding-top:5px" ng-hide="true">
+                            <input type="radio" id="txtCreatetionDate" name="txtCreatetionDate" value="1" ng-model="IsOnline" class="ng-pristine ng-untouched ng-valid ng-empty"> {{translation.Online}}
+                            <input type="radio" name="SocietyRegistration" id="isonline" value="0" ng-model="IsOnline" class="ng-pristine ng-untouched ng-valid ng-empty">{{translation.Offline}}
+                        </div>
+                        <div class="col-md-2  margin-Top20">
+                            <label>&nbsp;</label><br>
+                            <button type="button" ng-click="GetSocietyData()" class="btn btn-primary dev-btn ng-binding">{{translation.Search}}</button>
+                            <button type="button" ng-click="Reset()" class="btn btn-primary dev-btn ng-binding">{{translation.Clear}}</button>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-12" style="margin-bottom: 10px;">
+                        <input type="radio" name="SocietyRegistration" ng-click="GetSocietyData()" id="isonline" value="1" ng-model="IsOnline" />{{translation.Online}}
+                        <input type="radio" name="SocietyRegistration" ng-click="GetSocietyData()" id="isonline" value="0" ng-model="IsOnline" />{{translation.Offline}}
+                    </div>
+                    <div ng-show="DivShowCount">
+                        <table id="tbl6" class="table devtable" style="border:1px solid rgb(222, 221, 221); float: left;">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        {{ translation.District}}
+                                    </th>
+                                    @*<th>   {{ translation.PartialSave}} </th>*@
+                                    @*
+                                    <th>   {{ translation.PermanentSave}} </th>*@
+                                    <th>   {{ translation.Approvable}} </th>
+                                    <th>   {{ translation.Rejection}}/{{translation.AutoClose}} </th>
+                                    <th>   {{ translation.UnderProcess}} </th>
+                                    <th>   {{ translation.TOTAL}} </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="item in SocietyCombine">
+                                    <td>{{_language =='en-us' ?  item.DistrictNameEn : item.DistrictNameHi}}</td>
+                                    @*<td><a ng-click="GetDetail(item.DISTRICT_ID,1)">{{item.TotPartialSave}}</a></td>*@
+                                    @*
+                                    <td><a ng-click="GetDetail(item.DISTRICT_ID,2)">{{item.TotPermanetSave}}</a></td>*@
+                                    <td><a ng-click="GetDetail(item.DISTRICT_ID,3)">{{item.TotApprove}}</a></td>
+                                    <td><a ng-click="GetDetail(item.DISTRICT_ID,4)">{{item.TotReject}}</a></td>
+                                    <td><a ng-click="GetDetail(item.DISTRICT_ID,5)">{{item.TotUnderProcess}}</a></td>
+                                    <td><a ng-click="GetDetail(item.DISTRICT_ID,0)">{{item.TotRegi}}</a> </td>
+                                </tr>
+                                <tr ng-if="SocietyCombine.length>0">
+                                    <td colspan="6">
+                                        <input type="button" class="btn btn-primary dev-btn" onclick="tableToExcel('tbl6', 'Get Society District Wise Data')" value="Export to Excel">
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                    </div>
+                    <div ng-show="DivShowDetail">
+
+                        <div class="dev-search-form" id="search-filter">
+                            <div class="col-xs-2">
+                                <label for="search">{{translation.Search}}:</label>
+                                <input ng-model="q" name="SearchText" id="search" class="form-control" placeholder={{translation.filttertext}} autocomplete="off">
+                            </div>
+                            @*<div class="col-xs-2">
+                                <label for="search">{{translation.ItemPerPage}}:</label>
+                                <input type="number" min="1" max="9999" class="form-control" ng-model="pageSize">
+                            </div>*@
+
+                            <div class="col-md-2 margin-Top20 NewMemberdob">
+                                <label for="search" class="ng-binding">{{translation.FromDate}}:</label>
+                                <input id="txtFromDate" name="FromDate" disabled="disabled" class="form-control SetCalender" ng-model="Filter.FromDate" placeholder="{{translation.FromDate}}" onkeypress="return event.charCode >= 48 &amp;&amp; event.charCode <= 57" autocomplete="off">
+                            </div>
+                            <div class="col-md-2 margin-Top20 NewMemberdob">
+                                <label for="search" class="ng-binding">{{translation.ToDate}}:</label>
+                                <input id="txtToDate" name="ToDate" disabled="disabled" class="form-control SetCalender" ng-model="Filter.ToDate" placeholder="{{translation.ToDate}}" onkeypress="return event.charCode >= 48 &amp;&amp; event.charCode <= 57" autocomplete="off">
+                            </div>
+
+                            <div class="col-md-2  margin-Top20">
+                                <label>&nbsp;</label><br>
+                                <button type="button" ng-click="searchRequest(ShowSearchDetail)" class="btn btn-primary dev-btn ng-binding">{{translation.Search}}</button>
+                                <button type="button" ng-click="DetailsReset()" class="btn btn-primary dev-btn ng-binding">{{translation.Clear}}</button>
+                            </div>
+
+                            <div class="col-xs-4" style="padding-top: 25px; ">
+
+                            </div>
+                        </div>
+
+                        <table id="tblData" class="table devtable" style="margin-top: 10px;border:1px solid rgb(222, 221, 221); float: left;">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        {{translation.SRNO}}
+                                    </th>
+                                    <th>
+                                        {{translation.SocietyName}}
+                                    </th>
+                                    <th>
+                                        {{translation.RegistrationNo}}
+                                    </th>
+                                    <th>
+                                        {{translation.RegistrationDate}}
+                                    </th>
+                                    <th>
+                                        {{translation.District}}
+                                    </th>
+                                    <th>
+                                        {{translation.Act}}
+                                    </th>
+                                    <th>
+                                        {{translation.SocietyType}}
+                                    </th>
+                                    <th>
+                                        {{translation.Status}}
+                                    </th>
+                                    <th>
+                                        {{translation.View}}
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+
+                                <tr ng-repeat="item in SocietyList">
+                                    <td>{{(((DataPagingDetails.PageNumber - 1) * DataPagingDetails.PageSize) + 1)+$index}}</td>
+                                    <td>{{item.SocietyName}}</td>
+                                    <td>{{item.RegistrationNo}}</td>
+                                    <td>{{item.RegistrationDate}}</td>
+                                    <td>{{_language =='en-us' ?  item.DISTRICT_ENG : item.DISTRICT_MANGAL}}</td>
+                                    <td>{{_language =='en-us' ?  item.ActNameEn_Short : item.ActNameHi_Short}}</td>
+                                    <td>{{_language =='en-us' ?  item.TypeameEng : item.TypeNameHin}}</td>
+                                    <td>{{item.ProceesStatusTextEn}}</td>
+                                    <td><a ng-click="SocietyView(item.SocietyIdEnc)" href="javascript:" target="_blank"><i class="fa fa-eye"></i></a> </td>
+                                </tr>
+                                <tr>
+
+                                    @*
+                                    <td colspan="2"></td>*@
+
+
+                                    <td colspan="8" class="listCount">
+                                        <div class="col-md-2">
+                                            <button type="button" class="btn btn-primary dev-btn" ng-click="BackDetails()">{{translation.Back}}</button>
+                                            <input ng-if="SocietyList.length>0" type="button" class="btn btn-primary dev-btn" onclick="tableToExcel('tblData', 'Get Society Detail Data')" value="Export to Excel">
+                                        </div>
+                                        <div class="col-md-10">
+                                            <div ng-if="DataPagingDetails.TotalPages>1" class="dataTables_paginate paging_simple_numbers" id="dataTables-example_paginate">
+                                                <ul class="pagination pagination_1" style="margin: auto !important;display: block;">
+                                                    <li><label style="display: inline;position: relative;float: left;padding-top: 8px;padding-right:7px;">Total Records: {{DataPagingDetails.TotalRecords}}</label> </li>
+                                                    <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« First</span></li>
+                                                    <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« Previous</span></li>
+                                                    <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest('1',ShowSearchDetail)" style="cursor: pointer;">
+                                                        <span>«First</span>
+                                                    </li>
+                                                    <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest(DataPagingDetails.PageNumber-1,ShowSearchDetail)" style="cursor:pointer;">
+                                                        <span>« Previous</span>
+                                                    </li>
+                                                    <li class="{{n==DataPagingDetails.PageNumber?'active':''}}" style="{{n==DataPagingDetails.PageNumber?'':'cursor: pointer'}}" ng-repeat="n in PagingRange(DataPagingDetails.StartPageNumber,DataPagingDetails.EndPageNumber,DataPagingDetails.TotalPages)" ng-click="pageRequest(n,ShowSearchDetail)"><span>{{n}}</span></li>
+                                                    <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Next</span></li>
+                                                    <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Last</span></li>
+                                                    <li ng-if="DataPagingDetails.PageNumber!= DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.PageNumber+1,ShowSearchDetail)" style="cursor:pointer;">
+                                                        <span>Next »</span>
+                                                    </li>
+                                                    <li ng-if="DataPagingDetails.PageNumber != DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.TotalPages,ShowSearchDetail)" style="cursor:pointer;">
+                                                        <span>Last »</span>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

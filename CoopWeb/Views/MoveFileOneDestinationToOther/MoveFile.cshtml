@@ -1,0 +1,160 @@
+﻿
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml"; ;
+}
+
+<script src="~/Scripts/AngularFramework/MoveFiles.js?id=1"></script>
+
+
+<div ng-app="MoveFileModule">
+    <div ng-controller="MoveFileCont">
+        <div class="col-md-12">
+            <h3 class="h3heading citizen-dash-head">DIRECTORY Move and Copy</h3>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#"> {{translation.Home}} </a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <i class="fa fa-angle-right"> </i>
+                        <span style="margin: 0 5px;"> Directory  </span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="col-md-12">
+            <form class="dev-search-form citizen-dash-head " style="overflow: hidden;" name="Myauditform">
+                <div class="col-lg-12 form-group">
+                    <div class="col-md-12">
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+
+                            <div class="col-lg-12 form-group">
+                                <div class="col-lg-2">Source Directory Name<span class="error">*</span></div>
+                                <div class="col-lg-4">
+                                    <input type="text" name="SourceDirectory" class="form-control" id="SourceDirectoryName" ng-model="MoveFile.SourceDirName" placeholder="Enter Source Directory" ng-change="replaceSlash()" ng-init="MoveFile.SourceDirName='Content/SocietyProfiling/'" autocomplete="off">
+
+                                </div>
+                            </div>
+                            <div class="col-lg-12 form-group">
+                                <div class="col-lg-2">Destination Directory Name<span class="error">*</span></div>
+                                <div class="col-lg-4">
+                                    <input type="text" name="DestinationDirectory" class="form-control" id="DestinationDirectoryName" ng-model="MoveFile.DestDirName" placeholder="Enter Destination Directory" ng-change="replaceSlash()" ng-init="MoveFile.DestDirName='Content/SocietyProfiling/'" autocomplete="off">
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="dev-menu-btn">
+                            <button type="submit" class="btn btn-primary" ng-disabled="true" ng-click="CopyandMoveDirectory('Move')">Move Directory</button>
+                            <button type="submit" class="btn btn-primary" ng-disabled="Directory.$invalid" ng-click="CopyandMoveDirectory('Copy')">Copy Directory</button>
+                            <button type="submit" class="btn btn-primary" ng-disabled="Directory.$invalid" ng-click="CopyandMoveDirectory('Compress')">Compress</button>
+                            <button type="submit" class="btn btn-primary" ng-click="ClearForm()">{{translation.Clear}}</button>
+                            <button type="submit" class="btn btn-primary" ng-click="AllFilesInDirectory(true)">Show All Files with Size</button>
+                            <button type="submit" class="btn btn-primary" ng-click="AllFilesInDirectory(false)">Show All Files</button>
+                            <button type="submit" class="btn btn-primary" ng-click="ReadDirectoryData()">Read Files</button>
+
+
+                            <button type="submit" class="btn btn-primary" ng-click="GetAllUpdatedRegNoSocieties()">Move New RegNo Files </button>
+                            @*<button ng-click="RemoveUnnecessaryGuarantors()" class="btn btn-danger">
+            Remove Unnecessary Guarantors <i class="fa fa-trash"></i> Delete
+        </button>*@
+                        </div>
+                    </div>
+                </div>
+
+
+
+            </form>
+
+
+            <form class="dev-search-form citizen-dash-head " style="overflow: hidden;">
+                <div class="col-lg-12 form-group">
+                    <div class="col-md-12">
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+
+                            <div class="col-lg-12 form-group">
+                                <div class="col-lg-2">Source Directory Name<span class="error">*</span></div>
+                                <div class="col-lg-4">
+                                    <input type="text" class="form-control" ng-model="obj.dirName" placeholder="Enter Source Directory" autocomplete="off">
+
+                                </div>
+                            </div>
+                            <div class="col-lg-12 form-group">
+                                <div class="col-lg-2">Upload Files<span class="error">*</span></div>
+                                <div class="col-lg-4">
+                                    <input type="file" id="fu" dat-val="nocheck" multiple />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="dev-menu-btn">
+                            <button type="submit" class="btn btn-primary" ng-click="uploadMultipleFiles()">Upload</button>
+                        </div>
+                    </div>
+                </div>
+
+            </form>
+            <div class="col-lg-12 form-group">
+                <div class="table-responsive" ng-show="IsShowDirFiles">
+                    <table class="table devtable" style="border:1px solid rgb(222, 221, 221); float: left;  ">
+                        <thead>
+                            <tr>
+                                <th>
+                                    {{translation.SRNO}}
+                                </th>
+                                <th>
+                                    File Name
+                                </th>
+                                <th>
+                                    File Size
+                                </th>
+                                <th>
+                                    Last Modified Date
+                                </th>
+                                <th>
+                                    Download
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody style="color:black;">
+                            <tr ng-repeat="item in DirFilesList">
+                                <td>{{$index+1}}</td>
+                                @*<td>hello</td>*@
+                                <td>{{item.FileName}}</td>
+                                <td>{{item.FileSize}}</td>
+                                <td>{{item.LastModifiedDate}}</td>
+                                <td><a ng-show="item.FullPath.indexOf('.')!=-1" ng-href="../{{item.FullPath}}" target="_blank" ><i class="fa fa-eye"></i></a>
+                             
+                                    <a ng-show="item.FullPath.indexOf('.pdf') !== -1 ||item.FullPath.indexOf('.jpg') !== -1 ||item.FullPath.indexOf('.jpeg') !== -1 || item.FullPath.indexOf('.png') !== -1  " ng-href="/{{item.FullPath}}" download><i class="fa fa-download"></i></a>
+                                    <button ng-show="item.FullPath.indexOf('.cshtml') !== -1 ||item.FullPath.indexOf('.js') !== -1 " ng-click="downloadFile(item.FullPath)" class="btn btn-primary"> <i class="fa fa-download"></i> Download</button>
+                                    @*<button ng-click="downloadFolder(item.FullPath)" class="btn btn-primary">
+                                            <i class="fa fa-download"></i> Download Folder
+                                        </button>*@
+                                    <button ng-show="item.FullPath.indexOf('.pdf') !== -1||item.FullPath.indexOf('.xml') !== -1" ng-click="deleteFile(item.FullPath)" class="btn btn-danger">
+                                        <i class="fa fa-trash"></i> Delete
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col-md-12">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" ng-show="IsTextFile" style="color:black;">
+                        <textarea ng-model="Viewtext" rows="15" cols="250"></textarea>
+                    </div>
+                </div>
+
+
+
+            </div>
+
+        </div>
+
+    </div>
+</div>

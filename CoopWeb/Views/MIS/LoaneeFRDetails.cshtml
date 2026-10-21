@@ -1,0 +1,140 @@
+﻿@{
+    ViewBag.Title = "Loanee FR Details";
+}
+<style>
+    .flexEqualCenter {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    a.backBtn {
+        padding: 3px 5px;
+        background: rgb(99,205,219);
+        color: #fff;
+        border: 0px;
+        outline: none;
+        display: inline-block;
+        text-decoration: none;
+    }
+
+        a.backBtn i {
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+    .tblthfont {
+        font-weight: bold;
+    }
+</style>
+<script src="~/Scripts/AngularFramework/LoaneeFRDetails.js?v=1.2"></script>
+<div ng-app="loaneeFRMod" ng-controller="loaneeFRCtrl" ng-cloak="">
+    <div class="container-fluid citizen-dash-head">
+        <input type="hidden" id="hdnDistrictId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DistrictId)" />
+        <input type="hidden" id="hdnPldbId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).PLDBId)" />
+        <input type="hidden" id="hdnPldbBranchId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).PLDBBrancchId)" />
+
+        <div class="panel panel-default">
+            <div class="panel-heading flexEqualCenter">
+                <b><i class="fa fa-th-list"></i>&nbsp; Loanee FR Details</b>
+                <div class="text-right">
+                    @*<button ng-click="BackToPage()" class="btn btn-primary dev-btn">Back To List</button>*@
+                </div>
+            </div>
+            <div class="panel-body">
+                <input type="hidden" id="hdnDistrictId" ng-model="search.LoanDistrictId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DistrictId)" />
+                <div class="row">
+                    <div class="col-md-6 form-group">
+                        <label class="help-block-gender">
+                            <input type="radio" id="LoaneePRByDate" name="ReportType" ng-value="1" ng-model="ReportType" ng-change="ReportTypeChange() " selected>दिनांक के अनुसार
+                        </label>
+                        <label class="help-block-gender">
+                            <input type="radio" id="LoaneePRByPLDB" ng-value="2" name="ReportType" ng-model="ReportType" ng-change="ReportTypeChange()">प्राथमिक बैंक के अनुसार
+                        </label>
+                    </div>
+                    <div class="col-md-6 form-group">
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-2 form-group" ng-show="isLBDisabled">
+                        <label for="PLDB_DateFilter">एफआर दिनांक</label>
+                        <input type="date" ng-model="search.PLDB_TransationDate" name="PLDB_DateFilter"  ng-change="SearchReceiptDetails()" id="PLDB_TransationDate" class="form-control" only-select-date/>
+                    </div>
+
+                    <div class="col-md-2 form-group" ng-show="false">
+                        <label>ज़िला<span class="error">*</span></label>
+                        <select id="DISTRICT_ID" ng-model="search.DISTRICT_ID" class="form-control" ng-init="search.DISTRICT_ID='0'" ng-change="PLDBListData(0)">
+                            <option value="0">{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in DistrictList" value="{{item.DISTRICT_ID}}">
+                                {{_language =='en-us' ?  item.DISTRICT_ENG : item.DISTRICT_MANGAL}}
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="col-lg-2 form-group " id="ddlPLDBID" ng-show="Islinkcalled">
+                        <label for="PLDB_ID">प्राथमिक बैंक </label>
+                        <select id="PLDB_ID" name="PLDB_ID" ng-model="search.PLDB_ID" class="form-control" ng-init="PLDB_ID='0'" ng-change="PLDBBranchList('0')">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="itemPLDB in PLDBList  track by itemPLDB.PldbId " value="{{itemPLDB.PldbId}}">
+                                {{itemPLDB.PLDBName}}
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="col-lg-2 form-group"  id="ddlPldbBranchID" ng-show="Islinkcalled">
+                        <label for="PLDB_Branch_ID">शाखा</label>
+                        <select ng-model="search.PLDB_Branch_ID" name="PLDB_Branch_ID" id="PLDB_Branch_ID" class="form-control" ng-init="PLDB_Branch_ID='0'" ng-change="GetPldbLoaneeFinalReceiptDetail('0')">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="itemBlock in PLDBBranches " value="{{itemBlock.BLOCK_ID}}">
+                                {{_language =='en-us' ?  itemBlock.BLOCK_ENG : itemBlock.BLOCK_MANGAL}}
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="col-lg-2" style="padding-top: 26px;">
+                        <button ng-click="SearchReceiptDetails()" class="btn btn-primary dev-btn">Search</button>
+                    </div>
+
+                </div>
+                <div class="table-responsive devtable">
+                    <table class="table table-hover table-striped table-bordered mb-0">
+                        <thead>
+                            <tr>
+                                <th width="60">क्र.सं.</th>
+                                <th>ऋणी का नाम</th>
+                                <th>खाता संख्या</th>
+                                <th>राशि</th>
+                                <th>दिनांक</th>
+                                <th>FR संख्या</th>
+                                <th>एक्शन </th>
+                            </tr>
+
+                        </thead>
+                        <tbody>
+                            <tr ng-if="LoaneePRRecDetails && LoaneePRRecDetails.length > 0" ng-repeat="item in LoaneePRRecDetails">
+                                <td><span ng-hide="item.LoanAccNo=='Total'">{{$index+1}}.</span></td>
+                                <td>{{item.ApplicantName}}</td>
+                                <td>{{item.LoanAccNo}}</td>
+                                <td ng-style="(item.LoanAccNo == 'Total') && {'font-weight': 'bold', 'color': 'black'}">{{item.SubTotal|inrCurrency}}</td>
+                                <td>{{item.CreatedOn }}</td>
+                                <td ng-style="(item.LoanAccNo == 'Total') && {'font-weight': 'bold', 'color': 'black'}">{{item.ReceiptNo}}</td>
+                                <td>
+                                    <div class="payment-delete-remark" ng-hide="item.LoanAccNo=='Total'">
+                                        <span class="dev-spancon">
+                                            <a href="~/PLDB/ots_fr_receipt?otsIdEnc={{item.otsIdEnc}}" target="_blank" class="btn btn-xs btn-primary"> <i class="fa fa-print text-white"></i>  </a>
+                                        </span>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr ng-if="(!LoaneePRRecDetails || LoaneePRRecDetails.length === 0)">
+                                <td colspan="{{colspan}}" style="text-align: center;">No record available.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,357 @@
+﻿@model Cooperative.Models.BankDetailsViewModel
+
+@{
+    ViewBag.Title = "GetBankDetails";
+    Layout = "~/Views/Shared/_CitizenLayout.cshtml";
+}
+
+@if (((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]) != null)
+{
+    if (((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).UserType == "C")
+    {
+        Layout = "~/Views/Shared/_CitizenLayout.cshtml";
+    }
+    else
+    {
+        Layout = "~/Views/Shared/_Layout.cshtml";
+    }
+}
+else
+{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script src="~/Scripts/BankDetails.js"></script>
+<script type="text/javascript" src="~/Scripts/1.8.3.jquery.min.js"></script>
+<script type="text/javascript" src="~/Scripts/pdfmake.min.js"></script>
+<script type="text/javascript" src="~/Scripts/html2canvas.min.js"></script>
+
+<link href="~/Scripts/google_hindi/google_transliteration.css" rel="stylesheet" />
+
+<style>
+    .inputapi-transliterate-indic-suggestion-menu {
+        z-index: 99999 !important;
+        display: block;
+    }
+</style>
+
+<style type="text/css">
+    body {
+        font-family: Arial;
+        font-size: 10pt;
+    }
+
+    table {
+        border: 1px solid #ccc;
+        border-collapse: collapse;
+    }
+
+        table th {
+            background-color: #F7F7F7;
+            color: #333;
+            font-weight: bold;
+        }
+
+        table th, table td {
+            padding: 5px;
+            border: 1px solid #ccc;
+        }
+
+    .NewDate input {
+        float: left;
+        width: 90%;
+    }
+
+    .NewDate button {
+        float: left;
+    }
+
+    .notValid {
+        border: solid 1px red !important
+    }
+</style>
+
+<style>
+
+    @@media (min-width: 768px) {
+
+        .modal-dialog {
+            width: 836px !important;
+            margin: 30px auto !important;
+        }
+    }
+</style>
+
+<div id="mController" ng-app="BankDetailsMasterMOD" ng-controller="BankDetailsMasterCONT">
+
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <h3 class="citizen-dash-head"> {{translation.BankDetails}} </h3>
+    </div>
+
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="devpage-breadcrumb">
+            <ul class="page-breadcrumb">
+                <li class="dev-page-br">
+                    <i class="fa fa-home"> </i>
+                    <a href="../Citizen/Index"> {{translation.Home}} </a>
+                    <i class="fa fa-angle-right"> </i>
+                </li>
+                <li style="float: left">
+                    <span style="margin: 0 5px;">{{translation.BankDetails}}</span>
+                </li>
+
+                <li style="float: right;" id="divAddBtn">
+                    <i class="fa fa-angle-double-right" style="color: #025e63;"></i>
+                    <a onclick="Reset()" style="color: #025e63; cursor: pointer; text-decoration:none; font-weight: bold;" class="ng-binding">{{translation.AddNew}}</a>
+                </li>
+
+
+            </ul>
+        </div>
+    </div>
+    @*MEMBERS*@
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" id="ModelList">
+        <div class="table-responsive citizen-dash-head">
+            <div class="table-dropdown" id="search-filter">
+                <div class="col-md-4">
+                    <label for="search" class="ng-binding">{{translation.Search}}</label>
+                    <input name="searchText" id="search" class="form-control ng-pristine ng-valid ng-empty ng-touched" placeholder="Filter Text" autocomplete="off">
+                </div>
+                @*<div class="col-md-4">
+            <label for="search">{{translation.ItemPerPage}}:</label>
+            <input type="number" min="1" max="100" class="form-control" ng-model="pageSize">
+        </div>*@
+
+                <div class="col-md-4">
+                    <label>&nbsp;</label><br>
+                    <button type="button" onclick="searchRequest()" class="btn btn-primary dev-btn ng-binding">{{translation.Search}}</button>
+                    <button type="button" id="reset" onclick="resetFilter()" class="btn btn-primary dev-btn ng-binding">{{translation.Clear}}</button>
+                  
+                </div>
+            </div>
+            <div id="DataList">
+                @Html.Partial("_BankDetailList")
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="display:none" id="addModal" data-backdrop="static" data-keyboard="false" role="dialog">
+        @*<div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" onclick="Reset() ">&times;</button>
+                <h4 class="modal-title"> {{translation.BankDetails}}</h4>
+            </div>*@
+        <div>
+
+            @Html.Partial("_BankDetails", Model)
+
+        </div>
+    </div>
+</div>
+<input type="hidden" name="hdlang" id="hdlang" value="hi-IN" />
+<script src="~/Scripts/ajaxgrid.js"></script>
+<script>
+    _accessUrl = '../Master/_BankDetailList';
+    // asynList();
+</script>
+
+<script src="~/Scripts/google_hindi/google_transapi.js"></script>
+<script type="text/javascript">
+    google.load("elements", "1", {
+        packages: "transliteration"
+    });
+
+    function onLoad() {
+        var content = document.getElementById('content');
+        if (document.getElementById('hdlang').value == "hi-IN") {
+            var options = {
+                sourceLanguage: google.elements.transliteration.LanguageCode.ENGLISH,
+                destinationLanguage: google.elements.transliteration.LanguageCode.HINDI, // available option English, Bengali, Marathi, Malayalam etc.
+                shortcutKey: 'ctrl+g',
+                transliterationEnabled: true
+            };
+        }
+        else {
+            var options = {
+                sourceLanguage: google.elements.transliteration.LanguageCode.ENGLISH,
+                destinationLanguage: google.elements.transliteration.LanguageCode.HINDI, // available option English, Bengali, Marathi, Malayalam etc.
+                shortcutKey: 'ctrl+g',
+                transliterationEnabled: false
+            }
+        }
+        var ids = ["name_hi"];
+        var control = new google.elements.transliteration.TransliterationControl(options);
+        //control.makeTransliteratable(ids);
+    }
+    google.setOnLoadCallback(onLoad);
+
+    function back() {
+        $("#ModelList").show();
+        $("#addModal").hide();
+    }
+    
+
+    function resetFilter() {
+        $("#search").val('');
+
+    }
+    function SearchFilter(id) {
+        var SearchVal = $("#search").val();
+        $(".blockUI").fadeIn("slow");
+        // $("#addModal").modal("show");
+        $.get("../Master/GetBankDetails?WhereSearchVal=" + SearchVal, function (data, status) {
+            $(".blockUI").fadeOut("slow");
+        })
+    }
+    
+    function update(id) {
+        $(".blockUI").fadeIn("slow");
+        // $("#addModal").modal("show");
+        $.get("../Master/_BankDetails?id=" + id, function (data, status) {
+            $("#hdnID").val(data.Id);
+            $("#SocietyID").val(data.SocietyID);
+            $("#ApplicationNo").val(data.ApplicationNo);
+            $("#RegID").val(data.RegID);
+            $("#BankName").val(data.BankName);
+            $("#BankID").val(data.BankID);
+            $("#BankBranch").val(data.BankBranch);
+            $("#IFSCCode").val(data.IFSCCode);
+            $("#CreatedDate").val(data.CreatedDate);
+            $("#BankAccountNo").val(data.BankAccountNo);
+            $("#AccHolderName").val(data.AccHolderName);
+            $("#IsActive").val(data.IsActive);
+            $("#ModelList").hide();
+            $("#addModal").show();
+            $("#addModal").removeClass("modal-backdrop");
+            // $("#dvmodelBody").html(data);
+            $(".blockUI").fadeOut("slow");
+        })
+    }
+
+    //Delete Bank Details
+    function deleteDetails(id, IsActive) {
+        if (IsActive == 2)
+            if (!confirm("Are you sure to delete record !!"))
+                return false;
+
+        $(".blockUI").fadeIn("slow");
+        $.post("../Master/DeleteBankDetails?Id=" + id + "&ActionId=" + IsActive, function (data, status) {
+            location.reload();
+            if (data > 0 && IsActive == 2) {
+                //alert('Record delete sucessfully!');
+                window.location = "/master/GetBankDetails";
+            }
+            $(".blockUI").fadeOut("slow");
+        })
+    }
+
+    function Reset() {
+
+        $("#SocietyID").val('');
+        $("#ApplicationNo").val(0);
+        $("#RegID").val('');
+        $("#BankName").val('');
+        $("#BankID").val(0);
+        $("#BankBranch").val('');
+        $("#IFSCCode").val('');
+        $("#CreatedDate").val('');
+        $("#BankAccountNo").val('');
+        $("#AccHolderName").val('');
+
+        $("#ModelList").hide();
+        $("#addModal").show();
+        $("#addModal").removeClass("modal-backdrop");
+
+        if ($("#hdnPLDBId").val() != "0") {
+            $("#SocietyID").val($("#hdnPLDBId").val());
+        }
+
+        if ($("#hdnBranchId").val() != "0") {
+            $("#BranchId").val($("#hdnBranchId").val());
+        }
+
+
+        if ($("#hdnPLDBId").val() != "0" && $("#hdnBranchId").val() != "0") {
+            $("#BranchId").attr("disabled", "disabled");
+            $("#SocietyID").attr("disabled", "disabled");
+        }
+
+    }
+
+    function ValidateBankDetailsMaster() {
+
+        var SocietyId = $("#SocietyID").removeClass("notValid").val();
+        var PLDBBranchId = $("#BranchId").removeClass("notValid").val();
+        var ApplicationNo = $("#ApplicationNo").removeClass("notValid").val();
+        var RegID = $("#RegID").removeClass("notValid").val();
+        var BankName = $("#BankName").removeClass("notValid").val();
+        var BankID = $("#BankID").removeClass("notValid").val();
+        var BankBranch = $("#BankBranch").removeClass("notValid").val();
+        var IFSCCode = $("#IFSCCode").removeClass("notValid").val();
+        var BankAccountNo = $("#BankAccountNo").removeClass("notValid").val();
+        var AccHolderName = $("#AccHolderName").removeClass("notValid").val();
+
+        var message = _language == 'en-us' ? 'Validate following : ' : 'निम्नलिखित मान्य करें :';
+
+        //if (SocietyId == 0) {
+        //    message += _language == 'en-us' ? '\n <br />Please select Society.' : '\n <br />कृपया सेक्टर का नाम चुनें।';
+        //    $("#SocietyID").addClass("notValid");
+        //}
+
+        if (ApplicationNo == 0) {
+            message += _language == 'en-us' ? '\n <br />Please enter Application No.' : '\n <br />कृपया आवेदन संख्या दर्ज करें।';
+            $("#ApplicationNo").addClass("notValid");
+        }
+
+        if (RegID == "") {
+            message += _language == 'en-us' ? '\n <br />Please enter RegID.' : '\n <br />कृपया पंजीकरण आईडी दर्ज करें।';
+            $("#RegID").addClass("notValid");
+        }
+
+        if (BankID == 0) {
+            message += _language == 'en-us' ? '\n <br />Please select Bank.' : '\n <br />कृपया बैंक का चयन करें।';
+            $("#BankID").addClass("notValid");
+        }
+
+        if (BankBranch == "") {
+            message += _language == 'en-us' ? '\n <br />Please enter your Bank Branch name.' : '\n <br />कृपया अपना बैंक शाखा नाम दर्ज करें।।';
+            $("#BankBranch").addClass("notValid");
+        }
+        if (IFSCCode == "") {
+            message += _language == 'en-us' ? '\n <br />Please enter IFSC Code.' : '\n <br />कृपया IFSC कोड दर्ज करें।';
+            $("#IFSCCode").addClass("notValid");
+        }
+
+        if (BankAccountNo == "") {
+            message += _language == 'en-us' ? '\n <br />Please enter Bank Account No.' : '\n <br />कृपया बैंक खाता संख्या दर्ज करें।।';
+            $("#BankAccountNo").addClass("notValid");
+        }
+        if (AccHolderName == 0) {
+            message += _language == 'en-us' ? '\n <br />Please enter Account Holder Name.' : '\n <br />कृपया खाता धारक का नाम दर्ज करें।';
+            $("#AccHolderName").addClass("notValid");
+        }
+
+        if (SocietyId == "" || SocietyId == "0"|| SocietyId == 0) {
+            message += _language == 'en-us' ? '\n <br /> Please  Select the Society Type.' : '\n <br /> कृपया  सोसाइटी  का  चयन  करें।';
+            $("#SocietyID").addClass("notValid");
+        }
+
+        if (BranchId == "" || BranchId == "0" || BranchId == 0) {
+            message += _language == 'en-us' ? '\n <br /> Please  Select the PLDB Branch.' : '\n <br /> कृपया पी.एल.डी.बी. ब्रांच चयन  करें।';
+            $("#BranchId").addClass("notValid");
+        }
+
+        
+        if (message.length > 29) {
+            ShowModelAlert("Sector Master", message);
+            return false;
+        }
+        else {
+            $("#formSavebankDetail").submit();
+        }
+        return true;
+    }
+
+</script>
+
+<script src="~/Scripts/google_hindi/google_transliteration.js"></script>

@@ -1,0 +1,393 @@
+﻿@{
+    ViewBag.Title = "Society Assigned To Auditor Report";
+}
+
+<script src="~/Scripts/AngularFramework/SocietyListAssignedToAuditorReport.js?@DateTime.Today.Ticks"></script>
+<script src="~/Scripts/jquery-1.11.3.min.js"></script>
+<script type="text/javascript" src="~/Scripts/jqueryuitimepicker.js"></script>
+<link href="~/Content/Stylesheets/jqueryuitimepicker.css" rel="stylesheet" />
+
+<script type="text/javascript">
+    var tableToExcel = (function () {
+        var uri = 'data:application/vnd.ms-excel;base64,'
+            , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>'
+            , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) }
+            , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
+        return function (table, name) {
+            if (!table.nodeType) {
+                table = document.getElementById(table)
+                table.deleteTFoot();
+            }
+            var ctx = { worksheet: name || 'Worksheet', table: table.innerHTML }
+            window.location.href = uri + base64(format(template, ctx))
+        }
+    })()
+
+    $(document).ready(function () {
+        $('.SetCalender').datepicker({
+            showOn: "both",
+            changeMonth: true,
+            buttonImage: "../images/calender.png",
+            changeYear: true,
+            dateFormat: "dd/mm/yy",
+        });
+    });
+
+
+
+
+</script>
+<style>
+    .NewMemberdob input {
+        float: left;
+        width: 90%;
+    }
+
+    .NewMemberdob button {
+        float: left;
+    }
+
+    .margin-Top20 {
+        margin-top: 5px;
+    }
+
+    .listCount ul {
+        margin: auto !important;
+    }
+</style>
+<div ng-app="UploadAuditByAuditorMod" ng-controller="UploadAuditByAuditorCont" ng-cloak="">
+    <div>
+        <div class="col-md-12">
+            <h3 class="citizen-dash-head">{{translation.SocietyListAssignedToAuditorReport}}</h3>
+            <hr style="margin: 0;">
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <input type="hidden" id="DivisionId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DivisionId)" />
+            <input type="hidden" id="hdnActId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).ActId)" />
+            <input type="hidden" id="hdnDistrictId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DistrictId)" />
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#"> {{translation.MIS}}</a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;"> {{translation.SocietyListAssignedToAuditorReport}} </span>
+                    </li>
+                    <li style="float: right;" id="divAddBtn">
+                        &nbsp;
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="table-responsive citizen-dash-head">
+                <div class="table-dropdown" ng-show="DivShowCount">
+
+
+
+                    <div class="col-md-2 margin-Top20" style="padding-left: 0;">
+                        <label>{{ translation.FincialYearHeading}}</label>
+                        <select name="FIN_YEAR_NAME" class="form-control" ng-model="Filter.FinancialYear" ng-change="LoanListBYFIN_Year()">
+                            <option value="">{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in FinancialYearList" value="{{item.FIN_YEAR_MASTR_ID}}">
+                                {{item.FIN_YEAR_NAME}}
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="form-group col-lg-2 col-md-3 margin-Top20">
+                        <label>{{ translation.Month}}</label>
+                        <select name="Month" ng-model="Filter.Month" class="form-control" ng-init="Filter.Month='0'">
+                            <option value="0">{{translation.All}}</option>
+                            <option ng-repeat="item in MonthList" value="{{item.Month_Id}}">
+                                {{_language =='en-us' ?  item.Month_En : item.Month_Hi}}
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2 col-xs-2" style="display:none;">
+                        <label>{{translation.AuditBy}}:</label>
+                        <select ng-model="Filter.IsEmpanelledCA" name="IsEmpanelledCA" class="form-control">
+                            <option value="">{{translation.SelectOption}}</option>
+                            <option value="0">{{translation.ByDepartment}}</option>
+                            <option value="1">{{translation.ByEmpanelledAgency}}</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 margin-Top20" style="padding-left: 0;" ng-show="DivisionBlock==true">
+                        <label>{{ translation.Division}}</label>
+                        <select name="A.Division_Id" ng-model="DIVISION_ID" ng-disabled="IsSubmiApplication" class="form-control" ng-init="Filter.Division_Id=''" id="ddrDivisionId">
+                            <option value="">{{translation.SelectOption}}</option>
+                            <option ng-repeat="division in Divisions" value="{{division.DIVISION_ID}}">
+                                {{_language =='en-us' ?  division.DIVISION_ENG : division.DIVISION_MANGAL}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 margin-Top20" style="padding-left: 0;">
+                        <label>{{ translation.DistrictHeading}}</label>
+                        <select name="A.DISTRICT_ID" ng-model="Filter.DistrictId" class="form-control" ng-init="Filter.DistrictId=''" id="ddrDistrictId">
+                            <option value="">{{translation.SelectOption}}</option>
+                            <option ng-repeat="district in DistrictList" value="{{district.DISTRICT_ID}}">
+                                {{_language =='en-us' ?  district.DISTRICT_ENG : district.DISTRICT_MANGAL}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-lg-2" style="text-align:left;margin-top:5px;padding-top:5px" ng-hide="true">
+                        <label for="search">{{translation.Date}}:</label>
+                    </div>
+                    <div class="col-lg-4" style="text-align:center;margin-top:5px;padding-top:5px" ng-hide="true">
+                        <input type="radio" id="txtCreatetionDate" name="txtCreatetionDate" value="1" ng-model="IsOnline" class="ng-pristine ng-untouched ng-valid ng-empty"> {{translation.Online}}
+                        <input type="radio" name="SocietyRegistration" id="isonline" value="0" ng-model="IsOnline" class="ng-pristine ng-untouched ng-valid ng-empty">{{translation.Offline}}
+                    </div>
+                    <div class="col-md-2  margin-Top20">
+                        <label>&nbsp;</label><br>
+                        <button type="button" ng-click="GetSocietyData()" class="btn btn-primary dev-btn ng-binding">{{translation.Search}}</button>
+                        <button type="button" ng-click="Reset()" class="btn btn-primary dev-btn ng-binding">{{translation.Clear}}</button>
+                    </div>
+                </div>
+                @*<div class="col-lg-12" style="margin-bottom: 10px;">
+                        <input type="radio" name="SocietyRegistration" ng-click="GetSocietyData()" id="isonline" value="1" ng-model="IsOnline" />{{translation.Online}}
+                        <input type="radio" name="SocietyRegistration" ng-click="GetSocietyData()" id="isonline" value="0" ng-model="IsOnline" />{{translation.Offline}}
+                    </div>*@
+                <div ng-show="DivShowCount">
+                    <table id="tbl6" class="table devtable" style="border:1px solid rgb(222, 221, 221); float: left;">
+                        <thead>
+                            <tr style="text-transform:capitalize;">
+                                <th>
+                                    {{ translation.District}}
+                                </th>
+                                <th>
+                                    Appointed/Allotment
+                                </th>
+                                <th>
+                                    Audit report not uploaded
+                                    @*Partial Submit*@
+                                </th>
+                                <th>
+                                    Audit report uploaded
+                                    @*Completed*@
+                                </th>
+                                @*<th>
+                                        Remaining Count
+                                    </th>*@
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="item in SocietyCombine" ng-class="item.DISTRICT_ENG=='Total' ?'bold':''">
+                                <td>{{_language =='en-us' ?  item.DISTRICT_ENG : item.DISTRICT_MANGAL}}</td>
+                                <td><a href="javascript:void(0)" ng-click="ViewSocietyList(1,item.DISTRICT_ID)">{{ item.TotalAppointed }} </a>   </td>
+                                <td><a href="javascript:void(0)" ng-click="ViewSocietyList(2,item.DISTRICT_ID)">{{ item.TotalPartialSubmit}}</a>   </td>
+                                <td><a href="javascript:void(0)" ng-click="ViewSocietyList(3,item.DISTRICT_ID)">{{ item.TotalComplete}}    </a>    </td>
+                                @*<td><a href="javascript:void(0)" ng-click="ViewSocietyList(4,item.DISTRICT_ID)">{{ item.TotalRemaining}}    </a>    </td>*@
+                            </tr>
+                            <tr ng-if="SocietyCombine.length>0">
+                                <td colspan="4">
+                                    <input type="button" class="btn btn-primary dev-btn" onclick="tableToExcel('tbl6', 'Get Society Audit District Wise Data')" value="Export to Excel">
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div ng-show="DivShowDetail">
+                    <div class="row">
+                        <div class="col-md-12" style="margin-bottom:20px">
+                            <div id="search-filter">
+                                <div class="row">
+                                    <div class="col-md-2 col-xs-2">
+                                        <label>{{translation.AuditBy}}:</label>
+                                        <select ng-model="obj.auditBy" class="form-control">
+                                            <option value="">{{translation.SelectOption}}</option>
+                                            <option value="0">{{translation.ByDepartment}}</option>
+                                            <option value="1">{{translation.ByEmpanelledAgency}}</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2 col-xs-2">
+                                        <label for="search" class="ng-binding">{{translation.SocietyType}}:</label>
+                                        <select ng-model="obj.societyTypeId" class="form-control" ng-init="obj.societyTypeId='0'">
+                                            <option value="0">{{translation.All}}</option>
+                                            <option ng-repeat="item in Typelist" value="{{item.SocietyTypeId}}">
+                                                {{_language =='en-us' ?  item.TypeameEng : item.TypeNameHin}}
+                                            </option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4 col-xs-6">
+                                        <label for="search">{{translation.Search}}:</label>
+                                        <input ng-model="obj.FilterText" name="SearchText" id="search" class="form-control" placeholder="search Society Name/Registration" autocomplete="off">
+                                    </div>
+                                    <div class="col-md-2 col-xs-2">
+                                        <label>{{translation.Pages}}:</label>
+                                        <select ng-model="obj.pageSize" class="form-control" ng-change="DataPaging.pageSize=obj.pageSize" ng-init="obj.pageSize='25'">
+                                            <option value="">{{translation.All}}</option>
+                                            <option value="25">25</option>
+                                            <option value="50">50</option>
+                                            <option value="100">100</option>
+                                            <option value="200">200</option>
+                                            <option value="500">500</option>
+                                            <option value="1000">1000</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2 margin-Top20">
+                                        <label>&nbsp;</label><br>
+                                        <button type="button" ng-click="searchRequest(GetSocietyListAssignedToAuditor)" class="btn btn-primary dev-btn ng-binding">{{translation.Search}}</button>
+                                        <button type="button" ng-click="DetailsReset()" class="btn btn-primary dev-btn ng-binding">{{translation.Clear}}</button>
+                                    </div>
+                                    <div class="col-xs-4" style="padding-top: 25px; ">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-12 text-left" style="margin-bottom:5px">
+                            <button type="button" class="btn btn-primary dev-btn" ng-click="BackDetails()">{{translation.Back}}</button>
+                            @*<input ng-if="AssignedAuditor.length>0" type="button" class="btn btn-primary dev-btn" onclick="tableToExcel('tblAssignedAuditor', 'Get Society Detail Data')" value="Export to Excel">*@
+                            <button type="button" class="btn btn-warning" ng-click="exportExcel()"><i class="fa fa-file-excel-o"></i> Export Excel</button>
+                        </div>
+                    </div>
+                    <table class="table devtable" id="tblAssignedAuditor">
+                        <thead>
+                            <tr>
+                                <th>
+                                    {{translation.SRNO}}
+                                </th>
+                                <th>
+                                    {{translation.SocietyName}}
+                                </th>
+                                <th>
+                                    {{translation.RegistrationNo}}
+                                </th>
+                                <th>
+                                    {{translation.AuditBy}}
+                                </th>
+                                <th>
+                                    {{translation.AuditorInspector}}
+                                </th>
+                                <th>
+                                    {{translation.FincialYearHeading}}
+                                </th>
+                                <th>
+                                    {{translation.RequestStatus}}
+                                </th>
+                                <th>
+                                    {{translation.Date}}
+                                </th>
+                                <th>
+                                    {{translation.Order}}
+                                </th>
+                                <th>
+                                    {{translation.Document}}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr dir-paginate="items in AssignedAuditor | filter: q  | orderBy:colsort:reverseSort | itemsPerPage: pageSize" current-page="currentPage" pagination-id="rolePagination">
+                                <td>{{(((DataPagingDetails.PageNumber - 1) * DataPagingDetails.PageSize) + 1)+$index}}</td>
+                                <td>{{ items.SocietyName }}</td>
+                                <td>{{ items.RegistrationNo }}</td>
+                                <td>{{ items.AuditBy}}</td>
+                                <td>{{ items.AuditorName }}</td>
+                                <td>{{items.FIN_YEAR_NAME}}</td>
+                                <td>{{ items.RequestStatusText }} </td>
+                                <td>{{ items.RequestDate }}</td>
+                                <td><a ng-show="{{items.AuditorAssignFilePath!=''}}" href="{{items.AuditorAssignFilePath}}" class="fa fa-download" target="_blank"></a> </td>
+                                <td><a href="javascript:void(0)" ng-click="ViewDocuments(items.Id)" class="fa fa-eye"></a> </td>
+                            </tr>
+                        </tbody>
+                        <tfoot ng-hide="AssignedAuditor.length>0">
+                            <tr>
+                                <td colspan="10" align="center">
+                                    <img src="~/Content/Images/no_record_found.png" height="90" /><br />
+                                    <h5 class="text-danger">No record found/available!</h5>
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                    <div class="row">
+                        <div class="col-md-2">
+                            <button type="button" class="btn btn-primary dev-btn" ng-click="BackDetails()">{{translation.Back}}</button>
+                            @*<input ng-if="AssignedAuditor.length>0" type="button" class="btn btn-primary dev-btn" onclick="tableToExcel('tblAssignedAuditor', 'Get Society Detail Data')" value="Export to Excel">*@
+                        </div>
+                        <div class="col-md-10">
+                            <div ng-if="DataPagingDetails.TotalPages>1" class="dataTables_paginate paging_simple_numbers" id="dataTables-example_paginate" style="display: flex; align-items: center; justify-content: space-between;">
+                                <div class="dataTables_info" id="dataTables-example_info" role="status" aria-live="polite">
+                                    Total Records: {{DataPagingDetails.TotalRecords}}
+                                </div>
+                                <ul class="pagination pagination_1" style="margin-left: 10px !important; margin:0">
+                                    <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« First</span></li>
+                                    <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« Previous</span></li>
+
+                                    <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest('1',SearchData)" style="cursor: pointer;">
+                                        <span>« First</span>
+                                    </li>
+                                    <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest(DataPagingDetails.PageNumber-1,SearchData)" style="cursor:pointer;">
+                                        <span>« Prev</span>
+                                    </li>
+                                    <li class="{{n==DataPagingDetails.PageNumber?'active':''}}" style="{{n==DataPagingDetails.PageNumber?'':'cursor: pointer'}}" ng-repeat="n in PagingRange(DataPagingDetails.StartPageNumber,DataPagingDetails.EndPageNumber,DataPagingDetails.TotalPages)" ng-click="pageRequest(n,SearchData)"><span>{{n}}</span></li>
+                                    <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Next</span></li>
+                                    <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Last</span></li>
+                                    <li ng-if="DataPagingDetails.PageNumber!= DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.PageNumber+1,SearchData)" style="cursor:pointer;">
+                                        <span>Next »</span>
+                                    </li>
+                                    <li ng-if="DataPagingDetails.PageNumber != DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.TotalPages,SearchData)" style="cursor:pointer;">
+                                        <span>Last »</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="dev-popup-body modal fade" id="myModal" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">{{translation.UploadeddocumentList}}</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive citizen-dash-head">
+                        <table class="table devtable">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        {{translation.SRNO}}
+                                    </th>
+                                    <th>
+                                        {{translation.Name}}
+                                    </th>
+                                    <th ng-repeat="item in DocumentList.DocumentTypes">
+                                        {{(item === 'docx' || item === 'doc') ? translation.WORD : ( (item === 'xls' || item === 'xlsx') ? translation.EXCEL : (item === 'pdf' ? translation.PDF : ''))}}
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="items in DocumentList.DocumentList">
+                                    <td>{{$index+1}}</td>
+                                    <td>
+                                        {{ _language =='en-us' ? items.DocumentNameEnglish  : items.DocumentNameHindi}}
+                                    </td>
+                                    <td ng-repeat="item2 in items.DocumenTypeDetails">
+                                        <a ng-show="item2.URL !=''" href="{{item2.URL}}" target="_blank" style="color:#505050;" class="fa fa-download"></a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                            <tfoot ng-hide="DocumentList.DocumentList.length>0">
+                                <tr>
+                                    <td colspan="2" align="center">
+                                        <img src="~/Content/Images/no_record_found_1.png" height="100" />
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">{{translation.Close}}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

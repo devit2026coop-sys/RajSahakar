@@ -1,0 +1,593 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    .profile-d1 {
+        color: #000;
+        background: #fff;
+        border-radius: 5px;
+    }
+
+    .profile-d1-hr {
+        font-size: 17px;
+        background: #025e63;
+        padding: 10px 15px;
+        color: #fff;
+        border-radius: 4px;
+    }
+
+    .dev-spancon {
+        font-size: 14px;
+        color: #424242;
+        font-weight: 700;
+    }
+
+    label {
+        color: #025e63;
+        font-size: 14px;
+    }
+
+    .devtable thead tr th {
+        background: #64c0c5;
+        color: #fff;
+    }
+</style>
+<script src="~/Scripts/AngularFramework/ChangeApplicationStatus.js?id=1"></script>
+<script src="~/Scripts/jquery.unobtrusive-ajax.min.js"></script>
+<script type="text/javascript">
+    function OnSuccess(data) {
+        $('#preloader').hide();
+        if (data.UserType == 'C') {
+            $('#FormPost').html(data.result);
+            $('#FormPost').find('form').submit();
+        }
+        else {
+            if (data.result == '1') {
+                alert('Payment Successful Received');
+                window.location = "../Citizen/SocietyProfile";
+            }
+            else {
+                ShowModelAlert("Society Administrative Details", 'Issue in Payment Receiveing Please Try after Some time');
+            }
+        }
+    }
+    function OnFailure(data) {
+        $('#preloader').hide();
+    }
+    function OnBegin() {
+        $('#preloader').show();
+    }
+</script>
+
+<style>
+    label {
+        display: inline-block;
+        width: 100% !important;
+        margin-bottom: 5px;
+        font-weight: 700;
+    }
+
+    .zoom {
+        transition: transform .2s; /* Animation */
+        margin: 0 auto;
+    }
+
+        .zoom:hover {
+            padding-left: 30px;
+            transform: scale(2.5); /* (150% zoom - Note: if the zoom is too large, it will go outside of the viewport) */
+        }
+</style>
+<style>
+    a > i.fa.fa-plus-circle {
+        font-size: 25px;
+        cursor: pointer;
+    }
+
+    a:hover > i.fa.fa-plus-circle {
+        font-size: 26px;
+        cursor: pointer;
+    }
+
+    a > i.fa.fa-eye {
+        font-size: 25px;
+        cursor: pointer;
+    }
+
+    a:hover > i.fa.fa-eye {
+        font-size: 26px;
+        cursor: pointer;
+    }
+
+    .add-more {
+    }
+
+    .dvfieldset {
+        border: 1px solid #b0adad;
+        border-radius: 5px;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+        background: #fff;
+    }
+
+    .dvlegend {
+        width: auto;
+        padding: 24px;
+        margin-left: 11px;
+        border: 1px solid gray;
+        padding: 5px;
+        border-radius: 14px;
+        font-size: 16px;
+        padding-left: 14px;
+        padding-right: 15px;
+        background: #025e63;
+        color: #fff;
+    }
+</style>
+<div ng-app="SocietyApplicationStatusMod" ng-controller="SocietyApplicationStatusCnt">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <h5 style="text-align:center;font-size: 17px;background:#025e63;color:#fff;" class="citizen-dash-head">Registration of Society under Rajasthan Society Registration Act,{{SocietyDetailsData.BasicDetails.ActId==1?'1958':SocietyDetailsData.BasicDetails.ActId==3?'2001':SocietyDetailsData.BasicDetails.ActId==7?'2005':''}}/राजस्थान सोसायटी रजिस्ट्रीकरण अधिनियम, {{SocietyDetailsData.BasicDetails.ActId==1?'1958':SocietyDetailsData.BasicDetails.ActId==3?'2001':SocietyDetailsData.BasicDetails.ActId==7?'2005':''}} के अंतर्गत सोसायटी का पंजीकरण</h5>
+    </div>
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" id="printTable" ng-show="divSocietyProfilingShow">
+        <fieldset class="dvfieldset">
+            <legend class="dvlegend">Application Details/आवेदन के ब्यौरे:</legend>
+            <input type="hidden" id="hdnDistrictId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DistrictId)" />
+            <input type="hidden" id="hdnActId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).ActId)" />
+            <div class="fa col-lg-12">
+                <div class="fa col-md-2"><label>{{_language=='en-us' ? translation.SocietyRegistrationNo: translation.SocietyRegistrationNo}} :</label></div>
+                <div class="fa col-md-5">
+                    <span class="dev-spancon">  {{ _language=='en-us' ? SocietyDetailsData.BasicDetails.RegistrationNo : SocietyDetailsData.BasicDetails.RegistrationNo }}</span>
+                </div>
+                <div class="fa col-md-1"><label>{{_language=='en-us' ? translation.Status: translation.Status}} :</label></div>
+                <div class="fa col-md-4">
+                    <span class="dev-spancon">{{ _language =='en-us' ? ApplicationFlowSociety[0].ProceesStatusTextEn : ApplicationFlowSociety[0].ProceesStatusTextHi}}</span>
+                </div>
+            </div>
+            <div class="fa col-lg-12">
+                <div class=" profile-d1" style="margin-top: 30px;">
+                    <div>
+                        <h5 class="profile-d1-hr" style="text-align:center">{{_language=='en-us' ? 'Application Trail': 'आवेदन ट्रेल'}} </h5>
+                    </div>
+                    <div class="col-md-12 table-responsive ">
+                        <table class="table table-responsive devtable" style="color:black" id="a">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        {{translation.SRNO}}
+                                    </th>
+                                    <th>
+                                        {{translation.Status}}
+                                    </th>
+                                    <th>{{translation.AssignTo}}</th>
+                                    <th>
+                                        {{translation.Remarks}}
+                                    </th>
+                                    <th>
+                                        {{translation.CreationDate}}
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr dir-paginate="AppFlowOne in ApplicationFlowSociety | itemsPerPage: 50">
+                                    <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                                    <td>{{ _language =='en-us' ? AppFlowOne.ProceesStatusTextEn : AppFlowOne.ProceesStatusTextHi}}</td>
+                                    <td>{{AppFlowOne.OfficerNameEn}}</td>
+                                    <td>{{AppFlowOne.Remark}}</td>
+                                    <td>{{AppFlowOne.ActionDate}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
+            </div>
+        </fieldset>
+        <fieldset class="dvfieldset">
+            <legend class="dvlegend">Society Details/सोसायटी विवरण</legend>
+            <div class="fa col-lg-12">
+                <div class="col-lg-12 table-responsive">
+                    <table class="col-lg-12 table ">
+
+                        <tr>
+
+                            <td>
+
+                                <label>{{_language=='en-us' ? translation.BRN: translation.BRN}} :</label>
+
+                            </td>
+                            <td>
+
+                                <span class="dev-spancon"> {{ _language=='en-us' ? SocietyDetailsData.BasicDetails.BRN : SocietyDetailsData.BasicDetails.BRN }}</span>
+
+
+                            </td>
+                            <td>
+                                <label>{{_language=='en-us' ? translation.Act: translation.Act}} :</label>
+                            </td>
+                            <td>
+                                <span class="dev-spancon"> {{ _language=='en-us' ? SocietyDetailsData.BasicDetails.ActNameEn : SocietyDetailsData.BasicDetails.ActNameHi }}  </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label>{{_language=='en-us' ? translation.SocietyName: translation.SocietyName}} :</label>
+                            </td>
+                            <td>
+                                <span class="dev-spancon">   {{_language=='en-us' ? SocietyDetailsData.BasicDetails.SocietyName: SocietyDetailsData.BasicDetails.SocietyName}}</span>
+                            </td>
+                            <td>
+                                <label>{{_language=='en-us' ? translation.SocietyRegistrationNo: translation.SocietyRegistrationNo}} :</label>
+
+                            </td>
+                            <td>
+                                <span class="dev-spancon">  {{ _language=='en-us' ? SocietyDetailsData.BasicDetails.RegistrationNo : SocietyDetailsData.BasicDetails.RegistrationNo }}</span>
+                            </td>
+
+                        </tr>
+
+                        <tr>
+                            <td>
+                                <label>{{_language=='en-us' ? translation.RegistrationDate: translation.RegistrationDate}} :</label>
+
+                            </td>
+                            <td>
+                                <span class="dev-spancon" ng-hide="SocietyDetailsData.BasicDetails.RegistrationDate.indexOf('9999') != -1">
+                                    {{ SocietyDetailsData.BasicDetails.RegistrationDate}}
+                                </span>
+                            </td>
+                            <td>
+                                <label>{{_language=='en-us' ? translation.SocietyType: translation.SocietyType}} :</label>
+                            </td>
+                            <td>
+                                <span class="dev-spancon">  {{ _language=='en-us' ? SocietyDetailsData.BasicDetails.TypeameEng : SocietyDetailsData.BasicDetails.TypeNameHin }}</span>
+                            </td>
+                        </tr>
+
+
+                        <tr>
+                            <td>
+                                <label>{{translation.ElectionDate}} :</label>
+
+                            </td>
+                            <td>
+                                <span class="dev-spancon" ng-hide="SocietyDetailsData.BasicDetails.ElectionDate.indexOf('9999') != -1">
+                                    {{ SocietyDetailsData.BasicDetails.ElectionDate }}
+                                </span>
+                            </td>
+                            <td>
+                                <label>{{ translation.Business}} :</label>
+                            </td>
+                            <td>
+                                <span class="dev-spancon">  {{ _language=='en-us' ? SocietyDetailsData.BasicDetails.BusinessNameEn : SocietyDetailsData.BasicDetails.BusinessNameHi }}</span>
+                            </td>
+                        </tr>
+
+
+                        <tr>
+                            <td>
+                                <label>{{translation.GeneralMeetingDate}} :</label>
+
+                            </td>
+                            <td>
+                                <span class="dev-spancon" ng-hide="SocietyDetailsData.BasicDetails.AGMDate.indexOf('9999') != -1">
+                                    {{ SocietyDetailsData.BasicDetails.AGMDate }}
+                                </span>
+                            </td>
+                            <td ng-show="SocietyDetailsData.BasicDetails.ActId=='3'">
+                                <label>{{ translation.LTDSocietyLiablityMember}} :</label>
+                            </td>
+                            <td ng-show="SocietyDetailsData.BasicDetails.ActId=='3'">
+                                <span class="dev-spancon"> {{SocietyDetailsData.BasicDetails.MemberLiablity  }}</span>
+                            </td>
+                        </tr>
+
+                        <tr ng-show="SocietyDetailsData.BasicDetails.ActId!='1'">
+                            <td>
+                                <label>{{ translation.EntranceFeesCollected }} :</label>
+
+                            </td>
+                            <td>
+                                <span class="dev-spancon">  {{  SocietyDetailsData.BasicDetails.EntranceFeesCollected }}</span>
+                            </td>
+                            <td>
+                                <label>{{ translation.Liability}} :</label>
+                            </td>
+                            <td>
+                                <span class="dev-spancon">  {{ _language=='en-us' ? SocietyDetailsData.BasicDetails.LiablityNameEn : SocietyDetailsData.BasicDetails.LiablityNameHi }}</span>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>
+                                <label>{{ translation.GenMeetingParticipant}} :</label>
+
+                            </td>
+                            <td>
+                                <span class="dev-spancon">    {{ SocietyDetailsData.BasicDetails.NoOfMemberInAGM }}</span>
+                            </td>
+                            <td>
+                                <label>{{ translation.MembersApplyingForTheSociety}} :</label>
+                            </td>
+                            <td>
+                                <span class="dev-spancon">  {{ SocietyDetailsData.BasicDetails.TotalNumberOfMembers }}</span>
+                            </td>
+                        </tr>
+
+                        <tr ng-show="SocietyDetailsData.BasicDetails.ActId=='3'">
+                            <td>
+                                <label>{{ translation.PaidUpShareCapital}} :</label>
+
+                            </td>
+                            <td>
+                                <span class="dev-spancon">  {{SocietyDetailsData.BasicDetails.PaidUpShareCapital}}</span>
+                            </td>
+                            <td>
+                                <label>{{translation.OneShareValue}} :</label>
+                            </td>
+                            <td>
+                                <span class="dev-spancon">  {{ SocietyDetailsData.BasicDetails.SingleShareValue }}</span>
+                            </td>
+                        </tr>
+
+                        <tr ng-show="SocietyDetailsData.BasicDetails.ActId=='3'">
+                            <td>
+                                <label>{{_language=='en-us' ? translation.SocietyClass: translation.SocietyClass}} :</label>
+
+                            </td>
+                            <td>
+                                <span class="dev-spancon">     {{ _language=='en-us' ? SocietyDetailsData.BasicDetails.ClassNameEn : SocietyDetailsData.BasicDetails.ClassNameHi }}</span>
+                            </td>
+                            <td>
+                                <label>{{_language=='en-us' ? translation.SocietySubClass: translation.SocietySubClass}} :</label>
+                            </td>
+                            <td>
+                                <span class="dev-spancon">   {{ _language=='en-us' ? SocietyDetailsData.BasicDetails.SubClassNameEn : SocietyDetailsData.BasicDetails.SubClassNameHi }}</span>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td ng-show="SocietyDetailsData.BasicDetails.ActId!='1'">
+                                <label>{{_language=='en-us' ? translation.NoOfBranches: translation.NoOfBranches}} :</label>
+
+                            </td>
+                            <td ng-show="SocietyDetailsData.BasicDetails.ActId!='1'">
+                                <span class="dev-spancon">    {{ _language=='en-us' ? SocietyDetailsData.BasicDetails.NoOfBranches : SocietyDetailsData.BasicDetails.NoOfBranches }}</span>
+                            </td>
+                            <td ng-show="showBankstatement">
+                                <label>{{_language=='en-us' ? translation.PaidUpShareCapitals: translation.PaidUpShareCapitals}} :</label>
+                            </td>
+                            <td ng-show="showBankstatement">
+                                <span class="dev-spancon">   {{SocietyDetailsData.BasicDetails.PaidUpShareCapital}}</span>
+                            </td>
+                        </tr>
+
+                        @*
+                        <tr>
+                            <td>
+                                <label>{{_language=='en-us' ? translation.PaidUpShareCapitals: translation.PaidUpShareCapitals}} :</label>
+                            </td>
+                            <td>
+                                <span class="dev-spancon">   {{SocietyDetailsData.BasicDetails.PaidUpShareCapital}}</span>
+                            </td>
+                        </tr>*@
+
+                    </table>
+                </div>
+            </div>
+        </fieldset>
+        <fieldset class="dvfieldset" ng-show="DivPayment" ng-if="false">
+            <legend class="dvlegend">Payment Details/भुगतान का विवरण</legend>          
+            <div class="fa col-lg-12 profile-d">
+                <div class="col-md-12 table-responsive ">
+                    <table class="table table-responsive devtable" style="color:black">
+                        <thead>
+                            <tr>
+                                <th> {{translation.SRNO}}</th>
+                                <th>{{translation.RequestID}}</th>
+                                <th>{{translation.TRANSACTIONSTATUSCODE}}</th>
+                                <th>{{translation.ReceiptNo}}</th>
+                                <th>{{translation.TRANSACTIONID}}</th>
+                                <th>{{translation.Amount}}</th>
+                                <th>{{translation.PaidAmount}}</th>
+                                <th>{{translation.Status}}</th>
+                                <th>{{translation.StatusMsg}}</th>
+                                <th>{{translation.RequestDateTime}}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="Payment in SocietyPaymentTransectin">
+                                <td>{{$index+1}}</td>
+                                <td><span class="dev-spancon">{{Payment.ResponseString.PRN}}</span></td>
+                                <td><span class="dev-spancon">{{Payment.ResponseString.TRANSACTIONSTATUSCODE}}</span></td>
+                                <td><span class="dev-spancon">{{Payment.ResponseString.RECEIPTNO}}</span></td>
+                                <td><span class="dev-spancon">{{Payment.ResponseString.TRANSACTIONID}}</span></td>
+                                <td><span class="dev-spancon">{{Payment.ResponseString.AMOUNT}}{{ Payment.ResponseString.TRANSAMT}}</span></td>
+                                <td><span class="dev-spancon">{{Payment.ResponseString.PAIDAMOUNT}}</span></td>
+                                <td><span class="dev-spancon">{{Payment.ResponseString.RESPONSEMESSAGE}} {{Payment.ResponseString.TRANSACTIONSTATUS}}</span></td>
+                                <td><span class="dev-spancon">{{Payment.ResponseString.STATUS}}{{Payment.ResponseString.MSG}}</span></td>
+                                <td><span class="dev-spancon">{{Payment.CreationDate}}</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+
+            <fieldset class="dvfieldset">
+                <legend class="dvlegend">Change Payment Status/भुगतान की स्थिति बदलें</legend>
+                <div class="fa col-lg-12 profile-d1">
+                    @*ng-show="BaseUserId==ApplicationFlowMaster.UserId"*@
+                    <form class="dev-search-form" name="MyClassForm" style="overflow: hidden; margin-bottom:35px;">
+                        <div class="col-md-6">
+                            <label>
+                                {{translation.Status}} :
+                            </label>
+                            <select ng-model="ApplicationFlowMaster.ApplicationPayment" class="form-control">                                
+                            <option value="">{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in PaymentStatusList" value="{{item.Id}}">
+                                {{_language =='en-us' ?  item.ProceesStatusTextEn : item.ProceesStatusTextHi}}
+                            </option>
+                            </select>
+                        </div>
+                        <div class="clearfix"></div>
+                        <div class="form-group col-md-6">
+                            <label>{{translation.Remarks}}</label>
+                            <textarea type="text" rows="4" cols="50" class="form-control" id="PaymentRemark" name="PaymentRemark" ng-bind="PaymentRemark" ng-model="ApplicationFlowMaster.PaymentRemark" placeholder={{translation.Remarks}}></textarea>                          
+                        </div>                      
+                       
+                        <div class="form-group col-md-12">
+                            <div class="dev-menu-btn">
+                                <button type="submit" class="btn btn-primary" ng-click="SaveStatusApplicationPayment()">{{translation.Submit}}</button>
+                                <button type="submit" class="btn btn-primary" ng-click="BackToPage()">{{translation.Back}}</button>
+                            </div>
+                        </div>                    
+                    </form>
+                </div>
+            </fieldset>
+
+        </fieldset>    
+    </div>
+
+    <div class=" profile-d1" style="margin-top: 30px;">
+        <fieldset class="dvfieldset">
+            <legend class="dvlegend">Change Application Status/एप्लिकेशन की स्थिति बदलें</legend>
+            <div class="fa col-lg-12 profile-d1">
+                @*ng-show="BaseUserId==ApplicationFlowMaster.UserId"*@
+                <form class="dev-search-form" name="MyClassForm" style="overflow: hidden; margin-bottom:35px;">
+                    <div class="col-md-6">
+                        <label>
+                            {{translation.Status}} *
+                        </label>
+                        <select ng-model="ApplicationFlowMaster.ApplicationFlowID" class="form-control">
+                            <option value="">{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in SocietyProceesStatus" value="{{item.ApplicationFlowID}}">
+                                {{_language =='en-us' ?  item.ProceesStatusTextEn : item.ProceesStatusTextHi}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="clearfix"></div>
+
+                    <div class="form-group col-md-6" ng-hide="ShowOTPDiv">
+                        <label>{{translation.Remarks}}*</label>
+                        <textarea type="text" rows="4" cols="50" class="form-control" id="Remarks" name="Remarks" ng-bind="Remarks" ng-model="ApplicationFlowMaster.Remark" placeholder={{translation.Remarks}}></textarea>
+                        <code style="float: left;">
+                        </code>
+                        @*<input type="hidden" class="form-control hindiFont" id="txtRemark" ng-bind="Remarks" ng-model="ApplicationFlowMaster.Remark" />
+            <textarea type="text" rows="4" cols="50" class="form-control hindiFont" name="Remarks" onblur="convert_to_unicode(this,'txtRemark')" placeholder={{translation.Remarks}}></textarea>*@
+                    </div>
+                    <div class="clearfix"></div>
+                    <div class="form-group col-md-6" ng-hide="ShowOTPDiv">
+                        <label>Attachment*</label>
+                        <input type="file" name="File" accept="application/pdf,image/*" class="form-control" id="StatusChangeFile">
+                    </div>
+
+                    <div class="form-group col-md-12" ng-hide="ShowOTPDiv">
+                        <div class="citizen-dash-head col-md-3" ng-show="ApplicationFlowMaster.StatusId==5 || ApplicationFlowMaster.StatusId==10 || ApplicationFlowMaster.StatusId==20">
+                            <label>{{translation.ObjectionBelongTo}}</label>
+                        </div>
+                        <div class="citizen-dash-head col-md-9" style="text-align:left" ng-show="ApplicationFlowMaster.StatusId==5 || ApplicationFlowMaster.StatusId==10 || ApplicationFlowMaster.StatusId==20">
+                            <input type="checkbox" style="" name="Basic" ng-model="ObjectionFlagBasic">{{translation.SocietyDetails}}
+                            <input type="checkbox" style="padding-left:15px;margin-left:15px" name="Administrative" ng-model="ObjectionFlagAdmin">{{translation.AdministrativeDetails}}
+                            <input type="checkbox" style="padding-left:15px;margin-left:15px" name="Office" ng-model="ObjectionFlagOffice"> {{translation.SocietyOfficeDetails}}
+                        </div>
+                    </div>
+                    <div class="form-group col-md-12" ng-hide="ShowOTPDiv">
+                        <div class="dev-menu-btn">
+                            <button type="submit" class="btn btn-primary" ng-click="SaveStatusApplicationStatus()">{{translation.Submit}}</button>
+                            <button type="submit" class="btn btn-primary" ng-click="BackToPage()">{{translation.Back}}</button>
+                        </div>
+                    </div>
+                    <div class="form-group col-md-6" ng-show="ShowOTPDiv">
+                        <label>{{translation.EnterOTP}}</label>
+                        <input type="text" class="form-control" name="Remarks" ng-bind="OTP" ng-model="ApplicationFlowMaster.OTP" placeholder={{translation.EnterOTP}} autocomplete="off" /><br />
+                        <button type="submit" class="btn btn-primary" ng-click="VerifyOTP()">{{translation.Submit}}</button>
+                        <button type="submit" class="btn btn-primary" ng-click="SaveSocietyApplicationFlowStatus()">{{translation.ReSendOTP}}</button>
+                    </div>
+                </form>
+            </div>
+        </fieldset>
+
+   <fieldset class="dvfieldset" ng-if="false">
+       <legend class="dvlegend">Change Officer/अधिकारी बदलें</legend>
+            <div class="fa col-lg-12 profile-d1">
+                @*ng-show="BaseUserId==ApplicationFlowMaster.UserId"*@
+                <form class="dev-search-form" name="MyClassForm" style="overflow: hidden; margin-bottom:35px;">
+                     <div class="col-md-6" ng-hide="ShowOTPDiv">
+                                
+                             <label>
+                                 {{translation.Officer}} :
+                             </label>
+                             <select ng-model="ApplicationFlowMaster.OfficeId" class="form-control" >                             
+                                 <option value="" >{{translation.SelectOption}}</option>
+                                 <option ng-repeat="item in OfficerData " value="{{item.userid}}">
+                                     {{ item.OfficerNameEn }}
+                                 </option>
+                             </select>
+                         </div>
+                    
+                    <div class="clearfix"></div>
+
+                    <div class="form-group col-md-6">
+                        <label>{{translation.Remarks}}</label>
+                        <textarea type="text" rows="4" cols="50" class="form-control" id="Remarks" name="Remarks" ng-bind="Remarks" ng-model="ApplicationFlowMaster.RemarkUser" placeholder={{translation.Remarks}}></textarea>
+                        <code style="float: left;">
+                        </code>
+                        @*<input type="hidden" class="form-control hindiFont" id="txtRemark" ng-bind="Remarks" ng-model="ApplicationFlowMaster.Remark" />
+                        <textarea type="text" rows="4" cols="50" class="form-control hindiFont" name="Remarks" onblur="convert_to_unicode(this,'txtRemark')" placeholder={{translation.Remarks}}></textarea>*@
+                    </div>   
+                    <div class="form-group col-md-12">
+                        <div class="dev-menu-btn">
+                            <button type="submit" class="btn btn-primary" ng-click="SaveApplicationUser()">{{translation.Submit}}</button>
+                            <button type="submit" class="btn btn-primary" ng-click="BackToPage()">{{translation.Back}}</button>
+                        </div>
+                    </div>                   
+                </form>
+            </div>
+        </fieldset>
+    </div>
+    <!-- end  show details -->
+    <div id="stop" class="scrollTop">
+        <span><a href=""><i class="fa fa-arrow-up">Top</i></a></span>
+    </div>
+</div>
+<input type="hidden" name="hdlang" id="hdlang" value="hi-IN" />
+
+<link href="~/Scripts/google_hindi/google_transliteration.css" rel="stylesheet" />
+
+<style>
+    .inputapi-transliterate-indic-suggestion-menu {
+        z-index: 99999 !important;
+        display: block;
+    }
+</style>
+<script src="~/Scripts/google_hindi/google_transapi.js"></script>
+<script type="text/javascript">
+    google.load("elements", "1", {
+        packages: "transliteration"
+    });
+
+    function onLoad() {
+        var content = document.getElementById('content');
+        if (document.getElementById('hdlang').value == "hi-IN") {
+            var options = {
+                sourceLanguage: google.elements.transliteration.LanguageCode.ENGLISH,
+                destinationLanguage: google.elements.transliteration.LanguageCode.HINDI, // available option English, Bengali, Marathi, Malayalam etc.
+                shortcutKey: 'ctrl+g',
+                transliterationEnabled: true
+            };
+        }
+        else {
+            var options = {
+                sourceLanguage: google.elements.transliteration.LanguageCode.ENGLISH,
+                destinationLanguage: google.elements.transliteration.LanguageCode.HINDI, // available option English, Bengali, Marathi, Malayalam etc.
+                shortcutKey: 'ctrl+g',
+                transliterationEnabled: false
+            }
+        }
+        var ids = ["Remarks"];
+        var control = new google.elements.transliteration.TransliterationControl(options);
+        control.makeTransliteratable(ids);
+    }
+    google.setOnLoadCallback(onLoad);
+
+</script>
+<script src="~/Scripts/google_hindi/google_transliteration.js"></script>

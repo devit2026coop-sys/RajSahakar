@@ -1,0 +1,185 @@
+﻿
+@{
+    ViewBag.Title = "Generate and Manage Beneficiary DBT File";
+    Layout = "~/Views/Shared/_PMKisanLayout.cshtml";
+}
+
+<script src="~/Scripts/AngularFramework/GenerateBeneficiaryDBTFiles.js?v=@DateTime.Now.Ticks"></script>
+<script src="~/Scripts/AngularFramework/commonEsign.js?v=@DateTime.Now.Ticks"></script>
+@*<script src="~/Scripts/AngularFramework/AadharAuthLanding.js"></script>*@
+<div class="container-fluid QuarterlyOverviewSection" ng-app="gbdbtApp" ng-controller="gbdbtCnt" ng-cloak="">
+
+    <div class="panel panel-default">
+        <div class="panel-heading flexEqualCenter">
+            <b><i class="fa fa-paper-plane"></i>&nbsp; Manage Beneficiary DBT File</b>
+        </div>
+        <div class="panel-body">
+            <form ng-submit="GenerateBeneficiaryDBTFiles()" ng-show="(objRFT!=null && objRFT!='') && (dbtFileList==null || dbtFileList.length==0)">
+                <div class="row">
+                    <div class="col-md-3 col-sm-4 mt-5">
+                        <label>RFT No.</label>: {{objRFT.RFT_NO}}
+                    </div>
+                    <div class="col-md-3 col-sm-4 mt-5">
+                        <label>{{translation.FinancialYear}}</label>: {{objRFT.FINANCIAL_YEAR}}
+                    </div>
+                    <div class="col-md-3 col-sm-4 mt-5">
+                        <label>Scheme Name</label>: {{objRFT.SchemeName_EN}}
+                    </div>
+                    <div class="col-md-3 col-sm-4 mt-5">
+                        <label>Quadrimester</label>: {{objRFT.QUADRIMESTER}}
+                    </div>
+                    <div class="col-md-3 col-sm-4 mt-5">
+                        <label>Installment</label>: {{objRFT.INSTALLMENT_TYPE}}
+                    </div>
+                    <div class="col-md-3 col-sm-4 mt-5">
+                        <label>DBT Date</label>
+                        <input type="date" class="form-control" id="dbtDate" ng-model="objRFT.TRAN_DATE_TIME" required>
+                    </div>
+                </div>
+                <div class="clearfix"></div>
+                <div class="row">
+                    <div class="col-md-12 text-center mt-5 mb-5">
+                        <button type="submit" class="btn btn-primary">Generate DBT Files</button>
+                    </div>
+                </div>
+            </form>
+            <div class="row">
+                <div class="col-md-12 mt-2 mb-1 text-right">
+                    Download all generated <i class="fa fa-hand-o-right"></i>
+                    <button type="button" class="btn btn-default" ng-show="IS_BILL_GENERATED==true" ng-click="downloadZip(1)">RFT BILL</button>
+                    <button type="button" class="btn btn-success" ng-show="IS_BILL_ESIGNED==true" ng-click="downloadZip(1,1)">ESIGNED RFT BILL</button>
+                    <button type="button" class="btn btn-default" ng-show="IS_XML_GENERATED==true" ng-click="downloadZip(2)">XML FILE</button>
+                    <button type="button" class="btn btn-default" ng-show="IS_XML_ESIGNED==true" ng-click="downloadZip(2,1)">ESIGNED SLIA</button>
+                    <button type="button" class="btn btn-success" ng-show="IS_XML_ENCRYPTED==true" ng-click="downloadZip(3)">ENCRYPTED SLIA </button>
+                </div>
+            </div>
+            <div class="table-responsive" ng-show="dbtFileList.length>0">
+                <table class="table table-hover table-striped table-bordered mb-0">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Debit Reference No.</th>
+                            <th>Credit Count</th>
+                            <th>Debit Amount</th>
+                            <th>DBT Date</th>
+                            <th class="text-center">RFT Bill</th>
+                            <th class="text-center">XML File</th>
+                            <th class="text-center">Is eSigned</th>
+                            <th>eSigned Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="li in dbtFileList">
+                            <td>{{$index+1}}</td>
+                            <td><a href="javascript:void()">{{li.DEBIT_REFERENCE}}</a></td>
+                            <td>{{li.CREDIT_COUNT}}</td>
+                            <td>{{li.DEBIT_AMOUNT}}</td>
+                            <td>{{li.TRAN_DATE_TIME}}</td>
+                            <td class="text-center">
+                                <span ng-show="li.IS_BILL_GENERATED=='True' && li.IS_BILL_ESIGNED=='False'">
+                                    <a href="~/Content/CMK_DBT/{{li.BILL_PATH}}" class="btn btn-sm btn-primary" title="Download RFT Bill" download><i class="fa fa-download"></i></a>
+                                    <a href="~/Content/CMK_DBT/{{li.BILL_PATH}}" class="btn btn-sm btn-primary" target="_blank" title="View Bill"><i class="fa fa-eye"></i></a>
+                                </span>
+                                <span ng-show="li.IS_BILL_GENERATED=='True' && li.IS_BILL_ESIGNED=='True'">
+                                    <a href="~/Content/CMK_DBT/{{li.ESIGNED_BILL_PATH}}" class="btn btn-sm btn-primary" title="Download e-Signed RFT Bill" download><i class="fa fa-download"></i></a>
+                                    <a href="~/Content/CMK_DBT/{{li.ESIGNED_BILL_PATH}}" class="btn btn-sm btn-success" target="_blank" title="View e-Signed Bill"><i class="fa fa-check"></i> View</a>
+                                </span>
+                                <span ng-show="li.IS_BILL_GENERATED=='False'">
+                                    <button type="button" class="btn btn-sm btn-warning" ng-click="GenetateRFT_BILL(li.CMK_DebitMasterId_Enc)">Generate RFT Bill</button>
+                                </span>
+                                @if (((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).UserId == 3137)
+
+                                {
+                                    @*<span ng-show="li.IS_BILL_GENERATED=='True' && li.IS_BILL_ESIGNED=='False'">
+                                            <button type="button" class="btn btn-sm btn-warning" ng-click="GenerateOTP(li.CMK_DebitMasterId_Enc)">Esign RFT Bill</button>
+                                        </span>*@
+                                    <span ng-show="li.IS_BILL_GENERATED=='True' && li.IS_BILL_ESIGNED=='False'">
+                                        <button type="button" class="btn btn-sm btn-warning" ng-click="RedirectToESPportal(li.CMK_DebitMasterId_Enc)">Esign RFT Bill</button>
+                                    </span>
+                                }
+                            </td>
+                            <td class="text-center">
+                                <span ng-show="li.IS_XML_GENERATED=='True'">
+                                    <a href="~/Content/CMK_DBT/{{li.XML_PATH}}" class="btn btn-sm btn-primary" title="Download XML" download><i class="fa fa-download"></i></a>
+                                </span>
+                                <span ng-show="li.IS_XML_GENERATED=='False'">
+                                    <button type="button" class="btn btn-sm btn-warning" ng-click="GenetateXML(li.CMK_DebitMasterId_Enc)">Generate XML</button>
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <span ng-show="li.IS_XML_ESIGNED=='True'">
+                                    <a href="~/Content/CMK_DBT/{{li.ESIGNED_XML_PATH}}" class="btn btn-sm btn-primary" download>Download eSigned File</a>
+                                    <button type="button" class="btn btn-sm btn-warning" ng-show="li.IS_XML_ENCRYPTED=='False'" ng-click="encryptXML(li.CMK_DebitMasterId_Enc)">Encrypt SLIA File</button>
+                                    <a href="~/Content/CMK_DBT/{{li.ENCYPTED_FILE_PATH}}" class="btn btn-sm btn-primary" ng-show="li.IS_XML_ENCRYPTED=='True'" title="Download SLIA File" download><i class="fa fa-download"></i></a>
+                                </span>
+                                @if (((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).UserId == 15950)
+                                {
+                                    <span ng-show="li.IS_XML_ESIGNED=='False' && li.IS_XML_GENERATED=='True'">
+                                        <button type="button" class="btn btn-sm btn-warning" ng-click="eSignXML(li)">eSign File</button>
+                                    </span>
+                                }
+
+                                <span ng-show="li.IS_XML_ESIGNED=='False' && li.IS_XML_GENERATED=='False'">
+                                    <div class="loader-container">
+                                        <div class="bouncing-dots">
+                                            <div class="dot"></div>
+                                            <div class="dot"></div>
+                                            <div class="dot"></div>
+                                        </div>
+                                    </div>
+                                </span>
+                            </td>
+                            <td>{{li.XML_ESIGNED_ON}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="modal fade" id="otpModal" tabindex="-1" role="dialog" aria-labelledby="otpModalLabel" aria-hidden="true" data-backdrop="static">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="otpModalLabel">{{translation.EnterOTP}}</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="form-group">
+                                    @*<label>{{translation.EnterOTP}}</label>*@
+                                    <input type="text" class="form-control" ng-model="EsignOTP" placeholder="{{translation.EnterOTP}}" maxlength="6" autocomplete="off" />
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-primary" ng-click="VerifyOTP()">{{translation.Submit}}</button>
+                                <button type="button" class="btn btn-secondary" ng-click="ResendOTP()" data-dismiss="modal">{{translation.ReSendOTP}}</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal fade" id="esignModal" tabindex="-1" role="dialog" aria-labelledby="esignModal" aria-hidden="true" data-backdrop="static">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="esignModal">e-Sign document -{{selectedItem.DEBIT_REFERENCE}}.xml</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close" ng-click="selectedItem={}">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="form-group">
+                                    Enter your password
+                                    <input type="password" class="form-control" ng-model="EsignPassword" placeholder="{{translation.Password}}" autocomplete="off" />
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-primary" ng-click="eSignXMLDoc(selectedItem.CMK_DebitMasterId_Enc)">{{translation.Submit}}</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @*@Html.Partial("_AadhaarValidation")*@
+</div>
+

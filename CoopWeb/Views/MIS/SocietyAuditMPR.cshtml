@@ -1,0 +1,233 @@
+﻿<script src="~/Scripts/AngularFramework/SocietyAuditMPR.js?id=0"></script>
+<style type="text/css">
+    body {
+        font-family: Arial;
+        font-size: 10pt;
+    }
+
+    /*table {
+        border: 1px solid #ccc;
+        border-collapse: collapse;
+    }
+
+        table th {
+            background-color: #F7F7F7;
+            color: #333;
+            font-weight: bold;
+        }
+
+        table th, table td {
+            padding: 5px;
+            border: 1px solid #ccc;
+        }*/
+
+    .NewMemberdob input {
+        float: left !important;
+        width: 90% !important;
+    }
+
+    .NewMemberdob button {
+        float: left;
+    }
+
+    .notValid {
+        border: solid 1px red !important
+    }
+
+    .NewRequestList td {
+        color: black !important;
+    }
+
+    .rowdeleteBtn {
+        color: #fff !important;
+        font-weight: bold !important;
+        font-size: 12px !important;
+    }
+
+    .margin-Top20 {
+        margin-top: 20px;
+    }
+</style>
+
+<script>
+    $(document).ready(function () {
+        $("#ddrYear").val(new Date().getFullYear());
+        $("#ddrMonth").val((new Date().getMonth() + 1));
+    });
+
+</script>
+
+<div ng-app="SocietyAuditMPRMod" ng-controller="SocietyAuditMPRCnt">
+    <div class="col-md-12">
+        <h3 class="h3heading citizen-dash-head">Society Registration Time Sheet</h3>
+    </div>
+
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="devpage-breadcrumb">
+            <ul class="page-breadcrumb">
+                <li class="dev-page-br">
+                    <i class="fa fa-home"> </i>
+                    <a href="#"> {{translation.MIS}}  </a>
+                    <i class="fa fa-angle-right"> </i>
+                </li>
+                <li style="float: left">
+                    <span style="margin: 0 5px;">Society Registration Time Sheet</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="table-responsive citizen-dash-head">
+            <div>
+                <div class="table-dropdown" id="search-filter">
+                    <input type="hidden" id="hdnDivisionId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DivisionId)" />
+                    <input type="hidden" id="hdnActId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).ActId)" />
+                    <input type="hidden" id="hdnDistrictId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DistrictId)" />
+
+
+                    <div class="col-md-2 margin-Top20" ng-if="IsShowDivision">
+                        <label for="search" class="ng-binding">{{translation.DivisionHeading}}</label>
+                        <select name="DIVISION_ID"  class="form-control" id="ddlDivision"  ng-model="FilterSearch.DIVISION_ID">
+                            <option value="">{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in Divisions" value="{{item.DIVISION_ID}}">
+                                {{_language =='en-us' ?  item.DIVISION_ENG : item.DIVISION_MANGAL}}
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2 margin-Top20" style="padding-left: 0;">
+                        <label>{{ translation.DistrictHeading}}</label>
+                        <select name="DistrictId" id="ddlDistrictId" class="form-control"  ng-model="FilterSearch.DistrictId">
+                            <option value="">{{translation.SelectOption}}</option>
+                            <option ng-repeat="district in DistrictList" value="{{district.DISTRICT_ID}}">
+                                {{_language =='en-us' ?  district.DISTRICT_ENG : district.DISTRICT_MANGAL}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 margin-Top20">
+                        <label for="search" class="ng-binding">{{translation.YEAR}}</label>
+                        <select name="Year" id="ddrYear" style="" class="form-control" ng-model="FilterSearch.Year">
+                            <option value="">{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in FinancialYearList" value="{{item.FIN_YEAR_END}}">
+                                {{item.FIN_YEAR_END}}
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2 margin-Top20" style="padding-left: 0;">
+                        <label>{{ translation.Month}}</label>
+                        <select name="Month" id="ddrMonth" ng-model="FilterSearch.Month" class="form-control">
+                            <option value="">{{translation.SelectOption}}</option>
+                            <option ng-repeat="mnt in MonthList" value="{{mnt.Id}}">
+                                {{_language =='en-us' ?  mnt.NameEn : mnt.NameHi}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 margin-Top20" style="padding-left: 0;">
+                        <label> Group By</label>
+                        <select name="GroupBy" class="form-control" ng-model="FilterSearch.GroupBy" ng-init="FilterSearch.GroupBy='2'">
+                            <option value="2">{{translation.SelectOption}}</option>
+                            <option value="1">Division Wise</option>
+                            <option value="2">District Wise</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2  margin-Top20">
+                        <label>&nbsp;</label><br>
+                        <button type="button" ng-click="searchRequest(GetSocietyRegistrationTimeSheet)" class="btn btn-primary dev-btn ng-binding">{{translation.Search}}</button>
+                        <button type="button" ng-click="ClearSearch()" class="btn btn-primary dev-btn ng-binding">{{translation.Clear}}</button>
+                    </div>
+                </div>
+
+                
+                
+                <table id="example" class="table devtable" style="border:1px solid rgb(222, 221, 221); float: left;">
+                    <thead>
+                        <tr>
+                            <th>
+                                #
+                            </th>
+                            <th ng-if="FilterSearch.GroupBy=='1'">
+                                {{translation.Division}}
+                            </th>
+                            <th ng-if="FilterSearch.GroupBy=='2'">
+                                {{translation.District}}
+                            </th>
+                            <th>{{translation.AuditableSocieties}}</th>
+                            <th>{{translation.AuditableSocietiesTillLastMonth}}</th>
+                            <th>{{translation.AuditedSocietyInMonth}}</th>
+                            <th>
+                                {{_language =='en-us' ?  'Audited Society Till '+selectedMlonth : 'माह '+selectedMlonth +'तक ऑडिटेड'}}
+                            </th>
+                            <th>{{translation.AuditRemaining}} </th>
+                            <th>
+                                {{translation.AuditPercentage}}
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="item in AuditMRPList">
+                            <td>{{(((DataPagingDetails.PageNumber - 1) * DataPagingDetails.PageSize) + 1)+$index}}</td>
+
+                            <td  ng-if="FilterSearch.GroupBy=='1'">{{_language =='en-us' ?  item.DIVISION_ENG: item.DIVISION_MANGAL}}</td>
+                            <td  ng-if="FilterSearch.GroupBy=='2'">{{_language =='en-us' ?  item.DISTRICT_ENG: item.DISTRICT_MANGAL}}</td>
+
+                            <td>
+                                {{item.TotalAudit}}
+                            </td>
+                            <td>{{item.TotalAtLastMonth}}</td>
+                            <td>
+                                {{ item.TotalInMonth}}
+                            </td>
+                            <td>
+                                {{ item.TotalAtMonth}}
+                            </td>
+                            <td>
+                                {{item.TotalAudit-item.TotalAtMonth}}
+                            </td>
+                            <td>
+                                {{item.AuditPer}} %
+                            </td>
+                        </tr>
+                    </tbody>
+                    
+                </table>
+
+
+                <div class="col-md-12">
+                    <div ng-if="DataPagingDetails.TotalPages>1" class="dataTables_paginate paging_simple_numbers" id="dataTables-example_paginate">
+                        <div class="dataTables_info" id="dataTables-example_info" role="status" aria-live="polite">
+                            Total Records: {{DataPagingDetails.TotalRecords}}
+                        </div>
+                        <ul class="pagination pagination_1" style="margin-left: 10px !important;">
+                            <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« First</span></li>
+                            <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« Previous</span></li>
+
+                            <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest('1',GetSocietyRegistrationTimeSheet)" style="cursor: pointer;">
+                                <span>«First</span>
+                            </li>
+                            <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest(DataPagingDetails.PageNumber-1,GetSocietyRegistrationTimeSheet)" style="cursor:pointer;">
+                                <span>« Previous</span>
+                            </li>
+                            <li class="{{n==DataPagingDetails.PageNumber?'active':''}}" style="{{n==DataPagingDetails.PageNumber?'':'cursor: pointer'}}" ng-repeat="n in PagingRange(DataPagingDetails.StartPageNumber,DataPagingDetails.EndPageNumber,DataPagingDetails.TotalPages)" ng-click="pageRequest(n,GetSocietyRegistrationTimeSheet)"><span>{{n}}</span></li>
+                            <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Next</span></li>
+                            <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Last</span></li>
+                            <li ng-if="DataPagingDetails.PageNumber!= DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.PageNumber+1,GetSocietyRegistrationTimeSheet)" style="cursor:pointer;">
+                                <span>Next »</span>
+                            </li>
+                            <li ng-if="DataPagingDetails.PageNumber != DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.TotalPages,GetSocietyRegistrationTimeSheet)" style="cursor:pointer;">
+                                <span>Last »</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <input ng-if="WRDetails.length>0" type="button" id="btnExport" class="btn btn-primary dev-btn" style="" ng-click="ExportData()" value="Export" />
+            </div>
+        </div>        
+    </div>
+</div>
+
+
+

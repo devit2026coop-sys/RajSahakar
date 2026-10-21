@@ -1,0 +1,270 @@
+﻿
+<script src="~/Scripts/AngularFramework/Tilam_StockPurchaseVerificationByHq.js"></script>
+<script type="text/javascript">
+
+    function ValidateAlpha(evt) {
+        var keyCode = (evt.which) ? evt.which : evt.keyCode
+        if ((evt.which == 8 || evt.keyCode == 8 || evt.charCode == 8))
+            return true;
+
+        if (((keyCode < 49 || keyCode > 90) && (keyCode < 97 || keyCode > 123) && keyCode != 32))
+            return false;
+        return true;
+    };
+
+</script>
+
+<div ng-app="TilamSangh_StockPurchaseTrackingByHqCnt">
+    <div ng-controller="TilamSangh_StockPurchaseTrackingByHqMod">
+        <div class="col-md-12">
+            <h3 class="citizen-dash-head">{{translation.StockPurchaseVerificationByHq}}</h3>
+            <hr style="margin: 0;">
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#"> {{translation.StockManagement}}</a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;"> {{translation.StockPurchaseVerificationByHq}} </span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        
+
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div>
+                <div class="citizen-dash-head">
+                    <div class="table-dropdown">
+                        <div class="col-lg-12 form-group">
+                            <div class="col-md-4" style="padding-left: 0;">
+                                <label for="search">{{translation.Search}}:</label>
+                                <input ng-model="q" id="search" class="form-control" placeholder={{translation.filttertext}} autocomplete="off">
+                            </div>
+                            <div class="col-md-4" style="padding-left: 0;">
+                                <label for="search">{{translation.ItemPerPage}}:</label>
+                                <input type="number" min="1" max="100" class="form-control" onkeypress='return event.charCode >= 48 && event.charCode <= 57' ng-model="pageSize">
+                            </div>
+                        </div>
+                    </div>
+                    <table class="table table-responsive devtable" style="overflow-x:auto;">
+                        <thead>
+                            <tr>
+                                <th>
+                                    {{translation.SRNO}}
+                                </th>
+                                <th>
+                                    {{translation.PartyNameOnly}}
+                                </th>
+                                <th>
+                                    {{translation.BrokerNameOnly}}
+                                </th>
+
+                                <th>
+                                    {{translation.Product}}
+                                </th>
+
+                                <th>
+                                    {{translation.Rate}}
+                                </th>
+                                <th>
+                                    {{translation.PaymentDate}}
+                                </th>
+                                <th>
+                                    {{translation.ExpectedDeliveryDate}}
+                                </th>
+                                <th>
+                                    {{translation.SaleContractNo}}
+                                </th>
+                                <th>
+                                    {{translation.Conditions}}
+                                </th>
+                                <th>
+                                    {{translation.Remarks}}
+                                </th>
+                                <th>
+                                    {{translation.Details}}
+                                </th>
+                                <th>
+                                    {{translation.Details}}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr dir-paginate="item in PurchaseOrders | filter: q | orderBy:colsort:reverseSort | itemsPerPage: pageSize" current-page="currentPage" pagination-id="TrainningFormatPagination">
+                                <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                                <td>
+                                    {{ _language === 'en-us' ? item.PartyName : item.PartyNameHi}}
+                                </td>
+                                <td>
+                                    {{ _language === 'en-us' ? item.BrokerName : item.BrokerNameHi}}
+                                </td>
+                                <td>
+                                    {{ _language === 'en-us' ? item.ProductSubCategoryDetails.ProductSubCategoryNameEng : item.ProductSubCategoryDetails.ProductSubCategoryNameHi }}
+                                    ({{ _language === 'en-us' ? item.ProductDetails.ProductNameEng : item.ProductDetails.ProductNameHi }})
+                                </td>
+                                <td>
+                                    {{ item.RateQuantity }}  {{ _language === 'en-us' ? item.RateUnitDetails.UnitNameEng : item.RateUnitDetails.UnitNameHi }} @@ &#8377; {{item.Rate}}
+                                </td>
+                                <td>
+                                    {{ item.PurchasePaymentDate}}
+                                </td>
+                                <td>
+                                    {{ item.ExpectedDeliveryDate}}
+                                </td>
+
+                                <td>
+                                    {{ item.SaleContractNo}}
+                                </td>
+                                <td>
+                                    {{ item.Conditions}}
+                                </td>
+                                <td>
+                                    {{ item.Remark}}
+                                </td>
+                                <td>
+                                    <div ng-repeat="item2 in item.StockDetails">
+                                        <div ng-show="item2.IsTakeActionByHq" ng-click="SetDetails(item2.PurchaseRegisterDetailId,item2.IsTakeActionByHq)" data-target="#myModal" data-toggle="modal"> <label style="color:red;"> {{item2.VehicleNo}} </label></div>
+                                        <div ng-show="!item2.IsTakeActionByHq" ng-click="SetDetails(item2.PurchaseRegisterDetailId,item2.IsTakeActionByHq)"><label style="color:green;"> {{item2.VehicleNo}} </label></div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div ng-click="VehicleDetailStatus(item.PurchaseRegisterId,item2.PurchaseRegisterDetailId)" data-target="#myModalForVehicleDetailsStatus" data-toggle="modal">{{translation.Details}}</div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="col-md-10">
+                <div class="text-center">
+                    <dir-pagination-controls boundary-links="true" pagination-id="TrainningFormatPagination" on-page-change="pageChangeHandler(newPageNumber)" template-url="/dirPagination.tpl.html"></dir-pagination-controls>
+                </div>
+            </div>
+
+            <div class="dev-popup-body modal fade" id="myModal">
+                <div class="modal-dialog" style="width:950px;">
+                    <!-- Modal content-->
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" ng-click="ClearClassForm()">&times;</button>
+                            <h4 class="modal-title"> {{translation.StockPurchaseVerificationByHq}}  </h4>
+                        </div>
+                        <div class="citizen-dash-head">
+                            <div class="col-lg-12 form-group">
+                                <div class="col-lg-2">{{ translation.IsApproved}}<span class="error">*</span></div>
+                                <div class="col-lg-4">
+                                    <input type="radio" name="IsApproved" value="1" ng-model="HqResponse.IsApprovedByHQ" ng-init="HqResponse.IsApprovedByHQ=1"> &nbsp;{{translation.Yes}} &nbsp;&nbsp;&nbsp;&nbsp;
+                                    <input type="radio" name="IsApproved" value="2" ng-model="HqResponse.IsApprovedByHQ"> &nbsp;{{translation.No}}
+                                </div>
+                                <div class="col-lg-2" ng-show="HqResponse.IsApprovedByHQ==='2'">{{ translation.RejectionReasonMaster}}<span class="error">*</span></div>
+                                <div class="col-lg-4" ng-show="HqResponse.IsApprovedByHQ==='2'">
+                                    <select class="form-control" ng-model="HqResponse.RejectionIdByHQ" ng-init="HqResponse.RejectionIdByHQ='0'">
+                                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                                        <option ng-repeat="item in RejectionReasons" value="{{item.RejectionId}}">
+                                            {{_language =='en-us' ?  item.RejectionReasonEng : item.RejectionReasonHi}}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-12 form-group">
+                                <div class="col-lg-2">{{ translation.IsDebitNote}}<span class="error">*</span></div>
+                                <div class="col-lg-4">
+                                    <input type="radio" name="IsDebitNote" value="1" ng-model="HqResponse.IsDebitNote"> &nbsp;{{translation.Yes}} &nbsp;&nbsp;&nbsp;&nbsp;
+                                    <input type="radio" name="IsDebitNote" value="2" ng-model="HqResponse.IsDebitNote" ng-init="HqResponse.IsDebitNote=2"> &nbsp;{{translation.No}}
+                                </div>
+
+                                <div class="col-lg-2" ng-show="HqResponse.IsDebitNote === '1'">{{ translation.DebitNoTeFile}}<span class="error">*</span></div>
+                                <div class="col-lg-4" ng-show="HqResponse.IsDebitNote === '1'">
+                                    <input type="file" name="fileDeliveryAcceptanceLetter" onchange="angular.element(this).scope().UploadFile(this.files)" />
+                                </div>
+                            </div>
+
+                            <div class="col-lg-12 form-group">
+                                <div class="col-lg-2">{{ translation.Remarks}}<span class="error">*</span></div>
+                                <div class="col-lg-4">
+                                    <textarea name="HtmlContentRequest" id="HtmlContentRequest" rows="8" cols="120" style="resize:none;" ng-model="HqResponse.RemarkByHQ"></textarea>
+                                </div>
+
+                            </div>
+                            <div class="form-group col-md-12">
+                                <div class="dev-menu-btn">
+                                    <button type="submit" class="btn btn-primary" ng-click="InsertHqResponseOnPurchaseOrder()">{{translation.Submit}}</button>
+                                    <button type="submit" class="btn btn-primary" ng-click="ClearForm()">{{translation.Clear}}</button>
+                                    <input type="hidden" ng-model="HqResponse.PurchaseRegisterDetailId" />
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="dev-popup-body modal fade" id="myModalForVehicleDetailsStatus">
+                <div class="modal-dialog" style="width:950px;">
+                    <!-- Modal content-->
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" ng-click="ClearClassForm()">&times;</button>
+                            <h4 class="modal-title"> {{translation.Details}}  </h4>
+                        </div>
+                        <div class="citizen-dash-head">
+
+                            <div ng-repeat="item in VehicleDetails.StockDetails">
+                                <div class="col-lg-12 form-group">
+                                    <h4 class="heading-hr ng-binding"> {{translation.VehicleNo}} : {{item.VehicleNo}}</h4>
+                                </div>
+                                <div class="col-lg-12 form-group">
+                                    <div class="col-lg-5">{{ translation.Capacity}} : <b> {{item.Quantity}} {{_language ==='en-us' ? item.UnitDetails.UnitNameEng : item.UnitDetails.UnitNameHi}} </b></div>
+                                    <div class="col-lg-5"> {{ translation.IsQualityProduct}} : <b>{{item.IsQualityCheckOkay === null ? translation.NotAvailable : item.IsQualityCheckOkay ? translation.Yes : translation.No}}</b> </div>
+                                </div>
+
+                                <div class="col-lg-12 form-group">
+                                    <div class="col-lg-5"> {{ translation.IsDeliveryAccepted}} : <b>{{item.IsAccepted === null ? '' : item.IsAccepted ? translation.Yes : translation.No}}</b> </div>
+                                    <div class="col-lg-5" ng-show="item.IsAccepted===true">{{ translation.AcceptanceFilebyPlant}} : <b><b> <a target="_blank" href="~/Content/TilamSangh/StockDeliveryFiles/{{item.AcceptanceFile}}">{{ translation.AcceptanceFilebyPlant}}</a></b></div>
+                                    <div class="col-lg-5" ng-show="item.IsAccepted===false"> {{ translation.RejectionReasonMaster}} : <b>{{ _language ==='en-us' ? item.RejectDetailsOfPlant.RejectionReasonEng : item.RejectDetailsOfPlant.RejectionReasonHi}}</b> </div>
+                                </div>
+
+                                <div class="col-lg-12 form-group">
+                                    <div class="col-lg-5">{{ translation.Activity}} : <b>{{_language ==='en-us' ? item.PlantUserDetails.OfficerNameEn : item.PlantUserDetails.OfficerNameHi}} {{item.PlantUserActivityDateTime}}</b></div>
+                                    <div class="col-lg-5">{{ translation.Remarks}} : <b>{{item.RemarkByPlant}}</b></div>
+                                </div>
+
+                                <div class="col-lg-12 form-group">
+                                    <div class="col-lg-5"> {{ translation.IsFinalApprovedByHq}} : <b>{{item.IsApprovedByHQ === null ? translation.NotAvailable : item.IsApprovedByHQ ? translation.Yes : translation.No}} </b></div>
+                                    <div class="col-lg-5" ng-show="item.IsApprovedByHQ===false"> {{ translation.RejectionReasonMaster}} : <b>{{ _language ==='en-us' ? item.RejectDetailsOfHq.RejectionReasonEng : item.RejectDetailsOfHq.RejectionReasonHi}} </b></div>
+                                </div>
+
+                                <div class="col-lg-12 form-group">
+                                    <div class="col-lg-5">{{ translation.Activity}} : <b>{{_language ==='en-us' ? item.HqUserDetails.OfficerNameEn : item.HqUserDetails.OfficerNameHi}} {{item.HQUserActivityDateTime}}</b></div>
+                                    <div class="col-lg-5">{{ translation.Remarks}} : <b>{{item.RemarkByHQ}}</b></div>
+                                </div>
+
+                                <div class="col-lg-12 form-group">
+                                    <div class="col-lg-5">{{ translation.IsDebitNote}} : <b>{{item.IsDebitNote === null ? translation.NotAvailable : item.IsDebitNote ? translation.Yes : translation.No}}</b> </div>
+                                    <div class="col-lg-5" ng-show="item.IsDebitNote === true"><b><a target="_blank" href="/Content/TilamSangh/StockDeliveryFiles/{{item.DebitNoteFile}}">{{ translation.DebitNoTeFile}}</a></b></div>
+                                </div>
+
+                            </div>
+
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</div>

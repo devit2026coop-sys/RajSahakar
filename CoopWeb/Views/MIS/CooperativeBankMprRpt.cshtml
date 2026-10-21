@@ -1,0 +1,266 @@
+﻿
+<script src="~/Scripts/AngularFramework/CooperativeBankMprRpt.js"></script>
+<script type="text/javascript" src="~/Scripts/jqueryuitimepicker.js"></script>
+<link href="~/Content/Stylesheets/jqueryuitimepicker.css" rel="stylesheet" />
+<script src="~/Scripts/Excel/jszip_v1.js"></script>
+<script src="~/Scripts/Excel/xlsx.js"></script>
+<script src="~/Scripts/Excel/jszip.js"></script>
+<script src="~/Scripts/Excel/FileSaver.js"></script>
+<script src="~/Scripts/Excel/myexcel.js"></script>
+
+
+
+@Html.Hidden("TemplateId")
+<div ng-app="AppEntryFormCooperativeBankMpr">
+    <div ng-controller="CooperativeBankMprcnt">
+        <div class="col-md-12">
+            <h3 class="citizen-dash-head">{{translation.CooperativeBankMprRpt}}</h3>
+            <hr style="margin: 0;">
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#"> {{translation.EntryForm}}</a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;"> {{translation.CooperativeBankMprRpt}} </span>
+                    </li>
+                    <!--
+                        <li style="float: right;" id="divAddBtn">
+                            <button type="button" ng-click="ShowLiqudationContent()" class="btn btn-info btn-lg dev-popup-btn" data-toggle="modal" style="color: #025e63; cursor: pointer; text-decoration:none;  font-weight: bold;" data-target="#myModal">
+                                <h5>&#187; {{translation.NewEntry}}</h5>
+                            </button>
+                        </li>
+                            -->
+                </ul>
+            </div>
+        </div>
+
+
+        <div class="citizen-dash-head" ng-show="showtringdiv">
+            <form>
+
+                <div class="col-lg-12 form-group">
+                    <input type="hidden" ng-model="Loan.LoanDataId" />
+                    <label>{{ translation.LoanAdvancement}}</label>
+                </div>
+
+                <div class="col-lg-12 form-group">
+
+                    <div class="col-lg-1">{{translation.Stamt}}</div>
+                    <div class="col-lg-2">
+                        <input type="number" class="form-control" ng-bind="ProgrammeNameEn" ng-model="Loan.AprStamt" placeholder="" autocomplete="off" />
+                    </div>
+                    <div class="col-lg-1"></div>
+                    <div class="col-lg-1">{{translation.Mtamt}}</div>
+                    <div class="col-lg-2">
+                        <input type="number" class="form-control" ng-bind="ProgrammeNameEn" ng-model="Loan.AprMtamt" placeholder="" autocomplete="off" />
+
+                    </div>
+                    <div class="col-lg-1"></div>
+                    <div class="col-lg-1">{{translation.ltamt}}</div>
+                    <div class="col-lg-2">
+                        <input type="number" class="form-control" ng-bind="ProgrammeNameEn" ng-model="Loan.Aprltamt" placeholder="" autocomplete="off" />
+
+                    </div>
+
+                </div>
+
+                <div class="col-lg-12 form-group">
+                    <label>{{ translation.LoanRecovered}}</label>
+                </div>
+
+                <div class="col-lg-12 form-group">
+
+                    <div class="col-lg-1">{{translation.Stamt}}</div>
+                    <div class="col-lg-2">
+                        <input type="number" class="form-control" ng-bind="ProgrammeNameEn" ng-model="Loan.RecStamt" placeholder="" autocomplete="off" ng-init="Liqudation.NameUnit='0'" />
+                    </div>
+                    <div class="col-lg-1"></div>
+
+                    <div class="col-lg-1">{{translation.Mtamt}}</div>
+                    <div class="col-lg-2">
+                        <input type="number" class="form-control" ng-bind="ProgrammeNameEn" ng-model="Loan.RecMtamt" placeholder="" autocomplete="off" />
+                    </div>
+
+                    <div class="col-lg-1"></div>
+
+                    <div class="col-lg-1">{{translation.ltamt}}</div>
+                    <div class="col-lg-2">
+                        <input type="number" class="form-control" ng-bind="ProgrammeNameEn" ng-model="Loan.Recltamt" placeholder="" autocomplete="off" />
+
+                    </div>
+                </div>
+
+
+                <div class="form-group col-md-12">
+                    <div class="dev-menu-btn">
+                        <button type="submit" class="btn btn-primary" ng-disabled="MyClassForm.$invalid" ng-click="SaveLoan(true)">{{translation.Submit}}</button>
+                        <button type="submit" class="btn btn-primary" ng-click="ClearLoanForm()">{{translation.Clear}}</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div ng-show="DivtringGrid">
+            <div class="col-md-12">
+                <div class="citizen-dash-head">
+                    <div class="table-dropdown" id="search-filter" style="overflow:inherit; float:left;width: 100%;margin-bottom: 10px;">
+                        <div class="col-md-2 margin-Top20 y_dropdown" style="padding-left: 0 ;display:none">
+                            <label for="search" class="ng-binding">{{translation.Year}}:</label>
+                            <input id="txtFromMonth" value="date" type="number" maxlength="4" class="form-control" autocomplete="off" />
+                        </div>
+                        <div class="col-md-2 margin-Top20 y_dropdown" style="padding-left: 0;">
+                            <label>{{ translation.DistrictHeading}}:</label>
+                            <input type="hidden" id="hdnDistrictId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DistrictId)" />
+
+                            <select name="Districtdll" ng-model="DistrictId" class="form-control" ng-init="DistrictId='0'" id="ddrDistrictId">
+                                <option value="0">{{translation.SelectOption}}</option>
+                                <option ng-repeat="district in DistrictList" value="{{district.DISTRICT_ID}}">
+                                    {{_language =='en-us' ?  district.DISTRICT_MANGAL : district.DISTRICT_MANGAL}}
+                                </option>
+                            </select>
+                        </div>
+
+
+                        <div class="col-sm-2 form-group">
+                            <label>Financial Year</label>
+                            <select class="form-control" ng-model="YearName" ng-click="GetFinancialYearList()" id="YearName" ng-init="YearName=''" >
+                                <option value="">{{translation.SelectOption}}</option>
+                                <option ng-repeat="district in FinancialYearList" value="{{district.FIN_YEAR_NAME}}"  @*value="{{district.FIN_YEAR_MASTR_ID}}"*@  >
+                                    {{_language =='en-us' ?  district.FIN_YEAR_NAME : district.FIN_YEAR_NAME}}
+                                </option>
+                            </select>
+
+
+                        </div>
+                        <div class="col-md-4 margin-Top20 y_dropdown" style="padding-left: 0;">
+                            <br />
+                            <button type="submit" class="btn btn-primary dev-btn" ng-click="GridData2()">{{translation.Search}}</button>
+                            <input type="button" class="btn btn-primary dev-btn" ng-click="ExportData()" value="Export to Excel">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div class="citizen-dash-head">
+                    <table class="table table-responsive devtable" style="overflow-x:auto;">
+                        <thead>
+                            <tr>
+                                <th rowspan="2">
+                                    {{translation.SRNO}}
+                                </th>
+
+                                <th rowspan="2" style="text-align: left !important">
+                                    {{translation.District}}
+
+                                </th>
+
+                                <th colspan="2" style="text-align:center !important">
+                                    {{translation.RajStateCoopBank}}
+
+                                </th>
+
+                                <th colspan="2" style="text-align:center !important">
+                                    {{translation.CentralCoopBank}}
+
+                                </th>
+
+                                <th colspan="2" style="text-align:center !important">
+                                    {{translation.PriLandDevBank}}
+
+                                </th>
+
+                                <th colspan="2" style="text-align:center !important">
+                                    {{translation.RajStateLandDevBank}}
+
+                                </th>
+                            </tr>
+
+
+                            <tr>
+                                <th style="text-align:center !important">{{translation.Number}}</th>
+                                <th style="text-align:center !important">{{translation.Member1}}</th>
+                                <th style="text-align:center !important">{{translation.Number}}</th>
+                                <th style="text-align:center !important">{{translation.Member1}}</th>
+                                <th style="text-align:center !important">{{translation.Number}}</th>
+                                <th style="text-align:center !important">{{translation.Member1}}</th>
+                                <th style="text-align:center !important">{{translation.Number}}</th>
+                                <th style="text-align:center !important">{{translation.Member1}}</th>
+
+
+                            </tr>
+
+
+                        </thead>
+
+                        <tbody>
+
+                            <tr dir-paginate="BData in CoopBankMprData | filter: q | orderBy:colsort:reverseSort | itemsPerPage: pageSize" current-page="currentPage" pagination-id="TrainningFormatPagination">
+                                <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+
+                                <td style="text-align:left !important">
+                                    {{ BData.DISTRICT_ENG}}
+                                </td>
+                                <td style="text-align:center !important">
+                                    {{BData.RSCB_Society}}
+                                </td>
+                                <td style="text-align:center !important">
+                                    {{BData.RSCB1_Member}}
+                                </td>
+                                <td style="text-align:center !important">
+                                    {{BData.CCB_Society}}
+                                </td>
+                                <td style="text-align:center !important">
+                                    {{BData.CCB1_Member}}
+                                </td>
+                                <td style="text-align:center !important">
+                                    {{BData.PLDB_Society}}
+                                </td>
+                                <td style="text-align:center !important">
+                                    {{BData.PLDB1_Member}}
+                                </td>
+
+                                <td style="text-align:center !important">
+                                    {{BData.SLDB_Society}}
+                                </td>
+                                <td style="text-align:center !important">
+                                    {{BData.SLDB1_Member}}
+                                </td>
+                            </tr>
+                            <tr>
+                                <th></th>
+                                <th style="text-align:left;">{{translation.Yog}}</th>
+                                <th style="text-align:center;">{{TotRSCB_Society}}</th>
+                                <th style="text-align:center;">{{TotRSCB1_Member     }}</th>
+                                <th style="text-align:center;">{{TotCCB_Society   }}</th>
+                                <th style="text-align:center;">{{TotCCB1_Member}}</th>
+                              
+                                <th style="text-align:center;">{{TotPLDB_Society}}</th>
+                                <th style="text-align:center;">{{TotPLDB1_Member     }}</th>
+                                <th style="text-align:center;">{{TotSLDB_Society   }}</th>
+                                <th style="text-align:center;">{{TotSLDB1_Member}}</th>
+
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="col-md-10">
+                <div class="text-center">
+                    <dir-pagination-controls boundary-links="true" pagination-id="TrainningFormatPagination" on-page-change="pageChangeHandler(newPageNumber)" template-url="/dirPagination.tpl.html"></dir-pagination-controls>
+                </div>
+            </div>
+            <div class="form-group col-md-12" ng-if="dss">
+                <div class="dev-align-btn">
+                    <a class="btn btn-primary dev-btn" style="text-transform:capitalize;" href="../mis/CooperativeBankMprRpt"> Back</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

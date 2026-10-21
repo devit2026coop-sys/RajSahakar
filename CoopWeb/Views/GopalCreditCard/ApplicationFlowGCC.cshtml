@@ -1,0 +1,666 @@
+﻿<script src="~/Scripts/AngularFramework/ApplicationFlowGCC.js?id=1.14"></script>
+<script src="~/Scripts/AngularFramework/commonEsign.js?v=@DateTime.Now.Ticks"></script>
+<script src="~/Scripts/google_hindi/google_transliteration.js"></script>
+@*<link href="~/Scripts/google_hindi/google_transliteration.css" rel="stylesheet" />*@
+
+<style>
+    .inputapi-transliterate-indic-suggestion-menu {
+        z-index: 99999 !important;
+        display: block;
+    }
+
+    .table > tbody > tr > td, .table > tbody > tr > th, .table > tfoot > tr > td, .table > tfoot > tr > th, .table > thead > tr > td {
+        padding: 1px;
+        padding-right: 5px;
+        padding-left: 5px;
+    }
+</style>
+<div ng-app="ApplicationFlowModule" ng-controller="ApplicationFlowCont" ng-cloak="">
+    <div class="row">
+        <div class="col-md-12">
+            <h3 class="citizen-dash-head ng-binding" style="margin-top:0px;">{{translation.GCC}}</h3>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#">  {{translation.Home}}</a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;"> {{translation.New}} </span>
+                        <i class="fa fa-angle-right"> </i>
+                        <span style="margin: 0 5px;"> {{translation.GCC}} </span>
+                    </li>
+
+                </ul>
+            </div>
+        </div>
+        <!--<div class="dev-popup-body modal fade" id="myModal" role="dialog" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog">-->
+        <!-- Modal content-->
+        <!--<div class="modal-content" style="width:800px">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" ng-click="ClearAppFlowForm()">&times;</button>
+                        <h4 class="modal-title"> {{translation.ApplicationFlow}} </h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="table-responsive">
+                            <table class="table table-responsive devtable" style="margin-top: 30px;color:black" id="a">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            {{translation.SRNO}}
+                                        </th>
+                                        <th>
+                                            {{translation.Status}}
+                                        </th>
+                                        <th>{{translation.AssignTo}}</th>
+                                        <th>
+                                            {{translation.Remarks}}
+                                        </th>
+                                        <th>
+                                            {{translation.CreationDate}}
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr dir-paginate="AppFlowOne in ApplicationFlowSociety | itemsPerPage: 10">
+                                        <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                                        <td>{{ _language =='en-us' ? AppFlowOne.ProceesStatusTextEn : AppFlowOne.ProceesStatusTextHi}}</td>
+                                        <td>{{AppFlowOne.OfficerNameEn}}</td>
+                                        <td>{{AppFlowOne.Remark}}</td>
+                                        <td>{{AppFlowOne.ActionDate}}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <form class="dev-search-form" name="MyClassForm" ng-show="BaseUserId==ApplicationFlowMaster.UserId" style="overflow: hidden; margin-bottom:35px;">
+                            <div class="col-md-6" ng-hide="ShowOTPDiv">
+                                <label>
+                                    {{translation.Status}} :
+                                </label>
+                                <select ng-model="ApplicationFlowMaster.StatusId" class="form-control" ng-init="ApplicationFlowMaster.StatusId='0'" ng-change="GetRoleList()">
+                                    <option value="0" disabled>{{translation.SelectOption}}</option>
+                                    <option ng-repeat="item in SocietyProceesStatus" value="{{item.SocietyProceesStatusId}}">
+                                        {{_language =='en-us' ?  item.ProceesStatusTextEn : item.ProceesStatusTextHi}}
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="col-md-6" ng-hide="ShowOTPDiv">
+                                <div ng-show="ApplicationFlowMaster.StatusId==3 || ApplicationFlowMaster.StatusId==9 || ApplicationFlowMaster.StatusId==12 || ApplicationFlowMaster.StatusId==19 || ApplicationFlowMaster.StatusId==23 || ApplicationFlowMaster.StatusId==35|| ApplicationFlowMaster.StatusId==36 || ApplicationFlowMaster.StatusId==1058">
+                                    <label>
+                                        {{translation.RoleHeading}} :
+                                    </label>
+                                    <select ng-model="RoleId" class="form-control" id="ddlRole" ng-init="RoleId=0" ng-change="GetOfficer()">
+                                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                                        <option ng-repeat="item in RoleList " value="{{item.RoleID}}">
+                                            {{ item.RoleName_EN }}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6" ng-hide="ShowOTPDiv">
+                                <div ng-show="ApplicationFlowMaster.StatusId==3 || ApplicationFlowMaster.StatusId==9 || ApplicationFlowMaster.StatusId==12 || ApplicationFlowMaster.StatusId==19 || ApplicationFlowMaster.StatusId==23 || ApplicationFlowMaster.StatusId==35 || ApplicationFlowMaster.StatusId==36 || ApplicationFlowMaster.StatusId==1058">
+                                    <label>
+                                        {{translation.Officer}} :
+                                    </label>
+                                    <select ng-model="ApplicationFlowMaster.OfficeId" id="ddlOffice" class="form-control" ng-init="ApplicationFlowMaster.OfficeId='0'">
+                                        <option ng-repeat="item in OfficerData " value="{{item.userid}}">
+                                            {{ item.OfficerNameEn }}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group col-md-12" ng-hide="ShowOTPDiv">
+                                <label>{{translation.Remarks}}</label>
+                                <textarea type="text" rows="4" cols="50" class="form-control" id="Remarks" name="Remarks" ng-bind="Remarks" ng-model="ApplicationFlowMaster.Remark" placeholder={{translation.Remarks}}></textarea>
+                                <code style="float: left;">
+                                </code>
+                                   </div>
+
+                            <div class="form-group col-md-12" ng-hide="ShowOTPDiv" ng-if="ApplicationFlowMaster.StatusId==1065">
+                                <label>{{translation.Amount}}</label>
+                                <input type="text" rows="4" cols="50" class="form-control" id="AmendmendAmount" name="AmendmendAmount" ng-model="ApplicationFlowMaster.AmendmendAmount" placeholder={{translation.Amount}} />
+                            </div>
+                            <div class="form-group col-md-12" ng-hide="ShowOTPDiv" ng-if="ApplicationFlowMaster.StatusId==1065">
+                                <label>{{translation.ReceiptNumber }}</label>
+                                <input type="text" rows="4" cols="50" class="form-control" id="AmendmendAmountReceipt" name="AmendmendAmountReceipt" ng-model="ApplicationFlowMaster.ReceiptNumber" placeholder={{translation.ReceiptNumber}} />
+                            </div>
+
+                            <div class="form-group col-md-12" ng-hide="ShowOTPDiv">
+                                <div ng-show="ApplicationFlowMaster.StatusId==36">
+                                    <div class="col-md-3">
+                                        <label>
+                                            {{translation.File}} :
+                                        </label>
+                                    </div>
+                                    <div class="col-md-8" style="text-align:left">
+                                        <input type="file" name="File" filetype='pdf' id="flReportFile" class="form-control" ng-model="ApplicationFlowMaster.ReportFile" onchange="angular.element(this).scope().UploadReportFile(this.files)">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group col-md-12" ng-hide="ShowOTPDiv">
+                                <div class="citizen-dash-head col-md-3" ng-show="ApplicationFlowMaster.StatusId==5 || ApplicationFlowMaster.StatusId==10 || ApplicationFlowMaster.StatusId==20">
+                                    <label>{{translation.ObjectionBelongTo}}</label>
+                                </div>
+                                <div class="citizen-dash-head col-md-9" style="text-align:left" ng-show="ApplicationFlowMaster.StatusId==5 || ApplicationFlowMaster.StatusId==10 || ApplicationFlowMaster.StatusId==20">
+                                    <input type="checkbox" style="" name="Basic" ng-model="ObjectionFlagBasic"> {{translation.SocietyDetails}}
+                                    <input type="checkbox" style="padding-left:15px;margin-left:15px" name="Administrative" ng-model="ObjectionFlagAdmin"> {{translation.AdministrativeDetails}}
+                                    <input type="checkbox" style="padding-left:15px;margin-left:15px" name="Office" ng-model="ObjectionFlagOffice"> {{translation.SocietyOfficeDetails}}
+                                </div>
+                            </div>
+                            <div class="form-group col-md-12" ng-hide="ShowOTPDiv">
+                                <div class="dev-menu-btn">
+                                    <button type="submit" class="btn btn-primary" ng-click="SaveSocietyApplicationFlowStatus()">{{translation.Submit}}</button>
+                                    <button type="submit" class="btn btn-primary" ng-click="ClearAppFlowForm()">{{translation.Clear}}</button>
+                                </div>
+                            </div>
+
+                            <div class="form-group col-md-6" ng-show="ShowOTPDiv">
+                                <label>{{translation.EnterOTP}}</label>
+                                <input type="text" class="form-control" name="OTP" ng-bind="OTP" ng-model="ApplicationFlowMaster.OTP" placeholder={{translation.EnterOTP}} autocomplete="off" /><br />
+                                <button type="submit" class="btn btn-primary" ng-click="VerifyOTP()">{{translation.Submit}}</button>
+                                <button type="submit" class="btn btn-primary" ng-click="SaveSocietyApplicationFlowStatus()">{{translation.ReSendOTP}}</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>-->
+        <div class="dev-popup-body modal fade" id="myModalNotAssign" role="dialog" data-backdrop="static" data-keyboard="false">
+            <div class="modal-dialog" style="width: 1000px;">
+                <div class="modal-content" style="width: 950px">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" ng-click="ClearAppFlowForm()">&times;</button>
+                        <h4 class="modal-title"> Assign User to Submitted Application </h4>
+                    </div>
+                    <div class="modal-body">
+
+                        <div class="table-responsive">
+                            <div class="col-lg-12" style="padding-right: 0px !important; padding-left: 0px !important; ">
+                                <div class="col-md-3" style="color:black;"><label>{{translation.GccRegNo}} :</label></div>
+                                <div class="col-md-4">
+                                    <span style="color:black;">  {{GopalCreditCardModel.RegistrationNo}}</span>
+                                </div>
+                                <div class="col-md-2"><label style="color:black;">{{translation.Status}} :</label></div>
+                                <div class="col-md-3">
+                                    <span style="color:black;">{{ _language =='en-us' ? GopalCreditCardModel.ProceesStatusTextEn : GopalCreditCardModel.ProceesStatusTextHi}}</span>
+                                </div>
+                            </div>
+                            <table class="table table-responsive devtable" style="margin-top: 30px;color:black" id="a">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            {{translation.SRNO}}
+                                        </th>
+                                        <th>
+                                            {{translation.Status}}
+                                        </th>
+                                        <th>{{translation.AssignTo}}</th>
+                                        <th>
+                                            {{translation.Remarks}}
+                                        </th>
+                                        <th>
+                                            {{translation.CreationDate}}
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr dir-paginate="AppFlowOne in ApplicationFlowGCC | itemsPerPage: 10">
+                                        <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                                        <td>{{ _language =='en-us' ? AppFlowOne.ProceesStatusTextEn : AppFlowOne.ProceesStatusTextHi}}</td>
+                                        <td>{{AppFlowOne.OfficerNameEn}}</td>
+                                        <td>{{AppFlowOne.Remark}}</td>
+                                        <td>{{AppFlowOne.ActionDate}}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <form class="dev-search-form" name="MyClassForm" style="overflow: hidden; margin-bottom:35px;">
+                            <div class="col-md-6">
+                                <label>
+                                    {{translation.Officer}} :
+                                </label>
+                                <select ng-model="GopalCreditCardModel.OfficerId" id="ddlOffice" class="form-control" ng-init="GopalCreditCardModel.OfficerId='0'">
+                                    <option value="0">{{translation.SelectOption}}</option>
+                                    <option ng-repeat="item in OfficerNotAssignData " value="{{item.UserId}}">
+                                        {{ item.OfficerNameEn }}
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="col-md-12">
+                                <span style="color: #964c4c;    font-weight: bold;">{{DivTextForNotMaaped}}</span>
+                            </div>
+                            <div class="clearfix"></div>
+                            <div class="form-group col-md-12" style="margin-top:20px;">
+                                <div class="dev-menu-btn">
+                                    <button type="submit" class="btn btn-primary" ng-click="SavePermanentGccData()">{{translation.Submit}}</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-12">
+            <div class="citizen-dash-head" style="overflow: hidden;">
+                <div class="table-dropdown row" id="search-filter" style="margin-bottom: 5px;">
+                    <div class="col-lg-12">
+                        <div class="row">
+                            <input type="hidden" id="hdnDistrictId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DistrictId)" />
+                            <input type="hidden" id="hdnStatusId" value="" />
+                            <div class="col-md-2 margin-Top20" id="ddrDistrictId">
+                                <label>{{ translation.DistrictHeading}}:</label>
+                                <select name="DISTRICT_ID" ng-model="DISTRICT_ID" class="form-control">
+                                    <option value="">{{translation.SelectOption}}</option>
+                                    <option ng-repeat="district in DistrictList" value="{{district.DISTRICT_ID}}">
+                                        {{_language =='en-us' ?  district.DISTRICT_ENG : district.DISTRICT_MANGAL}}
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="col-md-2 margin-Top20" id="ddrStatus">
+                                <label>{{ translation.Status}}:</label>
+                                <select name="StatusId" ng-model="StatusId" class="form-control">
+                                    <option value="">{{translation.SelectOption}}</option>
+                                    <option ng-repeat="sts in StatusList" value="{{sts.GccProceesStatusId}}">
+                                        {{_language =='en-us' ?  sts.ProceesStatusTextEn : sts.ProceesStatusTextHi}}
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label for="search">{{translation.Search}}:</label>
+                                <input ng-model="q" name="SearchText" id="search" class="form-control" placeholder={{translation.filttertext}} autocomplete="off">
+                            </div>
+                            <div class="col-md-2">
+                                <label for="search">{{translation.ItemPerPage}}:</label>
+                                <input type="number" min="1" max="100" class="form-control" ng-model="pageSize">
+                            </div>
+                            <div class="col-md-4  margin-Top20">
+                                <label>&nbsp;</label><br>
+                                <button type="button" ng-click="searchRequest(GetAppliFlowList)" class="btn btn-primary dev-btn ng-binding">{{translation.Search}}</button>
+                                <button type="button" ng-click="ClearSearch()" class="btn btn-primary dev-btn ng-binding">{{translation.Clear}}</button>
+                                <button type="button" class="btn btn-warning" ng-click="exportExcel()"><i class="fa fa-file-excel-o"></i> Export</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-12" style="margin-bottom: 10px;">
+                        <div>
+                            <label><input type="radio" id="one" name="ApplicationStatus" value="R" ng-model="selectedStatus" style="margin-left: 0px;" ng-click="searchRequest(GetAppliFlowList)">Reject</label>
+                            <label><input type="radio" id="two" name="ApplicationStatus" value="A" ng-model="selectedStatus" ng-click="searchRequest(GetAppliFlowList)">Sanctioned&nbsp;</label>
+                            <label><input type="radio" id="six" name="ApplicationStatus" value="DI" ng-model="selectedStatus" ng-click="searchRequest(GetAppliFlowList)">Disbursed&nbsp;</label>
+                            <label><input type="radio" id="three" name="ApplicationStatus" value="O" ng-model="selectedStatus" ng-click="searchRequest(GetAppliFlowList)">Objection&nbsp;</label>
+                            <label><input type="radio" id="four" name="ApplicationStatus" value="PA" ng-model="selectedStatus" ng-click="searchRequest(GetAppliFlowList)">Pending All&nbsp;</label>
+                            <label><input type="radio" id="five" name="ApplicationStatus" checked="checked" value="PS" ng-model="selectedStatus" ng-click="searchRequest(GetAppliFlowList)">Pending Self</label>
+                            @*<label><input type="radio" id="five" name="ApplicationStatus" value="AP" ng-click="searchRequest(GetAppliFlowList)">Pending For Assign</label>*@
+                        </div>
+                        @*<div class="margin-Top20">
+                                <label><input type="checkbox" id="one" ng-model="IsAmendment" ng-click="searchRequest(GetAppliFlowList)" style="margin-right: 5px;">Section 12</label>
+                                <label><input type="checkbox" id="one" ng-model="NewRegistration" name="NewRegistration" value="N" ng-click="searchRequest(GetAppliFlowList)" style="margin-right: 5px;">Section 4</label>
+                            </div>*@
+                        <div class="margin-Top20" ng-show="false">
+                            <label><input type="checkbox" id="one" ng-model="OverDue30days" name="OverDue30days" value="P" ng-click="searchRequest(GetAppliFlowList)" style="margin-right: 5px;">Show more than 30 days overdue</label>
+                            <label><input type="checkbox" id="one" ng-model="OverDue10days" name="OverDue10days" value="P" ng-click="searchRequest(GetAppliFlowList)" style="margin-right: 5px;">Show more than 10 days overdue</label>
+                        </div>
+                        <div class="clearfix"></div>
+                    </div>
+                </div>
+                <div>
+                    @if (((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).LevelId == 7)
+                    {
+                        <label class="text-danger"><i>Note: If you want to perform bulk action on application then you select the application by clicking on the checkbox.</i></label>
+                    }
+                </div>
+                <div style="overflow-x: auto;">
+                    <input type="hidden" id="hdnLevelId" ng-model="levelId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).LevelId)" />
+                    <table class="table table-responsive devtable" style="">
+                        <thead>
+                            <tr>
+                                <th>
+                                    #
+                                </th>
+                                <th ng-click="sortData('Name')">
+                                    {{translation.Name}}
+                                    <div ng-class="getSortClass('Name')"></div>
+                                </th>
+                                <th style=" min-width: 125px;">
+                                    {{translation.RegistrationNo}}
+                                </th>
+                                @*<th>
+                                        SSO ID
+                                    </th>*@
+                                <th>
+                                    {{translation.AssignTo}}
+                                </th>
+                                <th>
+                                    {{translation.Status}}
+                                </th>
+                                <th>
+                                    {{translation.Remarks}}
+                                </th>
+                                <th style=" min-width: 115px;">
+                                    {{translation.CreationDate}}
+                                </th>
+                                @if (((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).LevelId == 7)
+                                {
+                                    <th>
+                                        {{translation.LoanAmountRecommendedByDCS}}
+                                    </th>
+                                }
+                                <th>
+                                    View GCC Details
+                                </th>
+
+                                <th>
+                                    <div ng-show="selectedStatus=='PS'">
+                                        {{translation.Actions}}
+                                    </div>
+                                </th>
+
+                                <th ng-if="levelId==9 && AppFlow.StatusId==6">
+                                    {{translation.MokaReport}}
+                                </th>
+                                @*<th>
+                                        <div ng-show="levelId==8">
+                                            {{translation.BranchLevelReport}}
+                                        </div>
+                                    </th>*@
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="AppFlow in ApplicationFlowList">
+                                <td>
+                                    {{(((DataPagingDetails.PageNumber - 1) * DataPagingDetails.PageSize) + 1)+$index}}
+                                    @if (((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).LevelId == 7)
+                                    {<input type="checkbox" ng-model="AppFlow.selected" ng-show="selectedStatus=='PS'" ng-change="toggleSelection(AppFlow)">}
+
+                                </td>
+                                <td>
+                                    <b> <i>{{AppFlow.Name_ENG }}</i></b>
+                                </td>
+                                <td>{{AppFlow.RegistrationNo}}  </td>
+                                @*<td>{{AppFlow.SSOID}}  </td>*@
+                                <td style="text-transform:capitalize;">{{ _language =='en-us' ? AppFlow.OfficerNameEn : AppFlow.OfficerNameEn}}</td>
+                                <td>{{ _language =='en-us' ? AppFlow.ProceesStatusTextEn : AppFlow.ProceesStatusTextHi}}</td>
+                                <td>{{AppFlow.Remark}}</td>
+                                <td>{{AppFlow.ActionDate | date:'dd MMM yyyy' }}</td>
+                                @if (((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).LevelId == 7)
+                                {
+                                    <td>{{AppFlow.ReqLoanAmount}}</td>
+                                }
+                                <td class="add-more-td">
+                                    <a title="VIEW" ng-click="ApplicationView(AppFlow.GccIdDBEnc)"><i class="fa fa-eye"></i></a>
+
+                                    @if ((((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).UserId) == 1)
+                                    {
+                                        <a title="Assign User" style="color:#505050;" ng-if="AppFlow.ProceesStatusTextEn=='SUBMITTED' || AppFlow.ProceesStatusTextEn.indexOf('ASSIGNED') !== -1 || AppFlow.ProceesStatusTextEn.indexOf('FORWARD') !== -1"><i class="fa fa-user-plus" ng-click="updateNotAssign(AppFlow)"></i></a>
+                                    }
+                                    else if ((((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).LevelId) == 7)
+                                    {
+                                        <a title="Assign User" style="color:#505050;" ng-if="AppFlow.ProceesStatusTextEn=='SUBMITTED'"><i class="fa fa-user-plus" ng-click="updateNotAssign(AppFlow)"></i></a>
+                                    }
+                                    @*<a title="View" ng-show="AppFlow.ApplicantSignedForm!=null  && AppFlow.ApplicantSignedForm!='' && AppFlow.ApplicantSignedForm.indexOf('.pdf')!=-1" target="_blank" href="../Content/GopalCreditCard/GSSProfiling/{{AppFlow.ApplicantSignedForm}}" class="btn btn-sm btn-primary mb-2"> View e-Sign Doc</a>*@&nbsp;
+                                </td>
+
+                                <td>
+                                    <div ng-show="selectedStatus=='PS'" class="text-center">
+                                        @*<a title="VIEW" ng-show="{{$index}}==0 || levelId==9" ng-click="ApplicationActionView(AppFlow.GccIdDBEnc)"><i class="fa fa-info-circle infoicon-edit"></i></a>*@
+                                        <span ng-show="AppFlow.StatusId==4 && AppFlow.IsPacsManagerSigned==true && AppFlow.IsGurantor1Signed==true && AppFlow.IsGurantor2Signed==true && AppFlow.IsApplicantSigned==true">
+                                            <a title="VIEW" ng-click="ApplicationActionView(AppFlow.GccIdDBEnc)"><i class="fa fa-info-circle infoicon-edit"></i></a>
+                                        </span>
+                                        <span ng-show="AppFlow.StatusId!=4 || AppFlow.StatusId==24">
+                                            <a title="VIEW" ng-click="ApplicationActionView(AppFlow.GccIdDBEnc)"><i class="fa fa-info-circle infoicon-edit"></i></a>
+                                        </span>
+                                        @if (((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).LevelId == 9)
+                                        {
+                                            <span>
+                                                <a title="E-sign" ng-show="AppFlow.StatusId==4 && AppFlow.IsPacsManagerSigned==false" class="btn btn-sm btn-success mb-2" ng-click="DocumentEsign(AppFlow,1)"><i class="fa fa-check-circle"></i> eSign Document</a>&nbsp;
+                                                <a title="E-sign" ng-show="AppFlow.StatusId==4 && AppFlow.IsGurantor1Signed==false" class="btn btn-sm btn-success mb-2" ng-click="DocumentEsign(AppFlow,2)"><i class="fa fa-check-circle"></i> Gurantor 1 eSign</a><br />
+                                                <a title="E-sign" ng-show="AppFlow.StatusId==4 && AppFlow.IsGurantor2Signed==false" class="btn btn-sm btn-success" ng-click="DocumentEsign(AppFlow,3)"><i class="fa fa-check-circle"></i> Gurantor 2 eSign</a>
+                                            </span>
+                                        }
+                                    </div>
+                                </td>
+                                <td ng-if="levelId==9 && AppFlow.StatusId==6">
+                                    <a title="VIEW" ng-click="MokaReportView(AppFlow.GccIdDBEnc)"><i class="fa fa-download"></i></a>
+                                </td>
+                                @*<td>
+                                        <div ng-if="levelId==8 && AppFlow.StatusId==7">
+                                            <a title="VIEW" ng-click="BranchLevelReportView(AppFlow.GccIdDBEnc)"><i class="fa fa-download"></i></a>
+                                        </div>
+                                    </td>*@
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </div>
+                <div class="col-md-12">
+                    <div ng-if="DataPagingDetails.TotalPages>1" class="dataTables_paginate paging_simple_numbers" id="dataTables-example_paginate">
+                        <div class="dataTables_info" id="dataTables-example_info" role="status" aria-live="polite">
+                            Total Records: {{DataPagingDetails.TotalRecords}}
+                        </div>
+                        <ul class="pagination pagination_1" style="margin-left: 10px !important;">
+                            <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« First</span></li>
+                            <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« Previous</span></li>
+
+                            <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest('1',GetAppliFlowList)" style="cursor: pointer;">
+                                <span>«First</span>
+                            </li>
+                            <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest(DataPagingDetails.PageNumber-1,GetAppliFlowList)" style="cursor:pointer;">
+                                <span>« Previous</span>
+                            </li>
+                            <li class="{{n==DataPagingDetails.PageNumber?'active':''}}" style="{{n==DataPagingDetails.PageNumber?'':'cursor: pointer'}}" ng-repeat="n in PagingRange(DataPagingDetails.StartPageNumber,DataPagingDetails.EndPageNumber,DataPagingDetails.TotalPages)" ng-click="pageRequest(n,GetAppliFlowList)"><span>{{n}}</span></li>
+                            <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Next</span></li>
+                            <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Last</span></li>
+                            <li ng-if="DataPagingDetails.PageNumber!= DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.PageNumber+1,GetAppliFlowList)" style="cursor:pointer;">
+                                <span>Next »</span>
+                            </li>
+                            <li ng-if="DataPagingDetails.PageNumber != DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.TotalPages,GetAppliFlowList)" style="cursor:pointer;">
+                                <span>Last »</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="se-pre-con"></div>
+        @*<div id="stop" class="scrollTop">
+                <span><a href=""><i class="fa fa-arrow-up">Top</i></a></span>
+            </div>*@
+
+
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" ng-show="chkBulkSelected">
+            <div class=" profile-d1" style="margin-top: 30px;">
+                <fieldset class="dvfieldset" ng-show="BaseUserId==ApplicationFlowMaster.UserId && BaseRoleId==ApplicationFlowMaster.RoleId">
+                    <legend class="dvlegend">{{translation.ApplicationFlow}}</legend>
+                    <div class="col-lg-12 profile-d1">
+                        <form class="dev-search-form" name="MyClassForm" ng-show="BaseUserId==ApplicationFlowMaster.UserId" style="overflow: hidden; margin-bottom:35px;">
+
+                            <div class="row">
+                                <div class="col-md-6" ng-show="!ShowOTPDiv ">
+                                    <div>
+                                        <label>
+                                            {{translation.Status}} :
+                                        </label>
+                                        <select ng-model="ddlStatus" class="form-control" id="ddlStatus" ng-init="ddlStatus=''" ng-change="StatusChange()">
+                                            <option value="" disabled>{{translation.SelectOption}}</option>
+                                            <option ng-repeat="item in ProceesStatus" value="{{item.ProcessStatusType}}">
+                                                {{_language =='en-us' ?  item.Status : item.Status}}
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6" ng-show="!ShowOTPDiv && Appstatus1">
+                                    <label>
+                                        {{translation.Status}} :
+                                    </label>
+                                    <select ng-model="ApplicationFlowMaster.StatusId" class="form-control" ng-init="ApplicationFlowMaster.StatusId='0'">
+                                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                                        <option ng-repeat="item in GccProceesStatus" value="{{item.GccProceesStatusId}}">
+                                            {{_language =='en-us' ?  item.ProceesStatusTextEn : item.ProceesStatusTextHi}}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            @*<div class="row">
+                                    <div class="form-group col-md-6" ng-hide="ShowOTPDiv">
+                                        <label ng-show="ApplicationFlowMaster.StatusId!=7 && ApplicationFlowMaster.StatusId!=8"> {{translation.OtherAttachment}} : </label> <label ng-show="ApplicationFlowMaster.StatusId==7">{{translation.MokaReport}} :</label><label ng-show="ApplicationFlowMaster.StatusId==8">{{translation.BranchLevelReport}} :</label>
+                                        <input type="file" name="File" accept="application/pdf" filetype='pdf' id="flReportFile" class="form-control" ng-model="ApplicationFlowMaster.ReportGccFile" onchange="angular.element(this).scope().UploadReportFile(this.files)">
+
+                                    </div>
+                                </div>*@
+
+                            @*<div class="row" ng-show="(ApplicationFlowMaster.StatusId==8) && !ShowOTPDiv">
+                                    <div class="col-md-6">
+                                        <label for="search">{{translation.PurposeOfLoan}}<span class="error">*</span>:</label>
+                                        <select class="form-control" ng-model="ApplicationFlowMaster.PurposeOfLoan" ng-init="ApplicationFlowMaster.PurposeOfLoan='0'">
+                                            <option value="0">{{translation.SelectOption}}</option>
+                                            <option value="1" selected>{{_language =='en-us' ?  'To build animal shelter' : 'पशु निवास बनाने हेतु'}}</option>
+                                            <option value="2">{{_language =='en-us' ?  'To purchase animal feed for animals' : 'पशु के लिए पशु आहार क्रय हेतु'}}</option>
+                                            <option value="3">{{_language =='en-us' ?  'To purchase animals' : 'पशु क्रय के लिए'}}</option>
+                                            <option value="4">{{_language =='en-us' ?  'To improve animal shelter' : 'पशु निवास सुधार हेतु'}}</option>
+                                            <option value="5">{{_language =='en-us' ?  'Other' : 'अन्य'}}</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 form-group" ng-show="ApplicationFlowMaster.PurposeOfLoan==5">
+                                        <label for="search">{{translation.Other}}<span class="error">*</span>:</label>
+                                        <input type="text" class="form-control" disable ng-model="ApplicationFlowMaster.PurposeOfLoanOther" id="txtPurposeOfLoanOther" maxlength="50">
+                                    </div>
+
+                                </div>*@
+
+                            @*<div class="row" ng-show="(ApplicationFlowMaster.StatusId==8 || ApplicationFlowMaster.StatusId==19 ) && !ShowOTPDiv">
+                                    <div class="form-group col-md-6">
+                                        <label for="txtLoanAmountRecommendedByDCS" ng-show="ApplicationFlowMaster.StatusId==8"> {{translation.LoanAmountRecommendedByDCS}}:<span class="error">*</span></label>
+                                        <label for="txtLoanAmountRecommendedByDCS" ng-show="ApplicationFlowMaster.StatusId==19"> {{translation.SanctionedAmt}}:<span class="error">*</span></label>
+
+                                        <input type="text" class="form-control" ng-model="ApplicationFlowMaster.LoanAmountRecommendedByDCS" id="txtLoanAmountRecommendedByDCS" name="txtLoanAmountRecommendedByDCS" maxlength="6" onkeypress='return (event.charCode >= 48 && event.charCode <= 57) || event.charCode==46' autocomplete="off">
+                                    </div>
+                                </div>*@
+
+                            <div class="row">
+                                <div class="form-group col-md-12" ng-hide="ShowOTPDiv">
+                                    <label>{{translation.Remarks}}</label>
+                                    <textarea type="text" rows="4" cols="50" class="form-control" id="Remarks" name="Remarks" ng-bind="Remarks" ng-model="ApplicationFlowMaster.Remark" placeholder={{translation.Remarks}} ng-keypress="checkInput($event)"></textarea>
+                                    <code style="float: left;">
+                                    </code>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-12">
+                                    <label style="color:red;">  {{_language=='en-us'?'Note: The sanctioned amount will be the same as the recommended loan amount':'नोट: स्वीकृत राशि अनुशंसित ऋण राशि के समान होगी'}}</label>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-12" ng-hide="ShowOTPDiv">
+                                    <div class="dev-menu-btn">
+                                        <button type="button" class="btn btn-primary" ng-click="SaveGSSApplicationFlowStatus()">{{translation.Submit}}</button>
+                                        <button type="button" class="btn btn-primary" ng-click="BackToPage()">{{translation.Back}}</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6" ng-show="ShowOTPDiv">
+                                    <label>{{translation.EnterOTP}}</label>
+                                    <input type="text" class="form-control" name="otp" ng-bind="OTP" ng-model="ApplicationFlowMaster.OTP" placeholder={{translation.EnterOTP}} autocomplete="off" /><br />
+                                    <button type="button" class="btn btn-primary" ng-click="VerifyOTP()">{{translation.Submit}}</button>
+                                    <button type="button" class="btn btn-primary" ng-click="SaveGSSApplicationFlowStatus()">{{translation.ReSendOTP}}</button>
+
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </fieldset>
+
+            </div>
+
+        </div>
+    </div>
+    <div class="modal fade" id="modelPopupDocumentView" tabindex="-1" role="dialog" aria-labelledby="otpVerifyLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <div class="otp-gen">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close" ng-click="clearGccOTPModel()" style="opacity: 1; position: absolute; font-size: 28px; top: 0; right: 10px;">
+                            <span aria-hidden="true" style="color:#000 !important;">&times;</span>
+                        </button>
+                        <h4 class="modal-title-heading" style="text-align: center; color: #000; font-size: 24px; margin: 28px 0 40px;">Esign Document View</h4>
+                        <div class="text-center" style="margin-bottom:30px;">
+                            <button type="button" class="btn btn-link mr-2" style="border: 1px solid #337ab7; border-radius: 3px;" ng-click="ViewDocument()">View Document</button>
+                            @*<button type="button" class="btn btn-primary" ng-click="GenerateEsignOtp()">Generate OTP</button>*@
+                            <button type="button" class="btn btn-primary" ng-click="RedirectToESPportal()">Generate OTP</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modelGccPopupOTP" tabindex="-1" role="dialog" aria-labelledby="otpVerifyLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close" ng-click="clearGccOTPModel()">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 style="color:#000 !important;" class="modal-title">OTP Verification</h4>
+                </div>
+
+                <div class="modal-body">
+                    <form id="OTPVerificationForm" class="dev-search-form" style="overflow: hidden; margin-bottom: 35px;" name="OTPVerificationForm">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>{{translation.EnterOTP}}</label>
+                                <input type="text" class="form-control" max-length-and-validate placeholder="Enter The OTP" autocomplete="off" maxlength="6" ng-model="GccSign.OTP" />
+                            </div>
+                            <div class="text-center">
+                                <button type="button" class="btn btn-primary mr-2" ng-click="VerifyGccOTP()">Submit</button>
+                                <button type="button" class="btn btn-primary" ng-click="ApplicationEsignResendOtp()">Resend OTP</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<input type="hidden" name="hdlang" id="hdlang" value="hi-IN" />
+<script src="~/Scripts/google_hindi/google_transapi.js"></script>
+<script type="text/javascript">
+    google.load("elements", "1", {
+        packages: "transliteration"
+    });
+
+    function onLoad() {
+        var content = document.getElementById('content');
+        if (document.getElementById('hdlang').value == "hi-IN") {
+            var options = {
+                sourceLanguage: google.elements.transliteration.LanguageCode.ENGLISH,
+                destinationLanguage: google.elements.transliteration.LanguageCode.HINDI, // available option English, Bengali, Marathi, Malayalam etc.
+                shortcutKey: 'ctrl+g',
+                transliterationEnabled: true
+            };
+        }
+        else {
+            var options = {
+                sourceLanguage: google.elements.transliteration.LanguageCode.ENGLISH,
+                destinationLanguage: google.elements.transliteration.LanguageCode.HINDI, // available option English, Bengali, Marathi, Malayalam etc.
+                shortcutKey: 'ctrl+g',
+                transliterationEnabled: false
+            }
+        }
+        var ids = ["Remarks"];
+        var control = new google.elements.transliteration.TransliterationControl(options);
+        control.makeTransliteratable(ids);
+    }
+    google.setOnLoadCallback(onLoad);
+
+
+</script>

@@ -1,0 +1,256 @@
+﻿<script src="~/Scripts/AngularFramework/ApproveAttendance.js?v=@DateTime.Now.Ticks"></script>
+<script src="~/Scripts/AngularFramework/commonEsign.js?v=@DateTime.Now.Ticks"></script>
+<style>
+    .table.table-responsive.devtable {
+        color: #000;
+    }
+
+    .MdlTblScrl {
+        max-height: 500px;
+        overflow: auto;
+    }
+
+        .MdlTblScrl table thead {
+            position: sticky;
+            top: 0;
+        }
+
+    .modal.TrainingMdl.in .modal-dialog {
+        transform: translate(0, -50%);
+        top: 50%;
+    }
+
+    .modal.dcmtmdl.in .modal-dialog {
+        transform: translate(0, -50%);
+        top: 25%;
+    }
+
+    .modal-title {
+        color: #000;
+    }
+</style>
+<div ng-app="ApproveAttendanceMod">
+    <div ng-controller="ApproveAttendanceCnt">
+        <div class="col-md-12">
+            <h3 class="citizen-dash-head">Approve Attendance Trainning</h3>
+            <hr style="margin: 0;">
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#"> {{translation.TrainingRICEM}} </a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;">Approve Attendance Trainning </span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="col-md-12">
+            <div class="citizen-dash-head">
+                <table class="table table-responsive devtable" style="overflow-x:auto;">
+                    <thead>
+                        <tr>
+                            <th>
+                                {{translation.SRNO}}
+                            </th>
+                            <th ng-click="sortData('ProgrammeNameEn')">
+                                {{translation.ProgramName}}
+                                <div ng-class="getSortClass('ProgrammeNameEn')"></div>
+                            </th>
+                            <th ng-click="sortData('ChannelName_En')">
+                                {{translation.ChannelName}}
+                                <div ng-class="getSortClass('ChannelName_En')"></div>
+                            </th>
+                            <th ng-click="sortData('StartDate')">
+                                {{translation.StartDate}}
+                                <div ng-class="getSortClass('StartDate')"></div>
+                            </th>
+                            <th ng-click="sortData('EndDate')">
+                                {{translation.EndDate}}
+                                <div ng-class="getSortClass('EndDate')"></div>
+                            </th>
+                            <th ng-click="sortData('StartTime')">
+                                {{translation.StartTime}}
+                                <div ng-class="getSortClass('StartTime')"></div>
+                            </th>
+                            <th ng-click="sortData('EndTime')">
+                                {{translation.EndTime}}
+                                <div ng-class="getSortClass('EndTime')"></div>
+                            </th>
+
+                            <th>
+                                {{translation.Status}}
+                            </th>
+
+                            <th>
+                                Action
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr dir-paginate="Trainning in TrainningData | filter: q | orderBy:colsort:reverseSort | itemsPerPage: pageSize" current-page="currentPage" pagination-id="TrainningFormatPagination">
+                            <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                            <td>
+                                {{ _language==='en-us' ? Trainning.ProgrammeNameEn : Trainning.ProgrammeNameHi}}
+                            </td>
+                            <td>
+                                {{ _language==='en-us' ? Trainning.ChannelName_En : Trainning.ChannelName_Hi}}
+                            </td>
+                            <td>
+                                {{Trainning.StartDate}}
+                            </td>
+                            <td>
+                                {{Trainning.EndDate}}
+                            </td>
+                            <td>
+                                {{Trainning.StartTime}}
+                            </td>
+                            <td>
+                                {{Trainning.EndTime}}
+                            </td>
+
+                            <td>
+                                {{ _language==='en-us' ? Trainning.CurrentStatusEng : Trainning.CurrentStatusHi}}
+                            </td>
+                            <td>
+                                <button class="btn btn-success btn-sm" title="View Attendance"
+                                        ng-show="Trainning.IsApproved == 6"
+                                        ng-click="ViewAttendance(Trainning.TrainningId)">
+                                    <span class="fa fa-eye"></span>
+                                    View Attendance
+                                </button>
+
+                                <button class="btn btn-success btn-sm"
+                                        ng-show="Trainning.IsApproved == 6 && Trainning.IsEsign == 0"
+                                        ng-click="GenerateAttenderESign(Trainning.TrainningId)">
+                                    eSign
+                                </button>
+
+                                <button class="btn btn-primary btn-sm"
+                                        ng-show="Trainning.IsApproved == 6 && Trainning.IsEsign == 1"
+                                        ng-click="ViewAttenderESign(Trainning.PDFPath)">
+                                    View eSign
+                                </button>
+
+                                <button class="btn btn-success btn-sm"
+                                        ng-show="Trainning.IsApproved == 6 && Trainning.IsEsign == 1"
+                                        ng-click="GenerateInvoiceESign(Trainning.TrainningId)">
+                                    Generate Invoice
+                                </button>
+                                <button class="btn btn-success btn-sm"
+                                        ng-show="Trainning.IsApproved == 6 && Trainning.IsEsign == 2"
+                                        ng-click="ViewInvoice(Trainning.InvoicePath)">
+                                    View Invoice
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="modal dcmtmdl fade" id="AttenderModal" data-backdrop="static" data-keyboard="false" tabindex="-1">
+            <div class="modal-dialog" style="width: 100%; margin: 30px auto; max-width: 500px;">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 style="font-size: 18px; text-align:left;" class="modal-title">Document Action</h5>
+                        <button type="button" class="close" data-dismiss="modal" style=" position: absolute; right: 10px; top: 10px; opacity: 1;">
+                            &times;
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <button type="button" class="btn btn-primary" ng-click="GenerateDocument(1)">
+                            View Document
+                        </button>
+
+                        <button type="button" class="btn btn-success" ng-click="GenerateDocument(2)">
+                            Generate OTP
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal dcmtmdl fade" id="InvoiceModal" data-backdrop="static" data-keyboard="false" tabindex="-1">
+            <div class="modal-dialog" style="width: 100%; margin: 30px auto; max-width: 500px;">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 style="font-size: 18px; text-align:left;" class="modal-title">Document Action</h5>
+                        <button type="button" class="close" data-dismiss="modal" style=" position: absolute; right: 10px; top: 10px; opacity: 1;">
+                            &times;
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <button type="button" class="btn btn-primary" ng-click="GenerateTaxInvoice(1)">
+                            View Invoice
+                        </button>
+
+                        <button type="button" class="btn btn-success" ng-click="GenerateTaxInvoice(2)">
+                            Generate OTP
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal TrainingMdl fade" id="TrainingAttendanceModal" data-backdrop="static" data-keyboard="false" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Training Attendance Details</h4>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="MdlTblScrl">
+                            <table class="table table-responsive devtable">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            {{translation.SRNO}}
+                                        </th>
+                                        <th>
+                                            Trainning Date
+                                        </th>
+                                        <th>
+                                            {{translation.UserHeading}}
+                                        </th>
+                                        <th>
+                                            {{translation.SSOID}}
+                                        </th>
+                                        <th>
+                                            {{translation.DepartmentHeading}}
+                                        </th>
+                                        <th>
+                                            {{translation.DesignationHeading}}
+                                        </th>
+                                        <th>
+                                            Is present
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr dir-paginate="Class in AttendanceUsers | filter:q | orderBy:colsort:reverseSort | itemsPerPage: pageSize"
+                                        current-page="currentPage" pagination-id="SubclassPagination" ng-class="{'danger': Class.TrainingStatus == 'On Leave'}">
+                                        <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                                        <td>{{Class.TrainningDate}}</td>
+                                        <td ng-if="Class.TrainingStatus != 'On Leave'">{{Class.OfficerNameEn}}</td>
+                                        <td ng-if="Class.TrainingStatus != 'On Leave'">{{Class.SSO_ID}}</td>
+                                        <td ng-if="Class.TrainingStatus != 'On Leave'">{{Class.DEPTNAMEENGLISH}}</td>
+                                        <td ng-if="Class.TrainingStatus != 'On Leave'">{{Class.DESIGNATIONDESCENGLISH}}</td>
+                                        <td ng-if="Class.TrainingStatus != 'On Leave'">{{Class.PresentStatus}}</td>
+                                        <td ng-if="Class.TrainingStatus == 'On Leave'" colspan="5" class="text-center text-danger">
+                                            <strong>Training not held / प्रशिक्षण आयोजित नहीं किया गया।</strong>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,312 @@
+﻿@*@{
+        ViewBag.Title = "FertiMngEntry";
+        Layout = "~/Views/Shared/_Layout.cshtml";
+    }*@
+@*<h2>FertiMngEntry</h2>*@
+
+<script src="~/Scripts/AngularFramework/FertiMngEntry.js"></script>
+<script type="text/javascript">
+    var tableToExcel = (function () {
+        var uri = 'data:application/vnd.ms-excel;base64,'
+            , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>'
+            , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) }
+            , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
+        return function (table, name) {
+            if (!table.nodeType) table = document.getElementById(table)
+            var ctx = { worksheet: name || 'Worksheet', table: table.innerHTML }
+            window.location.href = uri + base64(format(template, ctx))
+        }
+    })()
+</script>
+<div ng-app="FertiMngEntryModule">
+    <div ng-controller="FertiMngEntryCont">
+        <div class="col-md-12">
+            <h3 class="citizen-dash-head">{{translation.FertilizerMNGReport}}<a target="_blank" style="float:right; font-size:12px" href="~/Content/UserManual/fertilizer entry form v 1.pdf">उपयोगकर्ता पुस्तिका</a></h3>
+            <hr style="margin: 0;">
+        </div>
+
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#"> {{translation.EntryForms}} </a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;"> {{translation.FertilizerMNGReport}} </span>
+                    </li>
+                    <li style="float: right;">
+                        <button type="button" ng-click="ShowEntryForm()" class="btn btn-info btn-lg dev-popup-btn" style="color: #025e63; cursor: pointer; text-decoration:none;  font-weight: bold;"> <h5>&#187; {{translation.AddNew}}</h5> </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="citizen-dash-head">
+            @*<div class="modal-header">
+                <h4 class="modal-title"> {{translation.FertilizerMNGReport}} </h4>
+            </div>*@
+            <div class="col-md-12" ng-show="DivForm">
+                <div class="col-lg-12 form-group">
+                    <div class="col-lg-2">{{translation.FincialYearHeading}}</div>
+                    <div class="col-lg-4">
+                        <select class="form-control" ng-model="FertiMng.FinYearId" ng-init="FertiMng.FinYearId='0'" >
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in FinancialYearList" value="{{item.FIN_YEAR_MASTR_ID}}">
+                                {{item.FIN_YEAR_NAME}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-lg-2">{{translation.Month}}</div>
+                    <div class="col-lg-4">
+                        <select class="form-control" ng-model="FertiMng.MonthId" ng-init="FertiMng.MonthId='0'" >
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in MonthList" value="{{item.Month_Id}}">
+                                {{_language =='en-us' ?  item.Month_En : item.Month_Hi}}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-lg-12 form-group">
+                    <div class="col-lg-2">{{translation.District}}</div>
+                    <div class="col-lg-4">
+                        <select class="form-control" ng-model="FertiMng.DistrictId" ng-change="BlockList(); KVSSList();SetFertId();">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in Districts" value="{{item.DISTRICT_ID}}">
+                                {{_language =='en-us' ?  item.DISTRICT_ENG : item.DISTRICT_MANGAL}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-lg-2">{{translation.BlockHeading}}</div>
+                    <div class="col-lg-4">
+                        <select class="form-control" ng-model="FertiMng.BlockId" ng-change="GramPanchayatList(); GSSList();SetFertId();">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in Blocks" value="{{item.BLOCK_ID}}">
+                                {{_language =='en-us' ?  item.BLOCK_ENG : item.BLOCK_MANGAL}}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-lg-12 form-group">
+                    <div class="col-lg-2">{{translation.KVSSMPRForm}}</div>
+                    <div class="col-lg-4">
+                        <select class="form-control" ng-model="FertiMng.KVSSId" ng-change="SetFertId();">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in KVSSList" value="{{item.Id}}">
+                                {{item.KvssNameHi}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-lg-2">{{translation.GramPanchayat}}</div>
+                    <div class="col-lg-4">
+                        <select class="form-control" ng-model="FertiMng.GPId" ng-change="SetFertId();">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in GramPanchayats" value="{{item.GP_ID}}">
+                                {{_language =='en-us' ?  item.GP_ENG : item.GP_MANGAL}}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-lg-12 form-group">
+                    <div class="col-lg-2">{{translation.GSS}}</div>
+                    <div class="col-lg-4">
+                        <select class="form-control" ng-model="FertiMng.GSSId" ng-change="SetFertId();">
+                            <option value="0">{{translation.SelectOption}}-</option>
+                            <option ng-repeat="item in GSSList" value="{{item.Id}}">
+                                {{_language =='en-us' ?  item.GSSName : item.GSSName}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-lg-2">{{translation.Fertilizer}}</div>
+                    <div class="col-lg-4">
+                        <select class="form-control" ng-model="FertiMng.FertiId" ng-init="FertiId='0'" ng-change="GetStockVal()">
+                            <option value="0" disabled>{{translation.SelectOption}}-</option>
+                            <option ng-repeat="item in FertiList" value="{{item.LovValuesId}}">
+                                {{item.Lovdescription}}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-lg-12 form-group">
+                    <div class="col-lg-2">{{translation.TotRecipt}}</div>
+                    <div class="col-lg-4">
+                        <input type="text" class="form-control" ng-model="FertiMng.TotReceipt" ng-change="AddStockVal()" onkeypress='return ((event.charCode >= 48 && event.charCode <= 57)|| event.which ==8 || event.keyCode ==8 || event.charCode==8 || event.keyCode ==46 || event.charCode==46)' >
+                    </div>
+                    <div class="col-lg-2">{{translation.TotSale}}</div>
+                    <div class="col-lg-4">
+                        <input type="text" class="form-control" ng-model="FertiMng.TotSale"  ng-change="AddStockVal()" onkeypress='return ((event.charCode >= 48 && event.charCode <= 57)|| event.which ==8 || event.keyCode ==8 || event.charCode==8 || event.keyCode ==46 || event.charCode==46)' >
+                    </div>
+                </div>
+                <div class="col-lg-12 form-group">
+                    <div class="col-lg-2">{{translation.StockInHand}}</div>
+                    <div class="col-lg-4">
+                        <input type="text" class="form-control" ng-disabled="StockHaveValue" ng-model="FertiMng.TotStockEnd" onkeypress='return ((event.charCode >= 48 && event.charCode <= 57)|| event.which ==8 || event.keyCode ==8 || event.charCode==8 || event.keyCode ==46 || event.charCode==46)' >
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="dev-menu-btn" style="margin-top:5px;padding-top:5px">
+                        <button type="submit" class="btn btn-primary" ng-disabled="SubForm.$invalid" ng-click="SaveFerti()">{{translation.Submit}}</button>
+                        @*<button type="submit" class="btn btn-primary" ng-click="ClearFertiForm()">{{translation.Clear}}</button>*@
+                        <button type="submit" class="btn btn-primary" ng-click="BackForm()">{{translation.Back}}</button>
+                        <input type="hidden" ng-model="FertiMng.FertiMNGReportId" />
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="col-md-12" ng-show="DivtringGrid">
+                <div class="citizen-dash-head">
+                    <div class="table-dropdown">
+                        <div class="col-md-12 dev-search-form">
+                            <div class="col-xs-3">
+                                <label for="search">{{translation.Search}}:</label>
+                                <input ng-model="q" id="search" class="form-control" placeholder={{translation.filttertext}} autocomplete="off">
+                            </div>
+                            <div class="col-xs-3">
+                                <label for="search">{{translation.ItemPerPage}}:</label>
+                                <input type="number" min="1" max="100" class="form-control" ng-model="pageSize">
+                            </div>
+                            <div class="col-md-3">
+                                <label>
+                                    {{translation.FincialYearHeading}}
+                                </label>
+                                <select class="form-control" ng-model="FertiMng.FinYearId" ng-init="FertiMng.FinYearId='0'">
+                                    <option value="0" disabled>{{translation.SelectOption}}</option>
+                                    <option ng-repeat="item in FinancialYearList" value="{{item.FIN_YEAR_MASTR_ID}}">
+                                        {{item.FIN_YEAR_NAME}}
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="col-lg-3">
+                                <label>{{translation.Month}}:</label>
+                                <select class="form-control" ng-model="FertiMng.MonthId" ng-init="FertiMng.MonthId='0'">
+                                    <option value="0" disabled>{{translation.SelectOption}}</option>
+                                    <option ng-repeat="item in MonthList" value="{{item.Month_Id}}">
+                                        {{_language =='en-us' ?  item.Month_En : item.Month_Hi}}
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label>  {{translation.District}} : </label>
+                                <select class="form-control" ng-model="FertiMng.DistrictId" ng-change=" KVSSList();">
+                                    <option value="0" disabled>{{translation.SelectOption}}</option>
+                                    <option ng-repeat="item in Districts" value="{{item.DISTRICT_ID}}">
+                                        {{_language =='en-us' ?  item.DISTRICT_ENG : item.DISTRICT_MANGAL}}
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                @*<label>
+                                    {{translation.KVSSMPRForm}} :
+                                </label>
+                                <select class="form-control" ng-model="FertiMng.KVSSId">
+                                    <option value="0" disabled>{{translation.SelectOption}}</option>
+                                    <option ng-repeat="item in KVSSList" value="{{item.Id}}">
+                                        {{_language =='en-us' ?  item.KvssNameEn : item.KvssNameHi}}
+                                    </option>
+                                </select>*@
+                                <label>
+                                    {{translation.Fertilizer}} :
+                                </label>
+                                <select class="form-control" ng-model="FertiMng.FertiId" ng-init="FertiMng.FertiId='0'">
+                                    <option value="0" disabled>{{translation.SelectOption}}-</option>
+                                    <option ng-repeat="item in FertiList" value="{{item.LovValuesId}}">
+                                        {{item.Lovdescription}}
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="col-md-3"style="padding-top: 25px; ">
+                                <input type="button" class="btn btn-primary dev-btn" ng-click="FertiReportList()" value="{{translation.Search}}">
+                            </div>
+                            <div class="col-md-3" style="padding-top: 25px; ">
+                                <input type="button" class="btn btn-primary dev-btn" onclick="tableToExcel('tblgetsuport', 'Get Fertilizer Data')" value="Export to Excel">
+                            </div>
+                        </div>
+                        <div>
+
+                            <div class="col-md-12">
+                                <div class="citizen-dash-head">
+                                    <table class="table devtable" id="tblgetsuport">
+                                        <caption>
+                                            <h2>{{translate.GramHeading}}</h2>
+                                        </caption>
+                                        <thead>
+                                            <tr>
+                                                <th>
+                                                    {{translation.SRNO}}
+                                                </th>
+                                                <th>
+                                                    {{translation.FincialYearHeading}}
+                                                </th>
+                                                <th>
+                                                    {{translation.Month}}
+                                                </th>
+                                                <th>
+                                                    {{translation.District}}
+                                                </th>
+                                                <th>
+                                                    {{translation.KVSSMPRForm}}
+                                                </th>
+                                                <th>
+                                                    {{translation.GSS}}
+                                                </th>
+                                                <th>
+                                                    {{translation.Fertilizer}}
+                                                </th>
+                                                <th>
+                                                    {{translation.TotRecipt}}
+                                                </th>
+                                                <th>
+                                                    {{translation.TotSale}}
+                                                </th>
+                                                <th>
+                                                    {{translation.StockInHand}}
+                                                </th>
+                                                <th>
+                                                    {{translation.Delete}}
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr dir-paginate="items in DataList | filter:q | orderBy:colsort:reverseSort | itemsPerPage: pageSize" current-page="currentPage" pagination-id="VillagePagination">
+                                                <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                                                <td>{{ items.FIN_YEAR_NAME }}</td>
+                                                <td>{{ items.Month_En }}</td>
+                                                <td>{{ items.DISTRICT_ENG }}</td>
+                                                <td>{{ items.KvssNameEn }}</td>
+                                                <td>{{ items.GSSName }}</td>
+                                                <td>{{ items.Ferti_En }}</td>
+                                                <td>{{ items.TotReceipt }}</td>
+                                                <td>{{ items.TotSale }}</td>
+                                                <td>{{ items.TotStockEnd }}</td>
+                                                <td><i class="fa fa-trash btn btn btn-xs tooltips" id="Remove_1" ng-click="DeleteFertiMNGReport(items.FertiMNGReportId)"></i></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div class="col-md-12">
+                                <div class="text-center">
+                                    <dir-pagination-controls boundary-links="true" pagination-id="VillagePagination" on-page-change="pageChangeHandler(newPageNumber)" template-url="/dirPagination.tpl.html"></dir-pagination-controls>
+                                </div>
+                            </div>
+
+                            <div class="col-md-2">
+                                <h5 class="dev-page"> {{translation.Page}}: {{ currentPage }} </h5>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="se-pre-con"></div>
+    <div id="stop" class="scrollTop">
+        <span><a href=""><i class="fa fa-arrow-up">Top</i></a></span>
+    </div>
+</div>
+
+
+

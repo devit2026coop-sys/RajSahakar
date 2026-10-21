@@ -1,0 +1,234 @@
+﻿
+<script src="~/Scripts/AngularFramework/ElectionSocietyReport.js"></script>
+<script>
+    $(document).ready(function () {
+
+        $('.devcalender').datepicker({
+            showOn: "both",
+            changeMonth: true,
+            buttonImage: "../images/calender.png",
+            changeYear: true,
+            dateFormat: "dd/mm/yy",
+            // minDate: '0'
+            yearRange: "c-10:c+0"
+        });
+
+    });
+</script>
+<div ng-app="ElectionSocietyReportMod">
+    <div ng-controller="ElectionSocietyReportCont">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <h3 class="citizen-dash-head">Election Society Report</h3>
+        </div>
+
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#"> {{translation.Home}} </a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;">{{translation.ElectionSocietyReport}}</span>
+                    </li>
+
+                </ul>
+            </div>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="citizen-dash-head">
+                <div class="col-md-12 dev-search-form" id="search-filter">
+
+                    <div class="row">
+                        <div class="col-lg-2 form-group">
+                            <label class="form-check-label" for="inlineRadio1">{{translation.District}} </label>
+                        </div>
+                        <div class="col-lg-2 form-group">
+                            <select ng-model="ElectionSociety.DISTRICT_ID" class="form-control" ng-init="ElectionSociety.DISTRICT_ID='0'" ng-change="BlockListByOffAdd(1);GetCityListByCityTypes(1);">
+                                <option value="0">{{translation.SelectOption}}</option>
+                                <option ng-repeat="item in DistrictList" value="{{item.DISTRICT_ID}}">
+                                    {{_language =='en-us' ?  item.DISTRICT_ENG : item.DISTRICT_MANGAL}}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="form-group col-md-2">
+                            <label class="form-check-label">{{translation.UrbanRural}}</label>
+                        </div>
+                        <div class="col-lg-3">
+                            <label class="help-block-gender" style="width:40% !important;">
+                                <input type="radio" id="sdfs" name="Rurals" value="True" ng-model="ElectionSociety.IsRural" ng-change="RuralUrbanBlock_change(true)">{{translation.Urban}}
+                            </label>
+                            <label class="help-block-gender" style="width:40% !important;">
+                                <input type="radio" id="sdf" value="False" name="Rural" ng-model="ElectionSociety.IsRural" ng-change="RuralUrbanBlock_change(false)">{{translation.Rural}}
+                            </label>
+                        </div>
+
+                    </div>
+                   
+                    <div class="row">
+                        <div ng-show="RuralDiv">
+
+                            <div class="col-lg-2 form-group">
+                                <label class="form-check-label" for="search">{{translation.BlockHeading}}:</label>
+                            </div>
+                            <div class="col-lg-2 form-group">
+                                <select ng-model="ElectionSociety.BlockId" id="ddlblocki" class="form-control" ng-init="ElectionSociety.BlockId='0'" ng-change="GramPanchayatList(1)">
+                                    <option value="0">{{translation.SelectOption}}</option>
+                                    <option ng-repeat="item in Blocksdata | orderBy:'BLOCK_ENG'" value="{{item.BLOCK_ID}}">
+                                        {{_language =='en-us' ?  item.BLOCK_ENG : item.BLOCK_MANGAL}}
+                                    </option>
+                                </select>
+                            </div>
+
+
+                            <div class="col-lg-2 form-group">
+                                <label class="form-check-label" for="search">{{translation.GramPanchayatHeading}}:</label>
+                            </div>
+                            <div class="col-lg-2 form-group">
+                                <select ng-model="ElectionSociety.GP_ID" id="ddlGP" class="form-control" ng-init="ElectionSociety.GP_ID='0'" ng-change="VillageList()">
+                                    <option value="0">{{translation.SelectOption}}</option>
+                                    <option ng-repeat="item in GramPanchayats | orderBy:'GramPanchayats'" value="{{item.GP_ID}}">
+                                        {{_language =='en-us' ?  item.GP_ENG : item.GP_MANGAL}}
+                                    </option>
+                                </select>
+                            </div>
+
+
+
+                            <div class="col-lg-1 form-group">
+                                <label class="form-check-label" for="search">{{translation.Village}}:</label>
+                            </div>
+                            <div class="col-lg-2 form-group">
+                                <select ng-model="ElectionSociety.VillageId" id="ddlVillage" class="form-control" ng-init="ElectionSociety.VillageId='0'">
+                                    <option value="0">{{translation.SelectOption}}</option>
+                                    <option ng-repeat="item in Villages | orderBy:'VILLAGE_ENG'" value="{{item.VILLAGE_ID}}">
+                                        {{_language =='en-us' ?  item.VILLAGE_ENG : item.VILLAGE_MANGAL}}
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="row">
+                        <div ng-show="UrbanDiv">
+                            <div class="col-lg-2 form-group">
+                                <label class="form-check-label" for="inlineRadio1">{{translation.City}} </label>
+                            </div>
+                            <div class="col-lg-2 form-group">
+                                <select ng-model="ElectionSociety.CITY_ID" class="form-control" ng-change="GetWardList(1)" ng-init="ElectionSociety.CITY_ID='0'">
+                                    <option value="0">{{translation.SelectOption}}</option>
+                                    <option ng-repeat="item in CityListdata" value="{{item.CITY_ID}}">
+                                        {{_language =='en-us' ?  item.CITY_ENG : item.CITY_MANGAL}}
+                                    </option>
+                                </select>
+                            </div>
+
+
+                            <div class="col-lg-2 form-group">
+                                <label>{{translation.Ward}}<span class="error">*</span></label>
+                            </div>
+                            <div class="col-lg-2 form-group">
+                                <select ng-model="ElectionSociety.WardId" class="form-control" ng-init="ElectionSociety.WardId='0'">
+                                    <option value="0">{{translation.SelectOption}}</option>
+                                    <option ng-repeat="item in Ward" value="{{item.WARD_ID}}">
+                                        {{_language =='en-us' ?  item.WARD_ENG : item.WARD_MANGAL}}
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        @*<div class="col-lg-2">
+                            <label>Date<span class="error">*</span>:</label>
+                        </div>
+                        <div class="col-lg-2">
+                            <input name="ComplaintDate" type="text" id="ComplaintDate1" dat-val="1" class="form-control devcalender" placeholder="dd/MM/yyyy" ng-model="ElectionSociety.CreationDate" autocomplete="off" onKeyPress="return isNumber(event);" size=10 maxlength=10 />
+                        </div>*@
+
+                        <div class="col-lg-2">
+                            <button type="button" ng-click="searchRequest(GetElectionSocietyList)" class="btn btn-primary dev-btn ng-binding">{{translation.Search}}</button>
+                            <button type="button" ng-click="ClearSearch_new()" class="btn btn-primary dev-btn ng-binding">{{translation.Clear}}</button>
+                        </div>
+                        </div>
+                        
+                      
+                    </div>
+
+                
+                </div>
+        
+            </div>
+
+
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <div class="citizen-dash-head">
+                            <table class="table table-responsive devtable">
+                                <thead>
+                                    <tr>
+                                        <th> {{translation.SRNO}} </th>
+                                        <th> {{translation.SocietyName}} </th>
+                                        <th> {{translation.DistrictHeading}}</th>
+                                        @*<th> {{translation.startDatetime}} </th>
+                                        <th> {{translation.EndDateTime}}   </th>*@
+                                        <th> {{translation.ElectionOfficerName}} </th>
+                                        <th> {{translation.Remarks}} </th>
+                                        <th> {{translation.Datetime}} </th>
+                                        
+                                    </tr>
+                                </thead>
+                                <tbody>
+
+
+                                    <tr ng-repeat="Item in SocietyReportList">
+                                        <td>{{$index+1}}</td>
+                                        <td>{{ Item.SocietyName }}</td>
+                                        @*<th> {{Item.OfficerNameEn}}</th>*@
+                                        <th>  {{Item.DISTRICT_ENG}}   </th>
+
+                                        <th>{{Item.OfficerNameEn}}</th>
+                                        @*<th> {{Item.StartTime}}    </th>
+                                        <th> {{Item.EndTime}}  </th>*@
+                                        <td>{{ Item.OfficerComment  }}</td>
+                                        <td>{{ Item.CreationDate }}</td>
+                                    </tr>
+
+                                    <tr>
+                                        <td colspan="7" style="text-align:right">
+                                            <div class="col-md-10">
+                                                <div ng-if="DataPagingDetails.TotalPages>1" class="dataTables_paginate paging_simple_numbers" id="dataTables-example_paginate">
+                                                    <ul class="pagination pagination_1" style="margin: auto !important;display: block;">
+                                                        <li><label style="display: inline;position: relative;float: left;padding-top: 8px;padding-right:7px;">Total Records: {{DataPagingDetails.TotalRecords}}</label> </li>
+                                                        <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« First</span></li>
+                                                        <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« Previous</span></li>
+                                                        <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest('1',GetSocietyDetailsList)" style="cursor: pointer;">
+                                                            <span>«First</span>
+                                                        </li>
+                                                        <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest(DataPagingDetails.PageNumber-1,GetElectionSocietyList)" style="cursor:pointer;">
+                                                            <span>« Previous</span>
+                                                        </li>
+                                                        <li class="{{n==DataPagingDetails.PageNumber?'active':''}}" style="{{n==DataPagingDetails.PageNumber?'':'cursor: pointer'}}" ng-repeat="n in PagingRange(DataPagingDetails.StartPageNumber,DataPagingDetails.EndPageNumber,DataPagingDetails.TotalPages)" ng-click="pageRequest(n,GetElectionSocietyList)"><span>{{n}}</span></li>
+                                                        <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Next</span></li>
+                                                        <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Last</span></li>
+                                                        <li ng-if="DataPagingDetails.PageNumber!= DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.PageNumber+1,GetElectionSocietyList)" style="cursor:pointer;">
+                                                            <span>Next »</span>
+                                                        </li>
+                                                        <li ng-if="DataPagingDetails.PageNumber != DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.TotalPages,GetElectionSocietyList)" style="cursor:pointer;">
+                                                            <span>Last »</span>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                           
+
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+

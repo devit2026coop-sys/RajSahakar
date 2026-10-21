@@ -1,0 +1,310 @@
+﻿
+@{
+
+    Layout = "~/Views/Shared/_CitizenLayout.cshtml";
+}
+
+
+<script src="~/Scripts/AngularFramework/AuditorRequest.js"></script>
+<script>
+
+    var modal = document.getElementById('myModal');
+
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function (event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+
+    function ValidateAlphaNumericAndSlash(evt) {
+        // alert(evt.keyCode);
+        var keyCode = (evt.which) ? evt.which : evt.keyCode
+        alert(keyCode);
+        if ((evt.which == 8 || evt.keyCode == 8 || evt.charCode == 8))
+            return true;
+        if ((keyCode < 65 || keyCode > 90) && (keyCode < 97 || keyCode > 123) && keyCode != 32) {
+            //    alert("not cahr");
+            if ((keyCode >= 48 && keyCode <= 57)) {   //   || keyCode == 47   for slash
+                //     alert(" num or slash");
+                return true;
+            }
+            else {
+                //    alert("not cahr and num");
+                return false;
+            }
+        } else {
+            //    alert("cahr");
+            return true;
+        }
+    };
+</script>
+
+<div ng-app="AuditorReqModule">
+    <div ng-controller="AuditorReqCont">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <h3 class="citizen-dash-head">{{translation.AuditorRequest}}<a target="_blank" style="float:right; font-size:12px" href="~/Content/UserManual/auditor citizen verification.pdf">उपयोगकर्ता पुस्तिका</a></h3>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#"> {{translation.Auditor}} </a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;">{{translation.AuditorRequest}}new</span>
+                    </li>
+                    <li style="float: right;" ng-if="ShowAddNewApplication">
+                        <button type="button" class="btn btn-info btn-lg dev-popup-btn" ng-click="ShowApplicationForm()"> <h4>&#187; {{translation.AddNew}}</h4> </button>
+                    </li>
+                </ul>
+
+            </div>
+        </div>
+
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+
+                <div ng-show="DivSearch">
+                    <div class="col-lg-12 form-group">
+                        <div class="col-lg-4"><label>{{translation.SearchBy}}</label><span class="error">*</span></div>
+                        <div class="col-lg-4">
+                            <input type="text" name="Name" class="form-control" placeholder="{{translation.SearchBy}}" ng-model="AuditorRequest.SearchDeatils" autocomplete="off" required>
+                        </div>
+                        <div class="col-lg-2"><label></label></div>
+                        <div class="col-lg-2">
+                            <button type="submit" class="btn btn-primary" ng-click="GetAuditorData()">{{translation.GetDetails}}</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <div class="col-lg-12">
+            <div class="citizen-dash-head" ng-show="RequestForm">
+                <div class="col-lg-12 form-group">
+                    <h5 class="heading-hr ng-binding">  {{translation.AuditorDetails}}</h5>
+                </div>
+                <div class="col-lg-12 form-group">
+                    <div class="col-lg-2">
+                        <label>{{translation.AuditorType}}</label>
+                    </div>
+                    <div class="col-lg-4">
+                        <input class="form-check-input" type="radio" name="inlineRadioOptions2" value="1" ng-model="AuditorRequest.IsFirm" ng-change="IsFirmYN()">
+                        <label class="form-check-label option_value" for="inlineRadio1" style="margin-right: 15px;">{{translation.Firm}}</label>
+
+                        <input class="form-check-input" type="radio" name="inlineRadioOptions2" id="inlineRadio3" value="0" ng-model="AuditorRequest.IsFirm" ng-change="IsFirmYN()">
+                        <label class="form-check-label option_value">{{translation.Individual}}</label>
+                    </div>
+                    <div class="col-lg-2" ng-show="IsFirm">
+                        <label>{{translation.FirmType}}</label>
+                    </div>
+                    <div class="col-lg-4" ng-show="IsFirm">
+                        <input class="form-check-input" type="radio" name="RadioOptions2" value="0" ng-model="AuditorRequest.FirmType" ng-change="IsFirmType()">
+                        <label class="form-check-label option_value" for="inlineRadio1" style="margin-right: 15px;">{{translation.Individual}}</label>
+
+                        <input class="form-check-input" type="radio" name="RadioOptions2" value="1" ng-model="AuditorRequest.FirmType" ng-change="IsFirmType()">
+                        <label class="form-check-label option_value">{{translation.Partnership}}</label>
+                    </div>
+                </div>
+                <div class="col-lg-12 form-group">
+                    <div class="col-lg-2"><label>{{title}}</label><span class="error">*</span></div>
+                    <div class="col-lg-4">
+                        <input type="text" name="Name" class="form-control" placeholder="{{translation.Name}}" ng-model="AuditorRequest.FirmName" autocomplete="off" required>
+                    </div>
+                    <div class="col-lg-2"><label>{{ translation.District}} </label><span class="error">*</span></div>
+                    <div class="col-lg-4">
+                        <select ng-model="AuditorRequest.DistrictId" id="ddlDistrict" class="form-control" ng-init="AuditorRequest.DistrictId='0'">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="itemDist in DistrictList | orderBy:'DISTRICT_ENG'" value="{{itemDist.DISTRICT_ID}}">
+                                {{_language =='en-us' ?  itemDist.DISTRICT_ENG : itemDist.DISTRICT_MANGAL}}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-lg-12 form-group">
+                    <div class="col-lg-2">
+                        <label>{{Firm}}</label><span class="error">*</span>
+                    </div>
+                    <div class="col-lg-4">
+                        <textarea type="text" name="FirmAddress" class="form-control" ng-model="AuditorRequest.FirmAddress" placeholder="{{translation.FirmAddress}}" autocomplete="off"></textarea>
+                    </div>
+                    <div class="col-lg-2">
+                        <label>{{FirmPin}}</label><span class="error">*</span>
+                    </div>
+                    <div class="col-lg-4">
+                        <input type="text" name="FirmPinCode" class="form-control" ng-model="AuditorRequest.FirmPinCode" placeholder="{{translation.FirmPinCode}}" maxlength="6" onkeypress='return event.charCode >= 48 && event.charCode <= 57' autocomplete="off">
+                    </div>
+                </div>
+                <div class="col-lg-12 form-group" ng-show="Partnership">
+                    <div class="col-lg-2">
+                        <label>{{translation.NoOfPartners}}</label><span class="error">*</span>
+                    </div>
+                    <div class="col-lg-4">
+                        <input type="text" name="Auditorfees" class="form-control" ng-model="AuditorRequest.NoOfPartners" placeholder="{{translation.NoOfPartners}}" maxlength="10" onkeypress='return event.charCode >= 48 && event.charCode <= 57' autocomplete="off" />
+                    </div>
+
+                </div>
+                <div class="col-lg-12 form-group" ng-show="Partnership">
+                    <div class="col-lg-2">
+                        <label>{{translation.BranchAddress}}</label><span class="error">*</span>
+                    </div>
+                    <div class="col-lg-4">
+                        <textarea type="text" name="BranchAddress" class="form-control" ng-model="AuditorRequest.BranchAddress" placeholder="{{translation.BranchAddress}}" autocomplete="off"></textarea>
+                    </div>
+                    <div class="col-lg-2">
+                        <label>{{translation.BranchPinCode}}</label><span class="error">*</span>
+                    </div>
+                    <div class="col-lg-4">
+                        <input type="text" name="Auditorfees" class="form-control" ng-model="AuditorRequest.BranchPinCode" placeholder="{{translation.BranchPinCode}}" maxlength="6" onkeypress='return event.charCode >= 48 && event.charCode <= 57' autocomplete="off">
+                    </div>
+                </div>
+                <div class="col-lg-12 form-group">
+                    <div class="col-lg-2">
+                        <label>{{translation.MobileNo}}</label><span class="error">*</span>
+                    </div>
+                    <div class="col-lg-4">
+                        <input type="text" name="Auditorfees" class="form-control" ng-model="AuditorRequest.MobileNo" placeholder="{{translation.MobileNo}}" maxlength="10" onkeypress='return event.charCode >= 48 && event.charCode <= 57' autocomplete="off">
+                    </div>
+                    <div class="col-lg-2">
+                        <label>{{translation.PhoneNo}}</label>
+                    </div>
+                    <div class="col-lg-4">
+                        <input type="text" name="Auditorfees" class="form-control" ng-model="AuditorRequest.PhoneNo" placeholder="{{translation.PhoneNo}}" maxlength="10" onkeypress='return event.charCode >= 48 && event.charCode <= 57' autocomplete="off">
+                    </div>
+                </div>
+                <div class="col-lg-12 form-group">
+                    <div class="col-lg-2">
+                        <label>{{translation.ICFAIRegistrationNo}}</label><span class="error">*</span>
+                    </div>
+                    <div class="col-lg-4">
+                        <input type="text" name="Auditorfees" class="form-control" ng-model="AuditorRequest.ICFAIRegistrationNo" placeholder="{{translation.ICFAIRegistrationNo}}" maxlength="10" autocomplete="off">
+                    </div>
+                    <div class="col-lg-2">
+                        <label>{{translation.ICFAIRegistrationDate}}</label><span class="error">*</span>
+                    </div>
+                    <div class="col-lg-4">
+                        <input name="Affiliation" id="txtRegistrationDate" ng-init="AuditorRequest.RegistrationDate=''" style="display:inline; margin-top: 0px;" class="form-control devcalender" disabled="disabled" placeholder="{{translation.Affiliation}}" ng-model="AuditorRequest.RegistrationDate" autocomplete="off" /> &nbsp;
+                    </div>
+                </div>
+                <div class="col-lg-12 form-group">
+                    <div class="col-lg-2">
+                        <label>{{translation.RBIPanelUniqueCode}}</label><span class="error">*</span>
+                    </div>
+                    <div class="col-lg-4">
+                        <input type="text" name="Auditorfees" class="form-control" ng-model="AuditorRequest.RBIPanelUniqueCode" placeholder="{{translation.RBIPanelUniqueCode}}" maxlength="10" autocomplete="off">
+
+                    </div>
+                    <div class="col-lg-2">
+                        <label>{{translation.EnrollmentNo}}</label><span class="error">*</span>
+                    </div>
+                    <div class="col-lg-4">
+                        <input type="text" name="EnrollmentNo" class="form-control" ng-model="AuditorRequest.EnrollmentNo" placeholder="{{translation.EnrollmentNo}}" maxlength="10" onkeypress='return event.charCode >= 48 && event.charCode <= 57' autocomplete="off">
+                    </div>
+                </div>
+                <div class="form-group col-md-12">
+                    <div class="dev-menu-btn">
+                        <button type="submit" class="btn btn-primary" ng-click="SendOtp()" data-toggle="modal">{{translation.OnlySave}}</button>@*ng-click="SaveAuditorRequest()"*@
+                        <button type="submit" class="btn btn-primary" ng-click="Clear()">{{translation.Clear}}</button>
+                        <button type="submit" class="btn btn-primary" ng-click="BackToPage()">{{translation.Back}}</button>
+                        <input type="hidden" ng-model="AuditorRequest.AuditorRequestID" value="0" />
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <div>
+            <div class="col-md-12">
+                <div class="citizen-dash-head">
+                    <table class="table devtable">
+                        <thead>
+                            <tr>
+                                <th>
+                                    {{translation.SRNO}}
+                                </th>
+                                <th>
+                                    {{translation.Name}}
+                                </th>
+                                <th>
+                                    {{translation.AuditorType}}
+                                </th>
+                                <th>
+                                    {{translation.FirmType}}
+                                </th>
+                                <th>
+                                    {{translation.District}}
+                                </th>
+                                <th>
+                                    {{translation.MobileNo}}
+                                </th>
+                                <th>
+                                    {{translation.ICFAIRegistrationNo}}
+                                </th>
+                                <th>
+                                    {{translation.RBIPanelUniqueCode}}
+                                </th>
+                                <th>
+                                    {{translation.EnrollmentNo}}
+                                </th>
+                                <th>
+                                    {{translation.ICFAIRegistrationDate}}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="items in AuditorData">
+                                <td>{{$index+1}}</td>
+                                <td>{{ items.FirmName | uppercase }}</td>
+                                <td>{{_language =='en-us' ?  items.AuditorTypeEn : items.AuditorTypeHi}}</td>
+                                <td>{{_language =='en-us' ? items.FirmTypeEn :  items.FirmTypeHi }}</td>
+                                <td>{{_language =='en-us' ? items.DISTRICT_ENG : items.DISTRICT_MANGAL }}</td>
+                                <td>{{ items.MobileNo}}</td>
+                                <td>{{ items.ICFAIRegistrationNo}}</td>
+                                <td>{{ items.RBIPanelUniqueCode}}</td>
+                                <td>{{ items.EnrollmentNo}}</td>
+                                <td>{{ items.RegistrationDate}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="dev-popup-body modal fade" id="myModal" role="dialog">
+            <div class="modal-dialog">
+                <!-- Modal content-->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" id="btnClose" class="close" data-dismiss="modal" ng-click="ClearClassForm()">&times;</button>
+                        <h4 class="modal-title"> {{translation.OtpVeryfication}} </h4>
+                    </div>
+                    <div class="modal-body">
+                        <form class="dev-search-form" name="MyClassForm" style="overflow: hidden; margin-bottom:35px;">
+                            <div class="col-lg-2">
+                                <label>{{translation.EnterOtp}}</label>
+                            </div>
+                            <div class="col-lg-6" ng-class="{ 'has-error' : MyClassForm.Classnameen.$invalid && !MyClassForm.Classnameen.$pristine }">
+                                <input type="text" class="form-control" name="Classnameen" ng-bind="Classnameen" ng-model="OtpText" placeholder={{translation.EnterOtp}} ng-required="true" autocomplete="off" />
+
+                            </div>
+                            <div>
+                                <button type="submit" style="font-size: 13px;" class="btn btn-primary" ng-click="SendOtp()">{{translation.ReSendOTP}}</button>
+                            </div>
+                            <br /><br />
+                            <div class="form-group col-md-12">
+                                <div class="dev-menu-btn">
+                                    <button type="submit" class="btn btn-primary" ng-disabled="MyClassForm.$invalid" ng-click="OtpVerify()">{{translation.EnterOTP}}</button>
+                                    <button type="submit" class="btn btn-primary" ng-click="ClearOTPForm()">{{translation.Clear}}</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+

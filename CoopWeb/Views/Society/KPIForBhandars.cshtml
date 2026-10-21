@@ -1,0 +1,439 @@
+﻿<script src="~/Scripts/AngularFramework/KPIForBhandars.js"></script>
+<style>
+    .section-head {
+        font-weight: 600;
+        font-size: 16px;
+        margin: 20px 0 10px 0;
+        border-bottom: 1px solid #ddd;
+        padding-bottom: 5px;
+    }
+
+    .field-label {
+        font-weight: 500;
+    }
+
+    .db-value {
+        color: #555;
+        font-style: italic;
+    }
+</style>
+<div ng-app="ApplicationBhandarKPIModule">
+    <div ng-controller="CooperativeBhandarKPIFormCont">
+        <div class="col-md-12">
+            <h3 class="citizen-dash-head ng-binding" style="margin-top:0px;">जिला सहकारी उपभोक्ता होलसेल भण्डार की {{PreviousMonth}} 2026 तक प्रगति रिपोर्ट</h3>
+        </div>
+
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#">  {{translation.Home}}</a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;"> {{translation.New}} </span>
+                        <i class="fa fa-angle-right"> </i>
+                        <span style="margin: 0 5px;">जिला सहकारी उपभोक्ता होलसेल भण्डार की {{PreviousMonth}} 2026 तक प्रगति रिपोर्ट</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div style="margin-top:30px;padding-top:30px">
+            <div class="col-md-12">
+                <div class="citizen-dash-head" style="overflow: hidden;">
+                    <h2 style=" font-weight: bold; text-align: center; "> जिला सहकारी उपभोक्ता होलसेल भण्डार की {{PreviousMonth}} 2026 तक प्रगति रिपोर्ट</h2>
+                    <h3 style=" font-weight: bold; text-align: center; margin: 30px 0;">कार्य प्रदर्शन के आधार पर (केपीआई)</h3>
+                    <div class="col-md-12">
+                        <div class="citizen-dash-head" style="overflow: hidden;">                                                  
+
+                                <div class="form-group col-md-3">
+                                    <label>{{translation.DepartmentHeading}}</label>
+                                    <select ng-model="UserRegistration.DEPTCODE" class="form-control" ng-init="UserRegistration.DEPTCODE='0'" ng-change="GetAllSubOrganisationList()">
+                                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                                        <option ng-repeat="item in Department" value="{{item.ID}}">
+                                            {{_language =='en-us' ?  item.DEPTNAMEENGLISH : item.DEPTNAMEENGLISH}}
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-3">
+                                    <label>Apex Body</label>
+                                    <select class="form-control" id="ddlOrganisation" ng-model="UserRegistration.OrganisationId" ng-init="UserRegistration.OrganisationId='0'" ng-change="LevelList()">
+                                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                                        <option ng-repeat="item in OrganisationData" value="{{item.OrganisationId}}">
+                                            {{_language =='en-us' ?  item.OrganisationNameEn : item.OrganisationNameHi}}
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group col-md-3">
+                                    <label>{{translation.Level}}</label>
+                                    <select class="form-control" id="ddllevel" ng-model="UserRegistration.LevelId" ng-init="UserRegistration.LevelId='0'" ng-change="GetValuesForDesignationList()">
+                                        <option value="0">{{translation.SelectOption}}</option>
+                                        <option ng-repeat="item in Level" value="{{item.LevelId}}~{{item.MappingID}}">
+                                            {{_language =='en-us' ?  item.LevelNameEn : item.LevelNameHi}}
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-3" ng-show="(gccData>0)">
+                                    <label>
+                                        {{translation.BankNameCCB}}
+                                    </label>
+                                    <select ng-model="GopalCreditCardModel.LoanBankID" ng-disabled="IsSubmiApplication" id="BankID" class="form-control" ng-init="GopalCreditCardModel.LoanBankID='0'" ng-change="Get_LoanBankBranch('0')">
+                                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                                        <option ng-repeat="itemBlock in BankMasterList | orderBy:'BLOCK_ENG'" value="{{itemBlock.CCBId}}">
+                                            {{_language =='en-us' ?  itemBlock.CCBNameEn : itemBlock.CCBNameHi}}
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-3" ng-show="(gccData>1)">
+                                    <label>
+                                        {{translation.BankBranchCCB}}
+                                    </label>
+                                    <select ng-model="GopalCreditCardModel.LoanBranchId" id="BranchId" class="form-control" ng-init="GopalCreditCardModel.LoanBranchId='0'" ng-change="Get_LoanBranch_PACS('0')">
+                                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                                        <option ng-repeat="itemBlock in PLDBBranches | orderBy:'BLOCK_ENG'" value="{{itemBlock.Branch_ID}}">
+                                            {{_language =='en-us' ?  itemBlock.BranchNameEn : itemBlock.BranchNameEn}}
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-3" ng-show="(gccData>2)">
+                                    <label>
+                                        {{translation.PACSNameCCB}}
+                                    </label>
+                                    <select ng-model="GopalCreditCardModel.PACS_ID" id="PacsId" class="form-control" ng-init="GopalCreditCardModel.PACS_ID='0'">
+                                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                                        <option ng-repeat="itemBlock in PACSNameList | orderBy:'BLOCK_ENG'" value="{{itemBlock.PACS_ID}}">
+                                            {{_language =='en-us' ?  itemBlock.PACSNameEn : itemBlock.PACSNameEn}}
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group col-md-3" ng-show="IsDivision" ng-if="UserRegistration.OrganisationId!='2'">
+                                    <label>{{translation.DivisionHeading}}</label> @*ng-change="DistrictList()"*@
+                                    <select ng-model="UserRegistration.DivisionId" id="ddlDivision" name="division" class="form-control" ng-init="UserRegistration.DivisionId ='0'">
+                                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                                        <option ng-repeat="item in Divisions" value="{{item.DIVISION_ID}}">
+                                            {{_language =='en-us' ?  item.DIVISION_ENG : item.DIVISION_MANGAL}}
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group col-md-3" ng-show="IsDivision" ng-if="UserRegistration.OrganisationId=='2'">
+                                    <label>{{translation.DivisionHeading}}</label> @*ng-change="DistrictList()"*@
+                                    <select ng-model="UserRegistration.DivisionId" id="ddlDivision" name="division" class="form-control" ng-init="UserRegistration.DivisionId ='0'">
+                                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                                        <option ng-repeat="item in ROList" value="{{item.RajfedROId}}">
+                                            {{_language =='en-us' ?  item.RONameEn : item.RONameHn}}
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <div class="col-lg-3 form-group" ng-show="IsDistrict">
+                                    <div ng-if="!isPLDB">
+                                        <label>{{translation.District}}</label>
+
+                                        <select ng-model="UserRegistration.DistrictId" id="ddlDistrict" class="form-control" ng-init="UserRegistration.DistrictId='0'" ng-change="GetCityList();">
+                                            @*ng-change="GetResionMapping()"*@
+
+                                            <option value="0">{{translation.SelectOption}}</option>
+                                            <option ng-repeat="item in Districts" value="{{item.DISTRICT_ID}}">
+                                                {{_language =='en-us' ?  item.DISTRICT_ENG : item.DISTRICT_MANGAL}}
+                                            </option>
+                                        </select>
+                                    </div>
+
+                                    <div ng-if="isPLDB">
+                                        <label>{{translation.PLDB}}</label>
+                                        <select ng-model="UserRegistration.DistrictId" id="ddlDistrict" class="form-control" ng-init="UserRegistration.DistrictId='0'" ng-change="PLDBBranchList()">
+                                            @*ng-change="GetResionMapping()"*@
+
+                                            <option value="0">{{translation.SelectOption}}</option>
+                                            <option ng-repeat="item in Districts" value="{{item.PldbId}}">
+                                                {{ item.PLDBName }}
+                                            </option>
+                                        </select>
+                                    </div>
+
+                                </div>
+                                <div class="form-group col-md-3" ng-show="RuralUrbanRedioDiv && !isPLDBBlock">
+
+                                    <div class="form-check form-check-inline col-md-12" style="padding: 0;">
+                                        <label class="form-check-label">{{translation.UrbanRural}}</label>
+                                        <div style="display:flex; gap:30px;">
+                                            <div class="radio-item">
+                                                <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1" value="true" ng-model="UserRegistration.IsRuralUrban" ng-change="RuralUrbanBlock()" ng-checked="UserRegistration.IsRuralUrban">
+                                                <label class="form-check-label option_value" for="inlineRadio1">{{translation.Urban}}</label>
+                                            </div>
+                                            <div class="radio-item">
+                                                <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio2" value="false" ng-model="UserRegistration.IsRuralUrban" ng-change="RuralUrbanBlock()" ng-checked="UserRegistration.IsRuralUrban">
+                                                <label class="form-check-label option_value" for="inlineRadio2">{{translation.Rural}}</label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                   
+
+                                </div>
+
+                                <div ng-show="UrbanDiv && !isPLDBBlock">
+                                    <div class="form-group col-md-3" ng-show="false">
+                                        <label>{{translation.CityType}}</label>
+                                        <select id="staticall" ng-model="UserRegistration.CityTypes" class="form-control" ng-init="UserRegistration.CityTypes='0'">
+                                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                                            <option value="1">{{translation.NagarParisad}}</option>
+                                            <option value="2">{{translation.NagarPalika}}</option>
+                                            <option value="3">{{translation.NagarNigam}}</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-lg-3 form-group">
+                                        <div>
+                                            <label>{{translation.City}}</label>
+                                            <select ng-model="UserRegistration.CITY_ID" class="form-control" id="ddlCity" ng-init="UserRegistration.CITY_ID='0'">
+                                                @*ng-change="GetWardListbySociety()"*@
+                                                <option value="0" disabled>{{translation.SelectOption}}</option>
+                                                <option ng-repeat="itemCity in CityList" value="{{itemCity.CITY_ID}}">
+                                                    {{_language =='en-us' ?  itemCity.CITY_ENG : itemCity.CITY_MANGAL}}
+                                                </option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div ng-show="RuralDiv && !isPLDBBlock">
+                                    <div class="form-group col-md-3">
+                                        <label>{{translation.PanchayatSamiti}}</label>
+                                        <select ng-model="UserRegistration.BlockId" id="ddlPanchayatSamiti" class="form-control" ng-change="GramPanchayatList()" ng-init="UserRegistration.BlockId='0'">
+                                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                                            <option ng-repeat="item in Blocks" value="{{item.BLOCK_ID}}">
+                                                {{_language =='en-us' ?  item.BLOCK_ENG : item.BLOCK_MANGAL}}
+                                            </option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group col-md-6" ng-show="UserRegistration.WorkScopeLevel_ID==5">
+                                        <label>{{translation.GramPanchayat}}</label>
+                                        <select ng-model="UserRegistration.GPId" id="ddlGramPanchayat" class="form-control" ng-change="VillageList()" ng-init="UserRegistration.GPId='0'">
+                                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                                            <option ng-repeat="item in GramPanchayats" value="{{item.GP_ID}}">
+                                                {{_language =='en-us' ?  item.GP_ENG : item.GP_MANGAL}}
+                                            </option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group col-md-6" ng-show="UserRegistration.WorkScopeLevel_ID==6">
+                                        <label>{{translation.Village}}</label>
+                                        <select ng-model="UserRegistration.VillageId" id="ddlVillage" class="form-control" ng-init="UserRegistration.VillageId='0'">
+                                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                                            <option ng-repeat="item in Villages" value="{{item.VILLAGE_ID}}">
+                                                {{_language =='en-us' ?  item.VILLAGE_ENG : item.VILLAGE_MANGAL}}
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group col-md-6" ng-show="false">
+                                    <label>{{translation.RoleHeading}}</label>
+                                    <select class="form-control" id="ddlRole" ng-model="UserRegistration.RoleID" ng-init="UserRegistration.RoleID='0'">
+                                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                                        <option ng-repeat="item in Roles" value="{{item.RoleID}}">
+                                            {{_language =='en-us' ?  item.RoleName_EN : item.RoleName_HI}}
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-3">
+                                    <label>{{translation.Office}}</label>
+                                    <select ng-model="UserRegistration.OfficeId" class="form-control" ng-init="UserRegistration.OfficeId='0'" ng-change="GetResionMapping();GetDesignationList()">
+                                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                                        <option ng-repeat="item in OfficeListData" value="{{item.OfficeId}}">
+                                            {{_language =='en-us' ?  item.OfficeNameEn : item.OfficeNameHi}}
+                                        </option>
+                                    </select>
+                                </div>
+                                @*<div class="form-group col-md-6">
+                                        <label>{{translation.Designation}}</label>
+                                        <select ng-model="UserRegistration.DesignationLevelMappingId" class="form-control" ng-init="UserRegistration.DesignationLevelMappingId='0'">
+                                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                                            <option ng-repeat="item in Designations" value="{{item.DesignationLevelMappingId}}">
+                                                {{_language =='en-us' ?  item.DESIGNATIONDESCENGLISH : item.DESIGNATIONDESCENGLISH}}
+                                            </option>
+                                        </select>
+                                    </div>*@
+
+                                <div class="form-group col-md-6" ng-show="UserRegistration.WorkScopeLevel_ID==3  && UserRegistration.OrganisationId==10">
+                                    <label>{{translation.ProcessingUnit}}</label>
+                                    <select ng-model="UserRegistration.ProcessingUnitId" class="form-control" ng-init="UserRegistration.ProcessingUnitId='0'">
+                                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                                        <option ng-repeat="item in ProcessingUnitList" value="{{item.ProcessingUnitId}}">
+                                            {{_language =='en-us' ?  item.ProcessingUnitNameEng : item.ProcessingUnitNameHi}}
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-6" ng-show="UserRegistration.WorkScopeLevel_ID==4  && UserRegistration.OrganisationId==17">
+                                    <label>{{translation.Warehouse}}</label>
+                                    <select ng-model="UserRegistration.WarehouseId" class="form-control" ng-init="UserRegistration.WarehouseId='0'">
+                                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                                        <option ng-repeat="item in WAREHOUSEList" value="{{item.WarehousId}}">
+                                            {{_language =='en-us' ?  item.WarehousNameEn : item.WarehousNameHi}}
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-6" ng-show="UserRegistration.WorkScopeLevel_ID==4 && UserRegistration.OrganisationId==10">
+                                    <label>{{translation.Depot}}</label>
+                                    <select ng-model="UserRegistration.DepotId" class="form-control" ng-init="UserRegistration.DepotId='0'">
+                                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                                        <option ng-repeat="item in DEPORTList" value="{{item.DepotId}}">
+                                            {{_language =='en-us' ?  item.AgentNameEng  : item.AgentNameHi }}
+                                        </option>
+                                    </select>
+                                </div>                               
+
+                                <div class="form-group col-md-6" ng-if="UserRegistration.WorkScopeLevel_ID>=3 && UserRegistration.OrganisationId==11">
+                                    <label>{{translation.PLDB}}</label>
+                                    <select ng-model="UserRegistration.PLDBId" id="ddlPLDB" class="form-control" ng-init="UserRegistration.PLDBId='0'" ng-change="PLDBBranchList()">
+                                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                                        <option ng-repeat="item in PLDBList | orderBy:'PLDBName'" value="{{item.PldbId}}">
+                                            {{ item.PLDBName }}
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group col-md-6" ng-if="UserRegistration.WorkScopeLevel_ID==4 && UserRegistration.OrganisationId==11">
+                                    <label>{{translation.PLDB}} {{ translation.Branch}}</label>
+                                    <select ng-model="UserRegistration.PLDBBrancchId" id="ddlblock" class="form-control" ng-init="UserRegistration.PLDBBrancchId='0'">
+                                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                                        <option ng-repeat="itemBlock in PLDBBranches | orderBy:'BLOCK_ENG'" value="{{itemBlock.BLOCK_ID}}">
+                                            {{_language =='en-us' ?  itemBlock.BLOCK_ENG : itemBlock.BLOCK_MANGAL}}
+                                        </option>
+                                    </select>
+                                </div>
+                  
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <table class="table table-bordered table-hover table-striped">
+                            <thead>
+                                @*<tr style="font-weight:bold;font-size:20px;">
+                                    <th style="text-align:center;"></th>
+                                    <th style="text-align:center;">
+                                        {{UserDetails.OfficeNameEn}}
+                                    </th>
+                                    <th style="text-align:center;">
+                                        {{UserDetails.DISTRICT_ENG}}
+                                    </th>
+                                    <th style="text-align:center;">माह</th>
+                                    <th style="text-align:center;">
+                                        {{PreviousMonth}}
+                                    </th>
+                                    <th colspan="2"></th>
+                                </tr>*@
+
+                                <tr style="background-color: #64c0c5; font-size: 17px; color: #fff; text-align: center; ">
+                                    <th style="width:5%;">KPI No.</th>
+                                    <th style="width:20%;">Key Task / KPI Area</th>
+                                    <th style="width:30%;">Details of Indicators</th>
+                                    <th style="width:10%;">Cumulative Target upto Month</th>
+                                    <th style="width:10%;">Cumulative Achievement upto Month</th>
+                                    <th style="width:8%;">Progress %</th>
+                                    <th style="width:8%;">Weighted Marks</th>
+                                    <th style="width:9%;">Marks Obtained</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+
+                                <tr ng-repeat-start="area in KPIAreas track by area.KPIAreaId">
+
+                                    <td rowspan="{{area.Indicators.length}}" class="text-center">
+                                        {{$index + 1}}
+                                    </td>
+
+                                    <td rowspan="{{area.Indicators.length}}" style="vertical-align:top;">
+                                        {{area.KPIArea}}
+                                    </td>
+
+                                    <td>
+                                        {{area.Indicators[0].KPIIndicators}}
+                                    </td>
+
+                                    <td>
+                                        <input type="number" class="form-control" ng-model="area.Indicators[0].Target" ng-change="Calculate(area.Indicators[0])" />
+                                    </td>
+
+                                    <td>
+                                        <select ng-if="area.Indicators[0].KPIIndicatorsId == 19" class="form-control" ng-model="area.Indicators[0].Achievement" ng-change="Calculate(area.Indicators[0])">
+                                            <option value="">--Select--</option>
+                                            <option value="1">Less than 5 Hours</option>
+                                            <option value="2">5 Hrs to Less than 6 Hrs</option>
+                                            <option value="3">6 Hrs to Less than 7 Hrs</option>
+                                            <option value="4">7 Hrs to Less than 8 Hrs</option>
+                                            <option value="5">8 Hrs to Less than 9 Hrs</option>
+                                            <option value="6">9 Hrs and Greater than 9 Hrs</option>
+                                        </select>
+
+                                        <input ng-if="area.Indicators[0].KPIIndicatorsId != 19" type="number" class="form-control" ng-model="area.Indicators[0].Achievement" ng-change="Calculate(area.Indicators[0])" />
+
+                                    </td>
+
+                                    <td>
+                                        <input type="text" class="form-control" ng-model="area.Indicators[0].Progress" readonly tabindex="-1" />
+                                    </td>
+
+                                    <td class="text-center" style="vertical-align:middle;" tabindex="-1">
+                                        {{area.Indicators[0].WeightedMarks}}
+                                    </td>
+
+                                    <td>
+                                        <input type="text" class="form-control" ng-model="area.Indicators[0].MarksObtained" readonly tabindex="-1" />
+                                    </td>
+
+                                </tr>
+
+                                <tr ng-repeat="indicator in area.Indicators.slice(1) track by indicator.KPIIndicatorsId"
+                                    ng-repeat-end>
+
+                                    <td>
+                                        {{indicator.KPIIndicators}}
+                                    </td>
+
+                                    <td>
+                                        <input type="number" class="form-control" ng-model="indicator.Target" ng-change="Calculate(indicator)" />
+                                    </td>
+
+                                    <td>
+                                        <input type="number" class="form-control" ng-model="indicator.Achievement" ng-change="Calculate(indicator)" />
+                                    </td>
+
+                                    <td>
+                                        <input type="text" class="form-control" ng-model="indicator.Progress" readonly tabindex="-1" />
+                                    </td>
+
+                                    <td class="text-center" tabindex="-1">
+                                        {{indicator.WeightedMarks}}
+                                    </td>
+
+                                    <td>
+                                        <input type="text" class="form-control" ng-model="indicator.MarksObtained" readonly tabindex="-1" />
+                                    </td>
+
+                                </tr>
+
+                                <tr ng-if="!KPIAreas || KPIAreas.length == 0">
+                                    <td colspan="8" class="text-center">
+                                        No Data Found
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div class="text-center" style="margin-top:20px;">
+                            <button type="button" class="btn btn-primary dev-btn" ng-click="SaveKPIResult()">  Save  </button>
+                            <button type="button" class="btn btn-primary" ng-click="GetSAKPISAODetails()">  Clear  </button>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="se-pre-con"></div>
+        </div>
+    </div>

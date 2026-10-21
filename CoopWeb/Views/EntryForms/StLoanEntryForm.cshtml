@@ -1,0 +1,150 @@
+﻿<script src="~/Scripts/AngularFramework/StLoanEntryForm.js"></script>
+
+<div ng-app="AppEntryFormStLone">
+    <div ng-controller="StLone">
+        <div class="col-md-12">
+            <h3 class="citizen-dash-head">{{translation.StLoneMPRForm}}</h3>
+            <hr style="margin: 0;">
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#"> {{translation.EntryForm}}</a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;"> {{translation.StLoneForm}} </span>
+                    </li>
+                    <li style="float: right;" id="divAddBtn">
+                        <input type="checkbox" ng-checked="IsExcelUpload" ng-click="ShowStLoneContent()" ng-model="IsExcelUpload" />
+                        <button type="button" class="btn btn-info btn-lg dev-popup-btn" data-toggle="modal" style="color: #025e63; cursor: pointer; text-decoration:none;  font-weight: bold;" data-target="#myModal">
+                            <h5>&#187; {{translation.ExcelUpload}}</h5>
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+
+        <div class="citizen-dash-head">
+            <form>
+                <div class="col-lg-12 form-group">                   
+                    <input type="hidden" ng-model="StLoneForm.ApexLoanDisbursementFYearId" />
+                    <div class="col-lg-2">{{translation.YEAR}}</div>
+                    <div class="col-lg-4">
+                        <select class="form-control" id="ddlFYearId" ng-model="FINYEARID" ng-change="GetYearTargetData()" ng-init="StLoneForm.FYearId='0'">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in FinancialYearList" value="{{item.FIN_YEAR_MASTR_ID}}">
+                                {{item.FIN_YEAR_NAME}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-lg-2">
+                        <label>{{translation.Date}}</label><span class="error">*</span>
+                    </div>
+                    <div class="col-lg-4">
+                        <input name="Affiliation" id="txtRegistrationDate" ng-init="AuditorRequest.RegistrationDate=''" style="display:inline; margin-top: 0px;" class="form-control devcalender" disabled="disabled" placeholder="{{translation.Affiliation}}" ng-model="AuditorRequest.RegistrationDate" autocomplete="off" /> &nbsp;
+                    </div>
+                </div>
+                <div class="col-lg-12 form-group">
+                    <div class="col-lg-2">{{ translation.TotalTarget}}<span class="error">*</span></div>
+                    <div class="col-lg-4">
+                        <input type="text" class="form-control" ng-model="StLoneForm.TotalTarget" placeholder={{translation.BlanckAmount}} autocomplete="off" />
+                    </div>
+                    <div class="col-lg-2">{{ translation.TotalDisbursement}}@*<span class="error">*</span>*@</div>
+                    <div class="col-lg-4">
+                        <input type="text" class="form-control" name="ProgrammeNameHi" ng-bind="ProgrammeNameHi" ng-model="StLoneForm.DMR_Credited_And_Loan_Disbursement" placeholder={{translation.BlanckAmount}} autocomplete="off" />
+                    </div>
+                </div>
+
+            </form>
+        </div>
+        <div class="col-md-12" ng-show="ShowExcelData">
+            <div class="citizen-dash-head" >
+
+                <div class="col-lg-12 form-group">
+                    <div class="citizen-dash-head">
+                        <div class="col-lg-2 btn-lg">{{ translation.ExcelUpload}}<span class="error">*</span></div>
+                        <div class="col-lg-4">
+                            <input type="file" style="width:680px; border:1px solid blue;" filetype='excel' name="File" id="fluBulkInsert" class="btn btn-outline-primary btn-lg active" ng-model="BulkInsert.BulkInsertFile" onchange="angular.element(this).scope().UploadBulkInsertFile(this.files)">
+                        </div>
+                        <div class="col-lg-4 btn-lg">&nbsp;</div>
+                        <div class="col-lg-2">
+                            <a id="ExlSampleLink" href="~/Content/EntryForms/CCBData.xlsx">DownLoad Sample</a>
+                        </div>
+                        <div class="clearfix"></div>
+                    </div>
+                </div>
+
+                <div class="form-group col-md-12">
+                    <div class="dev-align-btn">
+                        <button type="submit" class="btn btn-primary dev-btn" ng-click="SaveBulkInsert()">{{ translation.Submit}}</button>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+        <div class="col-md-12 citizen-dash-head" ng-show="ShowTableData">
+            <table id="TblStLoanData" class="table table-responsive devtable" style="overflow-x:auto;">
+                <thead>
+                    <tr>
+                        <th>
+                            {{translation.SRNO}}
+                        </th>
+                        <th>
+                            {{translation.DCCBNAME}}
+                        </th>
+                        <th>
+                            {{translation.TotalApplicationReceived}}
+                        </th>
+                        <th>
+                            {{translation.ApprovedByPacs}}
+                        </th>
+                        <th>
+                            {{translation.ApprovedByBranch}}
+                        </th>
+                        <th>
+                            {{translation.DMRCreditedAndLoanDisbursement}}
+                        </th>
+                    </tr>
+                </thead>
+                @*{{StLoanData[0]}}*@
+                <tbody>
+                    <tr ng-repeat="BData in StLoanData">
+                        <td hidden="hidden"><label>{{BData.CCBId}}</label></td>
+                        <td>{{$index+1}}</td>
+                        <td>
+                            {{_language =='en-us' ?  BData.CCBNameEn : BData.CCBNameHi}}
+                        </td>
+                        <td>
+                            <input type="text" class="form-control" ng-model="BData.Total_Application_Received" placeholder={{translation.BlanckAmount}} autocomplete="off" />
+                        </td>
+                        <td>
+                            <input type="text" class="form-control" ng-model="BData.Approved_By_Pacs" placeholder={{translation.BlanckAmount}} autocomplete="off" />
+                        </td>
+                        <td>
+                            <input type="text" class="form-control" ng-model="BData.Approved_By_Branch" placeholder={{translation.BlanckAmount}} autocomplete="off" />
+                        </td>
+                        <td>
+                            <input type="text" class="form-control" ng-model="BData.DMR_Credited_And_Loan_Disbursement" placeholder={{translation.BlanckAmount}} autocomplete="off" />
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="form-group col-md-12">
+                <div class="dev-align-btn">
+                    <button type="submit" class="btn btn-primary dev-btn" ng-click="SaveStLone()">{{ translation.Submit}}</button>
+                    <button type="button" class="btn btn-primary dev-btn" ng-click="ClearBulkInsertForm()">{{ translation.Clear}}</button>
+                    <a class="btn btn-primary dev-btn" style="text-transform:capitalize;" href="../User/DashBoard"> Back</a>
+                </div>
+            </div>
+        </div>
+
+        
+
+    </div>
+
+</div>

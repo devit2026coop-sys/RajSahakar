@@ -1,0 +1,175 @@
+﻿@{
+    ViewBag.Title = "PLDB Loan Application Purpose Wise Sector List";
+}
+<script src="~/Scripts/AngularFramework/PLBDLoanApplicationPurposeWiseSectorList.js?v=1.1"></script>
+<link href="~/Scripts/google_hindi/google_transliteration.css" rel="stylesheet" />
+
+<style>
+    .inputapi-transliterate-indic-suggestion-menu {
+        z-index: 99999 !important;
+        display: block;
+    }
+
+    .table > tbody > tr > td, .table > tbody > tr > th, .table > tfoot > tr > td, .table > tfoot > tr > th, .table > thead > tr > td {
+        padding-right: 5px;
+        padding-left: 5px;
+    }
+
+    .freeze-select {
+        pointer-events: none;
+        background-color: #ffffff !important; 
+        color: #000 !important; 
+        border: 1px solid #ced4da !important; 
+        cursor: default !important;
+    }
+
+</style>
+
+<script type="text/javascript">
+    var tableToExcel = (function () {
+        var uri = 'data:application/vnd.ms-excel;base64,'
+            , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>'
+            , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) }
+            , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
+        return function (table, name) {
+            if (!table.nodeType) table = document.getElementById(table)
+            var ctx = { worksheet: name || 'Worksheet', table: table.innerHTML }
+            window.location.href = uri + base64(format(template, ctx))
+        }
+    })()
+</script>
+
+
+<div ng-app="ApplicationFlowPurposeLoanWiseSectorModule" ng-controller="ApplicationPurposeLoanWiseSectorFlowCont" ng-cloak="">
+    <div>
+        <div class="col-md-12">
+            <h3 class="citizen-dash-head ng-binding" style="margin-top:0px;">PLDB Loan Application Purpose Wise Sector List</h3>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#"> {{translation.Home}}</a> <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;"> {{translation.New}} </span>
+                        <i class="fa fa-angle-right"> </i>
+                        <span style="margin: 0 5px;"> PLDB Loan Application Purpose Wise Sector List </span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div style="margin-top:30px;padding-top:30px">
+            <div class="col-md-12">
+                <div class="citizen-dash-head" style="overflow: hidden;">
+                    <div class="table-dropdown" id="search-filter" style="margin-bottom: 5px;">
+                        <div class="col-lg-12" style="margin-bottom: 5px; padding-left: 0;">
+                            <input type="hidden" id="hdnRoleId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).RoleId)" />
+                            <input type="hidden" id="hdnDistrictId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DistrictId)" />
+                            <input type="hidden" id="hdnPldbId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).PLDBId)" />
+                            <input type="hidden" id="hdnPldbBranchId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).PLDBBrancchId)" />
+                            <input type="hidden" id="hdnUserId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).UserId)" />
+                            <input type="hidden" id="hdnLevelId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).LevelId)" />
+
+
+                            @*Sector List*@
+                            <div class="form-group col-md-3">
+                                <label for="">Sector Name</label>
+                                <select id="SECTOR_ID" ng-model="SelectedSectorId" class="form-control caste-category" ng-init="SelectedSectorId='0'" ng-change="SectorOnChange()">
+                                    <option value="0" disabled>--चुनें--</option>
+                                    <option ng-repeat="itm in LoanSectorList" value="{{itm.sector_id}}">
+                                        {{_language =='en-us' ?  itm.sector_name_en : itm.sector_name_hi}}
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-4 margin-Top20">
+                                <label>&nbsp;</label><br>
+                                @*<button type="button" ng-click="searchRequest(PLDBLoanApplicationPurposeWiseSectorList)" class="btn btn-primary dev-btn ng-binding">{{translation.Search}}</button>*@
+                                <button type="button" ng-click="ClearSearch()" class="btn btn-primary dev-btn ng-binding">{{translation.Clear}}</button>
+                                <button type="button" ng-click="exportExcel()" class="btn btn-success dev-btn">
+                                    <i class="fa fa-file-excel-o"></i> Export Excel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="overflow-x: auto;">
+                        <table id="PLDBLoanApplicationSectorWise" class="table table-bordered devtable text-center" ng-if="SelectedSectorId != '0'">
+
+                            <thead>
+
+                                <!-- ROW 1 : SR / PLDB / SECTOR NAME -->
+                                <tr>
+                                    <th rowspan="3" style="max-width: 120px; vertical-align: middle !important; text-align: center !important;">SR No</th>
+                                    <th rowspan="3" style="min-width: 120px; vertical-align: middle !important; text-align: center !important;">PLDB Name</th>
+
+                                    <!-- Sector Name -->
+                                    <th colspan="{{HeaderList.length * 2}}" class="text-center" style="min-width:120px; vertical-align:middle !important;">
+                                        {{HeaderSectorList}}
+                                    </th>
+                                </tr>
+
+                                <!-- ROW 2 : PURPOSE NAMES -->
+                                <tr>
+                                    <th ng-repeat="h in HeaderList" colspan="2" class="text-center" style="min-width:120px; vertical-align:middle !important;">
+                                        {{h.Text}}
+                                    </th>
+                                </tr>
+
+                                <!-- ROW 3 : NO / AMT -->
+                                <tr>
+                                    <th ng-repeat-start="h in HeaderList">No.</th>
+                                    <th ng-repeat-end>Amt.</th>
+                                </tr>
+
+                            </thead>
+
+                            @*new*@
+                            <tbody>
+
+                                <tr ng-repeat="row in GridData"
+                                    ng-style="row.PLDBName=='TOTAL' && {'font-weight':'bold','color':'#fff','background':'#466b6d'}">
+
+                                    <td>
+                                        <span ng-hide="row.PLDBName == 'TOTAL'">{{$index + 1}}</span>
+                                    </td>
+
+                                    <td>{{row.PLDBName}}</td>
+
+                                    <td ng-repeat-start="h in HeaderList">
+
+                                        <a href="javascript:void(0)"
+                                           ng-if="row.PLDBName != 'TOTAL' && (row[h.Key + '_Count'] || 0) > 0"
+                                           ng-click="openCountDetails(row, h)">
+                                            {{ row[h.Key + '_Count'] }}
+                                        </a>
+
+                                        <span ng-if="row.PLDBName == 'TOTAL' || (row[h.Key + '_Count'] || 0) == 0">
+                                            {{ row[h.Key + '_Count'] || 0 }}
+                                        </span>
+
+                                    </td>
+
+                                    <td ng-repeat-end>
+                                        {{ row[h.Key + '_Amount'] || 0 }}
+                                    </td>
+
+                                </tr>
+
+                                <tr ng-if="GridData.length === 0">
+                                    <td colspan="{{HeaderList.length * 2 + 2}}" class="text-center">
+                                        Record Not Found
+                                    </td>
+                                </tr>
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="se-pre-con"></div>
+    </div>
+</div>
+

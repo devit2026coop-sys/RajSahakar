@@ -1,0 +1,284 @@
+﻿@{
+    ViewBag.Title = "Dashboard - CM Kisan Samman Nidhi";
+    Layout = "~/Views/Shared/_PMKisanLayout.cshtml";
+}
+<link href="~/Content/PMKisan/css/owl.carousel.min.css" rel="stylesheet" />
+<script src="~/Content/PMKisan/js/owl.carousel.min.js"></script>
+<script src="~/Scripts/AngularFramework/CM_kisandashboard.js?v=1.4"></script>
+<div ng-app="CM_KisanDashboardApp" ng-controller="CM_KisanDashboardCnt" ng-cloak="">
+    <div class="container-fluid dashHeader">
+        <div class="row flexEqualCenter">
+            @*@Html.Partial("_ChooseFYInstallment")*@
+            <div class="col-md-4">
+                <div class="dept-profile">
+                    <div class="dept-person">
+                        <div class="info">
+                            <h3>Shri Bhajanlal Sharma</h3>
+                            <p>Hon'ble Chief Minister of Rajasthan</p>
+                        </div>
+                        <img src="~/Content/Images/cm_rajasthan.png" />
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <h3 style="font-size:3rem;margin-top:15px;text-align:center">मुख्यमंत्री किसान सम्मान निधि</h3>
+            </div>
+            <div class="col-md-4">
+                <div class="dept-profile" style="justify-content:flex-end!important">
+                    <div class="dept-person">
+                        <div class="info">
+                            <h3>Shri Gautam Kumar</h3>
+                            <p>Hon'ble Minister of State (Independent Charge)<br /> Department of Cooperation</p>
+                        </div>
+                        <img src="~/Content/Images/GautamKumar.jpg" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container-fluid dashHeader">
+        <br />
+        <div class="row">
+            <div class="col-md-8">
+            </div>
+            @*@Html.Partial("_ChooseFYInstallment")*@
+            <div class="col-md-2 form-group">
+                <select class="form-control" ng-model="FinancialYearId">
+                    <option value="0">--All--</option>
+                    <option ng-repeat="FY in FinancialYearList" value="{{FY.CMK_CommonMasterId}}" ng-selected="FY.CMK_CommonMasterId==FinancialYearId">{{FY.TitleEn}}</option>
+                </select>
+            </div>
+            <div class="col-md-2 form-group">
+                <select class="form-control" ng-model="InstallmentTypeId" ng-change="GetPMK_DashboardData()">
+                    <option value="0">--Choose Installment Type--</option>
+                    <option ng-repeat="li in InstallmentTypeList" value="{{li.MasterInstallmentID}}" ng-selected="li.MasterInstallmentID==InstallmentTypeId">
+                        {{li.NameEn}}
+                    </option>
+                </select>
+            </div>
+        </div>
+    </div>
+    <div class="container-fluid staticsSection">
+        <div class="row">
+            <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                <div class="staticsDashboards staticsDashboards1">
+                    <div class="staticsDashboardsIcons">
+                        <img src="~/Content/PMKisan/images/icon/icon1.png" />
+                    </div>
+                    <div class="staticsDashboardsContent">
+                        <h1 title="{{Dashboard.TotalSuccessfulBeneficiary | inrNumber}}">{{Dashboard.TotalSuccessfulBeneficiary  | indianFormat}}</h1>
+                        <h4>Payment successful of CM Kisan ({{Dashboard.INSTALLMENT_TYPE}})</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12">
+                <div class="staticsDashboards staticsDashboards2">
+                    <div class="staticsDashboardsIcons">
+                        <img src="~/Content/PMKisan/images/icon/icon2.png" />
+                    </div>
+                    <div class="staticsDashboardsContent">
+                        <div class="staticsDashboardsContentMulti">
+                            <div class="" title="Male">
+                                <h1 title="{{Dashboard.TotalMaleFarmers  | inrNumber}}">{{Dashboard.TotalMaleFarmers  | indianFormat}}</h1>
+                                @*<span>Male</span>*@
+                                <img src="~/Content/PMKisan/images/icon/M_gnder.png" />
+                            </div>
+                            <div class="" title="Female">
+                                <h1 title="{{Dashboard.TotalFemaleFarmers  | inrNumber}}">{{Dashboard.TotalFemaleFarmers  | indianFormat}}</h1>
+                                @*<span>Female</span>*@
+                                <img src="~/Content/PMKisan/images/icon/F_gender.png" />
+                            </div>
+                            <div class="" title="Transgender">
+                                <h1 title="{{Dashboard.TotalTranFarmers  | inrNumber}}">{{Dashboard.TotalTranFarmers  | indianFormat}}</h1>
+                                @*<span>Transgender</span>*@
+                                <img src="~/Content/PMKisan/images/icon/T_Gender.png" />
+                            </div>
+                        </div>
+                        <h1 title="{{Dashboard.TotalFarmers  | inrNumber}}">{{Dashboard.TotalFarmers  | indianFormat}}</h1>
+                        <h4>Eligible Beneficiary as per PM Kisan Last Inst. </h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                <div class="staticsDashboards staticsDashboards3">
+                    <div class="staticsDashboardsIcons">
+                        <img src="~/Content/PMKisan/images/icon/icon3.png" />
+                    </div>
+                    <div class="staticsDashboardsContent">
+                        <h1 title="{{Dashboard.PayAmount | inrCurrency}}">{{Dashboard.PayAmount | indianFormat:'R'}}</h1>
+                        <h4>{{Dashboard.INSTALLMENT_TYPE}} Total Amount</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container-fluid QuarterlyOverviewSection">
+        <div class="panel panel-default">
+            <div class="panel-heading flexEqualCenter">
+                <b><i class="fa fa-money"></i>&nbsp;Quadrimester Overview by Financial Year</b>
+                <div class="owl-theme">
+                    <div class="owl-controls">
+                        <div class="custom-nav owl-nav"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="owl-carousel owl-theme QuarterlyOverview">
+                            <div class="item {{($index==0?'active':'')}}" ng-repeat="li in QuadrimesterDataList">
+                                <div class="OverViewDetails">
+                                    <h3><span>{{li.AMOUNT | indianFormat:'R'}}</span></h3>
+                                    <span><i class="fa fa-calendar"></i>&nbsp;{{li.QUADRIMESTER_TITLE}} {{li.FINANCIAL_YEAR}}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container-fluid FarmerCornerSection">
+        <div class="row">
+            <div class="col-lg-5 col-md-5">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <b><i class="fa fa-bar-chart"></i>&nbsp;Check Status Tracker Summary</b>
+                    </div>
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                <div class="table-responsive">
+                                    <table class="table table-striped table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Count From</th>
+                                                <th>Today</th>
+                                                <th>Yesterday</th>
+                                                <th>This Month</th>
+                                                <th>Last Month</th>
+                                                <th>This Year</th>
+                                                <th>Last Year</th>
+                                                <th>All Time</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <th>Web</th>
+                                                <td>{{statusTracker.W_Today}}</td>
+                                                <td>{{statusTracker.W_Yesterday}}</td>
+                                                <td>{{statusTracker.W_ThisMonth}}</td>
+                                                <td>{{statusTracker.W_LastMonth}}</td>
+                                                <td>{{statusTracker.W_ThisYear}}</td>
+                                                <td>{{statusTracker.W_LastYear}}</td>
+                                                <td>{{statusTracker.W_AllTime}}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>eMitra Plus</th>
+                                                <td>{{statusTracker.E_Today}}</td>
+                                                <td>{{statusTracker.E_Yesterday}}</td>
+                                                <td>{{statusTracker.E_ThisMonth}}</td>
+                                                <td>{{statusTracker.E_LastMonth}}</td>
+                                                <td>{{statusTracker.E_ThisYear}}</td>
+                                                <td>{{statusTracker.E_LastYear}}</td>
+                                                <td>{{statusTracker.E_AllTime}}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-7 col-md-7">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <b><i class="fa fa-user-o"></i>&nbsp;Farmer Corner</b>
+                    </div>
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 FarmerCornerItems">
+                                <a href="javascript:void(0)" class="FarmerCornerItem">
+                                    <img src="~/Content/PMKisan/images/icon/EKyc.png" />
+                                    <h4>e-KYC</h4>
+                                    <p class="text-warning">To be comming soon...</p>
+                                </a>
+                                <a href="javascript:void(0)" class="FarmerCornerItem">
+                                    <img src="~/Content/PMKisan/images/icon/NewRegistration.png" />
+                                    <h4>New Farmer Registration</h4>
+                                    <p class="text-warning">To be comming soon...</p>
+                                </a>
+                                @*<a href="javascript:void(0)" class="FarmerCornerItem">
+                                    <img src="~/Content/PMKisan/images/icon/selfStatusFarmer.png" />
+                                    <h4>Status of Self Registered Farmer/ CSC Farmers</h4>
+                                </a>*@
+                                @*<a href="~/PMKisan/KnowYourStatus" class="FarmerCornerItem">
+                                    <img src="~/Content/PMKisan/images/icon/kNOWsTATUS.png" />
+                                    <h4>Know Your Status</h4>
+                                </a>*@
+                                <a href="~/PMKisan/BeneficiaryList" class="FarmerCornerItem">
+                                    <img src="~/Content/PMKisan/images/icon/benificiry.png" />
+                                    <h4>Beneficiary List</h4>
+                                </a>
+                                <a href="javascript:void(0)" class="FarmerCornerItem">
+                                    <img src="~/Content/PMKisan/images/icon/helpdesk.png" />
+                                    <h4>Helpdesk - Query Form</h4>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+
+    </div>
+</div>
+
+<script>
+    setTimeout(function () {
+        $('.QuarterlyOverview').owlCarousel({
+            loop: true,
+            autoplay: true,
+            nav: true,
+            navText: [
+                '<i class="fa fa-long-arrow-left" aria-hidden="true"></i>',
+                '<i class="fa fa-long-arrow-right" aria-hidden="true"></i>'
+            ],
+            navContainer: '.custom-nav',
+            autoplayHoverPause: true,
+            responsiveClass: true,
+            responsive: {
+                0: {
+                    items: 1,
+                    nav: true
+                },
+                600: {
+                    items: 1,
+                    nav: true
+                },
+                1000: {
+                    items: 2,
+                    nav: true,
+                    loop: true,
+                    margin: 0
+                },
+                1366: {
+                    items: 3,
+                    nav: true,
+                    loop: true,
+                    margin: 0
+                },
+                1440: {
+                    items: 5,
+                    nav: true,
+                    loop: true,
+                    margin: 0
+                }
+
+            }
+        })
+    }, 3000);
+</script>
+

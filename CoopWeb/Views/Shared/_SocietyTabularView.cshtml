@@ -1,0 +1,185 @@
+﻿@model List<Cooperative.Models.SocietyRegistrationEntity>
+<link href="~/Content/Stylesheets/jquery.dataTables.min.css" rel="stylesheet" />
+<link href="~/Content/Stylesheets/buttons.dataTables.min.css" rel="stylesheet" />
+
+
+<style>
+    a > i.fa.fa-plus-circle {
+        font-size: 25px;
+        cursor: pointer;
+    }
+
+    a:hover > i.fa.fa-plus-circle {
+        font-size: 26px;
+        cursor: pointer;
+    }
+
+    a > i.fa.fa-eye {
+        font-size: 25px;
+        cursor: pointer;
+    }
+
+    a:hover > i.fa.fa-eye {
+        font-size: 26px;
+        cursor: pointer;
+    }
+
+    .add-more {
+    }
+</style>
+<div class="col-md-12">
+
+    <div class="table-responsive citizen-dash-head">
+        <div class="table-dropdown">
+            <div class="col-md-4" style="padding-left: 0;">
+                <label>{{ translation.Act}}</label>
+                <select ng-model="SocietyRegistration.ActId" class="form-control" ng-change="getSocietyfilter()" ng-init="SocietyRegistration.ActId='0'">
+                    <option value="0" disabled>{{translation.SelectOption}}</option>
+                    <option ng-repeat="item in ActList" value="{{item.ActId}}">
+                        {{_language =='en-us' ?  item.ActNameEn : item.ActNameHi}}
+                    </option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label>{{ translation.SocietyType}}</label>
+                <select ng-model="SocietyRegistration.SocietyTypeId" class="form-control" ng-init="SocietyRegistration.SocietyTypeId='0'" ng-change="getSocietyfilter();GetSocietyClass()">
+                    <option value="0" disabled>{{translation.SelectOption}}</option>
+                    <option ng-repeat="item in SocietyTypeList" value="{{item.SocietyTypeId}}">
+                        {{_language =='en-us' ?  item.TypeameEng : item.TypeNameHin}}
+                    </option>
+                </select>
+            </div>
+            <div class="col-md-4" style="padding-right: 0;">
+                <label>{{ translation.SocietyClass}}</label>
+                <select ng-model="SocietyRegistration.ClassId" class="form-control" ng-init="SocietyRegistration.ClassId='0'" ng-change="getSocietyfilter()">
+                    <option value="0" disabled>{{translation.SelectOption}}</option>
+                    <option ng-repeat="item in SocietyClassList" value="{{item.ClassId}}">
+                        {{_language =='en-us' ?  item.ClassNameEn : item.ClassNameHi}}
+                    </option>
+                </select>
+            </div>
+        </div>
+
+        <table id="example" class="table devtable" style="width:100%; margin-top: 30px;border:1px solid rgb(222, 221, 221); float: left;">
+            <thead>
+                <tr>
+                    <th>
+                        {{translation.SRNO}}
+                    </th>
+                    <th>
+                        {{translation.SocietyName}}
+                    </th>
+                    <th>
+                        {{translation.SocietyRegistrationNo}}
+                    </th>
+                    <th>
+                        {{translation.SocietyType}}
+                    </th>
+                    <th>
+                        {{translation.Status}}
+                    </th>
+                    <th>
+                        {{translation.Actions}}
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (int i = 0; i < Model.Count; i++)
+                {
+                    <tr>
+                        <td>@(i + 1)</td>
+                        <td>@Model[i].SocietyName</td>
+                        <td>@Model[i].RegistrationNo</td>
+                        <td>@Model[i].TypeNameEn</td>
+                        <td>@Model[i].Status</td>
+                        <td class="add-more-td">
+
+
+                            <a title="{{translation.ShowDetails}}" ng-click="ShowDetails('@Model[i].SocietyIDEnc','ShowDetails');ShowDetailsWorkscope('@Model[i].SocietyIDEnc')"><i class="fa fa-info-circle infoicon-edit"></i></a>
+
+
+                            @*<a title="{{translation.Edit}}" ng-model="SocietyRegistration.Edit" ng-click="EditBasicDetailsForm('@Model[i].SocietyIDEnc');ShowDetailsWorkscope('@Model[i].SocietyIDEnc')"><i class="fa fa-pencil" aria-hidden="true"></i></a>*@
+
+
+                            @*<button type="button"  ng-show="notnow" ng-model="SocietyRegistration.Edit" class="btn btn-default btn-sm" ng-click="EditBasicDetailsForm('@Model[i].SocietyIDEnc');ShowDetailsWorkscope('@Model[i].SocietyIDEnc')"><span class="glyphicon glyphicon-edit"></span> Edit</button>*@
+                            <a class="add-more" ng-show="@Model[i].FilledProfileLevel!=3" title="{{translation.AddMoreDetails}}" ng-click="AddAdministrativeDetails('@Model[i].SocietyIDEnc','AddMoreDetails','@Model[i].SocietyName',@Model[i].FilledProfileLevel,'@Model[i].RegistrationNo','@Model[i].ActIdEnc')"> <i class="fa fa-edit editicon-edit"></i> </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.5.1/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.5.1/js/buttons.flash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.32/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.32/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.5.1/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/1.5.1/js/buttons.print.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $('#example').DataTable({
+            //dom: 'Bfrtip'
+            //,
+            //buttons: [
+            //    'copy', 'csv', 'excel', 'pdf', 'print'
+            //]
+        });
+    });
+</script>
+    <!-- drop down on click -->
+<script>
+    /* When the user clicks on the button,
+    toggle between hiding and showing the dropdown content */
+    function myFunction() {
+        document.getElementById("myDropdown").classList.toggle("show");
+    }
+
+    // Close the dropdown if the user clicks outside of it
+    window.onclick = function (event) {
+        if (!event.target.matches('.dropbtn')) {
+
+            var dropdowns = document.getElementsByClassName("dropdown-content");
+            var i;
+            for (i = 0; i < dropdowns.length; i++) {
+                var openDropdown = dropdowns[i];
+                if (openDropdown.classList.contains('show')) {
+                    openDropdown.classList.remove('show');
+                }
+            }
+        }
+    }
+</script>
+<!-- Change image onclick -->
+<script>
+    $(".plus").click(function () {
+        $(this).toggleClass("minus");
+    })
+
+
+
+
+
+</script>
+<!-- Collapsible sidebar -->
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#sidebarCollapse').on('click', function () {
+            $('#sidebar').toggleClass('active');
+        });
+    });
+</script>
+@RenderSection("scripts", required: false)
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        setTimeout(function () {
+            $('#preloader').css('display', 'none');
+        }, 5000);
+    });
+</script>

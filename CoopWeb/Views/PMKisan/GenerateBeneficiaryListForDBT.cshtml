@@ -1,0 +1,109 @@
+﻿
+@{
+    ViewBag.Title = "Generate Beneficiary List For DBT";
+    Layout = "~/Views/Shared/_PMKisanLayout.cshtml";
+}
+
+<script src="~/Scripts/AngularFramework/GenerateBeneficiaryListForDBT.js?v=1.1"></script>
+<div class="container-fluid QuarterlyOverviewSection" ng-app="gbdbtApp" ng-controller="gbdbtCnt" ng-cloak="">
+    <div class="panel panel-default">
+        <div class="panel-heading flexEqualCenter">
+            <b><i class="fa fa-paper-plane"></i>&nbsp; Generate Beneficiary List For DBT</b>
+        </div>
+        <div class="panel-body">
+            @if (((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).UserId != 3137 &&
+                ((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).UserId != 15950)
+            {
+                <form ng-submit="GenerateBeneficiaryListDBT()">
+                    <div class="row">
+                        <div class="col-md-3 col-sm-4 mt-5">
+                            <label>{{translation.FinancialYear}}</label>
+                            <select class="form-control" ng-model="objRFT.FINANCIAL_YEAR_ID" required>
+                                <option value="" disabled>{{translation.SelectOption}}</option>
+                                <option ng-repeat="li in FinancialYearList" value="{{li.CMK_CommonMasterId}}">
+                                    {{li.TitleEn}}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 col-sm-4 mt-5">
+                            <label>Scheme Name</label>
+                            <select class="form-control" ng-model="objRFT.SCHEME_ID" required>
+                                <option value="" disabled>{{translation.SelectOption}}</option>
+                                <option ng-repeat="li in SchemeList" value="{{li.CMK_CommonMasterId}}">
+                                    {{li.TitleEn}}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 col-sm-4 mt-5">
+                            <label>Quadrimester</label>
+                            <select class="form-control" ng-model="objRFT.QUADRIMESTER_ID" required>
+                                <option value="" disabled>{{translation.SelectOption}}</option>
+                                <option ng-repeat="li in QuadrimesterList" value="{{li.CMK_CommonMasterId}}">
+                                    {{li.TitleEn}}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 col-sm-4 mt-5">
+                            <label>Installment</label>
+                            <select class="form-control" ng-model="objRFT.INSTALLMENT_TYPE_ID" required>
+                                <option value="" disabled>{{translation.SelectOption}}</option>
+                                <option ng-repeat="li in InstallmentTypeList" value="{{li.MasterInstallmentID}}">
+                                    {{li.NameEn}}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="clearfix"></div>
+                    <div class="row">
+                        <div class="col-md-12 text-center mt-5 mb-5">
+                            <button type="submit" class="btn btn-primary">Proceed to Generate Beneficiary List</button>
+                        </div>
+                    </div>
+                </form>
+            }
+            <div class="table-responsive">
+                <table class="table table-hover table-striped table-bordered mb-0">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>RFT Number</th>
+                            <th>Scheme Name</th>
+                            <th>Financial Year</th>
+                            <th>Quadrimester</th>
+                            <th>Installment Type</th>
+                            <th>Beneficiary Allocated Count</th>
+                            <th>Total Amount</th>
+                            <th>Creation Date</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="li in rbtDbtList">
+                            <td>{{$index+1}}</td>
+                            <td>
+                                <span ng-show="li.IS_ACTIVE=='True'">
+                                    <a href="~/PMKisan/GenerateBeneficiaryDBTFiles?id_enc={{li.CMK_DBT_RFT_ID_ENC}}" target="_blank">{{li.RFT_NO}}</a>
+                                </span>
+
+                                <span ng-show="li.IS_ACTIVE=='False'">
+                                    <del>{{li.RFT_NO}}</del>
+                                </span>
+                            </td>
+                            <td>{{li.SchemeName_EN}}</td>
+                            <td>{{li.FINANCIAL_YEAR}}</td>
+                            <td>{{li.QUADRIMESTER}}</td>
+                            <td>{{li.INSTALLMENT_TYPE}}</td>
+                            <td>{{li.ALLOCATED_BENEFICIARY}}</td>
+                            <td>{{li.AMOUNT*li.ALLOCATED_BENEFICIARY}}</td>
+                            <td>{{li.CREATION_DATE}}</td>
+                            <td>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+

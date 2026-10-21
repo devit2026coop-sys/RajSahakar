@@ -1,0 +1,386 @@
+﻿<script src="~/Scripts/AngularFramework/ElectionPublishByRO.js?89"></script>
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.22/pdfmake.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js"></script>
+
+<script type="text/javascript" src="https://simonbengtsson.github.io/jsPDF-AutoTable/examples.js"></script>
+@*<script type="text/javascript" src="https://simonbengtsson.github.io/jsPDF-AutoTable/libs/faker.min.js"></script>*@
+<script type="text/javascript" src="https://simonbengtsson.github.io/jsPDF-AutoTable/libs/jspdf.debug.js"></script>
+<script src="bower_components/jspdf/dist/jspdf.min.js"></script>
+
+@*<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/2.3.5/jspdf.plugin.autotable.js"></script>*@
+<script>
+    //window.onhashchange = function () {
+    //    update();
+    //};
+
+    //document.getElementById('btnExport').onclick = function () {
+    //    update(true);
+    //};
+
+    function update(shouldDownload) {
+        //  var funcStr = window.location.hash.replace(/#/g, '') || 'auto';
+        var funcStr = 'multiple';
+        var doc = examples[funcStr]();
+
+        doc.setProperties({
+            title: 'Example: ' + funcStr,
+            subject: 'A jspdf-autotable example pdf (' + funcStr + ')'
+        });
+
+        if (shouldDownload) {
+            doc.save('tablenew.pdf');
+        } else {
+            document.getElementById("output").src = doc.output('datauristring');
+        }
+    }
+
+       // update();
+</script>
+<style type="text/css">
+    body {
+        font-family: Arial;
+        font-size: 10pt;
+    }
+
+    table {
+        border: 1px solid #ccc;
+        border-collapse: collapse;
+    }
+
+        table th {
+            background-color: #F7F7F7;
+            color: #333;
+            font-weight: bold;
+        }
+
+        table th, table td {
+            padding: 5px;
+            border: 1px solid #ccc;
+        }
+</style>
+<script>
+    var myVar;
+    $(document).ready(function () {
+        $('#select-all').click(function (event) {
+            if (this.checked) {
+                // Iterate each checkbox
+                $('.chk').each(function () {
+                    this.checked = true;
+                });
+            } else {
+                $('.chk').each(function () {
+                    this.checked = false;
+                });
+            }
+        });
+        myVar = setInterval("SetOfficerData()", 4000);
+    });
+    var totalSeen = $("input#chk:checked").length;
+    function SetOfficerData() {
+        //$('#tblPublish tr').each(function () {
+        //    var OffiId = $(this).find('td:eq(3)').find('input').val();
+        //    $(this).find('td:eq(3)').find('select').val(OffiId);
+        //    if (OffiId != "0") {
+        //        $(this).find('td:eq(3)').find('select').prop("disabled", "disabled");
+        //    }
+        //    var StepId = $(this).find('td:eq(2)').find('input').val();
+        //    $(this).find('td:eq(2)').find('select').val(StepId);
+        //    if (StepId != "0") {
+        //        $(this).find('td:eq(2)').find('select').prop("disabled", "disabled");
+        //    }
+        //});
+        $("#divPrint").hide();
+        clearInterval(myVar);
+    }
+    function ChekOfficerStep(SocId) {
+        // alert(SocId.id);  // "ddlStep ddlOffi"
+        var SocIdAll = SocId.id;
+        var DDLOffiId;
+        var DDLStepId;
+        if (SocIdAll.indexOf("ddlStep") > -1)
+        {
+            DDLStepId = SocIdAll;
+            DDLOffiId = SocIdAll.replace("ddlStep", "ddlOffi");
+        }
+        else {
+            DDLOffiId = SocIdAll;
+            DDLStepId = SocIdAll.replace("ddlOffi", "ddlStep");
+        }
+        var DDLOffiVal = $('#' + DDLOffiId).val();
+        var DDLStepVal = $('#' + DDLStepId).val();
+        var flag = 0;
+        $('#tblPublish tr').each(function () {
+            var DDLStepVal1=$(this).find('td:eq(2)').find('select').val();
+            var DDLOffiVal1 = $(this).find('td:eq(3)').find('select').val();
+            if (DDLStepVal1 == DDLStepVal && DDLOffiVal1 == DDLOffiVal)
+            {
+                flag = flag + 1;
+            }
+        });
+        if (flag > 1)
+        {
+            alert("You can't select a officer in same step.");
+            $(SocId).val("0");
+        }
+        else {
+            return true;
+        }
+    }
+</script>
+
+<script>
+    function countChecked() {
+
+        alert($("input:checkbox:checked").length);
+    }
+</script>
+<style>
+    h5, p {
+        text-align: center;
+    }
+
+    .ui-timepicker-table th.periods {
+        padding: 0.1em !important;
+        width: 2.2em !important;
+    }
+
+    .ui-timepicker-table td span {
+        display: block !important;
+        padding: 0.2em 0.3em 0.2em 0.5em !important;
+        width: 1.2em !important;
+        text-align: right !important;
+        text-decoration: none !important;
+    }
+    /* anchors for clickable cells */
+    .ui-timepicker-table td a {
+        display: block !important;
+        padding: 0.2em 0.3em 0.2em 0.5em !important;
+        width: 2.2em !important;
+        cursor: pointer !important;
+        text-align: right !important;
+        text-decoration: none !important;
+    }
+</style>
+
+<div ng-app="PublishByROMOD" ng-controller="PublishByROCONT">
+    
+        <div class="col-md-12">
+            <h3 class="citizen-dash-head">{{translation.SelectionStepElectionOfficer}}</h3>
+            <label id="lbltrn" hidden="hidden"></label>
+            <hr style="margin: 0;">
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#">Home </a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;"> {{translation.SelectionStepElectionOfficer}} </span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div id="ShowDateDiv">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <div class="citizen-dash-head" ng-hide="ShowSavedData">
+                    <table class="table table-responsive devtable">
+                        <thead>
+                            <tr>
+                                <th>
+                                    {{translation.SRNO}}
+                                </th>
+                                <th>
+                                    {{translation.TotalSociety}}
+                                </th>
+                                <th>
+                                    {{translation.Election}}
+                                    {{translation.StartDate}}
+                                </th>
+                                <th>
+                                    {{translation.OrderDate}}
+                                </th>
+                                <th>
+                                    {{translation.SocietyName}}
+                                </th>
+                                <th>
+                                    {{translation.Election}} {{translation.ViewOrder}}
+                                </th>
+                                <th>
+                                    {{translation.ElectionOfficer}}  {{translation.ViewOrder}}
+                                </th>
+                                <th>{{translation.Status}}</th>
+                                <th>
+                                    {{translation.Actions}}
+                                </th>
+
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr dir-paginate="Class in ElectionOrderData | filter:q | orderBy:colsort:reverseSort | itemsPerPage: pageSize" current-page="currentPage" pagination-id="SubPagination">
+                                <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                                <td>{{Class.NoOfSociety}}</td>
+                                <td>{{Class.StartDate}}</td>
+                                <td>{{ Class.OrderDate }}</td>
+                                <td ng-bind-html="Class.SocietiesName"></td>
+                                <td><a style="color:#505050;" ng-hide="{{Class.ElectionOrderPDF==''}}" target="_blank" href="../Content/ElectionOrder/{{Class.ElectionOrderPDF }}"><i class="fa fa-download"></i></a></td>
+                                <td><a style="color:#505050;" ng-hide="{{Class.ElectionOrderEOPDF==''}}" target="_blank" href="../Content/ElectionOrder/{{Class.ElectionOrderEOPDF }}"><i class="fa fa-download"></i></a></td>
+                                <td>
+                                    {{_language =='en-us' ?  Class.process_name_en : Class.process_name_hi}}
+                                </td>
+                                <td>
+                                    <button  ng-if="Class.ElectionStatus!=5" type="button" ng-show="{{Class.ElectionOrderPDF !=''}}" class="btn btn-primary dev-btn" ng-click="ShowOfficerDetailDiv(Class.IdEnc,Class.StepInElection)" style="float:right">Procced</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="col-md-10">
+                        <div class="text-center">
+                            <dir-pagination-controls boundary-links="true" pagination-id="SubPagination" on-page-change="pageChangeHandler(newPageNumber)" template-url="/dirPagination.tpl.html"></dir-pagination-controls>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <h5 class="dev-page"> {{translation.Page}}: {{ currentPage }} </h5>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" ng-show="ShowOfficerDetail">
+                <table id="tblshow" class="table table-responsive devtable" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td>
+                            <div class="citizen-dash-head">
+                                <h5><u>{{translation.rajsarkas}}</u></h5>
+                                <p>{{translation.EleImpDateHeader}}</p>
+                                <p>{{translation.EleImpDateHeader1}}</p>
+                                <p>{{translation.EleImpDateHeader2}}</p>
+                                <table class="table table-responsive devtable" style="border:1px solid black;">
+                                    <thead>
+                                        <tr>
+                                            <th>
+                                                {{translation.SRNO}}
+                                            </th>
+
+                                            <th>
+                                                {{translation.vivran}}
+
+                                            </th>
+                                            <th>{{translation.Step1Date}} </th>
+                                            <th ng-show="StepInElection>1">{{translation.Step2Date}}</th>
+                                            <th ng-show="StepInElection>2">{{translation.Step3Date}}</th>
+                                            <th ng-show="StepInElection>3">{{translation.Step4Date}}</th>
+                                            <th ng-show="StepInElection>4">{{translation.Step5Date}}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr dir-paginate="Class in ElectionQuestionData | filter:q | orderBy:colsort:reverseSort | itemsPerPage: 15" current-page="currentPage" pagination-id="SubclassPagination">
+                                            <td ng-show="{{$index+1<9}}">{{pageSize *(currentPage-1)+$index+1}}</td>
+                                            <td ng-show="{{$index+1==13}}">9</td>
+                                            <td ng-show="{{$index+1>8 && $index+1<13}}"> </td>
+                                            <td>{{Class.QuestionEnWithDates}}</td>
+                                            <td>{{Class.Stap1Date}}</td>
+                                            <td ng-show="StepInElection>1">{{Class.Stap2Date}}</td>
+                                            <td ng-show="StepInElection>2">{{Class.Stap3Date}}</td>
+                                            <td ng-show="StepInElection>3">{{Class.Stap4Date}}</td>
+                                            <td ng-show="StepInElection>4">{{Class.Stap5Date}}</td>
+                                        </tr>
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="citizen-dash-head">
+                                <table class="table table-responsive devtable">
+                                    <thead>
+                                        <tr>
+                                            <th>
+                                                {{translation.SRNO}}
+                                            </th>
+
+                                            <th>
+                                                {{translation.SocietyName}}
+                                            </th>
+                                            <th>
+                                                {{translation.StepInElection}}
+                                            </th>
+                                            <th>
+                                                {{translation.NameElectionOfficer}}
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tblPublish">
+                                        <tr dir-paginate="Class in SocietyListdataview | filter:q | orderBy:colsort:reverseSort | itemsPerPage: pageSize" current-page="currentPage" pagination-id="SubclassPagination">
+                                            <td>{{pageSize *(currentPage-1)+$index+1}}<input type="hidden" id="hfSocietyEncID{{Class.SocietyID}}" value="{{Class.SocietyIdENC}}" /></td>
+                                            <td>{{ Class.SocietyName }} <input type="hidden" id="hfSocietyID{{Class.SocietyID}}" value="{{Class.SocietyID}}" /></td>
+                                            <td>
+                                                <input type="hidden" id="hfStepId{{Class.SocietyID}}" value="{{Class.StepId}}" />
+                                                <select ng-model="Class.StepId" class="form-control" id="ddlStep{{Class.SocietyID}}"
+                                                        ng-init="SocietyRegisteredOffice.StepId='0'" onchange="ChekOfficerStep(this)">
+                                                    <option value="0">{{translation.SelectOption}}</option>
+                                                    <option value="1">{{translation.Step1Date}}</option>
+                                                    <option ng-show="StepInElection>1" value="2">{{translation.Step2Date}}</option>
+                                                    <option ng-show="StepInElection>2" value="3">{{translation.Step3Date}}</option>
+                                                    <option ng-show="StepInElection>3" value="4">{{translation.Step4Date}}</option>
+                                                    <option ng-show="StepInElection>4" value="5">{{translation.Step5Date}}</option>
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <input type="hidden" id="hfOfficerId{{Class.SocietyID}}" class="ClsOfficer" value="{{Class.OfficerId}}" />
+                                                <select ng-model="Class.OfficerId" class="form-control ClsOfficer" id="ddlOffi{{Class.SocietyID}}"
+                                                        ng-init="SocietyRegisteredOffice.UserId='0'" onchange="ChekOfficerStep(this)">
+                                                    <option value="0" >{{translation.SelectOption}}</option>
+                                                    <option ng-repeat="item in SocietyListElectionOfficer" value="{{item.UserId}}">
+                                                        {{_language =='en-us' ?  item.OfficerNameEn : item.OfficerNameEn}}
+                                                    </option>
+                                                </select>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            
+                                <button id="btnautoclick" style="display:none" value="@ViewBag.ElectionMasterId">Click Me!</button>
+                                <input type="button" style="float:right" class="btn btn-primary dev-btn" ng-click="SendOTP()" id="save" value="Send OTP For E-Sign Election Order PDF" />
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+         
+            </div>
+
+
+
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="text-align:center;" ng-show="ShowSavedData">
+                <div class="citizen-dash-head"><button type="button" class="btn btn-success" ng-click="Backtable()">Back</button></div>
+               
+            </div>
+
+
+            </div>
+
+
+
+    <div class="col-md-12 citizen-dash-head" id="ShowOTPDiv" style="display:none">
+        
+
+        <div class="col-lg-12 form-group">
+            <div class="col-lg-2">{{translation.EnterOTP}}<span class="error">*</span></div>
+            <div class="col-lg-4">
+                <input type="text" class="form-control" placeholder="{{translation.EnterOTP}}" ng-bind="OTP"  ng-model="OTP" autocomplete="off" required onkeypress='return event.charCode >= 48 && event.charCode <= 57' min="6" maxlength="6">
+            </div>
+
+            <div class="col-lg-4">
+                <button type="button" class="btn btn-success ng-binding" ng-click="SavePublishData()">&nbsp;&nbsp;{{translation.OtpVeryfication}}</button>
+            </div>
+            <div class="col-lg-2"><button type="button" class="btn btn-success ng-binding"  ng-click="SendOTP()">&nbsp;&nbsp;{{translation.ReSendOTP}}</button></div>
+        </div>
+
+    </div>
+
+
+</div>

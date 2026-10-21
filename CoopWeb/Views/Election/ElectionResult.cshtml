@@ -1,0 +1,533 @@
+﻿
+<script src="~/Scripts/AngularFramework/ElectionResult.js"></script>
+<script type="text/javascript" src="~/Scripts/1.8.3.jquery.min.js"></script>
+<script type="text/javascript" src="~/Scripts/pdfmake.min.js"></script>
+<script type="text/javascript" src="~/Scripts/html2canvas.min.js"></script>
+<script type="text/javascript">
+    $("body").on("click", "#btnExport", function () {
+        $("#PrintDiv").css("display", "block");
+        html2canvas($('#tblCustomers')[0], {
+            onrendered: function (canvas) {
+                var data = canvas.toDataURL();
+                var docDefinition = {
+                    content: [{
+                        image: data,
+                        width: 500
+                    }]
+                };
+                pdfMake.createPdf(docDefinition).download("ResultList.pdf");
+                $("#PrintDiv").css("display", "none");
+            }
+        });
+    });
+</script>
+<style type="text/css">
+    body {
+        font-family: Arial;
+        font-size: 10pt;
+    }
+
+    table {
+        border: 1px solid #ccc;
+        border-collapse: collapse;
+    }
+
+        table th {
+            background-color: #F7F7F7;
+            color: #333;
+            font-weight: bold;
+        }
+
+        table th, table td {
+            padding: 5px;
+            border: 1px solid #ccc;
+        }
+
+    .NewMemberdob input {
+        float: left;
+        width: 90%;
+    }
+
+    .NewMemberdob button {
+        float: left;
+    }
+
+    .notValid {
+        border: solid 1px red !important
+    }
+    .rowdeleteBtn {
+        color: #fff !important;
+        font-weight: bold !important;
+        font-size: 20px !important;
+    }
+    .issued-i {
+        color: #248626 !important;
+    }
+    .notissued-i {
+        color: #db3443 !important;
+    }
+</style>
+
+
+<script type="text/javascript">
+    function RemoveRowAdminiAct2001(Control, row) {
+        if (confirm("Are you sure to remove this file?")) {
+            var id = $(Control).attr('id').replace("Remove_", '');
+            var File = $(Control).parents('#myTable2 tr').find('[Id^="File_' + id + '"]');
+            for (var temRowNo = 0; temRowNo < ImageDataList.length; temRowNo++) {
+                if (ImageDataList[temRowNo].RowNo == row) {
+                    ImageDataList.splice(temRowNo);
+                }
+            }
+            for (var temRowNo1 = 0; temRowNo1 < PDFDataList.length; temRowNo1++) {
+                if (PDFDataList[temRowNo1].RowNo == row) {
+                    PDFDataList.splice(temRowNo1);
+                }
+            }
+            $(Control).closest('tr').remove();
+            $("#Remove_" + (row - 1)).show();
+        }
+    };
+    function isNumber(evt) {
+        var iKeyCode = (evt.which) ? evt.which : evt.keyCode
+        if (iKeyCode != 46 && iKeyCode > 31 && (iKeyCode < 48 || iKeyCode > 57))
+            return false;
+
+        return true;
+    }
+    function ValidateAlpha(evt) {
+        var keyCode = (evt.which) ? evt.which : evt.keyCode
+        if ((keyCode < 65 || keyCode > 90) && (keyCode < 97 || keyCode > 123) && keyCode != 32)
+
+            return false;
+        return true;
+    };
+    $(document).ready(function () {
+        $('.SearchDate').datepicker({
+            showOn: "both",
+            changeMonth: true,
+            buttonImage: "../images/calender.png",
+            changeYear: true,
+            dateFormat: "dd/mm/yy",
+            //maxDate: '0D',
+            //defaultDate: (new Date()).getDate() + '/' + ((new Date()).getMonth()) + '/' + ((new Date()).getFullYear() - 18).toString(),
+            //yearRange: "-100:-18"
+        });
+    });
+</script>
+
+<div ng-app="CandidateListMod" ng-controller="CandidateListCnt">
+
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <h3 class="citizen-dash-head">{{translation.CandidateList}} </h3>
+    </div>
+
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="devpage-breadcrumb">
+            <ul class="page-breadcrumb">
+                <li class="dev-page-br">
+                    <i class="fa fa-home"> </i>
+                    <a href="../Citizen/Index"> {{translation.Home}} </a>
+                    <i class="fa fa-angle-right"> </i>
+                </li>
+                <li style="float: left">
+                    <span style="margin: 0 5px;"> {{translation.CandidateList}} </span>
+                </li>
+
+                <li style="float: right;" id="divAddBtn">
+                    @* <i class="fa fa-angle-double-right" style="color: #025e63;"></i>
+                        <a ng-click="AddNewSociety()" style="color: #025e63; cursor: pointer; text-decoration:none; font-weight: bold;" class="ng-binding">{{translation.AddNewSocietyProfile}}</a>*@
+                </li>
+
+
+            </ul>
+        </div>
+    </div>
+    @*MEMBERS*@
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div ng-show="ShowSocietyList" class="table-responsive citizen-dash-head">
+            <div class="table-dropdown" id="search-filter">
+                <div class="col-lg-4">
+                    <label for="search" class="ng-binding">{{translation.FilterType}}:</label>
+                    <select name="FilterType" class="form-control ng-pristine ng-valid ng-not-empty ng-touched" ng-model="Filter.FilterType" ng-change="FilterTypeChange()" ng-init="Filter.FilterType=''">
+                        <option value="">{{translation.SelectOption}}</option>
+                        <option value="SocietyName">{{translation.SocietyName}}</option>
+                        <option value="RegistrationNo">{{translation.SocietyRegistrationNo}}</option>
+                        <option value="ue.OfficerNameEn">{{translation.OrderOfficer}}</option>
+                        <option value="u.OfficerNameEn">{{translation.ElectionOfficer}}</option>
+                        <option value="s.SSOID">{{translation.CEO}}</option>
+                        <option value="SubmissionDate">{{translation.SubmissionDate}}</option>
+                    </select>
+                </div>
+                <div class="col-md-4" ng-show="showSearchText">
+                    <label for="search" class="ng-binding">Search:</label>
+                    <input name="searchText" id="search" class="form-control ng-pristine ng-valid ng-empty ng-touched" ng-model="Filter.SearchText" placeholder="Filter Text" autocomplete="off">
+                </div>
+
+                <div class="col-md-2 NewMemberdob" ng-show="showSearchDate">
+                    <label>
+                        {{translation.FromDate}}
+                    </label>
+                    <input id="txtFromDate" name="FromDate" disabled="disabled" class="form-control SearchDate" ng-model="Filter.FromDate" placeholder="{{translation.FromDate}}" onkeypress="return event.charCode >= 48 &amp;&amp; event.charCode <= 57" autocomplete="off">
+                </div>
+                <div class="col-md-2 NewMemberdob" ng-show="showSearchDate">
+                    <label>
+                        {{translation.ToDate}}
+                    </label>
+                    <input id="txtToDate" name="ToDate" disabled="disabled" class="form-control SearchDate" ng-model="Filter.ToDate" placeholder="{{translation.ToDate}}" onkeypress="return event.charCode >= 48 &amp;&amp; event.charCode <= 57" autocomplete="off">
+                </div>
+
+                <div class="col-md-4">
+                    <label>&nbsp;</label><br>
+                    <button type="button" ng-click="searchRequest(GetElectionSocietyListData)" class="btn btn-primary dev-btn ng-binding">{{translation.Search}}</button>
+                    <button type="button" ng-click="ClearSearch()" class="btn btn-primary dev-btn ng-binding">{{translation.Clear}}</button>
+                </div>
+            </div>
+            <table id="example" class="table devtable" style="border:1px solid rgb(222, 221, 221); float: left;">
+                <thead>
+                    <tr>
+                        <th>
+                            #
+                            @*{{translation.SRNO}}*@
+                        </th>
+                        <th ng-click="sortData('SocietyName')">
+                            {{translation.SocietyName}}
+                            <div ng-class="getSortClass('SocietyName')"></div>
+                        </th>
+                        <th ng-click="sortData('RegistrationNo')">
+                            {{translation.SocietyRegistrationNo}}
+                            <div ng-class="getSortClass('RegistrationNo')"></div>
+                        </th>
+                        <th>
+                            {{translation.OrderOfficer}}
+                        </th>
+                        <th>
+                            {{translation.MobileNo}}
+                        </th>
+                        <th>
+                            {{translation.ElectionOfficer}}
+                        </th>
+                        <th>
+                            {{translation.MobileNo}}
+                        </th>
+                        <th>
+                            {{translation.CEO}}
+                        </th>
+
+                        <th>
+                            {{translation.SubmissionDate}}
+                        </th>
+                        <th>
+                            {{translation.Order}}
+                        </th>
+                        <th>
+                            {{translation.Members}}
+                        </th>
+                        <th>{{translation.Candidate}}</th>
+                        <th>
+                            {{translation.ElectedMember}}
+                        </th>
+                        <th>
+                            {{translation.Result}}
+                        </th>
+                        <th>
+                            {{translation.Actions}}
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="item in ElectionSocietyListData">
+                        <td>{{(((DataPagingDetails.PageNumber - 1) * DataPagingDetails.PageSize) + 1)+$index}}</td>
+                        <td>{{item.SocietyName}}</td>
+                        <td>{{item.RegistrationNo}}</td>
+                        <td>{{item.ReturningOfficer}}</td>
+                        <td>{{item.ReturningOfficerMobile}}</td>
+                        <td>{{item.ElectionOfficer}}</td>
+                        <td>{{item.ElectionOfficerMobileNo}}</td>
+                        <td>{{item.CEO}}</td>
+                        <td>{{item.SubmissionDate}}</td>
+                        <td>
+                            <a style="color:#505050;" ng-hide="{{item.ElectionOrderFile==null}}" target="_blank" href="../Content/ElectionOrder/{{ item.ElectionOrderFile }}"><i class="fa fa-download"></i></a>
+                        </td>
+                        <td>
+                            @*{{item.TotalMembers}}*@
+                            <a style="color:#505050;" ng-if="item.MemberListFile!=null" target="_blank" href="../Content/ElectionOrder/{{ item.MemberListFile }}"><i class="fa fa-download"></i></a>
+                        </td>
+                        <td>
+                            @*{{item.TotalCandidate}}*@
+                            <a style="color:#505050;" ng-if="item.CandidateListFile!=null" target="_blank" href="../Content/ElectionOrder/{{ item.CandidateListFile }}"><i class="fa fa-download"></i></a>
+                        </td>
+
+                        <td>
+                            @*{{item.ElectedMemberList}}*@
+                            <a style="color:#505050;" ng-if="item.ElectedCandidate!=null" target="_blank" href="../Content/ElectionOrder/{{ item.ElectedCandidate }}"><i class="fa fa-download"></i></a>
+                        </td>
+                        <td>
+                            @*{{item.TotalCandidate}}*@
+                            <a style="color:#505050;" ng-if="item.ElectionResultFile!=null" target="_blank" href="../Content/ElectionOrder/{{ item.ElectionResultFile }}"><i class="fa fa-download"></i></a>
+                        </td>
+                        <td class="add-more-td">
+                            <a ng-if="item.ElectionOrderFile!=null" title="{{translation.ShowDetails}}" ng-click="EditBasicDetailsForm(item.SocietyIdENC,item.ElectionMasterId)"><i class="fa fa-info-circle infoicon-edit"></i></a>
+                        </td>
+
+                    </tr>
+                </tbody>
+            </table>
+            @Html.Partial("DataPaging")
+        </div>
+        <div ng-show="ShowVoterList">
+
+            <div class="table-responsive citizen-dash-head">
+                <div class="col-lg-12 form-group">
+                    <div class="citizen-dash-head">
+                        <div class="col-lg-2 btn-lg">{{ translation.AADHAARNo}}</div>
+                        <div class="col-lg-4">
+                            <input type="text" ng-model="SearchText" class="form-control" />
+                        </div>
+                        <div class="col-lg-4">
+                            <button type="submit" class="btn btn-primary dev-btn" ng-click="SearchVoter()">{{ translation.Search}}</button>
+                            <button type="button" class="btn btn-primary dev-btn" ng-click="CleaSearchVoter()">{{ translation.Clear}}</button>
+                        </div>
+                        <div class="clearfix"></div>
+                    </div>
+                </div>
+                <div style="width:100%;text-align:right" ng-if="false">
+                    <i class="fa fa-angle-double-right" style="color: #025e63;"></i>
+                    <a ng-click="ShowUploadExcel()" style="color: #025e63; cursor: pointer; text-decoration:none; font-weight: bold;" class="ng-binding">{{translation.ExcelUpload}}</a>
+                </div>
+                <div ng-if="!IsValid && !IsSubmit" style="color: red;    font-size: 17px;">
+                    {{IsValidMessages}}
+                </div>
+                {{ translation.LastDateOfSubmit}}: {{LastSubmistionDate}}<br />
+                {{ translation.TotalMembers}}: {{TotalMembers}}
+                <div ng-if="IsSubmit" style="color: green;    font-size: 17px; font-weight:bold">
+                    {{translation.ResultSubmit}}
+                </div>
+                <table class="table devtable" style="margin-top: 30px;border:1px solid rgb(222, 221, 221); float: left;">
+                    <thead>
+                        <tr>
+                            <th>
+
+                            </th>
+                            <th>
+                                {{translation.Photo}}
+                            </th>
+
+                            <th>
+                                {{translation.Name}}
+                            </th>
+                            <th>
+                                {{translation.FatherHusbandName}}
+                            </th>
+                            <th>
+                                {{translation.Address}}
+                            </th>
+                            <th>
+                                {{translation.ContactNo}}
+                            </th>
+                            <th>
+                                {{translation.AADHAARNo}}
+                            </th>
+                            <th>
+                                {{translation.DOB}}
+                            </th>
+                            <th>
+                                {{translation.TotalVotes}}
+                            </th>
+                            <th>
+                                {{translation.Result}}
+                            </th>
+                            <th>
+                                Document
+                            </th>
+                            <th>
+                                {{translation.Remarks}}
+                            </th>
+                            <th ng-if="IsSubmit"> {{translation.ElectionCertificate}}</th>
+                        </tr>
+                    </thead>
+                    <tbody id="myTable2">
+                        <tr ng-repeat="item in EMemberDetailsData" ng-show="item.IsShow">
+                            <td>{{item.SrNo}}</td>
+                            <td> <img src="~/Content/ElectionCandidate/{{item.Photo}}" style="width: 35px;" ng-if="item.Photo!=''"  /></td>
+
+                            <td>
+                                {{item.Name}}
+                            </td>
+                            <td>
+                                {{item.FHName}}
+                            </td>
+                            <td>
+                                {{item.Address}}
+                            </td>
+                            <td>
+                                {{item.ContactNo}}
+                            </td>
+                            <td>
+                                {{item.AadharNo2}}
+                            </td>
+                            <td>
+                                {{item.DOB}}
+                            </td>
+                            <td>
+                                {{ !IsValid || IsSubmit?item.TotalVotes:""}}
+                                <input type="text" class="form-control" ng-if="IsValid && !IsSubmit" ng-model="item.TotalVotes" maxlength="7" onkeypress="javascript: return isNumber(event);" />
+                            </td>
+                            <td>
+                                {{ !IsValid || IsSubmit?item.IsWinner?translation.Winner:translation.Lost:""}}
+                                <input type="checkbox" id="ckbIsProccess1" ng-model="item.IsWinner" ng-if="IsValid && !IsSubmit">
+                            </td>
+                            <td>
+                                <a href="~/Content/SocietyProfiling/{{item.SocietyDirectory}}/{{item.ResultDocument}}" style="width: 35px;" ng-if="item.ResultDocument!=''" target="_blank">
+                                    <i class="fa fa-eye"></i>
+                                </a>
+                                <input ng-show="IsValid && !IsSubmit" type="file" filetype="PDF" accept="application/pdf" name="File" class="form-control" ng-model="item.IsCandidate">
+                            </td>
+                            <td>
+                                {{ !IsValid || IsSubmit?item.ResultRemark:""}}
+                                <textarea type="text" class="form-control" ng-if="IsValid && !IsSubmit" ng-model="item.ResultRemark" maxlength="250"></textarea>
+                            </td>
+
+                            <td ng-if="IsSubmit" style="text-align:center">
+                                <a ng-if="item.IsWinner && IsSubmit && item.CandidateCirtificate==''" class="rowdeleteBtn" title="{{translation.Issue}}" ng-click="SendOTPForIssueCirtificate(item.SocietyIdEnc,item.ElectionMasterId,item.MemberId,$index)" style="cursor:pointer;"><i class="fa fa-address-card notissued-i"></i></a>
+                                <a ng-if="item.IsWinner && IsSubmit && item.CandidateCirtificate!=''" class="rowdeleteBtn" title="{{translation.Download}}" target="_blank" href="~/Content/ElectionOrder/{{item.CandidateCirtificate}}" style="cursor:pointer;"><i class="fa fa-address-card issued-i"></i></a>
+                            </td>
+
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="form-group col-md-12">
+                    <div class="dev-align-btn">
+                        <button type="submit" class="btn btn-primary dev-btn" ng-click="GetElectionSocietyListData()">{{translation.Back}}</button>
+                        <button ng-if="IsValid && !IsSubmit&&TotalMembers>0" type="submit" class="btn btn-primary dev-btn" ng-click="SaveSocietyAdministrativeDetails(false)">{{translation.SaveData}}</button>
+                      
+                        <button ng-if="IsValid && !IsSubmit&&TotalMembers>0" type="submit" class="btn btn-primary btn-success" ng-click="SaveSocietyAdministrativeDetails(true)">{{translation.Publish}}</button>
+                        <input ng-if="TotalMembers>0" type="button" id="btnExport" class="btn btn-primary dev-btn" style="float:right" value="Export" />
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div id="PrintDiv" style="display:none;">
+            <div class="table-responsive citizen-dash-head" id="tblCustomers">
+                <div style="text-align:center">
+                    <h5><u>{{translation.rajsarkas}}</u></h5>
+                    <p>{{translation.EleImpDateHeader}}</p>
+                    <p>{{translation.EleImpDateHeader1}}</p>
+                    <p>{{translation.EleImpDateHeader2}}</p>
+                    <p style="text-align:left">{{translation.PublishHeading}}</p><br />
+                    <p>{{translation.ElectedMemberList}}</p>
+                    <table id="content" class="table devtable" style="margin-top: 50px;border:1px solid rgb(222, 221, 221); float: left;">
+                        <thead>
+                            <tr>
+                                <th>
+
+                                </th>
+                                <th>
+                                    {{translation.Photo}}
+                                </th>
+
+                                <th>
+                                    {{translation.Name}}
+                                </th>
+                                <th>
+                                    {{translation.FatherHusbandName}}
+                                </th>
+                                <th>
+                                    {{translation.Address}}
+                                </th>
+                                <th>
+                                    {{translation.ContactNo}}
+                                </th>
+                                <th>
+                                    {{translation.AADHAARNo}}
+                                </th>
+                                <th>
+                                    {{translation.DOB}}
+                                </th>
+                                <th>
+                                    {{translation.TotalVotes}}
+                                </th>
+                                <th>
+                                    {{translation.Result}}
+                                </th>
+
+                                <th>
+                                    {{translation.Remarks}}
+                                </th>
+
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr dir-paginate="item in EMemberDetailsData   | itemsPerPage: 9000" ng-show="item.Delete && item.IsShow">
+
+                                <td>{{$index+1}}</td>
+                                <td><img src="~/Content/ElectionCandidate/{{item.Photo}}" style="width: 35px;" ng-if="item.Photo!=''"  /></td>
+                                <td>
+                                    {{item.Name}}
+                                </td>
+                                <td>
+                                    {{item.FHName}}
+                                </td>
+                                <td>
+                                    {{item.Address}}
+                                </td>
+                                <td>
+                                    {{item.ContactNo}}
+                                </td>
+                                <td>
+                                    {{item.AadharNo2}}
+                                </td>
+                                <td>
+                                    {{item.DOB}}
+                                </td>
+                                <td>
+                                    {{item.TotalVotes}}
+
+                                </td>
+                                <td>
+                                    {{item.IsWinner?translation.Winner:translation.Lost}}
+
+                                </td>
+                                <td>
+                                    {{item.ResultRemark}}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    @*MEMBERS END   Content/Images/Balnk.png*@
+    <div class="dev-popup-body modal fade" id="myOTPModal" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content citizen-dash-head">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    @*<h4 class="modal-title"> {{translation.AddOffice}} </h4>*@
+                    <label id="lbltrn" style="display:none;"></label>
+                    <label id="lblElectionMasterId" style="display:none;"></label>
+                    <label id="lblSocietyIdEnc" style="display:none;"></label>
+                    <label id="MemberId" style="display:none;"></label>
+                    <label id="CertIndex" style="display:none;"></label>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group col-md-6">
+                        <label>{{translation.EnterOTP}}</label>
+                        <input type="text" class="form-control" name="OTP" ng-bind="OTP" ng-model="OTP" placeholder={{translation.EnterOTP}} autocomplete="off" /><br />
+                        <button type="submit" class="btn btn-primary" ng-click="VerifyOTP()">{{translation.Submit}}</button>
+                        <button type="submit" class="btn btn-primary" style="margin-left:50px;" ng-click="SendOTPForIssueCirtificate(CertSocietyIdEnc,CertElectionMasterId,CertMemberId,CertIndex)">{{translation.ReSendOTP}}</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+

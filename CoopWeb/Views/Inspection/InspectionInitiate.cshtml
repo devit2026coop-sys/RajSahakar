@@ -1,0 +1,134 @@
+﻿
+@{
+    ViewBag.Title = "InspectionInitiate";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script src="~/Scripts/AngularFramework/InspectionInitiate.js"></script>
+<script>
+    $(document).ready(function () {
+        $('#select-all').click(function (event) {
+            if (this.checked) {
+                // Iterate each checkbox
+                $('.chk').each(function () {
+                    if ($(this).prop('disabled') == false) {
+                        this.checked = true;
+                    }
+                });
+            } else {
+                // ($('table input[type=checkbox]').prop('disabled')) == true;
+                $('.chk').each(function () {
+                    if ($(this).prop('disabled') == false) {
+                        this.checked = false;
+                    }
+                });
+            }
+
+        });
+    });
+    var totalSeen = $("input#chk:checked").length;
+
+    function countChecked() {
+        alert($("input:checkbox:checked").length);
+    }
+</script>
+<div ng-app="InspectionInitiateMOD">
+    <div ng-controller="InspectionInitiateCONT">
+        <div class="col-md-12">
+            <h3 class="citizen-dash-head">Inspection</h3>
+            <hr style="margin: 0;">
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#">Home </a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;"> Inspection </span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="col-md-12">
+            <div class="citizen-dash-head">
+                <div class="table-dropdown">
+                    <div class="col-xs-4">
+                        <label for="search">{{translation.Search}}:</label>
+                        <input ng-model="q" id="search" class="form-control" placeholder={{translation.filttertext}} autocomplete="off">
+                    </div>
+                    <div class="col-xs-4">
+                        <label for="search">{{translation.ItemPerPage}}:</label>
+                        <input type="number" min="1" max="100" class="form-control" onkeypress='return event.charCode >= 48 && event.charCode <= 57' ng-model="pageSize">
+                    </div>
+                    <div class="col-lg-4">
+                        {{translation.FincialYearHeading}}
+                        <select class="form-control" ng-model="Inspection.Year" ng-init="Inspection.Year='0'" ng-change="GetSocietyList()">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in FinancialYearList" value="{{item.FIN_YEAR_MASTR_ID}}">
+                                {{item.FIN_YEAR_NAME}}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+                <table class="table table-responsive devtable">
+                    <thead>
+                        <tr>
+                            <th>
+                                <input type="checkbox" name="select-alldfg" id="select-all" ng-click="allChkdsociety();" />
+                            </th>
+                            <th>
+                                {{translation.SRNO}}
+                            </th>
+                            <th>
+                                {{translation.SocietyName}}
+                            </th>
+                            <th>
+                                {{translation.LastInspOfficer}}
+                            </th>
+                            <th>
+                                {{translation.SecoundLastInspOfficer}}
+                            </th>
+                            <th>
+                                {{translation.InspectionOfficer}}
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="tblPublish">
+                        <tr dir-paginate="Class in SocietyListdataview | filter:q | orderBy:colsort:reverseSort | itemsPerPage: pageSize" current-page="currentPage" pagination-id="SubclassPagination">
+                            @*  ng-model="ElectionMastermodal.chkdboxValue" ng-disabled="{{Class.IsComplete==0}}"*@
+                            <td><input type="checkbox" name="checkbox-1" class="chk" ng-click="Chkdsociety(Class.SocietyIDEnc,Class.SocietyID);" placeholder="DDLOfficer{{Class.SocietyID}}" ng-disabled="Class.IsComplete==0" /></td>
+                            <td>{{pageSize *(currentPage-1)+$index+1}}<input type="hidden" id="hfSocietyEncID{{Class.SocietyID}}" value="{{Class.SocietyIDEnc}}" /></td>
+                            <td>{{ Class.SocietyName }} <input type="hidden" id="hfSocietyID{{Class.SocietyID}}" value="{{Class.SocietyID}}" /></td>
+                    
+                            <td>           {{ Class.LastInspOfficerName }}                 </td>
+                            <td>           {{ Class.SdLastInspOfficerName }}                 </td>
+                            <td>
+                                @*<input type="hidden" id="hfOfficerId{{Class.SocietyID}}" value="{{Class.OfficerId}}" />*@
+                                <select class="form-control" id="DDLOfficer{{Class.SocietyID}}" ng-hide="Class.IsComplete==0" >
+                                    <option value="0" disabled selected="selected">{{translation.SelectOption}}</option>
+                                    <option ng-repeat="item in SocietyListInspectionOfficer" value="{{item.UserId}}">
+                                        {{_language =='en-us' ?  item.OfficerNameEn : item.OfficerNameEn}}
+                                    </option>
+                                </select>
+                                <div  ng-show="Class.IsComplete==0" >
+                                    {{ Class.CurrentInspOfficerName }}                                    
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <input type="button" style="float:right" class="btn btn-primary dev-btn" ng-click="SaveInspectionData()" id="save" value="Save" />
+            </div>
+        </div>
+        <div class="col-md-10">
+            <div class="text-center">
+                <dir-pagination-controls boundary-links="true" pagination-id="SubclassPagination" on-page-change="pageChangeHandler(newPageNumber)" template-url="/dirPagination.tpl.html"></dir-pagination-controls>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <h5 class="dev-page"> {{translation.Page}}: {{ currentPage }} </h5>
+        </div>
+    </div>
+</div>

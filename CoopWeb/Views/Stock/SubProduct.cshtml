@@ -1,0 +1,162 @@
+﻿
+<script src="~/Scripts/AngularFramework/StockManagemenetMaster.js"></script>
+<script type="text/javascript">
+
+    function ValidateAlpha(evt) {
+        var keyCode = (evt.which) ? evt.which : evt.keyCode
+        if ((evt.which == 8 || evt.keyCode == 8 || evt.charCode == 8))
+            return true;
+
+        if (((keyCode < 49 || keyCode > 90) && (keyCode < 97 || keyCode > 123) && keyCode != 32))
+            return false;
+        return true;
+    };
+
+</script>
+
+<div ng-app="ProductSubCategoryCnt">
+    <div ng-controller="ProductSubCategoryMod">
+        <div class="col-md-12">
+            <h3 class="citizen-dash-head">{{translation.ProductSubCategory}}</h3>
+            <hr style="margin: 0;">
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#"> {{translation.StockManagement}}</a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;"> {{translation.ProductSubCategory}} </span>
+                    </li>
+                    <li style="float: right;" id="divAddBtn">
+                        <button type="button" ng-click="ShowDivProductInsert()" class="btn btn-info btn-lg dev-popup-btn" data-toggle="modal" style="color: #025e63; cursor: pointer; text-decoration:none;  font-weight: bold;">
+                            <h5>&#187; {{translation.InsertProductSubCategory}}</h5>
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" ng-show="divInsertProduct">
+            <form class="citizen-dash-head">
+
+                <div class="col-lg-12 form-group">
+                    <div class="col-lg-2">{{ translation.Product}}<span class="error">*</span></div>
+                    <div class="col-lg-4">
+                        <select class="form-control" ng-model="ProductSubCategory.ProductId" ng-init="ProductSubCategory.ProductId='0'">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in Products" value="{{item.ProductId}}">
+                                {{_language =='en-us' ?  item.ProductNameEng : item.ProductNameHi}}
+                            </option>
+                        </select>
+
+                    </div>
+                </div>
+
+                <div class="col-lg-12 form-group">
+                    <div class="col-lg-2">{{ translation.ProductSubCategoryEng}}<span class="error">*</span></div>
+                    <div class="col-lg-4">
+                        <input type="text" class="form-control" ng-model="ProductSubCategory.ProductSubCategoryNameEng" placeholder={{translation.ProductSubCategoryEng}} autocomplete="off" onKeyPress="return ValidateAlpha(event);" maxlength="50" />
+                    </div>
+                    <div class="col-lg-2">{{ translation.ProductNameHi}}<span class="error">*</span></div>
+                    <div class="col-lg-4">
+                        <input type="text" class="form-control" ng-model="ProductSubCategory.ProductSubCategoryNameHi" placeholder={{translation.ProductSubCategoryHi}} autocomplete="off" maxlength="50" />
+                    </div>
+                </div>
+
+                <div class="form-group col-md-12">
+                    <div class="dev-menu-btn">
+                        <button type="submit" class="btn btn-primary" ng-click="Insert()">{{translation.Submit}}</button>
+                        <button type="submit" class="btn btn-primary" ng-click="Clear()">{{translation.Clear}}</button>
+                        <a class="btn btn-primary dev-btn" style="text-transform:capitalize;" ng-click="BackToList()"> {{translation.Back}}</a>
+                        <input type="hidden" ng-model="ProductSubCategory.ProductSubCategoryId" />
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" ng-show="GridProducts">
+            <div>
+                <div class="citizen-dash-head">
+                    <div class="table-dropdown">
+                        <div class="col-lg-12 form-group">
+                            <div class="col-md-4" style="padding-left: 0;">
+                                <label for="search">{{translation.Search}}:</label>
+                                <input ng-model="q" id="search" class="form-control" placeholder={{translation.filttertext}} autocomplete="off">
+                            </div>
+                            <div class="col-md-4" style="padding-left: 0;">
+                                <label for="search">{{translation.ItemPerPage}}:</label>
+                                <input type="number" min="1" max="100" class="form-control" onkeypress='return event.charCode >= 48 && event.charCode <= 57' ng-model="pageSize">
+                            </div>
+                        </div>
+                    </div>
+                    <table class="table table-responsive devtable" style="overflow-x:auto;">
+                        <thead>
+                            <tr>
+                                <th>
+                                    {{translation.SRNO}}
+                                </th>
+                                <th ng-click="sortData('ProductNameEng')">
+                                    {{translation.Product}}
+                                    <div ng-class="getSortClass('ProductNameEng')"></div>
+                                </th>
+                                <th ng-click="sortData('ProductSubCategoryNameEng')">
+                                    {{translation.ProductSubCategoryEng}}
+                                    <div ng-class="getSortClass('ProductSubCategoryNameEng')"></div>
+                                </th>
+                                <th ng-click="sortData('ProductSubCategoryNameHi')">
+                                    {{translation.ProductSubCategoryHi}}
+                                    <div ng-class="getSortClass('ProductSubCategoryNameHi')"></div>
+                                </th>
+                                <th>
+                                    {{translation.IsActive}}
+                                </th>
+                                <th>
+                                    {{translation.Edit}}
+                                </th>
+                                <th>
+                                    {{translation.Delete}}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr dir-paginate="item in ProductSubCategories | filter: q | orderBy:colsort:reverseSort | itemsPerPage: pageSize" current-page="currentPage" pagination-id="TrainningFormatPagination">
+                                <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                                <td>
+                                    {{ _language === 'en-us' ?  item.ProductNameEng : item.ProductNameHi}}
+                                </td>
+                                <td>
+                                    {{ item.ProductSubCategoryNameEng}}
+                                </td>
+                                <td>
+                                    {{ item.ProductSubCategoryNameHi}}
+                                </td>
+                                <td>
+                                   
+                                    <div class="dev-action">
+                                        <label class="switch">
+                                            <input type="checkbox" ng-checked="item.IsActive === 'True' || item.IsActive === 'true' || item.IsActive === true" ng-click="SetStatus(item.ProductSubCategoryId,1)">
+                                            <span class="slider round"></span>
+                                        </label>
+                                    </div>
+                                </td>
+                                <td><a href="javascript:void(0)"><i class="fa fa-edit" aria-hidden="true" ng-click="Edit(item)"></i></a></td>
+                                <td><a href="javascript:void(0)"><i class="fa fa-trash" aria-hidden="true" ng-click="SetStatus(item.ProductSubCategoryId,2)"></i></a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="col-md-10">
+                <div class="text-center">
+                    <dir-pagination-controls boundary-links="true" pagination-id="TrainningFormatPagination" on-page-change="pageChangeHandler(newPageNumber)" template-url="/dirPagination.tpl.html"></dir-pagination-controls>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

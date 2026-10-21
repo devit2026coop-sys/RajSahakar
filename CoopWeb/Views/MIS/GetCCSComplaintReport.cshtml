@@ -1,0 +1,287 @@
+﻿
+<script src="~/Scripts/AngularFramework/GetCCSComplaintReport.js"></script>
+<script type="text/javascript">
+    var tableToExcel = (function () {
+        var uri = 'data:application/vnd.ms-excel;base64,'
+            , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>'
+            , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) }
+            , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
+        return function (table, name) {
+            if (!table.nodeType) table = document.getElementById(table)
+            var ctx = { worksheet: name || 'Worksheet', table: table.innerHTML }
+            window.location.href = uri + base64(format(template, ctx))
+        }
+    })()
+</script>
+
+
+<div ng-app="GetCCSComplaintReportMod" ng-controller="GetCCSComplaintReportCnt">
+
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <h3 class="citizen-dash-head"> Credit Cooperative Society Complaint Status  </h3>
+    </div>
+
+    <div class="col-md-12">
+        <div class="table-responsive citizen-dash-head">
+            <div class="table-responsive citizen-dash-head">
+                <div class="col-md-4" ng-show="@ViewBag.LoggedInUserLevelId==1">
+                    <label>
+                        {{translation.DistrictHeading}} :
+                    </label>
+
+                    <select ng-model="DistrictId" class="form-control" ng-init="DistrictId='0'" ng-change="GetComplaintReportCounts()">
+                        <option value="0">{{translation.SelectOption}}</option>
+                        <option ng-repeat="item in Districts" value="{{item.DISTRICT_ID}}">
+                            {{_language =='en-us' ?  item.DISTRICT_MANGAL: item.DISTRICT_ENG}}
+                        </option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label>
+                        {{translation.Type}} :
+                    </label>
+                    <input type="radio" name="name" value="0" ng-checked="true" ng-click="GetComplaintReportCounts()" />All
+                    <input type="radio" name="name" value="1" ng-click="GetCompaintDataDistrictWise()" />District Wise Count
+                </div>
+
+            </div>
+            <table class="table devtable" id="tblgetsuport" ng-show="IsDistrictwiseNot">
+                <thead>
+                    <tr>
+                        <th>SN.</th>
+                        <th>
+                            @*{{translation.TOTAL}}*@Total
+                        </th>
+                        <th>
+                            @*{{translation.Noticeisssue}}*@NextHearing
+                        </th>
+                        <th>
+                            @*{{translation.Istagasaissue}}*@Reject
+                        </th>
+                        <th>
+                            @*{{translation.NotRelevantforAct2019}}*@Dispose
+                        </th>
+                        <th>
+                            @*{{translation.Disposeasperrequestfromcomplainer}}*@Hold
+                        </th>
+                        @*<th>
+                                {{translation.Disposebycort}}
+                            </th>*@
+
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="items in GetActionIdCCSComplaintReport">
+                        @*<td>{{ items.Noticeisssue + items.stagasaissue+items.NotRelevantforAct2019+items.Disposeasperrequestfromcomplainer +items.DisposeBycort}}</td>
+                            <td><a href="" ng-click="GetCCSList(1)" class="collection-item ng-binding">{{ items.Noticeisssue }}</a></td>
+                            <td> <a href="" ng-click="GetCCSList(2)" class="collection-item ng-binding">{{ items.stagasaissue }}</a></td>
+                            <td> <a href="" ng-click="GetCCSList(3)" class="collection-item ng-binding">{{ items.NotRelevantforAct2019 }}</a></td>
+                            <td> <a href="" ng-click="GetCCSList(4)" class="collection-item ng-binding">{{ items.Disposeasperrequestfromcomplainer }}</a></td>
+                            <td> <a href="" ng-click="GetCCSList(5)" class="collection-item ng-binding">{{ items.DisposeBycort }}</a></td>*@
+
+                        @*<td>{{ items.Noticeisssue + items.stagasaissue+items.NotRelevantforAct2019+items.Disposeasperrequestfromcomplainer +items.DisposeBycort}}</td>*@
+                        <td>{{$index+1}}</td>
+                        <td><a href="" ng-click="GetCCSList(1)" class="collection-item ng-binding">{{ items.Total }}</a></td>
+                        <td> <a href="" ng-click="GetCCSList(2)" class="collection-item ng-binding">{{ items.NextHearing }}</a></td>
+                        <td> <a href="" ng-click="GetCCSList(3)" class="collection-item ng-binding">{{ items.Reject }}</a></td>
+                        <td> <a href="" ng-click="GetCCSList(4)" class="collection-item ng-binding">{{ items.Dispose }}</a></td>
+                        <td> <a href="" ng-click="GetCCSList(5)" class="collection-item ng-binding">{{ items.Hold }}</a></td>
+
+                    </tr>
+                </tbody>
+            </table>
+            <table class="table devtable" id="tblgetsuport" ng-show="IsDistrictwise">
+                <thead>
+                    <tr>
+                        <th>
+                            {{translation.SRNO}}
+                        </th>
+                        <th>
+                            {{translation.Noticeisssue}}
+                        </th>
+                        <th>
+                            {{translation.Istagasaissue}}
+                        </th>
+                        <th>
+                            {{translation.NotRelevantforAct2019}}
+                        </th>
+                        <th>
+                            {{translation.Disposeasperrequestfromcomplainer}}
+                        </th>
+                        <th>
+                            {{translation.Disposebycort}}
+                        </th>
+
+                    </tr>
+                </thead>
+                <tbody>
+
+                    <tr ng-repeat="items in DatabyDistricts">
+                        <td>{{$index+1}}</td>
+                        <td><a href="" ng-click="GetCCSList(1)" class="collection-item ng-binding">{{ items.DISTRICT_ENG }}</a></td>
+                        <td> <a href="" ng-click="GetCCSList(2)" class="collection-item ng-binding">{{ items.Act1 }}</a></td>
+                        <td> <a href="" ng-click="GetCCSList(3)" class="collection-item ng-binding">{{ items.Act2 }}</a></td>
+                        <td> <a href="" ng-click="GetCCSList(4)" class="collection-item ng-binding">{{ items.Act3 }}</a></td>
+                        <td> <a href="" ng-click="GetCCSList(5)" class="collection-item ng-binding">{{ items.Act4 }}</a></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <input type="hidden" id="hdfLoggedInUserDistrictId" value="@ViewBag.LoggedInUserDistrictId" />
+
+
+    <div ng-show="IsnotShow">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="table-responsive citizen-dash-head">
+                <div class="col-md-12 dev-search-form" id="search-filter">
+                    <div class="col-md-4" style="padding-left: 0;">
+                        <label for="search">{{translation.Search}}:</label>
+                        <input ng-model="qery" name="SearchText" id="search" class="form-control" placeholder="{{translation.filttertext}}" autocomplete="off">
+                    </div>
+                    <div class="col-md-4">
+                        <label>
+                            {{translation.CCSName}}
+                        </label>
+                        <select name="CCSId" ng-model="Filter.CCSId" class="form-control" ng-init="Filter.CCSId=''" ng-change="searchRequest(GetCCSCompalainteReportList)">
+                            <option value="">{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in CCSList" value="{{item.SocietyID}}">
+                                {{item.SocietyName}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-md-4  margin-Top20">
+                        <label>&nbsp;</label><br>
+                        <button type="button" ng-click="searchRequest(GetCCSCompalainteReportList)" class="btn btn-primary dev-btn ng-binding">{{translation.Search}}</button>
+                        <button type="button" ng-click="ClearSearch()" class="btn btn-primary dev-btn ng-binding">{{translation.Clear}}</button>
+                    </div>
+
+                </div>
+
+                <br>
+                <div class="dev-popup-body modal fade" id="myModals" role="dialog" data-backdrop="static" data-keyboard="false">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" ng-click="ClearMenuForm()">&times;</button>
+                                <h4 class="modal-title">  {{ translation.CCSComplaintStatus}}  </h4>
+                            </div>
+                            <div class="modal-body">
+                                <form class="dev-search-form" name="MySchemeForm" style="overflow: hidden;">
+                                    <table class="table devtable">
+                                        <thead>
+                                            <tr>
+                                                <th>{{translation.ComplainerName}}</th>
+                                                <th>{{translation.Status}}</th>
+                                                <th>{{translation.Remarks}}</th>
+
+                                                <th ng-show="Isnext"> {{translation.NextHearingDate}} </th>
+
+                                                <th>{{translation.CreationDate}}</th>
+
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr dir-paginate="items in ActionDetailsdata | filter:q | orderBy:colsort:reverseSort | itemsPerPage: pageSize" current-page="currentPage" pagination-id="PurchaseCenterPagination">
+                                                <td>{{items.ComplainerName}}</td>
+
+                                                <td ng-if="items.ActionId==1">{{translation.Rejection}}</td>
+                                                <td ng-if="items.ActionId==2">{{translation.dispose}}</td>
+                                                <td ng-if="items.ActionId==3">{{translation.NextHearing}}</td>
+                                                <td>{{items.Description}}</td>
+                                                <td ng-show="Isnext">{{items.Datetimes}}</td>
+                                                <td>{{items.CreationDate}}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </form>
+
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                <table id="tblData" class="table devtable" style="margin-top: 30px;  border:1px solid rgb(222, 221, 221); float: left;">
+                    <thead>
+                        <tr>
+                            <th>
+                                {{translation.SRNO}}
+                            </th>
+                            <th>
+                                {{translation.ComplainerName}}
+                            </th>
+                            <th>
+                                {{translation.Mobile}}
+                            </th>
+                            <th>
+                                {{translation.Address}}
+                            </th>
+                            <th>
+                                {{translation.AmountDepoisted}}
+                            </th>
+                            <th>
+                                {{translation.CCSName}}
+                            </th>
+                            <th>
+                                {{translation.CEOLetter}}
+                            </th>
+                            <th>
+                                {{translation.ComplainerLetter}}
+                            </th>
+                            <th>
+                                {{translation.Details}}
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        <tr ng-repeat="item in GetCCSCompalainteReportData">
+                            <td>{{(((DataPagingDetails.PageNumber - 1) * DataPagingDetails.PageSize) + 1)+$index}}</td>
+                            <td>{{item.ComplainerName}}</td>
+                            <td>{{item.MobileNo}}</td>
+                            <td>{{item.Address}}</td>
+                            <td>{{item.AmountDeposited}}</td>
+                            <td>{{item.SocietyName}}</td>
+                            <td><a target="_blank" ng-if="item.ceo_letter!=''" href="~/Content/CCSLetter/{{item.ceo_letter}}"><i class="fa fa-download"></i></a></td>
+                            <td><a target="_blank" ng-if="item.complainant_letter!=''" href="~/Content/CCSLetter/{{item.complainant_letter}}"><i class="fa fa-download"></i></a></td>
+                            <td ng-click="getcompid(item);getcompAlldata(item.ComplaintId)"><i class="fa fa-info-circle info-m2" ng-if="item.ceo_letter!='' || item.complainant_letter!='' " data-toggle="modal" data-target="#myModals"></i></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="col-md-12">
+                    <div ng-if="DataPagingDetails.TotalPages>1" class="dataTables_paginate paging_simple_numbers" id="dataTables-example_paginate">
+                        <div class="dataTables_info" id="dataTables-example_info" role="status" aria-live="polite">
+                            Total Records: {{DataPagingDetails.TotalRecords}}
+                        </div>
+                        <ul class="pagination pagination_1" style="margin-left: 10px !important;">
+                            <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« First</span></li>
+                            <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« Previous</span></li>
+
+                            <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest('1',GetCCSCompalainteReportList)" style="cursor: pointer;">
+                                <span>«First</span>
+                            </li>
+                            <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest(DataPagingDetails.PageNumber-1,GetCCSCompalainteReportList)" style="cursor:pointer;">
+                                <span>« Previous</span>
+                            </li>
+                            <li class="{{n==DataPagingDetails.PageNumber?'active':''}}" style="{{n==DataPagingDetails.PageNumber?'':'cursor: pointer'}}" ng-repeat="n in PagingRange(DataPagingDetails.StartPageNumber,DataPagingDetails.EndPageNumber,DataPagingDetails.TotalPages)" ng-click="pageRequest(n,GetCCSCompalainteReportList)"><span>{{n}}</span></li>
+                            <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Next</span></li>
+                            <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Last</span></li>
+                            <li ng-if="DataPagingDetails.PageNumber!= DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.PageNumber+1,GetCCSCompalainteReportList)" style="cursor:pointer;">
+                                <span>Next »</span>
+                            </li>
+                            <li ng-if="DataPagingDetails.PageNumber != DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.TotalPages,GetCCSCompalainteReportList)" style="cursor:pointer;">
+                                <span>Last »</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+

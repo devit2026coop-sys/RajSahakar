@@ -1,0 +1,165 @@
+﻿@{
+    ViewBag.Title = "Ncd-Service-Data-Sync";
+}
+
+<style>
+    .flexEqualCenter {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    a.backBtn {
+        padding: 3px 5px;
+        background: rgb(99,205,219);
+        color: #fff;
+        border: 0px;
+        outline: none;
+        display: inline-block;
+        text-decoration: none;
+    }
+
+        a.backBtn i {
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+    .tblthfont {
+        font-weight: bold;
+    }
+
+    .button-group {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+        .button-group .btn {
+            padding: 10px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+</style>
+<script src="~/Scripts/AngularFramework/NcdServiceDataSync.js?v=4"></script>
+<div ng-app="ncdSyncDataMod" ng-controller="ncdSyncDataCtrl" ng-cloak="">
+    <div class="container-fluid citizen-dash-head">
+        <div class="panel panel-default">
+            <div class="panel-heading flexEqualCenter">
+                <b><i class="fa fa-th-list"></i>&nbsp; NCD Service Data Sync</b>
+                <div class="text-right">
+                    <button ng-click="Refresh()" class="btn btn-primary dev-btn">Refresh</button>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="row g-4">
+                    <div class="col-lg-3 col-md-6 col-sm-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <h4 class="card-title text-start mb-3">Master Sync Data</h4>
+                                <div class="button-group">
+                                    <button class="btn btn-success" ng-click="syncNcdCooperativeSocietyRegistrations()">Cooperative Societies Registrations</button>
+                                    <button class="btn btn-warning" ng-click="syncNcdSectorMaster()">Sync Sector Data</button>
+                                    <button class="btn btn-primary" ng-click="syncNcdDistrictData()">District-wise</button>
+                                    <button class="btn btn-success" ng-click="syncNcdCityData()">City-wise</button>
+                                    <button class="btn btn-success" ng-click="syncNcdBlockData()">Block-wise</button>
+                                    <button class="btn btn-warning" ng-click="syncNcdVillageData()">Village-wise</button>
+                                    <button class="btn btn-secondary" ng-click="syncNcdWardData()">Ward-wise</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6 col-sm-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <h4 class="card-title text-start mb-3">Master Sync Data</h4>
+                                <div class="button-group">
+                                    <div class="form-group mb-3">
+                                        <label class="control-label">Page No / Limit</label>
+                                        <div class="row g-0">
+                                            <div class="col-xs-4">
+                                                <input type="text" ng-model="search.master.page" class="form-control" placeholder="Page No">
+                                            </div>
+                                            <div class="col-xs-8">
+                                                <input type="text" ng-model="search.master.limit" class="form-control" placeholder="Limit">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-warning" ng-click="syncNcdAreaOfOperationRural(search.master)">Area Operation Rural</button>
+                                    <button class="btn btn-primary" ng-click="syncNcdAreaOfOperationUrban(search.master)">Area Operation Urban</button>
+                                    <button class="btn btn-secondary" ng-click="syncNcdCooperativeRegistrationLandDetails(search.master)">Coopeative Registration Land Details</button>
+                                    <button class="btn btn-success" ng-click="syncNcdSocietyImplementingSchemeDetails(search.master)">Society Implementing Schemes Detail</button>
+                                    <button class="btn btn-success" ng-click="syncNcdSocietyAuditYearDetails(search.master)">Society Audit Years Details</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-3 col-md-6 col-sm-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <h4 class="card-title text-start mb-3">Sector Wise Sync Data</h4>
+                                <div class="button-group">
+                                    <div class="form-group mb-3">
+                                        <label class="control-label">Select Sector</label>
+                                        <select ng-model="search.NCD_Sectorcode" class="form-control" required ng-init="search.NCD_Sectorcode='0'">
+                                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                                            <option ng-repeat="item in NCDSectorDetails " value="{{item.id}}">
+                                                {{item.name}}
+                                            </option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label class="control-label">Page No / Limit</label>
+                                        <div class="row g-0">
+                                            <div class="col-xs-4">
+                                                <input type="text" ng-model="search.sector.page" class="form-control" placeholder="Page No">
+                                            </div>
+                                            <div class="col-xs-8">
+                                                <input type="text" ng-model="search.sector.limit" class="form-control" placeholder="Limit">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-primary" ng-click="syncNcdDataBySector(search.sector)">Sync Sector-wise Data</button>
+                                    <button class="btn btn-success" ng-click="syncNcdFinancialDetails()">Financial Details Data</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-3 col-md-6 col-sm-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <h4 class="card-title text-start mb-3">Master Data Sync by Levelcode</h4>
+                                <div class="button-group">
+                                    <div class="form-group mb-3">
+                                        <label class="form-label">Select Level code</label>
+                                        <select ng-model="search.NCD_Levelcode" class="form-control" required ng-init="search.NCD_Levelcode='0'">
+                                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                                            <option ng-repeat="item in LevelcodeList " value="{{item.id}}">
+                                                {{item.name}}
+                                            </option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label class="control-label">Page No / Limit</label>
+                                        <div class="row">
+                                            <div class="col-xs-4">
+                                                <input type="text" ng-model="search.level.page" class="form-control" placeholder="Page No">
+                                            </div>
+                                            <div class="col-xs-8">
+                                                <input type="text" ng-model="search.level.limit" class="form-control" placeholder="Limit">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-primary" ng-click="syncMasterDataByLevelCode(search.level)">Sync Master Data By LevelCode</button>
+                                    <button class="btn btn-success" ng-click="syncNcdMemberDetails()">Member Details Data</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,225 @@
+﻿@{
+    ViewBag.Title = "Gopal Credit Card Bank Wise Summary";
+}
+<style>
+    .flexEqualCenter {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    a.backBtn {
+        padding: 3px 5px;
+        background: rgb(99,205,219);
+        color: #fff;
+        border: 0px;
+        outline: none;
+        display: inline-block;
+        text-decoration: none;
+    }
+
+
+        a.backBtn i {
+            display: inline-block;
+            margin-right: 5px;
+        }
+</style>
+<script src="~/Scripts/AngularFramework/GccBankWiseSummaryList.js?v=1.4"></script>
+<div ng-app="BeneficiaryListMod" ng-controller="BeneficiaryListCnt" ng-cloak="">
+    <div class="container-fluid citizen-dash-head">
+        <div class="panel panel-default">
+            <div class="panel-heading flexEqualCenter">
+                <b><i class="fa fa-th-list"></i>&nbsp; Gopal Credit Card Bank Wise Summary</b>
+            </div>
+
+            <div class="panel-body">
+                <input type="hidden" id="hdnDistrictId" ng-model="search.LoanDistrictId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DistrictId)" />
+                <div class="row">
+                    <div class="col-md-6 form-group">
+                        @*<label class="help-block-gender">
+            <input type="radio" id="sdfs" name="IsOverall" ng-value="0" ng-model="GopalCreditCardModel.IsPendancy" ng-change="GridShow(0)"> Pendancy
+        </label>
+        <label class="help-block-gender">
+            <input type="radio" id="sdf" ng-value="1" name="IsOverall" ng-model="GopalCreditCardModel.IsPendancy" ng-change="GridShow(1)"> Overall
+        </label>*@
+                        <label class="help-block-gender">
+                            <input type="radio" name="IsOverall" ng-value="0"
+                                   ng-model="GopalCreditCardModel.IsPendancy" ng-change="GridShow(0)"> New
+                        </label>
+                        <label class="help-block-gender">
+                            <input type="radio" name="IsOverall" ng-value="1"
+                                   ng-model="GopalCreditCardModel.IsPendancy" ng-change="GridShow(1)"> Renew
+                        </label>
+                        <label class="help-block-gender">
+                            <input type="radio" name="IsOverall" ng-value="2"
+                                   ng-model="GopalCreditCardModel.IsPendancy" ng-change="GridShow(2)"> All Application
+                        </label>
+
+                    </div>
+                    <div class="col-md-6 form-group">
+                    </div>
+                </div>
+
+
+                <div class="row">
+                    <div class="col-md-3">
+                        <label>{{ translation.FincialYearHeading}}</label>
+                        <select class="form-control" ng-model="search.FinancialYearId" ng-init="search.FinancialYearId='0'" ng-change="GetGccSummary()">
+                            <option value="0">{{translation.All}}</option>
+                            <option ng-repeat="item in FinancialYearList" value="{{item.FIN_YEAR_MASTR_ID}}">
+                                {{item.FIN_YEAR_NAME}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 form-group">
+                        <label>
+                            {{translation.BankName}}
+                        </label>
+                        <select ng-model="search.LoanBankID" ng-disabled="IsSubmiApplication || isLBDisabled" id="BankID" class="form-control" ng-change="Get_LoanBankBranch('0')">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="itemBlock in BankMasterList | orderBy:'CCBNameEn'" value="{{itemBlock.CCBId}}" ng-selected="itemBlock.CCBId == selectedCCBId">
+                                {{_language =='en-us' ?  itemBlock.CCBNameEn : itemBlock.CCBNameHi}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 form-group">
+                        <label>
+                            {{translation.BankBranch}}
+                        </label>
+                        <select ng-model="search.LoanBranchId" id="BranchId" class="form-control" ng-init="search.LoanBranchId='0'" ng-change="Get_LoanBranch_PACS('0')">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="itemBlock in BankBranches | orderBy:'BranchNameEn'" value="{{itemBlock.Branch_ID}}">
+                                {{_language =='en-us' ?  itemBlock.BranchNameEn : itemBlock.BranchNameHi}}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+                <div class="table-responsive devtable" ng-hide="IsOverall">
+                    <table class="table table-hover table-striped table-bordered mb-0">
+                        <thead>
+                            <tr>
+                                <th valign="middle" width="60">Sr. No.</th>
+                                <th valign="middle">{{(search.LoanBankID!='0' && search.LoanBranchId!='0' ?'PACS Name':search.LoanBankID!='0'?'Branch Name':'CCB Name')}}</th>
+                                <th valign="middle" class="text-center">Total Application</th>
+                                @*<th valign="middle" class="text-center">Approve</th>
+                                    <th valign="middle" class="text-center">Sanctioned</th>
+                                    <th valign="middle" class="text-center">Objection</th>
+                                    <th valign="middle" class="text-center">Reject</th>*@
+                                @*<th valign="middle" class="text-center">Assign To PACS</th>*@
+                                @*<th valign="middle" class="text-center">Assign To BM</th>*@
+                                @*<th valign="middle" class="text-center">Assign To MD</th>*@
+                                <th valign="middle" class="text-center"> Pending </th>
+                                <th valign="middle" class="text-center">Objection</th>
+                                <th valign="middle" class="text-center">Reject</th>
+                                <th valign="middle" class="text-center">Sanctioned</th>
+                                <th valign="middle" class="text-center">Disbursed</th>
+                                <th valign="middle" class="text-center">Sanction Amt.</th>
+                                <th valign="middle" class="text-center">Disbursed Amt.</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="item in GccSummary">
+                                <td>{{$index+1}}.</td>
+                                <td>
+                                    {{ item.GroupName }}
+                                    @*{{( search.LoanBankID!='0' && search.LoanBranchId!='0'?item.PACSNameEn: search.LoanBankID!='0'?item.BranchNameEn:item.CCBNameEn)}}*@
+                                </td>
+                                <td align="center">{{item.TotalGcc}}</td>
+                                <td align="center"><a target="_blank" href="~/mis/GccApplicationList?districtId={{search.LoanBankID=='0'?item.DISTRICT_ID:0}}&FyId={{search.FinancialYearId}}&ccbId={{search.LoanBankID!='0'?search.LoanBankID:item.CCBId}}&branchId={{search.LoanBranchId!='0'?search.LoanBranchId:search.LoanBankID!='0'?item.GroupId:0}}&pacsId={{search.LoanBankID!='0' && search.LoanBranchId!='0'?item.GroupId:'0'}}&statusType=1">{{item.Pending}}</a></td>
+                                @*<td align="center"><a target="_blank" href="~/mis/GccApplicationList?districtId={{search.LoanBankID=='0'?item.DISTRICT_ID:0}}&FyId={{search.FinancialYearId}}&ccbId={{search.LoanBankID!='0'?search.LoanBankID:item.CCBId}}&branchId={{search.LoanBranchId!='0'?search.LoanBranchId:search.LoanBankID!='0'?item.GroupId:0}}&pacsId={{search.LoanBankID!='0' && search.LoanBranchId!='0'?item.GroupId:'0'}}&statusType=4">{{item.AssignToPacs}}</a></td>*@
+                                @*<td align="center"><a target="_blank" href="~/mis/GccApplicationList?districtId={{search.LoanBankID=='0'?item.DISTRICT_ID:0}}&FyId={{search.FinancialYearId}}&ccbId={{search.LoanBankID!='0'?search.LoanBankID:item.CCBId}}&branchId={{search.LoanBranchId!='0'?search.LoanBranchId:search.LoanBankID!='0'?item.GroupId:0}}&pacsId={{search.LoanBankID!='0' && search.LoanBranchId!='0'?item.GroupId:'0'}}&statusType=5">{{item.AssignToBM}}</a></td>*@
+                                @*<td align="center"><a target="_blank" href="~/mis/GccApplicationList?districtId={{search.LoanBankID=='0'?item.DISTRICT_ID:0}}&FyId={{search.FinancialYearId}}&ccbId={{search.LoanBankID!='0'?search.LoanBankID:item.CCBId}}&branchId={{search.LoanBranchId!='0'?search.LoanBranchId:search.LoanBankID!='0'?item.GroupId:0}}&pacsId={{search.LoanBankID!='0' && search.LoanBranchId!='0'?item.GroupId:'0'}}&statusType=6">{{item.AssignToCCB}}</a></td>*@
+                                <td align="center"><a target="_blank" href="~/mis/GccApplicationList?districtId={{search.LoanBankID=='0'?item.DISTRICT_ID:0}}&FyId={{search.FinancialYearId}}&ccbId={{search.LoanBankID!='0'?search.LoanBankID:item.CCBId}}&branchId={{search.LoanBranchId!='0'?search.LoanBranchId:search.LoanBankID!='0'?item.GroupId:0}}&pacsId={{search.LoanBankID!='0' && search.LoanBranchId!='0'?item.GroupId:'0'}}&statusType=2">{{item.ObjectionGcc}}</a></td>
+                                <td align="center"><a target="_blank" href="~/mis/GccApplicationList?districtId={{search.LoanBankID=='0'?item.DISTRICT_ID:0}}&FyId={{search.FinancialYearId}}&ccbId={{search.LoanBankID!='0'?search.LoanBankID:item.CCBId}}&branchId={{search.LoanBranchId!='0'?search.LoanBranchId:search.LoanBankID!='0'?item.GroupId:0}}&pacsId={{search.LoanBankID!='0' && search.LoanBranchId!='0'?item.GroupId:'0'}}&statusType=3">{{item.RejectGcc}}</a></td>
+                                <td align="center">
+                                    <a ng-show="(item.CCBNameEn!='Mahila Nidhi Federation')" target="_blank" href="~/mis/GccApplicationList?districtId={{search.LoanBankID=='0'?item.DISTRICT_ID:0}}&FyId={{search.FinancialYearId}}&ccbId={{search.LoanBankID!='0'?search.LoanBankID:item.CCBId}}&branchId={{search.LoanBranchId!='0'?search.LoanBranchId:search.LoanBankID!='0'?item.GroupId:0}}&pacsId={{search.LoanBankID!='0' && search.LoanBranchId!='0'?item.GroupId:'0'}}&statusType=4">{{item.Sanctioned}}</a>
+                                    <a ng-show="item.CCBNameEn=='Mahila Nidhi Federation'" target="_blank" href="~/mis/GccMahilaNidhiDistrictWiseSummary">{{item.Sanctioned}}</a>
+                                </td>
+                                <td align="center">
+                                    <a target="_blank" href="~/mis/GccApplicationList?districtId={{search.LoanBankID=='0'?item.DISTRICT_ID:0}}&FyId={{search.FinancialYearId}}&ccbId={{search.LoanBankID!='0'?search.LoanBankID:item.CCBId}}&branchId={{search.LoanBranchId!='0'?search.LoanBranchId:search.LoanBankID!='0'?item.GroupId:0}}&pacsId={{search.LoanBankID!='0' && search.LoanBranchId!='0'?item.GroupId:'0'}}&statusType=5">{{item.Disbursed}}</a>
+                                </td>
+                                <td align="center">
+                                    <span ng-show="(item.CCBNameEn!='Mahila Nidhi Federation')">{{item.SanctionAmt}}</span>
+                                    <span ng-show="item.CCBNameEn == 'Mahila Nidhi Federation'">{{item.SanctionAmt}}</span>
+                                </td>
+                                <td align="center">{{item.DisbursedAmt}}</td>
+
+
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr ng-repeat="item in TotalGccSummary">
+                                <td colspan="2" align="right"><b>Total</b></td>
+                                <td align="center"><b>{{item.TotalGcc}}</b></td>
+                                <td align="center"><b>{{item.Pending}}</b></td>
+                                @*<td align="center"><b>{{item.AssignToPacs}}</b></td>*@
+                                @*<td align="center"><b>{{item.AssignToBM}}</b></td>*@
+                                @*<td align="center"><b>{{item.AssignToCCB}}</b></td>*@
+                                <td align="center"><b>{{item.ObjectionGcc}}</b></td>
+                                <td align="center"><b>{{item.RejectGcc}}</b></td>
+                                <td align="center"><b>{{item.Sanctioned}}</b></td>
+                                <td align="center"><b>{{item.Disbursed}}</b></td>
+                                <td align="center"><b>{{item.SanctionAmt}}</b></td>
+                                <td align="center"><b>{{item.DisbursedAmt}}</b></td>
+
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                <div class="table-responsive devtable" ng-hide="!IsOverall">
+                    <table class="table table-hover table-striped table-bordered mb-0">
+                        <thead>
+                            <tr>
+                                <th valign="middle" width="60">Sr. No.</th>
+                                <th valign="middle">{{(search.LoanBankID!='0' && search.LoanBranchId!='0' ?'PACS Name':search.LoanBankID!='0'?'Branch Name':'CCB Name')}}</th>
+                                <th valign="middle" class="text-center">Total Application</th>
+                                <th valign="middle" class="text-center">Overall Pending</th>
+                                @*<th valign="middle" class="text-center">Overall Applications To PACS</th>*@
+                                @*<th valign="middle" class="text-center">Overall Applications To BM</th>*@
+                                @*<th valign="middle" class="text-center">Overall Applications To MD</th>*@
+                                <th valign="middle" class="text-center">Objection</th>
+                                <th valign="middle" class="text-center">Sanctioned</th>
+                                <th valign="middle" class="text-center">Disbursed</th>
+                                <th valign="middle" class="text-center">Reject</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="item in GccSummary">
+                                <td>{{$index+1}}.</td>
+                                <td>
+                                    {{ item.GroupName }}
+                                    @*{{( search.LoanBankID!='0' && search.LoanBranchId!='0'?item.PACSNameEn: search.LoanBankID!='0'?item.BranchNameEn:item.CCBNameEn)}}*@
+                                </td>
+                                <td align="center">{{item.TotalGcc}}</td>
+                                <td align="center"><a target="_blank" href="~/mis/GccApplicationList?districtId={{search.LoanBankID=='0'?item.DISTRICT_ID:0}}&FyId={{search.FinancialYearId}}&ccbId={{search.LoanBankID!='0'?search.LoanBankID:item.CCBId}}&branchId={{search.LoanBranchId!='0'?search.LoanBranchId:search.LoanBankID!='0'?item.GroupId:0}}&pacsId={{search.LoanBankID!='0' && search.LoanBranchId!='0'?item.GroupId:'0'}}&statusType=1&Overall=1">{{item.Pending}}</a></td>
+                                @*<td align="center"><a target="_blank" href="~/mis/GccApplicationList?districtId={{search.LoanBankID=='0'?item.DISTRICT_ID:0}}&FyId={{search.FinancialYearId}}&ccbId={{search.LoanBankID!='0'?search.LoanBankID:item.CCBId}}&branchId={{search.LoanBranchId!='0'?search.LoanBranchId:search.LoanBankID!='0'?item.GroupId:0}}&pacsId={{search.LoanBankID!='0' && search.LoanBranchId!='0'?item.GroupId:'0'}}&statusType=4&Overall=1">{{item.AssignToPacs}}</a></td>*@
+                                @*<td align="center"><a target="_blank" href="~/mis/GccApplicationList?districtId={{search.LoanBankID=='0'?item.DISTRICT_ID:0}}&FyId={{search.FinancialYearId}}&ccbId={{search.LoanBankID!='0'?search.LoanBankID:item.CCBId}}&branchId={{search.LoanBranchId!='0'?search.LoanBranchId:search.LoanBankID!='0'?item.GroupId:0}}&pacsId={{search.LoanBankID!='0' && search.LoanBranchId!='0'?item.GroupId:'0'}}&statusType=5&Overall=1">{{item.AssignToBM}}</a></td>*@
+                                @*<td align="center"><a target="_blank" href="~/mis/GccApplicationList?districtId={{search.LoanBankID=='0'?item.DISTRICT_ID:0}}&FyId={{search.FinancialYearId}}&ccbId={{search.LoanBankID!='0'?search.LoanBankID:item.CCBId}}&branchId={{search.LoanBranchId!='0'?search.LoanBranchId:search.LoanBankID!='0'?item.GroupId:0}}&pacsId={{search.LoanBankID!='0' && search.LoanBranchId!='0'?item.GroupId:'0'}}&statusType=6&Overall=1">{{item.AssignToCCB}}</a></td>*@
+                                <td align="center"><a target="_blank" href="~/mis/GccApplicationList?districtId={{search.LoanBankID=='0'?item.DISTRICT_ID:0}}&FyId={{search.FinancialYearId}}&ccbId={{search.LoanBankID!='0'?search.LoanBankID:item.CCBId}}&branchId={{search.LoanBranchId!='0'?search.LoanBranchId:search.LoanBankID!='0'?item.GroupId:0}}&pacsId={{search.LoanBankID!='0' && search.LoanBranchId!='0'?item.GroupId:'0'}}&statusType=2&Overall=1">{{item.ObjectionGcc}}</a></td>
+                                <td align="center"><a target="_blank" href="~/mis/GccApplicationList?districtId={{search.LoanBankID=='0'?item.DISTRICT_ID:0}}&FyId={{search.FinancialYearId}}&ccbId={{search.LoanBankID!='0'?search.LoanBankID:item.CCBId}}&branchId={{search.LoanBranchId!='0'?search.LoanBranchId:search.LoanBankID!='0'?item.GroupId:0}}&pacsId={{search.LoanBankID!='0' && search.LoanBranchId!='0'?item.GroupId:'0'}}&statusType=4&Overall=1">{{item.Sanctioned}}</a></td>
+                                <td align="center"><a target="_blank" href="~/mis/GccApplicationList?districtId={{search.LoanBankID=='0'?item.DISTRICT_ID:0}}&FyId={{search.FinancialYearId}}&ccbId={{search.LoanBankID!='0'?search.LoanBankID:item.CCBId}}&branchId={{search.LoanBranchId!='0'?search.LoanBranchId:search.LoanBankID!='0'?item.GroupId:0}}&pacsId={{search.LoanBankID!='0' && search.LoanBranchId!='0'?item.GroupId:'0'}}&statusType=5&Overall=1">{{item.Disbursed}}</a></td>
+                                <td align="center"><a target="_blank" href="~/mis/GccApplicationList?districtId={{search.LoanBankID=='0'?item.DISTRICT_ID:0}}&FyId={{search.FinancialYearId}}&ccbId={{search.LoanBankID!='0'?search.LoanBankID:item.CCBId}}&branchId={{search.LoanBranchId!='0'?search.LoanBranchId:search.LoanBankID!='0'?item.GroupId:0}}&pacsId={{search.LoanBankID!='0' && search.LoanBranchId!='0'?item.GroupId:'0'}}&statusType=3&Overall=1">{{item.RejectGcc}}</a></td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr ng-repeat="item in TotalGccSummary">
+                                <td colspan="2" align="right"><b>Total</b></td>
+                                <td align="center"><b>{{item.TotalGcc}}</b></td>
+                                <td align="center"><b>{{item.Pending}}</b></td>
+                                @*<td align="center"><b>{{item.AssignToPacs}}</b></td>*@
+                                @*<td align="center"><b>{{item.AssignToBM}}</b></td>*@
+                                @*<td align="center"><b>{{item.AssignToCCB}}</b></td>*@
+                                <td align="center"><b>{{item.ObjectionGcc}}</b></td>
+                                <td align="center"><b>{{item.Sanctioned}}</b></td>
+                                <td align="center"><b>{{item.Disbursed}}</b></td>
+                                <td align="center"><b>{{item.RejectGcc}}</b></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,254 @@
+﻿
+
+
+<script src="~/Scripts/AngularFramework/DigitalRegister.js?id=4"></script>
+<script type="text/javascript" src="~/Scripts/jqueryuitimepicker.js"></script>
+<link href="~/Content/Stylesheets/jqueryuitimepicker.css" rel="stylesheet" />
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $('.SetCalender').datepicker({
+            showOn: "both",
+            changeMonth: true,
+            buttonImage: "../images/calender.png",
+            changeYear: true,
+            dateFormat: "dd/mm/yy",
+            //minDate: (new Date()).getDate() + '/' + ((new Date()).getMonth()+1) + '/' + ((new Date()).getFullYear()).toString(),
+            //defaultDate: (new Date()).getDate() + '/' + ((new Date()).getMonth() + 1) + '/' + ((new Date()).getFullYear()).toString(),
+        });
+
+        var monthStartDate = "01/" + ((new Date().getMonth() + 1).toString().length <= 1 ? "0" + (new Date().getMonth() + 1).toString() : (new Date().getMonth() + 1).toString()) + "/" + new Date().getFullYear();
+        var currentDate = (new Date().getDate().toString().length <=1?"0" + new Date().getDate().toString() : new Date().getDate().toString()) + "/" + ((new Date().getMonth() + 1).toString().length <= 1 ? "0" + (new Date().getMonth() + 1).toString() : (new Date().getMonth() + 1).toString()) + "/" + new Date().getFullYear();
+
+
+
+        $("#txtFromDate").val(monthStartDate);
+        $("#txtToDate").val(currentDate);
+    });
+</script>
+
+<style type="text/css">
+    body {
+        font-family: Arial;
+        font-size: 10pt;
+    }
+
+    /*table {
+        border: 1px solid #ccc;
+        border-collapse: collapse;
+    }
+
+        table th {
+            background-color: #F7F7F7;
+            color: #333;
+            font-weight: bold;
+        }
+
+        table th, table td {
+            padding: 5px;
+            border: 1px solid #ccc;
+        }*/
+
+    .NewMemberdob input {
+        float: left;
+        width: 90%;
+    }
+
+    .NewMemberdob button {
+        float: left;
+    }
+
+    .notValid {
+        border: solid 1px red !important
+    }
+
+    .NewRequestList td {
+        color: black !important;
+    }
+
+    .rowdeleteBtn {
+        color: #fff !important;
+        font-weight: bold !important;
+        font-size: 12px !important;
+    }
+
+    .margin-Top20 {
+        margin-top: 20px;
+    }
+
+    .table > tbody > tr > td, .table > tbody > tr > th, .table > tfoot > tr > td, .table > tfoot > tr > th, .table > thead > tr > td, .table > thead > tr > th {
+        padding: 1px;
+        padding-right: 5px;
+        padding-left: 5px;
+    }
+
+</style>
+<div ng-app="DigitalRegisterMod" ng-controller="DigitalRegisterCnt">
+    <div class="col-md-12">
+        <h3 class="h3heading citizen-dash-head">{{translation.DigitalRegister}}</h3>
+    </div>
+
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="devpage-breadcrumb">
+            <ul class="page-breadcrumb">
+                <li class="dev-page-br">
+                    <i class="fa fa-home"> </i>
+                    <a href="#"> {{translation.MIS}}  </a>
+                    <i class="fa fa-angle-right"> </i>
+                </li>
+                <li style="float: left">
+                    <span style="margin: 0 5px;">{{translation.DigitalRegister}}   </span>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="table-responsive citizen-dash-head">
+            <div>
+                <input type="hidden" id="DivisionId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DivisionId)" />
+                <input type="hidden" id="hdnActId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).ActId)" />
+                <input type="hidden" id="hdnDistrictId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DistrictId)" />
+                <div class="table-dropdown" id="search-filter">
+                    
+                    <div class="col-md-2 margin-Top20">
+                        <label for="search" class="ng-binding">{{translation.Act}}:</label>
+                        <select name="ActId" ng-model="ActId" class="form-control" ng-init="ActId=''" ng-change="GetSocietyTypeList()" id="ddrActId">
+                            <option value="">{{translation.All}}</option>
+                            <option ng-repeat="item in Actlist" value="{{item.ActId}}">
+                                {{_language =='en-us' ?  item.ActNameEn : item.ActNameHi}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 margin-Top20">
+                        <label for="search" class="ng-binding">{{translation.SocietyType}}:</label>
+                        <select name="SocietyType" ng-model="SocietyTypeId" class="form-control" ng-init="SocietyTypeId=''">
+                            <option value="">{{translation.All}}</option>
+                            <option ng-repeat="item in Typelist" value="{{item.SocietyTypeId}}">
+                                {{_language =='en-us' ?  item.TypeameEng : item.TypeNameHin}}
+                            </option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-2 margin-Top20">
+                        <label for="search" class="ng-binding">{{translation.Search}}:</label>
+                        <input name="SearchText" type="text" class="form-control"  ng-model="Filter.SearchText"  />
+                    </div>
+
+                    <div class="col-md-2 NewMemberdob margin-Top20">
+                        <label>
+                            {{translation.FromDate}}
+                        </label><br />
+                        <input id="txtFromDate" name="FromDate" disabled="disabled" class="form-control SetCalender" ng-model="Filter.FromDate" placeholder="{{translation.FromDate}}" onkeypress="return event.charCode >= 48 &amp;&amp; event.charCode <= 57" autocomplete="off">
+                    </div>
+                    <div class="col-md-2 NewMemberdob margin-Top20">
+                        <label>
+                            {{translation.ToDate}}
+                        </label><br />
+                        <input id="txtToDate" name="ToDate" disabled="disabled" class="form-control SetCalender" ng-model="Filter.ToDate" placeholder="{{translation.ToDate}}" onkeypress="return event.charCode >= 48 &amp;&amp; event.charCode <= 57" autocomplete="off">
+                    </div>
+
+
+
+                    @*<div class="col-md-4 margin-Top20" style="padding-left: 0;">
+                            <label>{{ translation.Act}}</label>
+                            <select name="s.ActId" ng-model="ActId" class="form-control" ng-init="ActId='0'" ng-change="GetSocietyTypeList()" id="ddrActId">
+                                <option value="0">{{translation.All}}</option>
+                                <option ng-repeat="item in Actlist" value="{{item.ActId}}">
+                                    {{_language =='en-us' ?  item.ActNameEn : item.ActNameHi}}
+                                </option>
+                            </select>
+                        </div>*@
+                    @*<div class="col-md-2 margin-Top20" style="padding-left: 0;">
+                        <label>{{ translation.DistrictHeading}}</label>
+                        <select name="sro.DISTRICT_ID" ng-model="WrSearch.DistrictId" class="form-control" ng-init="WrSearch.DistrictId=''" ng-change="GetKVSSList()" id="ddrDistrictId">
+                            <option value="">{{translation.SelectOption}}</option>
+                            <option ng-repeat="district in DistrictList" value="{{district.DISTRICT_ID}}">
+                                {{_language =='en-us' ?  district.DISTRICT_ENG : district.DISTRICT_MANGAL}}
+                            </option>
+                        </select>
+                    </div>*@
+                    <div class="col-md-2  margin-Top20">
+                        <label>&nbsp;</label><br>
+                        <button type="button" ng-click="searchRequest(GetDigitalRegister)" class="btn btn-primary dev-btn ng-binding">{{translation.Search}}</button>
+                        <button type="button" ng-click="ClearSearch()" class="btn btn-primary dev-btn ng-binding">{{translation.Clear}}</button>
+                        <input type="button" id="btnExport" class="btn btn-primary dev-btn" style="" ng-click="searchRequest(ExportData)" value="Export" />
+                    </div>
+                </div>
+                <div>
+                    <table id="example" class="table devtable" style="border:1px solid rgb(222, 221, 221); float: left;">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th style="text-align:left">{{translation.SocietyName}}</th>                                
+                                <th style="text-align:left">{{translation.SocietyType}}</th>
+                                <th style="text-align:left">{{translation.Act}}</th>
+                                <th style="text-align:left">{{translation.Address}}</th>
+                                <th style="text-align:left">{{translation.Date}}</th>
+                                <th style="text-align:left">{{translation.RegistrationNo}}</th>                             
+                                <th style="text-align:left">{{translation.CEO}}</th>
+                                <th style="text-align:left">{{translation.Mobile}}</th>
+                                @*<th style="text-align:left">{{translation.Applicant}}</th>*@   
+                                <th style="text-align:right;width: 6%;">{{translation.Fee}}</th>
+                                <th style="text-align:right;width: 6%;">{{translation.ShareCapital}}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="item in DigitalRegisterList" style="cursor: pointer;">
+                                <td>{{(((DataPagingDetails.PageNumber - 1) * DataPagingDetails.PageSize) + 1)+$index}}</td>
+                                <td style="text-align:left">{{item.SocietyName}}</td>                                
+                                <td style="text-align:left">{{_language =='en-us' ?  item.TypeameEng : item.TypenameHin}}</td>
+                                <td style="text-align:left">{{_language =='en-us' ?  item.ActNameEn : item.ActNameHi}}</td>
+                                <td style="text-align:left">{{_language =='en-us' ?  item.AddressEn : item.AddressHi}}</td>
+                                <td style="text-align:left">{{item.Date}}</td>
+                                <td style="text-align:left">{{item.RegistrationNo}}</td>                               
+                                <td style="text-align:left">{{item.CeoName}}</td>
+                                <td style="text-align:left">{{item.CeoContactNo}}</td>
+                                @*<td style="text-align:left">{{item.ssoid}}</td>*@                                
+                                <td style="text-align:right">₹ {{item.Amount}}</td>
+                                <td style="text-align:right">₹ {{item.Amount==0? item.ShareCapital:0}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="col-md-12">
+                        <div ng-if="DataPagingDetails.TotalPages>1" class="dataTables_paginate paging_simple_numbers" id="dataTables-example_paginate">
+                            <div class="dataTables_info" id="dataTables-example_info" role="status" aria-live="polite">
+                                Total Records: {{DataPagingDetails.TotalRecords}}
+                            </div>
+                            <ul class="pagination pagination_1" style="margin-left: 10px !important;">
+                                <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« First</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« Previous</span></li>
+
+                                <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest('1',GetDigitalRegister)" style="cursor: pointer;">
+                                    <span>«First</span>
+                                </li>
+                                <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest(DataPagingDetails.PageNumber-1,GetDigitalRegister)" style="cursor:pointer;">
+                                    <span>« Previous</span>
+                                </li>
+                                <li class="{{n==DataPagingDetails.PageNumber?'active':''}}" style="{{n==DataPagingDetails.PageNumber?'':'cursor: pointer'}}" ng-repeat="n in PagingRange(DataPagingDetails.StartPageNumber,DataPagingDetails.EndPageNumber,DataPagingDetails.TotalPages)" ng-click="pageRequest(n,GetDigitalRegister)"><span>{{n}}</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Next</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Last</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber!= DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.PageNumber+1,GetDigitalRegister)" style="cursor:pointer;">
+                                    <span>Next »</span>
+                                </li>
+                                <li ng-if="DataPagingDetails.PageNumber != DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.TotalPages,GetDigitalRegister)" style="cursor:pointer;">
+                                    <span>Last »</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <input ng-if="WRDetails.length>0" type="button" id="btnExport" class="btn btn-primary dev-btn" style="" ng-click="ExportData()" value="Export" />
+                </div>
+            </div>
+        </div>
+        <input type="hidden" value="@ViewBag.FromDate" id="fromdateserver" />
+        <input type="hidden" value="@ViewBag.TodateDate" id="todateserver" />
+        <input type="hidden" value="@ViewBag.MinDate" id="mindateserver" />
+    </div>
+</div>
+
+
+

@@ -1,0 +1,426 @@
+﻿@{
+    ViewBag.Title = "Gopal Credit Card Bank Wise Summary";
+}
+<style>
+    .flexEqualCenter {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    a.backBtn {
+        padding: 3px 5px;
+        background: rgb(99,205,219);
+        color: #fff;
+        border: 0px;
+        outline: none;
+        display: inline-block;
+        text-decoration: none;
+    }
+
+
+        a.backBtn i {
+            display: inline-block;
+            margin-right: 5px;
+        }
+</style>
+
+<script type="text/javascript">
+    var tableToExcel = (function () {
+        var uri = 'data:application/vnd.ms-excel;base64,'
+            , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>'
+            , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) }
+            , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
+        return function (table, name) {
+            if (!table.nodeType) table = document.getElementById(table)
+            var ctx = { worksheet: name || 'Worksheet', table: table.innerHTML }
+            window.location.href = uri + base64(format(template, ctx))
+        }
+    })()
+
+    //old
+    //$(document).ready(function () {
+    //    $('.datepicker').datepicker({
+    //        format: 'dd/mm/yyyy',
+    //        autoclose: true,
+    //        todayHighlight: true
+    //    });
+
+    //    // To Date, From Date se pehle na ho isliye restriction
+    //    $('#txtFromDate').on('changeDate', function (e) {
+    //        $('#txtToDate').datepicker('setStartDate', e.date);
+    //    });
+    //});
+
+    //$(document).ready(function () {
+    //    $('.datepicker').datepicker({
+    //        format: 'dd/mm/yyyy',
+    //        autoclose: true,
+    //        todayHighlight: true
+    //    });
+
+    //    var today = new Date();
+    //    $('#txtFromDate').datepicker('setDate', today);
+    //    $('#txtToDate').datepicker('setDate', today);
+
+    //    $('#txtFromDate').on('changeDate', function (e) {
+    //        $('#txtToDate').datepicker('setStartDate', e.date);
+    //    });
+    //});
+
+</script>
+
+<script>
+    $(function () {
+        $(".datepicker").each(function () {
+            if ($(this).hasClass("hasDatepicker")) {
+                $(this).datepicker("destroy");
+            }
+
+            $(this).datepicker({
+                dateFormat: "dd/mm/yy",
+                changeMonth: true,
+                changeYear: true,
+                yearRange: "1950:2050"
+            });
+        });
+
+    });
+</script>
+<script src="~/Scripts/xlsx.full.min.js"></script>
+
+<script src="~/Scripts/AngularFramework/GccBankWiseSanctionDetails.js?v=1.6"></script>
+<div ng-app="GccBankWiseListMod" ng-controller="GccBankWiseListCnt" ng-cloak="">
+    <div class="container-fluid citizen-dash-head">
+        <div class="row">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <h3 class="citizen-dash-head ng-binding">Gopal Credit Card Bank Wise Summary</h3>
+            </div>
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading flexEqualCenter">
+                        <b><i class="fa fa-filter"></i>&nbsp; Filters</b>
+                    </div>
+
+                    <div class="panel-body" id="search-filter">
+                        <input type="hidden" id="hdnDistrictId" ng-model="search.LoanDistrictId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DistrictId)" />
+
+                        <div class="row">
+                            <div class="col-lg-1 col-md-4 col-sm-6 col-xs-12 form-group">
+                                <label>  Report Type <span class="error">*</span>  </label>
+                                <select name="ReportType" class="form-control" ng-model="search.ReportType" ng-init="search.ReportType='0'" ng-change="OnReportTypeChange()">
+                                    <option value="0" disabled selected>--Select--</option>
+                                    <option value="Details">Details</option>
+                                    <option value="Count">Count</option>
+                                </select>
+                            </div>
+                            @*<div class="col-lg-1 col-md-4 col-sm-6 col-xs-12 form-group">
+                                    <label>{{ translation.FincialYearHeading}}<span class="error">*</span></label>
+                                    <select name="FinancialYearId" class="form-control" ng-model="search.FinancialYearId" ng-init="search.FinancialYearId='0'">
+                                        <option value="0">{{translation.All}}</option>
+                                        <option ng-repeat="item in FinancialYearList" value="{{item.FIN_YEAR_MASTR_ID}}">
+                                            {{item.FIN_YEAR_NAME}}
+                                        </option>
+                                    </select>
+                                </div>*@
+
+                            <div class="col-lg-1 col-md-4 col-sm-6 col-xs-12 form-group">
+                                <label>Files Type <span class="error">*</span> </label>
+                                <select name="Type" class="form-control" ng-model="GopalCreditCardModel.Type" ng-init="GopalCreditCardModel.Type='' ">
+                                    <option value="">--Select--</option>
+                                    <option value="0">Disbursement</option>
+                                    <option value="1">Sanction</option>
+                                    <option value="2">Overall</option>
+                                    <option value="3">NOC Generated</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-2">
+                                <label>
+                                    {{GopalCreditCardModel.Type=='0' ? 'Disbursement' :GopalCreditCardModel.Type=='1' ? 'Sanction' : GopalCreditCardModel.Type=='2' ? 'Application Received' : GopalCreditCardModel.Type=='3' ? 'NOC Generated' : ''}} From Date<span class="text-danger">*</span>
+                                </label>
+                                @*<input type="date" id="txtFromDate" name="FromDate" class="form-control" placeholder="DD/MM/YYYY" autocomplete="off" />*@
+                                <input id="txtFromDate" name="FromDate" class="form-control datepicker" placeholder="DD/MM/YYYY" autocomplete="off" />
+                            </div>
+                            <div class="col-md-2">
+                                <label>
+                                    {{GopalCreditCardModel.Type=='0' ? 'Disbursement' :GopalCreditCardModel.Type=='1' ? 'Sanction' : GopalCreditCardModel.Type=='2' ? 'Application Received' : GopalCreditCardModel.Type=='3' ? 'NOC Generated' : ''}} To Date<span class="text-danger">*</span>
+                                </label>
+                                @*<input type="date" id="txtToDate" name="ToDate" FromDate="ToDate" class="form-control" placeholder="DD/MM/YYYY" autocomplete="off" />*@
+                                <input id="txtToDate" name="ToDate" class="form-control datepicker" placeholder="DD/MM/YYYY" autocomplete="off" onkeypress="return false;">
+
+                            </div>
+
+                            <div class="col-lg-2 col-md-4 col-sm-6 col-xs-12 form-group">
+                                <label> {{translation.BankName}}<span class="error">*</span>  </label>
+                                <select name="LoanBankID" ng-model="search.LoanBankID" id="BankID" class="form-control" ng-change="OnBankChange()" ng-disabled="isBankDisabled" ng-init="search.LoanBankID = '0'">
+                                    <option value="0" disabled>{{translation.SelectOption}}</option>
+                                    <option ng-repeat="itemBlock in BankMasterList | orderBy:'CCBNameEn'" value="{{itemBlock.CCBId}}">
+                                        {{_language =='en-us' ?  itemBlock.CCBNameShort : itemBlock.CCBNameShort}}
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="col-lg-1 col-md-4 col-sm-6 col-xs-12 form-group">
+                                <label>  {{translation.BankBranch}} </label>
+                                <select name="LoanBranchId" ng-model="search.LoanBranchId" id="BranchId" class="form-control" ng-init="search.LoanBranchId='0'" ng-change="Get_LoanBranch_PACS('0')">
+                                    <option value="0" disabled>{{translation.SelectOption}}</option>
+                                    <option ng-repeat="itemBlock in BankBranches | orderBy:'BranchNameEn'" value="{{itemBlock.Branch_ID}}">
+                                        {{_language =='en-us' ?  itemBlock.BranchNameEn : itemBlock.BranchNameHi}}
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="col-lg-1 col-md-4 col-sm-6 col-xs-12 form-group">
+                                <label> Appl. Type <span class="error">*</span> </label>
+                                <select name="IsOverall" class="form-control" ng-model="GopalCreditCardModel.IsRenew" ng-init="GopalCreditCardModel.IsRenew=''">
+                                    <option value="">--Select--</option>
+                                    <option value="0">New</option>
+                                    <option value="1">Renew</option>
+                                    <option value="2">Both</option>
+                                </select>
+                            </div>
+
+                            <!-- OD/NOD/Closed/Outstanding Status -->
+                            <div class="col-lg-1 col-md-4 col-sm-6 col-xs-12 form-group">
+                                <label> OD/NOD/Close<span class="error">*</span> </label>
+                                <select name="NODODStatus" class="form-control" ng-model="search.NODODStatus" ng-init="search.NODODStatus='0'">
+                                    <option value="0">--Select--</option>
+                                    <option value="OD">OD</option>
+                                    <option value="NOD">NOD</option>
+                                    <option value="Closed">Closed</option>
+                                    <option value="Outstanding">Outstanding</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-1">
+                                <label for="search">Record Page:</label>
+                                <input type="number" min="1" max="1000" class="form-control" ng-model="pageSize">
+                            </div>
+                        </div>
+                        <div style="display: flex; justify-content: center;">
+                            <button class="btn btn-success dev-btn" ng-click="SearchData()">Search</button>
+                            <button class="btn btn-success dev-btn" ng-click="Clear()">Clear</button>
+                            <button type="button" ng-click="exportAllToExcel()" class="btn btn-success dev-btn">
+                                <i class="fa fa-file-excel-o"></i> Export Excel
+                            </button>
+                        </div>
+
+                        <div class="clearfix"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <b>
+                            <i class="fa fa-th-list"></i>
+                            Gopal Credit Card Bank Wise Summary
+                            <span ng-if="GccSummary.length > 0">
+                                (Details showing {{ getReportTypeText() }}
+                                during the period from {{FromDate}} to {{ToDate}}.
+                                ({{FromDate}} से {{ToDate}} की अवधि के दौरान
+                                {{ getReportTypeHindiText() }} का विवरण।))
+                            </span>
+                        </b>
+                    </div>
+
+                    <div class="panel-body">
+                        <div class="table-responsive devtable">
+                            <table class="table table-hover table-striped table-bordered mb-0" id="GCCBankWiseSanction">
+                                <thead>
+                                    <tr>
+
+                                        <!-- DETAILS REPORT -->
+
+                                        <th ng-if="search.ReportType == 'Details'" valign="middle" width="60">Sr. No.</th>
+                                        <th ng-if="search.ReportType == 'Details'" valign="middle" class="text-center">Branch Name</th>
+                                        <th ng-if="search.ReportType == 'Details'" valign="middle" class="text-center">Pacs Name</th>
+                                        <th ng-if="search.ReportType == 'Details'" valign="middle" class="text-center">Application No</th>
+                                        <th ng-if="search.ReportType == 'Details'" valign="middle" class="text-center">Bank Account No</th>
+                                        <th ng-if="search.ReportType == 'Details'" valign="middle" class="text-center">Applicant Name</th>
+                                        <th ng-if="search.ReportType == 'Details'" valign="middle" class="text-center">Father Name</th>
+
+                                        <th ng-if="search.ReportType == 'Details'" valign="middle" class="text-center">Application Received Date</th>
+                                        <th ng-if="search.ReportType == 'Details' && (GopalCreditCardModel.Type == 0 || GopalCreditCardModel.Type == 3)" valign="middle" class="text-center"> Disbursed Amt. </th>
+                                        <th ng-if="search.ReportType == 'Details' && GopalCreditCardModel.Type == 1" valign="middle" class="text-center"> Sanction Date </th>
+                                        <th ng-if="search.ReportType == 'Details' && GopalCreditCardModel.Type == 1" valign="middle" class="text-center"> Sanction Amt. </th>
+                                        <th ng-if="search.ReportType == 'Details' && (GopalCreditCardModel.Type == 0 || GopalCreditCardModel.Type == 3)" valign="middle" class="text-center">Due Date</th>
+                                        <th ng-if="search.ReportType == 'Details' && GopalCreditCardModel.Type == 1" valign="middle" class="text-center">Due Date Sanction</th>
+                                        @*<th ng-if="search.ReportType == 'Details' && GopalCreditCardModel.Type == 1" valign="middle" class="text-center">Extended Due Date (6 Months Relaxation)</th>*@
+                                        <th ng-if="search.ReportType == 'Details' && GopalCreditCardModel.Type == 1" valign="middle" class="text-center">Disbursement Date Sanction</th>
+                                        <th ng-if="search.ReportType == 'Details' && GopalCreditCardModel.Type == 2" valign="middle" class="text-center">Due Date</th>
+                                        <th ng-if="search.ReportType == 'Details' && GopalCreditCardModel.Type == 2" valign="middle" class="text-center">Extended Due Date (6 Months Relaxation) </th>
+                                        <th ng-if="search.ReportType == 'Details' && GopalCreditCardModel.Type == 2" valign="middle" class="text-center">Disbursement Date Over All</th>
+                                        <th ng-if="search.ReportType == 'Details' && GopalCreditCardModel.Type == 2" valign="middle" class="text-center">Sanction Date Over All</th>
+                                        <th ng-if="search.ReportType == 'Details' && (GopalCreditCardModel.Type == 0 || GopalCreditCardModel.Type == 3)" valign="middle" class="text-center">Extended Due Date (6 Months Relaxation) </th>
+                                        <th ng-if="search.ReportType == 'Details' && (GopalCreditCardModel.Type == 0 || GopalCreditCardModel.Type == 3)" valign="middle" class="text-center"> Disbursed Date  </th>
+                                        <th ng-if="search.ReportType == 'Details'" valign="middle" class="text-center">NOC Generate Date</th>
+                                        <th ng-if="search.ReportType == 'Details'" valign="middle" class="text-center">Current Status</th>
+                                        <th ng-if="search.ReportType == 'Details' && GopalCreditCardModel.Type == 0" valign="middle" class="text-center">NOD/OD </th>
+                                        <th ng-if="search.ReportType == 'Details'" valign="middle" class="text-center">Mobile No</th>
+                                        <th ng-if="search.ReportType == 'Details'" valign="middle" class="text-center">Jan Aadhar Nos</th>
+
+
+                                        <!-- COUNT REPORT -->
+
+                                        <th ng-if="(search.ReportType == 'Count' && search.ReportType != 'Details') && (GopalCreditCardModel.Type == 0 || GopalCreditCardModel.Type == 1 && GopalCreditCardModel.Type != 2)" class="text-center">Bank Name</th>
+                                        <th ng-if="search.ReportType == 'Count' && search.ReportType != 'Details' && GopalCreditCardModel.Type == 0" class="text-center">Total Disbursed Till Date</th>
+                                        <th ng-if="search.ReportType == 'Count' && search.ReportType != 'Details' && GopalCreditCardModel.Type == 0" class="text-center">Total Disbursed Amount</th>
+                                        <th ng-if="search.ReportType == 'Count' && search.ReportType != 'Details' && GopalCreditCardModel.Type == 1" class="text-center">Total Sanctioned Till Date</th>
+                                        <th ng-if="(search.ReportType == 'Count' && search.ReportType != 'Details') && (GopalCreditCardModel.Type == 0 || GopalCreditCardModel.Type == 1)" class="text-center">OD Count</th>
+                                        <th ng-if="(search.ReportType == 'Count' && search.ReportType != 'Details') && (GopalCreditCardModel.Type == 0 || GopalCreditCardModel.Type == 1)" class="text-center">NOD Count</th>
+                                        <th ng-if="(search.ReportType == 'Count' && search.ReportType != 'Details') && (GopalCreditCardModel.Type == 0 || GopalCreditCardModel.Type == 1)" class="text-center">Total Outstanding (OD+NOD)</th>
+                                        <th ng-if="(search.ReportType == 'Count' && search.ReportType != 'Details') && (GopalCreditCardModel.Type == 0 || GopalCreditCardModel.Type == 1)" class="text-center">Closed</th>
+
+                                        <!-- OVERALL COUNT REPORT -->
+
+                                        <th ng-if="search.ReportType == 'Count' && GopalCreditCardModel.Type == 2" class="text-center"> CCB Bank Name</th>
+                                        <th ng-if="search.ReportType == 'Count' && GopalCreditCardModel.Type == 2" class="text-center"> Total Applications  </th>
+                                        <th ng-if="search.ReportType == 'Count' && GopalCreditCardModel.Type == 2" class="text-center">  Sanction </th>
+                                        <th ng-if="search.ReportType == 'Count' && GopalCreditCardModel.Type == 2" class="text-center"> Disbursement </th>
+                                        <th ng-if="search.ReportType == 'Count' && GopalCreditCardModel.Type == 2" class="text-center">  Total Disbursement Amount </th>
+                                        <th ng-if="search.ReportType == 'Count' && GopalCreditCardModel.Type == 2" class="text-center"> Reject  </th>
+                                        <th ng-if="search.ReportType == 'Count' && GopalCreditCardModel.Type == 2" class="text-center"> Objection </th>
+                                        <th ng-if="search.ReportType == 'Count' && GopalCreditCardModel.Type == 2" class="text-center"> Pending </th>
+                                        <th ng-if="search.ReportType == 'Count' && GopalCreditCardModel.Type == 2" class="text-center">  Closed </th>
+
+
+                                        <!-- NOC Generated COUNT REPORT -->
+                                        <th ng-if="search.ReportType == 'Count' && GopalCreditCardModel.Type == 3" class="text-center"> CCB Bank Name</th>
+                                        <th ng-if="search.ReportType == 'Count' && GopalCreditCardModel.Type == 3" class="text-center"> Total NOC Genereated Applications  </th>
+                                        <th ng-if="search.ReportType == 'Count' && GopalCreditCardModel.Type == 3" class="text-center">  New Cases </th>
+                                        <th ng-if="search.ReportType == 'Count' && GopalCreditCardModel.Type == 3" class="text-center"> Renew Cases</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    <tr ng-repeat="item in GccSummary">
+
+                                        <!-- DETAILS REPORT -->
+
+                                        <td ng-if="search.ReportType == 'Details' && search.ReportType != 'Count'"> {{(((DataPagingDetails.PageNumber - 1) * DataPagingDetails.PageSize) + 1)+$index}} </td>
+                                        <td ng-if="search.ReportType == 'Details'">{{item.BranchNameEn}}</td>
+                                        <td ng-if="search.ReportType == 'Details'">{{item.PACSNameEn}}</td>
+                                        <td ng-if="search.ReportType == 'Details'">{{item.ApplicationNo}}</td>
+                                        <td ng-if="search.ReportType == 'Details'">{{item.BankAccountNo}}</td>
+                                        <td ng-if="search.ReportType == 'Details'">{{item.Name_ENG}}</td>
+                                        <td ng-if="search.ReportType == 'Details'">{{item.FatherName_ENG}}</td>
+                                        <td ng-if="search.ReportType == 'Details'">{{item.ApplicationReceivedDate}}</td>
+                                        <td ng-if="search.ReportType == 'Details' && (GopalCreditCardModel.Type == 0 || GopalCreditCardModel.Type == 3)">  {{item.DisbursedAmt}} </td>
+                                        <td ng-if="search.ReportType == 'Details' && GopalCreditCardModel.Type == 1"> {{item.SanctionDateFormat}} </td>
+                                        <td ng-if="search.ReportType == 'Details' && GopalCreditCardModel.Type == 1"> {{item.SanctionsAmt}} </td>
+                                        <td ng-if="search.ReportType == 'Details' && (GopalCreditCardModel.Type == 0 || GopalCreditCardModel.Type == 3)">{{item.DueDateDisbursement}}</td>
+                                        @*<td ng-if="search.ReportType == 'Details' && GopalCreditCardModel.Type == 1">{{item.ExtendedDueDateSanction}}</td>*@
+                                        <td ng-if="search.ReportType == 'Details' && GopalCreditCardModel.Type == 1">{{item.DueDateSanctions}}</td>
+                                        <td ng-if="search.ReportType == 'Details' && GopalCreditCardModel.Type == 1">{{item.DisbursementSanctionsDate}}</td>
+                                        @*<td ng-if="search.ReportType == 'Details' && GopalCreditCardModel.Type == 2 ">{{item.DueDateSanction}}</td>*@
+                                        <td ng-if="search.ReportType == 'Details' && GopalCreditCardModel.Type == 2 ">{{item.DueDateOverAll}}</td>
+                                        <td ng-if="search.ReportType == 'Details' && GopalCreditCardModel.Type == 2">{{item.ExtendedDueDateOverAll}}</td>
+                                        <td ng-if="search.ReportType == 'Details' && GopalCreditCardModel.Type == 2">{{item.DisbursementDateOverAll}}</td>
+                                        <td ng-if="search.ReportType == 'Details' && GopalCreditCardModel.Type == 2">{{item.SanctionDateOverAll}}</td>
+                                        <td ng-if="search.ReportType == 'Details' && (GopalCreditCardModel.Type == 0 || GopalCreditCardModel.Type == 3)">{{item.DueDateFormat}}</td>
+                                        <td ng-if="search.ReportType == 'Details' && (GopalCreditCardModel.Type == 0 || GopalCreditCardModel.Type == 3)"> {{item.DisbursedDateFormat}} </td>
+                                        <td ng-if="search.ReportType == 'Details'">{{item.NOCGenerateDateFormat}}</td>
+                                        <td ng-if="search.ReportType == 'Details'">{{item.StatusEn}}</td>
+                                        <td ng-if="search.ReportType == 'Details' && GopalCreditCardModel.Type == 0">{{item.NOD_OD_Flag}}</td>
+                                        <td ng-if="search.ReportType == 'Details'">{{item.MobileNo}}</td>
+                                        <td ng-if="search.ReportType == 'Details'">{{item.JanAadharNo}}</td>
+
+                                        <!-- COUNT REPORT -->
+
+                                        <td ng-if="(search.ReportType == 'Count' && search.ReportType != 'Details') && (GopalCreditCardModel.Type == 0 || GopalCreditCardModel.Type == 1)">{{item.BankName}}</td>
+                                        <td ng-if="(search.ReportType == 'Count' && search.ReportType != 'Details') && (GopalCreditCardModel.Type == 0 || GopalCreditCardModel.Type == 1)">{{item.TotalApplicationCount}}</td>
+                                        <td ng-if="(search.ReportType == 'Count' && search.ReportType != 'Details') && (GopalCreditCardModel.Type == 0 || GopalCreditCardModel.Type != 1 && GopalCreditCardModel.Type != 2 && GopalCreditCardModel.Type != 3 )">{{item.TotalDisbursementAmount}}</td>
+                                        <td ng-if="(search.ReportType == 'Count' && search.ReportType != 'Details') && (GopalCreditCardModel.Type == 0 || GopalCreditCardModel.Type == 1)">{{item.ODCount}}</td>
+                                        <td ng-if="(search.ReportType == 'Count' && search.ReportType != 'Details') && (GopalCreditCardModel.Type == 0 || GopalCreditCardModel.Type == 1)">{{item.NODCount}}</td>
+                                        <td ng-if="(search.ReportType == 'Count' && search.ReportType != 'Details') && (GopalCreditCardModel.Type == 0 || GopalCreditCardModel.Type == 1)">{{item.OutstandingCount}}</td>
+                                        <td ng-if="(search.ReportType == 'Count' && search.ReportType != 'Details') && (GopalCreditCardModel.Type == 0 || GopalCreditCardModel.Type == 1)">{{item.Closed}}</td>
+
+
+                                        <!-- OVERALL COUNT REPORT -->
+                                        <td ng-if="search.ReportType == 'Count' && GopalCreditCardModel.Type == 2">{{item.BankName}}</td>
+                                        <td ng-if="search.ReportType == 'Count' && GopalCreditCardModel.Type == 2"> {{item.TotalApplicationCount}}  </td>
+                                        <td ng-if="search.ReportType == 'Count' && GopalCreditCardModel.Type == 2"> {{item.SanctionCount}}  </td>
+                                        <td ng-if="search.ReportType == 'Count' && GopalCreditCardModel.Type == 2"> {{item.DisbursementCount}} </td>
+                                        <td ng-if="search.ReportType == 'Count' && GopalCreditCardModel.Type == 2"> {{item.TotalDisbursementAmount}} </td>
+                                        <td ng-if="search.ReportType == 'Count' && GopalCreditCardModel.Type == 2"> {{item.RejectCount}}  </td>
+                                        <td ng-if="search.ReportType == 'Count' && GopalCreditCardModel.Type == 2"> {{item.ObjectionCount}} </td>
+                                        <td ng-if="search.ReportType == 'Count' && GopalCreditCardModel.Type == 2"> {{item.PendingCount}}  </td>
+                                        <td ng-if="search.ReportType == 'Count' && GopalCreditCardModel.Type == 2"> {{item.ClosedCount}}  </td>
+
+                                        <!-- NOC Generated COUNT REPORT -->
+                                        <td ng-if="search.ReportType == 'Count' && GopalCreditCardModel.Type == 3"> {{item.BankName}}</td>
+                                        <td ng-if="search.ReportType == 'Count' && GopalCreditCardModel.Type == 3"> {{item.TotalApplicationCount}}  </td>
+                                        <td ng-if="search.ReportType == 'Count' && GopalCreditCardModel.Type == 3"> {{item.NewCases}} </td>
+                                        <td ng-if="search.ReportType == 'Count' && GopalCreditCardModel.Type == 3"> {{item.RenewCases}}</td>
+                                    </tr>
+
+                                </tbody>
+
+                                <tfoot ng-if="search.ReportType == 'Count' && GccSummary.length > 0 && GopalCreditCardModel.Type == 2 && GopalCreditCardModel.Type != 1">
+                                    <tr style="font-weight:bold;background:#f0f0f0;">
+                                        <td>Total</td>
+                                        <td>{{getTotal('TotalApplicationCount')}}</td>
+                                        <td>{{getTotal('SanctionCount')}}</td>
+                                        <td>{{getTotal('DisbursementCount')}}</td>
+                                        <td>{{getTotal('TotalDisbursementAmount')}}</td>
+                                        <td>{{getTotal('RejectCount')}}</td>
+                                        <td>{{getTotal('ObjectionCount')}}</td>
+                                        <td>{{getTotal('PendingCount')}}</td>
+                                        <td>{{getTotal('ClosedCount')}}</td>
+                                    </tr>
+                                </tfoot>
+
+                                <tfoot ng-if="search.ReportType == 'Count' && GccSummary.length > 0 && GopalCreditCardModel.Type != 2">
+                                    <tr style="font-weight: bold; background-color: #f0f0f0;">
+                                        <td class="text-center">Total</td>
+                                        <td>{{getTotal('TotalApplicationCount')}}</td>
+                                        <td ng-if="GopalCreditCardModel.Type == 0 || GopalCreditCardModel.Type != 1 && GopalCreditCardModel.Type != 3">{{getTotal('TotalDisbursementAmount')}}</td>
+                                        <td ng-if="GopalCreditCardModel.Type == 0 || GopalCreditCardModel.Type == 1">{{getTotal('ODCount')}}</td>
+                                        <td ng-if="GopalCreditCardModel.Type == 0 || GopalCreditCardModel.Type == 1">{{getTotal('NODCount')}}</td>
+                                        <td ng-if="GopalCreditCardModel.Type == 0 || GopalCreditCardModel.Type == 1">{{getTotal('OutstandingCount')}}</td>
+                                        <td ng-if="GopalCreditCardModel.Type == 0 || GopalCreditCardModel.Type == 1">{{getTotal('Closed')}}</td>
+                                        <td ng-if="GopalCreditCardModel.Type == 3">{{getTotal('NewCases')}}</td>
+                                        <td ng-if="GopalCreditCardModel.Type == 3">{{getTotal('RenewCases')}}</td>
+                                    </tr>
+                                </tfoot>
+
+                            </table>
+                        </div>
+
+                        <div class="col-md-12">
+                            <div ng-if="DataPagingDetails.TotalPages >1" class="dataTables_paginate paging_simple_numbers" id="dataTables-example_paginate">
+                                <div class="dataTables_info" id="dataTables-example_info" role="status" aria-live="polite">
+                                    Total Records: {{DataPagingDetails.TotalRecords}}
+                                </div>
+                                <ul class="pagination pagination_1" style="margin-left: 10px !important;">
+                                    <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« First</span></li>
+                                    <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« Previous</span></li>
+
+                                    <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest('1',GccBankWiseSanctionList)" style="cursor: pointer;">
+                                        <span>«First</span>
+                                    </li>
+                                    <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest(DataPagingDetails.PageNumber-1,GccBankWiseSanctionList)" style="cursor:pointer;">
+                                        <span>« Previous</span>
+                                    </li>
+                                    <li class="{{n==DataPagingDetails.PageNumber?'active':''}}" style="{{n==DataPagingDetails.PageNumber?'':'cursor: pointer'}}" ng-repeat="n in PagingRange(DataPagingDetails.StartPageNumber,DataPagingDetails.EndPageNumber,DataPagingDetails.TotalPages)" ng-click="pageRequest(n,GccBankWiseSanctionList)"><span>{{n}}</span></li>
+                                    <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Next</span></li>
+                                    <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Last</span></li>
+                                    <li ng-if="DataPagingDetails.PageNumber!= DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.PageNumber+1,GccBankWiseSanctionList)" style="cursor:pointer;">
+                                        <span>Next »</span>
+                                    </li>
+                                    <li ng-if="DataPagingDetails.PageNumber != DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.TotalPages,GccBankWiseSanctionList)" style="cursor:pointer;">
+                                        <span>Last »</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

@@ -1,0 +1,1088 @@
+﻿@if (((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]) != null)
+{
+    if (((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).UserType == "C")
+    {
+        Layout = "~/Views/Shared/_CitizenLayout.cshtml";
+    }
+    else
+    {
+        Layout = "~/Views/Shared/_Layout.cshtml";
+    }
+}
+else
+{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<script src="~/Scripts/AngularFramework/WRSummaryReport.js?v=1.8"></script>
+<link href="~/Scripts/google_hindi/google_transliteration.css" rel="stylesheet" />
+<style>
+    .inputapi-transliterate-indic-suggestion-menu {
+        z-index: 99999 !important;
+        display: block;
+    }
+</style>
+
+<style type="text/css">
+    body {
+        font-family: Arial;
+        font-size: 10pt;
+    }
+
+    /*table {
+        border: 1px solid #ccc;
+        border-collapse: collapse;
+    }
+
+        table th {
+            background-color: #F7F7F7;
+            color: #333;
+            font-weight: bold;
+        }
+
+        table th, table td {
+            padding: 5px;
+            border: 1px solid #ccc;
+        }*/
+
+    .NewMemberdob input {
+        float: left;
+        width: 90%;
+    }
+
+    .NewMemberdob button {
+        float: left;
+    }
+
+    .notValid {
+        border: solid 1px red !important
+    }
+
+    .NewRequestList td {
+        color: black !important;
+    }
+
+    .rowdeleteBtn {
+        color: #fff !important;
+        font-weight: bold !important;
+        font-size: 12px !important;
+    }
+
+    .margin-Top20 {
+        margin-top: 20px;
+    }
+</style>
+
+<script type="text/javascript">
+
+    function ValidateAlpha(evt) {
+        var keyCode = (evt.which) ? evt.which : evt.keyCode
+        if ((keyCode < 65 || keyCode > 90) && (keyCode < 97 || keyCode > 123) && keyCode != 32)
+
+            return false;
+        return true;
+    };
+    function ValidateFloat(th, e) {
+        if (isNaN(th.value + "" + String.fromCharCode(e.charCode)))
+            return false;
+        return true;
+    }
+    function ValidateFloat(th, e) {
+        if (isNaN(th.value + "" + String.fromCharCode(e.charCode)))
+            return false;
+        return true;
+    }
+
+    function ValidateTodate(th) {
+        //$(".Todate").datepicker("option", "minDate", $('.Fromdate').val());
+
+        var newdate = $("#Valid_From_Date").val().split('/')[2] + '/' + $("#Valid_From_Date").val().split('/')[1] + '/' + $("#Valid_From_Date").val().split('/')[0];
+
+        var toDate = getTodate(new Date(newdate));//new Date(fromDate.setMonth(fromDate.getMonth() + 3));
+        $("#Valid_To_Date").val(toDate);
+    }
+    function getTodate(newdate) {
+
+        //var newdate = new Date();
+
+        newdate.setDate(newdate.getDate() - 1);
+
+
+        newdate.setMonth(newdate.getMonth() + 3)
+
+        var dd = newdate.getDate();
+        var mm = newdate.getMonth() + 1;
+        var y = newdate.getFullYear();
+
+        dd = dd.toString().length == 1 ? "0" + dd : dd;
+        mm = mm.toString().length == 1 ? "0" + mm : mm;
+
+        return dd + '/' + mm + '/' + y;
+
+        //document.getElementById('follow_Date').value = someFormattedDate;
+    }
+    $(document).ready(function () {
+        $('.SetCalender').datepicker({
+            showOn: "both",
+            changeMonth: true,
+            buttonImage: "../images/calender.png",
+            changeYear: true,
+            dateFormat: "dd/mm/yy",
+            minDate: '01/01/2000'
+        });
+
+        $("#Valid_From_Date").val((new Date()).getDate() + '/' + ((new Date()).getMonth() + 1) + '/' + ((new Date()).getFullYear()).toString())
+
+        var fromDate = new Date();
+        fromDate.setDate(-1);
+        var toDate = getTodate(new Date());//new Date(fromDate.setMonth(fromDate.getMonth() + 3));
+        $("#Valid_To_Date").val(toDate);
+
+        $('.Fromdate').datepicker({
+            showOn: "both",
+            changeMonth: true,
+            buttonImage: "../images/calender.png",
+            changeYear: true,
+            dateFormat: "dd/mm/yy",
+            //minDate: (new Date()).getDate() + '/' + ((new Date()).getMonth()+1) + '/' + ((new Date()).getFullYear()).toString(),
+            //defaultDate: (new Date()).getDate() + '/' + ((new Date()).getMonth() + 1) + '/' + ((new Date()).getFullYear()).toString(),
+        });
+        $('.Todate').datepicker({
+            showOn: "both",
+            changeMonth: true,
+            buttonImage: "../images/calender.png",
+            changeYear: true,
+            dateFormat: "dd/mm/yy",
+            minDate: $('.Fromdate').val(),
+            //defaultDate: (new Date()).getDate() + '/' + ((new Date()).getMonth() + 1) + '/' + ((new Date()).getFullYear()).toString(),
+        });
+
+
+
+
+
+    });
+</script>
+
+<div ng-app="WRSummaryMod" ng-controller="WRSummaryCnt">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <h3 class="citizen-dash-head">{{translation.WRSummary}} {{translation.Report}} </h3>
+    </div>
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="devpage-breadcrumb">
+            <ul class="page-breadcrumb">
+                <li class="dev-page-br">
+                    <i class="fa fa-home"> </i>
+                    <a href="../Citizen/Index"> {{translation.Home}} </a>
+                    <i class="fa fa-angle-right"> </i>
+                </li>
+                <li style="float: left">
+                    <span style="margin: 0 5px;"> {{translation.WRSummary}} </span>
+                </li>
+                @*
+                    <li style="float: right;" id="divAddBtn">
+                        <i class="fa fa-angle-double-right" style="color: #025e63;"></i>
+                        <a ng-click="AddNew()" style="color: #025e63; cursor: pointer; text-decoration:none; font-weight: bold;" class="ng-binding">{{translation.AddNew}}</a>
+                    </li>*@
+            </ul>
+        </div>
+    </div>
+    @*MEMBERS*@
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <input type="hidden" id="hdnRoleId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).RoleId)" />
+        <div class="table-responsive citizen-dash-head">
+            <div ng-show="!showPriView">
+                <div class="table-dropdown" id="search-filter">
+                    @*<div class="col-lg-2">
+                            <label for="search" class="ng-binding">{{translation.Warehouse}}:</label>
+                            <select name="wharehouse_id" class="form-control ng-pristine ng-valid ng-not-empty ng-touched" ng-model="Filter.WarehouseId" ng-init="Filter.WarehouseId=''" ng-change="searchRequest(GetWarehouseList)" ">
+                                <option value="" selected="selected">{{translation.SelectOption}}</option>
+                                <option ng-repeat="itm in WarehouseList" value="{{itm.WarehousId}}">
+                                    {{_language =='en-us' ?  itm.WarehousNameEn : itm.WarehousNameHi}}
+                                </option>
+                            </select>
+                        </div>*@
+                    <div class="col-lg-2">
+                        <label for="search" class="ng-binding">{{_language =='en-us' ? 'Agency' :'एजेंसी'}}:</label>
+                        <select id="agency"  name="Agency" class="form-control ng-pristine ng-valid ng-not-empty ng-touched" ng-model="Filter.Agency" ng-change="searchRequest(GetWarehouseList)">
+                            <option value="" selected="selected">{{translation.SelectOption}}</option>
+                            <option value="NAFED">NAFED</option>
+                            <option value="NCCF">NCCF</option>
+                        </select>
+                    </div>
+                    <div class="col-lg-2">
+                        <label for="search" class="ng-binding">{{translation.Commodity}}:</label>
+                        <select name="Item_Kind" class="form-control ng-pristine ng-valid ng-not-empty ng-touched" ng-model="Filter.Item_Kind" ng-change="searchRequest(GetWarehouseList)" ng-init="Filter.Item_Kind=''">
+                            <option value="" selected="selected">{{translation.SelectOption}}</option>
+                            <option ng-repeat="itm in ItemList" value="{{itm.CommodityId}}">
+                                {{_language =='en-us' ?  itm.CommodityNameEn : itm.CommodityNameHi}}
+                            </option>
+                        </select>
+                    </div>
+                    @*<div class="col-lg-2">
+                            <label for="search" class="ng-binding">{{translation.RegionalOffice}}:</label>
+                            <select name="RajfedROId " class="form-control ng-pristine ng-valid ng-not-empty ng-touched" ng-model="Filter.RegionalOffice" ng-change="searchRequest(GetWarehouseList)" ng-init="Filter.RegionalOffice=''">
+                                <option value="" selected="selected">{{translation.SelectOption}}</option>
+                                <option ng-repeat="itm in ROList" value="{{itm.RajfedROId}}">
+                                    {{_language =='en-us' ?  itm.RONameEn : itm.RONameHn}}
+                                </option>
+                            </select>
+                        </div>*@
+
+
+                    <div class="col-md-2 NewMemberdob">
+                        <label>
+                            {{translation.FromDate}}
+                        </label>
+                        <input id="txtFromDate" name="FromDate" disabled="disabled" class="form-control SetCalender" ng-model="Filter.FromDate" placeholder="{{translation.FromDate}}" onkeypress="return event.charCode >= 48 &amp;&amp; event.charCode <= 57" autocomplete="off">
+                    </div>
+                    <div class="col-md-2 NewMemberdob">
+                        <label>
+                            {{translation.ToDate}}
+                        </label>
+                        <input id="txtToDate" name="ToDate" disabled="disabled" class="form-control SetCalender" ng-model="Filter.ToDate" placeholder="{{translation.ToDate}}" onkeypress="return event.charCode >= 48 &amp;&amp; event.charCode <= 57" autocomplete="off">
+                    </div>
+
+                    <div class="col-md-2">
+                        <label>&nbsp;</label><br>
+                        <button type="button" ng-click="searchRequest(GetWarehouseList)" class="btn btn-primary dev-btn ng-binding">{{translation.Search}}</button>
+                        <button type="button" ng-click="ClearSearch()" class="btn btn-primary dev-btn ng-binding">{{translation.Clear}}</button>
+                    </div>
+                </div>
+                @*<div class="col-lg-12" style="margin-bottom: 10px;">
+                        <input type="radio" style="" ng-click="GetWarehouseFilterList('1')" checked="checked" name="Type" value="New" />{{translation.PendingSummary}}
+                        <input style="" type="radio" ng-click="GetWarehouseFilterList('2')" name="Type" value="Generate" />{{translation.SummaryGenerated}}
+                    </div>*@
+                <table id="example" class="table devtable" style="border:1px solid rgb(222, 221, 221); float: left;" ng-if="ListType=='1'">
+                    <thead>
+                        <tr>
+                            <th>
+                                #
+                            </th>
+                            <th ng-if="ListType=='1' && Filter.Item_Kind!=''"><input type="checkbox" id="chk_all" ng-click="SelectAll()" /></th>
+                            <th> {{translation.Warehouse}}</th>
+                            <th>
+                                {{translation.WRNo}}
+                            </th>
+                            <th ng-if="ListType!='1'">{{translation.SRNo}}</th>
+                            <th ng-if="ListType!='1'">{{translation.SummaryDate}}</th>
+                            <th>
+                                {{translation.SrNoOfPhysicalReceipt}}
+                            </th>
+                            <th>
+                                {{translation.District}}
+                            </th>
+                            <th>
+                                {{translation.KVSSMPRForm}}
+                            </th>
+                            <th>
+                                {{translation.Commodity}}
+                            </th>
+                            <th>
+                                {{translation.PurchaseCenter}}
+                            </th>
+                            <th>{{translation.WRDate}}</th>
+
+                            <th>{{translation.FromDate}}</th>
+                            <th>{{translation.ToDate}}</th>
+                            <th>
+                                {{translation.Price}}
+                            </th>
+                            <th>{{translation.PackagesLots}}</th>
+                            <th>{{translation.NetQuantityInQTL}}</th>
+                            <th>{{translation.TotalValue}}</th>
+                            <th>{{translation.WR}}</th>
+                            <th ng-if="ListType=='2'">{{translation.SummaryWR}}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="item in RSWCViewList">
+                            <td>{{(((DataPagingDetails.PageNumber - 1) * DataPagingDetails.PageSize) + 1)+$index}}</td>
+                            <td ng-if="ListType=='1' && Filter.Item_Kind!=''">
+                                <input type="checkbox" ng-model="item.IsChecked" ng-click="SelectDemand(item)" />
+                            </td>
+                            <td>
+                                {{_language =='en-us' ?  item.WarehousNameEn : item.WarehousNameHi}}
+                            </td>
+                            <td>
+                                {{item.receipt_no}}
+                            </td>
+                            <td ng-if="ListType!='1'">{{item.summary_no}}</td>
+                            <td ng-if="ListType!='1'">{{item.summary_date}}</td>
+                            <td>
+                                {{item.receipt_serial_no}}
+                            </td>
+                            <td>
+                                {{_language =='en-us' ?  item.DISTRICT_ENG : item.DISTRICT_MANGAL}}
+                            </td>
+                            <td>
+                                {{ item.SocietyName}}
+                            </td>
+                            <td>
+                                {{_language =='en-us' ?  item.CommodityNameEn : item.CommodityNameHi}}
+                            </td>
+                            <td>
+                                {{_language =='en-us' ?  item.PurchaseCenterEng : item.PurchaseCenterHi}}
+                            </td>
+                            <td>{{item.WRGenerateDate}}</td>
+
+                            <td>{{item.from_date}}</td>
+                            <td>{{item.to_date}}</td>
+                            <td>{{item.Price}}</td>
+                            <td>{{item.packages_lots}}</td>
+                            <td>{{item.net_quantity}}</td>
+                            <td>{{item.TotalProce}}</td>
+
+                            @*
+                                <td>{{item.PrivateMarkofDepositor}}</td>
+                                <td>{{item.StorageRateCharge}}</td>
+                                <td>{{item.IndemnifiedInsurance}}</td>
+                                <td>{{item.InsuredName}}</td>*@
+
+                            <td>
+                                <a style="color:#505050;" ng-if="item.EntryFile!=''" target="_blank" href="../Content/RSWC/{{item.EntryFile}}"><i class="fa fa-download"></i></a>
+
+                            </td>
+                            <td ng-if="ListType=='2'">
+                                <a style="color:#505050;" ng-if="item.summary_file!=''" target="_blank" href="../Content/RSWC/{{item.summary_file}}"><i class="fa fa-download"></i></a>
+                            </td>
+                        </tr>
+                    </tbody>
+                    <tfoot ng-if="OrderList.length>0 && RSWCViewList.length>0">
+                        <tr>
+                            <td colspan="15">
+                                <button type="submit" class="btn btn-success" ng-click="GenerateRequest()">{{translation.GenerateSummaryPreview}}</button>
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+                <table id="example" class="table devtable" style="border:1px solid rgb(222, 221, 221); float: left;" ng-if="ListType!='1'">
+                    <thead>
+                        <tr>
+                            <th>
+                                #
+                            </th>
+                            <th ng-if="ListType=='1'"><input type="checkbox" id="chk_all" ng-click="SelectAll()" /></th>
+
+                            <th>{{translation.SRNo}}</th>
+                            <th>{{translation.Commodity}}</th>
+                            <th>{{translation.SummaryDate}}</th>
+                            <th style="text-align:right">{{translation.Total}} {{translation.WR}}</th>
+                            <th style="text-align:right">{{translation.PackagesLots}}</th>
+                            <th style="text-align:right">{{translation.NetQuantityInQTL}}</th>
+                            <th style="text-align:right">{{translation.TotalValue}}</th>
+                            <th style="text-align:center">{{translation.ShowDetails}}</th>
+                            <th style="text-align:center">{{translation.SummaryWR}}</th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="item in RSWCViewList">
+                            <td>{{(((DataPagingDetails.PageNumber - 1) * DataPagingDetails.PageSize) + 1)+$index}}</td>
+                            <td>{{item.request_no}}</td>
+                            <td>{{_language =='en-us' ? item.CommodityNameEn: item.CommodityNameHi}}</td>
+                            <td>{{item.created_date}}</td>
+                            <td style="text-align:right">{{item.TotalWR}}</td>
+                            <td style="text-align:right">{{item.packages_lots}}</td>
+
+                            <td style="text-align:right">{{item.net_quantity}}</td>
+                            <td style="text-align:right">{{item.TotalValue}}</td>
+                            <td ng-click="ShowSRSummary(item)" style="text-align:center">
+                                <a style="color:#505050;" ng-click="ShowSRSummary(item)" href="javascript:void(0);"><i class="fa fa-info-circle"></i></a>
+                            </td>
+                            <td style="text-align:center">
+                                <a style="color:#505050;" ng-if="item.summary_file!=''" target="_blank" href="../Content/RSWC/{{item.summary_file}}"><i class="fa fa-download"></i></a>
+                            </td>
+                        </tr>
+                    </tbody>
+
+                </table>
+                <div class="col-md-12">
+                    <div ng-if="DataPagingDetails.TotalPages>1" class="dataTables_paginate paging_simple_numbers" id="dataTables-example_paginate">
+                        <div class="dataTables_info" id="dataTables-example_info" role="status" aria-live="polite">
+                            Total Records: {{DataPagingDetails.TotalRecords}}
+                        </div>
+                        <ul class="pagination pagination_1" style="margin-left: 10px !important;">
+                            <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« First</span></li>
+                            <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« Previous</span></li>
+
+                            <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest('1',GetWarehouseList)" style="cursor: pointer;">
+                                <span>«First</span>
+                            </li>
+                            <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest(DataPagingDetails.PageNumber-1,GetWarehouseList)" style="cursor:pointer;">
+                                <span>« Previous</span>
+                            </li>
+                            <li class="{{n==DataPagingDetails.PageNumber?'active':''}}" style="{{n==DataPagingDetails.PageNumber?'':'cursor: pointer'}}" ng-repeat="n in PagingRange(DataPagingDetails.StartPageNumber,DataPagingDetails.EndPageNumber,DataPagingDetails.TotalPages)" ng-click="pageRequest(n,GetWarehouseList)"><span>{{n}}</span></li>
+                            <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Next</span></li>
+                            <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Last</span></li>
+                            <li ng-if="DataPagingDetails.PageNumber!= DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.PageNumber+1,GetWarehouseList)" style="cursor:pointer;">
+                                <span>Next »</span>
+                            </li>
+                            <li ng-if="DataPagingDetails.PageNumber != DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.TotalPages,GetWarehouseList)" style="cursor:pointer;">
+                                <span>Last »</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-12">
+                <input ng-if="RSWCViewList.length>0" type="button" id="btnExport" class="btn btn-primary dev-btn" style="" ng-click="ExportWRSummaryReportData()" value="Export" />
+            </div>
+
+            <div id='divtoOrderPrint' ng-if="showPriView" style="padding-left: 15%; padding-right: 15%;">
+                <div style='margin-right: 25px;    margin-left: 25px;    font-size: 20px;    padding: 30px;    padding-bottom: 30px;    border: 1px solid gainsboro;overflow: auto;  max-height: 800px;'>
+                    <table id='content' border="0" style='width:100%;border:none;color: black;' cellpadding="0" cellspacing="0">
+                        <tr>
+                            <td colspan='3' style='text-align:center'>
+                                <div style='text-align:left;width:80px;float:left;'>
+                                    <img style='width:80px;height:80px' src='../../Content/Images/rajfed_logo.jpg' />
+                                </div>
+                                <div style='text-align:center;float:left;width: 90%;'>
+                                    <label style='font-size: 30px;'>
+                                        <b>राजस्थान राज्य सहकारी क्रय-विक्रय संघ लि.</b>
+                                    </label>
+
+                                    <br>
+                                    <label style='font-size: 15px;'>RAJASTHAN STATE CO-OPERATIVE MARKETING FEDERATION LTD.</label>
+
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan='3' style='text-align:center;border-bottom: 2px solid black;'>  </td>
+                        </tr>
+                        <tr>
+                            <td style='text-align:left;width:55%;'>शाखा प्रबंधक <br /> नेफैड <br /> जयपुर ।</td>
+                        </tr>
+                        <tr>
+                            <td colspan='3'>
+                                विषय :- समर्थन मूल्य पर {{_language =='en-us' ?  OrderList[0].CommodityNameEn : OrderList[0].CommodityNameHi}} की WR भिजवाने  बाबत ।
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan='3'>
+                                महोदय
+                            </td>
+                        </tr>
+                        <tr><td style='' colspan='3'><br>विषयान्तर्गत निवेदन हैं कि  समर्थन  मूल्य  पर  {{_language =='en-us' ?  OrderList[0].CommodityNameEn : OrderList[0].CommodityNameHi}} की WR सलग्न कर निम्नानुसार भिजवाई जा रही  हैं :-</td></tr>
+                        <tr>
+                            <td colspan='3' style=''>
+                                <table cellpadding='5' cellspacing='0' border='1' style='width:100%;font-size:15px;'>
+                                    <tr>
+                                        <td>
+                                            #
+                                        </td>
+                                        <td>
+                                            {{translation.KVSSMPRForm}}
+                                        </td>
+                                        <td>
+                                            {{translation.PurchaseCenter}}
+                                        </td>
+                                        <th>{{translation.Warehouse}}</th>
+                                        <td>
+                                            {{translation.ReceiptNo}}
+                                        </td>
+                                        <td>{{translation.Date}}</td>
+
+                                        <td>{{translation.PackagesLots}}</td>
+                                        <td>{{translation.Weight}}</td>
+                                        @*<td>{{translation.TotalValue}}</td>*@
+
+                                    </tr>
+                                    <tr ng-repeat="item in OrderList">
+                                        <td style=''>{{$index+1}}</td>
+                                        <td>
+                                            {{ item.SocietyName}}
+                                        </td>
+                                        <td>
+                                            {{_language =='en-us' ?  item.PurchaseCenterEng : item.PurchaseCenterHi}}
+                                        </td>
+
+                                        <td>
+                                            {{_language =='en-us' ?  item.WarehousNameEn : item.WarehousNameHi}}
+                                        </td>
+                                        <td>
+                                            {{item.receipt_no}}
+                                        </td>
+                                        <td>
+                                            {{item.WRGenerateDate}}
+                                        </td>
+                                        <td>{{item.packages_lots}}</td>
+                                        <td>{{item.net_quantity}}</td>
+
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+
+                </div>
+
+
+                <div class="col-md-12 margin-Top20">
+                    <input id="SSOAuth_chkConsent" style="width: 20px; height: 20px; float: left;" type="checkbox" name="SSOAuth_chkConsent" ng-model="otpModel.IsChecked">
+                    <label for="SSOAuth_chkConsent" style="float: left;width: 90%;padding-left: 5px;">{{translation.AaddharSendOTPCheckValidate}}</label>
+                </div>
+                <div style="margin-top: 10px;">
+                    <div class="dev-menu-btn" style="text-align:left;margin-left: 15px">
+                        <button type="submit" class="btn btn-success" ng-click="SendOTP()">{{translation.SendOTPGenerateSummary}}</button>
+                        <button type="submit" class="btn btn-primary" ng-click="GenerateRequestBack()">{{translation.Back}}</button>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+
+    </div>
+    <div class="dev-popup-body modal fade" id="addModal" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog" style="width: 90%;">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    @*<h4 class="modal-title"> {{translation.AddNewRequest}}</h4>*@
+                </div>
+                <div class="modal-body">
+                    <form class="dev-search-form" ng-hide="showPriView" style="overflow: hidden; margin-bottom: 35px;" name="OfficeForm">
+                        <input type="hidden" ng-model="AddNewModel.master_id" />
+
+
+                        <div class="col-md-12 margin-Top20">
+                            <div class="col-md-3">
+                                <label>   {{translation.SrNoOfPhysicalReceipt}} </label>
+                            </div>
+                            <div class="col-md-6">
+                                <input style="text-transform:uppercase;" type="text" id="SerialNoOfReceipt" name="SerialNoOfReceipt" class="form-control number-only validateNewAdd" placeholder="{{translation.SrNoOfPhysicalReceipt}}" ng-model="AddNewModel.OldReceipt_No" maxlength="15" onkeypress='return ValidateFloat(this,event);' autocomplete="off">
+                            </div>
+                        </div>
+                        <div class="clearfix"></div>
+                        <div class="col-md-12 margin-Top20">
+                            <div class="col-md-3">
+                                <label>   {{translation.NameAndLocationOfWarehouse}} </label>
+                            </div>
+                            <div class="col-md-6">
+                                <select ng-model="AddNewModel.Wharehouse_Id" id="NameAndLocationOfWarehouse" class="form-control" disabled="disabled" ng-init="AddNewModel.Wharehouse_Id='0'">
+                                    <option value="0" selected="selected">{{translation.SelectOption}}</option>
+                                    <option ng-repeat="itm in WarehouseList" value="{{itm.WarehousId}}">
+                                        {{_language =='en-us' ?  itm.WarehousNameEn : itm.CommodityNameEn}}
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-12 margin-Top20">
+
+                            <div class="col-md-3">
+                                <label>    {{translation.WarehouseMansLicenseNo}} </label>
+                            </div>
+                            <div class="col-md-6">
+                                <input type="text" id="WarehouseMansLicenseNo" name="WarehouseMansLicenseNo" class="form-control number-only" disabled value="" ng-model="AddNewModel.Lisence_No" maxlength="10" onkeypress='return ValidateFloat(this,event);' autocomplete="off">
+                            </div>
+                        </div>
+
+
+                        <div class="col-md-12 margin-Top20">
+
+                            <div class="col-md-3">
+                                <label>{{translation.Commodity}} </label>
+                            </div>
+                            <div class="col-md-6">
+                                <select ng-model="AddNewModel.Item_Kind" id="Item_Kind" class="form-control validateNewAdd" ng-init="item.Item_Kind='0'" ng-change="GetPurchaseCenterList()">
+                                    <option value="0" selected="selected">{{translation.SelectOption}}</option>
+                                    <option ng-repeat="itm in ItemList" value="{{itm.CommodityId}}">
+                                        {{_language =='en-us' ?  itm.CommodityNameEn : itm.CommodityNameHi}}
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+
+
+                        <div class="col-md-12 margin-Top20">
+                            <div class="col-md-3">
+                                <label>   {{translation.ReceivedFrom}} </label>
+                            </div>
+                            <div class="col-md-2">
+                                <select ng-model="AddNewModel.DistrictId" id="DistrictId" class="form-control validateNewAdd" ng-init="AddNewModel.DistrictId='0'" ng-change="GetKVSSList();">
+                                    <option value="0" selected="selected">{{translation.District}}</option>
+                                    <option ng-repeat="itm in DistrictList" value="{{itm.DISTRICT_ID}}">
+                                        {{_language =='en-us' ?  itm.DISTRICT_ENG : itm.DISTRICT_MANGAL}}
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <select ng-model="AddNewModel.KVSSId" id="KVSSId" class="form-control validateNewAdd" ng-init="AddNewModel.KVSSId='0'">
+                                    <option value="0" selected="selected">{{translation.KVSSMPRForm}}</option>
+                                    <option ng-repeat="itm in KVSSList" value="{{itm.KvssId}}">
+                                        {{_language =='en-us' ?  itm.KVSS : itm.KVSS}}
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-2">
+                                <select ng-model="AddNewModel.PurchaseCenter_Id" id="PurchaseCenter_Id" class="form-control validateNewAdd" ng-init="AddNewModel.PurchaseCenter_Id='0'">
+                                    <option value="0" selected="selected">{{translation.PurchaseCenter}}</option>
+                                    <option ng-repeat="itm in PurchaseCenterList" value="{{itm.Center_Id}}">
+                                        {{_language =='en-us' ?  itm.CenterNameEn : itm.CenterNameHi}}
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-12" style="margin-top:20px;">
+                            <div class="col-md-12">
+                                <label>
+                                    {{translation.GoodsDescription}}
+                                </label>
+                            </div>
+                            <div class="col-md-12">
+                                <table id="example" class="table devtable" style="border:1px solid rgb(222, 221, 221); float: left;">
+                                    <thead>
+                                        <tr>
+                                            <th>
+                                                #
+                                                @*{{translation.SRNO}}*@
+                                            </th>
+                                            @*
+                                                <th>
+                                                    {{translation.Commodity}}
+                                                </th>*@
+                                            <th style="vertical-align:central;">
+                                                {{translation.KindQuality}}
+                                            </th>
+                                            <th style="vertical-align:central;">
+                                                {{translation.PackagesLots}}
+                                            </th>
+                                            <th style="vertical-align:central;">
+                                                {{translation.Unit}}
+                                            </th>
+                                            @*
+                                                <th style="vertical-align:central;">
+                                                    {{translation.QuantityParUnit}}
+                                                </th>*@
+
+                                            <th style="vertical-align:central;">
+                                                {{translation.NetQuantity}}
+                                            </th>
+                                            <th style="vertical-align:central;">{{translation.IsEditable}}</th>
+                                            <th style="vertical-align:central;">
+                                                {{translation.NameOfSampler}}
+                                            </th>
+                                            <th style="vertical-align:central;"> {{translation.Godown}}</th>
+                                            <th style="vertical-align:central;">
+                                                {{translation.StackNo}}
+                                            </th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="NewRequestList">
+                                        <tr ng-repeat="item in RSWCList">
+                                            <td>{{$index+1}}</td>
+                                            @*
+                                                <td>
+                                                    <select ng-model="item.Item_Kind" id="BlockId" class="form-control" ng-init="item.Item_Kind='0'">
+                                                        <option value="0" selected="selected">{{translation.SelectOption}}</option>
+                                                        <option ng-repeat="itm in ItemList" value="{{itm.CommodityId}}">
+                                                            {{_language =='en-us' ?  itm.CommodityNameEn : itm.CommodityNameHi}}
+                                                        </option>
+                                                    </select>
+                                                </td>*@
+                                            <td>
+                                                <textarea ng-model="item.Quality" class="form-control validateNewAdd" name="Quality" id="Quality" maxlength="150" rows="1" placeholder="{{translation.KindQuality}}"></textarea>
+                                            </td>
+                                            <td>
+                                                <input type="text" id="Packages_Lots_{{$index}}" name="Packages_Lots" ng-keyup="SetNetQuantity($index)" class="form-control number-only  validateNewAdd" placeholder="{{translation.PackagesLots}}" ng-model="item.Packages_Lots" maxlength="6" onkeypress='return ValidateFloat(this,event);' autocomplete="off">
+                                            </td>
+                                            <td>
+                                                <select ng-model="item.Packages_Quantity_Unit" id="Packages_Quantity_Unit_{{$index}}" class="form-control  validateNewAdd" ng-init="item.Packages_Quantity_Unit='0'" ng-change="SetNetQuantity($index)">
+                                                    <option value="0" selected="selected">{{translation.SelectOption}}</option>
+                                                    <option ng-repeat="itm in UnitList" value="{{itm.UnitId}}">
+                                                        {{_language =='en-us' ?  itm.UnitNameEng : itm.UnitNameHi}}
+                                                    </option>
+                                                    @*
+                                                        <option value="35">35 {{_language =='en-us' ?  'Kg' : 'किलोग्राम'}}</option>
+                                                        <option value="50">50 {{_language =='en-us' ?  'Kg' : 'किलोग्राम'}}</option>*@
+                                                </select>
+                                            </td>
+                                            @*
+                                                <td>
+                                                    <input type="text" id="Packages_Quantity_{{$index}}" name="Packages_Quantity" ng-keyup="SetNetQuantity($index)" class="form-control number-only  validateNewAdd" placeholder="{{translation.QuantityParUnit}}" ng-model="item.Packages_Quantity" maxlength="6" onkeypress='return ValidateFloat(this,event);' autocomplete="off">
+                                                </td>*@
+                                            <td>
+                                                <input type="text" id="NetQuantity_{{$index}}" disabled="disabled" ng-keyup="SetNetQuantity($index)" style="" name="NetQuantity" class="form-control number-only  validateNewAdd" placeholder="{{translation.NetQuantity}}" ng-model="item.NetQuantity" maxlength="6" onkeypress='return ValidateFloat(this,event);' autocomplete="off">
+                                                @*<textarea style="float: left;width: 130px;" ng-model="item.QuantityNote" class="form-control" placeholder="{{translation.QuantityNote}}" name="QuantityNote" id="QuantityNote" maxlength="150" rows="1"></textarea>*@
+                                            </td>
+                                            <td>
+                                                <input type="text" id="OtherNetQuantity_{{$index}}" ng-if="item.IsEditable" name="OtherNetQuantity" class="form-control number-only  validateNewAdd" placeholder="" ng-model="item.OtherNetQuantity" maxlength="10" onkeypress='return ValidateFloat(this,event);' autocomplete="off">
+                                                <input ng-model="item.IsEditable" type="checkbox" />
+                                            </td>
+                                            <td>
+                                                <textarea ng-model="item.NameOfSampler" class="form-control  validateNewAdd" name="NameOfSampler" id="NameOfSampler_{{$index}}" maxlength="150" rows="1" placeholder="{{translation.NameOfSampler}}"></textarea>
+                                            </td>
+                                            <td>
+                                                <select ng-model="item.Godown_Id" id="Godown_Id_{{$index}}" class="form-control  validateNewAdd" ng-init="item.Godown_Id='0'">
+                                                    <option value="0" selected="selected">{{translation.SelectOption}}</option>
+                                                    <option ng-repeat="itm in GodownList" value="{{itm.GoDownId}}">
+                                                        {{_language =='en-us' ?  itm.GoDownNameEng : itm.GoDownNameHi}}
+                                                    </option>
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <input type="text" id="Stack_No_{{$index}}" name="Stack_No" style="width:90px" class="form-control number-only  validateNewAdd" placeholder="{{translation.StackNo}}" ng-model="item.Stack_No" maxlength="10" onkeypress='return ValidateAlpha(this,event);' autocomplete="off">
+                                            </td>
+                                            <td>
+                                                <i class="fa fa-trash clsShowHide btn btn btn-xs btn-danger tooltips rowdeleteBtn" id="Remove_2" ng-if="RSWCList.length>1" ng-click="RemoveItem($index)" style=""></i>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="8"></td>
+                                            <td colspan="3" style="text-align:right;cursor:pointer;border:none;"><i ng-click="AddNewItem()" class="fa fa-plus" title="Add New"></i>{{translation.Add}}</td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="col-md-12 margin-Top20">
+                            <div class="col-md-2">
+                                <label>    {{translation.ConditionOfGoods}} </label>
+                            </div>
+                            <div class="col-md-6">
+                                <input type="radio" name="ConditionOfGoods" value="1" ng-model="AddNewModel.ConditionOfGoods"> <label>{{translation.Good}}</label>
+                                <input type="radio" name="ConditionOfGoods" value="2" ng-model="AddNewModel.ConditionOfGoods"> <label> {{translation.Fair}}</label>
+                                <input type="radio" name="ConditionOfGoods" value="3" ng-model="AddNewModel.ConditionOfGoods"> <label>{{translation.Average}} </label>
+                            </div>
+                        </div>
+                        <div class="col-md-12 margin-Top20">
+                            <div class="col-md-2">
+                                <label>{{translation.ValidityDate}} </label>
+                            </div>
+                            <div class="col-md-3 NewMemberdob">
+                                <label>
+                                    {{translation.FromDate}}
+                                </label>
+                                <input id="Valid_From_Date" name="Valid_From_Date" onchange="ValidateTodate(this);" disabled="disabled" class="form-control Fromdate" ng-model="AddNewMember.Valid_From_Date">
+                            </div>
+                            <div class="col-md-3 NewMemberdob">
+                                <label>
+                                    {{translation.ToDate}}
+                                </label>
+                                <input id="Valid_To_Date" name="Valid_To_Date" disabled="disabled" class="form-control" ng-model="AddNewMember.Valid_To_Date">
+                            </div>
+                        </div>
+                        <div class="col-md-12 margin-Top20">
+                            <div class="col-md-2">
+                                <label>{{translation.PrivateMarkofDepositor}} </label>
+                            </div>
+                            <div class="col-md-4 NewMemberdob">
+                                <input type="text" class="form-control" ng-model="AddNewModel.PrivateMarkofDepositor" maxlength="100" onkeypress='return ValidateAlpha(this,event);' autocomplete="off">
+                            </div>
+                            <div class="col-md-2">
+                                <label>{{translation.StorageRateCharge}} </label>
+                            </div>
+                            <div class="col-md-4 NewMemberdob">
+                                <input type="text" class="form-control" ng-model="AddNewModel.StorageRateCharge" maxlength="100" onkeypress='return ValidateAlpha(this,event);' autocomplete="off">
+                            </div>
+                        </div>
+                        <div class="col-md-12 margin-Top20">
+                            <div class="col-md-2">
+                                <label>{{translation.IndemnifiedInsurance}} </label>
+                            </div>
+                            <div class="col-md-4 NewMemberdob">
+
+                                <select ng-model="AddNewModel.IndemnifiedInsuranceType" id="IndemnifiedInsuranceType{{$index}}" class="form-control  validateNewAdd" ng-init="AddNewModel.IndemnifiedInsuranceType='0'">
+                                    <option value="0" selected="selected">{{translation.SelectOption}}</option>
+                                    <option value="Self">Self</option>
+                                    <option value="Depositor">{{translation.Depositor}}</option>
+
+                                </select>
+
+                                <input type="text" style="margin-top:5px;" ng-if="AddNewModel.IndemnifiedInsuranceType=='Depositor'" class="form-control" ng-model="AddNewModel.IndemnifiedInsurance" maxlength="100" onkeypress='return ValidateAlpha(this,event);' autocomplete="off">
+                            </div>
+                            <div class="col-md-2">
+                                <label>{{translation.InsuredName}} </label>
+                            </div>
+                            <div class="col-md-4 NewMemberdob">
+                                <input type="text" class="form-control" ng-model="AddNewModel.InsuredName" maxlength="100" onkeypress='return ValidateAlpha(this,event);' autocomplete="off">
+                            </div>
+                        </div>
+
+                        <div class="col-md-12 margin-Top20">
+                            <div class="col-md-2">
+                                <label>{{translation.MarketRate}} </label>
+                            </div>
+                            <div class="col-md-4 NewMemberdob">
+                                <input type="text" class="form-control" value="Rs. {{itemPrice}}" ng-disabled="true">
+                            </div>
+                            <div class="col-md-2">
+                                <label>{{translation.DoneAmount}} </label>
+                            </div>
+                            <div class="col-md-4 NewMemberdob">
+                                <input type="text" class="form-control" value="Rs.  {{totalPrice}}" ng-disabled="true">
+                            </div>
+                        </div>
+
+                        <div class="clearfix"></div>
+
+                        <div class="col-md-12" style="margin-top: 20px;" ng-if="RSWCList.length>0">
+                            <div class="dev-menu-btn">
+                                <button type="submit" class="btn btn-primary" ng-click="GenerateRequestView()">{{translation.Next}}</button>
+                                <button type="submit" class="btn btn-primary" ng-click="ResetAddNew()">{{translation.Clear}}</button>
+                            </div>
+                        </div>
+                    </form>
+
+                    <div id='divtoOrderPrint' ng-if="showPriView" style="padding-left: 15%; padding-right: 15%;">
+                        <div style='margin-right: 25px;    margin-left: 25px;    font-size: 20px;    padding: 30px;    padding-bottom: 30px;    border: 1px solid gainsboro;overflow: auto;  max-height: 800px;'>
+                            <table id='content' border="0" style='width:100%;border:none;color: black;' cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <td colspan='3' style=''>
+                                        <div style='text-align:left;width:80px;float:left;'>
+                                            <img style='width:80px;height:80px' src='../../Content/Images/rswc_logo.png' />
+                                        </div><div style='text-align:center;float:left;'>
+                                            <label style='font-size: 30px;'>
+                                                <b>RAJASTHAN STATE WAREHOUSING CORPORATION</b>
+                                            </label>
+                                            <br>
+                                            <label style='font-size: 20px;'>(A GOVERNMENT UNDERTAKING)</label>
+                                            <br>
+                                            <label style='font-size: 20px;'>Wharehouse Receipt- Nagotiable/Non-negotiable</label>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan='3' style='text-align:center;border-bottom: 2px solid black;'>  </td>
+                                </tr>
+                                <tr>
+                                    <td style='text-align:left;width:55%;'><b>Old Serial No. of Receipt</b></td>
+                                    <td colspan='2' style='text-align:left;'> {{AddNewModel.OldReceipt_No}} </td>
+                                </tr>
+                                <tr>
+                                    <td style='text-align:left;'><b>Name & Location of Warehouse</b></td>
+                                    <td colspan='2' style='text-align:left;'>   S/W                         {{GetNameFromList(WarehouseList,AddNewModel.Wharehouse_Id,'Warehous')}} </td>
+                                </tr>
+                                <tr>
+                                    <td style='text-align:left;'><b>Warehousemans license No.</b></td>
+                                    <td style='text-align:left;'> EXEMPTED                                         Valid up to                     </td>
+                                    <td style='text-align:left;'>                          N.A. </td>
+                                </tr>
+                                <tr>
+                                    <td style='text-align:left;'><b>Received From (Name and address of depositor)</b></td>
+                                    <td colspan='2' style='text-align:left;'> NAFED Through {{GetNameFromList(DistrictList,AddNewModel.DistrictId,'District')}}, {{GetNameFromList(KVSSList,AddNewModel.KVSSId,'KVSS')}} , {{GetNameFromList(PurchaseCenterList,AddNewModel.PurchaseCenter_Id,'PurchaseCenter')}}  </td>
+                                </tr>
+                                <tr>
+                                    <td style='text-align:left;'><b>Commodity</b></td>
+                                    <td colspan='2' style='text-align:left;'> {{GetNameFromList(ItemList,AddNewModel.Item_Kind,'Commodity')}}  </td>
+                                </tr>
+                                <tr><td style='' colspan='3'><br>Goods of the following description</td></tr>
+                                <tr>
+                                    <td colspan='3' style=''>
+                                        <table cellpadding='5' cellspacing='0' border='1' style='width:100%;font-size:15px;'>
+                                            <tr>
+                                                <td style='text-align:center;'>Sr.No.</td>
+                                                <td>Class or standared Quality and/or Grade</td>
+                                                <td style='width:80px;'>No. of Packages or Lots</td>
+                                                <td>Unit</td>
+                                                <td>Net Quantity Measured</td>
+                                                <td>Name and/or Licence No. of the Weighter/Classifier/Sampler</td>
+                                                <td>GNO/Stack No.</td>
+                                            </tr>
+                                            <tr ng-repeat="item in RSWCList">
+                                                <td style=''>{{$index+1}}</td>
+                                                <td style=''> {{item.Quality}} </td>
+                                                <td style='text-align:center'> {{item.Packages_Lots}} </td>
+                                                <td style=''>{{GetNameFromList(UnitList,item.Packages_Quantity_Unit,'Unit')}} KG </td>
+                                                <td style='text-align:center'> {{item.OtherNetQuantity}} Quintal </td>
+                                                <td style=''> {{item.NameOfSampler}} </td>
+                                                <td style=''>{{GetNameFromList(GodownList,item.Godown_Id,'Godown')}}/{{item.Stack_No}} </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr><td style='text-align:left;'><b>Condition of Goods -(1)Good (2)Fair (3)Average</b></td><td colspan='2' style='text-align:left;'>{{AddNewModel.ConditionOfGoods=='1'?'Good':AddNewModel.ConditionOfGoods=='2'?'Fair':'Average'}}</td></tr>
+                                <tr><td style='text-align:left;'><b>Private marks of the depositor on the packages if any</b></td><td colspan='2' style='text-align:left;'>{{AddNewModel.PrivateMarkofDepositor}}</td></tr>
+                                <tr><td style='text-align:left;'><b>Rate of storage and other charges</b></td><td colspan='2' style='text-align:left;'>{{AddNewModel.StorageRateCharge}}</td></tr>
+                                <tr><td style='text-align:left;'><b>Indemnified / Insured for Fire /Theft/Riots / Other Contingency with</b></td><td colspan='2' style='text-align:left;'>{{AddNewModel.IndemnifiedInsurance}}</td></tr>
+                                <tr><td style='text-align:left;'><b>If Insured (Name Of Insurance Co.)</b></td><td colspan='2' style='text-align:left;'>{{AddNewModel.InsuredName}}</td></tr>
+                                <tr><td style='text-align:left;'><b>Done for an amount of Rs.</b></td><td colspan='2' style='text-align:left;'>Rs. {{totalPrice}} </td></tr>
+                                <tr><td style='text-align:left;'><b>Goods are accepted for storage from</b></td><td colspan='2' style='text-align:left;'> {{AddNewModel.Valid_From_Date}} to {{AddNewModel.Valid_To_Date}} </td></tr>
+                                <tr><td style='text-align:left;'><b>Market rate at the time of deposit</b></td><td colspan='2' style='text-align:left;'>Rs.  {{GetNameFromList(ItemList,AddNewModel.Item_Kind,'CommodityPrice')}} Valuation Rs. {{totalPrice}} </td></tr>
+                            </table>
+
+                        </div>
+                        <div style="margin-top: 10px;">
+                            <div class="dev-menu-btn">
+                                <button type="submit" class="btn btn-primary" ng-click="GenerateRequestBack()">{{translation.Back}}</button>
+                                <button type="submit" class="btn btn-success" ng-click="GenerateRequest()">{{translation.GenerateSummary}}</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+    <div class="dev-popup-body modal fade" id="myOTPModal" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content citizen-dash-head">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    @*<h4 class="modal-title"> {{translation.AddOffice}} </h4>*@
+                    <label id="lbltrn" style="display:none;"></label>
+                    <label id="lblElectionMasterId" style="display:none;"></label>
+                    <label id="lblSocietyIdEnc" style="display:none;"></label>
+                    <label id="MemberId" style="display:none;"></label>
+                    <label id="CertIndex" style="display:none;"></label>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group col-md-6">
+                        <label>{{translation.EsignWROTPTitel}}</label>
+                        <input type="text" class="form-control" name="OTP" ng-bind="OTP" ng-model="OTP" placeholder={{translation.EsignWROTPTitel}} autocomplete="off" /><br />
+                        <button type="submit" class="btn btn-primary" ng-click="VerifyOTP()">{{translation.Submit}}</button>
+                        <button type="submit" class="btn btn-primary" style="margin-left:50px;" ng-click="SendOTP()">{{translation.ReSendOTP}}</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="dev-popup-body modal fade" id="SummaryModal" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog" style="width: 80%;color: black;">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    @*<h4 class="modal-title"> {{translation.AddNewRequest}}</h4>*@
+                </div>
+                <div class="modal-body">
+                    <form class="dev-search-form" style="overflow: hidden; margin-bottom: 35px;" name="OfficeForm">
+
+                        <div class="col-md-12">
+                            <div class="col-md-1"><label> {{translation.SRNo}} : </label></div>
+                            <div class="col-md-11">{{SummaryList[0].summary_no}}</div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="col-md-1"><label>{{translation.SummaryDate}} : </label></div>
+                            <div class="col-md-11">{{SummaryList[0].summary_date}}</div>
+                        </div>
+
+                        <div class="col-md-12">
+                            <div class="col-md-1"><label>{{translation.Commodity}} : </label></div>
+                            <div class="col-md-11">{{_language =='en-us' ?  SummaryList[0].CommodityNameEn : SummaryList[0].CommodityNameHi}}</div>
+                        </div>
+
+
+                        <div class="col-md-12" style="text-align: right;">
+                            @*<input ng-if="SummaryList.length>0" type="button" id="btnExport" class="btn btn-primary dev-btn" style="" ng-click="ExportWRSummaryDetailsReportData()" value="Export" />*@
+
+                            <a href="../mis/GetWRSummaryDetailsReportExportExcelEn?RequestNo={{SummaryNo}}" class="btn btn-primary dev-btn">Export</a>
+
+
+
+
+                        </div>
+                        <div class="col-md-12 margin-Top20" style="max-height:550px; overflow:auto">
+                            <table id="example" class="table devtable" style="border:1px solid rgb(222, 221, 221); float: left;">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            #
+                                        </th>
+
+                                        <th> {{translation.Warehouse}}</th>
+                                        <th>
+                                            {{translation.WRNo}}
+                                        </th>
+
+                                        <th>
+                                            {{translation.SrNoOfPhysicalReceipt}}
+                                        </th>
+
+                                        <th>
+                                            {{translation.RegionalOffice}}
+                                        </th>
+                                        <th>
+                                            {{translation.District}}
+                                        </th>
+                                        <th>
+                                            {{translation.KVSSMPRForm}}
+                                        </th>
+
+                                        <th>
+                                            {{translation.PurchaseCenter}}
+                                        </th>
+                                        <th>{{translation.WRDate}}</th>
+
+                                        <th>{{translation.FromDate}}</th>
+                                        <th>{{translation.ToDate}}</th>
+                                        <th>
+                                            {{translation.Price}}
+                                        </th>
+                                        <th>{{translation.PackagesLots}}</th>
+                                        <th>{{translation.NetQuantityInQTL}}</th>
+                                        <th>{{translation.TotalValue}}</th>
+                                        <th>{{translation.WR}}</th>
+                                        <th ng-if="ListType=='2'">{{translation.SummaryWR}}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="item in SummaryList">
+                                        <td>{{(((DataPagingDetails.PageNumber - 1) * DataPagingDetails.PageSize) + 1)+$index}}</td>
+
+                                        <td>
+                                            {{_language =='en-us' ?  item.WarehousNameEn : item.WarehousNameHi}}
+                                        </td>
+                                        <td>
+                                            {{item.receipt_no}}
+                                        </td>
+                                        <td>
+                                            {{item.receipt_serial_no}}
+                                        </td>
+                                        <td>
+                                            {{_language =='en-us' ?  item.RONameEn : item.RONameHi}}
+                                        </td>
+                                        <td>
+                                            {{_language =='en-us' ?  item.DISTRICT_ENG : item.DISTRICT_MANGAL}}
+                                        </td>
+                                        <td>
+                                            {{ item.SocietyName}}
+                                        </td>
+
+                                        <td>
+                                            {{_language =='en-us' ?  item.PurchaseCenterEng : item.PurchaseCenterHi}}
+                                        </td>
+                                        <td>{{item.WRGenerateDate}}</td>
+
+                                        <td>{{item.from_date}}</td>
+                                        <td>{{item.to_date}}</td>
+                                        <td>{{item.Price}}</td>
+                                        <td>{{item.packages_lots}}</td>
+                                        <td>{{item.net_quantity}}</td>
+                                        <td>{{item.TotalProce}}</td>
+                                        <td>
+                                            <a style="color:#505050;" ng-if="item.EntryFile!=''" target="_blank" href="../Content/RSWC/{{item.EntryFile}}"><i class="fa fa-download"></i></a>
+
+                                        </td>
+                                        <td ng-if="ListType=='2'">
+                                            <a style="color:#505050;" ng-if="item.summary_file!=''" target="_blank" href="../Content/RSWC/{{item.summary_file}}"><i class="fa fa-download"></i></a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </form>
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

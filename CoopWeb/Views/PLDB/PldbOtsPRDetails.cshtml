@@ -1,0 +1,328 @@
+﻿<script src="~/Scripts/AngularFramework/PldbOtsPRDetails.js?v=1.2"></script>
+@{
+    ViewBag.Title = "Loanee Final Payment Receipt";
+}
+<style>
+    label {
+        display: inline-block;
+        width: 100% !important;
+        margin-bottom: 5px;
+        font-weight: 700;
+        font-weight: normal
+    }
+
+    .zoom {
+        transition: transform .2s; /* Animation */
+        margin: 0 auto;
+    }
+
+        .zoom:hover {
+            padding-left: 30px;
+            transform: scale(2.5); /* (150% zoom - Note: if the zoom is too large, it will go outside of the viewport) */
+        }
+
+    a > i.fa.fa-plus-circle {
+        font-size: 25px;
+        cursor: pointer;
+    }
+
+    a:hover > i.fa.fa-plus-circle {
+        font-size: 26px;
+        cursor: pointer;
+    }
+
+    a > i.fa.fa-eye {
+        font-size: 25px;
+        cursor: pointer;
+    }
+
+    a:hover > i.fa.fa-eye {
+        font-size: 26px;
+        cursor: pointer;
+    }
+
+
+    .dvfieldset {
+        border: 1px solid #b0adad;
+        border-radius: 5px;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+        background: #fff;
+        color: #444;
+    }
+
+    .dvlegend {
+        width: auto;
+        padding: 24px;
+        margin-left: 11px;
+        border: 1px solid gray;
+        padding: 5px;
+        border-radius: 14px;
+        font-size: 16px;
+        padding-left: 14px;
+        padding-right: 15px;
+        background: #025e63;
+        color: #fff;
+    }
+
+    .modal-dialog {
+        color: #444;
+    }
+
+    .payment-table {
+        width: 100%;
+    }
+
+        .payment-table td {
+            padding: 5px;
+        }
+
+    .payment-delete-remark {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+</style>
+<div ng-app="pldbApp" ng-controller="pldbCtrl" ng-cloak="">
+    <div class="col-md-12">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 pt-4">
+            <div class="text-right">
+                <button ng-click="BackToPage()" class="btn btn-primary dev-btn">Back To List</button>
+            </div>
+        </div>
+        <fieldset class="dvfieldset" ng-show="ShowReceiptDiv">
+            <legend class="dvlegend">OTS Payment Receipt Details</legend>
+            <div class="col-lg-12">
+                <div class="row">
+                    <div class="col-md-4 d-flex align-items-end">
+                        <div class="flex-grow-1 me-1">
+                            <label for="NoticeNo">Notice No:</label>
+                            <input id="NoticeNo" class="form-control" placeholder="Notice No" ng-model="NoticeNo" autocomplete="off" />
+                            <label ng-show="isErrorShow" class="text-danger">Record not found!</label>
+                        </div>
+                        <div>
+                            <label>&nbsp;</label>
+                            <button ng-click="GetApplicationDetails()" class="btn btn-primary dev-btn">Get Details</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+
+        <fieldset class="dvfieldset" ng-show="ApplicantDetails!=null">
+            <legend class="dvlegend">Application Details/आवेदक का विवरण</legend>
+            <div class="col-lg-12">
+                <div class="col-lg-12 table-responsive">
+                    <table class="col-lg-12 table ">
+                        <tr>
+                            <td>
+                                <label>{{translation.LoanApplicationNo}} :</label>
+                            </td>
+                            <td>
+                                {{ _language=='en-us' ? ApplicantDetails.LoanAccNo : ApplicantDetails.LoanAccNo }}
+                            </td>
+                            <td>
+                                <label>{{translation.RegistrationNo}} :</label>
+                            </td>
+                            <td>
+                                {{ _language=='en-us' ? ApplicantDetails.NoticeNo : ApplicantDetails.NoticeNo }}
+                            </td>
+                            <td>
+                                <label>{{translation.PLDB}} :</label>
+                            </td>
+                            <td>
+                                {{_language=='en-us' ? ApplicantDetails.PLDBName: ApplicantDetails.PLDBName}}
+                            </td>
+                            <td>
+                                <label>{{translation.PLDBBranch}} :</label>
+                            </td>
+                            <td>
+                                {{_language=='en-us' ? ApplicantDetails.PLDBBranch: ApplicantDetails.PLDBBranch}}
+                            </td>
+
+                        </tr>
+                        <tr>
+                            <td>
+                                <label>{{translation.ApplicantName}} :</label>
+                            </td>
+                            <td>
+                                {{_language=='en-us' ? ApplicantDetails.ApplicantName: ApplicantDetails.ApplicantName}}
+                            </td>
+                            <td>
+                                <label>{{translation.FatherHasbandName}} :</label>
+                            </td>
+                            <td>
+                                {{ _language=='en-us' ? ApplicantDetails.FatherHusbandName : ApplicantDetails.FatherHusbandName }}
+                            </td>
+                            <td>
+                                <label>{{translation.Gender}} :</label>
+                            </td>
+                            <td>
+                                {{_language=='en-us' ? ApplicantDetails.Gender: ApplicantDetails.Gender}}
+                            </td>
+                            <td>
+                                <label>{{translation.MobileNo}} :</label>
+                            </td>
+                            <td>
+                                {{_language=='en-us' ? ApplicantDetails.MobileNo: ApplicantDetails.MobileNo}}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label>Outstanding as on 31-03-2025 (A) :  @*(37+38)*@</label>
+                            </td>
+                            <td>
+                                {{ApplicantDetails.PrincipalOutstandingAs31032025|inrCurrency}}
+                            </td>
+
+                            <td>
+                                <label>{{translation.RateOfInterest}} : </label>
+                            </td>
+                            <td>
+                                {{ApplicantDetails.RateOfInterest}}%
+                            </td>
+
+                            <td>
+                                <label>{{translation.OtherInterestFrom}}(B) : @*(47*RateOFInterest + RateOfInterest*daysFrom1_4_2025)*@</label>
+                            </td>
+                            <td>
+                                {{ApplicantDetails.OtherInterestAmt|inrCurrency}}
+                            </td>
+
+
+                            <td>
+                                <label>Current Penal Interest (C)</label>
+                            </td>
+                            <td>
+                                {{ApplicantDetails.CurrentPenalInterestAmount|inrCurrency}}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label>Recoverable Total Amount  : @*(47*RateOFInterest + RateOfInterest*daysFrom1_4_2025)*@</label>
+                            </td>
+                            <td>
+                                {{ApplicantDetails.EstimatedTotalAmount|inrCurrency}}
+                            </td>
+                            <td>
+                                <label>{{translation.AmountOfRecovery|inrCurrency}} :</label>
+                            </td>
+                            <td>
+                                {{ApplicantDetails.AlreadyPaidAmount|inrCurrency}}
+                            </td>
+                            <td>
+                                <label>Remaining Amount:</label>
+                            </td>
+                            <td>
+                                {{(ApplicantDetails.EstimatedTotalAmount-ApplicantDetails.AlreadyPaidAmount)|inrCurrency}}
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </fieldset>
+        <fieldset class="dvfieldset" ng-show="paymentSummaryList.length>0">
+            <legend class="dvlegend">Payment Details/भुगतान का विवरण</legend>
+            <div class="col-lg-12 profile-d">
+                <div class="col-md-12 table-responsive ">
+
+                    <table class="table table-responsive devtable" style="color:black">
+                        <thead>
+                            <tr>
+                                <th> {{translation.SRNO}}</th>
+                                <th>{{translation.ReceiptNo}}</th>
+                                <th>{{translation.PaymentDate}}</th>
+                                <th>{{translation.PaidAmount}}</th>
+                                <th>{{translation.PaymentMode}}</th>
+                                <th>{{translation.UTR_RefNo}}</th>
+                                @*<th>{{translation.Status}}</th>*@
+                                <th>{{translation.DepositorPerson}}</th>
+                                <th>{{translation.Actions}}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="li in paymentSummaryList">
+                                <td>{{$index+1}}</td>
+                                <td><span class="dev-spancon">{{li.ReceiptNo}}</span></td>
+                                <td><span class="dev-spancon">{{li.PaymentDate|date:'dd-MM-yyyy'}}</span></td>
+                                <td><span class="dev-spancon">{{li.PaidAmount1}}</span></td>
+                                <td><span class="dev-spancon">{{li.PaymentMode}}</span></td>
+                                <td>
+                                    <span class="dev-spancon">{{li.UTR_RefNo}}</span>
+                                    <div ng-show="li.PaymentModeId==2">
+                                        Cheque No: {{li.ChequeNo}}
+                                        Cheque Date: {{li.ChequeDate|date:'dd-MM-yyyy'}}
+                                        Remark: {{li.ChequeOther}}
+                                    </div>
+                                </td>
+                                @*<td><span class="dev-spancon">{{li.Status}}</span></td>*@
+                                <td><span class="dev-spancon">{{li.DepositByPerson}}</span></td>
+                                <td>
+                                    <div class="payment-delete-remark">
+                                        <span class="dev-spancon">
+                                            <a href="~/PLDB/ots_pr_receipt?otsIdEnc={{li.OtsIdEnc}}&SummaryId={{li.OTSRePaymentSummaryId}}" target="_blank" class="btn btn-xs btn-primary"> <i class="fa fa-print text-white"></i>  </a>
+                                            <button ng-if="ApplicantDetails.Status<4" ng-click="li.showDeleteRemark = true" class="btn btn-xs "> <i class="fa fa-trash" style="color:red"></i> </button>
+                                        </span>
+                                        <div ng-if="li.showDeleteRemark" class="payment-delete-remark">
+                                            <input type="text" ng-model="li.deleteRemark" placeholder="Enter remark" class="form-control input-sm"
+                                                   style="width: 150px;" />
+                                            <button ng-click="DeletePaymentReq(li.OTSRePaymentSummaryId, li.deleteRemark)" class="btn btn-xs btn-danger">
+                                                Delete
+                                            </button>
+                                            <button ng-click="li.showDeleteRemark = false" class="btn btn-xs btn-default">
+                                                Cancel
+                                            </button>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                        <tfoot ng-show="paymentSummaryList==null">
+                            <tr>
+                                <td class="text-danger text-center" colspan="8">No payment has been deposited yet./अभी तक कोई भुगतान जमा नहीं किया गया है।</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </fieldset>
+
+        @*<div class="row">
+                <div class="form-group col-md-6" ng-show="ShowOTPDiv">
+                    <label>{{translation.EnterOTP}}</label>
+                    <input type="text" class="form-control" name="Remarks" ng-bind="OTP" ng-model="OTP" placeholder={{translation.EnterOTP}} autocomplete="off" /><br />
+                    <button type="button" class="btn btn-primary" ng-click="VerifyOTP()">{{translation.Submit}}</button>
+                    <button type="button" class="btn btn-primary" ng-click="SaveGSSApplicationFlowStatus()">{{translation.ReSendOTP}}</button>
+
+                </div>
+            </div>*@
+        <div class="modal fade in" tabindex="-1" role="dialog" style="display:block;" ng-show="ShowOTPDiv">
+            <div class="modal-dialog">
+                <div class="modal-content">
+
+                    <div class="modal-header">
+                        <h4 class="modal-title">{{translation.EnterOTP}}</h4>
+                        <button type="button" class="close" ng-click="ShowOTPDiv = false">&times;</button>
+                    </div>
+
+                    <div class="modal-body">
+                        @*<label>{{translation.EnterOTP}}</label>*@
+                        <input type="text" class="form-control" name="Remarks" ng-model="OTP"
+                               placeholder="{{translation.EnterOTP}}" autocomplete="off" />
+                        <br />
+                        <button type="button" class="btn btn-primary" ng-click="VerifyOTP()">
+                            {{translation.Submit}}
+                        </button>
+                        <button type="button" class="btn btn-secondary" ng-click="ResendOTP()">
+                            {{translation.ReSendOTP}}
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @Html.Partial("_AadhaarValidation")
+</div>
+

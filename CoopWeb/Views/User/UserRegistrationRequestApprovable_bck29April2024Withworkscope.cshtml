@@ -1,0 +1,509 @@
+﻿<script src="~/Scripts/AngularFramework/UserRegistrationRequestApprovable.js?id=49"></script>
+
+<link href="~/Content/Stylesheets/bootstrap-multiselect.css" rel="stylesheet" type="text/css" />
+<script src="~/Scripts/bootstrap-multiselect.js" type="text/javascript"></script>
+<script>
+    function ResetActs() {
+        // alert(1);
+        var th = $("#ddlAct").find('input[type="checkbox"]').eq(0);
+        $.each($("#ddlAct").find('input[type="checkbox"]'), function (index) {
+            if (index == 0 && $(this).is(":checked")) {
+                //th = $(this);
+                $(this).prop("checked", true);
+            } else {
+                if (th.is(":checked")) {
+                    $(this).prop("checked", false).attr("disabled", "disabled");
+                } else {
+                    $(this).prop("checked", false).removeAttr("disabled");
+                }
+            }
+        });
+    }
+</script>
+<div ng-app="UserRegistrationApprsModule">
+    <div ng-controller="UserRegistrationApprCont">
+        <div class="loader"> </div>
+        <div class="col-md-12">
+            <h3 class="citizen-dash-head"> {{ translation.UserRequest}} <a target="_blank" style="float:right; font-size:12px" href="~/Content/UserManual/req_approve.pdf">उपयोगकर्ता पुस्तिका</a></h3>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#">  {{translation.Home}} </a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;"> {{translation.New}} </span>
+                        <i class="fa fa-angle-right"> </i>
+                        <span style="margin: 0 5px;">{{translation.UserRegistrationRequestApprovable}} </span>
+                    </li>
+
+                </ul>
+            </div>
+        </div>
+
+        <div class="dev-popup-body modal fade" id="myModal" role="dialog" data-backdrop="static" data-keyboard="false" ng-if="UserType==1">
+            <div class="modal-dialog">
+                <!-- Modal content-->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" ng-click="ClearOrganisationForm()">&times;</button>
+                        <h4 class="modal-title"> {{translation.UserRegistrationRequestApprovable}} </h4>
+                    </div>
+                    <div class="modal-body" id="DvNewUser">
+                        <form class="dev-search-form" style="overflow: hidden; margin-bottom: 35px;" name="OrganisationForm">
+                            <div class="col-md-12">
+                                <b><span id="spanUserDetail" style="color:black"></span></b>
+                            </div>
+                            <div class="col-md-6">
+                                <label>{{translation.RoleHeading}}</label>
+                                <select class="form-control" id="ddlRole" ng-model="UserRegistrationAppr.RoleID" ng-init="UserRegistrationAppr.RoleID='0'" ng-change="checkReplace()">
+                                    <option value="0" disabled>{{translation.SelectOption}}</option>
+                                    <option ng-repeat="item in Roles" value="{{item.RoleID}}">
+                                        {{_language =='en-us' ?  item.RoleName_EN : item.RoleName_HI}}
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-check-label">{{translation.Status}}</label>
+
+                                <div class="form-check form-check-inline col-md-12" style="padding: 0;">
+                                    <div class="form-check form-check-inline col-md-7">
+                                        <div class="radio-item">
+                                            <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1" value="true" ng-model="UserRegistrationAppr.approval" ng-checked="UserRegistrationAppr.approval">
+                                            <label class="form-check-label option_value" for="inlineRadio1">{{translation.Approvable}}</label>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="form-check form-check-inline col-md-5">
+                                        <div class="radio-item">
+                                            <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio2" value="false" ng-model="UserRegistrationAppr.approval" ng-checked="UserRegistrationAppr.approval">
+                                            <label class="form-check-label option_value" for="inlineRadio2">{{translation.Rejection}}</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-12" style="margin-top:15px;" ng-show="NewOfficeId=='3' || NewOfficeId=='41'" >
+                                <div class="col-md-6" style="padding-left:0px;">
+                                    <label>Replace Of ?</label>
+                                    <input type="checkbox" value="1" id="ReplaceCheck" ng-checked="checkstatus" ng-click="checkReplace('1')" ng-model="UserRegistrationAppr.Formation" />
+                                  
+                                        <select ng-show="UserRegistrationAppr.Formation" ng-model="UserRegistrationAppr.UserId" id="ddldesination" class="form-control" ng-init="UserRegistrationAppr.UserId='0'">
+                                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                                            <option ng-repeat="item in UserListActive" value="{{item.UserId}}">
+                                                {{_language =='en-us' ?  item.OfficerNameEn : item.OfficerNameHi}}
+                                            </option>
+                                        </select>
+                                      
+                                    </div>
+                            
+                                </div>
+
+                                <div class="form-group col-md-12" ng-show="OrganisationId==4">
+                                    <br />
+                                    @*<div class="col-lg-2">{{ translation.Act}}<span class="error">*</span></div>*@
+                                    <label>{{translation.Act}}</label>
+
+                                    <div class="col-lg-12" style="border: 1px solid #80808052;padding: 7px;" id="ddlAct">
+                                       
+                                        <input type="checkbox" ng-if="UserType == 2" value="0" onclick="ResetActs(this)" /><label  ng-if="UserType == 2" style="font-weight:bold!important; margin-left: 5px; ">No Act</label><br />
+                                        <input type="checkbox" ng-if="IsShowAct1958" value="1" ng-click="chnageReplaceOff()"/><label ng-if="IsShowAct1958" style="font-weight: bold !important;margin-left: 5px;">{{ActName1958}}</label><br />
+                                        <input type="checkbox" ng-if="IsShowAct2001" value="3" ng-click="chnageReplaceOff()"/><label  ng-if="IsShowAct2001" style="font-weight: bold !important;margin-left: 5px;">{{ActName2001}}</label><br />
+                                        <input type="checkbox" ng-if="IsShowAct2005" value="7" ng-click="chnageReplaceOff()"/><label  ng-if="IsShowAct2005"style="font-weight: bold !important;margin-left: 5px;">{{ActName2005}}</label>
+                                        
+                                    </div>
+
+                                    @*<select multiple="multiple" id="ddlAct" class="form-control form-control"></select>*@
+                                </div>
+
+                                <div class="col-lg-6 form-group" ng-show="OrganisationId==4">
+                                    <div>
+                                        <label>{{translation.WorkScope}}</label>
+                                        <div class="col-lg-12" style="border:1px solid #80808052;padding:7px;overflow:auto; max-height:100px;min-height:100px;" id="ddlPrimaryResion">
+                                        </div>
+                                        @*<select multiple="multiple" id="ddlPrimaryResion" class="form-control"></select>*@
+                                        <br />
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 form-group">
+                                    <div style="display:none">
+                                        <label>{{translation.DAIRY}} {{translation.WorkScope}}</label>
+                                        <select multiple ng-model="UserRegistration.DairyResionId" id="ddlDairyResion" class="form-control" ng-init="UserRegistration.DairyResionId='0'">
+                                            <option value="0">{{translation.SelectOption}}</option>
+                                            <option ng-repeat="itemm in ResionList" value="{{itemm.ResionId}}">
+                                                {{_language =='en-us' ?  itemm.DairyResionNameEn : itemm.DairyResionNameEn}}
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">&nbsp; </div>
+                                <div class="col-md-6">&nbsp; </div>
+                                <div class="col-md-6">&nbsp; </div>
+                                <div class="col-md-6" style="margin-top: 15px;">
+                                    <button type="submit" class="btn btn-primary" ng-click="SaveUserRegiApprFun()">{{translation.Submit}}</button>
+                                    <button type="submit" class="btn btn-primary" ng-click="ClearOrganisationForm()">{{translation.Clear}}</button>
+                                    <input type="hidden" ng-model="UserRegistrationAppr.MappingID" />
+                                </div>
+</form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="dev-popup-body modal fade" id="myModal" role="dialog" data-backdrop="static" data-keyboard="false" ng-if="UserType==2">
+            <div class="modal-dialog">
+                <!-- Modal content-->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" ng-click="ClearOrganisationForm()">&times;</button>
+                        <h4 class="modal-title"> {{translation.UserRegistrationRequestApprovable}} </h4>
+                    </div>
+                    <div class="modal-body" id="DvEditUser">
+                        <form class="dev-search-form" style="overflow: hidden; margin-bottom: 35px;" name="OrganisationForm">
+                            <div class="col-md-12">
+                                <b><span id="spanUserDetail" style="color:black"></span></b>
+                            </div>
+
+                            <div class="form-group col-md-12">
+                                <br />
+
+                                <label>{{translation.Act}}</label>
+                                @*<select multiple="multiple" id="ddlAct" class="form-control form-control"></select>*@
+                                <div class="col-lg-12" style="border: 1px solid #80808052;padding: 7px;" id="ddlAct">
+                                    <input type="checkbox" ng-if="UserType == 2" value="0" onclick="ResetActs(this)" /><label  ng-if="UserType == 2" style="font-weight:bold!important; margin-left: 5px; ">No Act</label><br />
+                                        <input type="checkbox" ng-if="IsShowAct1958" value="1" ng-click="chnageReplaceOff()"/><label ng-if="IsShowAct1958" style="font-weight: bold !important;margin-left: 5px;">{{ActName1958}}</label><br />
+                                        <input type="checkbox" ng-if="IsShowAct2001" value="3" ng-click="chnageReplaceOff()"/><label  ng-if="IsShowAct2001" style="font-weight: bold !important;margin-left: 5px;">{{ActName2001}}</label><br />
+                                        <input type="checkbox" ng-if="IsShowAct2005" value="7" ng-click="chnageReplaceOff()"/><label  ng-if="IsShowAct2005"style="font-weight: bold !important;margin-left: 5px;">{{ActName2005}}</label>
+                                        
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6 form-group">
+                                <br />
+                                <div>
+                                    <label>{{translation.WorkScope}}</label>
+                                    @*<select multiple="multiple" id="ddlPrimaryResion" class="form-control"></select><br />*@
+                                    <div class="col-lg-12" style="border:1px solid #80808052;padding:7px;overflow:auto; max-height:100px;min-height:100px;" id="ddlPrimaryResion">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 form-group">
+                                <div style="display:none">
+                                    <label>{{translation.DAIRY}} {{translation.WorkScope}}</label>
+                                    <select multiple ng-model="UserRegistration.DairyResionId" id="ddlDairyResion" class="form-control" ng-init="UserRegistration.DairyResionId='0'">
+                                        <option value="0">{{translation.SelectOption}}</option>
+                                        <option ng-repeat="itemm in ResionList" value="{{itemm.ResionId}}">
+                                            {{_language =='en-us' ?  itemm.DairyResionNameEn : itemm.DairyResionNameEn}}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">&nbsp; </div>
+                            <div class="col-md-6" style="margin-top: 15px;">
+                                <button type="submit" class="btn btn-primary" ng-click="SaveUserRegiApprFunEdit()">{{translation.Submit}}</button>
+                                <button type="submit" class="btn btn-primary" ng-click="ClearOrganisationForm()">{{translation.Clear}}</button><br />
+                                <button type="submit" class="btn btn-primary" style="margin-top:5px;padding-top:5px" ng-click="CheckRoleAtCuttentLocation()">Check User On Location</button>
+                                <input type="hidden" ng-model="UserRegistrationAppr.MappingID" />
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="">
+            <div class="col-md-12">
+                <div class="citizen-dash-head" style="overflow: hidden;">
+                    <div class="table-dropdown">
+                        <div class="col-xs-4">
+                            <label for="search">{{translation.Search}}:</label>
+                            <input ng-model="q" id="search" class="form-control" placeholder={{translation.filttertext}} autocomplete="off">
+                        </div>
+                        <div class="col-xs-4">
+                            <label for="search">{{translation.ItemPerPage}}:</label>
+                            <input type="number" min="1" max="100" class="form-control" onkeypress='return event.charCode >= 48 && event.charCode <= 57' ng-model="pageSize">
+                        </div>
+                    </div>
+
+                    <div>
+                        <input type="radio" name="UserType" ng-click="ChangeUserType(1)" checked="checked" value="1"><label style="">{{translation.NewRequest}}</label>
+                        <input type="radio" name="UserType" ng-click="ChangeUserType(2)" value="2"><label style="">{{translation.ApprovedUsers}}</label>
+                    </div>
+
+                    <table class="table table-responsive devtable" ng-if="UserType==1">
+                        <thead>
+                            <tr>
+                                <th>
+                                    {{translation.SRNO}}
+                                </th>
+                                <th ng-click="sortData('SubClassNameEn')">
+                                    {{translation.OfficerNameEn}}
+                                    <div ng-class="getSortClass('SubClassNameEn')"></div>
+                                </th>
+                                <th>
+                                    {{translation.MobileNo}}
+                                </th>
+                                <th>
+                                    {{translation.SSOID}}
+                                </th>
+                                <th ng-click="sortData(_language =='en-us' ? 'DEPTNAMEENGLISH' : 'DEPTNAMEHINDI')">
+                                    {{translation.DepartmentHeading}}
+                                    <div ng-class="getSortClass(_language =='en-us' ? 'DEPTNAMEENGLISH' : 'DEPTNAMEHINDI')"></div>
+                                </th>
+                                <th ng-click="sortData(_language =='en-us' ? 'OrganisationNameEn' : 'OrganisationNameHi')">
+                                    {{translation.Organisation}}
+                                    <div ng-class="getSortClass(_language =='en-us' ? 'OrganisationNameEn' : 'OrganisationNameHi')"></div>
+                                </th>
+                                <th ng-click="sortData(_language =='en-us' ? 'LevelNameEn' : 'LevelNameHi')">
+                                    {{translation.Level}}
+                                    <div ng-class="getSortClass(_language =='en-us' ? 'LevelNameEn' : 'LevelNameHi')"></div>
+                                </th>
+                                <th ng-click="sortData(_language =='en-us' ? 'OfficeNameEn' : 'OfficeNameHi')">
+                                    {{translation.Office}}
+                                    <div ng-class="getSortClass(_language =='en-us' ? 'OfficeNameEn' : 'OfficeNameHi')"></div>
+                                </th>
+                                <th ng-click="sortData(_language =='en-us' ? 'DESIGNATIONDESCENGLISH' : 'DESIGNATIONDESCHINDI')">
+                                    {{translation.Designation}}
+                                    <div ng-class="getSortClass(_language =='en-us' ? 'DESIGNATIONDESCENGLISH' : 'DESIGNATIONDESCHINDI')"></div>
+                                </th>
+                                <th>
+                                    {{translation.Place}}
+                                </th>
+                                <th>
+                                    {{translation.UserRequest}}
+                                </th>
+                                <th>
+                                    {{translation.Edit}}
+                                </th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+                            <tr dir-paginate="Class in UserReqData | filter:q | orderBy:colsort:reverseSort | itemsPerPage: pageSize" current-page="currentPage" pagination-id="SubclassPagination">
+
+                                <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                                <td>{{ Class.OfficerNameEn }}</td>
+
+                                <td>{{Class.MobileNo}} </td>
+                                <td>{{Class.SSO_ID}}</td>
+                                <td>{{_language =='en-us' ?  Class.DEPTNAMEENGLISH : Class.DEPTNAMEHINDI}}</td>
+                                <td>{{_language =='en-us' ?  Class.OrganisationNameEn : Class.OrganisationNameHi}}</td>
+                                <td>{{_language =='en-us' ?  Class.LevelNameEn : Class.LevelNameHi}}</td>
+                                <td>{{_language =='en-us' ?  Class.OfficeNameEn : Class.OfficeNameHi}}</td>
+                                <td>{{_language =='en-us' ?  Class.DESIGNATIONDESCENGLISH : Class.DESIGNATIONDESCHINDI}}</td>
+                                <td ng-show="Class.LevelId==1">{{translation.Rajasthan}}</td>
+                                <td ng-show="Class.LevelId==2">{{_language =='en-us' ?  Class.DIVISION_ENG : Class.DIVISION_MANGAL}} </td>
+                                <td ng-show="Class.LevelId==3">{{_language =='en-us' ?  Class.DISTRICT_ENG : Class.DISTRICT_MANGAL}} </td>
+
+                                <td ng-show="Class.LevelId==4 && Class.BLOCK_ENG==''">{{_language =='en-us' ?  Class.DISTRICT_ENG : Class.DISTRICT_MANGAL}}, {{_language =='en-us' ?  Class.CITY_ENG : Class.CITY_MANGAL}} </td>
+                                <td ng-show="Class.LevelId==4 && Class.BLOCK_ENG!=''">{{_language =='en-us' ?  Class.DISTRICT_ENG : Class.DISTRICT_MANGAL}}, {{_language =='en-us' ?  Class.BLOCK_ENG : Class.BLOCK_MANGAL}} </td>
+
+                                <td ng-show="Class.LevelId==5">{{_language =='en-us' ?  Class.DISTRICT_ENG : Class.DISTRICT_MANGAL}}, {{_language =='en-us' ?  Class.BLOCK_ENG : Class.BLOCK_MANGAL}} {{_language =='en-us' ?  Class.GP_ENG : Class.GP_MANGAL}} </td>
+                                <td>{{Class.RequestType}} </td>
+                                <td>
+                                    @*<i class="fa fa-edit" data-target="#myModal" data-toggle="modal" ng-click="update(Class)"></i>*@
+                                    <i class="fa fa-edit" data-target="#myModal" data-toggle="modal" ng-click="update(Class,true)"></i>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <table class="table table-responsive devtable" ng-if="UserType==2">
+                        <thead>
+                            <tr>
+                                <th>
+                                    {{translation.SRNO}}
+                                </th>
+                                <th ng-click="sortData('SubClassNameEn')">
+                                    {{translation.OfficerNameEn}}
+                                    <div ng-class="getSortClass('SubClassNameEn')"></div>
+                                </th>
+                                <th>
+                                    {{translation.MobileNo}}
+                                </th>
+                                <th>
+                                    {{translation.SSOID}}
+                                </th>
+                                <th ng-click="sortData(_language =='en-us' ? 'DEPTNAMEENGLISH' : 'DEPTNAMEHINDI')">
+                                    {{translation.DepartmentHeading}}
+                                    <div ng-class="getSortClass(_language =='en-us' ? 'DEPTNAMEENGLISH' : 'DEPTNAMEHINDI')"></div>
+                                </th>
+                                <th ng-click="sortData(_language =='en-us' ? 'OrganisationNameEn' : 'OrganisationNameHi')">
+                                    {{translation.Organisation}}
+                                    <div ng-class="getSortClass(_language =='en-us' ? 'OrganisationNameEn' : 'OrganisationNameHi')"></div>
+                                </th>
+                                <th ng-click="sortData(_language =='en-us' ? 'LevelNameEn' : 'LevelNameHi')">
+                                    {{translation.Level}}
+                                    <div ng-class="getSortClass(_language =='en-us' ? 'LevelNameEn' : 'LevelNameHi')"></div>
+                                </th>
+                                <th ng-click="sortData(_language =='en-us' ? 'OfficeNameEn' : 'OfficeNameHi')">
+                                    {{translation.Office}}
+                                    <div ng-class="getSortClass(_language =='en-us' ? 'OfficeNameEn' : 'OfficeNameHi')"></div>
+                                </th>
+                                <th ng-click="sortData(_language =='en-us' ? 'DESIGNATIONDESCENGLISH' : 'DESIGNATIONDESCHINDI')">
+                                    {{translation.Designation}}
+                                    <div ng-class="getSortClass(_language =='en-us' ? 'DESIGNATIONDESCENGLISH' : 'DESIGNATIONDESCHINDI')"></div>
+                                </th>
+                                <th>
+                                    {{translation.RoleHeading}}
+                                </th>
+                                <th>
+                                    {{translation.Place}}
+                                </th>
+                                <th>
+                                    {{translation.UserRequest}}
+                                </th>
+                                <th>
+                                    {{translation.Act}}
+                                </th>
+                                <th>
+                                    {{translation.Edit}}
+                                </th>
+                            </tr>
+
+                        </thead>
+                        <tbody>
+                            <tr dir-paginate="Class in UserReqData | filter:q | orderBy:colsort:reverseSort | itemsPerPage: pageSize" current-page="currentPage" pagination-id="SubclassPagination">
+
+                                <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                                <td>{{ Class.OfficerNameEn }}</td>
+
+                                <td>{{Class.MobileNo}} </td>
+                                <td>{{Class.SSO_ID}}</td>
+                                <td>{{_language =='en-us' ?  Class.DEPTNAMEENGLISH : Class.DEPTNAMEHINDI}}</td>
+                                <td>{{_language =='en-us' ?  Class.OrganisationNameEn : Class.OrganisationNameHi}}</td>
+                                <td>{{_language =='en-us' ?  Class.LevelNameEn : Class.LevelNameHi}}</td>
+                                <td>{{_language =='en-us' ?  Class.OfficeNameEn : Class.OfficeNameHi}}</td>
+                                <td>{{_language =='en-us' ?  Class.DESIGNATIONDESCENGLISH : Class.DESIGNATIONDESCHINDI}}</td>
+                                <td>{{_language =='en-us' ?  Class.RoleName_EN : Class.RoleName_HI}}</td>
+                                <td ng-show="Class.LevelId==1">{{translation.Rajasthan}}</td>
+                                <td ng-show="Class.LevelId==2">{{_language =='en-us' ?  Class.DIVISION_ENG : Class.DIVISION_MANGAL}} </td>
+                                <td ng-show="Class.LevelId==3">{{_language =='en-us' ?  Class.DISTRICT_ENG : Class.DISTRICT_MANGAL}} </td>
+                                <td ng-show="Class.LevelId==4 && Class.BLOCK_ENG==''">{{_language =='en-us' ?  Class.DISTRICT_ENG : Class.DISTRICT_MANGAL}}, {{_language =='en-us' ?  Class.CITY_ENG : Class.CITY_MANGAL}} </td>
+                                <td ng-show="Class.LevelId==4 && Class.BLOCK_ENG!=''">{{_language =='en-us' ?  Class.DISTRICT_ENG : Class.DISTRICT_MANGAL}}, {{_language =='en-us' ?  Class.BLOCK_ENG : Class.BLOCK_MANGAL}} </td>
+                                <td ng-show="Class.LevelId==5 && Class.IsRuralArban=='False'">{{_language =='en-us' ?  Class.DISTRICT_ENG : Class.DISTRICT_MANGAL}}, {{_language =='en-us' ?  Class.BLOCK_ENG : Class.BLOCK_MANGAL}} {{_language =='en-us' ?  Class.GP_ENG : Class.GP_MANGAL}} </td>
+                                <td>
+                                    @*<div class="dev-action" ng-show="Class.UserId!=1">
+                                        <label class="switch">
+                                            <input type="checkbox" ng-checked="Class.IsActive == 1" ng-click="MappingChangeStatus(Class.MappingID,Class.IsActive,Class.UserId,Class.OfficeId,Class.DesignationLevelMappingId,Class)">
+                                            <span class="slider round"></span>
+                                        </label>
+                                    </div>*@
+                                    <div class="dev-action" ng-show="Class.UserId!=1">
+                                        <label class="switch1">
+                                             <img  src="{{Class.IsActive == 1?'../../Images/btnON.png':'../../Images/btnOFF.png'}}" ng-click="MappingChangeStatus(Class.MappingID,Class.IsActive,Class.UserId,Class.OfficeId,Class.DesignationLevelMappingId,Class,$index)" style="cursor:pointer;"/>
+                                            @*<input type="checkbox" ng-checked="Class.IsActive == 1" ng-click="MappingChangeStatus(Class.MappingID,Class.IsActive,Class.UserId,Class.OfficeId,Class.DesignationLevelMappingId,Class)">
+                                            <span class="slider round"></span>*@
+                                        </label>
+                                    </div>
+
+                                </td>
+                                <td>
+                                    <span ng-show="Class.ActId.indexOf('1') >= 0"> 1958 </span>
+                                    <span ng-show="Class.ActId.indexOf('3') >= 0"> <span ng-show="Class.ActId.indexOf('1') >= 0"> , </span>  2001 </span>
+                                    <span ng-show="Class.ActId.indexOf('7') >= 0"> <span ng-show="Class.ActId.indexOf('1') >= 0 || Class.ActId.indexOf('3') >= 0"> , </span>  2005 </span>
+                                </td>
+                                <td>
+                                    @*<i class="fa fa-edit" data-target="#myModal" data-toggle="modal" ng-click="update(Class)"></i>*@
+                                    <i class="fa fa-edit" data-target="#myModal" data-toggle="modal" ng-click="update(Class,false)"></i>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+
+
+            <div class="col-md-10">
+                <div class="text-center">
+                    <dir-pagination-controls boundary-links="true" pagination-id="SubclassPagination" on-page-change="pageChangeHandler(newPageNumber)" template-url="/dirPagination.tpl.html"></dir-pagination-controls>
+                </div>
+            </div>
+            <div class="form-group col-md-12">
+                <div class="dev-align-btn">
+
+                    <a class="btn btn-primary dev-btn" style="text-transform:capitalize;" href="../User/DashBoard"> Back</a>
+                </div>
+            </div>
+
+            <div class="col-md-2">
+                <h5 class="dev-page"> {{translation.Page}}: {{ currentPage }} </h5>
+            </div>
+        </div>
+
+        @*bhupendra*@
+        <div class="dev-popup-body modal fade" id="myModal11" role="dialog" data-backdrop="static" data-keyboard="false" ng-if="UserType==2">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" ng-click="ClearOrganisationForm()">&times;</button>
+                        <h4 class="modal-title"> Transfer To User </h4>
+                    </div>
+                    <div class="modal-body" id="DvEditUser">
+                        <form class="dev-search-form" style="overflow: hidden; margin-bottom: 35px;" name="OrganisationForm">
+                            <div class="col-md-12">
+                                <b><span id="spanUserDetailActiveusr111" style="color:black">{{translation.SocietyAllocated}}</span></b>
+                            </div>
+                            <div class="col-md-12" style="margin-top:15px;" ng-show="NewOfficeId1=='3'||NewOfficeId1=='41'">
+                            <div class="col-md-8" style="padding-left:0px;">
+                                <label>Transfer to user</label>
+                                <select  ng-model="UserRegistrationAppr.UserId" id="ddldesination" class="form-control" ng-init="UserRegistrationAppr.UserId='0'">
+                                    <option value="0" disabled>{{translation.SelectOption}}</option>
+                                    <option ng-repeat="item in UserListActive" value="{{item.UserId}}">
+                                        {{_language =='en-us' ?  item.OfficerNameEn : item.OfficerNameHi}}
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-12" style="margin-top: 15px;text-align:center;">
+                            <button type="submit" class="btn btn-primary" ng-click="SaveUserInactive(false)">{{translation.Submit}}</button>
+                            <button type="submit" class="btn btn-primary" ng-click="Cancelpopup()">{{translation.Cancel}}</button>
+                            <input type="hidden" ng-model="UserRegistrationAppr.MappingID" />
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+        <div class="dev-popup-body modal fade" id="myModal_inactive" role="dialog" data-backdrop="static" data-keyboard="false">
+            <div class="modal-dialog">
+                <!-- Modal content-->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" ng-click="ClearOrganisationForm()">&times;</button>
+                        <h4 class="modal-title"> Transfer To User Confirm  </h4>
+                    </div>
+                    <div class="modal-body" id="DvEditUser">
+                        <form class="dev-search-form" style="overflow: hidden; margin-bottom: 35px;" name="OrganisationForm">
+                            <div class="col-md-12" style="margin-top:15px;">
+                                <h5 style="color:black;">Are you sure want to inactive user.and allocated to society another user. </h5>
+                            </div>
+                            
+                            <div class="col-md-12" style="margin-top: 15px;text-align:center;">
+                                <button type="submit" class="btn btn-primary" ng-click="SubmitFinal(true)">{{translation.Submit}}</button>
+                               
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+    <div class="se-pre-con"></div>
+    <div id="stop" class="scrollTop">
+        <span><a href=""><i class="fa fa-arrow-up">Top</i></a></span>
+    </div>
+</div>
+
+
+

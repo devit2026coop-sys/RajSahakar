@@ -1,0 +1,152 @@
+﻿
+<script src="~/Scripts/AngularFramework/MPRArticle25bReport.js?v=@DateTime.Today.Ticks"></script>
+<link href="~/Scripts/google_hindi/google_transliteration.css" rel="stylesheet" />
+<script src="~/Scripts/xlsx.full.min.js"></script>
+
+<style>
+    .inputapi-transliterate-indic-suggestion-menu {
+        z-index: 99999 !important;
+        display: block;
+    }
+
+    .table > tbody > tr > td, .table > tbody > tr > th, .table > tfoot > tr > td, .table > tfoot > tr > th, .table > thead > tr > td {
+        padding: 1px;
+        padding-right: 5px;
+        padding-left: 5px;
+    }
+</style>
+
+<div ng-app="MPRArticle25bReportMod">
+    <div ng-controller="MPRArticle25bReportCnt">
+
+        <div class="col-md-12">
+            <h3 class="citizen-dash-head ng-binding" style="margin-top:0px;">गत वर्ष तक की साधारण सभा आयोजन से शेष सोसायटियों का विवरण</h3>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#">  {{translation.Home}}</a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;"> {{translation.New}} </span>
+                        <i class="fa fa-angle-right"> </i>
+                        <span style="margin: 0 5px;"> Article 25B Report List </span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div style="margin-top:30px;padding-top:30px">
+            <div class="col-md-12">
+                <div class="citizen-dash-head" style="overflow: hidden;">
+                    <div class="table-dropdown" id="search-filter" style="margin-bottom: 5px;">
+                        <div class="col-lg-12" style="margin-bottom: 5px; padding-left: 0;">
+                            <input type="hidden" id="hdnRoleId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).RoleId)" />
+                            <input type="hidden" id="hdnDistrictId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DistrictId)" />
+
+                            @*<div class="col-md-2 ">
+                                    <label>{{ translation.DistrictHeading}}</label>
+                                    <select name="DISTRICT_ID" ng-model="DISTRICT_ID" id="ddrDistrictId" class="form-control" ng-init="DISTRICT_ID='0'">
+                                        <option value="0">{{translation.SelectOption}}</option>
+                                        <option ng-repeat="district in DistrictList" value="{{district.DISTRICT_ID}}">
+                                            {{_language =='en-us' ?  district.DISTRICT_ENG : district.DISTRICT_MANGAL}}
+                                        </option>
+                                    </select>
+                                </div>*@
+
+                            @*<div class="col-md-2">
+                                    <label for="search">{{translation.ItemPerPage}}:</label>
+                                    <input type="number" min="1" max="1000" class="form-control" ng-model="pageSize">
+                                </div>*@
+
+                            <div class="col-md-4 margin-Top20">
+                                <label>&nbsp;</label><br>
+                                @*<button type="button" ng-click="searchRequest(GetSocietyLocationList)" class="btn btn-primary dev-btn ng-binding">{{translation.Search}}</button>*@
+                                @*<button type="button" ng-click="ClearSearch()" class="btn btn-primary dev-btn ng-binding">{{translation.Clear}}</button>*@
+                                @*<button type="button" ng-click="exportAllToExcel()" class="btn btn-success dev-btn">
+                                    <i class="fa fa-file-excel-o"></i> Export Excel
+                                </button>*@
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div style="overflow-x: auto;"> 
+                        <table class="table table-responsive devtable" ng-if="MPRArticle25bReportList.length > 0">
+                            <thead>
+                                <tr>
+                                    <th rowspan="3">#</th>
+                                    <th rowspan="3">कार्यालय का नाम</th>
+                                    <th colspan="4">गत वर्ष तक साधारण सभा आयोजन से शेष सोसायटियों की संख्या</th>
+                                    <th colspan="4">माह तक सोसायटियों की संख्या जिनमें साधारण सभा का आयोजन किया गया</th>
+                                    <th colspan="4">माह के अन्त में साधारण सभा आयोजन से शेष सोसायटियों की संख्या</th> 
+                                </tr>
+                                <tr>
+                                    <th>सक्रिय</th>
+                                    <th>निष्क्रिय</th>
+                                    <th>परिसमापनाधीन</th>
+                                    <th>कुल</th>
+
+                                    <th>सक्रिय</th>
+                                    <th>निष्क्रिय</th>
+                                    <th>परिसमापनाधीन</th>
+                                    <th>कुल</th>
+
+                                    <th>सक्रिय</th>
+                                    <th>निष्क्रिय</th>
+                                    <th>परिसमापनाधीन</th>
+                                    <th>कुल</th>
+
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="item in MPRArticle25bReportList track by $index">
+                                    <td>{{$index + 1}}</td>
+                                    <td>{{item.DISTRICT_ENG}}</td>
+
+                                    <td>{{item.PyActive}}</td>
+                                    <td>{{item.PyInactive}}</td>
+                                    <td>{{item.PyUnderLiquidation}}</td>
+                                    <td>{{item.PyTotal}}</td>
+
+                                    <td>{{item.CmgmActive}}</td>
+                                    <td>{{item.CmgmInactive}}</td>
+                                    <td>{{item.CmgmUnderLiquidation}}</td>
+                                    <td>{{item.CmTotal}}</td>
+
+                                    <td>{{item.EmgmActive}}</td>
+                                    <td>{{item.EmgmInactive}}</td>
+                                    <td>{{item.EmgmUnderLiquidation}}</td>
+                                    <td>{{item.EmTotal}}</td>
+
+                                </tr>
+                            </tbody>
+                            <tfoot>
+                                <tr class="total-row">
+                                    <td colspan="2">योग (Total)</td>
+                                    <td>{{PyActive}}</td>
+                                    <td>{{PyInactive}}</td>
+                                    <td>{{PyUnderLiquidation}}</td>
+                                    <td>{{PyTotal}}</td>
+                                    <td>{{CmgmActive}}</td>
+                                    <td>{{CmgmInactive}}</td>
+                                    <td>{{CmgmUnderLiquidation}}</td>
+                                    <td>{{CmTotal}}</td>
+                                    <td>{{EmgmActive}}</td>
+                                    <td>{{EmgmInactive}}</td>
+                                    <td>{{EmgmUnderLiquidation}}</td>
+                                    <td>{{EmTotal}}</td> 
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

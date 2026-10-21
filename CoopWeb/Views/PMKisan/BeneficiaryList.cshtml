@@ -1,0 +1,281 @@
+﻿@{
+    ViewBag.Title = "Beneficiary List";
+    Layout = "~/Views/Shared/_PMKisanLayout.cshtml";
+}
+<script src="~/Scripts/AngularFramework/BeneficiaryList.js?id=3.4"></script>
+<div ng-app="BeneficiaryListMod" ng-controller="BeneficiaryListCnt" ng-cloak="">
+    <div class="container-fluid dashHeader">
+        <br />
+        <div class="row">
+            <div class="col-md-8">
+                <h3>मुख्यमंत्री किसान सम्मान निधि</h3>
+            </div>
+            @*@Html.Partial("_ChooseFYInstallment")*@
+            <div class="col-md-2 form-group">
+                <select class="form-control" ng-model="FinancialYearId">
+                    <option value="0">--All--</option>
+                    <option ng-repeat="FY in FinancialYearList" value="{{FY.CMK_CommonMasterId}}" ng-selected="FY.CMK_CommonMasterId==FinancialYearId">{{FY.TitleEn}}</option>
+                </select>
+            </div>
+            <div class="col-md-2 form-group">
+                <select class="form-control" ng-model="InstallmentTypeId" ng-change="GetBeneficiaryList()">
+                    <option value="0">--Choose Installment Type--</option>
+                    <option ng-repeat="li in InstallmentTypeList" value="{{li.MasterInstallmentID}}" ng-selected="li.MasterInstallmentID==InstallmentTypeId">
+                        {{li.NameEn}}
+                    </option>
+                </select>
+            </div>
+        </div>
+    </div>
+    <div class="container-fluid staticsSection">
+        <div class="row">
+            <div class="col-lg-3 col-md-6 col-sm-12 col-xs-12">
+                <div class="staticsDashboards staticsDashboards1">
+                    <div class="staticsDashboardsIcons">
+                        <img src="~/Content/PMKisan/images/icon/icon1.png" />
+                    </div>
+                    <div class="staticsDashboardsContent">
+                        <h1>{{TotalBeneficiaryList[0].TotalFarmers| indianFormat}} </h1>
+                        <h4>Payment successful of CM Kisan ({{TotalBeneficiaryList[0].InstallmentType}})</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 col-sm-12 col-xs-12">
+                <div class="staticsDashboards staticsDashboards2">
+                    <div class="staticsDashboardsIcons">
+                        <img src="~/Content/PMKisan/images/icon/icon2.png" />
+                    </div>
+                    <div class="staticsDashboardsContent">
+                        <div class="staticsDashboardsContentMulti">
+                            <div class="" title="Male">
+                                <h1>{{TotalBeneficiaryList[0].TotalMaleFarmers| indianFormat}}</h1>
+                                @*<span>Male</span>*@
+                                <img src="~/Content/PMKisan/images/icon/M_gnder.png" />
+
+                            </div>
+                            <div class="" title="Female">
+                                <h1>{{TotalBeneficiaryList[0].TotalFemaleFarmers| indianFormat}}</h1>
+                                @*<span>Female</span>*@
+                                <img src="~/Content/PMKisan/images/icon/F_gender.png" />
+                            </div>
+                            <div class="" title="Transgender">
+                                <h1>{{TotalBeneficiaryList[0].TotalTranFarmers| indianFormat}}</h1>
+                                @*<span>Transgender</span>*@
+                                <img src="~/Content/PMKisan/images/icon/T_Gender.png" />
+                            </div>
+
+                        </div>
+                        <h1>{{TotalBeneficiaryList[0].TotalFarmers| indianFormat}}</h1>
+                        <h4>Eligible Beneficiary</h4>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="col-lg-3 col-md-6 col-sm-12 col-xs-12">
+                <div class="staticsDashboards staticsDashboards4">
+                    <div class="staticsDashboardsIcons">
+                        <img src="~/Content/PMKisan/images/icon/icon1.png" />
+                    </div>
+                    <div class="staticsDashboardsContent">
+                        <h1>{{TotalBeneficiaryList[0].TotalFFarmers| indianFormat}}</h1>
+                        <h4>Payment Failure Beneficiary</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 col-sm-12 col-xs-12">
+                <div class="staticsDashboards staticsDashboards3">
+                    <div class="staticsDashboardsIcons">
+                        <img src="~/Content/PMKisan/images/icon/inr.png" />
+                    </div>
+                    <div class="staticsDashboardsContent">
+                        <h1>{{TotalBeneficiaryList[0].PayAmount | indianFormat:'R'}} </h1>
+                        <h4>{{TotalBeneficiaryList[0].InstallmentType}} Total Amount</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container-fluid QuarterlyOverviewSection">
+        <div class="panel panel-default">
+            <div class="panel-heading flexEqualCenter">
+                <b><i class="fa fa-th-list"></i>&nbsp; District Wise Beneficiary List</b>
+                <a href="~/pmkisan/Dashboard" class="backBtn"><i class="fa fa-angle-left"></i>Back</a>
+            </div>
+            <div class="panel-body">
+                <input type="hidden" id="hdnDistId" ng-model="search.DistId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DistrictId)" />
+
+                <div class="row" style="margin-bottom: 15px;">
+                    <div class="col-md-12">
+
+                        <label style="margin-right: 20px;">
+                            <input type="radio" ng-model="search.locationType" value="district" ng-change="onLocationTypeChange()"> District
+                        </label>
+
+                        <label>
+                            <input type="radio" ng-model="search.locationType" value="subdistrict" ng-change="onLocationTypeChange()">
+                            Sub-District
+                        </label>
+
+                        <label>
+                            <input type="radio" ng-model="search.locationType" value="village" ng-change="onLocationTypeChange()">
+                            Village
+                        </label>
+
+                    </div>
+                </div>
+
+                @*<div class="row">
+
+            <div class="col-md-3">
+                <label>{{translation.District}}:</label>
+                <select ng-model="search.districtId" class="form-control" ng-disabled="IsSubmiApplication || isLBDisabled || search.locationType == 'subdistrict'" ng-init="search.districtId='0'" ng-change="onDistrictChange()">
+                    <option value="0" disabled>{{translation.SelectOption}}</option>
+                    <option ng-repeat="li in DistrictList | orderBy:'DISTRICT_ENG'" value="{{li.DISTRICT_ID}}" ng-selected="li.DISTRICT_ID==selectedDistrictId">
+                        {{_language =='en-us' ?  li.DISTRICT_ENG : li.DISTRICT_MANGAL}}
+                    </option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label>{{translation.Sub}} {{translation.District}}:</label>
+                <select ng-model="search.subDistrictName" class="form-control" ng-init="search.subDistrictName=''" ng-disabled="search.locationType == 'district'" ng-change="onSubDistrictChange()">
+                    <option value="" disabled>{{translation.SelectOption}}</option>
+                    <option ng-repeat="li in SubDistrictList | orderBy:'SubDistrictName'" value="{{li.SubDistrictName}}">
+                        {{li.SubDistrictName}}
+                    </option>
+                </select>
+            </div>
+
+        </div>*@
+
+            <div class="row">
+
+                <div class="col-md-3">
+                    <label>{{translation.District}}:</label>
+                    <select ng-model="search.districtId" class="form-control" ng-disabled="IsSubmiApplication || isLBDisabled" ng-init="search.districtId='0'" ng-change="onDistrictChange()">
+                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                        <option ng-repeat="li in DistrictList | orderBy:'DISTRICT_ENG'" value="{{li.DISTRICT_ID}}" ng-selected="li.DISTRICT_ID==selectedDistrictId">
+                            {{_language =='en-us' ?  li.DISTRICT_ENG : li.DISTRICT_MANGAL}}
+                        </option>
+                    </select>
+                </div>
+
+                <div class="col-md-3" ng-if="search.locationType == 'subdistrict' || search.locationType == 'village'">
+                    <label>{{translation.Sub}} {{translation.District}}:</label>
+                    <select ng-model="search.subDistrictName" class="form-control" ng-init="search.subDistrictName=''" ng-change="onSubDistrictChange()">
+                        <option value="" disabled>{{translation.SelectOption}}</option>
+                        <option ng-repeat="li in SubDistrictList | orderBy:'SubDistrictName'"  value="{{li.SubDistrictName}}">  {{li.SubDistrictName}}  </option>
+                    </select>
+                </div>
+
+
+                <div class="col-md-3" ng-if="search.locationType == 'village'">
+                    <label>Village:</label>
+                    <select ng-model="search.villageName" class="form-control" ng-init="search.villageName=''" ng-change="onVillageChange()">
+                        <option value="" disabled>-- Select Village --</option>
+                        <option ng-repeat="v in VillageList | orderBy:'VillageName'" value="{{v.VillageName}}"> {{v.VillageName}} </option>
+                    </select>
+                </div>
+              
+            </div>
+                <div class="table-responsive pt-5">
+                    <table class="table table-hover table-striped table-bordered mb-0">
+                        <thead>
+                            <tr>
+                                <th valign="middle" rowspan="2" width="60">Sr. No.</th>
+
+                                @*<th valign="middle" rowspan="2">{{(search.districtId!='0' && search.subDistrictName!=''?'Village Name':search.districtId!='0'?'Sub District Name':'District Name')}}</th>*@
+                                <!-- District Column -->
+                                <!-- District (Always) -->
+                                <th valign="middle" rowspan="2">
+                                    District Name
+                                </th>
+
+                                <!-- SubDistrict -->
+                                <th valign="middle" rowspan="2"
+                                    ng-if="search.locationType == 'subdistrict' || search.locationType == 'village'">
+                                    Sub District Name
+                                </th>
+
+                                <!-- Village -->
+                                <th valign="middle" rowspan="2"
+                                    ng-if="search.locationType == 'village'">
+                                    Village Name
+                                </th>
+
+                                <th valign="middle" rowspan="2" align="center" class="text-center">Installment No.</th>
+                                <th valign="middle" rowspan="2" align="right" class="text-right">Beneficiary Count</th>
+                                <th valign="middle" rowspan="2" align="right" class="text-right">Failure Count</th>
+                                <th valign="middle" rowspan="2" align="right" class="text-right">Paid Amount</th>
+                                <th valign="middle" colspan="3" class="text-center">Gender</th>
+                                <th valign="middle" colspan="4" class="text-center">Category</th>
+                            </tr>
+                            <tr>
+                                <th valign="middle" align="right" class="text-right">Male</th>
+                                <th valign="middle" align="right" class="text-right">Female</th>
+                                <th valign="middle" align="right" class="text-right">Transgender</th>
+                                <th valign="middle" align="right" class="text-right" width="80">GEN</th>
+                                <th valign="middle" align="right" class="text-right" width="80">OBC</th>
+                                <th valign="middle" align="right" class="text-right" width="80">SC</th>
+                                <th valign="middle" align="right" class="text-right" width="80">ST</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="item in BeneficiaryList">
+                                <td>{{$index+1}}.</td>
+
+                                <!-- District -->
+                                <td>
+                                    {{item.DISTRICT_ENG}}
+                                </td>
+
+                                <!-- SubDistrict -->
+                                <td ng-if="search.locationType == 'subdistrict' || search.locationType == 'village'">
+                                    {{item.SubDistrictName}}
+                                </td>
+
+                                <!-- Village -->
+                                <td ng-if="search.locationType == 'village'">
+                                    {{item.VillageName}}
+                                </td>
+
+                                @*<td>*@
+                                @*{{item.SubDistrictName}}*@
+                                @*{{(search.districtId!='0' && search.subDistrictName!=''?item.VillageName:search.districtId!='0'?item.SubDistrictName:item.DISTRICT_ENG)}}*@
+                                @*</td>*@
+                                <td align="center">{{item.InstallmentType}}</td>
+                                <td align="right" style="background: linear-gradient(-45deg, rgba(188, 240, 188, {{((item.TotalFarmersPer)-40)}}%), transparent);"><a href="~/pmkisan/BeneficiaryListDetails?DistId={{search.districtId!='0'?search.districtId:item.DISTRICT_ID}}&FyId={{FinancialYearId}}&InstallmentTypeId={{InstallmentTypeId}}&type=1&subDistrictName={{search.subDistrictName!=''?search.subDistrictName:item.SubDistrictName}}&villageName={{item.VillageName}}" target="_blank">{{item.TotalFarmers |inrNumber}}</a></td>
+                                <td align="right" style="background: linear-gradient(-45deg, rgba(255, 0, 0, {{((item.TotalFFarmersPer)-15+17)}}%), transparent);"><a href="~/pmkisan/BeneficiaryListDetails?DistId={{item.DISTRICT_ID}}&FyId={{FinancialYearId}}&InstallmentTypeId={{InstallmentTypeId}}&type=0&subDistrictName={{item.SubDistrictName}}&villageName={{item.VillageName}}" target="_blank">{{item.TotalFFarmers |inrNumber}}</a></td>
+                                <td align="right">{{item.PayAmount | inrCurrency}}/-</td>
+                                <td align="right">{{item.TotalMaleFarmers | inrNumber}}</td>
+                                <td align="right">{{item.TotalFemaleFarmers | inrNumber}}</td>
+                                <td align="right">{{item.TotalTranFarmers | inrNumber}}</td>
+                                <td align="right">{{item.TotalGeneral | inrNumber}}</td>
+                                <td align="right">{{item.TotalOBC | inrNumber}}</td>
+                                <td align="right">{{item.TotalSC | inrNumber}}</td>
+                                <td align="right">{{item.TotalST | inrNumber}}</td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr ng-repeat="item in TotalBeneficiaryList" class="bg-success">
+                                <td colspan="3" align="right"><b>Total</b></td>
+                                @*<td align="right"><b>{{item.TotalFarmers | inrNumber}}</b></td>*@
+                                <td align="right"><a href="~/pmkisan/BeneficiaryListDetails?DistId=0&FyId={{FinancialYearId}}&InstallmentTypeId={{InstallmentTypeId}}&type=1" target="_blank"><b>{{item.TotalFarmers | inrNumber}}</b></a></td>
+                                <td align="right"><a href="~/pmkisan/BeneficiaryListDetails?DistId=0&FyId={{FinancialYearId}}&InstallmentTypeId={{InstallmentTypeId}}&type=0" target="_blank"><b>{{item.TotalFFarmers | inrNumber}}</b></a></td>
+                                <td align="right"><b>{{item.PayAmount | inrCurrency}}/-</b></td>
+                                <td align="right"><b>{{item.TotalMaleFarmers | inrNumber}}</b></td>
+                                <td align="right"><b>{{item.TotalFemaleFarmers | inrNumber}}</b></td>
+                                <td align="right"><b>{{item.TotalTranFarmers | inrNumber}}</b></td>
+                                <td align="right"><b>{{item.TotalGeneral | inrNumber}}</b></td>
+                                <td align="right"><b>{{item.TotalOBC | inrNumber}}</b></td>
+                                <td align="right"><b>{{item.TotalSC | inrNumber}}</b></td>
+                                <td align="right"><b>{{item.TotalST | inrNumber}}</b></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+        </div>
+    </div>
+</div>

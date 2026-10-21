@@ -1,0 +1,242 @@
+﻿@{
+    ViewBag.Title = "Society Mapping Report";
+}
+<style>
+    .flexEqualCenter {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    a.backBtn {
+        padding: 3px 5px;
+        background: rgb(99,205,219);
+        color: #fff;
+        border: 0px;
+        outline: none;
+        display: inline-block;
+        text-decoration: none;
+    }
+
+
+        a.backBtn i {
+            display: inline-block;
+            margin-right: 5px;
+        }
+</style>
+
+<script type="text/javascript">
+    var tableToExcel = (function () {
+        var uri = 'data:application/vnd.ms-excel;base64,'
+            , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>'
+            , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) }
+            , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
+        return function (table, name) {
+            if (!table.nodeType) table = document.getElementById(table)
+            var ctx = { worksheet: name || 'Worksheet', table: table.innerHTML }
+            window.location.href = uri + base64(format(template, ctx))
+        }
+    })()
+</script>
+<script src="~/Scripts/xlsx.full.min.js"></script>
+
+<script src="~/Scripts/AngularFramework/SocietyMappingReport.js?v=1.5"></script>
+<div ng-app="SocietyMappingWiseListMod" ng-controller="SocietyMappingWiseListCnt" ng-cloak="">
+    <div class="container-fluid citizen-dash-head">
+        <div class="row">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <h3 class="citizen-dash-head ng-binding">Society Mapping Report</h3>
+            </div>
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading flexEqualCenter">
+                        <b><i class="fa fa-filter"></i>&nbsp; Filters</b>
+                    </div>
+
+                    <div class="panel-body" id="search-filter">
+                        <input type="hidden" id="hdnDistrictId" ng-model="search.LoanDistrictId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DistrictId)" />
+
+                        <div class="row">
+                            <div class="col-lg-2 col-md-4 col-sm-6 col-xs-12 form-group">
+                                <label>  Report Type <span class="error">*</span>  </label>
+                                <select name="ReportType" class="form-control" ng-model="search.ReportType" ng-init="search.ReportType='0'" >
+                                    <option value="0" disabled selected>--Select--</option>
+                                    <option value="Correct">Correct</option>
+                                    <option value="InCorrect">InCorrect</option>
+                                </select>
+                            </div>
+
+                            <div class="col-lg-2 col-md-4 col-sm-6 col-xs-12 form-group">
+                                <label>{{ translation.DistrictHeading}}:</label>
+                                <select name="DISTRICT_ID" ng-model="DISTRICT_ID" class="form-control" ng-init="DISTRICT_ID='0'">
+                                    <option value="0">{{translation.SelectOption}}</option>
+                                    <option ng-repeat="district in DistrictList" value="{{district.DISTRICT_ID}}">
+                                        {{_language =='en-us' ?  district.DISTRICT_ENG : district.DISTRICT_MANGAL}}
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-2 margin-Top20" style="padding-left: 0;" id="ddrStatus" ng-init="StatusId='0'">
+                                <label>{{ translation.Status}}:</label>
+                                <select name="StatusId" ng-model="StatusId" class="form-control">
+                                    <option value="0">{{translation.SelectOption}}</option>
+                                    <option ng-repeat="sts in StatusList" value="{{sts.SocietyProceesStatusId}}">
+                                        {{_language =='en-us' ?  sts.ProceesStatusTextEn : sts.ProceesStatusTextHi}}
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="col-lg-2 col-md-4 col-sm-6 col-xs-12 form-group">
+                                <label> Application  Type <span class="error">*</span> </label> <br />
+                                <div>
+                                    <label class="help-block-gender">
+                                        <input type="radio" id="sdfs" name="IsRural" ng-value="1" ng-model="search.IsRural"> Rural
+                                    </label>
+                                    <label class="help-block-gender">
+                                        <input type="radio" id="sdf" ng-value="0" name="IsRural" ng-model="search.IsRural"> Urban
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-2 col-md-4 col-sm-6 col-xs-12 form-group">
+                                <label> Type <span class="error">*</span> </label> <br />
+                                <div>
+                                    <label class="help-block-gender">
+                                        <input type="radio" id="sdfs" name="IsOnline" ng-value="1" ng-model="search.Type"> Online
+                                    </label>
+                                    <label class="help-block-gender">
+                                        <input type="radio" id="sdf" ng-value="0" name="IsOnline" ng-model="search.Type"> Offline
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="col-md-2">
+                                <label for="search">{{translation.ItemPerPage}}:</label>
+                                <input type="number" min="1" max="1000" class="form-control" ng-model="pageSize">
+                            </div>
+                        </div>
+                        <div  style="display: flex; justify-content: center;">
+                            <button class="btn btn-success dev-btn" ng-click="searchRequest(GetSocietyJurisdictionList)">Search</button>
+                            <button class="btn btn-success dev-btn" ng-click="Clear()">Clear</button>                           
+                            <button type="button" ng-click="exportAllToExcel()" class="btn btn-success dev-btn">
+                                <i class="fa fa-file-excel-o"></i> Export Excel
+                            </button>
+                        </div>
+
+                        <div class="clearfix"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <b><i class="fa fa-th-list"></i> Society Mapping Report</b>
+                    </div>
+                    <div class="panel-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped table-hover">
+
+                                <thead>
+
+                                    <tr class="text-center bg-primary text-white">
+
+                                        <th style="vertical-align:middle;">Sr No</th>
+                                        <th style="vertical-align:middle;">Society Name</th>
+                                        <th style="vertical-align:middle;">Data Type</th>
+                                        <!-- Rural -->
+                                        <th ng-if="search.IsRural == 1" style="vertical-align:middle;">District</th>
+                                        <th ng-if="search.IsRural == 1" style="vertical-align:middle;">Block</th>
+                                        <th ng-if="search.IsRural == 1" style="vertical-align:middle;">Gram Panchayat</th>
+                                        <th ng-if="search.IsRural == 1" style="vertical-align:middle;">Village</th>
+
+                                        <!-- Urban -->
+                                        <th ng-if="search.IsRural == 0" style="vertical-align:middle;">District</th>
+                                        <th ng-if="search.IsRural == 0" style="vertical-align:middle;">City</th>
+                                        <th ng-if="search.IsRural == 0" style="vertical-align:middle;">Ward</th>
+
+                                        <th style="vertical-align:middle;">Current Status</th>
+
+                                    </tr>
+
+                                </thead>
+
+                                <tbody>
+
+                                    <!-- Society Data Row -->
+                                    <tr ng-repeat-start="item in SocietyJurisdictionList">
+                                        @*<td rowspan="2" class="text-center" style="vertical-align:middle;"> {{$index + 1}}  </td>*@
+                                        <td rowspan="2" class="text-center" style="vertical-align:middle;"> {{(((DataPagingDetails.PageNumber - 1) * DataPagingDetails.PageSize) + 1)+$index}}  </td>
+
+                                        <td rowspan="2" style="vertical-align:middle;">  {{item.SocietyName}} </td>
+                                        <td class="text-center"> <span class="label label-info"> Society Data </span>  </td>
+                                        <td ng-if="search.IsRural == 1"> {{item.SDistrictName}} </td>
+                                        <td ng-if="search.IsRural == 1">  {{item.SBlockName}} </td>
+                                        <td ng-if="search.IsRural == 1">  {{item.SGramPanchayatName}} </td>
+                                        <td ng-if="search.IsRural == 1">  {{item.SVillageName}}  </td>
+
+                                        <!-- Urban -->
+                                        <td ng-if="search.IsRural == 0"> {{item.SDistrictName}} </td>
+                                        <td ng-if="search.IsRural == 0"> {{item.SCityName}} </td>
+                                        <td ng-if="search.IsRural == 0">  {{item.SWardName}} </td>
+
+                                        <!-- Status -->
+                                        <td rowspan="2" class="text-center" style="vertical-align:middle;">
+                                            <span class="label label-success"> {{item.CurrentStatus}}  </span>
+                                        </td>
+
+                                    </tr>
+
+                                    <!-- Master Data Row -->
+                                    <tr ng-repeat-end>                                           
+                                        <td class="text-center">  <span class="label label-primary"> Master Data  </span>  </td>
+                                        <!-- Rural -->
+                                        <td ng-if="search.IsRural == 1"> {{item.DistrictName}}  </td>
+                                        <td ng-if="search.IsRural == 1"> {{item.BlockName}}  </td>
+                                        <td ng-if="search.IsRural == 1"> {{item.GramPanchayatName}}  </td>
+                                        <td ng-if="search.IsRural == 1">  {{item.VillageName}} </td>
+                                        <!-- Urban -->
+                                        <td ng-if="search.IsRural == 0">  {{item.DistrictName}} </td>
+                                        <td ng-if="search.IsRural == 0"> {{item.CityName}} </td>
+                                        <td ng-if="search.IsRural == 0">  {{item.WardName}}  </td>
+                                    </tr>
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                        <div class="col-md-12">
+                            <div ng-if="DataPagingDetails.TotalPages >1" class="dataTables_paginate paging_simple_numbers" id="dataTables-example_paginate">
+                                <div class="dataTables_info" id="dataTables-example_info" role="status" aria-live="polite">
+                                    Total Records: {{DataPagingDetails.TotalRecords}}
+                                </div>
+                                <ul class="pagination pagination_1" style="margin-left: 10px !important;">
+                                    <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« First</span></li>
+                                    <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« Previous</span></li>
+
+                                    <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest('1',GetSocietyJurisdictionList)" style="cursor: pointer;">
+                                        <span>«First</span>
+                                    </li>
+                                    <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest(DataPagingDetails.PageNumber-1,GetSocietyJurisdictionList)" style="cursor:pointer;">
+                                        <span>« Previous</span>
+                                    </li>
+                                    <li class="{{n==DataPagingDetails.PageNumber?'active':''}}" style="{{n==DataPagingDetails.PageNumber?'':'cursor: pointer'}}" ng-repeat="n in PagingRange(DataPagingDetails.StartPageNumber,DataPagingDetails.EndPageNumber,DataPagingDetails.TotalPages)" ng-click="pageRequest(n,GetSocietyJurisdictionList)"><span>{{n}}</span></li>
+                                    <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Next</span></li>
+                                    <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Last</span></li>
+                                    <li ng-if="DataPagingDetails.PageNumber!= DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.PageNumber+1,GetSocietyJurisdictionList)" style="cursor:pointer;">
+                                        <span>Next »</span>
+                                    </li>
+                                    <li ng-if="DataPagingDetails.PageNumber != DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.TotalPages,GetSocietyJurisdictionList)" style="cursor:pointer;">
+                                        <span>Last »</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>       
+        
+    </div>
+</div>

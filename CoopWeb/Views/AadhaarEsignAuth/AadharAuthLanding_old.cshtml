@@ -1,0 +1,93 @@
+﻿@{
+    Layout = null;
+}
+
+<script src="~/Scripts/angular.js"></script>
+<script src="~/Scripts/jquery-3.1.0.js"></script>
+<script src="~/Scripts/dirPagination.js"></script>
+<script src="~/Scripts/angular-cookies.js"></script>
+
+<script>
+    var app = angular.module('authApp', []);
+    app.controller('authCtrl', function ($scope, $http) {
+        $scope.result = '';
+        const urlParams = new URLSearchParams(window.location.search);
+        $scope.callController = function () {
+            if ($('#TxnIdDecData').val()!= "")
+                return;
+            $http.get("../ApplicationFlow/GenerateAadhaarOTPForEsing_Test")
+                .then(function (response) {
+                    console.log(response.data);
+                    var responseHtml = response.data
+                    var tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = responseHtml;
+
+                    document.body.appendChild(tempDiv);
+
+                    var form = tempDiv.querySelector('form');
+                    form.onsubmit = function (event) {
+                        event.preventDefault(); // Prevent the default form submission
+
+                        var formData = new FormData(form);
+
+                        $http({
+                            method: 'POST',
+                            url: form.action, // Get the form's action URL
+                            data: formData,
+                            headers: { 'Content-Type': undefined },
+                            transformRequest: angular.identity
+                        })
+                            .then(function (response) {
+                                console.log("Form submission response: ", response.data);
+                                // Handle the response from the server here
+                            })
+                            .catch(function (error) {
+                                console.error('Error during form submission:', error);
+                            });
+                    };
+                    form.submit();
+                })
+                .catch(function (error) {
+                    console.error('Error:', error);
+                });
+        };
+        $scope.callController();
+
+        $scope.DecResponseData = function () {
+            $http.get("../ApplicationFlow/GenerateAadhaarOTPForEsingDec_Test/")
+                .then(function (data) {
+                    console.log(data);
+                    if (window.opener) {
+                        window.opener.receiveTID(data);
+                    }
+                    window.close();
+                })
+                .catch(function (error) {
+                    console.error('Error:', error);
+                });
+        };
+        if ($('#TxnIdDecData').val() != null && $('#TxnIdDecData').val() != '') {
+            debugger;
+            $scope.DecResponseData();
+        }
+
+
+
+
+
+        const authInstance = new window.AadhaarAuth({ AppCode: '', Data: '' });
+        authInstance.open({
+            handler: (response) => {
+                console.log("Authentication successful", response);
+                // Handle successful authentication
+            }
+        });
+    });
+</script>
+<div ng-app="authApp" ng-controller="authCtrl">
+    <form>
+        <input type="hidden" id="TxnIdDecData" value="@System.Web.HttpContext.Current.Session["TxnIdDecData"]">
+    </form>
+</div>
+
+

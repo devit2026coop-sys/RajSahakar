@@ -1,0 +1,237 @@
+﻿
+var MasterMod = angular.module('BeneficiaryDetailsListMod', ['angularUtils.directives.dirPagination']);
+MasterMod.controller("BeneficiaryDetailsListCnt", function ($rootScope, $scope, $location, $http) {
+
+    // SCOPE
+    $scope._language = 'en-us';
+    $scope.currentPage = 1;
+    $scope.pageSize = 50;
+    $scope.divClass = false;
+    $scope.BeneficiaryDetailList = [];
+    $scope.TotalBeneficiaryDetailList = [];
+
+    const urlParams = new URLSearchParams(window.location.search);
+    $scope.requestType = urlParams.get('type');
+    $scope.DataPaging = {
+        searchBoxDivId: 'search-filter',
+        currentPageID: 1,
+        pageSize: 50,
+        sortExpression: '',
+        sortDirection: '1',
+        searchParameters: [],
+        TotalRecords: 0,
+    }
+
+    //$scope.DataPaging.PageSize = $scope.obj.pageSize ?? 50;
+
+    $scope.pagechange = function () {
+        $scope.DataPaging = {
+            searchBoxDivId: 'search-filter',
+            currentPageID: 1,
+            pageSize: $scope.obj.pageSize ?? 50,
+            sortExpression: '',
+            sortDirection: '1',
+            searchParameters: [],
+            TotalRecords: 0,
+        }
+        $scope.GetBeneficiaryList(urlParams.get('type'), false);
+    }
+
+
+    $rootScope.pageRequest = function (pageid, callback) {
+        $scope.DataPaging.currentPageID = parseInt(pageid);
+        $scope.DataPaging.searchParameters.splice(0, $scope.DataPaging.searchParameters.length);
+        var ln = $('#' + $scope.DataPaging.searchBoxDivId).find('input:text,select,input:checkbox').length;
+        var indx = 1;
+        $('#' + $scope.DataPaging.searchBoxDivId).find('input:text,select,input:checkbox').each(function () {
+
+            if ($(this).attr("type") == "checkbox" && $(this).attr('type') != undefined) {
+                if ($(this).is(":checked")) {
+                    var parameter = { Key: $(this).attr('name') + '#' + indx, Value: $(this).val() }
+                    $scope.DataPaging.searchParameters.push(parameter);
+                }
+            } else {
+                if ($(this).val() != '' && $(this).val() != null && $(this).attr('name') != undefined) {
+                    var parameter = { Key: $(this).attr('name'), Value: $(this).val() }
+                    $scope.DataPaging.searchParameters.push(parameter);
+                }
+            }
+            if (indx == ln) {
+                $scope.GetBeneficiaryList(urlParams.get('type'), false);
+            }
+            ++indx;
+        });
+
+    }
+    $rootScope.SetDataPaging = function () {
+
+        if ($rootScope.DataPagingDetails.TotalRecords > 0) {
+            $rootScope.DataPagingDetails.TotalPages = parseInt(($rootScope.DataPagingDetails.TotalRecords / $rootScope.DataPagingDetails.PageSize)) + (($rootScope.DataPagingDetails.TotalRecords % $rootScope.DataPagingDetails.PageSize == 0) ? 0 : 1);
+            $rootScope.DataPagingDetails.StartRecord = ($rootScope.DataPagingDetails.TotalRecords == 0) ? 0 : ((($rootScope.DataPagingDetails.PageNumber - 1) * $rootScope.DataPagingDetails.PageSize) + 1);
+            $rootScope.DataPagingDetails.EndRecord = ($rootScope.DataPagingDetails.TotalPages == $rootScope.DataPagingDetails.PageNumber || $rootScope.DataPagingDetails.TotalRecords == 0) ? $rootScope.DataPagingDetails.TotalRecords : ((($rootScope.DataPagingDetails.PageNumber - 1) * $rootScope.DataPagingDetails.PageSize) + $rootScope.DataPagingDetails.PageSize);
+
+
+            $rootScope.DataPagingDetails.StartPageNumber = 1;
+            $rootScope.DataPagingDetails.EndPageNumber = $rootScope.DataPagingDetails.TotalPages;
+            if ($rootScope.DataPagingDetails.TotalPages > 5 && $rootScope.DataPagingDetails.PageNumber > 0) {
+                $rootScope.DataPagingDetails.StartPageNumber = $rootScope.DataPagingDetails.PageNumber == 1 ? 1 : $rootScope.DataPagingDetails.PageNumber - 1;
+                $rootScope.DataPagingDetails.EndPageNumber = $rootScope.DataPagingDetails.StartPageNumber + 4;
+                if ($rootScope.DataPagingDetails.EndPageNumber > $rootScope.DataPagingDetails.TotalPages) {
+                    $rootScope.DataPagingDetails.EndPageNumber = $rootScope.DataPagingDetails.TotalPages;
+                    $rootScope.DataPagingDetails.StartPageNumber = $rootScope.DataPagingDetails.StartPageNumber > 4 ? $rootScope.DataPagingDetails.EndPageNumber - 4 : $rootScope.DataPagingDetails.StartPageNumber;
+                }
+            }
+        }
+        $scope.DataPaging.TotalRecords = $rootScope.DataPagingDetails.TotalRecords
+    }
+    $rootScope.PagingRange = function (startPage, endPage, totalPages, step) {
+        step = step || 1;
+        var input = [];
+
+        for (var tStart = startPage; tStart <= endPage && tStart <= totalPages; tStart++) {
+            input.push(tStart);
+        }
+        return input;
+    };
+    $scope.searchRequest = function (callback) {
+        //$scope.DataPaging.searchParameters = [];
+        $scope.DataPaging.searchParameters.splice(0, $scope.DataPaging.searchParameters.length);
+        var ln = $('#' + $scope.DataPaging.searchBoxDivId).find('input:text,select,input:checkbox').length;
+        var indx = 1;
+        $('#' + $scope.DataPaging.searchBoxDivId).find('input:text,select,input:checkbox').each(function () {
+
+            if ($(this).attr("type") == "checkbox" && $(this).attr('type') != undefined) {
+                if ($(this).is(":checked")) {
+                    var parameter = { Key: $(this).attr('name') + '#' + indx, Value: $(this).val() }
+                    $scope.DataPaging.searchParameters.push(parameter);
+                }
+            } else {
+                if ($(this).val() != '' && $(this).val() != null && $(this).attr('name') != undefined) {
+                    var parameter = { Key: $(this).attr('name'), Value: $(this).val() }
+                    $scope.DataPaging.searchParameters.push(parameter);
+                }
+            }
+            if (indx == ln) {
+                $scope.DataPaging.currentPageID = 1;
+                callback($scope.SocietyCountId_ss, $scope.DistrictId_ss);
+            }
+            ++indx;
+        });
+    }
+
+
+
+
+
+
+    // on page load
+    $scope.OnPageLoad = function () {
+        $scope._language = _language;
+        if (_language == 'en-us') {
+            $http.get("/Translations/Translation_EN.json").
+                success(function (data, status) {
+                    $scope.translation = data;
+                }).
+                error(function (data, status) {
+                    alert("Error while translation");
+                });
+        }
+        else {
+            $http.get("/Translations/Translation_HI.json").
+                success(function (data, status) {
+                    $scope.translation = data;
+                }).
+                error(function (data, status) {
+                    alert("Error while translation");
+                });
+
+            $scope.ClearUnitForm = function () {
+                $scope.UnitMaster = null;
+            };
+        }
+
+    };
+
+    $scope.GetBeneficiaryList = function (type, isExport) {
+        $(".se-pre-con").fadeIn("slow");
+        if (!isExport)
+            $rootScope.DataPagingDetails = {};
+
+
+        $scope.districtId = urlParams.get('DistId') ?? 0;
+        $scope.FinancialYearId = urlParams.get('FyId') ?? 0;
+        //$scope.InstallmentTypeId = urlParams.get('InstallmentTypeId') ?? 0;
+        //$scope.subDistrictName = decodeURIComponent(urlParams.get('subDistrictName') ?? '');
+        //$scope.villageName = decodeURIComponent(urlParams.get('villageName') ?? '');
+
+        var jsonParameters = { "TotalRecords": ($scope.DataPaging.TotalRecords ?? 0), "PageNumber": $scope.DataPaging.currentPageID, "PageSize": $scope.DataPaging.pageSize, "SortingColumn": $scope.DataPaging.sortExpression, "SortingOrder": $scope.DataPaging.sortDirection, "SearchParameter": $scope.DataPaging.searchParameters };
+
+        return $http.post(SiteUrl + "/mis/GetBeneficiaryDetailList", JSON.stringify({ Details: jsonParameters, financialYearId: ($scope.FinancialYearId ?? 0), districtId: ($scope.districtId ?? 0), type: type, isExport: isExport })).
+           
+            success(function (data, status) {
+                if (isExport) {
+                    $scope.downloadFile(data);
+                }
+                else {
+                    if (data != null && data.length>0) {
+                        $scope.BeneficiaryDetailList = data; // JSON.parse(data.Result.Data.BeneficiaryDetailList);
+                        //$scope.TotalBeneficiaryDetailList = JSON.parse(data.Result.Data.TotalBeneficiaryDetailList);
+                        if ($scope.DataPaging.currentPageID == 1) {
+                            $scope.TotalRecords = data[0].TotalRecords;
+                        }
+                        $rootScope.DataPagingDetails.TotalRecords = $scope.TotalRecords;
+                        $rootScope.DataPagingDetails.PageNumber = $scope.DataPaging.currentPageID;
+                        $rootScope.DataPagingDetails.PageSize = $scope.DataPaging.pageSize;
+                        $rootScope.SetDataPaging();
+                        $scope.colsort = "";
+                        $scope.reverseSort = false;
+                        $scope.sortData = function (column) {
+                            $scope.reverseSort = ($scope.colsort == column) ? !$scope.reverseSort : false;
+                            $scope.colsort = column;
+                        };
+                        $scope.getSortClass = function (column) {
+                            if ($scope.colsort == column) {
+                                return $scope.reverseSort ? 'arrow-down' : 'arrow-up'
+                            }
+                            return '';
+                        };
+                    }
+                }
+                $(".se-pre-con").fadeOut("slow");
+            }).
+            error(function (data, status) {
+                console.log(data);
+                $(".se-pre-con").fadeOut("slow");
+                $scope.BeneficiaryDetailList = [];
+                $scope.TotalBeneficiaryDetailList = []
+            });
+    };
+    $scope.exportExcel = function () {
+        $scope.GetBeneficiaryList(urlParams.get('type'), true);
+    }
+    $scope.downloadFile = function (fileUrl) {
+        const fileName = fileUrl.split('/').pop();
+        $http({
+            url: fileUrl,
+            method: 'GET',
+            responseType: 'blob'
+        }).then(function (response) {
+            var blob = new Blob([response.data], { type: response.headers('Content-Type') });
+            var downloadUrl = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = downloadUrl;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }).catch(function (error) {
+            console.error('Error downloading file:', error);
+        });
+    };
+
+
+    $scope.OnPageLoad();
+    $scope.GetBeneficiaryList(urlParams.get('type'), false);
+
+});
+

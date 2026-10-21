@@ -1,0 +1,212 @@
+﻿@{
+    ViewBag.Title = "OTS Land Mortgaged Report";
+}
+<style>
+    .flexEqualCenter {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    a.backBtn {
+        padding: 3px 5px;
+        background: rgb(99,205,219);
+        color: #fff;
+        border: 0px;
+        outline: none;
+        display: inline-block;
+        text-decoration: none;
+    }
+
+        a.backBtn i {
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+    .tblthfont {
+        font-weight: bold;
+    }
+
+    .devtable thead tr th {
+        vertical-align: middle;
+    }
+</style>
+<script src="~/Scripts/xlsx.full.min.js"></script>
+<script src="~/Scripts/AngularFramework/OTS_Land_Mortgaged_Report.js?v=1.2"></script>
+<div ng-app="otsMotganedMod" ng-controller="otsMotganedCtrl" ng-cloak="">
+    <div class="container-fluid citizen-dash-head">
+        <input type="hidden" id="hdnDistrictId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DistrictId)" />
+        <input type="hidden" id="hdnPldbId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).PLDBId)" />
+        <input type="hidden" id="hdnPldbBranchId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).PLDBBrancchId)" />
+
+        <div class="panel panel-default">
+            <div class="panel-heading flexEqualCenter">
+                <b><i class="fa fa-th-list"></i>&nbsp; OTS Land Mortgaged Report</b>
+                <div class="text-right">
+                    <button class="btn btn-primary dev-btn" ng-show="ProgressLandMortgagedDetail!=null && ProgressLandMortgagedDetail.length>0" ng-click="ReportDownload()">Export Excel</button>
+                </div>
+            </div>
+            <div class="panel-body">
+                <input type="hidden" id="hdnDistrictId" ng-model="search.LoanDistrictId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DistrictId)" />
+
+                <div class="row">
+                    <div class="col-md-12 form-group">
+                        <label class="help-block-gender">
+                            <input type="radio" id="NormalCases" name="ReportType" ng-value="1" ng-model="ReportType" ng-change="ReportTypeChange() " selected> Normal Cases
+                        </label>
+                        <label class="help-block-gender">
+                            <input type="radio" id="103Cases" ng-value="2" name="ReportType" ng-model="ReportType" ng-change="ReportTypeChange()"> 103 Cases
+                        </label>
+                    </div>
+
+                    <div class="col-md-12 form-group">
+                        <label class="help-block-gender">
+                            <input type="radio" ng-value="0" name="AmountType" ng-model="AmountType"> मूल रूप में राशि देखें
+                        </label>
+                        <label class="help-block-gender">
+                            <input type="radio" name="AmountType" ng-value="1" ng-model="AmountType"> लाख में राशि देखें
+                        </label>
+                    </div>
+                </div>
+
+                <div class="row">
+
+                    <div class="col-md-2 form-group" ng-show="false">
+                        <label>{{ translation.District}}<span class="error">*</span></label>
+                        <select id="DISTRICT_ID" ng-model="search.DISTRICT_ID" class="form-control" ng-init="search.DISTRICT_ID='0'" ng-change="PLDBListData(0)">
+                            <option value="0">{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in DistrictList" value="{{item.DISTRICT_ID}}">
+                                {{_language =='en-us' ?  item.DISTRICT_ENG : item.DISTRICT_MANGAL}}
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="col-lg-2 form-group " id="ddlPLDBID">
+                        <label for="PLDB_ID">{{ translation.PLDB}} </label>
+                        <select id="PLDB_ID" name="PLDB_ID" ng-model="search.PLDB_ID" class="form-control" ng-init="PLDB_ID='0'" ng-change="PLDBBranchList('0')">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="itemPLDB in PLDBList  track by itemPLDB.PldbId " value="{{itemPLDB.PldbId}}">
+                                {{itemPLDB.PLDBName}}
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="col-lg-2 form-group" id="ddlPldbBranchID">
+                        <label for="PLDB_Branch_ID">{{ translation.Branch}}</label>
+                        <select ng-model="search.PLDB_Branch_ID" name="PLDB_Branch_ID" id="PLDB_Branch_ID" class="form-control" ng-init="PLDB_Branch_ID='0'" ng-change="GetOtsLandMortgagedDetails()">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="itemBlock in PLDBBranches " value="{{itemBlock.BLOCK_ID}}">
+                                {{_language =='en-us' ?  itemBlock.BLOCK_ENG : itemBlock.BLOCK_MANGAL}}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+                <div class="table-responsive devtable">
+                    <table class="table table-hover table-striped table-bordered mb-0" id="{{OTSLandMortgagedDetail}}">
+                        <thead>
+                            <tr>
+                                <th rowspan="3">क्र.सं.</th>
+                                <th rowspan="3">प्राथमिक बैंक</th>
+                                <th rowspan="2" colspan="2" style="text-align:center;">पात्र ऋणी </th>
+                                @*<th colspan="2" ng-show="ReportType=='1'" style="text-align:center;">Land Mortgage</th>*@
+                                <th colspan="4" style="text-align:center;">वसूली</th>
+                                <th colspan="{{colspan}}" style="text-align:center;">
+                                    लंबित स्तर
+                                </th>
+                                @*<th rowspan="2" colspan="2" style="text-align:center;" ng-if="ReportType=='1'">
+                                    <span>नामान्तरण <br />खुल चुका है</span>
+                                </th>*@
+                                <th rowspan="2" style="text-align:center;" ng-if="ReportType=='2'">
+                                    <span>पोर्टल पर <br />अपलोड से वंचित</span>
+                                </th>
+                                <th rowspan="2" colspan="2" style="text-align:center;" ng-if="ReportType=='1'">
+                                    ऋण नीति अनुसार <br />रहन दर्ज आवश्यक नहीं
+                                </th>
+                            </tr>
+                            <tr>
+                                @*<th ng-show="ReportType=='1'">Count(Yes)</th>
+                                    <th ng-show="ReportType=='1'">Count(No)</th>*@
+                                <th colspan="2" style="text-align:center;">आंशिक</th>
+                                <th colspan="2" style="text-align:center;">पूर्ण </th>
+                                <th colspan="2" style="text-align:center;">बैंक</th>
+                                <th colspan="2" ng-show="ReportType=='2'" style="text-align:center;">उप रजिस्ट्रार </th>
+                                <th colspan="2" ng-show="ReportType=='2'" style="text-align:center;">जिला कलेक्टर</th>
+                                <th colspan="2" style="text-align:center;">तहसीलदार</th>
+                                <th colspan="2" style="text-align:center;">पटवारी </th>
+                                <th colspan="2" style="text-align:center;">
+                                    <span ng-if="ReportType==1">
+                                        नामान्तरण खुल चुका है
+                                    </span>
+                                    <span ng-if="ReportType==2">Mutation</span>
+                                </th>
+                            </tr>
+                            <tr>
+                                <th>सं.</th>
+                                <th>राशि</th>
+                                @*<th ng-show="ReportType=='1'">-</th>
+                                    <th ng-show="ReportType=='1'">-</th>*@
+                                <th>सं.</th>
+                                <th>राशि</th>
+                                <th>सं.</th>
+                                <th>राशि</th>
+                                <th>सं.</th>
+                                <th>राशि</th>
+                                <th ng-show="ReportType=='2'">सं.</th>
+                                <th ng-show="ReportType=='2'">राशि</th>
+                                <th ng-show="ReportType=='2'">सं.</th>
+                                <th ng-show="ReportType=='2'">राशि</th>
+                                <th>सं.</th>
+                                <th>राशि</th>
+                                <th>सं.</th>
+                                <th>राशि</th>
+                                <th>सं.</th>
+                                <th>राशि</th>
+                                <th ng-if="ReportType==2"></th>
+                                @*<th ng-if="ReportType==1">सं.</th>
+                                <th ng-if="ReportType==1">राशि</th>*@
+                                <th ng-if="ReportType==1">सं.</th>
+                                <th ng-if="ReportType==1">राशि</th>
+                        </thead>
+                        <tbody>
+                            <tr ng-if="ProgressLandMortgagedDetail && ProgressLandMortgagedDetail.length > 0" ng-repeat="item in ProgressLandMortgagedDetail track by $index" ng-style="(item.PLDBName == 'Total') && {'font-weight': 'bold', 'color': '#fdfdfd', 'background': '#466b6d'}">
+                                <th><span ng-hide="item.PLDBName=='Total'">{{$index+1}}.</span></th>
+                                <th>{{item.PLDBName}}</th>
+                                <td>{{item.TotalCasesNo}}</td>
+                                <td>{{item.TotalCasesAmount | ShowInLac:AmountType}}</td>
+                                @*<td ng-show="ReportType=='1'">{{item.LandMortgageYesCount}}</td>
+                                    <td ng-show="ReportType=='1'">{{item.LandMortgageNoCount}}</td>*@
+                                <td>{{item.RecoveryCasesPartialCount}}</td>
+                                <td>{{item.RecoveryCasesPartialAmount | ShowInLac:AmountType}}</td>
+                                <td>{{item.RecoveryCasesComplateCount}}</td>
+                                <td>{{item.RecoveryCasesComplateAmount | ShowInLac:AmountType}}</td>
+                                <td>{{item.NoRecoveryPLDBCount}}</td>
+                                <td>{{item.NoRecoveryPLDBAmount | ShowInLac:AmountType}}</td>
+                                <td ng-show="ReportType=='2'">{{item.NoRecoveryDRCount}}</td>
+                                <td ng-show="ReportType=='2'">{{item.NoRecoveryDRAmount | ShowInLac:AmountType}}</td>
+                                <td ng-show="ReportType=='2'">{{item.NoRecoveryCollectorCount}}</td>
+                                <td ng-show="ReportType=='2'">{{item.NoRecoveryCollectorAmount | ShowInLac:AmountType}}</td>
+                                <td>{{item.NoRecoveryTehsildarCount}}</td>
+                                <td>{{item.NoRecoveryTehsildarAmount | ShowInLac:AmountType}}</td>
+                                <td>{{item.NoRecoveryPatwariCount}}</td>
+                                <td>{{item.NoRecoveryPatwariAmount | ShowInLac:AmountType}}</td>
+                                <td>{{item.NoRecoveryMortgagedCount}}</td>
+                                <td>{{item.NoRecoveryMortgagedAmount | ShowInLac:AmountType}}</td>
+                                <td ng-if="ReportType=='2'">
+                                    {{(item.TotalCasesNo * 1)-((item.RecoveryCasesPartialCount * 1)+(item.RecoveryCasesComplateCount * 1)+(item.NoRecoveryPLDBCount * 1)+(item.NoRecoveryDRCount * 1)+(item.NoRecoveryCollectorCount * 1)+(item.NoRecoveryTehsildarCount * 1)+(item.NoRecoveryPatwariCount*1)+(item.NoRecoveryMortgagedCount*1))}}
+                                </td>
+                                @*<td ng-if="ReportType==1">{{item.NoRecoveryMortgagedCount}}</td>
+                                <td ng-if="ReportType==1">{{item.NoRecoveryMortgagedAmount | ShowInLac:AmountType}}</td>*@
+                                <td ng-if="ReportType==1">{{item.MortgageNotNecessaryCount}}</td>
+                                <td ng-if="ReportType==1">{{item.MortgageNotNecessaryAmount | ShowInLac:AmountType}}</td>
+                            </tr>
+                            <tr ng-if="(!ProgressLandMortgagedDetail || ProgressLandMortgagedDetail.length === 0)">
+                                <td colspan="{{(ReportType==1?18:21)}}" class="text-center">No records found</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+        </div>
+    </div>
+</div>

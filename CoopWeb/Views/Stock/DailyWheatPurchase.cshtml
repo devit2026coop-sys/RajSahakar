@@ -1,0 +1,431 @@
+﻿
+<script src="~/Scripts/AngularFramework/DailyWheatPurchase.js"></script>
+
+<style type="text/css">
+    body {
+        font-family: Arial;
+        font-size: 10pt;
+    }
+
+    table {
+        border: 1px solid #ccc;
+        border-collapse: collapse;
+    }
+
+        table th {
+            background-color: #F7F7F7;
+            color: #333;
+            font-weight: bold;
+        }
+
+        table th, table td {
+            padding: 5px;
+            border: 1px solid #ccc;
+        }
+
+
+
+    .notValid {
+        border: solid 1px red !important
+    }
+
+   
+    .margin-Top20 {
+        margin-top: 20px;
+    }
+
+    .loading-container-new {
+        background: #fff !important;
+    }
+</style>
+<script type="text/javascript">
+
+
+    function ValidateNumaric(th, evt) {
+        var keyCode = (evt.which) ? evt.which : evt.keyCode
+        if (keyCode != 8 && keyCode != 0 && (keyCode < 48 || keyCode > 57))
+
+            return false;
+        return true;
+    };
+
+
+    function ValidateAlpha(evt) {
+        var keyCode = (evt.which) ? evt.which : evt.keyCode
+        if ((keyCode < 65 || keyCode > 90) && (keyCode < 97 || keyCode > 123) && keyCode != 32)
+
+            return false;
+        return true;
+    };
+    function ValidateFloat(th, e) {
+        if (isNaN(th.value + "" + String.fromCharCode(e.charCode)))
+            return false;
+        return true;
+    }
+    function ValidateFloat(th, e) {
+        if (isNaN(th.value + "" + String.fromCharCode(e.charCode)))
+            return false;
+        return true;
+    }
+
+  
+
+    $(document).ready(function () {
+
+
+        $('.devcalender').datepicker({
+            showOn: "both",
+            changeMonth: true,
+            buttonImage: "../images/calender.png",
+            changeYear: true,
+            dateFormat: "dd/mm/yy",
+            // minDate: '0'
+            yearRange: "c-10:c+0"
+        });
+
+        //$('.Fromdate').datepicker({
+        //    showOn: "both",
+        //    changeMonth: true,
+        //    buttonImage: "../images/calender.png",
+        //    changeYear: true,
+        //    dateFormat: "dd/mm/yy"
+        //});
+
+    });
+
+</script>
+<div ng-app="DailyWheatPurchaseMod" ng-controller="DailyWheatPurchaseCnt">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <h3 class="citizen-dash-head">Daily Wheat Purchase</h3>
+    </div>
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="devpage-breadcrumb">
+            <ul class="page-breadcrumb">
+                <li class="dev-page-br">
+                    <i class="fa fa-home"> </i>
+                    <a href="../Citizen/Index"> {{translation.Home}} </a>
+                    <i class="fa fa-angle-right"> </i>
+                </li>
+                <li style="float: left">
+                    <span style="margin: 0 5px;">Daily Wheat Purchase</span>
+                </li>
+                <li style="float: right;" id="divAddBtn">
+                    <i class="fa fa-angle-double-right" style="color: #025e63;"></i>
+                    <a ng-click="AddNew()" style="color: #025e63; cursor: pointer; text-decoration:none; font-weight: bold;" class="ng-binding">{{translation.AddNew}}</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="table-responsive citizen-dash-head">
+            <table id="example" class="table devtable" style="border:1px solid rgb(222, 221, 221); float: left;">
+                <thead>
+                    <tr>
+                        <th>  SN. </th>
+                       <th> Commodity Name</th>
+                        <th> Purchase Center</th>
+                        <th> District Name</th>
+                        <th>Valid Date</th>
+                        <th>Quantity Note</th>
+                        <th> Date </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="item in DailyWheatPurchaseList">
+                        <td>{{$index+1}}</td>
+                        <td> {{item.CommodityNameEn}} </td>
+                        <td> {{ item.PurchaseCenterNameEn}}  </td>
+                        <td> {{_language =='en-us' ?  item.DISTRICT_ENG : item.DISTRICT_MANGAL}}  </td>
+                        <td>{{ item.Valid_From_Date }} </td>
+                        <td> {{item.QuantityNote}}</td>
+                        <td>{{item.CreationDate}}</td>
+                    </tr>
+                   <tr>
+                       <td colspan="7">
+                           <div ng-if="DataPagingDetails.TotalPages>1" class="dataTables_paginate paging_simple_numbers" id="dataTables-example_paginate">
+                               <div class="dataTables_info" id="dataTables-example_info" role="status" aria-live="polite">
+                                   Total Records: {{DataPagingDetails.TotalRecords}}
+                               </div>
+                               <ul class="pagination pagination_1" style="margin-left: 10px !important;">
+                                   <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« First</span></li>
+                                   <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« Previous</span></li>
+
+                                   <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest('1',GetDailyWheatPurchase)" style="cursor: pointer;">
+                                       <span>«First</span>
+                                   </li>
+                                   <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest(DataPagingDetails.PageNumber-1,GetDailyWheatPurchase)" style="cursor:pointer;">
+                                       <span>« Previous</span>
+                                   </li>
+                                   <li class="{{n==DataPagingDetails.PageNumber?'active':''}}" style="{{n==DataPagingDetails.PageNumber?'':'cursor: pointer'}}" ng-repeat="n in PagingRange(DataPagingDetails.StartPageNumber,DataPagingDetails.EndPageNumber,DataPagingDetails.TotalPages)" ng-click="pageRequest(n,GetDailyWheatPurchase)"><span>{{n}}</span></li>
+                                   <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Next</span></li>
+                                   <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Last</span></li>
+                                   <li ng-if="DataPagingDetails.PageNumber!= DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.PageNumber+1,GetDailyWheatPurchase)" style="cursor:pointer;">
+                                       <span>Next »</span>
+                                   </li>
+                                   <li ng-if="DataPagingDetails.PageNumber != DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.TotalPages,GetDailyWheatPurchase)" style="cursor:pointer;">
+                                       <span>Last »</span>
+                                   </li>
+                               </ul>
+                           </div>
+                       </td>
+                   </tr>
+                </tbody>
+            </table>
+
+         @*bhuendraDailyWheatPurchaseList*@
+        </div>
+      
+    </div>
+    <div class="dev-popup-body modal fade" id="addModal" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog" style="width: 75%;">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                 
+                </div>
+                <div class="modal-body">
+                    <form class="dev-search-form" ng-hide="showPriView" style="overflow: hidden; margin-bottom: 35px;" name="OfficeForm">
+                        <div class="col-md-12 margin-Top20" style="display:none;">
+
+                            <div class="col-md-3">
+                                <label>{{translation.FinancialYear}} </label>
+                            </div>
+                            <div class="col-md-6">
+                                @*<select ng-model="AddNewModel.FinancialYear" id="FinancialYear" class="form-control validateNewAdd" ng-init="AddNewModel.FinancialYear=''" ng-change="GetCommodityList('0')">
+                                    <option value="">{{translation.SelectOption}}</option>
+                                    <option ng-repeat="itm in FinancialYear" value="{{itm.Year}}">
+                                        {{_language =='en-us' ?  itm.Text : itm.Text}}
+                                    </option>
+                                </select>*@
+                            </div>
+                        </div>
+
+                        <div class="col-md-12 margin-Top20">
+                            <div class="col-md-2">
+                                <label>{{translation.Commodity}} </label>
+                            </div>
+                            <div class="col-md-5">
+                                <select ng-model="DailyPurchase.CommodityId" id="ddlCommodityId" class="form-control validateNewAdd" ng-init="AddNewModel.CommodityId='0'" ng-change="GetCommodityPrice(DailyPurchase.CommodityId)">
+                                    <option value="0" selected="selected">{{translation.SelectOption}}</option>
+                                    <option ng-repeat="itm in CommodityList" value="{{itm.CommodityId}}">
+                                        {{_language =='en-us' ?  itm.CommodityNameEn : itm.CommodityNameHi}}
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-12 margin-Top20">
+                            <div class="col-md-2">
+                                <label>District</label>
+                            </div>
+                            <div class="col-md-5">
+                                <select ng-model="DailyPurchase.DISTRICT_ID" id="dllDistrictId" class="form-control validateNewAdd" ng-init="DailyPurchase.DISTRICT_ID='0'" ng-change="GetPurchaseCenterList();">
+                                    <option value="0" selected="selected">{{translation.SelectOption}}</option>
+                                    <option ng-repeat="itm in DistrictList" value="{{itm.DISTRICT_ID}}">
+                                        {{_language =='en-us' ?  itm.DISTRICT_ENG : itm.DISTRICT_MANGAL}}
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+
+
+                        <div class="col-md-12 margin-Top20">
+                            <div class="col-md-2">
+                                <label> Purchase Center</label>
+                            </div>
+                            <div class="col-md-5">
+                                <select ng-model="DailyPurchase.PurchaseCenter_Id" id="dllPurchaseCenter_Id" class="form-control validateNewAdd" ng-init="AddNewModel.PurchaseCenter_Id='0'">
+                                    <option value="0" selected="selected">{{translation.SelectOption}}</option>
+                                    <option ng-repeat="itm in PurchaseCenterList" value="{{itm.PurchaseCenterId}}">
+                                        {{_language =='en-us' ?  itm.PurchaseCenterNameEn : itm.PurchaseCenterNameHi}}
+                                    </option>
+                                </select>
+                            </div>
+                            </div>
+
+                            <div class="col-md-12" style="margin-top:20px;">
+                                <div class="col-md-12">
+                                    <label>
+                                        {{translation.GoodsDescription}}
+                                    </label>
+                                </div>
+                                <div class="col-md-12">
+                                    <table id="example" class="table devtable" style="border:1px solid rgb(222, 221, 221); float: left;">
+                                        <thead>
+                                            <tr>
+                                                <th>
+                                                   SN.
+                                                </th>
+                                                <th>Quality</th>
+                                                <th>Quantity(Quintal)</th>
+                                                <th>No. of bags</th>
+                                                <th>Price</th>
+                                                <th>Total Price</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="NewRequestList">
+                                            <tr ng-repeat="item in DWPList">
+                                                <td>{{$index+1}}</td>
+                                                <td>
+                                                         <select ng-model="item.QualityID" id="QualityID_{{$index}}" class="form-control  validateNewAdd" ng-change="SetNetQuantity1($index,item.QualityID)">
+                                                        <option value="0" selected="selected">{{translation.SelectOption}}</option>
+                                                        <option ng-selected="{{itm.UnitId == item.Packages_Quantity_Unit}}" ng-repeat="itm in CommodityPriceList1" value="{{itm.UnitId}}">
+                                                           {{itm.UnitId =='1' ?  'FAQ' : 'URS'}}
+                                                        </select>
+                                                </td>
+                                                <td>
+                                                    <input type="text" id="Quantity_{{$index}}"  ng-keyup="SetNetQuantity($index)" style="" name="Quantity" class="form-control number-only  validateNewAdd" placeholder="{{translation.Quantity}}" ng-model="item.Quantity" maxlength="6" onkeypress='return ValidateFloat(this,event);' autocomplete="off">
+                                                </td>
+                                                <td>
+                                                    <input type="text" id="NoofBags_{{$index}}"  name="NoofBags" class="form-control number-only  validateNewAdd" placeholder="No of Bags" ng-model="item.NoofBags" maxlength="10" onkeypress='return ValidateFloat(this,event);' autocomplete="off">
+                                                </td>
+
+
+                                                <td>
+                                                    <input type="text" id="QualityPrice_{{$index}}"  name="QualityPrice" class="form-control number-only  validateNewAdd" ng-disabled="true" placeholder="QualityPrice" ng-model="item.QualityPrice" maxlength="10" onkeypress='return ValidateFloat(this,event);' autocomplete="off">
+                                                </td>
+                                                <td>
+                                                    <input type="text" id="TotalPrice_{{$index}}"  name="TotalPrice" class="form-control number-only  validateNewAdd" ng-disabled="true" placeholder="TotalPrice" ng-model="item.TotalPrice" maxlength="10" onkeypress='return ValidateFloat(this,event);' autocomplete="off">
+                                                </td>
+                                              
+                                            </tr>
+                                        </tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <td colspan="5"></td>
+                                                <td colspan="1" style="text-align:right;cursor:pointer;border:none;"><i ng-click="AddNewItem(item,$index)" class="fa fa-plus" title="Add New"></i>{{translation.Add}}</td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div class="col-md-12 margin-Top20">
+                                <div class="col-md-2">
+                                    <label>{{translation.ValidityDate}} </label>
+                                </div>
+                              
+                                    @*<input id="Valid_From_Date" name="Valid_From_Date" onchange="ValidateTodate(this);" disabled="disabled" class="form-control Fromdate" ng-model="AddNewModel.Valid_From_Date">*@
+
+
+                                    <div class="col-md-4 NewMemberdob">
+                                        <input name="Valid_From_Date" type="text" id="Valid_From_Date" dat-val="1" ng-disabled="true" class="form-control devcalender" placeholder="dd/MM/yyyy" ng-model="DailyPurchase.Valid_From_Date" autocomplete="off" onKeyPress="return isNumber(event);" size=10 maxlength=10 />
+                                    </div>
+                              
+                              
+                                <div class="col-md-2 NewMemberdob">
+                                    <label> {{translation.Remarks}} </label>
+                                  
+                                </div>
+
+                                <div class="col-md-4 NewMemberdob">
+                                    <textarea id="QuantityNote" name="QuantityNote" class="form-control" ng-model="DailyPurchase.QuantityNote"></textarea>
+                                </div>
+
+                                </div>
+                       
+                        @*bhupendra*@
+
+                        <div class="col-md-12 margin-Top20">
+                            <div class="col-md-2">
+                                <label>Payment Released  Rs. In (Lacs)</label>
+                            </div>
+                            <div class="col-md-4">
+                                <input type="text" class="form-control" name="PaymentReleased" id="PaymentReleased" placeholder="Payment Released Rs. In(Lacs)" ng-model="DailyPurchase.PaymentReleased">
+                            </div>
+                            <div class="col-md-2">
+                                <label>Pending Payment  Rs. In  (Lacs)</label>
+                            </div>
+                            <div class="col-md-4">
+                                <input type="text" class="form-control" name="PendingPayment" id="PendingPayment" placeholder="Pending Payment Rs. In (Lacs)" ng-model="DailyPurchase.PendingPayment">
+                            </div>
+                        </div>
+                    
+
+                        <div class="col-md-12 margin-Top20">
+                            <div class="col-md-2">
+                                <label>Qty. Sent for Storage Bags </label>
+                            </div>
+                            <div class="col-md-4">
+                                <input type="text" class="form-control" name="QtySent" id="QtySent" placeholder="Qty. Sent for Storage Bags" ng-model="DailyPurchase.QtySent">
+                            </div>
+                            <div class="col-md-2">
+                                <label>Qty. Lying for Storage Bags</label>
+                            </div>
+                            <div class="col-md-4">
+                                <input type="text" class="form-control" name="QtyLying" id="QtyLying" placeholder="Qty. Lying for Storage Bags" ng-model="DailyPurchase.QtyLying">
+                            </div>
+                        </div>
+
+                        <div class="col-md-12 margin-Top20">
+                            <div class="col-md-2">
+                                <label>Gunny Bags Sent up to Date Bags  </label>
+                            </div>
+                            <div class="col-md-4">
+                                <input type="text" class="form-control" name="GunnyBags" id="GunnyBags"  placeholder="Gunny Bags Sent up to Date Bags" ng-model="DailyPurchase.GunnyBags">
+                            </div>
+                            <div class="col-md-2">
+                                <label>Gunny Bags Stock on Day Bags</label>
+                            </div>
+                            <div class="col-md-4">
+                                <input type="text" class="form-control" name="GunnyBagsStock" id="GunnyBagsStock" placeholder="Gunny Bags Stock on Day Bags" ng-model="DailyPurchase.GunnyBagsStock">
+                            </div>
+                        </div>
+
+                        <div class="col-md-12 margin-Top20">
+                            <div class="col-md-2">
+                                <label>No. of Farmers Benefite</label>
+                            </div>
+                            <div class="col-md-4">
+                                <input type="text" class="form-control" name="NoofFarmersBenefite" id="NoofFarmersBenefite" placeholder="No. of Farmers Benefite" ng-model="DailyPurchase.NoofFarmersBenefite">
+                            </div>
+                            <div class="col-md-2">
+                                <label>WCM Recd till date bags</label>
+                            </div>
+                            <div class="col-md-4">
+                                <input type="text" class="form-control" name="WCMRecdtilldate" id="WCMRecdtilldate" placeholder="WCM Recd till date bags" ng-model="DailyPurchase.WCMRecdtilldate" >
+                            </div>
+                        </div>
+                        @*<div class="col-md-12 margin-Top20">
+                            <div class="col-md-2">
+                                <label>{{translation.DoneAmount}} </label>
+                            </div>
+                            <div class="col-md-4">
+                                <input type="text" class="form-control" placeholder="Done Amounts" value="Rs.  {{totalPrice}}" ng-disabled="true">
+                            </div>
+                        </div>*@
+                        @*bhupendra*@
+
+                    
+                            @*<div class="col-md-12 margin-Top20">
+                                <div class="col-md-2">
+                                <label>{{translation.MarketRate}} </label>
+                            </div>
+                            <div class="col-md-4 NewMemberdob">
+                                <input type="text" class="form-control" value="Rs. {{itemPrice}}" ng-disabled="true">
+                            </div>
+                                            <div class="col-md-2">
+                                                <label>{{translation.DoneAmount}} </label>
+                                            </div>
+                                            <div class="col-md-4 NewMemberdob">
+                                <input type="text" class="form-control" value="Rs.  {{totalPrice}}" ng-disabled="true">
+                            </div>
+                            </div>*@
+                            <div class="clearfix"></div>
+
+                            <div class="col-md-12" style="margin-top: 20px;">
+                                <div class="dev-menu-btn">
+                                    <button type="submit" class="btn btn-primary" ng-click="SaveDataValidate(true)">{{translation.Submit}}</button>
+                                </div>
+                            </div>
+                            </form>
+
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+
+    </div>

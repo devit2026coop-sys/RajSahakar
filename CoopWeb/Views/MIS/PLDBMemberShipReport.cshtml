@@ -1,0 +1,706 @@
+﻿@{
+    ViewBag.Title = "PLDBMemberShipReport";
+    Layout = "~/Views/Shared/_CitizenLayout.cshtml";
+}
+<script src="~/Scripts/AngularFramework/PLDBMembershipReport.js"></script>
+<script src="~/Scripts/AngularFramework/SocietydivisionwiseMprTB.js"></script>
+<link href="https://unpkg.com/tabulator-tables@4.8.1/dist/css/tabulator.min.css" rel="stylesheet">
+<script type="text/javascript" src="https://unpkg.com/tabulator-tables@4.8.1/dist/js/tabulator.min.js"></script>
+<script type="text/javascript" src="https://oss.sheetjs.com/sheetjs/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.5/jspdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.0.5/jspdf.plugin.autotable.js"></script>
+
+<script src="~/Scripts/Excel/jszip_v1.js"></script>
+<script src="~/Scripts/Excel/xlsx.js"></script>
+<script src="~/Scripts/Excel/jszip.js"></script>
+<script src="~/Scripts/Excel/FileSaver.js"></script>
+<script src="~/Scripts/Excel/myexcel.js"></script>
+
+<div ng-app="PLDBMemberShipReportMod" ng-controller="PLDBMemberShipReportCont">
+    <div class="col-md-12">
+        <h3 class="h3heading citizen-dash-head">{{translation.PLDBMemberShipReport}}</h3>
+    </div>
+
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="devpage-breadcrumb">
+            <ul class="page-breadcrumb">
+                <li class="dev-page-br">
+                    <i class="fa fa-home"> </i>
+                    <a href="#"> {{translation.MIS}}  </a>
+                    <i class="fa fa-angle-right"> </i>
+                </li>
+                <li style="float: left">
+                    <span style="margin: 0 5px;">{{translation.PLDBMemberShipReport}}</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="table-responsive citizen-dash-head">
+            <div class="table-dropdown" id="search-filter">
+                <div class="col-md-2 margin-Top20">
+                    <label for="search" class="ng-binding">{{translation.YEAR}}:</label>
+                    <select name="fy" style="" class="form-control" ng-model="MembershipReport.FinancialYear" ng-init="MembershipReport.FinancialYear=''">
+                        <option value="">{{translation.SelectOption}}</option>
+                        <option value="2015">2015</option>
+                        <option value="2016">2016</option>
+                        <option value="2017">2017</option>
+                        <option value="2018">2018</option>
+                        <option value="2019">2019</option>
+                        <option value="2020">2020</option>
+                        <option value="2019">2021</option>
+                        <option value="2020">2022</option>
+                    </select>
+                </div>
+                <div class="col-md-2 margin-Top20" style="">
+                    <label>{{ translation.Month}}:</label>
+                    <select name="MY" ng-model="MembershipReport.Month" class="form-control" ng-init="MembershipReport.Month=''">
+                        <option value="">{{translation.SelectOption}}-</option>
+                        <option ng-repeat="item in MonthList" value="{{item.Month_Id}}">
+                            {{_language =='en-us' ?  item.Month_En : item.Month_Hi}}
+                        </option>
+                    </select>
+                </div>
+                <div class="col-md-2 margin-Top20" style="">
+                    <label>{{ translation.DistrictHeading}}:</label>
+                    <select name="Districtdll" ng-model="MembershipReport.DistrictId" class="form-control" ng-init="MembershipReport.DistrictId=''" ng-change="BlockList()">
+                        <option value="">{{translation.SelectOption}}</option>
+                        <option ng-repeat="district in DistrictList" value="{{district.DISTRICT_ID}}">
+                            {{_language =='en-us' ?  district.DISTRICT_ENG : district.DISTRICT_MANGAL}}
+                        </option>
+                    </select>
+                </div>
+
+                <div class="col-md-2 margin-Top20">
+                    <label for="search">{{translation.PLDB}}:</label>
+                    <select ng-model="MembershipReport.PLDB_ID" name="ddlPldbId" class="form-control" ng-init="MembershipReport.PLDB_ID=''" ng-change="PLDBBranchList()">
+                        <option value="">{{translation.SelectOption}}</option>
+                        <option ng-repeat="itemPLDB in PLDB | orderBy:'PldbId'" value="{{itemPLDB.PldbId}}">
+                            {{itemPLDB.PLDBName}}
+                        </option>
+                    </select>
+                </div>
+                <div class="col-md-2 margin-Top20">
+                    <label>{{ translation.Branch}}</label>
+                    <select ng-model="MembershipReport.Branch_ID" name="ddlbranch" class="form-control" ng-init="MembershipReport.Branch_ID=''">
+                        <option value="">{{translation.SelectOption}}</option>
+                        <option ng-repeat="itemBlock in PLDBBranches | orderBy:'BLOCK_ENG'" value="{{itemBlock.BLOCK_ID}}">
+                            {{_language =='en-us' ?  itemBlock.BLOCK_ENG : itemBlock.BLOCK_MANGAL}}
+                        </option>
+                    </select>
+
+                </div>
+
+                @*<div class="col-md-2 margin-Top20" style="">
+                    <label>{{ translation.BlockHeading}}:</label>
+                    <select ng-model="MembershipReport.BLOCK_ID" name="blockdll" class="form-control" ng-init="MembershipReport.BLOCK_ID=''">
+                        <option value="">{{translation.SelectOption}}</option>
+                        <option ng-repeat="item in Blocks | orderBy:'BLOCK_ENG'" value="{{item.BLOCK_ID}}">
+                            {{_language =='en-us' ?  item.BLOCK_ENG : item.BLOCK_MANGAL}}
+                        </option>
+                    </select>
+                </div>*@
+
+
+                <div class="col-md-2 margin-Top20" style="">
+                    <label>{{ translation.CategoryEN}}</label>
+                    <select name="ddlCategory" ng-model="MembershipReport.CategoryId" class="form-control" ng-init="MembershipReport.CategoryId=''">
+                        <option value="">{{translation.SelectOption}}</option>
+                        <option ng-repeat="item in CategoryList | orderBy:'CODEID'" value="{{item.CODEID}}">
+                            {{_language =='en-us' ?  item.CODENAME : item.CODENAME_MANGAL}}
+                        </option>
+                    </select>
+                </div>
+
+                <div class="col-md-2 margin-Top20" style="">
+                    <label>{{ translation.Age}}</label>
+                    <select name="ddlAge" ng-model="MembershipReport.AgeId" class="form-control" ng-init="MembershipReport.AgeId=''">
+                        <option value="">{{translation.SelectOption}}</option>
+                        <option value="1-10">1-10 </option>
+                        <option value="11-20">11-20</option>
+                        <option value="21-30">21-30</option>
+                        <option value="31-40">31-40</option>
+                        <option value="41-50">41-50</option>
+                        <option value="51-60">51-60</option>
+                        <option value="61-70">61-70</option>
+                        <option value="71-80">71-80</option>
+                        <option value="81-90">81-90</option>
+                        <option value="91-200">Above 90</option>
+                    </select>
+                </div>
+
+                <div class="col-md-4  margin-Top20">
+                    <label>&nbsp;</label><br>
+                    <button type="button" ng-click="searchRequest(SearchData)" class="btn btn-primary dev-btn ng-binding">{{translation.Search}}</button>
+                    <button type="button" ng-click="ClearSearch()" class="btn btn-primary dev-btn ng-binding">{{translation.Clear}}</button>
+                </div>
+            </div>
+
+            <div class="col-lg-12" >
+                <input style="" type="radio" ng-click="GetWarehouseFilterList('M')" checked="checked" name="Type" value="Generate" />Members
+                <input style="" type="radio" ng-click="GetWarehouseFilterList('FY')" name="Type" value="Generate" />{{translation.yearwise}}
+                <input type="radio" style="" ng-click="GetWarehouseFilterList('MW')" name="Type" value="New" />{{translation.monthwise}}
+                <input type="radio" style="" ng-click="GetWarehouseFilterList('BW')" name="Type" value="New" />{{translation.blockwise}}
+                <input type="radio" style="" ng-click="GetWarehouseFilterList('DW')" name="Type" value="New" />{{translation.districtwise}}
+                <input type="radio" style="" ng-click="GetWarehouseFilterList('CW')" name="Type" value="New" />{{translation.categorywise}}
+                <input type="radio" style="" ng-click="GetWarehouseFilterList('AW')" name="Type" value="New" />{{translation.agewise}}
+                <input type="radio" style="" ng-click="GetWarehouseFilterList('BR')" name="Type" value="New" />{{translation.branchwise}}
+                <input type="radio" style="" ng-click="GetWarehouseFilterList('TMFW')" name="Type" value="New" />{{translation.totalmembersheepfeewise}}
+            </div>
+
+
+            <table id="example" class="table devtable" style="border:1px solid rgb(222, 221, 221); float: left;" ng-show="!SepterdList">
+                <thead>
+                    <tr>
+                        <th>
+                            {{translation.SRNO}}
+                        </th>
+
+                        <th ng-if="ReportType=='FY'">
+
+                            {{translation.YEAR}}
+                        </th>
+                        <th ng-if="ReportType=='MW'">
+
+                            {{translation.Month}}
+                        </th>
+                        <th ng-if="ReportType=='BW'">
+
+                            {{translation.BlockHeading}}
+                        </th>
+                        <th ng-if="ReportType=='DW'">
+
+                            {{translation.District}}
+                        </th>
+                        <th ng-if="ReportType=='CW'">
+
+                            {{translation.CategoryEN}}
+                        </th>
+
+                        <th ng-if="ReportType=='AW'">
+
+                            {{translation.Age}}
+                        </th>
+                        <th ng-if="ReportType=='BR'">
+                            {{translation.Branch}}
+                        </th>
+                        <th ng-if="ReportType=='TMFW'">
+
+                            {{translation.TotalFee}}
+                        </th>
+                        <th>
+                            {{translation.TotalMembers}}
+                        </th>
+                        <th>
+                            {{translation.Details}}
+
+                        </th>
+
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="item in PLDBMemberReportDetails">
+                        <td>{{$index+1}}</td>
+
+
+                        <td ng-if="ReportType=='FY'">
+                            {{item.Years}}
+                        </td>
+                        <td ng-if="ReportType=='MW'">
+
+
+                            {{item.months=='1'?'Jan':item.months=='2'?'Feb':item.months=='3'?'Mar':item.months=='4'?'April':item.months=='5'?'May':item.months=='6'?'June':item.months=='7'?'july':item.months=='8'?'Aug':item.months=='9'?'sep':item.months=='10'?'Oct':item.months=='11'?'Nov':item.months=='12'?'Dec':''}}
+
+
+                        </td>
+                        <td ng-if="ReportType=='BW'">
+
+                            {{item.BLOCK_ENG}}
+                        </td>
+                        <td ng-if="ReportType=='DW'">
+
+                            {{item.DISTRICT_ENG}}
+                        </td>
+                        <td ng-if="ReportType=='CW'">
+
+                            {{item.CODENAME}}
+                        </td>
+
+                        <td ng-if="ReportType=='AW'">
+
+                            {{item.Age}}
+                        </td>
+                        <td ng-if="ReportType=='BR'">
+
+                            {{item.BranchName_En}}
+                        </td>
+                        <td ng-if="ReportType=='TMFW'">
+
+                            {{item.TotalFee}}
+                        </td>
+
+
+
+                        <td>
+                            {{item.TotalMember}}
+                        </td>
+
+
+                        <td ng-if="ReportType=='FY'">
+                            <button type="submit" class="btn btn-primary dev-btn" ng-click="GetDetials(item.Years)">{{translation.Details}}</button>
+                        </td>
+                        <td ng-if="ReportType=='MW'">
+
+                            <button type="submit" class="btn btn-primary dev-btn" ng-click="GetDetials(item.months)">{{translation.Details}}</button>
+                        </td>
+                        <td ng-if="ReportType=='BW'">
+
+                            <button type="submit" class="btn btn-primary dev-btn" ng-click="GetDetials(item.BLOCK_ID)">{{translation.Details}}</button>
+                        </td>
+                        <td ng-if="ReportType=='DW'">
+
+                            <button type="submit" class="btn btn-primary dev-btn" ng-click="GetDetials(item.DISTRICT_ID)">{{translation.Details}}</button>
+                        </td>
+                        <td ng-if="ReportType=='CW'">
+
+                            <button type="submit" class="btn btn-primary dev-btn" ng-click="GetDetials(item.CODEID)">{{translation.Details}}</button>
+                        </td>
+
+                        <td ng-if="ReportType=='AW'">
+                            <button type="submit" class="btn btn-primary dev-btn" ng-click="GetDetials(item.Age)">{{translation.Details}}</button>
+                        </td>
+                        <td ng-if="ReportType=='BR'">
+                            <button type="submit" class="btn btn-primary dev-btn" ng-click="GetDetials(item.BranchId)">{{translation.Details}}</button>
+                        </td>
+                        <td ng-if="ReportType=='TMFW'">
+                            <button type="submit" class="btn btn-primary dev-btn" ng-click="GetDetials(item.MemberFees)">{{translation.Details}}</button>
+                        </td>
+
+
+                    </tr>
+                </tbody>
+            </table>
+
+            <div ng-show="SepterdList">
+                <table class="table table-responsive devtable">
+                    <thead>
+                        <tr>
+                            <th>
+                                {{translation.SRNO}}
+                            </th>
+                            <th>
+                                {{translation.ApplicantName}}
+                            </th>
+                            <th>
+                                {{translation.Age}}
+                            </th>
+                            <th>
+                                {{translation.PLDB}}
+                            </th>
+                            <th>{{translation.Branch}}</th>
+                            <th>
+                                {{translation.MobileNo}}
+                            </th>
+                            <th>
+                                {{translation.ApplicationNo}}
+                            </th>
+                            <th>
+                                {{translation.MembershipNo}}
+                            </th>
+                            <th>
+                                {{translation.MembershipFee}}
+                            </th>
+                            <th>
+                                {{translation.Date}}
+                            </th>
+                            <th>
+                                {{translation.Status}}
+                            </th>
+                            <th>{{translation.Details}}</th>
+
+                            <th>
+                                {{translation.TransactionLog}}
+                            </th>
+                            <th>
+                                {{translation.Certificates}}
+                            </th>
+                            @*
+                            <th>
+                                {{translation.TakeAction}}
+                            </th>*@
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @*ng-style="{'background-color': Item.ActionStatus == '0' ? 'red' : (Item.ActionStatus == '1' ? 'green' : '') }"*@
+                        <tr ng-repeat="Item in PLDBMemberReportCountby">
+                            <td>{{(((DataPagingDetails.PageNumber - 1) * DataPagingDetails.PageSize) + 1)+$index}}</td>
+                            <td>{{ Item.Name | uppercase }}</td>
+                            <td>{{ Item.Age}}</td>
+                            <td>{{(_language =='en-us' ?  Item.PLDBName : Item.PLDBNameHi) | uppercase}} </td>
+                            <td>{{(_language =='en-us' ?  Item.BLOCK_ENG : Item.BLOCK_MANGAL) | uppercase }}</td>
+                            <td>{{ Item.MobileNo }}</td>
+                            <td>{{ Item.ApplicationNo  }}</td>
+                            <td>{{ Item.ActionStatus==1043? Item.MembershipNo:''}}</td>
+                            <td>{{ Item.Amount  }}</td>
+                            <td>{{ Item.InsertDate  }}</td>
+                            <td>{{ Item.ProceesStatusTextHi  }}</td>
+                            <td style="text-align:center;">
+                                <i style="cursor:pointer;" class="fa fa-info-circle" ng-click="ViewMemberApplication(Item.RequestIdEnc,false)"></i>
+                            </td>
+                            <td style="text-align:center;">
+                                <i style="cursor:pointer;" class="fa fa-list-ul" data-target="#myModal" data-toggle="modal" ng-click="ShowTransactionLog(Item.RequestIdEnc)"></i>
+                            </td>
+                            <td style="text-align:center;">
+                                <a style="cursor:pointer;" ng-show="Item.MemberCertificate !=''" target="_blank" href="../Content/SocietyMember/{{Item.MemberCertificate}}"><i class="fa fa-id-card "></i></a>
+                            </td>
+                            @*
+                            <td style="text-align:center;">
+                                <i style="cursor:pointer;" class="fa fa-pencil-square-o" ng-click="ViewMemberApplication(Item.RequestIdEnc,true)" ng-if="Item.IsTakeAction==1"></i>
+                            </td>*@
+                        </tr>
+                        <tr>
+                            <td colspan="13">
+                                <div class="col-md-12">
+                                    <div ng-if="DataPagingDetails.TotalPages>1" class="dataTables_paginate paging_simple_numbers" id="dataTables-example_paginate">
+                                        <div class="dataTables_info" id="dataTables-example_info" role="status" aria-live="polite">
+                                            Total Records: {{DataPagingDetails.TotalRecords}}
+                                        </div>
+                                        <ul class="pagination pagination_1" style="margin-left: 10px !important;">
+                                            <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« First</span></li>
+                                            <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« Previous</span></li>
+
+                                            <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest('1',CountbySearchData)" style="cursor: pointer;">
+                                                <span>«First</span>
+                                            </li>
+                                            <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest(DataPagingDetails.PageNumber-1,CountbySearchData)" style="cursor:pointer;">
+                                                <span>« Previous</span>
+                                            </li>
+                                            <li class="{{n==DataPagingDetails.PageNumber?'active':''}}" style="{{n==DataPagingDetails.PageNumber?'':'cursor: pointer'}}" ng-repeat="n in PagingRange(DataPagingDetails.StartPageNumber,DataPagingDetails.EndPageNumber,DataPagingDetails.TotalPages)" ng-click="pageRequest(n,CountbySearchData)"><span>{{n}}</span></li>
+                                            <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Next</span></li>
+                                            <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Last</span></li>
+                                            <li ng-if="DataPagingDetails.PageNumber!= DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.PageNumber+1,CountbySearchData)" style="cursor:pointer;">
+                                                <span>Next »</span>
+                                            </li>
+                                            <li ng-if="DataPagingDetails.PageNumber != DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.TotalPages,CountbySearchData)" style="cursor:pointer;">
+                                                <span>Last »</span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="col-md-12">
+                    <input ng-if="PLDBMemberReportCountby.length>0" type="button" id="btnExport" class="btn btn-primary dev-btn" style="" ng-click="ExportData()" value="Export" />
+                </div>
+                <div class="col-md-12" style="text-align:right;">
+                    <button type="submit" class="btn btn-primary dev-btn" ng-click="Back()">{{translation.Back}}</button>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+
+
+
+    <style>
+        .dev-search-form div {
+            color: black !important;
+        }
+    </style>
+
+    <div class="dev-popup-body modal fade" id="divViewApplicationDetailShow" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog" style="width: 80%;">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 style="font-size: 25px; text-align:left;" class="modal-title">{{translation.PLDBHeading}}, {{ViewApplication.PLDBNameHi}}, {{translation.Branch}}-{{ViewApplication.BLOCK_MANGAL}}</h4>
+                </div>
+                <div class="modal-body">
+                    <form class="dev-search-form" style="overflow: hidden; margin-bottom: 35px;" name="OfficeForm">
+                        <div class="col-md-12 margin-Top20" ng-show="IsPaymentDone">
+                            <div class="col-md-5">
+                                {{translation.ApplicationNo}}
+                            </div>
+                            <div class="col-md-7">
+                                {{ViewApplication.ApplicationNo}}
+                            </div>
+                        </div>
+                        <div class="col-md-4 margin-Top20">
+                            <div class="col-md-5">
+                                <label>   {{translation.ApplicantName}} </label>
+                            </div>
+                            <div class="col-md-7">
+                                {{ViewApplication.Name}}
+                            </div>
+                            <div class="clearfix"></div>
+                        </div>
+
+
+                        <div class="col-md-4 margin-Top20">
+                            <div class="col-md-5">
+                                <label>   {{translation.FatherHusbandName}} </label>
+                            </div>
+                            <div class="col-md-7">
+                                {{ViewApplication.FatherHusbandName}}
+                            </div>
+                            <div class="clearfix"></div>
+                        </div>
+                        <div class="col-md-4 margin-Top20">
+                            <div class="col-md-5">
+                                <label>   {{translation.Age}} </label>
+                            </div>
+                            <div class="col-md-7">
+                                {{ViewApplication.Age}}
+                            </div>
+                            <div class="clearfix"></div>
+                        </div>
+                        <div class="col-md-4 margin-Top20">
+                            <div class="col-md-5">
+                                <label>   {{translation.EducationalQualification}} </label>
+                            </div>
+                            <div class="col-md-7">
+                                {{ViewApplication.QualificationHi}}
+                            </div>
+                            <div class="clearfix"></div>
+                        </div>
+                        <div class="col-md-4 margin-Top20">
+                            <div class="col-md-5">
+                                <label>   {{translation.PermanatAddress}} </label>
+                            </div>
+                            <div class="col-md-7">
+                                {{ViewApplication.Address}}
+                            </div>
+                            <div class="clearfix"></div>
+                        </div>
+                        <div class="col-md-4 margin-Top20">
+                            <div class="col-md-5">
+                                <label>   {{translation.CurrentAddress}} </label>
+                            </div>
+                            <div class="col-md-7">
+                                {{ViewApplication.CurrentAddress}}
+                            </div>
+                            <div class="clearfix"></div>
+                        </div>
+                        <div class="col-md-4 margin-Top20">
+                            <div class="col-md-5">
+                                <label>   {{translation.NomineeNameWithFatherName}} </label>
+                            </div>
+                            <div class="col-md-7">
+                                {{ViewApplication.NomineeName}}
+                            </div>
+                            <div class="clearfix"></div>
+                        </div>
+                        <div class="col-md-4 margin-Top20">
+                            <div class="col-md-5">
+                                <label>   {{translation.NomineeRelation}} </label>
+                            </div>
+                            <div class="col-md-7">
+                                {{ViewApplication.RelationHi}}
+                            </div>
+                            <div class="clearfix"></div>
+                        </div>
+                        <div class="col-md-4 margin-Top20">
+                            <div class="col-md-5">
+                                <label>   {{translation.MobileNo}} </label>
+                            </div>
+                            <div class="col-md-7">
+                                {{ViewApplication.MobileNo}}
+                            </div>
+                            <div class="clearfix"></div>
+                        </div>
+                        <div class="col-md-4 margin-Top20">
+                            <div class="col-md-5">
+                                <label>   {{translation.Business}} </label>
+                            </div>
+                            <div class="col-md-7">
+                                {{ViewApplication.Business}}
+                            </div>
+                            <div class="clearfix"></div>
+                        </div>
+                        <div class="col-md-4 margin-Top20" ng-show="IsPaymentDone">
+                            <div class="col-md-5">
+                                <label>   {{translation.MembershipFee}} </label>
+                            </div>
+                            <div class="col-md-7">
+                                100 ₹ {{translation.PartAmount}} 10 ₹
+                            </div>
+                            <div class="clearfix"></div>
+                        </div>
+                        <div class="col-md-4 margin-Top20" ng-show="IsPaymentDone">
+                            <div class="col-md-5">
+                                <label>   {{translation.TokenNo}} </label>
+                            </div>
+                            <div class="col-md-7">
+                                {{ViewApplication.TokenNo}}
+                            </div>
+                            <div class="clearfix"></div>
+                        </div>
+                        <div class="col-md-4 margin-Top20" ng-show="IsPaymentDone">
+                            <div class="col-md-5">
+                                <label>   {{translation.ReceiptNo}} </label>
+                            </div>
+                            <div class="col-md-7">
+                                {{ViewApplication.ReceiptNo}}
+                            </div>
+                            <div class="clearfix"></div>
+                        </div>
+                        <div class="col-md-4 margin-Top20" ng-show="IsPaymentDone">
+                            <div class="col-md-5">
+                                <label>   {{translation.BANK_NAME}} </label>
+                            </div>
+                            <div class="col-md-7">
+                                {{ViewApplication.BANK_NAME}}
+                            </div>
+                            <div class="clearfix"></div>
+                        </div>
+                        <div class="col-md-4 margin-Top20" ng-show="IsPaymentDone">
+                            <div class="col-md-5">
+                                <label>   {{translation.TranDate}} </label>
+                            </div>
+                            <div class="col-md-7">
+                                {{ViewApplication.TranDate}}
+                            </div>
+                            <div class="clearfix"></div>
+                        </div>
+                        <div class="col-md-4 margin-Top20" ng-show="IsPaymentDone">
+                            <div class="col-md-5">
+                                <label>   {{translation.KioskID}} </label>
+                            </div>
+                            <div class="col-md-7">
+                                {{ViewApplication.KioskID}}
+                            </div>
+                            <div class="clearfix"></div>
+                        </div>
+                        <div class="col-md-4 margin-Top20" ng-show="IsPaymentDone">
+                            <div class="col-md-5">
+                                <label>   {{translation.BANK_ACC_NO}} </label>
+                            </div>
+                            <div class="col-md-7">
+                                {{ViewApplication.BANK_ACC_NO}}
+                            </div>
+                            <div class="clearfix"></div>
+                        </div>
+                        <div class="col-md-12 margin-Top20">
+                            <div class="col-md-5">
+                                <label>   {{translation.Photo}} </label>
+                            </div>
+                            <div class="col-md-7">
+                                <img src="{{ViewApplication.PhotoPath}}" alt="Photo" width="100" height="100" />
+                            </div>
+                            <div class="clearfix"></div>
+                        </div>
+                        <div class="col-md-12 margin-Top20" ng-if="TackActionShow">
+                            <div class="col-md-5">
+                                <label> {{translation.TakeAction}} </label>
+                            </div>
+                            <div class="col-md-7">
+
+                            </div>
+                            <div class="clearfix"></div>
+                        </div>
+
+                        <div class="col-md-4 margin-Top20" ng-if="TackActionShow">
+                            <div class="col-md-5">
+                                <label>   {{translation.Status}} </label>
+                            </div>
+                            <div class="col-md-7">
+                                <select id="ddlStatus" ng-model="MemberApproval.StatusId" class="form-control" ng-init="MemberApproval.StatusId='0'">
+                                    <option value="0" disabled>{{translation.SelectOption}}</option>
+                                    <option ng-repeat="item in NextActionList | orderBy:'ProceesStatusTextHi'" value="{{item.SocietyProceesStatusId}}">
+                                        {{_language =='en-us' ?  item.ProceesStatusTextEn : item.ProceesStatusTextHi}}
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="clearfix"></div>
+                        </div>
+
+                        <div class="col-md-4 margin-Top20" ng-if="TackActionShow">
+                            <div class="col-md-5">
+                                <label>   {{translation.Remarks}} </label>
+                            </div>
+                            <div class="col-md-7">
+                                <textarea rows="2" class="form-control" cols="125" style="margin: 0px; width: 341px;resize:none;" placeholder="{{translation.Remarks}}" ng-model="MemberApproval.Remark" ng-maxlength="50" autocomplete="off" onKeyPress="return ValidateAlpha(event);"> </textarea>
+                            </div>
+                            <div class="clearfix"></div>
+                        </div>
+
+                        <div class="col-md-12 margin-Top20" ng-if="TackActionShow">
+                            <center>
+                                <br />            <div>
+                                    <button ng-if="ViewApplication.ActionStatus==1060" class="btn btn-primary dev-btn" ng-click="ApplicationEdit();EditMember(ViewApplication);ShowForm();"><i class="fa fa-edit"></i> {{translation.Edit}}</button>
+
+                                    <button class="btn btn-primary dev-btn ng-binding" ng-click="SavePLDBMemberStatus()">{{translation.Submit}}</button>
+                                </div>
+                            </center>
+                            <div class="clearfix"></div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="dev-popup-body modal fade" id="myModal" role="dialog">
+        <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content" style="width:800px">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title"> {{translation.TransactionLog}} </h4>
+                </div>
+                <div class="modal-header" style="color:#000;font-weight:800;">
+                    {{translation.ApplicationNo}} : {{ApplicationNo}} <br />
+                    {{translation.MembershipNo}} : {{MemberShipNo}} <br />
+                    {{translation.MemberName}} : {{TransactionMemberName}} <br />
+                    {{translation.PLDB}} : {{TransactionPLDB}} <br />
+                    {{translation.Branch}} : {{TransactionBranch}}
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table class="table table-responsive devtable" style="margin-top: 30px;color:black" id="a">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        {{translation.SRNO}}
+                                    </th>
+                                    <th>
+                                        {{translation.Status}}
+                                    </th>
+                                    <th>
+                                        {{translation.ActionBy}}
+                                    </th>
+                                    <th>
+                                        {{translation.Remarks}}
+                                    </th>
+                                    <th>
+                                        {{translation.CreationDate}}
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="item in MemberApprvalTransactionLog">
+                                    <td>{{$index+1}}</td>
+                                    <td>{{_language=='en-us' ? item.ProceesStatusTextEn : item.ProceesStatusTextHi}}</td>
+                                    <td>{{item.ActionTakenBy}}</td>
+                                    <td>{{item.ActionRemark}}</td>
+                                    <td>{{item.ActionTakenDateTime}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+

@@ -1,0 +1,184 @@
+﻿<script src="~/Scripts/AngularFramework/MonthlyActivityReport.js?v=1.1"></script>
+@{
+    ViewBag.Title = "Monthly Activity Reports";
+}
+<script type="text/javascript" src="~/Scripts/jqueryuitimepicker.js"></script>
+<link href="~/Content/Stylesheets/jqueryuitimepicker.css" rel="stylesheet" />
+<style>
+    .d-flex{
+        display:flex;
+    }
+    .justify-content {
+        justify-content: center;
+    }
+    .align-items {
+        align-items: center;
+    }
+    .ui-datepicker-trigger{
+        padding:4px;
+    }
+</style>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('.SetCalender').datepicker({
+            showOn: "both",
+            changeMonth: true,
+            buttonImage: "../images/calender.png",
+            changeYear: true,
+            dateFormat: "dd/mm/yy",
+        });
+
+        var monthStartDate = "01/" + ((new Date().getMonth() + 1).toString().length <= 1 ? "0" + (new Date().getMonth() + 1).toString() : (new Date().getMonth() + 1).toString()) + "/" + new Date().getFullYear();
+        var currentDate = (new Date().getDate().toString().length <= 1 ? "0" + new Date().getDate().toString() : new Date().getDate().toString()) + "/" + ((new Date().getMonth() + 1).toString().length <= 1 ? "0" + (new Date().getMonth() + 1).toString() : (new Date().getMonth() + 1).toString()) + "/" + new Date().getFullYear();
+
+        $("#txtFromDate").val(monthStartDate);
+        $("#txtToDate").val(currentDate);
+    });
+</script>
+
+
+<div ng-app="MafMod" ng-controller="MafCnt">
+    <div class="col-md-12">
+        <h3 class="h3heading citizen-dash-head">{{translation.MonthlyActivityReport}}</h3>
+    </div>
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="devpage-breadcrumb">
+            <ul class="page-breadcrumb">
+                <li class="dev-page-br">
+                    <i class="fa fa-home"> </i>
+                    <a href="#"> {{translation.MIS}}  </a>
+                    <i class="fa fa-angle-right"> </i>
+                </li>
+                <li style="float: left">
+                    <span style="margin: 0 5px;">{{translation.MonthlyActivityReport}}</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="table-responsive citizen-dash-head">
+            <div>
+                <div class="table-dropdown" id="search-filter">
+                    <div class="form-group col-lg-2 col-md-3 margin-Top20">
+                        <label>{{ translation.State}}</label>
+                        <select ng-model="Filter.STATE_ID" class="form-control" ng-change="GetDistrictList()" ng-init="Filter.STATE_ID='6'">
+                            <option ng-repeat="item in StateList" value="{{item.STATE_ID}}">
+                                {{_language =='en-us' ?  item.STATE_ENG : item.STATE_MANGAL}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="form-group col-lg-2 col-md-3 margin-Top20">
+                        <label>{{ translation.District}}</label>
+                        <select name="DISTRICT_ID" ng-model="Filter.DISTRICT_ID" class="form-control" ng-init="Filter.DISTRICT_ID='0'">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in DistrictList" value="{{item.DISTRICT_ID}}">
+                                {{_language =='en-us' ?  item.DISTRICT_ENG : item.DISTRICT_MANGAL}}
+                            </option>
+                        </select>
+                    </div>
+                    @*<div class="col-lg-2 col-md-3 margin-Top20">
+                        <label for="search">{{translation.Search}}:</label>
+                        <input name="SearchText" type="text" class="form-control" ng-model="Filter.SearchText" placeholder="Search" />
+                    </div>*@
+                    <div class="form-group col-lg-2 col-md-3 margin-Top20">
+                        <label>{{ translation.Month}}</label>
+                        <select name="Month" ng-model="Filter.Month_Id" class="form-control" ng-init="Filter.Month_Id='0'">
+                            <option value="0">{{translation.All}}</option>
+                            <option ng-repeat="item in MonthList" value="{{item.Month_Id}}">
+                                {{_language =='en-us' ?  item.Month_En : item.Month_Hi}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="form-group col-lg-2 col-md-3 margin-Top20" ng-show="Filter.Month_Id==0">
+                        <label>
+                            {{translation.FromDate}}
+                        </label><br />
+                        <div class="d-flex align-items justify-content">
+                            <input id="txtFromDate" name="FromDate" disabled="disabled" class="form-control SetCalender" ng-model="Filter.FromDate" placeholder="{{translation.FromDate}}" onkeypress="return event.charCode >= 48 &amp;&amp; event.charCode <= 57" autocomplete="off">
+                        </div>
+                    </div>
+                    <div class="form-group col-lg-2 col-md-3 margin-Top20" ng-show="Filter.Month_Id==0">
+                        <label>
+                            {{translation.ToDate}}
+                        </label><br />
+                        <div class="d-flex align-items justify-content">
+                            <input id="txtToDate" name="ToDate" disabled="disabled" class="form-control SetCalender" ng-model="Filter.ToDate" placeholder="{{translation.ToDate}}" onkeypress="return event.charCode >= 48 &amp;&amp; event.charCode <= 57" autocomplete="off">
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-md-4 col-sm-12 margin-Top20 text-center">
+                        <label>&nbsp;</label><br>
+                        <button type="button" ng-click="searchRequest(GetActivityReport)" class="btn btn-primary dev-btn">{{translation.Search}}</button>
+                        <button type="button" ng-click="ClearSearch()" class="btn btn-primary dev-btn">{{translation.Clear}}</button>
+                    </div>
+                </div>
+                <div>
+                    @*<div class="text-right">
+                        <input type="button" id="btnExport" class="btn btn-primary dev-btn" style="" ng-click="searchRequest(ExportData)" value="Export" />
+                    </div>*@
+                    <table id="example" class="table devtable" style="border:1px solid rgb(222, 221, 221); float: left;">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>{{translation.Sector}}</th>
+                                <th>{{translation.District}}</th>
+                                <th>{{translation.EventActivityName}}</th>
+                                <th>{{translation.NoOfParticipants}}</th>
+                                <th>{{translation.Location}}</th>
+                                <th>{{translation.EventHeldOn}}</th>
+                                <th>{{translation.CreationDate}}</th>
+                                <th>{{translation.Actions}}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="item in MonthlyActivityReportList" style="cursor: pointer;">
+                                <td>{{(((DataPagingDetails.PageNumber - 1) * DataPagingDetails.PageSize) + 1)+$index}}</td>
+                                <td>{{item.Sector}}</td>
+                                <td>{{_language =='en-us' ?  item.DISTRICT_ENG : item.DISTRICT_MANGAL}}</td>
+                                <td>{{item.EventActivityName}}</td>
+                                <td>{{item.NoOfParticipants}}</td>
+                                <td>{{_language =='en-us' ?  item.LOCATION_ENG : item.LOCATION_MANGAL}}</td>
+                                <td>{{item.EventHeldOn|date:'dd-MM-yyyy'}}</td>
+                                <td>{{item.CreatedOn|date:'dd-MM-yyyy'}}</td>
+                                <td style="text-align:right"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="col-md-12">
+                        <div ng-if="DataPagingDetails.TotalPages>1" class="dataTables_paginate paging_simple_numbers" id="dataTables-example_paginate">
+                            <div class="dataTables_info" id="dataTables-example_info" role="status" aria-live="polite">
+                                Total Records: {{DataPagingDetails.TotalRecords}}
+                            </div>
+                            <ul class="pagination pagination_1" style="margin-left: 10px !important;">
+                                <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« First</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« Previous</span></li>
+
+                                <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest('1',GetDigitalRegister)" style="cursor: pointer;">
+                                    <span>«First</span>
+                                </li>
+                                <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest(DataPagingDetails.PageNumber-1,GetDigitalRegister)" style="cursor:pointer;">
+                                    <span>« Previous</span>
+                                </li>
+                                <li class="{{n==DataPagingDetails.PageNumber?'active':''}}" style="{{n==DataPagingDetails.PageNumber?'':'cursor: pointer'}}" ng-repeat="n in PagingRange(DataPagingDetails.StartPageNumber,DataPagingDetails.EndPageNumber,DataPagingDetails.TotalPages)" ng-click="pageRequest(n,GetDigitalRegister)"><span>{{n}}</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Next</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Last</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber!= DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.PageNumber+1,GetDigitalRegister)" style="cursor:pointer;">
+                                    <span>Next »</span>
+                                </li>
+                                <li ng-if="DataPagingDetails.PageNumber != DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.TotalPages,GetDigitalRegister)" style="cursor:pointer;">
+                                    <span>Last »</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <input ng-if="WRDetails.length>0" type="button" id="btnExport" class="btn btn-primary dev-btn" style="" ng-click="ExportData()" value="Export" />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+

@@ -1,0 +1,447 @@
+﻿<script src="~/Scripts/AngularFramework/UserRegistrationClient.js"></script>
+<style>
+    .has-error {
+        border: #F00;
+    }
+</style>
+<script type="text/javascript">
+    function validateFileType(control) {
+        var fileName = control.value;
+        var idxDot = fileName.lastIndexOf(".") + 1;
+        var extFile = fileName.substr(idxDot, fileName.length).toLowerCase();
+        if (extFile == "jpg" || extFile == "jpeg" || extFile == "png") {
+            //TO DO
+        } else {
+            var Msg = _language == 'en-us' ? 'Only jpg/jpeg and png files are allowed!' : 'केवल jpg / jpeg और png फाइलों की अनुमति है!';
+            alert(Msg);
+            control.value = '';
+        }
+    }
+</script>
+
+<div ng-app="UserRegistrationMod" ng-controller="UserRegistrationCnt">
+    <div class="col-md-12">
+        <h3 class="citizen-dash-head"> {{translation.UserRegistration}}  </h3>
+    </div>
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="devpage-breadcrumb">
+            <ul class="page-breadcrumb">
+                <li class="dev-page-br">
+                    <i class="fa fa-home"> </i>
+                    <a href="#"> {{translation.Home}}</a>
+                    <i class="fa fa-angle-right"> </i>
+                </li>
+                <li style="float: left">
+                    <span style="margin: 0 5px;"> {{translation.New}} </span>
+                    <i class="fa fa-angle-right"> </i>
+                    <span style="margin: 0 5px;"> {{translation.UserRegistration}} </span>
+                </li>
+             
+            </ul>
+        </div>
+    </div>
+    <div class="col-lg-12 col-md-12">
+    <form name="MyUserForm" class="citizen-dash-head" style="overflow: hidden;">
+        <div class="col-md-12">
+            <div class="col-md-12">
+                <h4 class="user-regi">{{translation.LoginDetails}}</h4>
+                <hr style=" margin-top:  0; border-top: 1px solid #059ea7">
+            </div>
+
+
+                <div class="form-group col-md-6" ng-class="{ 'has-error' : MyUserForm.email.$invalid && !MyUserForm.email.$pristine }">
+                    <label>{{translation.EmailId}}</label>
+                    <input type="email" class="form-control" name="email" ng-model="UserRegistration.EmailId" placeholder="{{translation.EmailId}}" autocomplete="off">
+                    <label ng-show="MyUserForm.email.$invalid && !MyUserForm.email.$pristine" class="help-block">{{translation.EmailId}} - {{translation.NotValid}}</label>
+                </div>
+                <div class="form-group col-md-6">
+                    <label>SSOID</label>
+                    <input type="text" name="Password" class="form-control" placeholder="SSOID" ng-model="UserRegistration.SSOID" autocomplete="off" required>
+                    <label ng-show="MyUserForm.SSOID.$error.required && !MyUserForm.SSOID.$pristine" class="help-block"> {{translation.SSOID}}</label>
+                </div>
+                <div class="form-group col-md-6">
+                    <label>{{translation.Password}}</label>
+                    <input type="password" name="Password" class="form-control" placeholder="{{translation.Password}}" ng-model="UserRegistration.Password" autocomplete="off" required>
+                    <label ng-show="MyUserForm.Password.$error.required && !MyUserForm.Password.$pristine" class="help-block"> {{translation.PasswordMessage}}</label>
+                </div>
+
+                <div class="form-group col-md-6">
+                    <label>{{translation.ConfirmPassword}}</label>
+                    <input type="password" name="Password" class="form-control" placeholder="{{translation.ConfirmPassword}}" ng-model="UserRegistration.ConfirmPassword" autocomplete="off" required>
+                    <label ng-show="MyUserForm.ConfirmPassword.$error.required && !MyUserForm.ConfirmPassword.$pristine" class="help-block"> {{translation.PasswordMessage}}</label>
+                    <span ng-show="UserRegistration.Password !== UserRegistration.ConfirmPassword">Password mismatch</span>
+                </div>
+            </div>
+        <div class="col-md-12">
+            <div class="col-md-12">
+                <h4 class="user-regi">{{translation.RoleDetails}} </h4>
+                <hr style=" margin-top:  0; border-top: 1px solid #059ea7;">
+            </div>
+            <div class="form-group col-md-6">
+                <label>{{translation.DepartmentHeading}}</label>
+                <select class="form-control" ng-change="UnitList()" id="ddlDept" ng-model="UserRegistration.DEPTCODE" ng-init="UserRegistration.DEPTCODE='0'">
+                    <option value="0" disabled>{{translation.SelectDept}}</option>
+                    <option ng-repeat="item in Departments" value="{{item.DEPTCODE}}">
+                        {{_language =='en-us' ?  item.DEPTNAMEENGLISH : item.DEPTNAMEHINDI}}
+
+                    </option>
+                </select>
+            </div>
+            <div class="form-group col-md-6">
+                <label>{{translation.Unit}}</label>
+                <select class="form-control" id="ddlunit" ng-model="UserRegistration.UnitId" ng-init="UserRegistration.UnitId='0'">
+                    <option value="0" disabled>{{translation.SelectUnit}}</option>
+                    <option ng-repeat="item in Unit" value="{{item.UnitId}}">
+                        {{_language =='en-us' ?  item.UnitNameEn : item.UnitNameHi}}
+                    </option>
+                </select>
+            </div>
+            <div class="form-group col-md-6">
+                <label>{{translation.Level}}</label>
+                <select class="form-control" id="ddllevel" ng-model="UserRegistration.LevelId" ng-init="UserRegistration.LevelId='0'">
+                    <option value="0" disabled>{{translation.SelectLevel}}</option>
+                    <option ng-repeat="item in Level" value="{{item.LevelId}}">
+                        {{_language =='en-us' ?  item.LevelNameHi : item.LevelNameHi}}
+                    </option>
+                </select>
+            </div>
+
+
+            <div class="form-group col-md-6">
+                <label>{{translation.DesignationHeading}}</label>
+                <select class="form-control" id="ddlDesignation" ng-model="UserRegistration.DESIGNATIONCODE" ng-init="UserRegistration.DESIGNATIONCODE='0'">
+                    <option selected value="0" disabled>{{translation.SelectDesig}}</option>
+                    <option ng-repeat="item in Designations" value="{{item.DESIGNATIONCODE}}">
+                        {{_language =='en-us' ?  item.DESIGNATIONDESCENGLISH : item.DESIGNATIONDESCHINDI}}
+                    </option>
+                </select>
+            </div>
+
+            <div class="form-group col-md-6">
+                <label>{{translation.PostHeading}}</label>
+                <select class="form-control" id="ddlPost" ng-model="UserRegistration.PostId" ng-init="UserRegistration.PostId='0'">
+                    <option value="0" disabled>{{translation.SelectPost}}</option>
+                    <option ng-repeat="item in Posts" value="{{item.CAD_ID}}">
+                        {{_language =='en-us' ?  item.CAD_NAME : item.CAD_NAME}}
+                    </option>
+                </select>
+            </div>
+
+
+            <div class="form-group col-md-6">
+                <label>{{translation.RoleHeading}}</label>
+                <select class="form-control" id="ddlRole" ng-model="UserRegistration.RoleID" ng-init="UserRegistration.RoleID='0'">
+                    <option value="0" disabled>{{translation.SelectRole}}</option>
+                    <option ng-repeat="item in Roles" value="{{item.RoleID}}">
+                        {{_language =='en-us' ?  item.RoleName_EN : item.RoleName_HI}}
+                    </option>
+                </select>
+            </div>
+            <div class="form-group col-md-6">
+                <label>{{translation.DivisionHeading}}</label>
+                <select ng-model="UserRegistration.DivisionId" id="ddlDivision" name="division" ng-change="DistrictList()" class="form-control" ng-init="UserRegistration.DivisionId ='0'">
+                    <option value="0" disabled>{{translation.SelectOption}}</option>
+                    <option ng-repeat="item in Divisions" value="{{item.DIVISION_ID}}">
+                        {{_language =='en-us' ?  item.DIVISION_ENG : item.DIVISION_MANGAL}}
+                    </option>
+                </select>
+            </div>
+
+            <div class="form-group col-md-6">
+                <label>{{translation.District}}</label>  
+                <select ng-model="UserRegistration.DistrictId" id="ddlDistrict" ng-change="DistrictChange()" class="form-control" ng-init="UserRegistration.DistrictId='0'">
+                    <option value="0" disabled>{{translation.SelectOption}}</option>
+                    <option ng-repeat="item in Districts" value="{{item.DISTRICT_ID}}">
+                        {{_language =='en-us' ?  item.DISTRICT_ENG : item.DISTRICT_MANGAL}}
+                    </option>
+                </select>
+            </div>
+
+            <div class="form-group col-md-6" style="margin-top: 15px;">
+                <div class="form-check form-check-inline col-md-4" style="padding: 0;">
+                    <label class="form-check-label">{{translation.UrbanRural}}</label>
+                </div>
+
+                <div class="form-check form-check-inline col-md-4">
+                    <div class="radio-item">
+                        <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1" value="true" ng-model="UserRegistration.IsRuralUrban" ng-change="RuralUrbanBlock()" ng-checked="UserRegistration.IsRuralUrban">
+                        <label class="form-check-label option_value" for="inlineRadio1">{{translation.Urban}}</label>
+                    </div>
+                </div>
+
+
+                <div class="form-check form-check-inline col-md-4">
+                    <div class="radio-item">
+                        <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio2" value="false" ng-model="UserRegistration.IsRuralUrban" ng-change="RuralUrbanBlock()" ng-checked="UserRegistration.IsRuralUrban">
+                        <label class="form-check-label option_value" for="inlineRadio2">{{translation.Rural}}</label>
+                    </div>
+                </div>
+            </div>
+
+            <div ng-show="UrbanDiv">
+                <div class="form-group col-md-6">
+                    <label>{{translation.Tehsil}}</label> 
+                    <select ng-model="UserRegistration.TehsilId" id="ddlTehsil" class="form-control" ng-change="GetCity()" ng-init="UserRegistration.TehsilId='0'">
+                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                        <option ng-repeat="item in Tehsil" value="{{item.DISTRICT_ID}}">
+                            {{_language =='en-us' ?  item.TEHSIL_ENG : item.TEHSIL_MANGAL}}
+                        </option>
+                    </select>
+                </div>
+                <div class="form-group col-md-6">
+                    <label>{{translation.City}}</label> 
+                    <select ng-model="UserRegistration.CityId" id="ddlCity" class="form-control" ng-change="WardList()" ng-init="UserRegistration.CityId='0'">
+                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                        <option ng-repeat="item in City" value="{{item.CITY_ID}}">
+                            {{_language =='en-us' ?  item.CITY_ENG : item.CITY_MANGAL}}
+                        </option>
+                    </select>
+                </div>
+                <div class="form-group col-md-6">
+                    <label>{{translation.Ward}}</label> 
+                    <select ng-model="UserRegistration.WardId" id="ddlWard" class="form-control" ng-init="UserRegistration.WardId='0'">
+                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                        <option ng-repeat="item in Ward" value="{{item.WARD_ID}}">
+                            {{_language =='en-us' ?  item.WARD_ENG : item.WARD_MANGAL}}
+                        </option>
+                    </select>
+                </div>
+            </div>
+
+
+            <div ng-show="RuralDiv">
+                <div class="form-group col-md-6">
+                    <label>{{translation.PanchayatSamiti}}</label> 
+                    <select ng-model="UserRegistration.BlockId" id="ddlPanchayatSamiti" class="form-control" ng-change="GramPanchayatList()" ng-init="UserRegistration.BlockId='0'">
+                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                        <option ng-repeat="item in Blocks" value="{{item.BLOCK_ID}}">
+                            {{_language =='en-us' ?  item.BLOCK_ENG : item.BLOCK_MANGAL}}
+                        </option>
+                    </select>
+                </div>
+                <div class="form-group col-md-6">
+                    <label>{{translation.GramPanchayat}}</label> 
+                    <select ng-model="UserRegistration.GPId" id="ddlGramPanchayat" class="form-control" ng-change="VillageList()" ng-init="UserRegistration.GPId='0'">
+                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                        <option ng-repeat="item in GramPanchayats" value="{{item.GP_ID}}">
+                            {{_language =='en-us' ?  item.GP_ENG : item.GP_MANGAL}}
+                        </option>
+                    </select>
+                </div>
+                <div class="form-group col-md-6">
+                    <label>{{translation.Village}}</label> 
+                    <select ng-model="UserRegistration.VillageId" id="ddlVillage" class="form-control" ng-init="UserRegistration.VillageId='0'">
+                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                        <option ng-repeat="item in Villages" value="{{item.VILLAGE_ID}}">
+                            {{_language =='en-us' ?  item.VILLAGE_ENG : item.VILLAGE_MANGAL}}
+                        </option>
+                    </select>
+                </div>
+               
+            </div>
+            <div class="form-group col-md-6">
+                <label class="check-box"> {{translation.IsActive}} </label>
+                <input class="form-check-input" type="checkbox" id="chkIsActive" value="option1" ng-true-value="1" ng-false-value="0" ng-checked="UserRegistration.IsActive == 1" ng-model="UserRegistration.IsActive" />
+            </div>
+            <div class="form-group col-md-12">
+                <div class="dev-align-btn">
+                <button type="submit" class="btn btn-primary dev-btn" id="btnroledetailsadd" ng-click="SaveTempRole()">{{translation.Add}}</button>
+            </div>
+                </div>
+
+        </div>
+        <div class="col-md-12">
+            <div class="table-responsive" style="display:none;">
+                <table class="table dev-table" style="margin-top: 5px;">
+                    <thead>
+                        <tr>
+                            <th>
+                                {{translation.SRNO}}
+                            </th>
+                            <th>
+                                {{translation.DepartmentHeading}}
+                            </th>
+                            <th>
+                                {{translation.Unit}}
+                            </th>
+                            <th>
+                                {{translation.Level}}
+                            </th>
+                            <th>
+                                {{translation.DesignationHeading}}
+                            </th>
+                            <th>
+                                {{translation.PostHeading}}
+                            </th>
+                            <th>
+                                {{translation.RoleHeading}}
+                            </th>
+                            <th>
+                                {{translation.DivisionHeading}}
+                            </th>
+                            <th>
+                                {{translation.District}}
+                            </th>
+                            <th>
+                                {{translation.UrbanRural}}
+                            </th>
+                            <th>
+                                {{translation.Tehsil}}
+                            </th>
+                            <th>
+                                {{translation.City}}
+                            </th>
+                            <th>
+                                {{translation.Ward}}
+                            </th>
+                            <th>
+                                {{translation.PanchayatSamiti}}
+                            </th>
+                            <th>
+                                {{translation.GramPanchayat}}
+                            </th>
+                            <th>
+                                {{translation.Village}}
+                            </th>
+                            <th>
+                                {{translation.IsActive}}
+                            </th>
+                            <th>{{translation.Edit}}</th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="item in RoleTList">
+                            <td>{{$index+1}}</td>
+                            <td>{{item.DepartmentName}}</td>
+                            <td>
+                                {{item.UnitName}}
+                            </td>
+                            <td>{{item.LevelName}}</td>
+                            <td>{{item.DesignationName}}</td>
+                            <td>{{item.PostName}}</td>
+                            <td>{{item.RoleName}}</td>
+                            <td>{{item.DivisionName}}</td>
+                            <td>{{item.District}}</td>
+                            <td>{{item.UrbanRural}}</td>
+                            <td>{{item.Tehsil=="--- Select ---" ? "-" :item.Tehsil}}</td>
+                            <td>{{item.City=="--- Select ---" ? "-" :item.City}}</td>
+                            <td>{{item.Ward=="--- Select ---" ? "-" :item.Ward}}</td>
+                            <td>{{item.PanchayatSamiti=="--- Select ---" ? "-" :item.PanchayatSamiti}}</td>
+                            <td>{{item.GramPanchayat=="--- Select ---" ? "-" :item.GramPanchayat}}</td>
+                            <td>{{item.Village=="--- Select ---" ? "-" :item.Village}}</td>
+                            <td>{{item.IsActive}}</td>
+                            <td>
+                                <i class="fa fa-edit" ng-click="EditRoleDetails($index)"></i>
+                            </td>
+                            @*<td>
+                                    <i class="fa fa-trash" ng-click="SetStatus(item.UserId,2)"></i>
+                                </td>*@
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="col-md-12">
+            <div class="col-md-12">
+                <h4 class="user-regi">{{translation.OfficerDetails}} </h4>
+                <hr style=" margin-top:  0; border-top: 1px solid #059ea7;">
+            </div>
+
+            <div class="form-group col-md-6">
+                <label>{{translation.UserTitle}}</label>
+
+                <select ng-model="UserRegistration.UserTitle" class="form-control" ng-init="UserRegistration.UserTitle='0'">
+                    <option value="0" disabled>{{translation.SelectOption}}</option>
+                    <option ng-repeat="item in Titles" value="{{item.Id}}">
+                        {{_language =='en-us' ?  item.Title_EN : item.Title_HI}}
+                    </option>
+                </select>
+                <input type="hidden" ng-model="UserRegistration.UserId" />
+            </div>
+            <div class="form-group col-md-6" ng-class="{ 'has-error' : MyUserForm.OfficerNameEn.$invalid && !MyUserForm.OfficerNameEn.$pristine }">
+                <label>{{translation.OfficerNameEn}}</label>
+                <input type="text" class="form-control" only-letters-input name="OfficerNameEn" ng-model="UserRegistration.OfficerNameEn" placeholder="{{translation.OfficerNameEn}}" ng-minlength="1" maxlength="50" ng-required="true" autocomplete="off">
+                <label ng-show="MyUserForm.OfficerNameEn.$error.required && !MyUserForm.OfficerNameEn.$pristine" class="help-block">{{translation.OfficerNameEn}} - {{translation.Required}}</label>
+            </div>
+            <div class="form-group col-md-6" ng-class="{ 'has-error' : MyUserForm.OfficerNameHi.$invalid && !MyUserForm.OfficerNameHi.$pristine }">
+                <label>{{translation.OfficerNameHi}}</label>
+                <input type="text" name="OfficerNameHi" class="form-control" ng-model="UserRegistration.OfficerNameHi" placeholder="{{translation.OfficerNameHi}}" ng-required="true" autocomplete="off">
+                <label ng-show="MyUserForm.OfficerNameHi.$error.required && !MyUserForm.OfficerNameHi.$pristine" class="help-block">{{translation.OfficerNameHi}} - {{translation.Required}}</label>
+            </div>
+
+            <div class="form-group col-md-6" ng-class="{ 'has-error' : MyUserForm.PhoneNo.$invalid && !MyUserForm.PhoneNo.$pristine }">
+                <label>{{translation.PhoneNo}}</label>
+                <input type="text" name="PhoneNo" class="form-control" ng-model="UserRegistration.PhoneNo" placeholder="{{translation.PhoneNo}}" maxlength="10" ng-minlength="10" onkeypress='return event.charCode >= 48 && event.charCode <= 57' ng-required="true" autocomplete="off">
+                <label ng-show="MyUserForm.PhoneNo.$error.minlength && !MyUserForm.PhoneNo.$pristine" class="help-block">{{translation.PhoneNo}} - {{translation.MobileNoLimit}}</label>
+            </div>
+            <div class="form-group col-md-6" ng-class="{ 'has-error' : MyUserForm.MobileNo.$invalid && !MyUserForm.MobileNo.$pristine }">
+                <label>{{translation.MobileNo}}</label>
+                <input type="text" name="MobileNo" class="form-control" ng-model="UserRegistration.MobileNo" placeholder="{{translation.MobileNo}}" maxlength="10" ng-minlength="10" onkeypress='return event.charCode >= 48 && event.charCode <= 57' ng-required="true" autocomplete="off">
+                <label ng-show="MyUserForm.MobileNo.$error.minlength && !MyUserForm.MobileNo.$pristine" class="help-block">{{translation.MobileNo}} - {{translation.MobileNoLimit}}</label>
+            </div>
+
+            <div class="form-group col-md-6">
+                <label>{{translation.District}}</label>
+                <select ng-model="UserRegistration.UserDistrictId" class="form-control" ng-init="UserRegistration.UserDistrictId='0'">
+                    <option value="0" disabled>{{translation.SelectOption}}</option>
+                    <option ng-repeat="item in UserDistricts" value="{{item.DISTRICT_ID}}">
+                        {{_language =='en-us' ?  item.DISTRICT_ENG : item.DISTRICT_MANGAL}}
+                    </option>
+                </select>
+            </div>
+
+            <div class="form-group col-md-6" ng-class="{ 'has-error' : MyUserForm.AddressEn.$invalid && !MyUserForm.AddressEn.$pristine }">
+                <label class="control-label"> {{translation.AddressEn}} </label>
+                <textarea name="AddressEn" only-letters-input class="form-control resize" rows="5" placeholder="{{translation.AddressEn}}" ng-model="UserRegistration.AddressEn" maxlength="200" ng-minlength="5" ng-required="true" autocomplete="off"> </textarea>
+                <label ng-show="MyUserForm.AddressEn.$error.required && !MyUserForm.AddressEn.$pristine" class="help-block">{{translation.AddressEn}} - {{translation.Required}}</label>
+                <label ng-show="MyUserForm.AddressEn.$error.minlength && !MyUserForm.AddressEn.$pristine" class="help-block">{{translation.AddressEn}} - {{translation.NotValid}}</label>
+            </div>
+
+            <div class="form-group col-md-6" ng-class="{ 'has-error' : MyUserForm.AddressHi.$invalid && !MyUserForm.AddressHi.$pristine }">
+                <label class="control-label"> {{translation.AddressHi}} </label>
+                <textarea name="AddressHi" only-letters-input class="form-control resize" rows="5" placeholder="{{translation.AddressHi}}" ng-model="UserRegistration.AddressHi" maxlength="200" ng-minlength="5" ng-required="true" autocomplete="off"> </textarea>
+                <label ng-show="MyUserForm.AddressHi.$error.required && !MyUserForm.AddressHi.$pristine" class="help-block">{{translation.AddressHi}} - {{translation.Required}}</label>
+                <label ng-show="MyUserForm.AddressHi.$error.minlength && !MyUserForm.AddressHi.$pristine" class="help-block">{{translation.AddressHi}} - {{translation.NotValid}}</label>
+            </div>
+
+            <div class="form-group col-md-6">
+                <label> {{translation.GenderEN}}</label>
+                <select class="form-control" ng-model="UserRegistration.Gender" ng-init="UserRegistration.Gender='0'">
+                    <option value="0" disabled>{{translation.SelectOption}}</option>
+                    <option ng-repeat="item in Gender" value="{{item.GENDER_ID}}">
+                        {{_language =='en-us' ?  item.GENDER_DESC_ENG : item.GENDER_DESC_HIN}}
+                    </option>
+                </select>
+            </div>
+            <div class="form-group col-md-6" ng-class="{ 'has-error' : MyUserForm.PIN.$invalid && !MyUserForm.PIN.$pristine }">
+                <label>{{translation.PIN}}</label>
+                <input type="text" name="PIN" class="form-control" placeholder="{{translation.PIN}}" ng-model="UserRegistration.PIN" maxlength="6" ng-minlength="6" onkeypress='return event.charCode >= 48 && event.charCode <= 57' required autocomplete="off">
+                <label ng-show="MyUserForm.PIN.$error.required && !MyUserForm.PIN.$pristine" class="help-block">{{translation.PIN}} - {{translation.Required}}</label>
+                <label ng-show="MyUserForm.PIN.$error.minlength && !MyUserForm.PIN.$pristine" class="help-block">{{translation.PIN}} - {{translation.NotValid}}</label>
+            </div>
+            <div class="form-group col-md-6">
+                <label>{{translation.ImageUpload}}</label>
+                <input type="file" name="File" class="form-control" ng-model="UserRegistration.ImageUrl" onchange="angular.element(this).scope().selectFileforUpload(this.files)">
+            </div>
+
+
+        </div>
+
+        <div class="form-group col-md-12">
+            <div class="dev-align-btn">
+                <button type="submit" class="btn btn-primary dev-btn" ng-disabled="MyUserForm.$invalid" ng-click="SaveUser()">{{translation.Submit}}</button>
+                <button type="button" class="btn btn-primary dev-btn" ng-click="ClearForm()">{{translation.Clear}}</button>
+                <a class="btn btn-primary dev-btn" style="text-transform:capitalize;" href="../User/DashBoard"> Back</a>
+            </div>
+
+        </div>
+       
+    </form>
+</div>
+   
+    <div class="se-pre-con"></div>
+    <div id="stop" class="scrollTop">
+        <span><a href=""><i class="fa fa-arrow-up">Top</i></a></span>
+    </div>
+</div>

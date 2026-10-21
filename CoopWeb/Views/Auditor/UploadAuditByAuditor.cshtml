@@ -1,0 +1,1021 @@
+﻿
+
+<script src="~/Scripts/AngularFramework/UploadAuditByAuditor.js?ID=17"></script>
+
+<script type="text/javascript">
+    function validate(evt) {
+        var theEvent = evt || window.event;
+
+        // Handle paste
+        if (theEvent.type === 'paste') {
+            key = event.clipboardData.getData('text/plain');
+        } else {
+            // Handle key press
+            var key = theEvent.keyCode || theEvent.which;
+            key = String.fromCharCode(key);
+        }
+        var regex = /[0-9]|\./;
+        if (!regex.test(key)) {
+            theEvent.returnValue = false;
+            if (theEvent.preventDefault) theEvent.preventDefault();
+        }
+    }
+
+
+
+</script>
+
+
+<div ng-app="UploadAuditByAuditorMod" ng-controller="UploadAuditByAuditorCont">
+    <div class="col-md-12">
+        <h3 class="h3heading citizen-dash-head">{{translation.UploadAuditByAuditor}}<a target="_blank" style="float:right; font-size:12px" href="~/Content/UserManual/CEO_Audit_Report_Upload.pdf">उपयोगकर्ता पुस्तिका</a></h3>
+    </div>
+
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="devpage-breadcrumb">
+            <ul class="page-breadcrumb">
+                <li class="dev-page-br">
+                    <i class="fa fa-home"> </i>
+                    <a href="#"> {{translation.Home}}  </a>
+                    <i class="fa fa-angle-right"> </i>
+                </li>
+                <li style="float: left">
+                    <span style="margin: 0 5px;">{{translation.UploadAuditByAuditor}}   </span>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="col-md-12">
+        <form class="dev-search-form citizen-dash-head " style="overflow: hidden;" name="Myauditform">
+
+            <div class="col-lg-12 form-group">
+                <div class="col-md-2">
+                    <label>{{ translation.FincialYearHeading}}<span class="error">*</span></label>
+                </div>
+                <div class="col-md-4">
+                    <select class="form-control" ng-model="AuditorAssign.FinancialYear" ng-init="AuditorAssign.FinancialYear='0'" ng-change="ResetOnFyearChange()">
+                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                        <option ng-repeat="item in FinancialYearList" value="{{item.FIN_YEAR_MASTR_ID}}">
+                            {{item.FIN_YEAR_NAME}}
+                        </option>
+                    </select>
+                    <input type="hidden" ng-model="AuditorAssign.Id" />
+
+                </div>
+                <div class="col-lg-2">
+                    <label>{{translation.SocietyName}}</label>
+                </div>
+                <div class="col-lg-4">
+                    <select class="form-control" ng-model="AuditorAssign.SocietyIdENC" ng-init="AuditorAssign.SocietyIdENC='0'" ng-change="ShowOldYearDataDetail(AuditorAssign.FinancialYear) ">
+                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                        <option ng-repeat="item in SocietyList" value="{{item.SocietyId}}">
+                            {{item.SocietyName}}
+                        </option>
+                    </select>
+                </div>
+            </div>
+            <div ng-show="ShowCurrentYearData">
+                <div class="col-lg-12 form-group">
+                    <div class="col-lg-2">
+                        <label>@*{{translation.AuditorAppointedDataSelection}}*@ ऑडिटर 15/06/2021 से पहले नियुक्त है</label>
+                    </div>
+                    <div class="col-lg-4">
+                        <input class="form-check-input" type="radio" disabled="disabled" name="AuditinlineRadioOptions" value="true" ng-model="AuditorAppointedDateSelection" ng-change="CurrentYearAssignAuditor(true)">
+                        <label class="form-check-label option_value" style="margin-right: 15px;">{{translation.Yes}}</label>
+
+                        <input class="form-check-input" type="radio" disabled="disabled" name="AuditinlineRadioOptions" id="AuditinlineRadio2" value="false" ng-model="AuditorAppointedDateSelection" ng-change="CurrentYearAssignAuditor(false)">
+                        <label class="form-check-label option_value">{{translation.No}}</label>
+                    </div>
+                    <div class="col-lg-2">
+                    </div>
+                    <div class="col-lg-4">
+                    </div>
+                </div>
+                <div ng-show="CurrentYearAuditorAppointed" class="col-lg-12 form-group">
+                    <div class="col-lg-2">
+                        <label>{{translation.ResolutionPDF}}</label>
+                    </div>
+                    <div class="col-lg-3">
+                        <input disabled="disabled" type="file" id="ResolutionPDF" filetype="pdf" name="File" ng-model="AuditorAssign.ResolutionPDF" class="form-control" onchange="angular.element(this).scope().UploadEnclouserFile(this.files, this)" ddlid="ResolutionPDF_PDF_-2">
+                        <input disabled="disabled" type="hidden" id="hfResolutionPDF" value="{{AuditorAssign.ResolutionPDF}}" />
+                    </div>
+                    <div class="col-lg-1">
+                        <a ng-show="AuditorAssign.ResolutionPDF.length>0" class="fa fa-eye" target="_blank" style="text-transform:capitalize;" href="{{AuditorAssign.ResolutionPDF}}"></a>
+                    </div>
+                    <div class="col-lg-2">
+                        <label>{{translation.ResolutionDate}}</label>
+                    </div>
+                    <div class="col-lg-4">
+                        <input disabled="disabled" name="ResolutionDate" id="ResolutionDate" class="form-control devcalender" placeholder="{{translation.Date}}" ng-model="AuditorAssign.ResolutionDate" autocomplete="off" />
+                    </div>
+                </div>
+                <div ng-show="CurrentYearAuditorAppointed" class="col-lg-12 form-group">
+                    <div class="col-lg-2">
+                        <label>{{translation.AuditorAppointmentOrderPDF}}</label>
+                    </div>
+                    <div class="col-lg-3">
+                        <input disabled="disabled" type="file" id="AAOrderPDF" filetype="pdf" name="File" ng-model="AuditorAssign.AAOrderPDF" class="form-control" onchange="angular.element(this).scope().UploadEnclouserFile(this.files, this)" ddlid="AAOrderPDF_PDF_-3">
+                        <input disabled="disabled" type="hidden" id="hfAuditorAssignFilePath" value="{{AuditorAssign.AuditorAssignFilePath}}" />
+                    </div>
+                    <div class="col-lg-1">
+                        <a ng-show="AuditorAssign.AuditorAssignFilePath.length>0" class="fa fa-eye" target="_blank" style="text-transform:capitalize;" href="{{AuditorAssign.AuditorAssignFilePath}}"></a>
+                    </div>
+                    <div class="col-lg-2">
+                        <label>{{translation.AuditorAppointmentOrderDate}}</label>
+                    </div>
+                    <div class="col-lg-4">
+                        <input disabled="disabled" name="AudiAppoOrderDate" id="AudiAppoOrderDate" class="form-control devcalender" placeholder="{{translation.Date}}" ng-model="AuditorAssign.AudiAppoOrderDate" autocomplete="off" />
+                    </div>
+                </div>
+                <div ng-show="CurrentYearAuditorAppointed" class="col-lg-12 form-group">
+                    <div class="col-lg-2">
+                        <label>{{translation.YouhaveAuditReport}}</label>
+                    </div>
+                    <div class="col-lg-4">
+                        <input disabled="disabled" class="form-check-input" type="radio" name="haveAuditReportRadioOptions" value="true" ng-model="AuditorAssign.HaveAuditReport" ng-change="HaveAuditReportSelection(true)">
+                        <label class="form-check-label option_value" style="margin-right: 15px;">{{translation.Yes}}</label>
+
+                        <input disabled="disabled" class="form-check-input" type="radio" name="haveAuditReportRadioOptions" id="HaveAuditReportRadio2" value="false" ng-model="AuditorAssign.HaveAuditReport" ng-change="HaveAuditReportSelection(false)">
+                        <label class="form-check-label option_value">{{translation.No}}</label>
+                    </div>
+                    <div class="col-lg-2">
+                    </div>
+                    <div class="col-lg-4">
+                    </div>
+                </div>
+                <div class="col-lg-12 form-group">
+                    <div class="col-lg-2">
+                        <label>{{translation.AuditBy}}</label>
+                    </div>
+                    <div class="col-lg-4">
+                        <input disabled="disabled" class="form-check-input" type="radio" name="inlineRadioOptions" value="true" ng-model="AuditorAssign.IsEmpanelledCA" ng-change="SetAuditType(true)">
+                        <label class="form-check-label option_value" style="margin-right: 15px;">{{translation.ByEmpanelledAgency}}</label>
+
+                        <input disabled="disabled" class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio2" value="false" ng-model="AuditorAssign.IsEmpanelledCA" ng-change="SetAuditType(false)">
+                        <label class="form-check-label option_value">{{translation.ByDepartment}}</label>
+                    </div>
+                    <div class="col-lg-2" ng-show="divAuditType">
+                        <label>{{translation.AuditType}}</label>
+                    </div>
+                    <div class="col-lg-4" ng-show="divAuditType">
+                        <input disabled="disabled" class="form-check-input" type="radio" name="inlineRadioOptions2" value="0" ng-model="AuditorAssign.IsFirm" ng-change="GetAuditorData()">
+                        <label class="form-check-label option_value" for="inlineRadio1" style="margin-right: 15px;">{{translation.Firm}}</label>
+
+                        <input disabled="disabled" class="form-check-input" type="radio" name="inlineRadioOptions2" id="inlineRadio3" value="1" ng-model="AuditorAssign.IsFirm" ng-change="GetAuditorData()"> @*AuditTypeChange*@
+                        <label class="form-check-label option_value">{{translation.Individual}}</label>
+                    </div>
+                </div>
+
+                @*By CA*@
+                <div class="col-lg-12 form-group">
+                    <div class="col-lg-2" ng-show="divAuditor">
+                        <label>{{translation.District}}</label>
+                    </div>
+                    <div class="col-lg-4" ng-show="divAuditor">
+                        <select disabled="disabled" class="form-control" id="ddlunit" ng-model="AuditorAssign.DistrictId" ng-init="AuditorAssign.DistrictId='0'" ng-change="GetAuditorDataByDist()">
+                            @*ng-change="GetAuditorData()"*@
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in DistrictList" value="{{item.DISTRICT_ID}}">
+                                {{_language =='en-us' ?  item.DISTRICT_ENG : item.DISTRICT_MANGAL}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-lg-2" ng-show="divAuditor">
+                        <label>{{translation.AuditorData}}</label>
+                    </div>
+                    <div class="col-lg-4" ng-show="divAuditor">
+                        <select disabled="disabled" class="form-control" ng-model="AuditorAssign.AuditorId" ng-init="AuditorAssign.AuditorId='0'">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in AuditorList" value="{{item.AuditorId}}">
+                                {{_language =='en-us' ?  item.FirmName : item.FirmName}}
+                            </option>
+                        </select>
+                    </div>
+
+                </div>
+                <div class="col-lg-12 form-group" ng-show="divAuditor && IsDepartmentalAuditor!=1">
+                    <div class="col-lg-2">
+                        <label>{{translation.Auditorfees}}</label>
+                    </div>
+                    <div class="col-lg-4">
+                        <input type="text" name="Auditorfees" class="form-control" ng-model="AuditorAssign.Auditorfees" placeholder="{{translation.BlanckAmount}}" maxlength="10" onkeypress='return event.charCode >= 48 && event.charCode <= 57' autocomplete="off">
+                    </div>
+                    <div class="col-md-2">
+                        <label>{{translation.LastAudit}}</label>  @*<span class="error">*</span>*@
+                    </div>
+                    <div class="col-md-4">
+                        <select disabled="disabled" class="form-control" ng-model="AuditorAssign.LastFinancialYear" ng-init="AuditorAssign.LastFinancialYear='0'">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in FinancialYearList" value="{{item.FIN_YEAR_MASTR_ID}}">
+                                {{item.FIN_YEAR_NAME}}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-lg-12 form-group" ng-show="divAuditor && CurrentYearAuditorAppointed && IsDepartmentalAuditor!=1">
+                    <div class="col-lg-2">
+                        <label>{{translation.FeeDate}}</label>
+                    </div>
+                    <div class="col-lg-4">
+                        @*<input disabled="disabled" type="text" name="FeeDateFirm" class="form-control" ng-model="AuditorAssign.FeeDate" placeholder="{{translation.Date}}" autocomplete="off">*@
+                        <input disabled="disabled" name="RegistrsationDate" id="FeeDateFirmCurrentYear" class="form-control devcalender" placeholder="{{translation.FeeDate}}" ng-model="AuditorAssign.FeeDate" autocomplete="off" />
+                    </div>
+                    <div class="col-lg-2">
+                    </div>
+                    <div class="col-lg-4">
+                    </div>
+                </div>
+
+                @*By Department*@
+                <div class="col-lg-12 form-group" ng-show="!CurrentYearAuditorAppointed && CurrentYearAuditorAppointedByDepart">
+                    <div class="col-lg-2">
+                        <label>{{translation.District}}</label>
+                    </div>
+                    <div class="col-lg-4">
+                        <select disabled="disabled" class="form-control" id="ddlunit" ng-model="AuditorAssign.DistrictId" ng-init="AuditorAssign.DistrictId='0'" ng-change="GetAuditorDataByDist()">
+                            @*ng-change="GetAuditorData()"*@
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in DistrictList" value="{{item.DISTRICT_ID}}">
+                                {{_language =='en-us' ?  item.DISTRICT_ENG : item.DISTRICT_MANGAL}}
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="col-lg-2">
+                    </div>
+                    <div class="col-lg-4">
+                    </div>
+                </div>
+
+
+                <div class="col-lg-12 form-group" ng-show="CurrentYearAuditorAppointed && CurrentYearAuditorAppointedByDepart">
+                    <div class="col-lg-2">
+                        <label>{{translation.Inspector}}/{{translation.Auditor}}</label>
+                    </div>
+                    <div class="col-lg-4">
+                        <input disabled="disabled" type="text" name="InsName" class="form-control" ng-model="AuditorAssign.InspectorName" placeholder="{{translation.Inspector}}">
+                    </div>
+                    <div class="col-md-2">
+                        <label>{{translation.Byauthorized}}<span class="error">*</span></label>
+                    </div>
+                    <div class="col-md-4">
+                        <input disabled="disabled" class="form-check-input" type="radio" name="ApprovedBy" id="rbApprovedByRegistrar" value="1" ng-model="AuditorAssign.ApprovedBy">
+                        <label class="form-check-label option_value ng-binding" style="margin-right: 15px;">{{translation.ByRegistrar}}</label>
+                        <input disabled="disabled" class="form-check-input" type="radio" name="ApprovedBy" id="rbApprovedByBoard" value="2" ng-model="AuditorAssign.ApprovedBy">
+                        <label class="form-check-label option_value ng-binding">{{translation.ByBoard}}</label>
+                        <input disabled="disabled" class="form-check-input" type="radio" name="ApprovedBy" id="rbApprovedByBoth" value="3" ng-model="AuditorAssign.ApprovedBy">
+                        <label class="form-check-label option_value ng-binding">{{translation.Both}}</label>
+                    </div>
+                </div>
+                <div class="col-lg-12 form-group" ng-show="CurrentYearAuditorAppointed && CurrentYearAuditorAppointedByDepart">
+                    <div class="col-lg-2">
+                        <label>{{translation.Auditorfees}}</label>
+                    </div>
+                    <div class="col-lg-4">
+                        <input disabled="disabled" type="text" name="Auditorfees" class="form-control" ng-model="AuditorAssign.Auditorfees" placeholder="{{translation.BlanckAmount}}" maxlength="10" onkeypress='return event.charCode >= 48 && event.charCode <= 57' autocomplete="off">
+                    </div>
+                    <div class="col-lg-2">
+                        <label>{{translation.FeeDate}}</label>
+                    </div>
+                    <div class="col-lg-4">
+                        <input disabled="disabled" name="RegistrationDate" id="FeeDateCurrentDepart" class="form-control devcalender" placeholder="{{translation.FeeDate}}" ng-model="AuditorAssign.FeeDate" autocomplete="off" />
+                        @*<input disabled="disabled" type="text" name="FeeDate" class="form-control" ng-model="AuditorAssign.FeeDate" placeholder="{{translation.Date}}" autocomplete="off">*@
+                    </div>
+                </div>
+                <div class="col-lg-12 form-group" ng-show="CurrentYearAuditorAppointed && CurrentYearAuditorAppointedByDepart">
+                    <div class="col-lg-2">
+                        <label>{{translation.ChallanNo}}</label>
+                    </div>
+                    <div class="col-lg-4">
+                        <input disabled="disabled" type="text" name="ChallanNo" class="form-control" ng-model="AuditorAssign.ChallanNo" placeholder="{{translation.ChallanNo}}" maxlength="10" onkeypress='return event.charCode >= 48 && event.charCode <= 57' autocomplete="off">
+                    </div>
+                    <div class="col-lg-2">
+                        <label>{{translation.District}}</label>
+                    </div>
+                    <div class="col-lg-4">
+                        <select disabled="disabled" class="form-control" id="ddlunit" ng-model="AuditorAssign.DistrictId" ng-init="AuditorAssign.DistrictId='0'" ng-change="GetAuditorDataByDist()">
+                            @*ng-change="GetAuditorData()"*@
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in DistrictList" value="{{item.DISTRICT_ID}}">
+                                {{_language =='en-us' ?  item.DISTRICT_ENG : item.DISTRICT_MANGAL}}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+
+
+                <div class="form-group" ng-hide="CurrentYearAuditorAppointed">
+                    <div class="dev-align-btn">
+                        <button type="submit" class="btn btn-primary dev-btn" ng-hide="AuditorAssign.IsPermanentSave" ng-click="SaveAuditorAssignment(1)" ng-disabled="Myauditform.$invalid" style="margin-right:15px;">{{translation.PermanentSave}}</button>
+                        <button type="button" class="btn btn-primary dev-btn" ng-click="ClearForm()">{{translation.Clear}}</button>
+                        @*<a class="btn btn-primary dev-btn" style="text-transform:capitalize;" href="../User/DashBoard"> Back</a>*@
+                    </div>
+                </div>
+            </div>
+
+            <div ng-show="ShowOldYearData">
+                <div class="col-lg-12 form-group">
+                    <div class="col-lg-2">
+                        <label>{{translation.AuditBy}}</label>
+                    </div>
+                    <div class="col-lg-4">
+                        <input disabled="disabled" class="form-check-input" type="radio" name="inlineRadioOptionsOld" value="true" ng-model="AuditorAssign.IsEmpanelledCA" ng-change="ShowByEmpanelledAgencyDataOld(true)" checked="checked">
+                        <label class="form-check-label option_value" style="margin-right: 15px;">{{translation.ByEmpanelledAgency}}</label>
+
+                        <input disabled="disabled" class="form-check-input" type="radio" name="inlineRadioOptionsOld" id="inlineRadio2Old" value="false" ng-model="AuditorAssign.IsEmpanelledCA" ng-change="ShowByEmpanelledAgencyDataOld(false)">
+                        <label class="form-check-label option_value">{{translation.ByDepartment}}</label>
+                    </div>
+                    <div class="col-lg-2">
+                    </div>
+                    <div class="col-lg-4">
+                    </div>
+                </div>
+                <div ng-show="ShowEmpanelledCADataOld">
+                    <div class="col-lg-12 form-group">
+                        <div class="col-lg-2">
+                            <label>{{translation.AuditType}}</label>
+                        </div>
+                        <div class="col-lg-4">
+                            <input disabled="disabled" class="form-check-input" type="radio" name="inlineRadioOptions2Old" value="0" ng-model="AuditorAssign.IsFirm" ng-change="GetAuditorData()">
+                            <label class="form-check-label option_value" for="inlineRadio1Old" style="margin-right: 15px;">{{translation.Firm}}</label>
+
+                            <input disabled="disabled" class="form-check-input" type="radio" name="inlineRadioOptions2Old" id="inlineRadio3Old" value="1" ng-model="AuditorAssign.IsFirm" ng-change="GetAuditorData()">
+                            <label class="form-check-label option_value">{{translation.Individual}}</label>
+                        </div>
+                        <div class="col-lg-2">
+                            <label>{{translation.District}}</label>
+                        </div>
+                        <div class="col-lg-4">
+                            <select disabled="disabled" class="form-control" id="ddlunit" ng-model="AuditorAssign.DistrictId" ng-init="AuditorAssign.DistrictId='0'" ng-change="GetAuditorDataByDist()">
+                                <option value="0" disabled>{{translation.SelectOption}}</option>
+                                <option ng-repeat="item in DistrictList" value="{{item.DISTRICT_ID}}">
+                                    {{_language =='en-us' ?  item.DISTRICT_ENG : item.DISTRICT_MANGAL}}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-lg-12 form-group">
+                        <div class="col-lg-2">
+                            <label>{{translation.AuditorData}}</label>
+                        </div>
+                        <div class="col-lg-4">
+                            <select disabled="disabled" class="form-control" ng-model="AuditorAssign.AuditorId" ng-init="AuditorAssign.AuditorId='0'">
+                                <option value="0" disabled>{{translation.SelectOption}}</option>
+                                <option ng-repeat="item in AuditorList" value="{{item.AuditorId}}">
+                                    {{_language =='en-us' ?  item.FirmName : item.FirmName}}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-lg-2">
+                            <label>{{translation.Auditorfees}}</label>
+                        </div>
+                        <div class="col-lg-4">
+                            <input disabled="disabled" type="text" name="Auditorfees" class="form-control" ng-model="AuditorAssign.Auditorfees" placeholder="{{translation.BlanckAmount}}" maxlength="10" onkeypress='return event.charCode >= 48 && event.charCode <= 57' autocomplete="off">
+                        </div>
+
+                    </div>
+                    <div class="col-lg-12 form-group">
+                        <div class="col-md-2">
+                            <label>{{ translation.LastAudit}}</label>
+                        </div>
+                        <div class="col-md-4">
+                            <select disabled="disabled" class="form-control" ng-model="AuditorAssign.LastFinancialYear" ng-init="AuditorAssign.LastFinancialYear='0'">
+                                <option value="0" disabled>{{translation.SelectOption}}</option>
+                                <option ng-repeat="item in FinancialYearList" value="{{item.FIN_YEAR_MASTR_ID}}">
+                                    {{item.FIN_YEAR_NAME}}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-lg-2">
+                            <label>{{translation.FeeDate}}</label>
+                        </div>
+                        <div class="col-lg-4">
+                            @*<input disabled="disabled" type="text" name="FeeDateFirm" class="form-control" ng-model="AuditorAssign.FeeDate" placeholder="{{translation.Date}}" autocomplete="off">*@
+                            <input disabled="disabled" name="RegistrationDate" id="FeeDateFirm" class="form-control devcalender" placeholder="{{translation.FeeDate}}" ng-model="AuditorAssign.FeeDate" autocomplete="off" />
+                        </div>
+                    </div>
+                </div>
+                <div ng-show="ShowDepartmentDataOld">
+                    <div class="col-lg-12 form-group">
+                        <div class="col-lg-2">
+                            <label>{{translation.Inspector}}/{{translation.Auditor}}</label>
+                        </div>
+                        <div class="col-lg-4">
+                            <input disabled="disabled" type="text" name="InsName" class="form-control" ng-model="AuditorAssign.InspectorName" placeholder="{{translation.Inspector}}">
+                        </div>
+                        <div class="col-md-2">
+                            <label>{{translation.Byauthorized}}<span class="error">*</span></label>
+                        </div>
+                        <div class="col-md-4">
+                            <input disabled="disabled" class="form-check-input" type="radio" name="ApprovedBy1" id="rbApprovedByRegistrar" value="1" ng-model="AuditorAssign.ApprovedBy">
+                            <label class="form-check-label option_value ng-binding" style="margin-right: 15px;">{{translation.ByRegistrar}}</label>
+                            <input disabled="disabled" class="form-check-input" type="radio" name="ApprovedBy1" id="rbApprovedByBoard" value="2" ng-model="AuditorAssign.ApprovedBy">
+                            <label class="form-check-label option_value ng-binding">{{translation.ByBoard}}</label>
+                            <input disabled="disabled" class="form-check-input" type="radio" name="ApprovedBy1" id="rbApprovedByBoth" value="3" ng-model="AuditorAssign.ApprovedBy">
+                            <label class="form-check-label option_value ng-binding">{{translation.Both}}</label>
+                        </div>
+                    </div>
+                    <div class="col-lg-12 form-group">
+                        <div class="col-lg-2">
+                            <label>{{translation.Auditorfees}}</label>
+                        </div>
+                        <div class="col-lg-4">
+                            <input disabled="disabled" type="text" name="Auditorfees" class="form-control" ng-model="AuditorAssign.Auditorfees" placeholder="{{translation.BlanckAmount}}" maxlength="10" onkeypress='return event.charCode >= 48 && event.charCode <= 57' autocomplete="off">
+                        </div>
+                        <div class="col-lg-2">
+                            <label>{{translation.FeeDate}}</label>
+                        </div>
+                        <div class="col-lg-4">
+                            <input disabled="disabled" name="RegistrationDate" id="FeeDate" class="form-control devcalender" placeholder="{{translation.FeeDate}}" ng-model="AuditorAssign.FeeDate" autocomplete="off" />
+                            @*<input disabled="disabled" type="text" name="FeeDate" class="form-control" ng-model="AuditorAssign.FeeDate" placeholder="{{translation.Date}}" autocomplete="off">*@
+                        </div>
+                    </div>
+                    <div class="col-lg-12 form-group">
+                        <div class="col-lg-2">
+                            <label>{{translation.ChallanNo}}</label>
+                        </div>
+                        <div class="col-lg-4">
+                            <input disabled="disabled" type="text" name="ChallanNo" class="form-control" ng-model="AuditorAssign.ChallanNo" placeholder="{{translation.ChallanNo}}" maxlength="10" onkeypress='return event.charCode >= 48 && event.charCode <= 57' autocomplete="off">
+                        </div>
+                        <div class="col-lg-2">
+                        </div>
+                        <div class="col-lg-4">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div ng-show="ShowOldYearData || ( CurrentYearAuditorAppointed )">
+                @*&& CurrentYearAuditorAppointedHaveAuditReport*@
+                <div class="col-lg-12 form-group">
+                    <div class="col-lg-2">
+
+                        <label>{{translation.AuditStartDate}}</label>
+                    </div>
+                    <div class="col-lg-4">
+                        <input name="RegistrationDate" id="AuditStartDate" class="form-control devcalender" placeholder="{{translation.AuditStartDate}}" ng-model="AuditorAssign.AuditStartDate" autocomplete="off" />
+                    </div>
+                    <div class="col-lg-2">
+                        <label>{{translation.AuditEndDate}}</label>
+                    </div>
+                    <div class="col-lg-4">
+                        <input name="RegistrationDate" id="AuditEndDate" class="form-control devcalender" placeholder="{{translation.AuditEndDate}}" ng-model="AuditorAssign.AuditEndDate" autocomplete="off" />
+                    </div>
+                </div>
+                @*19082020-2 PM*@
+                <div class="col-lg-12 form-group">
+                    <h5 class="heading-hr ng-binding"> {{translation.AuditMetaData}} </h5>
+                </div>
+                <div class="col-lg-12 form-group">
+                    <div class="col-md-2">
+                        <label>{{translation.AuditReportDepartmentDetermined}}</label>
+                    </div>
+                    <div class="col-md-4">
+                        <input type="radio" name="Determined" value="1" ng-model="AuditorAssign.IsDeterminedFormat" />{{translation.Yes}}
+                        <input type="radio" name="Determined" value="0" ng-model="AuditorAssign.IsDeterminedFormat" />{{translation.No}}
+                    </div>
+                    <div class="col-md-2">
+                        <label>{{translation.AuditReporteneralAssembly}}</label>
+                    </div>
+                    <div class="col-md-4">
+                        <input type="radio" name="Assembly" value="1" ng-model="AuditorAssign.IsApprovedByGeneralAssembly" />{{translation.Yes}}
+                        <input type="radio" name="Assembly" value="0" ng-model="AuditorAssign.IsApprovedByGeneralAssembly" />{{translation.No}}
+                    </div>
+                </div>
+
+                <div class="col-lg-12" style="margin-top:10px;">
+                    <div class="col-md-2">
+                        <label>{{translation.Requireddocuments}}</label>
+                    </div>
+                    <div class="col-md-4">
+                        <input type="radio" name="Requireddocument" value="1" ng-model="AuditorAssign.IsDesiredDocumentAttached" />{{translation.Yes}}
+                        <input type="radio" name="Requireddocument" value="0" ng-model="AuditorAssign.IsDesiredDocumentAttached" />{{translation.No}}
+                    </div>
+                    <div class="col-md-2">
+                        <label>{{translation.Containsallaccounts}}</label>
+                    </div>
+                    <div class="col-md-4">
+                        <input type="radio" name="IsAllAuditReport" value="1" ng-model="AuditorAssign.IsAllAuditReportDocumentsAttached" />{{translation.Yes}}
+                        <input type="radio" name="IsAllAuditReport" value="0" ng-model="AuditorAssign.IsAllAuditReportDocumentsAttached" />{{translation.No}}
+                    </div>
+                </div>
+
+                <div class="col-lg-12" style="margin-top:10px;">
+
+                    <div class="col-md-2">
+                        <label>{{translation.Auditcompliancereport}}</label>
+                    </div>
+                    <div class="col-md-4">
+                        <input type="radio" name="IsCompliance" value="1" ng-model="AuditorAssign.IsComplianceReportApprovedByGeneralAssembly" />{{translation.Yes}}
+                        <input type="radio" name="IsCompliance" value="0" ng-model="AuditorAssign.IsComplianceReportApprovedByGeneralAssembly" />{{translation.No}}
+                    </div>
+                    <div class="col-md-2">
+                        <label>{{translation.Classificationofauditreports}}</label>
+                    </div>
+                    <div class="col-md-4">
+                        <select ng-model="AuditorAssign.ClassificationId" class="form-control" ng-init="AuditorAssign.ClassificationId='0'">
+                            <option value="0">{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in AuditCategoryList" value="{{item.LovValuesId}}">
+                                {{_language =='en-us' ?  item.LovCode : item.Lovdescription}}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-lg-12" style="margin-top:10px;">
+                    <div class="col-md-2">
+                        <label>{{translation.ActivMembers}}</label>
+                    </div>
+                    <div class="col-md-4">
+                        <input type="text" name="ActivMembers" class="form-control" ng-model="AuditorAssign.TotalActivMembers" placeholder="{{translation.ActivMembers}}">
+                    </div>
+
+                    <div class="col-md-2">
+                        <label>{{translation.ACategory}}</label>
+                    </div>
+                    <div class="col-md-4">
+                        <input type="text" name="NameChiefExecutive" class="form-control" ng-model="AuditorAssign.ACategory" placeholder="{{translation.ACategory}}">
+                        @*onkeypress='validate(event)'*@
+                    </div>
+                </div>
+
+                <div class="col-lg-12" style="margin-top:10px;">
+                    <div class="col-md-2">
+                        <label>{{translation.BCategory}}</label>
+                    </div>
+                    <div class="col-md-4">
+                        <input type="text" name="NameChiefExecutive" class="form-control" ng-model="AuditorAssign.BCategory" placeholder="{{translation.BCategory}}">
+                        @*onkeypress='validate(event)'*@
+                    </div>
+                    <div class="col-md-2">
+                        <label>{{translation.CCategory}}</label>
+                    </div>
+                    <div class="col-md-4">
+                        <input type="text" name="NameChiefExecutive" class="form-control" ng-model="AuditorAssign.CCategory" placeholder="{{translation.CCategory}}">
+                        @*onkeypress='validate(event)'*@
+                    </div>
+                </div>
+
+                <div class="col-lg-12" style="margin-top:10px;">
+                    <div class="col-md-2">
+                        <label>{{translation.CEONAME}}</label>
+                    </div>
+                    <div class="col-md-4">
+                        <input type="text" name="CEONAME" class="form-control" ng-model="AuditorAssign.CeoName" placeholder="{{translation.CEONAME}}">
+                    </div>
+
+                </div>
+
+
+                @*bh*@
+                <div class="col-lg-12" style="margin-top:10px;">
+                    <div class="col-md-2">
+                        <label>{{translation.Isirregularity}}</label>
+                    </div>
+                    <div class="col-md-4">
+                        <input type="radio" name="irregularity" value="1" ng-model="AuditorAssign.IsIrregularity" />{{translation.Yes}}
+                        <input type="radio" name="irregularity" value="0" ng-model="AuditorAssign.IsIrregularity" />{{translation.No}}
+                    </div>
+                </div>
+
+                <div class="col-lg-12" style="margin-top:10px;" ng-if="AuditorAssign.IsIrregularity==1">
+                    <div class="col-md-2">
+                        <label>{{translation.IrregularityType}}</label>
+                    </div>
+                    <div class="col-md-4">
+                        <input type="radio" name="compliance" value="1" ng-model="AuditorAssign.IrregularityType" />{{translation.AdministrativeIrregularity}}
+                        <input type="radio" name="compliance" value="0" ng-model="AuditorAssign.IrregularityType" />{{translation.FinancialIrregularity}}
+                        <input type="radio" name="compliance" value="2" ng-model="AuditorAssign.IrregularityType" />{{translation.FinancialAdministrativeIrregularity}}
+                    </div>
+                    <div class="col-md-2">
+                        <label>{{translation.DescriptionofIrregularity}}</label>
+                    </div>
+                    <div class="col-md-4">
+                        <textarea type="text" name="txtDescription" class="form-control" ng-model="AuditorAssign.DescriptionofIrregularity" maxlength="500"></textarea>
+                    </div>
+                </div>
+
+
+                <div class="col-lg-12" style="margin-top:10px;" ng-if="AuditorAssign.IsIrregularity==1">
+                    <div class="col-md-2">
+                        <label>{{translation.NameOfResponsibleOfficer}}</label>
+                    </div>
+                    <div class="col-md-4">
+                        <input type="text" name="NameChiefExecutive" class="form-control" ng-model="AuditorAssign.ResponsibleOfficerName" placeholder="{{translation.NameChiefExecutiveOfficer}}">
+                    </div>
+                    <div ng-hide="AuditorAssign.IrregularityType==1">
+                        <div class="col-md-2">
+                            <label>{{translation.Amount}}</label>
+                        </div>
+                        <div class="col-md-4">
+                            <input type="text" name="Amount" class="form-control" ng-model="AuditorAssign.IrregularityAmount" placeholder="{{translation.Amount}}">
+                            @*onkeypress='validate(event)'*@
+                        </div>
+                    </div>
+                </div>
+
+                @*bh*@
+
+                <div class="col-lg-12" style="margin-top:10px;">
+
+                    <div class="col-md-2">
+                        <label>{{translation.Actionisrequired}}</label>
+                    </div>
+                    <div class="col-md-4">
+                        <input type="radio" name="Section" value="1" ng-model="AuditorAssign.IsActionisrequired" />{{translation.Yes}}
+                        <input type="radio" name="Section" value="0" ng-model="AuditorAssign.IsActionisrequired" />{{translation.No}}
+                    </div>
+                    <div ng-if="AuditorAssign.IsActionisrequired==1">
+                        <div class="col-md-2">
+                            <label>{{translation.PeraNo}}{{translation.DescriptionofIrregularity}}</label>
+                        </div>
+                        <div class="col-md-4">
+                            <textarea type="text" name="txtDescription" class="form-control" ng-model="AuditorAssign.ActionDescription" maxlength="500"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+
+
+                <div class="col-lg-12" style="margin-top:10px;" ng-if="AuditorAssign.IsActionisrequired==1">
+
+                    <div class="col-md-2">
+                        <label>{{translation.NameOfResponsibleOfficer}}</label>
+                    </div>
+
+                    <div class="col-md-4">
+                        <input type="text" name="IrregularityName" class="form-control" ng-model="AuditorAssign.IrregularityOfficerName" placeholder="Officer Name">
+                    </div>
+                    <div class="col-md-2">
+                        <label>{{translation.section}}</label>
+                    </div>
+                    <div class="col-md-4">
+                        <select ng-model="AuditorAssign.SectionId" class="form-control" ng-init="AuditorAssign.SectionId=='0'">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in CourtSectionListData" value="{{item.ID}}">
+                                {{_language =='en-us' ?  item.valueeng : item.valuenamehi}}
+                        </select>
+                    </div>
+                </div>
+                @*bhu*@
+
+
+                <div class="col-lg-12" style="margin-top:10px;">
+                    <div class="col-md-2">
+                        <label>{{translation.ProfitLoss}}</label>
+                    </div>
+                    <div class="col-md-4">
+                        <input type="radio" name="ProfitLoss" value="1" ng-model="AuditorAssign.IsProfit" />{{translation.Profit}}
+                        <input type="radio" name="ProfitLoss" value="0" ng-model="AuditorAssign.IsProfit" />{{translation.Loss}}
+                    </div>
+                    <div class="col-md-2">
+                        <label>{{translation.TotalMember}}</label>
+                    </div>
+                    <div class="col-md-4">
+                        <input type="text" name="TotalMember" class="form-control" ng-model="AuditorAssign.TotalMembers" placeholder="{{translation.TotalMember}}">
+                    </div>
+                </div>
+                <div class="col-lg-12" style="margin-top:10px;">
+                    <div class="col-md-2">
+                        <label>{{translation.Accumulated}}</label>
+                    </div>
+                    <div class="col-md-4">
+                        <input type="text" name="Accumulate" class="form-control" ng-model="AuditorAssign.AccumulateProfitLoss" placeholder="{{translation.Accumulated}}">
+                    </div>
+                    <div class="col-md-2">
+                        <label>{{translation.Grossprofitorloss}}</label>
+                    </div>
+                    <div class="col-md-4">
+                        <input type="text" name="Grossprofitor" class="form-control" ng-model="AuditorAssign.Grossprofitor" placeholder="{{translation.Grossprofitorloss}}">
+                    </div>
+                </div>
+
+
+                <div class="col-lg-12" style="margin-top:10px;">
+                    <div class="col-md-2">
+                        <label>{{translation.Totalshareamount}}</label>
+                    </div>
+                    <div class="col-md-4">
+                        <input type="text" name="TotalAmonut" class="form-control" ng-model="AuditorAssign.TotalAmonut" placeholder="{{translation.Totalshareamount}}">
+
+                    </div>
+                    <div class="col-md-2">
+                        <label>{{translation.Membersshareamount}}</label>
+                    </div>
+                    <div class="col-md-4">
+                        <input type="text" name="Membersshareamount" class="form-control" ng-model="AuditorAssign.Membersshareamount" placeholder="{{translation.Membersshareamount}}">
+
+                    </div>
+                </div>
+                <div class="col-lg-12" style="margin-top:10px;">
+                    <div class="col-md-2">
+                        <label>{{translation.Stategovernmentshareamount}}</label>
+                    </div>
+                    <div class="col-md-4">
+                        <input type="text" name="StateGovtAmount" class="form-control" ng-model="AuditorAssign.StateGovtAmount" placeholder="{{translation.Stategovernmentshareamount}}">
+                    </div>
+                </div>
+
+                <div>
+                    <spam class="col-md-12 error">
+                        <p> * For partial submission 1 and 2 Records are mandatry</p>
+                        <p> * For permanent submission 1 to 12 Records are mandatry</p>
+                    </spam>
+                </div>
+                <div class="col-lg-12" style="margin-top:10px;">
+                    <h5 class="heading-hr ng-binding"> {{translation.AuditReportList}} </h5>
+                </div>
+                <div class="col-md-12">
+                    <div class="citizen-dash-head">
+                        <table class="table devtable" id="TblEnclouser">
+                            <thead>
+                                <tr>
+                                    <th class="ng-binding">
+                                        {{translation.SRNO}}
+                                    </th>
+                                    <th class="ng-binding">
+                                        {{translation.FileUploadType}}
+                                    </th>
+                                    <th class="ng-binding">
+                                        {{translation.FileInPDF}}
+                                    </th>
+                                    @*
+                                    <th class="ng-binding">
+                                        {{translation.FileInExcel}}
+                                    </th>*@
+                                    <th class="ng-binding">
+                                        {{translation.Download}}
+                                    </th>
+                                </tr>
+                            </thead>
+                            <!-- ngRepeat: x in records -->
+                            <tbody ng-repeat="x in FileUploadTypes" class="ng-scope">
+                                <tr>
+                                    <td hidden="hidden"><label>{{x.Id}}</label></td>
+                                    <td>{{$index+1}}</td>
+                                    <td>
+                                        <label>{{ _language =='en-us' ? x.UploadTypeEnglish : x.UploadtypeHindi}}</label>
+                                    </td>
+                                    <td>
+                                        <h1><input type="file" id="File_PDF_{{x.Id}}" filetype="pdf" name="File" ng-model="EnclouserDetails.Enclouserupload" class="form-control" onchange="angular.element(this).scope().UploadEnclouserFile(this.files, this)" ddlid="UploadType_PDF_{{x.Id}}"></h1>
+                                        @*<a ng-show="x.UploadFileNamePDF.length>0" target="_blank" class="fa fa-eye" style="text-transform:capitalize;" href="../Content/AuditReport/{{x.UploadFileNamePDF}}"></a>*@
+                                        <input type="hidden" id="hfpdf{{x.Id}}" value="{{x.UploadFileNamePDF}}" />
+                                    </td>
+                                    @*
+                                    <td>
+                                        <h1><input type="file" id="File_Excel_{{x.Id}}" filetype="{{x.FileType}}" name="File" ng-model="EnclouserDetails.Enclouserupload" class="form-control" onchange="angular.element(this).scope().UploadEnclouserFile(this.files, this)" ddlid="UploadType_Excel_{{x.Id}}"></h1>
+                                        <a ng-show="x.UploadFileNameXLS.length>0" target="_blank" class="fa fa-eye" style="text-transform:capitalize;" href="../Content/AuditReport/{{x.UploadFileNameXLS}}"></a>
+                                        <input type="hidden" id="hfxls{{x.Id}}" value="{{x.UploadFileNameXLS}}" />
+                                    </td>*@
+                                    <td>
+                                        <a ng-show="x.UploadFileNamePDF.length>0" target="_blank" class="fa fa-file-pdf-o" style="text-transform:capitalize;" href="../Content/AuditReport/{{x.UploadFileNamePDF}}"></a>
+                                        @*<a ng-show="x.UploadFileNameXLS.length>0" target="_blank" class="fa fa-file-word-o" style="text-transform:capitalize;" href="../Content/AuditReport/{{x.UploadFileNameXLS}}"></a>*@
+                                    </td>
+                                </tr>
+                            </tbody><!-- end ngRepeat: x in records -->
+
+
+                        </table>
+                    </div>
+                </div>
+                <div class="col-lg-12 form-group">
+                    <div class="col-lg-2">
+                        <label>{{translation.OtherFileUpload}}</label>
+                    </div>
+                    <div class="col-md-4">
+                        <select class="form-control" ng-model="OtherFileUpload.AddMoreFile" ng-init="OtherFileUpload.AddMoreFile='0'" ng-change="GetAddMoreFilesDiv()">
+                            <option value="0" disabled selected>{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in ExtraFileCounter" value="{{item}}">
+                                {{item}}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-12" ng-show="divMoreFilesAdd">
+                    <div class="citizen-dash-head">
+                        <table class="table devtable" id="AddMoreFilestbl">
+                            <thead>
+                                <tr>
+                                    <th class="ng-binding">
+                                        {{translation.SRNO}}
+                                    </th>
+                                    <th class="ng-binding">
+                                        {{translation.FileUploadType}}
+                                    </th>
+                                    <th class="ng-binding">
+                                        {{translation.FileInPDF}}
+                                    </th>
+                                    <th class="ng-binding">
+                                        {{translation.FileInExcel}}
+                                    </th>
+                                    <th class="ng-binding">
+                                        {{translation.Download}}
+                                    </th>
+                                </tr>
+                            </thead>
+                            <!-- ngRepeat: x in records -->
+                            <tbody class="ng-scope">
+                                <tr data-ng-repeat="p in records">
+                                    <td>{{$index+1}} <label style="display:none">{{p.Id}}</label></td>
+                                    <td>
+                                        <label><input type="text" value="{{p.Name}}" id="Name{{p.Id}}" /></label>
+                                    </td>
+                                    <td>
+                                        <h1><input type="file" filetype="pdf" name="File" ng-model="EnclouserDetails.Enclouserupload" class="form-control" onchange="angular.element(this).scope().UploadEnclouserFile(this.files, this)" ddlid="UploadType_PDF_{{ p.Id}}"></h1>
+                                        @*<a ng-show="p.UploadFileNamePDF.length>0" target="_blank" class="fa fa-eye" style="text-transform:capitalize;" href="../Content/AuditReport/{{p.UploadFileNamePDF}}"></a>*@
+                                        <input type="hidden" id="hfpdfOther{{p.Id}}" value="{{p.UploadFileNamePDF}}" />
+                                    </td>
+                                    <td>
+                                        <input type="file" width="100" filetype="worddocument" name="File" ng-model="EnclouserDetails.Enclouserupload" class="form-control" onchange="angular.element(this).scope().UploadEnclouserFile(this.files, this)" ddlid="UploadType_Excel_{{p.Id}}">
+                                        @*<a ng-show="p.UploadFileNameXLS.length>0" target="_blank" class="fa fa-eye" style="text-transform:capitalize;" href="../Content/AuditReport/{{p.UploadFileNameXLS}}"></a>*@
+                                        <input type="hidden" id="hfxlsOther{{p.Id}}" value="{{p.UploadFileNameXLS}}" />
+                                    </td>
+                                    <td>
+                                        <a ng-show="p.UploadFileNamePDF.length>0" target="_blank" class="fa fa-file-pdf-o" style="text-transform:capitalize;" href="../Content/AuditReport/{{p.UploadFileNamePDF}}"></a>
+                                        <a ng-show="p.UploadFileNameXLS.length>0" target="_blank" class="fa fa-file-word-o" style="text-transform:capitalize;" href="../Content/AuditReport/{{p.UploadFileNameXLS}}"></a>
+                                    </td>
+                                </tr>
+                            </tbody><!-- end ngRepeat: x in records -->
+
+
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div class="form-group" ng-show="ShowOldYearData || CurrentYearAuditorAppointed">
+                    <div class="dev-align-btn">
+                        <button type="submit" class="btn btn-primary dev-btn" ng-hide="AuditorAssign.IsPermanentSave" ng-click="SaveAuditorAssignmentOld(0)" ng-disabled="Myauditform.$invalid" style="margin-right:15px;">{{translation.PartialSave}}</button>
+                        <button type="submit" class="btn btn-primary dev-btn" ng-hide="AuditorAssign.IsPermanentSave" ng-click="SaveAuditorAssignmentOld(1)" ng-disabled="Myauditform.$invalid" style="margin-right:15px;">{{translation.PermanentSave}}</button>
+                        <button type="button" class="btn btn-primary dev-btn" ng-click="ClearForm()">{{translation.Clear}}</button>
+                        @*<a class="btn btn-primary dev-btn" style="text-transform:capitalize;" href="../Citizen/DashBoard"> Back</a>*@
+                    </div>
+                </div>
+                @*<div class="form-group" ng-show="CurrentYearAuditorAppointed">
+                    <div class="dev-align-btn">
+                        <button type="submit" class="btn btn-primary dev-btn" ng-hide="AuditorAssign.IsPermanentSave" ng-click="SaveAuditorAssignmentOld(0)" ng-disabled="Myauditform.$invalid" style="margin-right:15px;">{{translation.PartialSave}}</button>
+                        <button type="submit" class="btn btn-primary dev-btn" ng-hide="AuditorAssign.IsPermanentSave" ng-click="SaveAuditorAssignmentOld(1)" ng-disabled="Myauditform.$invalid" style="margin-right:15px;">{{translation.PermanentSave}}</button>
+                        <button type="button" class="btn btn-primary dev-btn" ng-click="ClearForm()">{{translation.Clear}}</button>
+                        <a class="btn btn-primary dev-btn" style="text-transform:capitalize;" href="../User/DashBoard"> Back</a>
+                    </div>
+                </div>*@
+            </div>
+
+        </form>
+    </div>
+
+    <div class="dev-popup-body modal fade" id="myModal" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">{{translation.UploadeddocumentList}}</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive citizen-dash-head">
+                        <table class="table devtable">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        {{translation.SRNO}}
+                                    </th>
+                                    <th>
+                                        {{translation.Name}}
+                                    </th>
+                                    <th ng-repeat="item in DocumentList.DocumentTypes">
+                                        {{(item === 'docx' || item === 'doc') ? translation.WORD : ( (item === 'xls' || item === 'xlsx') ? translation.EXCEL : (item === 'pdf' ? translation.PDF : ''))}}
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="items in DocumentList.DocumentList">
+                                    <td>{{$index+1}}</td>
+                                    <td>
+                                        {{ _language =='en-us' ? items.DocumentNameEnglish  : items.DocumentNameHindi}}
+                                    </td>
+                                    <td ng-repeat="item2 in items.DocumenTypeDetails">
+                                        <a ng-show="item2.URL !=''" href="{{item2.URL}}" target="_blank" style="color:#505050;" class="fa fa-download"></a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">{{translation.Close}}</button>
+                </div>
+
+
+
+
+
+            </div>
+        </div>
+    </div>
+
+
+    <div class="col-md-12" ng-show="divAuditorData">
+
+        <div class="table-responsive citizen-dash-head">
+            <h5 class="heading-hr ng-binding"> {{translation.AuditUploadedSocietyList}} </h5>
+            <table class="table devtable">
+                <thead>
+                    <tr>
+                        <th>
+                            {{translation.SRNO}}
+                        </th>
+                        <th>
+                            {{translation.SocietyName}}
+                        </th>
+                        <th>
+                            {{translation.Act}}
+                        </th>
+                        <th>
+                            {{translation.AuditBy}}
+                        </th>
+                        <th>
+                            {{translation.AuditType}}
+                        </th>
+
+                        <th>
+                            {{translation.District}}
+                        </th>
+                        <th>
+                            {{translation.AuditBy}}
+                        </th>
+
+                        <th>
+                            {{translation.FincialYearHeading}}
+                        </th>
+
+                        <th>
+                            {{translation.RequestStatus}}
+                        </th>
+                        <th>
+                            {{translation.TakeAction}}
+                        </th>
+                        @*
+                        <th>
+                            {{translation.ViewReport}}
+                        </th>*@
+                        <th>
+                            {{translation.Document}}
+                        </th>
+                        <th>Acknowledgement</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="items in AssignedAuditor">
+                        <td>{{$index+1}}</td>
+                        <td>{{ items.SocietyName }}</td>
+                        <td>{{ items.ActNameEn }}</td>
+                        <td>{{ items.IsEmpanelledCA == 'True' ? translation.ByEmpanelledAgency : translation.ByDepartment}}</td>
+                        <td ng-show="items.IsFirm == 0">{{  translation.Firm }}</td>
+                        <td ng-show="items.IsFirm == 1">{{ translation.Individual}}</td>
+                        <td ng-show="items.IsFirm == 2">{{ translation.ByDepartment }}</td>
+                        <td>{{ _language == 'en-us' ?  items.DISTRICT_ENG : items.DISTRICT_MANGAL }}</td>
+                        @*
+                        <td>{{ items.FirmName }}{{ items.IsEmpanelledCA }}{{ items.AuditerAssignByDapt }}</td>*@
+                        <td ng-show="items.IsEmpanelledCA == 'True'">{{ items.FirmName  }}</td>
+                        <td ng-show="items.IsEmpanelledCA == 'False'">{{ items.AuditerAssignByDapt }}</td>
+                        <td>{{items.FIN_YEAR_NAME}}</td>
+
+                        <td>{{ items.RequestStatusText }} / {{ items.SaveStatus }}</td>
+                        <td>
+                            <a class="fa fa-edit" ng-if="items.RequestStatus == 1" ng-click="ShowOldYearDataDetailLower(AuditorAssign.FinancialYear,items.SocietyId)"></a>
+                        </td>
+
+                        @*
+                        <td ng-if="item.IsAllowUpolad=='False'">
+                            <span>Profiling Pending</span>
+                        </td>*@
+
+                        @*
+                        <td ng-show="items.RequestStatus == 0" placeholder={{translation.Delete}}>  <i class="fa fa-trash btn btn btn-xs btn-danger tooltips" placeholder={{translation.Delete}} ng-click="SetDeleteStatusSAA(items.Id)"></i></td>
+                        <td ng-show="items.RequestStatus == 1" placeholder={{translation.Download}}>
+                            <a href="{{items.AuditorAssignFilePath}}" class="fa fa-download" target="_blank"></a>
+                        </td>
+                        <td ng-show="items.RequestStatus == 2">   <a ng-show="items.AuditorAssignFilePath!=''" href="{{items.AuditorAssignFilePath}}" class="fa fa-download" target="_blank"></a> </td>
+                        <td ng-show="items.RequestStatus == 3">  <a ng-show="items.AuditorAssignFilePath!=''" href="{{items.AuditorAssignFilePath}}" class="fa fa-download" target="_blank"></a>  </td>*@
+                        <td><a ng-click="ViewDocuments(items.Id)" data-target="#myModal" data-toggle="modal" class="fa fa-eye"></a> </td>
+                        <td style="text-align:center"><a ng-if="items.IsAllowUpolad=='True'||items.IsAllowUpolad=='true'||items.IsAllowUpolad==true" ng-click="PrintACKNOWLEDGEMENT(items)"  data-toggle="modal" ><i class="fa fa-print"></i></a></td>
+                    </tr>
+                </tbody>
+            </table>
+            <div id="DivPrintData" style="display:block">
+
+            </div>
+        </div>
+
+
+    </div>
+    <div class="se-pre-con"></div>
+    <div id="stop" class="scrollTop">
+        <span><a href=""><i class="fa fa-arrow-up">Top</i></a></span>
+    </div>
+
+   
+
+</div>
+

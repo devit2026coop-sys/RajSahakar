@@ -1,0 +1,145 @@
+﻿@{
+    ViewBag.Title = "Beneficiary Details List";
+    Layout = "~/Views/Shared/_PMKisanLayout.cshtml";
+}
+<script src="~/Scripts/AngularFramework/BeneficiaryListDetails.js?id=3"></script>
+<div ng-app="BeneficiaryDetailsListMod" ng-controller="BeneficiaryDetailsListCnt" ng-cloak="">
+    <div class="container-fluid dashHeader">
+        <div class="row">
+            <div class="col-md-8">
+                <h3>Beneficiary Transaction Details</h3>
+            </div>
+            @*@Html.Partial("_ChooseFYInstallment")*@
+            @*<div class="col-md-2 form-group">
+                    <select class="form-control">
+                        <option selected value="0">--Choose Financial Year--</option>
+                        <option ng-repeat="FY in FinancialYearList" ng-value="FY.FIN_YEAR_MASTR_ID">{{FY.TitleEn}}</option>
+                    </select>
+                </div>
+                <div class="col-md-2 form-group">
+                    <select class="form-control">
+                        <option selected value="0">--Choose Installment Type--</option>
+                        <option ng-repeat="li in InstallmentTypeList" ng-value="li.MasterInstallmentID">{{li.NameEn}}</option>
+                    </select>
+                </div>*@
+        </div>
+    </div>
+    <div class="container-fluid QuarterlyOverviewSection">
+        <div class="panel panel-default">
+            <div class="panel-heading flexEqualCenter">
+                <b><i class="fa fa-th-list"></i>&nbsp;{{requestType==1?'Beneficiary Details List':'Payment Failure List'}}</b>
+                <div>
+                    <a href="~/pmkisan/BeneficiaryList" class="backBtn"><i class="fa fa-angle-left"></i>Back</a>
+                    <button type="button" class="btn btn-warning" ng-click="exportExcel()"><i class="fa fa-file-excel-o"></i> Export Excel</button>
+                </div>
+            </div>
+            <div id="search-filter">
+                <div class="table-dropdown">
+                    <div class="col-xs-4">
+                        <label for="search">{{translation.Search}}:</label>
+                        <input ng-model="q" id="search" class="form-control" placeholder={{translation.filttertext}} autocomplete="off">
+                    </div>
+                    <div class="col-xs-4">
+                        <label for="search">{{translation.ItemPerPage}}:</label>
+                        @*<input type="number" min="1" max="100" class="form-control" onkeypress='return event.charCode >= 48 && event.charCode <= 57' ng-model="pageSize">*@
+                        @*<select ng-model="obj.pageSize" class="form-control" ng-change="DataPaging.pageSize=obj.pageSize" ng-init="obj.pageSize='25''">*@
+                        <select ng-model="obj.pageSize" class="form-control" ng-change="pagechange()" ng-init="obj.pageSize='50'">
+                            @*<option value="">{{translation.All}}</option>*@
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                            <option value="200">200</option>
+                            <option value="500">500</option>
+                            <option value="1000">1000</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="panel-body">
+                <div class="table-responsive devtable">
+                    @*<div class="row">
+                            <div class="col-xs-12 text-left" style="margin-bottom:5px">
+                                <input ng-if="BeneficiaryDetailList.length>0" type="button" class="btn btn-primary dev-btn" onclick="tableToExcel('tblBeneficiaryDetail', 'Get Beneficiary Detail Data')" value="Export to Excel">
+                            </div>
+                        </div>*@
+                    <table class="table table-hover table-striped table-bordered mb-0" id="tblBeneficiaryDetail">
+                        <thead>
+                            <tr>
+                                <th>Sr. No.</th>
+                                <th>Beneficiary Details</th>
+                                <th align="center" class="text-center">PM Kisan Reg No.</th>
+                                <th>District</th>
+                                @*<th width="250">Address</th>*@
+                                <th align="center" class="text-center">Installment No</th>
+                                <th width="280">Transaction Info</th>
+                                <th>{{requestType==1?'Paid Amount':'Amount'}}</th>
+                                <th>Remark</th>
+                                <th>Transaction Date</th>
+
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr dir-paginate="item in BeneficiaryDetailList | filter:q | orderBy:colsort:reverseSort | itemsPerPage: obj.pageSize" current-page="currentPage" pagination-id="SubclassPagination">
+                                <td>{{(((DataPagingDetails.PageNumber - 1) * DataPagingDetails.PageSize) + 1)+$index}}</td>
+                                <td>
+                                    {{item.FarmerName}}<br />
+                                    <small>Gender: {{item.Gender}}, (M){{item.MobileNo}}</small>
+                                </td>
+                                <td>
+                                    {{item.RegNo}}<br />
+                                    <small>Reg. Date: {{item.RegDate}}</small>
+                                </td>
+                                <td>{{item.DISTRICT_ENG}}</td>
+                                @*<td>{{item.HomeAddress}}</td>*@
+                                <td align="center">{{item.InstallmentType}}</td>
+                                <td>
+                                    Bank Name: {{item.BankName}}<br />
+                                    Account: {{item.CreditedAccount}}<br />
+                                    UTR No.: {{item.UTRNO}}
+                                </td>
+                                <td>{{item.PaidAmount | inrCurrency}}</td>
+                                <td>{{item.CreditRemarks}}</td>
+                                <td>{{item.CreditTransactionDate |date:'dd-MM-yyyy'}}</td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div ng-if="DataPagingDetails.TotalPages>1" class="dataTables_paginate paging_simple_numbers" id="dataTables-example_paginate" style="display: flex; align-items: center; justify-content: space-between;">
+                            <div class="dataTables_info" id="dataTables-example_info" role="status" aria-live="polite">
+                                Total Records: {{DataPagingDetails.TotalRecords}}
+                            </div>
+                            <ul class="pagination pagination_1" style="margin-left: 10px !important; margin:0">
+                                <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« First</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« Previous</span></li>
+
+                                <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest('1',SearchData)" style="cursor: pointer;">
+                                    <span>« First</span>
+                                </li>
+                                <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest(DataPagingDetails.PageNumber-1,SearchData)" style="cursor:pointer;">
+                                    <span>« Prev</span>
+                                </li>
+                                <li class="{{n==DataPagingDetails.PageNumber?'active':''}}" style="{{n==DataPagingDetails.PageNumber?'':'cursor: pointer'}}" ng-repeat="n in PagingRange(DataPagingDetails.StartPageNumber,DataPagingDetails.EndPageNumber,DataPagingDetails.TotalPages)" ng-click="pageRequest(n,SearchData)"><span>{{n}}</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Next</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Last</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber!= DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.PageNumber+1,SearchData)" style="cursor:pointer;">
+                                    <span>Next »</span>
+                                </li>
+                                <li ng-if="DataPagingDetails.PageNumber != DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.TotalPages,SearchData)" style="cursor:pointer;">
+                                    <span>Last »</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>

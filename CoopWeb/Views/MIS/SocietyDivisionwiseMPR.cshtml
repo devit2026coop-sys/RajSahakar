@@ -1,0 +1,130 @@
+﻿<script src="~/Scripts/AngularFramework/SocietydivisionwiseMprTB.js"></script>
+<script src="~/Scripts/Excel/jszip_v1.js"></script>
+<script src="~/Scripts/Excel/xlsx.js"></script>
+<script src="~/Scripts/Excel/jszip.js"></script>
+<script src="~/Scripts/Excel/FileSaver.js"></script>
+<script src="~/Scripts/Excel/myexcel.js"></script>
+
+<div class="hk-pg-wrapper" ng-app="societydivisionwisemodule" ng-controller="societydivisionwiseCount">
+  
+        <!-- Breadcrumb -->
+        <div class="col-md-12">
+            <h3 class="h3heading citizen-dash-head">{{translation.MPR2001SocietyRegistered}}</h3>
+        </div>
+
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#"> {{translation.MIS}}  </a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;">{{translation.MPR2001SocietyRegistered}}   </span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="table-responsive citizen-dash-head">
+                <div class="table-dropdown" id="search-filter" style="overflow:inherit; float:left;width: 100%;margin-bottom: 10px;">
+                    <div class="col-md-2 margin-Top20 y_dropdown" style="padding-left: 0;">
+                        <label for="search" class="ng-binding">{{translation.Month}}:</label>
+                        <input id="txtFromMonth" value="date" type="month" class="form-control" autocomplete="off" onkeypress="return false;" />
+                    </div>
+                    <div class="col-md-2 margin-Top20 y_dropdown" style="padding-left: 0;">
+                        <label>{{ translation.Division}}:</label>
+                        <select name="Districtdll" ng-model="DivisionId" class="form-control" ng-init="DivisionId='0'">
+                            <option value="0">{{translation.SelectOption}}</option>
+                            <option ng-repeat="district in DivisionList" value="{{district.DIVISION_ID}}">
+                                {{_language =='en-us' ?  district.DIVISION_MANGAL : district.DIVISION_MANGAL}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 margin-Top20 y_dropdown" style="padding-left: 0;">
+                        <br />
+                        <button type="submit" class="btn btn-primary dev-btn" ng-click="GetSocietyDivisionwiseMPR()">{{translation.Search}}</button>
+                        <input type="button" class="btn btn-primary dev-btn" ng-click="ExportData()" value="Export to Excel">
+                    </div>
+                </div>
+                <table class="table table-responsive devtable" id="tblgetsuport">
+                    <thead>
+                        <tr>
+                            <th>{{translation.SRNO}}</th>
+                            <th>{{translation.Sansthaokawarg}}</th>
+                            <th>{{dateummu}} {{translation.Gatmahtakpanjikritsocietykisankhya}}</th>
+                            <th>{{dateummu}} {{translation.Mahmepanjikritsocietykisankhya}}</th>
+                            <th>{{dateummu}} {{translation.Mahmenirstpanjiynokisankhya}}</th>
+                            <th>{{dateummu}} {{translation.Mahkeantmepanjikritsocietykikullsankhya}} Col.(3+4-5)</th>
+                            <th>{{translation.columnsankhya6medarsayigyisamitiyomesesakriysamitiya}}</th>
+                            <th>{{translation.columnsankhya6medarsayigyisamitiyomeseNiskriysamitiya}}</th>
+                            <th>{{translation.columnsankhya6medarsayigyisamitiyomeseAAwasaynadhinsamitiya}}</th>
+                        </tr>
+                        <tr>
+                            <th style="text-align:center;">1</th>
+                            <th style="text-align:center;">2</th>
+                            <th style="text-align:center;">3</th>
+                            <th style="text-align:center;">4</th>
+                            <th style="text-align:center;">5</th>
+                            <th style="text-align:center;">6</th>
+                            <th style="text-align:center;">7</th>
+                            <th style="text-align:center;">8</th>
+                            <th style="text-align:center;">9</th>                            
+                        </tr>
+                    </thead>
+                    <tbody style="text-align:center">
+                        <tr ng-repeat="Item in SocietyDivisionwiseMPR">
+                            <td>{{$index+1}}</td>
+                            @*
+                            <td>{{pageSize *(currentPage-1)+$index+1}}</td>*@
+                            <td style="text-align:left;">{{Item.CategoryNameHi}}</td>
+                            <td>{{Item.GatMah}}</td>
+                            <td>{{Item.MahMePanjikrit}}</td>
+                            <td>{{Item.MahMeNirastPanjiyno}}</td>
+                            <td>{{Item.MahKeAntMePanjikritsocietyKiKulSankhya}}</td>
+                            <td>{{Item.KalamNo6MeSakriySamitiya}}</td>
+                            <td>{{Item.KalamNo6MeNiskriySamitiya}}</td>
+                            <td>{{Item.KalamNo6MeLiqividationamitiya}}</td>
+                        </tr>
+
+                        <tr>
+                            <th style="text-align:center"></th>
+                            <th style="text-align:center">{{translation.Yog}}</th>
+                            <th style="text-align:center">{{GatMah}}</th>
+                            <th style="text-align:center">{{MahMePanjikrit}}</th>
+                            <th style="text-align:center">{{MahMeNirastPanjiyno}}</th>
+                            <th style="text-align:center">{{MahKeAntMePanjikritsocietyKiKulSankhya}}</th>
+                            <th style="text-align:center">{{KalamNo6MeSakriySamitiya}}</th>
+                            <th style="text-align:center">{{KalamNo6MeNiskriySamitiya}}</th>
+                            <th style="text-align:center">{{KalamNo6MeLiqividationamitiya}}</th>
+                        </tr>
+                        <tr>
+                            <th style="text-align:center"></th>
+                            <th style="text-align:center">{{translation.Shirshsansthaye}}</th>
+                            <th style="text-align:center">{{ShirshGatMah}}</th>
+                            <th style="text-align:center">{{ShirshMahMePanjikrit}}</th>
+                            <th style="text-align:center">{{ShirshMahMeNirastPanjiyno}}</th>
+                            <th style="text-align:center">{{ShirshMahKeAntMePanjikritsocietyKiKulSankhya}}</th>
+                            <th style="text-align:center">{{ShirshKalamNo6MeSakriySamitiya}}</th>
+                            <th style="text-align:center">{{ShirshKalamNo6MeNiskriySamitiya}}</th>
+                            <th style="text-align:center">{{ShirshKalamNo6MeLiqividationamitiya}}</th>
+                        </tr>
+                        <tr>
+                            <th style="text-align:center"></th>
+                            <th style="text-align:center">{{translation.Mahayog}}</th>
+                            <th style="text-align:center">{{MahaGatMah}}</th>
+                            <th style="text-align:center">{{MahaMahMePanjikrit}}</th>
+                            <th style="text-align:center">{{MahaMahMeNirastPanjiyno}}</th>
+                            <th style="text-align:center">{{MahaMahKeAntMePanjikritsocietyKiKulSankhya}}</th>
+                            <th style="text-align:center">{{MahaKalamNo6MeSakriySamitiya}}</th>
+                            <th style="text-align:center">{{MahaKalamNo6MeNiskriySamitiya}}</th>
+                            <th style="text-align:center">{{MahaKalamNo6MeLiqividationamitiya}}</th>
+                        </tr>
+                    </tbody>
+                  
+                </table>
+            </div>
+        </div>
+  
+</div>

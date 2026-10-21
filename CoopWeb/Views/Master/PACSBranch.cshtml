@@ -1,0 +1,244 @@
+﻿<script src="~/Scripts/AngularFramework/MastersClient.js"></script>
+<script type="text/javascript">
+    var tableToExcel = (function () {
+        var uri = 'data:application/vnd.ms-excel;base64,'
+            , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>'
+            , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) }
+            , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
+        return function (table, name) {
+            if (!table.nodeType) table = document.getElementById(table)
+            var ctx = { worksheet: name || 'Worksheet', table: table.innerHTML }
+            window.location.href = uri + base64(format(template, ctx))
+        }
+    })()
+</script>
+<div ng-app="MastersModule">
+    <div ng-controller="MasterCont">
+        <div class="col-md-12">
+            <h3 class="citizen-dash-head">{{translation.PanchayatSamiti}}</h3>
+            <hr style="margin: 0;">
+        </div>
+        <div class="col-md-12">
+
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#"> {{translation.Home}} </a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;"> {{translation.PanchayatSamiti}} </span>
+                    </li>
+
+                </ul>
+            </div>
+
+        </div>
+
+        <div class="col-md-12">
+            <form class="citizen-dash-head" style="overflow: hidden; margin-bottom: 20px;">
+                <div class="col-md-4">
+                    <label>
+                        {{translation.DivisionHeading}} :
+                    </label>
+
+                    <select ng-model="ddlDivisions" class="form-control" ng-options="_language == 'en-us' ?  item.DIVISION_ENG : item.DIVISION_MANGAL for item in Divisions" ng-change="DistrictListDivID()">
+                        <option value="" disabled>{{translation.SelectOption}}-</option>
+                        @*<option value="0">{{translation.SelectOption}}-</option>
+                            <option ng-repeat="item in Divisions" value="{{item.DIVISION_ID}}">
+                                {{_language =='en-us' ?  item.DIVISION_ENG : item.DIVISION_MANGAL}}
+                            </option>*@
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label>
+                        {{translation.District}} :
+                    </label>
+                    <select ng-model="ddlDistrct" class="form-control" ng-options="_language == 'en-us' ?  item.DISTRICT_ENG : item.DISTRICT_MANGAL for item in Districts">
+                        <option value="" disabled>{{translation.SelectOption}}-</option>
+                        @*<option value="0">{{translation.SelectOption}}-</option>
+                            <option ng-repeat="item in Districts" value="{{item.DISTRICT_ID}}">
+                                {{_language =='en-us' ?  item.DISTRICT_ENG : item.DISTRICT_MANGAL}}
+                            </option>*@
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-primary dev-btn" style="margin-top: 25px;" ng-disabled="block1.$invalid" ng-click="PACSBranchList()">{{translation.Show}}</button>
+                </div>
+            </form>
+        </div>
+
+
+
+        <div class="col-md-12" ng-show="divPanchayatSamiti">
+            <div class="citizen-dash-head">
+                <div class="table-dropdown">
+                        <div class="col-md-12 dev-search-form">
+                            <div class="col-xs-4">
+                                <label for="search">{{translation.Search}}:</label>
+                                <input ng-model="q" id="search" class="form-control" placeholder={{translation.filttertext}} autocomplete="off">
+                            </div>
+                            <div class="col-xs-4">
+                                <label for="search">{{translation.ItemPerPage}}:</label>
+                                <input type="number" min="1" max="100" class="form-control" ng-model="pageSize">
+                            </div>
+                            <div class="col-xs-4" style="padding-top: 25px; ">
+
+                                <input type="button" class="btn btn-primary dev-btn" onclick="tableToExcel('tblgetsuport', 'Get Support Data')" value="Export to Excel">
+
+                            </div>
+                        </div>
+                        <br>
+
+                        <div class="col-md-12 table-responsive">
+                            <table class="table devtable" id="tblgetsuport">
+                                <caption>
+                                    <h2>{{translate.TehsilHeading}}</h2>
+                                </caption>
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            {{translation.SRNO}}
+                                        </th>
+                                        <th ng-click="sortData('DISTRICT_ENG')">
+                                            {{translation.District}}
+                                            <div ng-class="getSortClass('DISTRICT_ENG')"></div>
+                                        </th>
+                                        <th ng-click="sortData('PLDBName')">
+                                            {{translation.PLDB}}
+                                            <div ng-class="getSortClass('PLDBName')"></div>
+                                        </th>
+                                        <th ng-click="sortData('BranchName_En')">
+                                            {{translation.Branch}} {{translation.English}}
+                                            <div ng-class="getSortClass('BranchName_En')"></div>
+                                        </th>
+                                        <th ng-click="sortData('BranchNameHi')">
+                                            {{translation.Branch}} {{translation.Hindi}}
+                                            <div ng-class="getSortClass('BranchNameHi')"></div>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr dir-paginate="items in PACS_List | filter:q | orderBy:colsort:reverseSort | itemsPerPage: pageSize" current-page="currentPage" pagination-id="BlockPagination">
+                                        <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                                        <td>{{ items.DISTRICT_ENG }}</td>
+                                        <td>{{ items.PLDBName }}</td>
+                                        <td>{{ items.BranchName_En }}</td>
+                                        <td>{{ items.BranchNameHi }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                </div>
+
+
+
+                <div class="col-md-12">
+                    <div class="text-center">
+                        <dir-pagination-controls boundary-links="true" pagination-id="BlockPagination" on-page-change="pageChangeHandler(newPageNumber)" template-url="/dirPagination.tpl.html"></dir-pagination-controls>
+                    </div>
+                </div>
+                <div class="form-group col-md-12">
+                    <div class="dev-align-btn">
+
+                        <a class="btn btn-primary dev-btn" style="text-transform:capitalize;" href="../User/DashBoard"> Back</a>
+                    </div>
+
+                </div>
+                <div class="col-md-2">
+                    <h5 class="dev-page"> {{translation.Page}}: {{ currentPage }} </h5>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12">
+            <div class="citizen-dash-head table-dropdown">
+                <div class="col-md-12" style="margin-top:5px;padding-top:5px">
+                    <div class="col-lg-2">{{ translation.District}} <span class="error">*</span></div>
+                    <div class="col-lg-4">
+                        <select ng-model="Mapping.DISTRICT_ID" id="ddlDistrict" class="form-control" ng-init="Mapping.DISTRICT_ID='0'" ng-change="BlockListt()">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="itemDist in DistrictList | orderBy:'DISTRICT_ENG'" value="{{itemDist.DISTRICT_ID}}">
+                                {{_language =='en-us' ?  itemDist.DISTRICT_ENG : itemDist.DISTRICT_MANGAL}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-lg-2">{{ translation.PLDB}} <span class="error">*</span></div>
+                    <div class="col-lg-4">
+                        <select ng-model="Mapping.PldbId" class="form-control" ng-init="Mapping.PldbId='0'">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="itemDist in PLDBList | orderBy:'PLDBName'" value="{{itemDist.PldbId}}">
+                                {{_language =='en-us' ?  itemDist.PLDBName : itemDist.PLDBName}}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-12" style="margin-top:5px;padding-top:5px">
+                    <div class="col-lg-2">{{ translation.UrbanRural}} <span class="error">*</span></div>
+                    <div class="col-lg-4">
+                        <label class="help-block-gender" style="width:40% !important;"><input type="radio" id="ISrurl" name="Rural" value="true" checked="checked" ng-model="Mapping.Rural" ng-click="LeveldataonUrban(1)">{{translation.Rural}} </label>
+                        <label class="help-block-gender" style="width:40% !important;"> <input type="radio" id="ISUrban" value="false" name="Rural" ng-model="Mapping.Rural" ng-click="LeveldataonUrban(2)">{{translation.Urban}}</label>
+                    </div>
+                    <div class="col-lg-2" ng-show="ShowUrban">{{ translation.CityType}}<span class="error">*</span></div>
+                    <div class="col-lg-4" ng-show="ShowUrban">
+                        <select id="staticall" ng-model="Mapping.CityTypes" class="form-control" ng-init="Mapping.CityTypes='0'" ng-change="GetCityListt()">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option value="1">{{translation.NagarParisad}}</option>
+                            <option value="2">{{translation.NagarPalika}}</option>
+                            <option value="3">{{translation.NagarNigam}}</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-md-12" style="margin-top:5px;padding-top:5px">
+                    <div class="col-lg-2" ng-hide="ShowUrban">{{ translation.BlockHeading}} <span class="error">*</span></div>
+                    <div class="col-lg-4" ng-hide="ShowUrban">
+                        <select ng-model="Mapping.BLOCK_ID" id="ddlblocki" class="form-control" ng-init="Mapping.BLOCK_ID='0'">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="itemBlock in Blocks | orderBy:'BLOCK_ENG'" value="{{itemBlock.BLOCK_ID}}">
+                                {{_language =='en-us' ?  itemBlock.BLOCK_ENG : itemBlock.BLOCK_MANGAL}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-lg-2" ng-show="ShowUrban"> {{translation.City}}<span class="error">*</span></div>
+                    <div class="col-lg-4" ng-show="ShowUrban">
+                        <select ng-model="Mapping.CITY_ID" class="form-control" id="ddlCity" ng-init="Mapping.CITY_ID='0'">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="itemCity in CityList" value="{{itemCity.CITY_ID}}">
+                                {{_language =='en-us' ?  itemCity.CITY_ENG : itemCity.CITY_MANGAL}}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <div style="display:none">
+                        <div class="col-lg-2">{{ translation.SocietyRegistrationNo}}<span class="error">*</span></div>
+                        <div class="col-lg-4">
+                            <input type="text" name="RegistrationNo" class="form-control" ng-model="Mapping.RegistrationNo" placeholder="{{translation.SocietyRegistrationNo}}" onKeyPress="return ValidateAlphaNumericAndSlash(event);" autocomplete="off" ng-disabled="txtRegistrationNo">
+                        </div>
+                    </div>
+                    <div style="display:none">
+                        <div class="col-lg-2">{{ translation.SocietyName}}<span class="error">*</span></div>
+                        <div class="col-lg-4">
+                            <input type="text" name="SocietyName" class="form-control" ng-model="Mapping.SocietyName" placeholder="{{translation.ProposedSocietyName}}" autocomplete="off" onKeyPress="return ValidateAlpha(event);" ng-readonly="txtSocietyName">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-12" style="margin-top:5px;padding-top:5px">
+                    <div class="col-lg-5">&nbsp;</div>
+                    <div class="col-lg-6"><button type="button" class="btn btn-primary dev-btn" ng-click="SUBForm()">{{ translation.Submit}}</button></div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="se-pre-con"></div>
+    <div id="stop" class="scrollTop">
+        <span><a href=""><i class="fa fa-arrow-up">Top</i></a></span>
+    </div>
+</div>

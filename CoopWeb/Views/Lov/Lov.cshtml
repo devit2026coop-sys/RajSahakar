@@ -1,0 +1,146 @@
+﻿<script src="~/Scripts/AngularFramework/Lov.js"></script>
+<style>
+    .has-error {
+        border: #F00;
+    }
+    
+</style>
+<div ng-app="LovMod" ng-controller="LovCnt">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <h3 class="citizen-dash-head"> {{translation.LOV}} </h3>
+    </div>
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="devpage-breadcrumb">
+            <ul class="page-breadcrumb">
+                <li class="dev-page-br">
+                    <i class="fa fa-home"> </i>
+                    <a href="#" class="ng-binding">Home</a>
+                    <i class="fa fa-angle-right"> </i>
+                </li>
+                <li style="float: left">
+                    <span style="margin: 0 5px;" class="ng-binding"> Godown </span>
+                    <i class="fa fa-angle-right"> </i>
+                    <span style="margin: 0 5px;" class="ng-binding"> List of Values </span>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div class=" citizen-dash-head">
+        <div class="row">
+            <div class="col-md-12">
+                <form class="dev-masters" name="lovno">
+                    <div class="form-group col-md-6" ng-class="{ 'has-error' : lovno.LOVCode.$invalid && !lovno.LOVCode.$pristine }">
+                        <label>{{translation.LOVCode}}</label>
+                        <input type="text" class="form-control" name="LOVCode" ng-model="LOV.ListCode" placeholder="{{translation.LOVCode}}">
+                        <label ng-show="lovno.LOVCode.$error.required && !lovno.LOVCode.$pristine" class="help-block">{{translation.LOVCode}} - {{translation.Required}}</label>
+                        <input type="hidden" ng-model="LOV.LovListId" value="{{LOV.LovListId}}" />
+                    </div>
+
+                    <div class="form-group col-md-6" ng-class="{ 'has-error' : lovno.LOVDescEn.$invalid && !lovno.LOVDescEn.$pristine }">
+                        <label>{{translation.LOVDescEn}}</label>
+                        <input type="text" class="form-control" only-letters-input name="LOVDescEn" ng-model="LOV.ListDescription" placeholder="{{translation.LOVDescEn}}" ng-required="true" autocomplete="off">
+                        <label ng-show="lovno.LOVDescEn.$error.required && !lovno.LOVDescEn.$pristine" class="help-block">{{translation.LOVDescEn}} - {{translation.Required}}</label>
+                    </div>
+
+                    <div class="form-group col-md-6" ng-class="{ 'has-error' : lovno.LOVDeschi.$invalid && !lovno.LOVDeschi.$pristine }">
+                        <label>{{translation.LOVDeschi}}</label>
+                        <input type="text" class="form-control" name="LOVDeschi" ng-model="LOV.ListDescriptionHi" placeholder="{{translation.LOVDeschi}}" ng-required="true" autocomplete="off">
+                        <label ng-show="lovno.LOVDeschi.$error.required && !lov.LOVDeschi.$pristine" class="help-block">{{translation.LOVDeschi}} - {{translation.Required}}</label>
+                    </div>
+
+                    <div class="form-group col-md-12">
+                        <div class="dev-align-btn">
+                            <button type="submit" class="btn btn-primary dev-btn" ng-click="SaveLOV(LOV)">{{translation.Submit}}</button>
+                            <button type="button" class="btn btn-primary dev-btn" ng-click="ClearLovForm()">{{translation.Clear}}</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="citizen-dash-head">
+        <div class="">
+            {{newdiv}}
+        </div>
+        <div class="" ng-show="DivLov">
+            <div class="col-md-12 dev-search-form">
+                <div class="col-md-4">
+                    <label for="search">{{translation.Search}}:</label>
+                    <input ng-model="q" id="search" class="form-control" placeholder="Filter text" autocomplete="off">
+                </div>
+                <div class="col-md-4">
+                    <label for="search">{{translation.ItemPerPage}}:</label>
+                    <input type="number" min="1" max="100" class="form-control" ng-model="pageSize">
+                </div>
+            </div>
+
+            @*<div ng-repeat="item in myJson">
+                <div data-ng-repeat="i in range">
+                    {{item[i]}}
+                </div>
+            </div>*@
+
+
+            <div class="col-md-12">
+                <div class=" ">
+                    <table class="table devtable" style="margin-top: 30px;">
+                        <thead>
+                            <tr>
+                                <th>
+                                    {{translation.SRNO}}
+                                </th>
+                                <th>
+                                    {{translation.LOVCode}}
+                                    <div ng-class="getSortClass('ListCode')"></div>
+                                </th>
+                                <th>
+                                    {{translation.LOVDescEn}}
+                                    <div ng-class="getSortClass('ListDescription')"></div>
+                                </th>
+                                <th>
+                                    {{translation.LOVDeschi}}
+                                    <div ng-class="getSortClass('ListDescriptionHi')"></div>
+                                </th>
+                                @*<th>
+                                    {{translation.SchemeHeading}}
+                                    <div ng-class="getSortClass('SchemeNameEn')"></div>
+                                </th>*@
+                                <th>
+                                    {{translation.Action}}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr dir-paginate="item in LovData | filter: q | orderBy:colsort:reverseSort | itemsPerPage: pageSize" current-page="currentPage" pagination-id="lovPagination">
+                                <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                                <td>{{ item.ListCode }}</td>
+                                <td>{{ item.ListDescription }}</td>
+                                <td>{{item.ListDescriptionHi}}</td>
+                                @*<td>{{ language == 'en-us' ? item.SchemeNameEn  : item.SchemeNameHi }}</td>*@
+                                <td>
+                                    <div class="dev-action">
+                                        <label class="switch">
+                                            <input type="checkbox" ng-checked="item.IsActive == 1" ng-click="SetStatus(item.LovListId,item.IsActive)">
+                                            <span class="slider round"></span>
+                                        </label>
+
+                                        <i class="fa fa-edit" ng-click="LovUpdate(item)"></i>
+                                        <i class="fa fa-trash" ng-click="SetStatus(item.LovListId,2)"></i>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12">
+            <div class="text-center">
+                <dir-pagination-controls boundary-links="true" pagination-id="lovPagination" on-page-change="pageChangeHandler(newPageNumber)" template-url="/dirPagination.tpl.html"></dir-pagination-controls>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+

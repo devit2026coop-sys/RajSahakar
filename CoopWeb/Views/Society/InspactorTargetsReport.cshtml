@@ -1,0 +1,592 @@
+﻿
+
+
+<script src="~/Scripts/AngularFramework/InspactorTargetsReport.js"></script>
+<script>
+
+    function ValidateTodate(th) {
+        $(".Todate").datepicker("option", "minDate", $('.Fromdate').val());
+    }
+    function printpage() {
+        var printContents = document.getElementById('printdiv').innerHTML;
+        var originalContents = document.body.innerHTML;
+        document.body.innerHTML = printContents;
+        window.print();
+        document.body.innerHTML = originalContents;
+    }
+
+    $(document).ready(function () {
+        $('.Fromdate').datepicker({
+            showOn: "both",
+            changeMonth: true,
+            buttonImage: "../images/calender.png",
+            changeYear: true,
+            dateFormat: "dd/mm/yy"
+            //minDate: new Date(serverdate),
+            //maxDate: new Date(toDayDate)
+        });
+    });
+</script>
+<style>
+    .hideclass{
+        display:none;
+    }
+    .hideclass1 {
+        display: block;
+    }
+    .NewMemberdob input {
+        float: left;
+        width: 90%;
+    }
+
+    .NewMemberdob select {
+        float: left;
+        width: 90%;
+    }
+
+    .NewMemberdob button {
+        float: left;
+    }
+</style>
+<div ng-app="UnitMastersModule">
+    <div ng-controller="UnitMasterCont">
+        <div class="col-md-12">
+            <h3 class="citizen-dash-head">{{translation.Inspector}}</h3>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#"> {{translation.Home}} </a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;"> {{translation.Inspector}} </span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="col-md-12" ng-show="IsShowAssignForm">
+            <div class="citizen-dash-head" style="overflow: hidden;">
+                <div class="col-md-12">
+                    <div class="table-responsive">
+                        <table class="table table-responsive devtable" style="margin-top: 30px;">
+                            <thead>
+                                <tr>
+                                    <th>{{translation.SRNO}}</th>
+                                    <th> {{translation.District}}</th>
+                                    <th>MPacs/Gram Panchayat</th>
+                                    <th>MPacs Allotted</th>
+                                    <th>Survey Submitted</th>
+                                    <th>Pending Approval ( JR Plan ) </th>                
+                                    <th>Sanction</th>                                   
+                                    <th>{{translation.TotalObjection}}</th>
+                                    <th> Rejected</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="item in InspactorTargetsList">
+                                    <td>{{$index+1}}</td>
+                                    <td>{{item.DISTRICT_ENG}}</td>
+                                    <td style="text-align:center"><a href="javascript:void(0);" ng-click="getinsepectorwise(item.DISTRICT_ID,item.Inspector_ID,'')">  {{item.GSSCount}}</a></td>
+                                    <td style="text-align:center"><a href="javascript:void(0);" ng-click="getinsepectorwise(item.DISTRICT_ID,item.Inspector_ID,'0')">  {{item.AssignCount}}</a></td>
+                                    <td style="text-align:center"><a href="javascript:void(0);" ng-click="getinsepectorwise(item.DISTRICT_ID,item.Inspector_ID,'1')">  {{item.SurveyCount}}</a></td>
+                                    @*<td style="text-align:center"><a href="javascript:void(0);" ng-click="getinsepectorwise(item.DISTRICT_ID,item.Inspector_ID,'3')">  {{item.DistrictSubmitCount}}</a></td>*@
+                                    <td style="text-align:center"><a href="javascript:void(0);" ng-click="getinsepectorwise(item.DISTRICT_ID,item.Inspector_ID,'8')">  {{item.TotalJRPlanApprovalCount}}</a></td>
+                                    <td style="text-align:center"><a href="javascript:void(0);" ng-click="getinsepectorwise(item.DISTRICT_ID,item.Inspector_ID,'4')">  {{item.TotalSenction}}</a></td>
+                                    @*<td style="text-align:center"><a href="javascript:void(0);" ng-click="getinsepectorwise(item.DISTRICT_ID,item.Inspector_ID,'2')"> {{item.ClosesCount}}</a></td>*@
+                                    <td style="text-align:center">{{item.TotalObjection}}</td>
+                                    @*<td style="text-align:center"><a href="javascript:void(0);" ng-click="getinsepectorwise(item.DISTRICT_ID,item.Inspector_ID,'15')">{{ item.TotalSanctionCount }}</a></td>*@
+                                    <td style="text-align:center"><a href="javascript:void(0);" ng-click="getinsepectorwise(item.DISTRICT_ID,item.Inspector_ID,'7')">{{ item.TotalRejectedCount }}</a></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+
+
+        <div ng-show="AllDetails">
+          
+            <div class="citizen-dash-head">
+                <div class="table-dropdown" id="search-filter">
+                    <div class="col-xs-4">
+                        <label for="search">{{translation.Inspector}}:</label>
+                        <select name="StatusId" id="CaseStatusId" class="form-control" ng-init="InspactorId=''" ng-model="InspactorId">
+                            <option value="">{{translation.SelectOption}}</option>
+                            <option ng-repeat="itm in InspacorData" value="{{itm.MappingID}}">
+                                {{_language =='en-us' ?  itm.OfficerNameEn : itm.OfficerNameHi}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-md-4  margin-Top20">
+                        <label>&nbsp;</label><br>
+                        <button type="button" ng-click="GetInspactorTargetsDetails()" class="btn btn-primary dev-btn ng-binding">{{translation.Search}}</button>
+                        <button type="button" ng-click="ClearSearch()" class="btn btn-primary dev-btn ng-binding">{{translation.Clear}}</button>
+                    </div>
+                </div>
+
+
+                <div class="table-dropdown" id="search-filter">
+                    <div class="col-xs-4" style="display:none;">
+                        <label for="search">{{translation.Status}}:</label>
+                        <select name="StatusId" id="CaseStatusId" class="form-control" ng-init="StatusId='0'" ng-model="StatusId">
+                            <option value="0">{{translation.SelectOption}}</option>
+                            <option ng-repeat="itm in GSSStatusList" value="{{itm.StatusId}}">
+                                {{_language =='en-us' ?  itm.StatusNameEn : itm.StatusNameHi}}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+
+               @*jaya pre GSSSStatusId=='3'" after replace just for dummy GSSSStatusId=='9'"*@
+
+                <div class="col-md-12" ng-show="GSSSStatusId=='9'" style="margin-bottom:15px;">
+                    <div class="table-responsive">
+                        <table class="table table-responsive devtable" style="margin-top: 10px;">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        <input type="checkbox" name="select-alldfg" ng-model="Ischeckedall" ng-click="ChkdiAllnspector();" id="select-all" />
+                                    </th>
+                                    <th>{{translation.SRNO}}</th>
+                                    <th> {{translation.InspectorName}}</th>
+                                    <th>{{translation.Urban}}/{{translation.Rural}}</th>
+                                    <th>{{translation.District}}</th>
+                                    <th>{{translation.BlockHeading}}</th>
+                                    <th>{{translation.City}}</th>
+                                    <th>{{translation.PrecentNameGSS}}</th>
+                                    <th>{{translation.NewGSSName}}</th>
+                                    <th> {{translation.GramPanchayat}}</th>
+                                    <th>{{translation.NewGSSMemNo}}</th>
+                                    <th>{{translation.NewGSSAmanat}}</th>
+                                    <th>{{translation.NewGssAmount}}</th>
+                                    <th>{{translation.Remarkhi}}</th>
+                                    <th>प्रस्ताव पत्र</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="item in InspactorTargetsListDetils">
+
+                                    <td><input type="checkbox" name="checkbox-1" class="chk" ng-model="item.chkdboxValue" ng-click="Chkdinspector(item);" /></td>
+                                    <td>{{$index+1}}</td>
+                                    <td>
+                                        {{item.InspacorName}}
+                                    </td>
+                                    @*<td>*@
+                                    @*{{ item }}*@
+                                    @*</td>*@
+                                    <td>
+                                        {{item.Urban_Rural}}
+                                    </td>
+                                    <td>
+                                        {{item.DISTRICT_ENG}}
+                                    </td>
+                                    <td>
+                                        Block / City
+                                    </td>
+                                    <td>
+                                        {{item.PrecentNameGSS}}
+                                    </td>
+                                    <td>
+                                        {{item.NewGSSName}}
+                                    </td>
+                                    <td>
+                                        {{item.GP_ENG}}
+                                    </td>
+                                    <td>
+                                        {{item.NoofMember}}
+                                    </td>
+                                    <td>
+                                        {{item.NewGSSprecious}}
+                                    </td>
+                                    <td>
+                                        {{item.NewGSSFinanceAmount}}
+                                    </td>
+                                    <td>
+                                        {{item.Remark}}
+                                    </td>
+
+                                    <td>
+
+                                        <a style="color:#505050;" ng-if="item.Documentname!=null" target="_blank" href="../Content/SenctionFiles/{{item.SenctionLatter}}"><i class="fa fa-eye"></i></a>
+                                    </td>
+
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div ng-show="ischeckdtrue">
+                        <div class="col-md-12" style="margin-top:15px;">
+                            <label style="padding-right:20px;">
+                                कार्यवाही
+                            </label>
+                            @*5-Complete*@
+                            <input type="radio" id="member1" name="member" value="4" style="margin-left:0px;" ng-model="ObjectBySen" />Sention
+                            <input type="radio" id="member2" name="member" value="6" ng-model="ObjectBySen" />Objection
+                        </div>
+                        <div class="col-md-4 NewMemberdob" style="margin-top:15px;">
+                            <label>
+                                कार्यवाही  दिनांक
+                            </label>
+                            <input id="Valid_From_Date" name="Valid_From_Date" onchange="ValidateTodate(this);" disabled="disabled" class="form-control Fromdate" ng-model="AddNewMember.Valid_From_Date">
+                        </div>
+                        <div class="col-md-12"></div>
+                        <div class="col-md-4" style="margin-top:15px;">
+                            <label>
+                                Remark
+                            </label>
+                            <textarea class="form-control" ng-model="Remarks"></textarea>
+                        </div>
+
+
+
+                    </div>
+
+                </div>
+
+                @*jaya  pre - GSSSStatusId=='1' the i do GSSSStatusId=='8'*@
+                <div class="col-md-12" ng-show="GSSSStatusId=='8'" style="margin-bottom:15px;">
+                    <div class="table-responsive">
+                        <table class="table table-responsive devtable" style="margin-top: 10px;">
+                            <thead>
+                                <tr>
+                                    <th>{{translation.SRNO}}</th>
+                                    <th> {{translation.InspectorName}}</th>
+                                    <th>{{translation.Urban}}/{{translation.Rural}}</th>
+                                    <th>{{translation.District}}</th>
+                                    <th>{{translation.BlockHeading}}</th>
+                                    <th>{{translation.City}}</th>
+                                    <th>{{translation.PrecentNameGSS}}</th>
+                                    <th>{{translation.NewGSSName}}</th>
+                                    <th> {{translation.GramPanchayat}}</th>
+                                    <th>{{translation.NewGSSMemNo}}</th>
+                                    <th>{{translation.NewGSSAmanat}}</th>
+                                    <th>{{translation.NewGssAmount}}</th>
+                                    <th>{{translation.Remarkhi}}</th>
+                                    <th> Document</th>
+                                    <th> {{translation.Status}}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="item in InspactorTargetsListDetils">
+                                    <td>{{$index+1}}</td>
+                                    <td>
+                                        {{item.InspacorName}}
+                                    </td>
+                                    <td>
+                                        {{item.Urban_Rural}}
+                                    </td>
+                                    <td>
+                                        {{item.DISTRICT_ENG}}
+                                    </td>
+                                    <td>
+                                        {{item.BLOCK_ENG}}
+                                    </td>
+                                    <td>
+                                        {{item.CITY_ENG}}
+                                    </td>
+                                    <td>
+                                        {{item.PrecentNameGSS}}
+                                    </td>
+                                    <td>
+                                        {{item.NewGSSName}}
+                                    </td>
+                                    <td>
+                                        {{item.GP_ENG}}
+                                    </td>
+                                    <td>
+                                        {{item.NoofMember}}
+                                    </td>
+                                    <td>
+                                        {{item.NewGSSprecious}}
+                                    </td>
+                                    <td>
+                                        {{item.NewGSSFinanceAmount}}
+                                    </td>
+                                    <td>
+                                        {{item.Remark}}
+                                    </td>
+
+                                    <td>
+                                        <a style="color:#505050;" ng-if="item.Documentname!=null" target="_blank" href="../Content/InspactorDocument/{{ item.Documentname}}"><i class="fa fa-eye"></i></a>
+                                    </td>
+                                    <td>
+                                        <span ng-if="item.InspectorStatusId=='1'">Survey Submitted </span>
+                                        <span ng-if="item.InspectorStatusId=='2'">Not Feasible</span>
+                                        <span ng-if="item.InspectorStatusId=='3'">Proposal Submitted</span>
+                                        <span ng-if="item.InspectorStatusId=='4'">Sention Submited</span>
+                                        <span ng-if="item.InspectorStatusId=='5'">Completed</span>
+                                        <span ng-if="item.InspectorStatusId=='6'">Objection Submitted </span>
+                                        <span ng-if="item.InspectorStatusId=='7'">Rejected Submited</span>
+                                        <span ng-if="item.InspectorStatusId=='8'">Approved For Ragistration </span>
+                                    </td>
+
+                                </tr>
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                @*jaya*@
+                <div class="col-md-12" ng-show=" GSSSStatusId=='1' || GSSSStatusId=='3' || GSSSStatusId=='2' || GSSSStatusId=='0' || GSSSStatusId=='4' || GSSSStatusId=='6' || GSSSStatusId=='7' || GSSSStatusId == '15' || GSSSStatusId =='' ">
+                    <div class="table-responsive">
+                        <table class="table table-responsive devtable" style="margin-top: 30px;">
+                            <thead>
+                                <tr>
+                                    <th>{{translation.SRNO}}</th>
+                                    <th>{{translation.InspectorName}}</th>
+                                    <th> Mobile No</th>
+                                    <th>{{translation.Urban}}/{{translation.Rural}}</th>
+                                    <th>{{translation.District}}</th>
+                                    <th>{{translation.BlockHeading}}/{{translation.City}}</th>
+                                    @*<th>{{translation.City}}</th>*@
+                                    <th> {{translation.GramPanchayat}}</th>
+                                    <th> {{translation.Remark}}</th>
+                                    <th> {{translation.Document}}</th>
+                                    <th> {{translation.Status}}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                                <tr ng-repeat="item in InspactorTargetsListDetils">
+
+                                    <td>{{$index+1}}</td>
+                                    <td>
+                                        {{item.InspacorName}}
+                                    </td>
+                                    <td>
+                                        {{ item.MobileNo }}
+                                    </td>
+                                    <td>
+                                        {{item.Urban_Rural}}
+                                    </td>
+                                    <td>
+                                        {{item.DISTRICT_ENG}}
+                                    </td>
+                                    <td>
+                                        {{item.BLOCK_ENG}}
+                                    </td>
+                                    @*<td>
+                                {{item.CITY_ENG}}
+                            </td>*@
+                                    <td>
+                                        {{item.GP_ENG}}
+                                    </td>
+                                    <td>
+                                        {{item.Remark}}
+                                    </td>
+
+                                    <td>
+                                        <a style="color:#505050;" ng-if="item.SenctionLatter!=null" target="_blank" href="../Content/SenctionFiles/{{ item.SenctionLatter}}"><i class="fa fa-eye"></i></a>
+                                    </td>
+                                    <td>
+                                        <span ng-if="item.InspectorStatusId=='1'">Survey Submitted </span>
+                                        <span ng-if="item.InspectorStatusId=='2'">Not Feasible</span>
+                                        <span ng-if="item.InspectorStatusId=='3'">Proposal Submitted</span>
+                                        <span ng-if="item.InspectorStatusId=='4'">Sention Submited</span>
+                                        <span ng-if="item.InspectorStatusId=='5'">Completed</span>
+                                        <span ng-if="item.InspectorStatusId=='6'">Objection Submitted </span>
+                                        <span ng-if="item.InspectorStatusId=='7'">Rejected Submited</span>
+                                        <span ng-if="item.InspectorStatusId=='8'">Approved For Ragistration </span>
+                                    </td>
+
+                                </tr>
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div ng-if="DataPagingDetails.TotalPages>1" class="dataTables_paginate paging_simple_numbers" id="dataTables-example_paginate">
+                    <div class="dataTables_info" id="dataTables-example_info" role="status" aria-live="polite">
+                        Total Records: {{DataPagingDetails.TotalRecords}}
+                    </div>
+                    <ul class="pagination pagination_1" style="margin-left: 10px !important;">
+                        <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« First</span></li>
+                        <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« Previous</span></li>
+
+                        <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest('1',GetInspactorTargetsDetails)" style="cursor: pointer;">
+                            <span>«First</span>
+                        </li>
+                        <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest(DataPagingDetails.PageNumber-1,GetInspactorTargetsDetails)" style="cursor:pointer;">
+                            <span>« Previous</span>
+                        </li>
+                        <li class="{{n==DataPagingDetails.PageNumber?'active':''}}" style="{{n==DataPagingDetails.PageNumber?'':'cursor: pointer'}}" ng-repeat="n in PagingRange(DataPagingDetails.StartPageNumber,DataPagingDetails.EndPageNumber,DataPagingDetails.TotalPages)" ng-click="pageRequest(n,GetInspactorTargetsDetails)"><span>{{n}}</span></li>
+                        <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Next</span></li>
+                        <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Last</span></li>
+                        <li ng-if="DataPagingDetails.PageNumber!= DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.PageNumber+1,GetInspactorTargetsDetails)" style="cursor:pointer;">
+                            <span>Next »</span>
+                        </li>
+                        <li ng-if="DataPagingDetails.PageNumber != DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.TotalPages,GetInspactorTargetsDetails)" style="cursor:pointer;">
+                            <span>Last »</span>
+                        </li>
+                    </ul>
+                </div>
+
+
+                <div class="col-md-12 dev-menu-btn" style="margin-top: 20px; text-align:center;">
+                    <button type="submit" class="btn btn-primary" ng-show="GSSSStatusId=='3' &&ischeckdtrue" ng-click="SubmitDRToDistrictVal()">{{translation.Submit}}</button>
+                    <button class="btn btn-primary dev-btn" ng-show="GSSSStatusId=='3' &&ischeckdtrue" onclick="printpage()"><i class="fa fa-print"></i> Print</button>
+                    <button type="submit" class="btn btn-primary" ng-click="BacktoMainDiv()">{{translation.Back}}</button>
+                </div>
+                <div class="col-md-12" style="margin-top: 10px; text-align:left;">
+                    <input ng-if="InspactorTargetsListDetils.length>0" type="button" id="btnExport" class="btn btn-primary dev-btn" style="" ng-click="ExportData()" value="Export" />
+                </div>
+
+            </div>
+        </div>
+
+        <div id="printdiv" style="display:none">
+            <div class="col-lg-12" style="text-align:center; margin-top:15px; margin-bottom:15px; font-weight:bold; font-size:15px;">
+                <span>:: नई प्रस्तावित ग्राम सेवा सहकारी समिति हेतु अनुसंशा ::</span>
+            </div>
+            <table id="tblid" border='1' cellpadding='5'>
+
+                <tr>
+                    <td rowspan="2" style="font-size:12px;padding:5px;font-weight:normal;text-align:center;vertical-align:top;">क्र. सं.</td>
+                    <td rowspan="2" style="font-size:12px;padding:5px;font-weight:normal;text-align:center;vertical-align:top;">वर्तमान ग्राम सेवा सहकारी समिति (पैक्स/लेम्पस) का नाम</td>
+                    <td rowspan="2" style="font-size:12px;padding:5px;font-weight:normal;text-align:center;vertical-align:top;">नई प्रस्तावित ग्राम सेवा सहकारी समिति (पैक्स/लेम्पस) का नाम</td>
+                    <td rowspan="2" style="font-size:12px;padding:5px;font-weight:normal;text-align:center;vertical-align:top;">ग्राम पंचायत</td>
+                    <td rowspan="2" style="font-size:12px;padding:5px;font-weight:normal;text-align:center;vertical-align:top;">पंचायत सिमिति</td>
+                    <td colspan="3" style="font-size:12px;padding:5px;font-weight:normal;text-align:center;vertical-align:top;"> नई प्रस्तावित ग्राम सेवा<br /> सहकारी समिति की</td>
+                    <td rowspan="2" style="font-size:12px;padding:5px;font-weight:normal;text-align:center;vertical-align:top;">विशेष विवरण (कार्यालय/गोदाम निर्माण हेतु भूमि उब्लब्ध है अथवा नहीं तथा अन्य आवश्य्क सूचना)</td>
+                </tr>
+                <tr>
+                    <td style="font-size:12px;padding:5px;font-weight:normal;text-align:center;vertical-align:top;">सदस्य संख्या</td>
+                    <td style="font-size:12px;padding:5px;font-weight:normal;text-align:center;vertical-align:top;">अमानत</td>
+                    <td style="font-size:12px;padding:5px;font-weight:normal;text-align:center;vertical-align:top;">हिस्सा पूंजी</td>
+                </tr>
+
+
+                <tr ng-repeat="item in PrintDatalist">
+                    <td style="font-size:12px;padding:5px">{{$index+1}}</td>
+                    <td style="font-size:12px;padding:5px">{{item.PrecentNameGSS}}</td>
+                    <td style="font-size:12px;padding:5px">{{item.NewGSSName}}</td>
+                    <td style="font-size:12px;padding:5px">{{item.GP_ENG}}</td>
+                    <td style="font-size:12px;padding:5px"></td>
+                    <td style="font-size:12px;padding:5px">{{item.NoofMember}}</td>
+                    <td style="font-size:12px;padding:5px">{{item.NewGSSprecious}}</td>
+                    <td style="font-size:12px;padding:5px">{{item.NewGSSFinanceAmount}}</td>
+                    <td style="font-size:12px;padding:5px">{{item.Remark}}</td>
+                </tr>
+
+            </table>
+        </div>
+
+        <div class="col-md-12" ng-show="IsShowAssignForm1">
+            <div class="citizen-dash-head" style="overflow: hidden;">
+                <div class="col-lg-6 margin-Top20" style="padding-left:30px;">
+                    <label>
+                        {{translation.Inspector}}
+                    </label>
+                    <select name="StatusId" id="CaseStatusId" class="form-control" ng-model="InspactorId">
+                        <option value="0">{{translation.SelectOption}}</option>
+                        <option ng-repeat="itm in InspacorData" value="{{itm.MappingID}}">
+                            {{_language =='en-us' ?  itm.OfficerNameEn : itm.OfficerNameHi}}
+                        </option>
+                    </select>
+                </div>
+                <div class="clearfix"></div>
+                <div class="col-lg-6 margin-Top20" style="padding-left:30px;">
+                    <label>{{ translation.Month}}</label>
+                    <select name="Mon" ng-model="MonthID" class="form-control" ng-init="MonthID='0'">
+                        <option value="0">{{translation.SelectOption}}</option>
+                        <option ng-repeat="item in MonthList" value="{{item.Month_Id}}">
+                            {{_language =='en-us' ?  item.Month_En : item.Month_Hi}}
+                        </option>
+                    </select>
+                </div>
+            
+
+                    <div class="form-group col-md-12">
+                        <h5 class="heading-hr ng-binding">{{translation.GSS}}</h5>
+                    </div>
+                    @Html.Partial("_AddressControl", "MemberAdd")
+
+                    <div class="col-lg-12  clspanal" id="panal_6">
+                        <button type="button" style="margin-left: 13px;" ng-click="AddGSS()" class="btn btn-primary dev-btn ng-binding">{{translation.Add}}</button>
+                    </div>
+
+                    <div class="col-lg-12  clspanal  margin-Top20" id="panal_6" style="margin-top:50px;">
+                        <div class="table-responsive">
+                            <table class="table devtable" id="tblLoanAmountDetail">
+                                <thead>
+                                    <tr>
+                                        <th>{{translation.SRNO}}</th>
+                                        <th> {{translation.Inspector}}</th>
+                                        <th> Month</th>
+                                        <th>{{translation.Urban}}/{{translation.Rural}}</th>
+                                        <th>{{translation.City}}/{{translation.BlockHeading}}</th>
+                                        <th> {{translation.GramPanchayat}}</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="item in OtherPersonListNew" ng-if="!item.IsDelete">
+                                        <td>{{$index+1}}</td>
+                                        <td>
+                                            {{item.Inspector}}
+                                        </td>
+                                        <td>
+                                            <span ng-if="item.MonthId=='1'">January</span>
+                                            <span ng-if="item.MonthId=='2'">February</span>
+                                            <span ng-if="item.MonthId=='3'">March</span>
+                                            <span ng-if="item.MonthId=='4'">April</span>
+                                            <span ng-if="item.MonthId=='5'">May</span>
+                                            <span ng-if="item.MonthId=='6'">June</span>
+                                            <span ng-if="item.MonthId=='7'">July</span>
+                                            <span ng-if="item.MonthId=='8'">August</span>
+                                            <span ng-if="item.MonthId=='9'">September</span>
+                                            <span ng-if="item.MonthId=='10'">October</span>
+                                            <span ng-if="item.MonthId=='11'">November</span>
+                                            <span ng-if="item.MonthId=='12'">December</span> 
+                                        </td>
+                                        <td>
+                                            {{item.Urban_Rural}}
+                                        </td>
+                                        <td>
+                                            {{item.City_Block}}
+                                        </td>
+                                        <td>
+                                            {{item.GramPanchayat}}
+                                        </td>
+                                        <td style="text-align: right !important">
+
+                                            <i class="fa fa-trash clsShowHide btn btn btn-xs  tooltips " id="Remove_8" ng-click="RemoveOtherPersonListRow($index)" style=""></i>
+                                        </td>
+                                    </tr>
+                                </tbody>
+
+                            </table>
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-12" style="margin-top: 20px;">
+                        <div class="dev-menu-btn">
+                            <button type="submit" class="btn btn-primary" ng-click="SaveIODetailsUser()">{{translation.Submit}}</button>
+                            <button type="submit" class="btn btn-primary" ng-click="Backtomove()">{{translation.Back}}</button>
+                        </div>
+                    </div>
+
+
+                </div>
+
+
+            </div>
+
+
+
+        <div class="se-pre-con"></div>
+        <div id="stop" class="scrollTop">
+            <span><a href=""><i class="fa fa-arrow-up">Top</i></a></span>
+        </div>
+        @Html.Partial("_AadhaarValidation")
+    </div>
+    </div>

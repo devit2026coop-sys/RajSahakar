@@ -1,0 +1,322 @@
+﻿@{
+    ViewBag.Title = "PLDB Dashboard";
+}
+<script src="~/Scripts/AngularFramework/PLDBDashboard.js?v=1.3"></script>
+<script src="~/Scripts/zingchart.min.js"></script>
+<script src="~/Scripts/zingchart-angularjs.js"></script>
+<script src="~/Scripts/AngularFramework/ng-google-chart.min.js"></script>
+<script src="~/Scripts/loader.js"></script>
+<style>
+    .progress {
+        margin: 10px;
+        width: 700px;
+    }
+
+    .popupGraph {
+        position: fixed !important;
+        top: 1% !important;
+        width: 100% !important;
+        height: 600px;
+        z-index: 999 !important;
+        left: 1% !important;
+        right: 1% !important;
+    }
+
+        .popupGraph .card-body div {
+            height: 600px !important;
+        }
+
+        .popupGraph .card-body2 div {
+            height: 600px !important;
+        }
+
+    .DivisionReport {
+        float: left;
+        margin: 0;
+        font-size: 14px;
+    }
+
+    .ReportControl {
+        float: right;
+    }
+
+        .ReportControl .form-control {
+            height: 24px;
+            padding: 2px 12px;
+        }
+
+    .portlet-fullscreen .div_chart {
+        height: 600px !important;
+    }
+
+    .page-content-wrapper .page-content {
+        padding: 15px 10px 10px;
+    }
+
+    .page-title {
+        margin: 0 0 5px;
+    }
+
+
+
+    .dashboard-stat {
+        margin-bottom: 10px;
+    }
+
+    .dashboard-stat2 {
+        padding: 5px 15px 15px 15px;
+    }
+
+    .portlet {
+        margin-bottom: 10px;
+    }
+
+        .portlet.light {
+            padding: 5px 10px 10px 10px;
+        }
+
+    .modal {
+        display: none; /* Hidden by default */
+        position: fixed; /* Stay in place */
+        z-index: 1; /* Sit on top */
+        padding-top: 100px; /* Location of the box */
+        left: 0;
+        top: 0;
+        width: 100%; /* Full width */
+        height: 100%; /* Full height */
+        overflow: auto; /* Enable scroll if needed */
+        background-color: rgb(0,0,0); /* Fallback color */
+        background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+    }
+
+    /* Modal Content */
+    .modal-content {
+        background-color: #fefefe;
+        margin: auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 90%;
+        min-height: 250px;
+    }
+
+    /* The Close Button */
+    .close {
+        color: #aaaaaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+        .close:hover,
+        .close:focus {
+            color: #000;
+            text-decoration: none;
+            cursor: pointer;
+        }
+</style>
+<style id="compiled-css" type="text/css">
+    .panel-actions {
+        margin-top: -20px;
+        margin-bottom: 0;
+        text-align: right;
+    }
+
+        .panel-actions a {
+            color: #333;
+        }
+
+    .panel-fullscreen {
+        display: block;
+        z-index: 9999;
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        right: 0;
+        left: 0;
+        bottom: 0;
+        overflow: auto;
+    }
+</style>
+<style>
+    a.canvasjs-chart-credit {
+        display: none;
+    }
+
+    .FullW {
+        width: 800px !important;
+    }
+</style>
+<style type="text/css">
+    .cont-m1 {
+        background-color: transparent;
+        height: 275px;
+        perspective: 1000px;
+    }
+
+    #card {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        transform-style: preserve-3d;
+        transition: transform 1s;
+        color: white;
+    }
+
+        #card figure {
+            margin: 0;
+            display: block;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            z-index: 999;
+        }
+
+        #card .back {
+            transform: rotateY( 180deg);
+        }
+
+        #card.flipped {
+            transform: rotateY( 180deg);
+        }
+
+    .line-clamp-1 {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+    }
+</style>
+<div ng-app="pldbMod" ng-controller="pldbCtrl" ng-cloak="">
+    <div class="row">
+        <div class="col-lg-3 col-md-4">
+            <div class="card">
+                <div class="card-header card-header-warning">OTS 2025-26 Loanee Applications</div>
+                <div class="card-image">
+                    <div class="collection">
+                        <a href="../PLDB/OTSApplicationList?Status={{dsh.statusId}}" ng-repeat="dsh in RegistrationModel" class="collection-item">{{ _language =='en-us' ?  dsh.Status_En : dsh.Status_Hi }}<span class="new badge2">{{ dsh.TotalCount }}</span></a>
+                    </div>
+                    <div class="collection">
+                        <a href="javascript:void(0)" ng-repeat="dsh in AccountModel" class="collection-item">{{ _language =='en-us' ?  dsh.Status_En : dsh.Status_Hi }}<span class="new badge2">{{ dsh.TotalCount|inrCurrency }}</span></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-9 col-md-7 col-sm-12 col-xs-12" id="Graph_PldbChart">
+            <div class="card" style="min-height: 310px;">
+                <div class="card-header card-header-info">
+                    OTS 2025-26 Recovery
+                    <ul class="list-inline panel-actions">
+                        <li><a href="javascript:void(0)" id="panel-fullscreen" ng-click="ExpandGraph(5,'Graph_PldbChart')" role="button" title="Toggle fullscreen"><i class="fa fa-expand"></i></a></li>
+                    </ul>
+                </div>
+                <div class="cont-m1">
+                    <div id="card">
+                        <div class="card-body2">
+                            <div style="height: 293px; width: 100%;" id="PldbChart">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-8 col-md-7 col-sm-12 col-xs-12 pr-5">
+            <div class="card">
+                <div class="card-header card-header-info">Recovery Payment Statistics</div>
+                <div class="card-body">
+                    <div class="collection">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-striped table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th rowspan="2" width="60">{{translation.SRNO}}</th>
+                                        <th>{{translation.PLDB}}</th>
+                                        @if ((((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).PLDBBrancchId) == 0 && (((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).PLDBId) != 0)
+                                        {
+                                            <th>{{translation.PLDBBranch}}</th>
+                                        }
+                                        <th>Today</th>
+                                        <th>Yesterday</th>
+                                        <th>Current Month</th>
+                                        <th>Last Month</th>
+                                        <th>Total</th>
+                                        <th>Relief Amount</th>
+                                        <th>Total (Recovery + Relief Amount)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="item in RecoveryPaymentStatistics" ng-style="item.PLDBName == 'Total' && {'font-weight':'bold'}" ng-if="RecoveryPaymentStatistics.length>0">
+                                        <td><span class="line-clamp-1" ng-if="item.PLDBName != 'Total'">{{$index+1}}</span></td>
+                                        <td>
+                                            <span>{{item.PLDBName}}</span>
+                                        </td>
+                                        @if ((((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).PLDBBrancchId) == 0 && (((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).PLDBId) != 0)
+                                        {
+                                            <td>
+                                                <span>{{item.PLDBBranch}}</span>
+                                            </td>
+                                        }
+
+                                        <td>
+                                            <span>
+                                                {{item.Today|inrCurrency}}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span>{{item.Yesterday|inrCurrency}}</span>
+                                        </td>
+                                        <td>
+                                            <span>
+                                                {{item.ThisMonth|inrCurrency}}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span>
+                                                {{item.LastMonth|inrCurrency}}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span>{{item.TotalAmount|inrCurrency}}</span>
+                                        </td>
+                                        <td>
+                                            <span>{{item.ReliefAmount|inrCurrency}}</span>
+                                        </td>
+                                        <td>
+                                            <span>{{((item.TotalAmount*1)+(item.ReliefAmount*1))|inrCurrency}}</span>
+                                        </td>
+                                    </tr>
+                                    <tr ng-show="isNoRecord"><td colspan="{{isColSpan}}" style="text-align: center;">No Records found</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="clearfix"></div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        //Toggle fullscreen
+        $("#panel-fullscreen").click(function (e) {
+            e.preventDefault();
+
+            var $this = $(this);
+
+            if ($this.children('i').hasClass('glyphicon-resize-full')) {
+                $this.children('i').removeClass('glyphicon-resize-full');
+                $this.children('i').addClass('glyphicon-resize-small');
+            }
+            else if ($this.children('i').hasClass('glyphicon-resize-small')) {
+                $this.children('i').removeClass('glyphicon-resize-small');
+                $this.children('i').addClass('glyphicon-resize-full');
+            }
+            $(this).closest('.panel').toggleClass('panel-fullscreen');
+        });
+    });
+</script>

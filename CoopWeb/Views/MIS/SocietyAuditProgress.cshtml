@@ -1,0 +1,151 @@
+﻿<script src="~/Scripts/AngularFramework/SocietyAuditprogress.js?=1"></script>
+<script type="text/javascript" src="~/Scripts/jqueryuitimepicker.js"></script>
+<link href="~/Content/Stylesheets/jqueryuitimepicker.css" rel="stylesheet" />
+<script type="text/javascript">
+    function printDataJS(Id) {
+        // ExportToPDF(Id, [], '', PDFPageType.Portrait);
+        $('body').prepend("<form method='post' action='../ExportHandler.ashx' id='tempForm'><input type='hidden' name='data' value='" + Id + "' ><input type='hidden' name='PageType' value='" + PDFPagePrintType.Portrait + "' ></form>");
+        $('#tempForm').submit();
+        $("tempForm").remove();
+    }
+    var PDFPagePrintType = {
+        Default: 'Default',
+        Portrait: 'Portrait',
+        Landscape: 'Landscape'
+    }
+
+    var tableToExcel = (function () {
+        var currentdate = new Date();
+        var uri = 'data:application/vnd.ms-excel;base64,'
+            , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>'
+            , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) }
+            , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
+        return function (table, name) {
+            if (!table.nodeType) table = document.getElementById(table)
+            var ctx = { worksheet: name || 'Worksheet', table: table.innerHTML }
+            window.location.href = uri + base64(format(template, ctx))
+        }
+    })()
+
+</script>
+
+<div ng-app="SocietyAuditprogressMod" ng-controller="SocietyAuditprogressCont">
+    <div class="col-md-12">
+        <h3 class="h3heading citizen-dash-head">{{translation.SocietyListAssignedToAuditorReport}}@*<a target="_blank" style="float:right; font-size:12px" href="~/Content/UserManual/CEO_Audit_Report_Upload.pdf">उपयोगकर्ता पुस्तिका</a>*@</h3>
+    </div>
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="devpage-breadcrumb">
+            <ul class="page-breadcrumb">
+                <li class="dev-page-br">
+                    <i class="fa fa-home"> </i>
+                    <a href="#"> {{translation.Home}}  </a>
+                    <i class="fa fa-angle-right"> </i>
+                </li>
+                <li style="float: left">
+                    <span style="margin: 0 5px;">{{translation.SocietyListAssignedToAuditorReport}}   </span>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="col-md-12">
+        <form class="dev-search-form citizen-dash-head " style="overflow: hidden;" name="Myauditform">
+            <input type="hidden" id="DivisionId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DivisionId)" />
+            <input type="hidden" id="hdnActId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).ActId)" />
+            <input type="hidden" id="hdnDistrictId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DistrictId)" />
+
+            <input type="hidden" id="hdnDivisionId" value="@ViewBag.Division_Id " />
+            <input type="hidden" id="hdnDistrict_Id" value="@ViewBag.District_Id" />
+            <div class="col-lg-12 form-group" id="search-filter">
+
+                <div class="col-md-4 margin-Top20" style="padding-left: 0;">
+                    <label>{{ translation.FincialYearHeading}}</label>
+                    <select name="FIN_YEAR_NAME" class="form-control" ng-model="Filter.FinancialYear" ng-init="Filter.FinancialYear=''" ng-change="LoanListBYFIN_Year()">
+                        <option value="">{{translation.SelectOption}}</option>
+                        <option ng-repeat="item in FinancialYearList" value="{{item.FIN_YEAR_NAME}}">
+                            {{item.FIN_YEAR_NAME}}
+                        </option>
+                    </select>
+                </div>
+                <div class="col-md-4 margin-Top20" style="padding-left: 0;">
+                    <label>{{ translation.DistrictHeading}}</label>
+                    <select name="A.DISTRICT_ID" ng-model="Filter.DistrictId" class="form-control" ng-init="Filter.DistrictId=''" id="ddrDistrictId">
+                        <option value="">{{translation.SelectOption}}</option>
+                        <option ng-repeat="district in DistrictList" value="{{district.DISTRICT_ID}}">
+                            {{_language =='en-us' ?  district.DISTRICT_ENG : district.DISTRICT_MANGAL}}
+                        </option>
+                    </select>
+                </div>
+                <div class="col-md-2 margin-Top20" style="padding-left: 0;" ng-show="non">
+                    <label> Group By</label>
+                    <select name="GroupBy" class="form-control" ng-model="Filter.GroupBy" ng-init="Filter.GroupBy='2'">
+                        <option value="2">{{translation.SelectOption}}</option>
+                        <option value="1">Division Wise</option>
+                        <option value="2">District Wise</option>
+                        <option value="3"> Society Type Wise</option>
+                    </select>
+                </div>
+                <div class="col-md-4  margin-Top20">
+                    <label>&nbsp;</label><br>
+                    <button type="button" ng-click="searchRequest(GetCountSocietyAssignedToAuditorList)" class="btn btn-primary dev-btn ng-binding">{{translation.Search}}</button>
+                    <button type="button" ng-click="ClearSearch()" class="btn btn-primary dev-btn ng-binding">{{translation.Clear}}</button>
+                    <input type="button" class="btn btn-primary dev-btn" onclick="tableToExcel('tblgetsuport', 'Get Support Data')" value="Export to Excel">
+                </div>
+
+
+
+            </div>
+            <table class="table devtable" id="tblgetsuport">
+                <thead> </thead>
+                <tr><th colspan="6">Report Genrated Time:{{dateformate}}</th></tr>               
+                <thead>
+                    <tr>
+
+                        <th>
+                            {{translation.SRNO}}
+                        </th>                        
+                        <th ng-show="ShowDistrictName == true">
+                            District Name
+                        </th>                        
+                        <th>
+                            Total Count
+                        </th>
+                        <th>
+                            Appointed
+                        </th>
+                        <th>
+                            Partial Submit
+                        </th>
+                        <th>
+                            Completed
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="items in GetSocietyCountList">
+                        <td>{{$index+1}}</td>                      
+                        <td ng-show="ShowDistrictName == true"> {{ items.DISTRICT_ENG }} </td>
+                        <td><a href=""> {{ items.TOTAL }}  </a>    </td>
+                        <td><a href="">{{ items.Appointed }} </a>   </td>
+                        <td><a href="">{{ items.PARTIALSUBMIT}}</a>   </td>
+                        <td><a href="">{{ items.Completed}}    </a>    </td>
+
+                    </tr>
+                </tbody>
+            </table>
+
+        </form>
+    </div>
+
+
+
+
+
+
+
+
+    <div class="se-pre-con"></div>
+    <div id="stop" class="scrollTop">
+        <span><a href=""><i class="fa fa-arrow-up">Top</i></a></span>
+    </div>
+</div>

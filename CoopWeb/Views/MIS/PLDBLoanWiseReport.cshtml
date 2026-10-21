@@ -1,0 +1,135 @@
+﻿@{
+    ViewBag.Title = "PLDB District Wise Report View";
+}
+<style>
+    .flexEqualCenter {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    a.backBtn {
+        padding: 3px 5px;
+        background: rgb(99,205,219);
+        color: #fff;
+        border: 0px;
+        outline: none;
+        display: inline-block;
+        text-decoration: none;
+    }
+
+        a.backBtn i {
+            display: inline-block;
+            margin-right: 5px;
+        }
+</style>
+<script src="~/Scripts/AngularFramework/PLDBLoanWiseReport.js?v=1.4"></script>
+<div ng-app="BeneficiaryListMod" ng-controller="BeneficiaryListCnt" ng-cloak="">
+    <div class="container-fluid citizen-dash-head">
+        <input type="hidden" id="hdnDistrictId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DistrictId)" />
+        <input type="hidden" id="hdnPldbId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).PLDBId)" />
+        <input type="hidden" id="hdnPldbBranchId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).PLDBBrancchId)" />
+        <div class="panel panel-default">
+            <div class="panel-heading flexEqualCenter">
+                <b><i class="fa fa-th-list"></i>&nbsp; PLDB Loan Wise Summary</b>
+                <div class="text-right">
+                    <button ng-click="BackToPage()" class="btn btn-primary dev-btn">Back To List</button>
+                    <button type="button" class="btn btn-warning" ng-click="exportExcel()"><i class="fa fa-file-excel-o"></i> Export Excel</button>
+                </div>
+            </div>
+            <div class="panel-body">
+                <input type="hidden" id="hdnDistrictId" ng-model="search.LoanDistrictId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DistrictId)" />
+                <div class="row" id="search-filter">
+                    <div class="col-md-4" ng-show="false">
+                        <label for="search">{{translation.Search}}:</label>
+                        <input ng-model="Filter.SearchText" name="SearchText" id="search" placeholder="Filter text" class="form-control" autocomplete="off">
+                    </div>
+                    <div class="col-md-2">
+                        <label for="search">{{translation.ItemPerPage}}:</label>
+                        <input type="number" min="1" max="1000" class="form-control" ng-model="pageSize" ng-change="pagechange()">
+                    </div>
+                </div>
+                <div class="table-responsive devtable">
+                    <table class="table table-hover table-striped table-bordered mb-0">
+                        <thead>
+                            <tr>
+                                <th rowspan="2" style="text-align:center" width="60">क्र.सं.</th>
+                                <th rowspan="2">ऋणी का नाम</th>
+                                <th rowspan="2">निवासी</th>
+                                <th rowspan="2">ब्लॉक</th>
+                                <th rowspan="2">विधानसभा</th>
+                                <th rowspan="2">जिला</th>
+                                <th rowspan="2">शाखा का नाम</th>
+                                <th colspan="3" style="text-align:center">वसूली राशि</th>
+                                <th colspan="3" style="text-align:center" ng-if="ReportType==3">नोटिस तामील ऋणियो में योजनागृत पात्र अवधिपार राशि</th>
+                                @*<th style="text-align:center" ng-if="(ReportType==5||ReportType==6)">व्यू डाक्यूमेंट्स </th>*@
+                                <th rowspan="2" style="text-align:center" ng-if="ReportType==5 || ReportType==7 ">तामील </th>
+                                <th rowspan="2" style="text-align:center" ng-if="ReportType==6 || ReportType==8">सेल्फी </th>
+                            </tr>
+                            <tr>
+                                <th style="text-align:center">ऋणी से वसूली योग्य</th>
+                                <th style="text-align:center">राहत राशि</th>
+                                <th style="text-align:center">योग</th>
+                                <th style="text-align:center" ng-if="ReportType==3">ऋणी से वसूली योग्य</th>
+                                <th style="text-align:center" ng-if="ReportType==3">राहत राशि</th>
+                                <th style="text-align:center" ng-if="ReportType==3">योग</th>
+                                
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="item in GetPldbSummary">
+                                <td>{{(((DataPagingDetails.PageNumber - 1) * DataPagingDetails.PageSize) + 1)+$index}} @*{{$index+1}}*@</td>
+                                @*<td align="center">{{item.PLDBName}}</td>
+        <td align="center"><a href="" ng-click="PldbBranchNameChange(item)">{{item.BranchName_En}}</a></td>*@
+                                <td>{{item.ApplicantName}}</td>
+                                <td>{{item.TehsilName}}</td>
+                                <td>{{item.BlockName}}</td>
+                                <td>{{item.VidhanSabha}}</td>
+                                <td>{{item.DISTRICT}}</td>
+                                <td>{{item.BranchName}}</td>
+                                <td align="center">{{item.RemainingAmt}}</td>
+                                <td align="center">{{item.ReliefAmount}}</td>
+                                <td align="center">{{item.Yog}}</td>
+                                <td align="center" ng-if="ReportType==3">{{item.TaamilRemainingAmt}}</td>
+                                <td align="center" ng-if="ReportType==3">{{item.TaamilReliefAmount}}</td>
+                                <td align="center" ng-if="ReportType==3">{{item.TaamilYog}}</td>
+
+                                <td align="center" ng-if="ReportType==5 || ReportType==7"> <a target="_blank" ngif="item.TaamilDoc!=''" href="~/Content/OTS/AcceptanceLetter/{{item.TaamilDoc}}"><i class="fa fa-eye"></i></a></td>
+                                <td align="center" ng-if="ReportType==6 || ReportType==8"> <a target="_blank" ngif="item.SelfieDoc!=''" href="~/Content/OTS/AcceptanceLetter/{{item.SelfieDoc}}"><i class="fa fa-eye"></i></a></td>
+                                @*<td align="center" ng-if="ReportType==6">{{item.SelfieDoc}}</td>*@
+
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col-md-12">
+                    <div ng-if="DataPagingDetails.TotalPages>1" class="dataTables_paginate paging_simple_numbers" id="dataTables-example_paginate">
+                        <div class="dataTables_info" id="dataTables-example_info" role="status" aria-live="polite">
+                            Total Records: {{DataPagingDetails.TotalRecords}}
+                        </div>
+                        <ul class="pagination pagination_1" style="margin-left: 10px !important;">
+                            <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« First</span></li>
+                            <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« Previous</span></li>
+                            <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest('1',GetPldbDetailList)" style="cursor: pointer;">
+                                <span>«First</span>
+                            </li>
+                            <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest(DataPagingDetails.PageNumber-1,GetPldbDetailList)" style="cursor:pointer;">
+                                <span>« Previous</span>
+                            </li>
+                            <li class="{{n==DataPagingDetails.PageNumber?'active':''}}" style="{{n==DataPagingDetails.PageNumber?'':'cursor: pointer'}}'" ng-repeat="n in PagingRange(DataPagingDetails.StartPageNumber,DataPagingDetails.EndPageNumber,DataPagingDetails.TotalPages)" ng-click="pageRequest(n, GetPldbDetailList)"><span>{{n}}</span></li>
+                            <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Next</span></li>
+                            <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Last</span></li>
+                            <li ng-if="DataPagingDetails.PageNumber!= DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.PageNumber+1,GetPldbDetailList)" style="cursor:pointer;">
+                                <span>Next »</span>
+                            </li>
+                            <li ng-if="DataPagingDetails.PageNumber != DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.TotalPages,GetPldbDetailList)" style="cursor:pointer;">
+                                <span>Last »</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+        </div>
+    </div>
+</div>

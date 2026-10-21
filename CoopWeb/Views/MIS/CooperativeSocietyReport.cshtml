@@ -1,0 +1,194 @@
+﻿
+<script>
+
+    var tableToExcel = (function () {
+        var uri = 'data:application/vnd.ms-excel;base64,'
+            , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>'
+            , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) }
+            , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
+        return function (table, name) {
+            
+            if (!table.nodeType) table = document.getElementById(table)
+            var ctx = { worksheet: name || 'Worksheet', table: table.innerHTML }
+            var link = document.createElement("a");
+            link.download = name + ".xls";;
+            link.href = uri + base64(format(template, ctx));
+            link.click();
+
+
+            // window.location.href = uri + base64(format(template, ctx))
+        }
+    })()
+</script>
+
+<script src="~/Scripts/AngularFramework/CooperativeSocietyReport.js"></script>
+<script type="text/javascript" src="~/Scripts/jqueryuitimepicker.js"></script>
+<link href="~/Content/Stylesheets/jqueryuitimepicker.css" rel="stylesheet" />
+
+
+<div ng-app="CooperativeReportMod" ng-controller="CooperativeSocietyReportCnt">
+
+    <div class="col-md-12">
+        <h3 class="h3heading citizen-dash-head">{{translation.CooperativeSocietyReport}} 2001</h3>
+    </div>
+
+
+    <input type="hidden" id="DivisionId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DivisionId)" />
+    <input type="hidden" id="hdnActId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).ActId)" />
+    <input type="hidden" id="hdnDistrictId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DistrictId)" />
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="devpage-breadcrumb">
+            <ul class="page-breadcrumb">
+                <li class="dev-page-br">
+                    <i class="fa fa-home"> </i>
+                    <a href="#"> {{translation.MIS}}  </a>
+                    <i class="fa fa-angle-right"> </i>
+                </li>
+                <li style="float: left">
+                    <span style="margin: 0 5px;">{{translation.CooperativeSocietyReport}}  2001</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="table-responsive citizen-dash-head">
+
+            <div class="table-dropdown" id="search-filter">
+
+                <div class="col-md-2 margin-Top20">
+                    <label for="search" class="ng-binding">{{translation.Act}}:</label>
+                    <select ng-model="ActId" class="form-control" ng-init="ActId='0'" ng-change="gettextact()" id="ddrActId">
+                        <option value="0">{{translation.All}}</option>
+                        <option ng-repeat="item in Actlist | filter:{ActId:3}" value="{{item.ActId}}">
+                            {{_language =='en-us' ?  item.ActNameEn : item.ActNameHi}}
+                        </option>
+                    </select>
+                </div>
+
+
+                <div class="col-md-2 margin-Top20" style="padding-left: 0;">
+                    <label>{{ translation.DivisionHeading}}</label>
+                    <select name="DIVISION_ID" ng-model="DIVISION_ID" class="form-control" ng-init="DIVISION_ID='0'" ng-change="GetDistrictList()">
+                        <option value="0">{{translation.All}}</option>
+                        <option ng-repeat="division in DivisionList" value="{{division.DIVISION_ID}}">
+                            {{_language =='en-us' ?  division.DIVISION_ENG : division.DIVISION_MANGAL}}
+                        </option>
+                    </select>
+                </div>
+
+                <div class="col-md-2 margin-Top20" style="padding-left: 0;" ng-if="IsShowDistict">
+                    <label>{{ translation.DistrictHeading}}</label>
+                    <select name="DISTRICT_ID" ng-model="DISTRICT_ID" class="form-control" ng-init="DISTRICT_ID='0'">
+                        <option value="0">{{translation.All}}</option>
+                        <option ng-repeat="district in DistrictList" value="{{district.DISTRICT_ID}}">
+                            {{_language =='en-us' ?  district.DISTRICT_MANGAL : district.DISTRICT_ENG}}
+                        </option>
+                    </select>
+                </div>
+
+                <div class="col-md-2 margin-Top20" style="padding-left: 0;">
+                    <label>Group By</label>
+                    <select name="DISTRICT_ID" ng-model="GroupBy" class="form-control" ng-init="GroupBy='0'">
+                        <option value="0">{{translation.SelectOption}}</option>
+                        <option value="1">{{translation.DistrictHeading}}</option>
+                        <option value="2">{{translation.Division}}</option>
+                    </select>
+                </div>
+
+
+
+                <div class="col-md-4  margin-Top20">
+                    <label>&nbsp;</label><br>
+                    <button type="button" ng-click="SearchData()" class="btn btn-primary dev-btn ng-binding">{{translation.Search}}</button>
+                    <button type="button" ng-click="ClearSearch()" class="btn btn-primary dev-btn ng-binding">{{translation.Clear}}</button>
+                </div>
+                <div class="col-lg-12" style="margin-bottom: 10px;">
+                    <input type="radio" name="SocietyRegistration" ng-click="SearchData()" id="isonline" value="1" ng-model="IsOnline" />Online Registration
+                    <input type="radio" name="SocietyRegistration" ng-click="SearchData()" id="isonline" value="0" ng-model="IsOnline" />Old Profiling
+                </div>
+            </div>
+
+            <table id="tbl3" class="table devtable" style="border:1px solid rgb(222, 221, 221); float: left;">
+                <thead style="display:none;">
+                    <tr style="height:30px;">
+                        <td colspan="10" align="center">{{defaultact}}</td>
+
+                    </tr>
+                    <tr>
+                        <td colspan="10" align="right">Date:{{ DateStatus | date:'dd/MM/yyyy'}} &nbsp;&nbsp;&nbsp;&nbsp;Time:{{ DateStatus | date:'HH:mm:ss'}}</td>
+                        @*
+                            <td colspan="1" align="right"></td>*@
+                    </tr>
+                </thead>
+                <thead>
+                    <tr>
+                        <th>SN.</th>
+                        <th>{{translation.NameofunitDivision}}</th>
+
+                        <th  ng-if="IsShowDistict">{{translation.NameofunitDistrict}}</th>
+                        <th>Total Number of Societies</th>
+                        <th>No. of Active Societies</th>
+                        <th>No. of defunct Societies </th>
+                        <th>No of Societies under liquidation</th>
+                        <th>No of active Societies of which data uploaded By DR (Offline Societies)</th>
+                        <th>Profile complete by Society</th>
+                        <th>No of offline Societies approved by DR</th>
+                        <th ng-if="ActId==3||ActId==0">Audit Report Upload (Year)</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+
+                    <tr ng-repeat="x in CooperativeSocietyList">
+                        <td>{{$index+1}}</td>
+                        <td>{{ _language =='en-us' ? x.DIVISION_ENG : x.DIVISION_MANGAL}}</td>
+                        <td  ng-if="IsShowDistict">{{ _language =='en-us' ? x.DISTRICT_ENG : x.DISTRICT_MANGAL}}</td>
+
+                        <td>{{x.TotalNumberofSocieties}}</td>
+                        <td>{{x.NoofActiveSocieties}}</td>
+                        <td>{{x.NoofdefunctSocieties}}</td>
+                        <td>{{x.NoofSocietiesunderliquidation}}</td>
+                        <td>{{x.NoofactiveSocietiesuploaded}}</td>
+                        <td>{{x.ProfilecompletebySociety}}</td>
+                        <td>{{x.NoofofflineSocieties}}</td>
+                        <td ng-if="ActId==3||ActId==0">{{x.AuditReportUpload}}</td>
+
+                    </tr>
+
+                    <tr>
+                        <td colspan="{{IsShowDistict?3:2}}" style="text-align:right;">Total</td>
+                        <td>{{TotalNumberofSocieties}}</td>
+                        <td>{{NoofActiveSocieties}}</td>
+                        <td>{{NoofdefunctSocieties}}</td>
+                        <td>{{NoofSocietiesunderliquidation}}</td>
+                        <td>{{NoofactiveSocietiesuploaded}}</td>
+                        <td>{{ProfilecompletebySociety}}</td>
+                        <td>{{NoofofflineSocieties}}</td>
+                        <td ng-if="ActId==3||ActId==0">{{AuditReportUpload}}</td>
+
+                    </tr>  
+
+
+                    <tr ng-if="CooperativeSocietyList.length>0">
+                        <td colspan="{{ActId==3||ActId==0?11:10}}">
+                            <input type="button" class="btn btn-primary dev-btn" onclick="tableToExcel('tbl3', 'Cooperative Society Wise Data')" value="Export to Excel">
+                        </td>
+                    </tr>
+                </tbody>
+
+
+            </table>
+
+
+            @*<input ng-if="CooperativeSocietyList.length>0" type="button" id="btnExport" class="btn btn-primary dev-btn" style="" ng-click="ExportData()" value="Export" />*@
+
+
+
+
+        </div>
+    </div>
+
+
+</div>

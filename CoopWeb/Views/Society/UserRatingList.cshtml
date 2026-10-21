@@ -1,0 +1,150 @@
+﻿
+@{
+    ViewBag.Title = "UserRatingList";
+    Layout = "~/Views/Shared/_CitizenLayout.cshtml";
+}
+
+<script src="~/Scripts/AngularFramework/Getuserratinglist.js"></script>
+<div ng-app="GetUserRatingMod">
+    <div ng-controller="GetUserRatingCont">
+
+
+        <div class="col-md-12">
+            <h3 class="h3heading citizen-dash-head">{{translation.UserratingList}}</h3>
+        </div>
+
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#"> {{translation.Home}}  </a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;">{{translation.UserratingList}}</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+
+
+        <div class="col-md-12">
+            <div class="citizen-dash-head"  id="search-filter">
+                <div class="col-lg-3">
+                    <label>Rating</label>
+                    <select id="ddlRatingId" name="RatingId" ng-model="RatingId"  class="form-control" ng-init="RatingId='0'">
+                        <option value="0">{{translation.SelectOption}}</option>
+                        <option value="1">Very Poor</option>
+                        <option value="2">Poor</option>
+                        <option value="3">Average</option>
+                        <option value="4">Good</option>
+                        <option value="5">Excellent</option>
+
+                    </select>
+                </div>
+
+                <div class="col-lg-3">
+                    <label>{{translation.Act}}</label>
+                    <select  ng-model="ActId" id="ddlAct" class="form-control form-control" ng-init="ActId='0'">
+                        <option value="0">{{translation.SelectOption}}</option>
+                        <option ng-repeat="item in ActList" value="{{item.ActId}}">
+                            {{_language =='en-us' ?  item.ActNameEn : item.ActNameHi}}
+                        </option>
+                    </select>
+                    </div>
+
+                    <div class="col-lg-2" style="margin-top:25px;">
+                        <button type="button" ng-click="GetUserRatingList()" class="btn btn-primary dev-btn ng-binding">{{translation.Search}}</button>
+                        <button type="button" ng-click="ClearSearch_new()" class="btn btn-primary dev-btn ng-binding">{{translation.Clear}}</button>
+                    </div>
+                </div>
+        </div>
+
+
+
+        <div class="col-md-12">
+            <div class="citizen-dash-head">
+                <table class="table devtable" id="GetRatingtbl">
+                   <thead>
+                       <tr>
+                           <th>
+                               {{translation.SRNO}}
+                           </th>
+
+                           <th>
+                               {{translation.SocietyName}}
+                           </th>
+                           <th>
+                               {{translation.Act}}
+                           </th>
+                           <th>
+                               {{translation.CreationDate}}
+                           </th>
+                           <th>
+                               Rating
+                           </th>
+                           <th>
+                               {{translation.Mobile}}
+                           </th>
+                           <th>{{translation.vivran}}</th>
+                       </tr>
+                   </thead>
+                 
+                    <tbody>
+                        <tr ng-repeat="x in UserRatingListData">
+                            <td>{{(((DataPagingDetails.PageNumber - 1) * DataPagingDetails.PageSize) + 1)+$index}}</td>
+
+                            <td>{{x.SocietyName}}</td>
+                            <td>{{x.ActNameEn}}</td>
+
+                            <td>{{x.CreatedDate}}</td>
+                            @*
+                            <td>{{x.Rating}}</td>*@
+                            <td>{{x.Rating==1?'Very Poor':x.Rating==2?'Poor':x.Rating==3?'Average':x.Rating==4?'Good':x.Rating==5?'Excellent':''}}</td>
+                            <td>{{x.Mobile}}</td>
+                            <td>{{x.Comment}}</td>
+                        </tr>
+
+
+                        <tr>
+                            <td colspan="7">
+                                <div ng-if="DataPagingDetails.TotalPages>1" class="dataTables_paginate paging_simple_numbers" id="dataTables-example_paginate">
+                                    <div class="dataTables_info" id="dataTables-example_info" role="status" aria-live="polite">
+                                        Total Records: {{DataPagingDetails.TotalRecords}}
+                                    </div>
+                                    <ul class="pagination pagination_1" style="margin-left: 10px !important;">
+                                        <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« First</span></li>
+                                        <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« Previous</span></li>
+
+                                        <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest('1',GetUserRatingList)" style="cursor: pointer;">
+                                            <span>«First</span>
+                                        </li>
+                                        <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest(DataPagingDetails.PageNumber-1,GetUserRatingList)" style="cursor:pointer;">
+                                            <span>« Previous</span>
+                                        </li>
+                                        <li class="{{n==DataPagingDetails.PageNumber?'active':''}}" style="{{n==DataPagingDetails.PageNumber?'':'cursor: pointer'}}" ng-repeat="n in PagingRange(DataPagingDetails.StartPageNumber,DataPagingDetails.EndPageNumber,DataPagingDetails.TotalPages)" ng-click="pageRequest(n,GetUserRatingList)"><span>{{n}}</span></li>
+                                        <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Next</span></li>
+                                        <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Last</span></li>
+                                        <li ng-if="DataPagingDetails.PageNumber!= DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.PageNumber+1,GetUserRatingList)" style="cursor:pointer;">
+                                            <span>Next »</span>
+                                        </li>
+                                        <li ng-if="DataPagingDetails.PageNumber != DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.TotalPages,GetUserRatingList)" style="cursor:pointer;">
+                                            <span>Last »</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+
+                    </tbody>
+                   </table>
+                </div>
+            </div>
+
+
+
+            </div>
+        </div>
+

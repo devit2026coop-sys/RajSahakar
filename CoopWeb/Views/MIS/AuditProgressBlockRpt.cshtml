@@ -1,0 +1,152 @@
+﻿<script src="~/Scripts/AngularFramework/AuditProgresBlockRpt.js"></script>
+<script type="text/javascript" src="~/Scripts/jqueryuitimepicker.js"></script>
+<link href="~/Content/Stylesheets/jqueryuitimepicker.css" rel="stylesheet" />
+<script type="text/javascript">
+    function printDataJS(Id) {
+        $('body').prepend("<form method='post' action='../ExportHandler.ashx' id='tempForm'><input type='hidden' name='data' value='" + Id + "' ><input type='hidden' name='PageType' value='" + PDFPagePrintType.Portrait + "' ></form>");
+        $('#tempForm').submit();
+        $("tempForm").remove();
+    }
+    var PDFPagePrintType = {
+        Default: 'Default',
+        Portrait: 'Portrait',
+        Landscape: 'Landscape'
+    }
+    AutoselectMonth = function () {
+        var DT = new Date();
+        var date = "";
+        if ((DT.getMonth() + 1) < 10) {
+            date = DT.getFullYear() + '-0' + (DT.getMonth() + 1);
+        }
+        else {
+            date = DT.getFullYear() + '-' + (DT.getMonth() + 1);
+        }
+        $("#txtFromMonth").val(date);
+    };
+    AutoselectFromMonth = function () {
+
+        var DT = new Date();
+        var date = "";
+        if ((DT.getMonth() + 1) < 10) {
+            date = DT.getFullYear() + '-0' + (DT.getMonth() + 1);
+        }
+        else {
+            date = DT.getFullYear() + '-' + (DT.getMonth() + 1);
+        }
+        $("#txtFromMonth").val(date);
+    };
+
+    AutoselectToMonth = function () {
+
+        var DT = new Date();
+        var date = "";
+        if ((DT.getMonth() + 1) < 10) {
+            date = DT.getFullYear() + '-0' + (DT.getMonth() + 1);
+        }
+        else {
+            date = DT.getFullYear() + '-' + (DT.getMonth() + 1);
+        }
+        $("#txtToMonth").val(date);
+    };
+    AutoselectMonth = function () {
+
+        var DT = new Date();
+        var date = "";
+        if ((DT.getMonth() + 1) < 10) {
+            date = DT.getFullYear() + '-0' + (DT.getMonth() + 1);
+        }
+        else {
+            date = DT.getFullYear() + '-' + (DT.getMonth() + 1);
+        }
+        $("#txtMonth").val(date);
+    };
+    window.onload = function () {
+        AutoselectToMonth();
+        AutoselectMonth();
+        AutoselectFromMonth();
+    };
+</script>
+
+<div ng-app="AuditProgressBlock" ng-controller="AuditProgressBlockCont">
+    <div class="col-md-12">
+        <h3 class="h3heading citizen-dash-head">{{translation.LokGuaranteeServicewise}}</h3>
+    </div>
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="devpage-breadcrumb">
+            <ul class="page-breadcrumb">
+                <li class="dev-page-br">
+                    <i class="fa fa-home"> </i>
+                    <a href="#"> {{translation.Home}}  </a>
+                    <i class="fa fa-angle-right"> </i>
+                </li>
+                <li style="float: left">
+                    <span style="margin: 0 5px;">{{translation.AuditProgressBlockReport}}   </span>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="col-md-12">
+        <form class="dev-search-form citizen-dash-head " style="overflow: hidden;" name="Myauditform">
+            @*<div class="col-lg-12 form-group" id="search-filter">
+
+            <div class="col-md-2 margin-Top20" style="padding-left: 0;">
+                <label>{{ translation.FromMonth}}</label>
+                <input id="txtFromMonth" value="date" type="month" class="form-control" autocomplete="off" onkeypress="return false;" />
+            </div>
+
+            <div class="col-md-2 margin-Top20" style="padding-left: 0;">
+                <label>{{ translation.ToMonth}}</label>
+                <input id="txtToMonth" value="date" type="month" class="form-control" autocomplete="off" onkeypress="return false;" />
+            </div>
+            <div class="col-md-4  margin-Top20">
+                <label>&nbsp;</label><br>
+                <button type="button" ng-click="searchRequest(GetMonthlySummary)" class="btn btn-primary dev-btn ng-binding">{{translation.Search}}</button>
+                <button type="button" ng-click="ClearSearch()" class="btn btn-primary dev-btn ng-binding">{{translation.Clear}}</button>
+            </div>
+        </div>*@
+
+            <div class="table-dropdown" style="overflow:inherit; float:left;" ng-show="divTabulation">
+                <table id="divExportPrint" class="table table-responsive devtable" style="width:100%;border:1px solid rgb(222, 221, 221); float: left; margin-bottom:0;">
+                    <thead>
+                        <tr>
+                            <th rowspan="2" class="tdHover" style="width:5%;vertical-align: middle;"> {{translation.SRNO}}</th>
+                            <th rowspan="2" class="tdHover" style="width:5%;vertical-align: middle;"> {{translation.Unit}}</th>
+                            <th rowspan="2" class="tdHover" style="width:7%;vertical-align: middle;">{{translation.AuditComitee}}</th>
+                            <th rowspan="2" class="tdHover" style="width:9%;text-align:right;vertical-align: middle;"> {{translation.LastMonthAuditedComitee}}</th>
+                            <th rowspan="2" class="tdHover" style="width:10%;text-align:right;vertical-align: middle;">{{translation.AuditedComiteeInMonth}}</th>
+                            <th rowspan="2" class="tdHover" style="width:10%;text-align:right;vertical-align: middle;">Audited Upto .....Month</th>
+                            <th rowspan="2" class="tdHover" style="width:5%;text-align:right;vertical-align: middle;">{{translation.BalancefromAudit}}</th>
+                            <th rowspan="2" class="tdHover" style="width:5%;text-align:right;vertical-align: middle;">{{translation.AuditPercentage}}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        <tr ng-repeat="item in MonthlySummaryRegister">
+                            <td style="text-align:left;" class="{{item.dt1=='Total'||item.dt2=='Total'||item.dt3=='Total'?'BoldCount':''}}">{{$index+1}}</td>
+                            <td style="text-align:left;" class="{{item.dt1=='Total'||item.dt2=='Total'||item.dt3=='Total'?'BoldCount':''}}"><b>{{item.dt2!=MonthlySummaryRegister[$index-1].dt2? item.dt2:''}}</b>
+                            {{item.dt3}}
+                            </td>
+                            <td style="text-align:left;" class="{{item.dt1=='Total'||item.dt2=='Total'||item.dt3=='Total'?'BoldCount':''}}"></td>
+                            <td style="text-align:left;" class="{{item.dt1=='Total'||item.dt2=='Total'||item.dt3=='Total'?'BoldCount':''}}">{{item.dt4}}</td>
+                            <td style="text-align:left;" class="{{item.dt1=='Total'||item.dt2=='Total'||item.dt3=='Total'?'BoldCount':''}}">{{item.dt5}}</td>
+                            <td style="text-align:right;" class="{{item.dt1=='Total'||item.dt2=='Total'||item.dt3=='Total'?'BoldCount':''}}">{{item.dt6}}</td>
+                            <td style="text-align:right;" class="{{item.dt1=='Total'||item.dt2=='Total'||item.dt3=='Total'?'BoldCount':''}}">{{item.dt7}}</td>
+                            <td style="text-align:right;" class="{{item.dt1=='Total'||item.dt2=='Total'||item.dt3=='Total'?'BoldCount':''}}">{{item.dt8}}</td>
+                            
+                        </tr>
+                </table>
+            </div>
+            <div class="col-md-10">
+                <div class="text-center">
+                    <dir-pagination-controls boundary-links="true" pagination-id="LokGuaranteePagination" on-page-change="pageChangeHandler(newPageNumber)" template-url="/dirPagination.tpl.html"></dir-pagination-controls>
+                </div>
+            </div>
+
+        </form>
+    </div>
+    <div class="se-pre-con"></div>
+    <div id="stop" class="scrollTop">
+        <span><a href=""><i class="fa fa-arrow-up">Top</i></a></span>
+    </div>
+</div>

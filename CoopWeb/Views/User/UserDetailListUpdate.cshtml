@@ -1,0 +1,290 @@
+﻿
+
+<script src="~/Scripts/AngularFramework/UserDetailUpdateSSOID.js"></script>
+
+<link href="http://cdn.rawgit.com/davidstutz/bootstrap-multiselect/master/dist/css/bootstrap-multiselect.css" rel="stylesheet" type="text/css" />
+<script src="http://cdn.rawgit.com/davidstutz/bootstrap-multiselect/master/dist/js/bootstrap-multiselect.js" type="text/javascript"></script>
+
+
+<div ng-app="UserDetailUpdateModule">
+    <div ng-controller="UserDetailupdateListCont">
+        <div class="loader"> </div>
+        <div class="col-md-12">
+
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#">  {{translation.Home}} </a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;"> {{translation.New}} </span>
+                        <i class="fa fa-angle-right"> </i>
+                        <span style="margin: 0 5px;">{{translation.UserDetailList}} </span>
+                    </li>
+
+                </ul>
+            </div>
+        </div>
+
+       
+                        <div class="dev-popup-body modal fade" id="myModal" role="dialog" data-backdrop="static" data-keyboard="false">
+                            <div class="modal-dialog">
+                                <!-- Modal content-->
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal" ng-click="ClearOrganisationForm()">&times;</button>
+                                        <h4 class="modal-title"> {{translation.UserUpdateinformation}} </h4>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form class="dev-search-form" style="overflow: hidden; margin-bottom: 35px;" name="OrganisationForm">
+                                            <div class="col-md-12">
+                                                <b><span id="spanUserDetail" style="color:black"></span></b>
+                                            </div>
+
+                                                <div class="col-md-4" style="text-align:right;">
+                                                <label>
+                                                    {{translation.NewSSOID}}
+                                                </label>
+                                                </div>
+
+                                                <div class="col-md-4">
+                                                    <input type="text" name="LoanAmountApplied" class="form-control" placeholder="{{translation.NewSSOID}}" ng-model="UserNewSSOID" />
+                                                </div>
+
+                                            <div class="col-md-12" style="text-align:center; margin-bottom:10px; ">
+                                                <button type="submit" class="btn btn-primary" style="margin-top:10px;padding-top:10px" ng-click="GetNewSSoidData()">{{translation.Submit}}</button>
+                                            </div>
+                                            <br />
+                                            <hr />
+                                            <div class="col-sm-12" ng-show="ISssoid">
+                                                <h5 style="font-size: 15px;color: black;text-align: center;"><u>Get New SSOID Information </u> </h5>
+                                                <div class="col-md-12">
+                                                    <label>SSOID:-&nbsp;&nbsp;</label><label>{{SSOID}}</label>
+                                                </div>
+                                                <div class="col-md-12">
+                                                    <label>Gender.:-&nbsp;&nbsp;</label><label>{{Gender}}</label>
+                                                </div>
+
+                                                <div class="col-md-12">
+                                                    <label>Mobile No.:-&nbsp;&nbsp;</label><label>{{MobileNo}}</label>
+                                                </div>
+
+                                                <div class="col-md-12">
+                                                    <label>Officer Name:-&nbsp;&nbsp;</label><label>{{OfficerNameEn}}</label>
+                                                </div>
+                                                <div class="col-md-12">
+                                                    <label>Aadhaar No.:-&nbsp;&nbsp;</label><label>{{adar}}</label>
+                                                </div>
+                                               
+
+                                                <div class="col-sm-12" style="text-align:center;">
+                                                    `<button type="submit" class="btn btn-primary" style="margin-top:10px;padding-top:10px" ng-click="SetNewSSoidData()">Update</button>
+                                                    </div>
+                                                </div>
+
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="">
+                            <div class="col-md-12">
+                                <div class="citizen-dash-head" style="overflow: hidden;">
+                                    <div class="table-dropdown">
+                                        <div class="col-xs-4">
+                                            <label for="search">{{translation.Search}}:</label>
+                                            <input ng-model="q" id="search" class="form-control" placeholder={{translation.filttertext}} autocomplete="off">
+                                        </div>
+                                        <div class="col-xs-4">
+                                            <label for="search">{{translation.ItemPerPage}}:</label>
+                                            <input type="number" min="1" max="100" class="form-control" onkeypress='return event.charCode >= 48 && event.charCode <= 57' ng-model="pageSize">
+                                        </div><div class="col-md-4">
+                                            <label>
+                                                {{translation.DepartmentHeading}} :
+                                            </label>
+
+                                            <select ng-model="UserRegistrationSearch.DepartmentId" class="form-control" ng-init="UserRegistrationSearch.DepartmentId='0'" ng-change="GetOrganisations()">
+                                                <option value="0" disabled>{{translation.SelectOption}}</option>
+                                                <option ng-repeat="item in Departments" value="{{item.ID}}">
+                                                    {{_language =='en-us' ?  item.DEPTNAMEENGLISH : item.DEPTNAMEHINDI}}
+                                                </option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label>
+                                                {{translation.Organisation}} :
+                                            </label>
+                                            <select ng-model="UserRegistrationSearch.OrganisationId" class="form-control" ng-init="UserRegistrationSearch.OrganisationId='0'" ng-change="GetLevels()">
+                                                <option value="0" disabled>{{translation.SelectOption}}</option>
+                                                <option ng-repeat="item in Organisations" value="{{item.OrganisationId}}">
+                                                    {{_language =='en-us' ?  item.OrganisationNameEn : item.OrganisationNameHi}}
+                                                </option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label>
+                                                {{translation.Level}} :
+                                            </label>
+                                            <select ng-model="UserRegistrationSearch.OrganizationLevelsMappingID" class="form-control" ng-init="UserRegistrationSearch.OrganizationLevelsMappingID='0'" ng-change="GetOfficeList();GetRoleList()">
+                                                <option value="0" disabled>{{translation.SelectOption}}</option>
+                                                <option ng-repeat="item in Levels" value="{{item.MappingID}}">
+                                                    {{_language =='en-us' ?  item.LevelNameEn : item.LevelNameHi}}
+                                                </option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label>
+                                                {{translation.Office}} :
+                                            </label>
+                                            <select ng-model="UserRegistrationSearch.OfficeId" class="form-control" ng-init="UserRegistrationSearch.OfficeId='0'" ng-change="GetRoleList()">
+                                                <option value="0" disabled>{{translation.SelectOption}}</option>
+                                                <option ng-repeat="item in OfficeListData" value="{{item.OfficeId}}">
+                                                    {{_language =='en-us' ?  item.OfficeNameEn : item.OfficeNameHi}}
+                                                </option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label>
+                                                {{translation.RoleHeading}} :
+                                            </label>
+                                            <select ng-model="UserRegistrationSearch.RoleId" class="form-control" ng-init="UserRegistrationSearch.RoleId='0'">
+                                                <option value="0" disabled>{{translation.SelectOption}}</option>
+                                                <option ng-repeat="item in RoleListData" value="{{item.RoleID}}">
+                                                    {{_language =='en-us' ?  item.RoleName_EN : item.RoleName_HI}}
+                                                </option>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <button type="submit" class="btn btn-primary" style="margin-top:10px;padding-top:10px" ng-click="ShowUserSearchList()">{{translation.Search}}</button>
+                                        </div>
+                                    </div>
+                                    <table class="table table-responsive devtable">
+                                        <thead>
+                                            <tr>
+                                                <th>
+                                                    {{translation.SRNO}}
+                                                </th>
+                                                <th ng-click="sortData('SubClassNameEn')">
+                                                    {{translation.OfficerNameEn}}
+                                                    <div ng-class="getSortClass('SubClassNameEn')"></div>
+                                                </th>
+                                                <th>
+                                                    {{translation.MobileNo}}
+                                                </th>
+                                                <th>
+                                                    {{translation.SSOID}}
+                                                </th>
+                                                @*<th ng-click="sortData(_language =='en-us' ? 'DEPTNAMEENGLISH' : 'DEPTNAMEHINDI')">
+                                                        {{translation.DepartmentHeading}}
+                                                        <div ng-class="getSortClass(_language =='en-us' ? 'DEPTNAMEENGLISH' : 'DEPTNAMEHINDI')"></div>
+                                                    </th>*@
+                                                @*<th ng-click="sortData(_language =='en-us' ? 'OrganisationNameEn' : 'OrganisationNameHi')">
+                                                        {{translation.Organisation}}
+                                                        <div ng-class="getSortClass(_language =='en-us' ? 'OrganisationNameEn' : 'OrganisationNameHi')"></div>
+                                                    </th>*@
+                                                <th ng-click="sortData(_language =='en-us' ? 'LevelNameEn' : 'LevelNameHi')">
+                                                    {{translation.Level}}
+                                                    <div ng-class="getSortClass(_language =='en-us' ? 'LevelNameEn' : 'LevelNameHi')"></div>
+                                                </th>
+                                                <th ng-click="sortData(_language =='en-us' ? 'OfficeNameEn' : 'OfficeNameHi')">
+                                                    {{translation.Office}}
+                                                    <div ng-class="getSortClass(_language =='en-us' ? 'OfficeNameEn' : 'OfficeNameHi')"></div>
+                                                </th>
+                                                <th ng-click="sortData(_language =='en-us' ? 'DESIGNATIONDESCENGLISH' : 'DESIGNATIONDESCHINDI')">
+                                                    {{translation.Designation}}
+                                                    <div ng-class="getSortClass(_language =='en-us' ? 'DESIGNATIONDESCENGLISH' : 'DESIGNATIONDESCHINDI')"></div>
+                                                </th>
+                                                <th>
+                                                    {{translation.RoleHeading}}
+                                                </th>
+                                                <th>
+                                                    {{translation.Place}}
+                                                </th>
+                                                <th>
+                                                    {{translation.UserRequest}}
+                                                </th>
+                                                <th>
+                                                    {{translation.Act}}
+                                                </th>
+                                                <th>
+                                                    {{translation.Edit}}
+                                                </th>
+                                            </tr>
+
+                                        </thead>
+                                        <tbody>
+                                            <tr dir-paginate="Class in UserReqData | filter:q | orderBy:colsort:reverseSort | itemsPerPage: pageSize" current-page="currentPage" pagination-id="SubclassPagination">
+
+                                                <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                                                <td>{{ Class.OfficerNameEn }}</td>
+
+                                                <td>{{Class.MobileNo}} </td>
+                                                <td>{{Class.SSO_ID}}</td>
+                                                @*<td>{{_language =='en-us' ?  Class.DEPTNAMEENGLISH : Class.DEPTNAMEHINDI}}</td>
+                                                    <td>{{_language =='en-us' ?  Class.OrganisationNameEn : Class.OrganisationNameHi}}</td>*@
+                                                <td>{{_language =='en-us' ?  Class.LevelNameEn : Class.LevelNameHi}}</td>
+                                                <td>{{_language =='en-us' ?  Class.OfficeNameEn : Class.OfficeNameHi}}</td>
+                                                <td>{{_language =='en-us' ?  Class.DESIGNATIONDESCENGLISH : Class.DESIGNATIONDESCHINDI}}</td>
+                                                <td>{{_language =='en-us' ?  Class.RoleName_EN : Class.RoleName_HI}}</td>
+                                                <td ng-show="Class.LevelId==1">{{translation.Rajasthan}}</td>
+                                                <td ng-show="Class.LevelId==2">{{_language =='en-us' ?  Class.DIVISION_ENG : Class.DIVISION_MANGAL}} </td>
+                                                <td ng-show="Class.LevelId==3">{{_language =='en-us' ?  Class.DISTRICT_ENG : Class.DISTRICT_MANGAL}} </td>
+                                                <td ng-show="Class.LevelId==4 && Class.BLOCK_ENG==''">{{_language =='en-us' ?  Class.DISTRICT_ENG : Class.DISTRICT_MANGAL}}, {{_language =='en-us' ?  Class.CITY_ENG : Class.CITY_MANGAL}} </td>
+                                                <td ng-show="Class.LevelId==4 && Class.BLOCK_ENG!=''">{{_language =='en-us' ?  Class.DISTRICT_ENG : Class.DISTRICT_MANGAL}}, {{_language =='en-us' ?  Class.BLOCK_ENG : Class.BLOCK_MANGAL}} </td>
+                                                <td ng-show="Class.LevelId==5 && Class.IsRuralArban=='False'">{{_language =='en-us' ?  Class.DISTRICT_ENG : Class.DISTRICT_MANGAL}}, {{_language =='en-us' ?  Class.BLOCK_ENG : Class.BLOCK_MANGAL}} {{_language =='en-us' ?  Class.GP_ENG : Class.GP_MANGAL}} </td>
+                                                <td>
+                                                    <div class="dev-action" ng-show="Class.UserId!=1">
+                                                        <label class="switch">
+                                                            <input type="checkbox" ng-checked="Class.IsActive == 1" ng-click="MappingChangeStatus(Class.MappingID,Class.IsActive)">
+                                                            <span class="slider round"></span>
+                                                        </label>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <span ng-show="Class.ActId.indexOf('1') >= 0"> 1958 </span>
+                                                    <span ng-show="Class.ActId.indexOf('3') >= 0"> <span ng-show="Class.ActId.indexOf('1') >= 0"> , </span>  2001 </span>
+                                                    <span ng-show="Class.ActId.indexOf('7') >= 0"> <span ng-show="Class.ActId.indexOf('1') >= 0 || Class.ActId.indexOf('3') >= 0"> , </span>  2005 </span>
+                                                </td>
+                                                <td>
+                                                    <i class="fa fa-edit" ng-click="update(Class)"></i>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+
+                            <div class="col-md-10">
+                                <div class="text-center">
+                                    <dir-pagination-controls boundary-links="true" pagination-id="SubclassPagination" on-page-change="pageChangeHandler(newPageNumber)" template-url="/dirPagination.tpl.html"></dir-pagination-controls>
+                                </div>
+                            </div>
+                            <div class="form-group col-md-12">
+                                <div class="dev-align-btn">
+
+                                    <a class="btn btn-primary dev-btn" style="text-transform:capitalize;" href="../User/DashBoard"> Back</a>
+                                </div>
+                            </div>
+
+                            <div class="col-md-2">
+                                <h5 class="dev-page"> {{translation.Page}}: {{ currentPage }} </h5>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="se-pre-con"></div>
+                    <div id="stop" class="scrollTop">
+                        <span><a href=""><i class="fa fa-arrow-up">Top</i></a></span>
+                    </div>
+                </div>
+
+
+
+

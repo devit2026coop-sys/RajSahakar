@@ -1,0 +1,432 @@
+﻿
+<script src="~/Scripts/AngularFramework/SocietyAuditWorkSheet.js?=1"></script>
+@*<script src="~/Scripts/jquery-1.11.3.min.js"></script>*@
+<script src="http://code.jquery.com/jquery-migrate-1.0.0.js"></script>
+<script type="text/javascript" src="~/Scripts/jqueryuitimepicker.js"></script>
+<link href="~/Content/Stylesheets/jqueryuitimepicker.css" rel="stylesheet" />
+<script src="~/Scripts/summernote.js"></script>
+<link href="~/Content/Stylesheets/summernote.css" rel="stylesheet" />
+<style>
+    .note-toolbar panel-heading h5, p {
+        text-align: left;
+    }
+
+    .ui-timepicker-table th.periods {
+        padding: 0.1em !important;
+        width: 2.2em !important;
+    }
+
+    .ui-timepicker-table td span {
+        display: block !important;
+        padding: 0.2em 0.3em 0.2em 0.5em !important;
+        width: 1.2em !important;
+        text-align: right !important;
+        text-decoration: none !important;
+    }
+    /* anchors for clickable cells */
+    .ui-timepicker-table td a {
+        display: block !important;
+        padding: 0.2em 0.3em 0.2em 0.5em !important;
+        width: 2.2em !important;
+        cursor: pointer !important;
+        text-align: right !important;
+        text-decoration: none !important;
+    }
+</style>
+
+
+@model List<Cooperative.Models.SocietyRegistrationEntity>
+
+    <script type="text/javascript">
+
+        function ValidateAlpha(evt) {
+            var keyCode = (evt.which) ? evt.which : evt.keyCode
+            if ((keyCode < 65 || keyCode > 90) && (keyCode < 97 || keyCode > 123) && keyCode != 32)
+                return false;
+            return true;
+        };
+        function ValidateFloat(th, e) {
+            if (isNaN(th.value + "" + String.fromCharCode(e.charCode)))
+                return false;
+            return true;
+        }
+        function ValidateFloat(th, e) {
+            if (isNaN(th.value + "" + String.fromCharCode(e.charCode)))
+                return false;
+            return true;
+        }
+        
+
+        $(document).ready(function () {
+
+            var dt = new Date();
+            var year = dt.getFullYear();
+            var day = dt.getDate();
+            var month = dt.getMonth() + 1;
+
+
+            $("#StartDates").val(day + "/" + month + "/" + year);
+            $("#EndDates").val(day + "/" + month + "/" + year)
+
+         
+
+            //$('#txtTime2').timepicker({
+            //    showOn: "both",
+            //    buttonImage: "../images/Time.png",
+            //    buttonImageOnly: true,
+            //    showPeriod: true,
+            //    showLeadingZero: true
+            //});
+
+            $('.devcalender').datepicker({
+                showOn: "both",
+                changeMonth: true,
+                buttonImage: "../images/calender.png",
+                changeYear: true,
+                dateFormat: "dd/mm/yy",
+                maxDate: new Date(),
+                yearRange: "c-10:c+0"
+            });
+
+        });
+    </script>
+
+    <div ng-app="CitizenSocietyAuditMod" ng-controller="CitizenSocietyAuditCnt">
+        <div class="col-md-12">
+            <h3 class="citizen-dash-head">Society Audit Work Sheet</h3>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="../Citizen/Index"> {{translation.Home}} </a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+
+                        <span style="margin: 0 5px;">Society Audit Work Sheet Rreport </span>
+                    </li>
+
+                </ul>
+            </div>
+        </div>
+
+        <div ng-show="divTabulation">
+            <div class="col-md-12">
+                <div class="table-responsive citizen-dash-head">
+                    <div class="table-dropdown">
+                        <div class="col-md-4" style="padding-left: 0;">
+                            <label>{{ translation.Act}}</label>
+                            <select ng-model="SocietyRegistration.ActId" class="form-control" ng-change="getSocietyfilter()" ng-init="SocietyRegistration.ActId='0'">
+                                <option value="0" disabled>{{translation.SelectOption}}</option>
+                                <option ng-repeat="item in ActList" value="{{item.ActId}}">
+                                    {{_language =='en-us' ?  item.ActNameEn : item.ActNameHi}}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label>{{ translation.SocietyType}}</label>
+                            <select ng-model="SocietyRegistration.SocietyTypeId" class="form-control" ng-init="SocietyRegistration.SocietyTypeId='0'" ng-change="getSocietyfilterBySocietyType()">
+                                <option value="0" disabled>{{translation.SelectOption}}</option>
+                                <option ng-repeat="item in SocietyTypeList" value="{{item.SocietyTypeId}}">
+                                    {{_language =='en-us' ?  item.TypeameEng : item.TypeNameHin}}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-4" style="padding-right: 0;">
+                            <label>{{ translation.SocietyClass}}</label>
+                            <select ng-model="SocietyRegistration.ClassId" class="form-control" ng-init="SocietyRegistration.ClassId='0'" ng-change="getSocietyfilterByClass()">
+                                <option value="0" disabled>{{translation.SelectOption}}</option>
+                                <option ng-repeat="item in SocietyClassList" value="{{item.ClassId}}">
+                                    {{_language =='en-us' ?  item.ClassNameEn : item.ClassNameHi}}
+                                </option>
+                            </select>
+                        </div>
+                        <br />
+
+                        <div class="col-md-4" style="padding-left: 0;">
+                            <label for="search">{{translation.Search}}:</label>
+                            <input ng-model="q" id="search" class="form-control" placeholder="{{translation.filttertext}}" autocomplete="off">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="search">{{translation.ItemPerPage}}:</label>
+                            <input type="number" min="1" max="100" class="form-control" ng-model="pageSize">
+                        </div>
+                    </div>
+
+                    <h5 class="heading-hr ng-binding"> {{translation.SocietyListForAudit}} </h5>
+                    <table id="example" class="table devtable" style="margin-top: 10px;border:1px solid rgb(222, 221, 221); float: left;">
+                        <thead>
+                            <tr>
+                                <th>
+                                    {{translation.SRNO}}
+                                </th>
+                                <th>
+                                    {{translation.SocietyName}}
+                                </th>
+                                <th>
+                                    {{translation.SocietyRegistrationNo}}
+                                </th>
+                                <th>
+                                    {{translation.FincialYearHeading}}
+                                </th>
+                                <th>
+                                    {{translation.Status}}
+                                </th>
+                                <th>
+                                    {{translation.Order}}   {{translation.File}}
+                                </th>
+                                <th>
+                                    {{translation.Actions}}
+                                </th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+
+                            <tr dir-paginate="item in TableData | filter:q | orderBy:colsort:reverseSort | itemsPerPage: pageSize" current-page="currentPage" pagination-id="CityPagination">
+
+                                <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                                <td>{{item.SocietyName}}</td>
+                                <td>{{item.RegistrationNo}}</td>
+                                <td>{{item.FIN_YEAR_NAME}} </td>
+                                <td>
+                                    {{item.SocietyAuditReportId!=0 ? item.IsPermanentSave=='True' ? 'Permanent Save':'Partial Save' : 'Pending'}}
+                                </td>
+                                <td>
+                                    @*{{item.AuditorAssignFilePath}}*@
+                                    <a ng-show="item.AuditorAssignFilePath!=''" href="{{item.AuditorAssignFilePath}}" target="_blank" style="color:#505050;" class="fa fa-download"></a>
+                                </td>
+                                <td class="add-more-td">
+                                    @*ng-show="item.IsPermanentSave=='False'"*@
+                                    <a ng-click="ShowEntry(item)"> <i class="fa fa-edit"></i> </a>
+
+
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col-md-10">
+                    <div class="text-center">
+                        <dir-pagination-controls boundary-links="true" pagination-id="CityPagination" on-page-change="pageChangeHandler(newPageNumber)" template-url="/dirPagination.tpl.html"></dir-pagination-controls>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div ng-show="divSocietyAuditReport">
+            @Html.Partial("~/Views/Society/_SocietyAuditInformation.cshtml")
+        </div>
+
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" ng-show="divSocietyAuditReportShow">
+
+            <form class="dev-masters" name="SocietyAuditReportForm" style="margin:20px 0px 20px 0px;">
+                <div class="col-md-12">
+                    <div class="table-responsive">
+                        <table class="table dev-table" style="margin-top: 30px;">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        {{translation.SRNO}}
+                                    </th>
+                                    <th>
+                                        {{translation.IsAuditReportAudit}}
+                                    </th>
+                                    <th>
+                                        {{translation.IsSocietyWorking}}
+                                    </th>
+
+                                    <th>
+                                        {{translation.FinancialYearAuditReportAvailable}}
+                                    </th>
+
+                                    <th>
+                                        {{translation.IsSocietyWorking}}
+                                    </th>
+
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="items in SocietyAuditDetails">
+                                    <td>{{$index+1}}</td>
+                                    <td>{{items.IsApprovedByRegistrar ? translation.Yes : translation.No}}</td>
+                                    <td>{{items.IsSocietyWorking ? translation.Yes : translation.No}}</td>
+                                    <td>{{items.FIN_YEAR_NAME}}</td>
+                                    <td>
+                                        <a style="color:#000;" target="_blank" href="{{ items.AuditReport == '' ? 'javascript:' : '/Content/SocietyProfiling/'+items.AuditReport }}">{{translation.Download}}</a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                @*<div class="form-group col-md-12">
+                    <div class="dev-align-btn">
+                        <a ng-click="BackToPage()" data-toggle="modal" style="color:#ef0707;float:right;text-decoration:none;cursor:pointer" class="ng-binding">» {{translation.Back}}</a>
+                    </div>
+                </div>*@
+
+            </form>
+        </div>
+
+        <div class="dev-popup-body modal fade" id="addModal" data-backdrop="static" data-keyboard="false" role="dialog">
+            <div class="modal-dialog" style="width: 50%;">
+                <!-- Modal content-->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 style="color:black">Audit Schedule information</h3>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <form class="dev-search-form" style="overflow: hidden; margin-bottom: 35px;" name="OfficeForm">
+                            <div class="col-md-12 margin-Top20" style="margin-top:20px;">
+
+                                <div class="col-md-2">
+                                    <label>{{translation.SocietyName}} </label>
+                                </div>
+                                <div class="col-md-8" style="color:black">
+                                    <b>  {{AuditSociety}}</b>
+                                </div>
+
+                            </div>
+
+                            <div class="clearfix"></div>
+                            <div class="col-lg-12 margin-Top20" style="margin-top:20px;" ">
+                                <div class="col-lg-2">
+                                    <label>{{translation.AuditStartTime}}</label>
+                                </div>
+                                <div class="col-lg-8" style="padding-left: 0px;">
+                                    <div class="col-lg-4">
+                                        <input name="RegistrationDates" ng-disabled="true" ng-di id="StartDates" class="form-control" placeholder="{{translation.AuditStartDate}}" ng-model="LetterData.AuditStartDate" autocomplete="off" />
+                                    </div>
+                                    <div class="col-lg-8">                                        
+                                            <select class="form-control validateNewAdd" ng-model="LetterData.StartTime_HHs" ng-change="TimeCheck()" style="float: left;width: 75px;margin-top: -3px;" id="StartTime_HHs">
+                                                <option value="">HH</option>
+                                                <option value="01">01</option>
+                                                <option value="02">02</option>
+                                                <option value="03">03</option>
+                                                <option value="04">04</option>
+                                                <option value="05">05</option>
+                                                <option value="06">06</option>
+                                                <option value="07">07</option>
+                                                <option value="08">08</option>
+                                                <option value="09">09</option>
+                                                <option value="10">10</option>
+                                                <option value="11">11</option>
+                                                <option value="12">12</option>
+                                            </select>&nbsp;&nbsp;
+                                            <select class="form-control validateNewAdd" ng-model="LetterData.StartTime_MMs" ng-change="TimeCheck()" style="float: left;width: 75px;margin-top: -3px;" id="StartTime_MMs">
+                                                <option value="">MM</option>
+                                                <option value="00">00</option>
+                                                <option value="05">05</option>
+                                                <option value="10">10</option>
+                                                <option value="15">15</option>
+                                                <option value="20">20</option>
+                                                <option value="25">25</option>
+                                                <option value="30">30</option>
+                                                <option value="35">35</option>
+                                                <option value="40">40</option>
+                                                <option value="45">45</option>
+                                                <option value="50">50</option>
+                                                <option value="55">55</option>
+                                            </select>&nbsp;
+                                            <select class="form-control validateNewAdd"  ng-init="LetterData.StartTime_APs='AM'" ng-model="LetterData.StartTime_APs" ng-change="TimeCheck()" style="float: left;width: 75px;margin-top: -3px;" id="StartTime_APs">
+                                                <option value="AM">AM</option>
+                                                <option value="PM">PM</option>
+                                            </select>
+                                       
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div class="col-lg-12 margin-Top20" style="margin-top:20px;" ">
+
+                                <div class="col-lg-2">
+                                    <label>{{translation.AuditEndTime}}</label>
+                                </div>
+                                <div class="col-lg-8">
+                                    <div class="col-lg-4" style="padding-left: 0px;">
+                                        <input name="RegistrationDates" ng-disabled="true" id="EndDates" class="form-control" placeholder="{{translation.AuditEndDate}}" ng-model="LetterData.AuditEndDate" autocomplete="off" />
+                                    </div>
+                                    <div class="col-lg-8">
+                                       
+
+                                            <select class="form-control validateNewAdd" ng-model="LetterData.EndTime_HHs" ng-change="TimeCheck()" style="float: left;width: 75px;margin-top: -3px;" id="EndTime_HHs">
+                                                <option value="">HH</option>
+                                                <option value="01">01</option>
+                                                <option value="02">02</option>
+                                                <option value="03">03</option>
+                                                <option value="04">04</option>
+                                                <option value="05">05</option>
+                                                <option value="06">06</option>
+                                                <option value="07">07</option>
+                                                <option value="08">08</option>
+                                                <option value="09">09</option>
+                                                <option value="10">10</option>
+                                                <option value="11">11</option>
+                                                <option value="12">12</option>
+                                            </select>&nbsp;&nbsp;
+                                            <select class="form-control validateNewAdd"  ng-model="LetterData.EndTime_MMs"  ng-change="TimeCheck()"style="float: left;width: 75px;margin-top: -3px;" id="EndTime_MMs">
+                                                <option value="">MM</option>
+                                                <option value="00">00</option>
+                                                <option value="05">05</option>
+                                                <option value="10">10</option>
+                                                <option value="15">15</option>
+                                                <option value="20">20</option>
+                                                <option value="25">25</option>
+                                                <option value="30">30</option>
+                                                <option value="35">35</option>
+                                                <option value="40">40</option>
+                                                <option value="45">45</option>
+                                                <option value="50">50</option>
+                                                <option value="55">55</option>
+                                            </select>&nbsp;
+                                            <select class="form-control validateNewAdd" ng-model="LetterData.EndTime_APs" ng-init="LetterData.EndTime_APs='AM'" ng-change="TimeCheck()" style="float: left;width: 75px;margin-top: -3px;" id="EndTime_APs">
+                                                <option value="AM">AM</option>
+                                                <option value="PM">PM</option>
+                                            </select>
+
+                                        </div>
+                                </div>
+                            </div>
+                            <div class="clearfix"></div>
+                            <div class="col-md-12" style="margin-top:20px;">
+                                <div class="col-md-2">
+                                    <label>{{translation.Time}}(Hours) </label>
+                                </div>
+                                <div class="col-md-8">
+                                    <input Id="ttime" ng-disabled="true" class="form-control" ng-model="LetterData.Time">
+                                </div>
+                            </div>
+
+                            <div class="clearfix"></div>
+                            <div class="col-md-12 margin-Top20" style="margin-top:20px;">
+                                <div class="col-md-2">
+                                    <label>Audit Work Details </label>
+                                </div>
+                                <div class="col-md-8 ">
+                                    <textarea class="form-control" id="ddetails" ng-model="LetterData.Details"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="col-md-12" style="margin-top: 20px;">
+                                <div class="dev-menu-btn">
+                                    <button type="submit" class="btn btn-primary" ng-click="SaveDataLetter()">{{translation.Submit}}</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+        <div class="se-pre-con"></div>
+        <div id="stop" class="scrollTop">
+            <span><a href=""><i class="fa fa-arrow-up">Top</i></a></span>
+        </div>
+    </div>

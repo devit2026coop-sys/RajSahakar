@@ -1,0 +1,208 @@
+﻿@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" name="viewport" content="width=device-width" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>@ViewBag.Title</title>
+    <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="EO" content="Directorate of Rajcooperatives (Government of Rajasthan)">
+    <link href="~/Content/Stylesheets/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="~/Content/Stylesheets/font-awesome.min.css">
+    <link href="~/Content/Stylesheets/SiteStyle.css" rel="stylesheet" type="text/css" />
+    <link href="~/Content/Stylesheets/responsive.css" rel="stylesheet" type="text/css" />
+    <link href="~/Content/Stylesheets/custom.css" rel="stylesheet" type="text/css" />
+    <script src="~/Scripts/angular.js"></script>
+    <link href="~/Content/Stylesheets/StyleSheet1.css" rel="stylesheet" />
+    <script src="~/Scripts/jquery-3.1.0.js"></script>
+    <script>
+        var AppClasses = angular.module("CertificateMod", []);
+        AppClasses.controller("CertificateCnt", function ($scope, $http, $rootScope) {
+            $scope.CertificateList = [];
+            $scope.GetCertificate = function () {
+                if ($("#txtSearch").val() == '') {
+                    ShowOkMessage("", "Please Enter Application Number", function () { });
+                } else {
+                    $(".blockUI").fadeIn("slow");
+                    return $http.post("/VerifyCertificate/GetCertificate", JSON.stringify({ ApplicationNo: $scope.Filter.SearchText })).
+                        success(function (data, status) {
+                            $(".blockUI").fadeOut("slow");
+                            if (JSON.parse(data.DataList).length <= 0) {
+                                $scope.CertificateList = [];
+                                ShowOkMessage("", "No Record Found", function () { });
+                            } else {
+                                $scope.CertificateList = JSON.parse(data.DataList);
+                            }
+                        }).
+                        error(function (data, status) {
+                            $scope.CertificateList = [];
+                            $(".blockUI").fadeOut("slow");
+                        });
+                }
+            }
+        });
+    </script>
+</head>
+<body>
+    <div id="wrapper">
+        <div class="main-header">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-lg-2 col-md-2 col-sm-4 col-xs-12">
+                        <div class="logo">
+                            <a href="../User/DashBoard"><img src="~/Images/cooperative_logo.png" class="img-responsive"></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row">
+                <!-- start mobile view -->
+                <div class="dev-toggle-bg">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="#"> Menu </a>
+                </div>
+                <!-- end mobile view -->
+                <!-- Sidebar Holder -->
+
+                <div id="sidebar">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 no_padding table-responsive" style="background: #e8e9ea; min-height: 1030px;">
+                        <div class="dev-bg-color">
+                            <div ng-app="CertificateMod" ng-controller="CertificateCnt">
+                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                    <div class="card">
+                                        <div class="col-md-12" style="text-align: center;    padding: 8px;    background: #64c0c5;    color: #fff;    margin-top: 17px;">
+                                            <label style="font-size:20px;font-weight:bolder;">Check Your Society Registration Status@*Verify Your Certificate*@</label>
+                                        </div>
+                                        <div class="card">
+                                            <div class="row" style="    margin-top: 35px;">
+                                                <div class="col-md-4" style="text-align: right;font-weight:bold;">
+                                                    Application/BRN Number *
+                                                </div>
+                                                <div class="col-md-5">
+                                                    <input id="txtSearch" name="SearchText" class="form-control" ng-model="Filter.SearchText" placeholder="Application/BRN Number" style="font-weight:bold;">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12" style="text-align: center;margin-bottom: 10px;">
+                                                <label>&nbsp;</label><br>
+                                                <button type="button" ng-click="GetCertificate()" class="btn btn-primary dev-btn ng-binding">Submit</button>
+                                                <button type="button" ng-click="ClearSearch()" class="btn btn-primary dev-btn ng-binding">Reset</button>
+                                            </div>
+                                            <table id="tblData" class="table devtable" style="margin-top: 10px;border:1px solid rgb(222, 221, 221); float: left;" ng-if="CertificateList.length>0">
+                                                <thead>
+                                                    <tr>
+                                                        <th class="info_news_slh_table_fix">Sr No.</th>
+                                                        <th style="min-width: 96px;">Department</th>
+                                                        <th style="min-width: 200px;">Service</th>
+                                                        <th style="text-align: center">App Id</th>
+                                                        <th style="text-align: center">Submission Date</th>
+                                                        <th style="min-width: 95px;">Status</th>
+                                                        <th ng-if="CertificateList[0].CertificateFile!=''" >Registration Certificate</th>
+                                                        <th ng-if="CertificateList[0].BankOpeningCertificate!=''" >Bank Account Open Certificate</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="item in CertificateList">
+                                                        <td>{{$index+1}}</td>
+                                                        <td>{{item.Department}}</td>
+                                                        <td>{{item.ServiceName}}</td>
+                                                        <td>{{item.ApplicationNo}}</td>
+                                                        <td>{{item.SubmissionDate}}</td>
+                                                        <td>{{item.Status}}</td>
+                                                        <td ng-if="item.CertificateFile!=''" ><a target="_blank"  href="~/Content/SocietyProfiling/{{item.CertificateFile}}"><i class="fa fa-download"></i></a></td>
+                                                        <td ng-if="item.BankOpeningCertificate!=''" ><a target="_blank" href="~/Content/SocietyProfiling/{{item.BankOpeningCertificate}}"><i class="fa fa-download"></i></a></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+
+    <div class="footer">
+        <div style="color:#fff" class="copydev"> @DateTime.Now.Year © DOITC <a style="color:#fff" href="#"> DOITC.RAJASTHAN.GOV.IN </a>|| Help line No. : 9001525777 , e-mail : SUPPORT.RAJSAHAKAR@RAJASTHAN.GOV.IN </div>
+    </div>
+    <script src="~/Scripts/bootstrap.min.js"></script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
+
+    <script type="text/javascript">
+
+        function ShowOkMessage(title, msg, callback) {
+            $("#dvmessgesOkBoxTitle ").html(title);
+            $("#dvmessgesOkBox ").html(msg);
+            $("#messageOkModel").modal("show");
+            if (title == "Warning" || title == "Error")
+                $(".modal-content").find("p").addClass("ErrorText");
+            else
+                $(".modal-content").find("p").removeClass("ErrorText");
+
+            $(document).on('click', '#btnOkYes', function () { callback(); });
+        }
+    </script>
+
+    <div id="messageOkModel" class="modal fade" role="dialog" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-body">
+                    <p style="color: #000; font-size: 14px;font-weight:800;text-align:left;" id="dvmessgesOkBoxTitle"></p>
+                </div>
+                <div class="modal-body">
+                    <p style="color: #000; font-size: 14px;" id="dvmessgesOkBox"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal" id="btnOkYes">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="messageAlertModel" class="modal fade" role="dialog" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="" style="padding-left: 20px;padding-top: 15px;">
+
+                    <i style="font-size: 50px;color: darkred;" class="fa fa-warning"></i>
+
+                </div>
+                <div class="modal-body">
+                    <p style="color: #9a2f2f;font-size: 21px; text-align:left;" id="dvmessgesAlertBox"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal" id="btnAlertYes">Yes</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">No</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @Html.Partial("_loader")
+
+</body>
+</html>
+
+

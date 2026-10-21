@@ -1,0 +1,199 @@
+﻿@{
+
+    Layout = "~/Views/Shared/_CitizenLayout.cshtml"; ;
+}
+<script src="~/Scripts/AngularFramework/CaseRegistraion.js"></script>
+<script type="text/javascript" src="~/Scripts/1.8.3.jquery.min.js"></script>
+<script src="table2excel.js" type="text/javascript"></script>
+
+<style>
+    /* Style the tab */
+    .tab {
+        overflow: hidden;
+        border: unset;
+        background-color: #f1f1f1;
+        border-radius: 11px;
+    }
+
+        /* Style the buttons inside the tab */
+        .tab button {
+            background-color: inherit;
+            float: left;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 14px 16px;
+            transition: 0.3s;
+            font-size: 17px;
+        }
+
+            /* Change background color of buttons on hover */
+            .tab button:hover {
+                background-color: #ddd;
+                border-radius: 11px;
+            }
+
+            /* Create an active/current tablink class */
+            .tab button.active {
+                background-color: #1899a0;
+                border-radius: 11px;
+            }
+
+    .dishide {
+        display: none !important;
+    }
+
+    .disshow {
+        display: block !important;
+    }
+
+    /* Style the tab content */
+    .tabcontent {
+        display: none;
+        padding: 50px 12px;
+        /*border: 1px solid #ccc;*/
+        border: none !important;
+    }
+</style>
+<script type="text/javascript">
+    var tableToExcel = (function () {
+        var uri = 'data:application/vnd.ms-excel;base64,'
+            , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>'
+            , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) }
+            , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
+        return function (table, name) {
+            if (!table.nodeType) table = document.getElementById(table)
+            var ctx = { worksheet: name || 'Worksheet', table: table.innerHTML }
+            window.location.href = uri + base64(format(template, ctx))
+        }
+    })()
+</script>
+<div ng-app="CaseRegistraionModule">
+    <div ng-controller="CaseRegistraionCont">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <h3 class="citizen-dash-head">{{translation.CaseReport}}</h3>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#"> {{translation.Home}} </a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;">{{translation.CaseReport}} </span>
+
+                    </li>
+                    <li style="float: right;" id="divAddBtn">
+                        &nbsp;
+                    </li>
+
+                </ul>
+            </div>
+        </div>
+
+        <div class="col-lg-12">
+            <div class="citizen-dash-head">
+                <div class="table-dropdown">
+                    <div class="col-lg-12 form-group">
+                        <div class="col-lg-4" style="padding-left: 0;">
+                            <label for="search">{{translation.Act}}:</label>
+                            <select ng-model="CaseRegistration.Act" class="form-control" ng-init="CaseRegistration.Act='0'" ng-change="GetAllCaseList()">
+                                <option value="0" disabled>{{translation.SelectOption}}</option>
+                                <option ng-repeat="item in CourtActListData" value="{{item.ID}}">
+                                    {{_language =='en-us' ?  item.valueeng : item.valuenamehi}}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-lg-4" style="padding-left: 0;">
+                            <label for="search">{{translation.section}}:</label>
+                            <select ng-model="CaseRegistration.section" class="form-control" ng-init="CaseRegistration.section='0'" ng-change="GetAllCaseList()">
+                                <option value="0">{{translation.SelectOption}}</option>
+                                <option ng-repeat="item in CourtSectionListData" value="{{item.ID}}">
+                                    {{_language =='en-us' ?  item.valueeng : item.valuenamehi}}
+
+                            </select>
+                        </div>
+                        <div class="col-lg-4" style="padding-left: 0;">
+                            <label for="search">{{translation.TypeOfCase}}:</label>
+                            <select ng-model="CaseRegistration.TypeOfCase" class="form-control" ng-init="CaseRegistration.TypeOfCase='0'" ng-change="GetAllCaseList()">
+                                <option value="0">{{translation.SelectOption}}</option>
+                                <option ng-repeat="item in CourtCaseTypeListData" value="{{item.ID}}">
+                                    {{_language =='en-us' ?  item.valueeng : item.valuenamehi}}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-lg-4" style="padding-left: 0; display:none; padding-top: 10px;">
+                            <label for="search"> {{translation.DateOfAffiliation}}</label>
+                            <input name="Affiliation" id="txtfAffiliationDate" ng-init="CaseRegistration.DateOfAffiliation=''" style="display:inline; margin-top: 0px;" class="form-control devcalender" disabled="disabled" placeholder="{{translation.Affiliation}}" ng-model="CaseRegistration.DateOfAffiliation" ng-text-change="CaseRegDetailList()" autocomplete="off" /> &nbsp;
+                        </div>
+                        <div class="col-lg-4" style="padding-left: 0; padding-top: 10px;">
+                            <label for="search">{{translation.Search}}:</label>
+                            <input ng-model="q" id="search" class="form-control" placeholder={{translation.filttertext}} autocomplete="off">
+                        </div>
+
+                        <div class="col-md-4" style="padding-left: 0; padding-top: 10px;">
+                            <label for="search">{{translation.ItemPerPage}}:</label>
+                            <input type="number" min="1" max="100" class="form-control" onkeypress='return event.charCode >= 48 && event.charCode <= 57' ng-model="pageSize">
+                        </div>
+                        <div class="col-md-4" style="padding-left: 265px; padding-top: 35px;">
+                            <input type="button" class="btn btn-primary dev-btn" onclick="tableToExcel('tblgetsuport', 'Get Support Data')" value="Export to Excel">
+                        </div>
+                    </div>
+                    <div style="min-width:100%;overflow-x :scroll;" id="tblgetsuport">
+                        <table class="table table-responsive devtable">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        {{translation.SRNO}}
+                                    </th>
+                                    <th>
+                                        {{translation.Court}}
+
+                                    </th>
+                                    <th>
+                                        {{translation.Act}}
+                                    </th>
+                                    <th>
+                                        {{translation.section}}
+
+                                    </th>
+                                    <th>
+                                        {{translation.TypeOfCase}}
+
+                                    </th>
+
+                                    <th>
+                                        {{translation.DateOfAffiliation}}
+                                    </th>
+                                    <th>
+                                        {{translation.CaseRegistraionNo}}
+                                    </th>
+
+
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr dir-paginate="items in CaseRegDetailListData | filter:q | orderBy:colsort:reverseSort | itemsPerPage: pageSize" current-page="currentPage" pagination-id="statePagination">
+                                    <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                                    <td>{{ items.courtname }}</td>
+                                    <td>{{ items.Act}}</td>
+                                    <td>{{ items.Section}}</td>
+                                    <td>{{ items.Casetype}}</td>
+                                    <td>{{ items.AffilationDate}}</td>
+                                    <td>{{ items.CaseRegNo}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-md-10">
+                        <div class="text-center">
+                            <dir-pagination-controls boundary-links="true" pagination-id="statePagination" on-page-change="pageChangeHandler(newPageNumber)" template-url="/dirPagination.tpl.html"></dir-pagination-controls>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,187 @@
+﻿@if (((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]) != null)
+{
+    if (((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).UserType == "C")
+    {
+        Layout = "~/Views/Shared/_CitizenLayout.cshtml";
+    }
+    else
+    {
+        Layout = "~/Views/Shared/_Layout.cshtml";
+    }
+}
+else
+{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<script src="~/Scripts/AngularFramework/PLDBMembershipAmmountReport.js"></script>
+<script type="text/javascript" src="~/Scripts/1.8.3.jquery.min.js"></script>
+<script type="text/javascript" src="~/Scripts/pdfmake.min.js"></script>
+<script type="text/javascript" src="~/Scripts/html2canvas.min.js"></script>
+
+<link href="~/Scripts/google_hindi/google_transliteration.css" rel="stylesheet" />
+<style>
+    .inputapi-transliterate-indic-suggestion-menu {
+        z-index: 99999 !important;
+        display: block;
+    }
+</style>
+
+<style type="text/css">
+    body {
+        font-family: Arial;
+        font-size: 10pt;
+    }
+
+    table {
+        border: 1px solid #ccc;
+        border-collapse: collapse;
+    }
+
+        table th {
+            background-color: #F7F7F7;
+            color: #333;
+            font-weight: bold;
+        }
+
+        table th, table td {
+            padding: 5px;
+            border: 1px solid #ccc;
+        }
+
+    .NewMemberdob input {
+        float: left;
+        width: 90%;
+    }
+
+    .NewMemberdob button {
+        float: left;
+    }
+
+    .notValid {
+        border: solid 1px red !important
+    }
+</style>
+
+
+<script type="text/javascript">
+
+    function ValidateAlpha(evt) {
+        var keyCode = (evt.which) ? evt.which : evt.keyCode
+        if ((keyCode < 65 || keyCode > 90) && (keyCode < 97 || keyCode > 123) && keyCode != 32)
+
+            return false;
+        return true;
+    };
+
+</script>
+
+<div ng-app="PLDBMembershipAmmountReportMOD" ng-controller="PLDBMembershipAmmountReportCONT">
+   
+            <div class="col-md-12">
+                <h3 class="citizen-dash-head">PLDBLoan Application Report</h3>
+                <hr style="margin: 0;">
+            </div>
+
+     
+            <div class="">
+                <div class="col-md-12">
+                    <div class="citizen-dash-head">
+                        <div class="table-dropdown">
+                            <div class="col-md-4">
+                                <label for="search">{{translation.Search}}:</label>
+                                <input ng-model="q" id="search" class="form-control" placeholder={{translation.filttertext}} autocomplete="off">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="search">{{translation.ItemPerPage}}:</label>
+                                <input type="number" min="1" max="1000" class="form-control" ng-model="pageSize">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="search" class="ng-binding">{{translation.FincialYearHeading}}:</label>
+                                <select name="fy" style="" class="form-control" ng-model="Filter.FinancialYear" ng-init="Filter.FinancialYear=''" ng-change="searchRequest(GetCommodityReleaseOrderList)">
+                                    <option value="">{{translation.SelectOption}}</option>
+                                    <option ng-repeat="item in FinancialYearList" value="{{item.FIN_YEAR_NAME}}">
+                                        {{item.FIN_YEAR_NAME}}
+                                    </option>
+                                </select>
+                            </div>                 
+                            
+                        </div>
+                        <table class="table table-responsive devtable">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        {{translation.SRNO}}
+                                    </th>
+                                    <th>PLDB Name</th>                                    
+                                    <th>Membership Ammount</th>                               
+
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr dir-paginate="item in DataSet | filter: q | orderBy:colsort:reverseSort  | itemsPerPage: pageSize" current-page="currentPage" pagination-id="MenuPagination">
+                                    <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+
+                                    <td>
+                                        {{item.PLDBName }}
+                                    </td>                                   
+                                    <td>
+                                       
+                                        <a style="color:#505050;" ng-click="MembershipAmmountReport(item.PLDB)" href="javascript:void(0);">{{item.MembershipFee }}</a> 
+                                    </td>
+                                                            
+                                </tr>
+                            </tbody>
+                        </table>
+                  
+                    
+                    </div>
+                    <div class="citizen-dash-head" ng-show="ShowbranchRport">
+                        
+                        <table class="table table-responsive devtable">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        {{translation.SRNO}}
+                                    </th>                                   
+                                    <th>Branch Name</th>
+                                    <th>Membership Ammount</th>
+
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr dir-paginate="item in DataSetforbranches | filter: q | orderBy:colsort:reverseSort  | itemsPerPage: pageSize" current-page="currentPage" pagination-id="MenuPagination">
+                                    <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+
+                                 
+                                    <td>
+                                        {{item.BranchName_En}}
+                                    </td>
+                                    <td>
+                                        {{item.MembershipFee }}
+                                    </td>
+
+                                </tr>
+                            </tbody>
+                        </table>
+
+
+                    </div>
+                </div>
+                <div class="col-md-10">
+                    <div class="text-center">
+                        <dir-pagination-controls boundary-links="true" pagination-id="MenuPagination" on-page-change="pageChangeHandler(newPageNumber)" template-url="/dirPagination.tpl.html"></dir-pagination-controls>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <h5 class="dev-page"> {{translation.Page}}: {{ currentPage }} </h5>
+                </div>
+            </div>
+        </div>
+     
+
+
+
+
+
+

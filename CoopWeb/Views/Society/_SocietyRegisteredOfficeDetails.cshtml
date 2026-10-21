@@ -1,0 +1,629 @@
+﻿<script type="text/javascript">
+    function blockSpecialChar(e) {
+        var k = e.keyCode;
+        return ((k > 64 && k < 91) || (k > 96 && k < 123) || k == 8 || (k >= 48 && k <= 57));
+    }
+</script>
+
+<form name="SocietyRegisteredOfficeForm">
+
+    <div >
+
+
+        <div ng-show="IsAddressEditAble">
+            <div class="col-lg-12 form-group">
+                <span class="error">
+                    {{translation.AddressAllert}}
+                </span>
+            </div>
+            <div class="form-group col-md-12">
+                <h5 class="heading-hr ng-binding"> {{translation.OfficeAddressHeading}}</h5>
+            </div>
+            <input type="hidden" name="name" ng-model="SocietyRegisteredOffice.EMitraTransactionId" />
+            <input type="hidden" class="form-control" name="HouseBuildingNo" ng-model="SocietyRegisteredOffice.ActId" placeholder="{{translation.HouseBuildingNo}}" autocomplete="off" ng-disabled="allDisable">
+            <div class="form-group col-md-6">
+                <label>{{ translation.HouseBuildingNo}}<span class="error">*</span></label>
+                <input type="text" class="form-control" name="HouseBuildingNo" ng-model="SocietyRegisteredOffice.HouseBuildingNo" placeholder="{{translation.HouseBuildingNo}}" autocomplete="off" ng-disabled="allDisable">
+            </div>
+            <div class="form-group col-md-6">
+                <label>{{ translation.LaneStreetName}}<span class="error">*</span></label>
+                <input type="text" class="form-control" name="LaneStreetName" ng-model="SocietyRegisteredOffice.LaneStreetName" placeholder="{{translation.LaneStreetName}}" autocomplete="off" ng-disabled="allDisable">
+            </div>
+            <div class="form-group col-md-6">
+                <label>{{ translation.Locality}}<span class="error">*</span></label>
+                <input type="text" class="form-control" name="Locality" ng-model="SocietyRegisteredOffice.Locality" placeholder="{{translation.Locality}}" autocomplete="off" ng-disabled="allDisable">
+            </div>
+
+            <div class="form-group col-md-6">
+                <label>{{ translation.State}}<span class="error">*</span></label>
+                <select ng-model="SocietyRegisteredOffice.STATE_ID" class="form-control" ng-change="GetDivisionList()" ng-disabled="allDisable" ng-init="SocietyRegisteredOffice.STATE_ID='6'">
+                    <option ng-repeat="item in Statelist" value="{{item.STATE_ID}}">
+                        {{_language =='en-us' ?  item.STATE_ENG : item.STATE_MANGAL}}
+                    </option>
+                </select>
+            </div>
+            <div class="form-group col-md-6">
+                <label ng-model="SocietyRegisteredOffice.SocietyId"></label>
+                <div class="form-check form-check-inline col-md-4" style="padding: 0;">
+                    <label class="form-check-label" for="inlineRadio1">{{translation.UrbanRural}}</label>
+                </div>
+
+                <div>
+
+                    <div class="col-lg-4">
+                        <label class="help-block-gender" style="width:40% !important;">
+                            <input type="radio" id="sdfs" name="Rurals" value="True" ng-model="SocietyRegisteredOffice.IsRural" ng-change="RuralUrbanBlock(true)" ng-disabled="allDisable">{{translation.Urban}}
+                        </label>
+                        <label class="help-block-gender" style="width:40% !important;">
+                            <input type="radio" id="sdf" value="False" name="Rural" ng-model="SocietyRegisteredOffice.IsRural" ng-change="RuralUrbanBlock(false)" ng-disabled="allDisable">{{translation.Rural}}
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div ng-show="UrbanDiv">
+                <div class="form-group col-md-6">
+                    <label>{{translation.CityType}}<span class="error">*</span></label>
+
+                    <select id="staticall" ng-model="SocietyRegisteredOffice.CityTypes" class="form-control" ng-init="SocietyRegisteredOffice.CityTypes='0'" ng-change="GetCityListByCityTypes(1)" ng-disabled="allDisable">
+                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                        <option value="1">{{translation.NagarParisad}}</option>
+                        <option value="2">{{translation.NagarPalika}}</option>
+                        <option value="3">{{translation.NagarNigam}}</option>
+                    </select>
+                </div>
+                <div class="form-group col-md-6">
+                    <label>{{translation.City}}<span class="error">*</span></label>
+                    <select ng-model="SocietyRegisteredOffice.CITY_ID" class="form-control" ng-change="GetWardList(1)" ng-init="SocietyRegisteredOffice.CITY_ID='0'" ng-disabled="allDisable">
+                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                        <option ng-repeat="item in CityListdata" value="{{item.CITY_ID}}">
+                            {{_language =='en-us' ?  item.CITY_ENG : item.CITY_MANGAL}}
+                        </option>
+                    </select>
+                </div>
+                <div class="form-group col-md-6">
+                    <label>{{translation.Ward}}<span class="error">*</span></label>
+                    <select ng-model="SocietyRegisteredOffice.WARD_ID" class="form-control" ng-init="SocietyRegisteredOffice.WARD_ID='0'" ng-disabled="allDisable">
+                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                        <option ng-repeat="item in Ward" value="{{item.WARD_ID}}">
+                            {{_language =='en-us' ?  item.WARD_ENG : item.WARD_MANGAL}}
+                        </option>
+                    </select>
+                </div>
+            </div>
+
+
+            <div ng-show="RuralDiv">
+                <div class="form-group col-md-6">
+                    <label>{{translation.DivisionHeading}}</label>
+                    <select ng-model="SocietyRegisteredOffice.DIVISION_ID" id="ddlDivision" name="division" ng-change="GetDistrictList(1);DivisionList()" class="form-control" ng-init="SocietyRegisteredOffice.DIVISION_ID ='0'" ng-disabled="allDisable">
+                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                        <option ng-repeat="item in Divisions" value="{{item.DIVISION_ID}}">
+                            {{_language =='en-us' ?  item.DIVISION_ENG : item.DIVISION_MANGAL}}
+                        </option>
+                    </select>
+                </div>
+                <div class="form-group col-md-6">
+                    <label>{{ translation.District}}<span class="error">*</span></label>
+                    <select ng-model="SocietyRegisteredOffice.DISTRICT_ID" class="form-control" ng-init="SocietyRegisteredOffice.DISTRICT_ID='0'" ng-change="BlockListByOffAdd(1)" ng-disabled="allDisable">
+                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                        <option ng-repeat="item in DistrictList" value="{{item.DISTRICT_ID}}">
+                            {{_language =='en-us' ?  item.DISTRICT_ENG : item.DISTRICT_MANGAL}}
+                        </option>
+                    </select>
+                </div>
+                <div class="form-group col-md-6">
+                    <label>{{ translation.BlockHeading}} </label>
+                    <select ng-model="SocietyRegisteredOffice.BLOCK_ID" id="ddlblocki" class="form-control" ng-init="SocietyRegisteredOffice.BLOCK_ID='0'" ng-change="GramPanchayatList(1)" ng-disabled="allDisable">
+                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                        <option ng-repeat="item in Blocksdata | orderBy:'BLOCK_ENG'" value="{{item.BLOCK_ID}}">
+                            {{_language =='en-us' ?  item.BLOCK_ENG : item.BLOCK_MANGAL}}
+                        </option>
+                    </select>
+                </div>
+                <div class="form-group col-md-6">
+                    <label>{{ translation.GramPanchayatHeading}}</label>
+
+                    <select ng-model="SocietyRegisteredOffice.GP_ID" id="ddlGP" class="form-control" ng-init="SocietyRegisteredOffice.GP_ID='0'" ng-change="VillageList(1)" ng-disabled="allDisable">
+                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                        <option ng-repeat="item in GramPanchayats | orderBy:'GramPanchayats'" value="{{item.GP_ID}}">
+                            {{_language =='en-us' ?  item.GP_ENG : item.GP_MANGAL}}
+                        </option>
+                    </select>
+                </div>
+
+
+
+                <div class="form-group col-md-6">
+                    <label>{{translation.Village}}</label>
+
+                    <select ng-model="SocietyRegisteredOffice.VILLAGE_ID" id="ddlVillage" class="form-control" ng-init="SocietyRegisteredOffice.VILLAGE_ID='0'" ng-disabled="allDisable">
+                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                        <option ng-repeat="item in Villages | orderBy:'VILLAGE_ENG'" value="{{item.VILLAGE_ID}}">
+                            {{_language =='en-us' ?  item.VILLAGE_ENG : item.VILLAGE_MANGAL}}
+                        </option>
+                    </select>
+                </div>
+
+            </div>
+
+
+            <div class="form-group col-md-6">
+                <label class="control-label">{{ translation.PIN}}<span class="error">*</span></label>
+                <input type="text" name="PinCode" class="form-control" ng-model="SocietyRegisteredOffice.PinCode" placeholder="{{translation.PIN}}" maxlength="6" ng-minlength="6" onkeypress='return event.charCode >= 48 && event.charCode <= 57' autocomplete="off" ng-disabled="allDisable">
+            </div>
+        </div>
+        <br />
+        <div ng-show="SocietyDetailsData.BasicDetails.UserType!=3 && SocietyRegistration.IsAdministrative!='Administrative'">
+            <div class="form-group col-md-12">
+                <h5 class="heading-hr ng-binding"> {{translation.Chairman}}   </h5>
+            </div>
+
+            <div class="form-group col-md-12">
+                <input class="form-check-input" type="checkbox" name="inlinecheckOptions" id="inlinechk1" value="" ng-model="SocietyRegisteredOffice.IsSameCEOAddress" ng-change="updateaddress()">
+                <h5 style="margin-top:0px">{{translation.CopyAddressSame}}</h5>
+            </div>
+            <div>
+                <div class="form-group col-md-6">
+                    <label>{{ translation.HouseBuildingNo}}<span class="error">*</span></label>
+                    <input type="text" class="form-control" name="HouseBuildingNocopy" ng-model="SocietyRegisteredOffice.HouseBuildingNocopy" ng-disabled="allDisable" placeholder="{{translation.HouseBuildingNo}}" autocomplete="off">
+                </div>
+                <div class="form-group col-md-6">
+                    <label>{{ translation.LaneStreetName}}<span class="error">*</span></label>
+                    <input type="text" class="form-control" name="LaneStreetNamecopy" ng-model="SocietyRegisteredOffice.LaneStreetNamecopy" ng-disabled="allDisable" placeholder="{{translation.LaneStreetName}}" autocomplete="off">
+                </div>
+                <div class="form-group col-md-6">
+                    <label>{{ translation.Locality}}<span class="error">*</span></label>
+                    <input type="text" class="form-control" name="Localitycopy" ng-model="SocietyRegisteredOffice.Localitycopy" ng-disabled="allDisable" placeholder="{{translation.Locality}}" autocomplete="off">
+                </div>
+
+                <div class="form-group col-md-6">
+                    <label>{{ translation.State}}<span class="error">*</span></label>
+                    <select ng-model="SocietyRegisteredOffice.STATE_IDcopy" class="form-control" ng-disabled="allDisable" ng-change="GetDivisionList()">
+                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                        <option ng-repeat="item in Statelist" value="{{item.STATE_ID}}">
+                            {{_language =='en-us' ?  item.STATE_ENG : item.STATE_MANGAL}}
+                        </option>
+                    </select>
+                </div>
+
+                <div class="form-group col-md-6">
+                    <label ng-model="SocietyRegisteredOffice.SocietyIdcopy"></label>
+                    <div class="form-check form-check-inline col-md-4" style="padding: 0;">
+                        <label class="form-check-label" for="inlineRadio1">{{translation.UrbanRural}}</label>
+                    </div>
+                    <div>
+                        <div>
+                            <div class="col-lg-4">
+                                <label class="help-block-gender" style="width:40% !important;">
+                                    <input type="radio" name="states" id="Idtrue" value="True" ng-model="SocietyRegisteredOffice.IsRuralcopy" ng-disabled="allDisable" ng-change="RuralUrbanBlockCopy()">{{translation.Urban}}
+                                </label>
+                                <label class="help-block-gender" style="width:40% !important;">
+                                    <input type="radio" name="state" id="Iddfalse" value="False" ng-model="SocietyRegisteredOffice.IsRuralcopy" ng-disabled="allDisable" ng-change="RuralUrbanBlockCopy()">{{translation.Rural}}
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div ng-show="UrbanDivCopy">
+                    <div class="form-group col-md-6">
+                        <label>{{translation.CityType}}<span class="error">*</span></label>
+                        <select ng-model="SocietyRegisteredOffice.CityTypes_copy" class="form-control" ng-disabled="allDisable" ng-init="SocietyRegisteredOffice.CityTypes_copy='0'" ng-change="GetCityListByCityTypes(2)">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option value="1">{{translation.NagarParisad}}</option>
+                            <option value="2">{{translation.NagarPalika}}</option>
+                            <option value="3">{{translation.NagarNigam}}</option>
+                        </select>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label>{{translation.City}}<span class="error">*</span></label>
+                        <select ng-model="SocietyRegisteredOffice.CITY_IDcopy" class="form-control" ng-disabled="allDisable" ng-change="GetWardList(2)" ng-init="SocietyRegisteredOffice.CITY_IDcopy='0'">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in CityListdatacopy" value="{{item.CITY_ID}}">
+                                {{_language =='en-us' ?  item.CITY_ENG : item.CITY_MANGAL}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label>{{translation.Ward}}<span class="error">*</span></label>
+                        <select ng-model="SocietyRegisteredOffice.WARD_IDcopy" class="form-control" ng-disabled="allDisable" ng-init="SocietyRegisteredOffice.WARD_IDcopy='0'">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in Wardcopy" value="{{item.WARD_ID}}">
+                                {{_language =='en-us' ?  item.WARD_ENG : item.WARD_MANGAL}}
+                            </option>
+                        </select>
+                    </div>
+
+                </div>
+
+                <div ng-show="RuralDivcopy">
+                    <div class="form-group col-md-6">
+                        <label>{{translation.DivisionHeading}}</label>
+                        <select ng-model="SocietyRegisteredOffice.DIVISION_ID_copy" id="ddlDivision" name="division" ng-disabled="allDisable" ng-change="GetDistrictList(2)" class="form-control" ng-init="SocietyRegisteredOffice.DIVISION_ID_copy ='0'">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in Divisions" value="{{item.DIVISION_ID}}">
+                                {{_language =='en-us' ?  item.DIVISION_ENG : item.DIVISION_MANGAL}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label>{{ translation.District}}<span class="error">*</span></label>
+                        <select ng-model="SocietyRegisteredOffice.DISTRICT_ID_copy" class="form-control" ng-init="SocietyRegisteredOffice.DISTRICT_ID_copy='0'" ng-disabled="allDisable" ng-change="BlockListByOffAdd(2)">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in DistrictListcopy" value="{{item.DISTRICT_ID}}">
+                                {{_language =='en-us' ?  item.DISTRICT_ENG : item.DISTRICT_MANGAL}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label>{{ translation.BlockHeading}} </label>
+                        <select ng-model="SocietyRegisteredOffice.BLOCK_ID_copy" class="form-control" ng-init="SocietyRegisteredOffice.BLOCK_ID_copy='0'" ng-disabled="allDisable" ng-change="GramPanchayatList(2)">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in Blocksdatacopy | orderBy:'BLOCK_ENG'" value="{{item.BLOCK_ID}}">
+                                {{_language =='en-us' ?  item.BLOCK_ENG : item.BLOCK_MANGAL}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label>{{ translation.GramPanchayatHeading}}</label>
+
+                        <select ng-model="SocietyRegisteredOffice.GP_IDcopy" class="form-control" ng-init="SocietyRegisteredOffice.GP_IDcopy='0'" ng-disabled="allDisable" ng-change="VillageList(2)">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in GramPanchayatscopy | orderBy:'GramPanchayats'" value="{{item.GP_ID}}">
+                                {{_language =='en-us' ?  item.GP_ENG : item.GP_MANGAL}}
+                            </option>
+                        </select>
+                    </div>
+
+
+
+                    <div class="form-group col-md-6">
+                        <label>{{translation.Village}}</label>
+
+                        <select ng-model="SocietyRegisteredOffice.VILLAGE_IDcopy" class="form-control" ng-init="SocietyRegisteredOffice.VILLAGE_IDcopy='0'" ng-disabled="allDisable">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in Villagescopy | orderBy:'VILLAGE_ENG'" value="{{item.VILLAGE_ID}}">
+                                {{_language =='en-us' ?  item.VILLAGE_ENG : item.VILLAGE_MANGAL}}
+                            </option>
+                        </select>
+                    </div>
+
+                </div>
+                <div class="form-group col-md-6">
+                    <label class="control-label">{{ translation.PIN}}<span class="error">*</span></label>
+                    <input type="text" name="PinCodecopy" class="form-control" ng-model="SocietyRegisteredOffice.PinCodecopy" ng-disabled="allDisable" placeholder="{{translation.PIN}}" maxlength="6" ng-minlength="6" onkeypress='return event.charCode >= 48 && event.charCode <= 57' autocomplete="off">
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+
+        <input type="hidden" name="name" value="" ng-model="SocietyRegisteredOffice.SocietyRegisrationID_copy" />
+
+
+        <div ng-show="DivSport">
+
+            <br />
+            <div class="form-group col-md-12">
+                <h5 class="heading-hr ng-binding"> {{translation.Secretary}}</h5>
+
+
+            </div>
+
+            <div class="form-group col-md-6">
+                <label>{{ translation.HouseBuildingNo}}<span class="error">*</span></label>
+                <input type="text" class="form-control" name="HouseBuildingNoSecretary" ng-model="SocietyRegisteredOffice.HouseBuildingNoSecretary" placeholder="{{translation.HouseBuildingNo}}" autocomplete="off">
+            </div>
+            <div class="form-group col-md-6">
+                <label>{{ translation.LaneStreetName}}<span class="error">*</span></label>
+                <input type="text" class="form-control" name="LaneStreetNameSecretary" ng-model="SocietyRegisteredOffice.LaneStreetNameSecretary" placeholder="{{translation.LaneStreetName}}" autocomplete="off">
+            </div>
+            <div class="form-group col-md-6">
+                <label>{{ translation.Locality}}<span class="error">*</span></label>
+                <input type="text" class="form-control" name="Localitycopy" ng-model="SocietyRegisteredOffice.LocalitySecretary" placeholder="{{translation.Locality}}" autocomplete="off">
+            </div>
+            <div class="form-group col-md-6">
+                <label>{{ translation.State}}<span class="error">*</span></label>
+                <select ng-model="SocietyRegisteredOffice.STATE_IDSecretary" class="form-control" ng-change="GetDivisionList()">
+                    <option value="0" disabled>{{translation.SelectOption}}</option>
+                    <option ng-repeat="item in Statelist" value="{{item.STATE_ID}}">
+                        {{_language =='en-us' ?  item.STATE_ENG : item.STATE_MANGAL}}
+                    </option>
+                </select>
+            </div>
+            <div class="form-group col-md-6">
+                <label ng-model="SocietyRegisteredOffice.SocietyIdSecretary"></label>
+                <div class="form-check form-check-inline col-md-4" style="padding: 0;">
+                    <label class="form-check-label" for="inlineRadio1">{{translation.UrbanRural}}</label>
+                </div>
+
+
+                <div>
+
+                    <div>
+                        <div class="col-lg-4">
+                            <label class="help-block-gender" style="width:40% !important;">
+                                <input type="radio" name="stateM" id="Idtruesec2" value="True" ng-model="SocietyRegisteredOffice.IsRuralSecretary" ng-change="RuralUrbanBlockForSportcopy()">{{translation.Urban}}
+                            </label>
+                            <label class="help-block-gender" style="width:40% !important;">
+                                <input type="radio" name="stateF" id="Iddfalsesec3" value="False" ng-model="SocietyRegisteredOffice.IsRuralSecretary" ng-change="RuralUrbanBlockForSportcopy()">{{translation.Rural    }}
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div ng-show="UrbanDivSportCopy">
+                <div class="form-group col-md-6">
+                    <label>{{translation.CityType}}<span class="error">*</span></label>
+
+                    <select ng-model="SocietyRegisteredOffice.CityTypesSecretary" class="form-control" ng-init="SocietyRegisteredOffice.CityTypesSecretary='0'" ng-change="GetCityListByCityTypes(3)">
+                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                        <option value="1">{{translation.NagarParisad}}</option>
+                        <option value="2">{{translation.NagarPalika}}</option>
+                        <option value="3">{{translation.NagarNigam}}</option>
+                    </select>
+
+                </div>
+
+                <div class="form-group col-md-6">
+                    <label>{{translation.City}}<span class="error">*</span></label>
+                    <select ng-model="SocietyRegisteredOffice.CITY_IDSecretary" class="form-control" ng-change="GetWardList(3)" ng-init="SocietyRegisteredOffice.CITY_IDSecretary='0'">
+                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                        <option ng-repeat="item in CityListdataSecretary" value="{{item.CITY_ID}}">
+                            {{_language =='en-us' ?  item.CITY_ENG : item.CITY_MANGAL}}
+                        </option>
+                    </select>
+                </div>
+                <div class="form-group col-md-6">
+                    <label>{{translation.Ward}}<span class="error">*</span></label>
+                    <select ng-model="SocietyRegisteredOffice.WARD_IDSecretary" class="form-control" ng-init="SocietyRegisteredOffice.WARD_IDSecretary='0'">
+                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                        <option ng-repeat="item in WardSecretary" value="{{item.WARD_ID}}">
+                            {{_language =='en-us' ?  item.WARD_ENG : item.WARD_MANGAL}}
+                        </option>
+                    </select>
+                </div>
+
+            </div>
+            <div ng-show="RuralDivSportcopy">
+                <div class="form-group col-md-6">
+                    <label>{{translation.DivisionHeading}}</label>
+                    <select ng-model="SocietyRegisteredOffice.DIVISION_IDSecretary" id="ddlDivision" name="divisionTreasurer" ng-change="GetDistrictList(3)" class="form-control" ng-init="SocietyRegisteredOffice.DIVISION_IDSecretary ='0'">
+                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                        <option ng-repeat="item in Divisions" value="{{item.DIVISION_ID}}">
+                            {{_language =='en-us' ?  item.DIVISION_ENG : item.DIVISION_MANGAL}}
+                        </option>
+                    </select>
+                </div>
+                <div class="form-group col-md-6">
+                    <label>{{ translation.District}}<span class="error">*</span></label>
+                    <select ng-model="SocietyRegisteredOffice.DISTRICT_IDSecretary" class="form-control" ng-init="SocietyRegisteredOffice.DISTRICT_IDSecretary='0'" ng-change="BlockListByOffAdd(3)">
+                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                        <option ng-repeat="item in DistrictListSecretary" value="{{item.DISTRICT_ID}}">
+                            {{_language =='en-us' ?  item.DISTRICT_ENG : item.DISTRICT_MANGAL}}
+                        </option>
+                    </select>
+                </div>
+                <div class="form-group col-md-6">
+                    <label>{{ translation.BlockHeading}} </label>
+                    <select ng-model="SocietyRegisteredOffice.BLOCK_IDSecretary" class="form-control" ng-init="SocietyRegisteredOffice.BLOCK_IDSecretary='0'" ng-change="GramPanchayatList(3)">
+                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                        <option ng-repeat="item in BlocksdataSecretary | orderBy:'BLOCK_ENG'" value="{{item.BLOCK_ID}}">
+                            {{_language =='en-us' ?  item.BLOCK_ENG : item.BLOCK_MANGAL}}
+                        </option>
+                    </select>
+                </div>
+                <div class="form-group col-md-6">
+                    <label>{{ translation.GramPanchayatHeading}}</label>
+
+                    <select ng-model="SocietyRegisteredOffice.GP_IDSecretary" class="form-control" ng-init="SocietyRegisteredOffice.GP_IDSecretary='0'" ng-change="VillageList(3)">
+                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                        <option ng-repeat="item in GramPanchayatsSecretary | orderBy:'GramPanchayats'" value="{{item.GP_ID}}">
+                            {{_language =='en-us' ?  item.GP_ENG : item.GP_MANGAL}}
+                        </option>
+                    </select>
+                </div>
+
+
+
+                <div class="form-group col-md-6">
+                    <label>{{translation.Village}}</label>
+
+                    <select ng-model="SocietyRegisteredOffice.VILLAGE_IDSecretary" class="form-control" ng-init="SocietyRegisteredOffice.VILLAGE_IDSecretary='0'">
+                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                        <option ng-repeat="item in VillagesSecretary | orderBy:'VILLAGE_ENG'" value="{{item.VILLAGE_ID}}">
+                            {{_language =='en-us' ?  item.VILLAGE_ENG : item.VILLAGE_MANGAL}}
+                        </option>
+                    </select>
+                </div>
+
+
+            </div>
+
+            <div class="form-group col-md-6">
+                <label class="control-label">{{ translation.PIN}}<span class="error">*</span></label>
+                <input type="text" name="PinCodeSecretary" class="form-control" ng-model="SocietyRegisteredOffice.PinCodeSecretary" placeholder="{{translation.PIN}}" maxlength="6" ng-minlength="6" onkeypress='return event.charCode >= 48 && event.charCode <= 57' autocomplete="off">
+            </div>
+            <br />
+            <div class="form-group col-md-12">
+                <h5 class="heading-hr ng-binding"> {{translation.Treasurer}}</h5>
+
+            </div>
+
+            <div class="form-group col-md-6">
+                <label>{{ translation.HouseBuildingNo}}<span class="error">*</span></label>
+                <input type="text" class="form-control" name="HouseBuildingNoTreasurer" ng-model="SocietyRegisteredOffice.HouseBuildingNoTreasurer" placeholder="{{translation.HouseBuildingNo}}" autocomplete="off">
+            </div>
+            <div class="form-group col-md-6">
+                <label>{{ translation.LaneStreetName}}<span class="error">*</span></label>
+                <input type="text" class="form-control" name="LaneStreetNameTreasurer" ng-model="SocietyRegisteredOffice.LaneStreetNameTreasurer" placeholder="{{translation.LaneStreetName}}" autocomplete="off">
+            </div>
+            <div class="form-group col-md-6">
+                <label>{{ translation.Locality}}<span class="error">*</span></label>
+                <input type="text" class="form-control" name="LocalityTreasurer" ng-model="SocietyRegisteredOffice.LocalityTreasurer" placeholder="{{translation.Locality}}" autocomplete="off">
+            </div>
+
+            <div class="form-group col-md-6">
+                <label>{{ translation.State}}<span class="error">*</span></label>
+                <select ng-model="SocietyRegisteredOffice.STATE_IDTreasurer" class="form-control" ng-change="GetDivisionList()">
+                    <option value="0" disabled>{{translation.SelectOption}}</option>
+                    <option ng-repeat="item in Statelist" value="{{item.STATE_ID}}">
+                        {{_language =='en-us' ?  item.STATE_ENG : item.STATE_MANGAL}}
+                    </option>
+                </select>
+            </div>
+
+            <div class="form-group col-md-6">
+                <label ng-model="SocietyRegisteredOffice.SocietyIdTreasurer"></label>
+                <div class="form-check form-check-inline col-md-4" style="padding: 0;">
+                    <label class="form-check-label" for="inlineRadio1">{{translation.UrbanRural}}</label>
+                </div>
+
+
+                <div>
+
+                    <div>
+
+                        <div class="col-lg-4">
+                            <label class="help-block-gender" style="width:40% !important;">
+                                <input type="radio" name="stateMM" id="Idtrueter1" value="True" ng-model="SocietyRegisteredOffice.IsRuralTreasurer" ng-change="IsTreasurer()">{{translation.Urban}}
+                            </label>
+                            <label class="help-block-gender" style="width:40% !important;">
+                                <input type="radio" name="stateFF" id="Iddfalseter2" value="False" ng-model="SocietyRegisteredOffice.IsRuralTreasurer" ng-change="IsTreasurer()">{{translation.Rural}}
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div ng-show="UrbanDivTreasurer">
+                <div class="form-group col-md-6">
+                    <label>{{translation.CityType}}<span class="error">*</span></label>
+                    <select ng-model="SocietyRegisteredOffice.CityTypesTreasurer" class="form-control" ng-init="SocietyRegisteredOffice.CityTypesTreasurer='0'" ng-change="GetCityListByCityTypes(4)">
+                        {{SocietyRegisteredOffice.CityTypesTreasurer}}
+                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                        <option value="1">{{translation.NagarParisad}}</option>
+                        <option value="2">{{translation.NagarPalika}}</option>
+                        <option value="3">{{translation.NagarNigam}}</option>
+                    </select>
+
+                </div>
+
+                <div class="form-group col-md-6">
+                    <label>{{translation.City}}<span class="error">*</span></label>
+                    <select ng-model="SocietyRegisteredOffice.CITY_IDTreasurer" class="form-control" ng-change="GetWardList(4)" ng-init="SocietyRegisteredOffice.CITY_IDTreasurer='0'">
+                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                        <option ng-repeat="item in CityListdataTreasurer" value="{{item.CITY_ID}}">
+                            {{_language =='en-us' ?  item.CITY_ENG : item.CITY_MANGAL}}
+                        </option>
+                    </select>
+                </div>
+                <div class="form-group col-md-6">
+                    <label>{{translation.Ward}}<span class="error">*</span></label>
+                    <select ng-model="SocietyRegisteredOffice.WARD_IDTreasurer" class="form-control" ng-init="SocietyRegisteredOffice.WARD_IDTreasurer='0'">
+                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                        <option ng-repeat="item in WardTreasurer" value="{{item.WARD_ID}}">
+                            {{_language =='en-us' ?  item.WARD_ENG : item.WARD_MANGAL}}
+                        </option>
+                    </select>
+                </div>
+
+            </div>
+
+
+            <div ng-show="RuralDivTreasurer">
+                <div class="form-group col-md-6">
+                    <label>{{translation.DivisionHeading}}</label>
+                    <select ng-model="SocietyRegisteredOffice.DIVISION_IDTreasurer" id="ddlDivision" name="divisionTreasurer" ng-change="GetDistrictList(4)" class="form-control" ng-init="SocietyRegisteredOffice.DIVISION_IDTreasurer ='0'">
+                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                        <option ng-repeat="item in Divisions" value="{{item.DIVISION_ID}}">
+                            {{_language =='en-us' ?  item.DIVISION_ENG : item.DIVISION_MANGAL}}
+                        </option>
+                    </select>
+                </div>
+                <div class="form-group col-md-6">
+                    <label>{{ translation.District}}<span class="error">*</span></label>
+                    <select ng-model="SocietyRegisteredOffice.DISTRICT_IDTreasurer" class="form-control" ng-init="SocietyRegisteredOffice.DISTRICT_IDTreasurer='0'" ng-change="BlockListByOffAdd(4)">
+                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                        <option ng-repeat="item in DistrictListTreasurer" value="{{item.DISTRICT_ID}}">
+                            {{_language =='en-us' ?  item.DISTRICT_ENG : item.DISTRICT_MANGAL}}
+                        </option>
+                    </select>
+                </div>
+                <div class="form-group col-md-6">
+                    <label>{{ translation.BlockHeading}} </label>
+                    <select ng-model="SocietyRegisteredOffice.BLOCK_IDTreasurer" class="form-control" ng-init="SocietyRegisteredOffice.BLOCK_IDTreasurer='0'" ng-change="GramPanchayatList(4)">
+                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                        <option ng-repeat="item in BlocksdataTreasurer | orderBy:'BLOCK_ENG'" value="{{item.BLOCK_ID}}">
+                            {{_language =='en-us' ?  item.BLOCK_ENG : item.BLOCK_MANGAL}}
+                        </option>
+                    </select>
+                </div>
+                <div class="form-group col-md-6">
+                    <label>{{ translation.GramPanchayatHeading}}</label>
+
+                    <select ng-model="SocietyRegisteredOffice.GP_IDTreasurer" class="form-control" ng-init="SocietyRegisteredOffice.GP_IDTreasurer='0'" ng-change="VillageList(4)">
+                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                        <option ng-repeat="item in GramPanchayatsTreasurer | orderBy:'GramPanchayats'" value="{{item.GP_ID}}">
+                            {{_language =='en-us' ?  item.GP_ENG : item.GP_MANGAL}}
+                        </option>
+                    </select>
+                </div>
+
+
+
+                <div class="form-group col-md-6">
+                    <label>{{translation.Village}}</label>
+
+                    <select ng-model="SocietyRegisteredOffice.VILLAGE_IDTreasurer" class="form-control" ng-init="SocietyRegisteredOffice.VILLAGE_IDTreasurer='0'">
+                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                        <option ng-repeat="item in VillagesTreasurer | orderBy:'VILLAGE_ENG'" value="{{item.VILLAGE_ID}}">
+                            {{_language =='en-us' ?  item.VILLAGE_ENG : item.VILLAGE_MANGAL}}
+                        </option>
+                    </select>
+                </div>
+
+            </div>
+
+
+            <div class="form-group col-md-6">
+                <label class="control-label">{{ translation.PIN}}<span class="error">*</span></label>
+                <input type="text" name="PinCodeTreasurer" class="form-control" ng-model="SocietyRegisteredOffice.PinCodeTreasurer" placeholder="{{translation.PIN}}" maxlength="6" ng-minlength="6" onkeypress='return event.charCode >= 48 && event.charCode <= 57' autocomplete="off">
+            </div>
+
+        </div>
+        <br />
+        <div class="form-group col-md-12" style="margin-left:10px;">
+            <ul>
+                <li>{{translation.herebyfirst}} -</li>
+                <li>{{translation.herebyTwo}}</li>
+                <li>{{translation.herebyThree}}</li>
+                <li>{{translation.herebyFour}}</li>
+                <li>{{translation.herebyFive}}</li>
+                <li ng-show="SocietyRegisteredOffice.ActId=='3'">{{translation.herebySix}}</li>
+                <li ng-show="SocietyRegisteredOffice.ActId=='3'">{{translation.herebySeven}}</li>
+                <li ng-show="SocietyRegisteredOffice.ActId=='3'">{{translation.herebyEight}}</li>
+            </ul>
+            <div class="form-group col-md-12">
+                <input class="form-check-input" type="checkbox" name="inlinecheckOptions" id="inlinechk1" value="" ng-model="SocietyRegisteredOffice.herebyAccept"> {{translation.herebyNine}}
+                <h5 style="margin-top:0px"></h5>
+            </div>
+        </div>
+
+
+        <div class="form-group col-md-12">
+            <div class="dev-align-btn">
+                <button type="submit" ng-if="IsPermanentSave==0" class="btn btn-primary" ng-click="SaveRegisteredOfficeDetails(0)">{{translation.PayPartialSubmit}}</button>
+                <button type="submit" ng-if="IsPermanentSave==0" class="btn btn-success" ng-click="SaveRegisteredOfficeDetails(1)">{{translation.Submit}}</button>
+
+                <button type="button" class="btn btn-primary dev-btn" ng-click="ClearSocietyOfficeDetailsForm()">{{translation.Clear}}</button>
+                @*<a class="btn btn-primary dev-btn" style="text-transform:capitalize;" href="../Citizen/Index">{{ translation.Back}}</a>*@
+                <button type="submit" ng-if="IsPermanentSave==1" class="btn btn-success" ng-click="SaveRegisteredOfficeDetails(1)">{{translation.Next}}</button>
+                <a class="btn btn-primary dev-btn" style="text-transform:capitalize;" ng-click="BackClipk()">{{ translation.Back}}</a>
+            </div>
+
+        </div>
+
+</form>
+

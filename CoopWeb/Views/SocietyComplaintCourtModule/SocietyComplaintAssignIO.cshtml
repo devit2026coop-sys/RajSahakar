@@ -1,0 +1,666 @@
+﻿<script src="~/Scripts/AngularFramework/SocietyComplaintCourtModule.js"></script>
+
+<script src="~/Scripts/jquery-1.11.3.min.js"></script>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
+<script type="text/javascript" src="~/Scripts/jqueryuitimepicker.js"></script>
+<link href="~/Content/Stylesheets/jqueryuitimepicker.css" rel="stylesheet" />
+<script src="~/Scripts/jquery.unobtrusive-ajax.min.js"></script>
+<script src="~/Scripts/summernote.js"></script>
+<link href="~/Content/Stylesheets/summernote.css" rel="stylesheet" />
+
+<link href="/Scripts/jquery-ui/themes/base/jquery.ui.datepicker.css" rel="stylesheet" />
+<script>
+    $(document).ready(function () {
+        $('#HtmlContent').summernote();
+
+        $('.devcalender').datepicker({
+            showOn: "both",
+            changeMonth: true,
+            buttonImage: "../images/calender.png",
+            changeYear: true,
+            dateFormat: "dd/mm/yy",
+            minDate: '0',
+            yearRange: "c-10:c+0"
+        });
+
+    });
+</script>
+
+
+<script type="text/javascript">
+
+    function ValidateAlpha(evt) {
+        var keyCode = (evt.which) ? evt.which : evt.keyCode
+        if ((keyCode < 65 || keyCode > 90) && (keyCode < 97 || keyCode > 123) && keyCode != 32)
+
+            return false;
+        return true;
+    };
+    function ValidateFloat(th, e) {
+        if (isNaN(th.value + "" + String.fromCharCode(e.charCode)))
+            return false;
+        return true;
+    }
+    function ValidateFloat(th, e) {
+        if (isNaN(th.value + "" + String.fromCharCode(e.charCode)))
+            return false;
+        return true;
+    }
+
+
+</script>
+
+
+
+<style>
+    .inputapi-transliterate-indic-suggestion-menu {
+        z-index: 99999 !important;
+        display: block;
+    }
+</style>
+
+
+
+<style type="text/css">
+    .modal-ku {
+        width: 750px;
+        margin: auto;
+    }
+
+    body {
+        font-family: Arial;
+        font-size: 10pt;
+    }
+
+    .datecolumn input {
+        float: left;
+        /*width: 90%;*/
+    }
+
+    .datecolumn button {
+        float: left;
+    }
+
+    .notValid {
+        border: solid 1px red !important
+    }
+
+    .NewRequestList td {
+        color: black !important;
+    }
+
+    .rowdeleteBtn {
+        color: #fff !important;
+        font-weight: bold !important;
+        font-size: 12px !important;
+    }
+
+    .margin-Top20 {
+        margin-top: 20px;
+    }
+
+    .note-editable {
+        height: 200px !important;
+    }
+
+    #sidebar {
+        /* max-width: 220px; */
+    }
+
+    #lblSSOAuth_rbtnListType_1 {
+        width: 100%;
+    }
+</style>
+
+
+
+
+
+<div ng-app="CourtModuleMod" ng-controller="CourtModuleCnt">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <h3 class="citizen-dash-head">{{translation.ComplaintUnderSection55}} </h3>
+    </div>
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="devpage-breadcrumb">
+            <ul class="page-breadcrumb">
+                <li class="dev-page-br">
+                    <i class="fa fa-home"> </i>
+                    <a href="../Citizen/Index"> {{translation.Home}} </a>
+                    <i class="fa fa-angle-right"> </i>
+                </li>
+                <li style="float: left">
+                    <span style="margin: 0 5px;"> {{translation.ComplaintUnderSection55}} </span>
+                </li>
+            </ul>
+        </div>
+    </div>
+    @*MEMBERS*@
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="citizen-dash-head">
+            <div ng-show="!showPriView">
+
+
+                <div class="table-dropdown" id="search-filter">
+                    <div class="col-lg-4" style="padding-left: 0;">
+                        <label for="search">{{translation.Search}}:</label>
+                        <input name="searchText" id="searchText" class="form-control" placeholder="{{translation.filttertext}}" autocomplete="off">
+                    </div>
+
+                    <div class="col-lg-4">
+                        <label>
+                            {{translation.Status}}
+                        </label>
+                        <select name="StatusId" id="CaseStatusId" class="form-control" ng-init="IODetail.UserId=''">
+                            <option value="">{{translation.SelectOption}}</option>
+                            <option ng-repeat="itm in FilterComplainStatus" value="{{itm.Id}}">
+                                {{_language =='en-us' ?  itm.StatusName : itm.StatusNameHi}}
+                            </option>
+                        </select>
+
+
+
+                    </div>
+                    <div class="col-lg-4">
+                        <label>&nbsp;</label><br>
+                        <button type="button" ng-click="searchRequest(GetApprovedSocietyAssignForIO)" class="btn btn-primary dev-btn ng-binding">{{translation.Search}}</button>
+                        <button type="button" ng-click="ClearSearch()" class="btn btn-primary dev-btn ng-binding">{{translation.Clear}}</button>
+                    </div>
+                </div>
+
+
+
+
+                <table id="tblData" class="table table-responsive devtable" style="margin-top: 10px;border:1px solid rgb(222, 221, 221); float: left;">
+                    <thead>
+                        <tr>
+                            <th>
+                                {{translation.SRNO}}
+                            </th>
+                            <th>
+                                {{translation.SocietyName}}
+                            </th>
+                            <th>{{translation.CreationDate}}</th>
+                            <th>{{translation.ComplaintLatter}}</th>
+                            <th>{{translation.ComplainLatterCEO}}</th>
+                            <th>
+                                {{translation.Status}}
+                            </th>
+                            <th>
+                                {{translation.TransactionLog}}
+                            </th>
+                            <th>
+                                {{translation.Action}}
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        @*
+                            <tr dir-paginate="item in GetApprovedSocietyACT2001List | filter:q | orderBy:colsort:reverseSort | itemsPerPage: pageSize" current-page="currentPage" pagination-id="SocietyComplaintPagination">
+                        *@
+                        <tr ng-repeat="item in GetApprovedSocietyAssignForIOList">
+                            <td style="display:none"><input type="hidden" value="{{item.SocietyID}}" id="SocietyID" ng-model="SocietyID" /></td>
+                            <td>{{$index+1}}</td>
+                            @*
+                                <td>{{(((DataPagingDetails.PageNumber - 1) * DataPagingDetails.PageSize) + 1)+$index}}</td>*@
+
+                            <td>
+                                {{item.SocietyName}}
+                            </td>
+                            <td>
+                                {{ item.CreationDate}}
+                            </td>
+
+                            <td style="text-align:center;">
+
+                                <a style="color:#505050;" ng-if="item.ComplainLetter!=''" target="_blank" href="../Content/CCSComplaintFiles/{{item.ComplainLetter}}"><i class="fa fa-download"></i></a>
+
+                            </td>
+                            <td style="text-align:center;">
+                                <a style="color:#505050;" ng-if="item.IOComplainLetter!=''" target="_blank" href="../Content/CCSComplaintFiles/{{item.IOComplainLetter}}"><i class="fa fa-download"></i></a>
+                            </td>
+                            <td>{{item.StatusName}}</td>
+                            <td>
+                                <a title="Add" ng-click="GetComplainTrail(item.ComplainID)"><i class="fa fa-list-ul"></i></a>
+                            </td>
+
+                            <td>
+                                <a ng-show="item.StatusId == 2||item.StatusId == 9 ||item.StatusId == 10 ||item.StatusId == 5||item.StatusId == 11" title="Add" ng-click="AddNewIO(item)"><i class="fa fa-edit"></i></a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="col-md-12">
+                    <div ng-if="DataPagingDetails.TotalPages>1" class="dataTables_paginate paging_simple_numbers" id="dataTables-example_paginate">
+                        <div class="dataTables_info" id="dataTables-example_info" role="status" aria-live="polite">
+                            {{translation.TotalRecords}}: {{DataPagingDetails.TotalRecords}}
+                        </div>
+                        <ul class="pagination pagination_1" style="margin-left: 10px !important;">
+                            <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« {{translation.First}}</span></li>
+                            <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« {{translation.Previous}}</span></li>
+
+                            <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest('1',GetApprovedSocietyAssignForIO)" style="cursor: pointer;">
+                                <span>
+                                    «{{translation.First}}
+                                </span>
+                            </li>
+                            <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest(DataPagingDetails.PageNumber-1,GetApprovedSocietyAssignForIO)" style="cursor:pointer;">
+                                <span>
+                                    «{{translation.Previous}}
+                                </span>
+                            </li>
+                            <li class="{{n==DataPagingDetails.PageNumber?'active':''}}" style="{{n==DataPagingDetails.PageNumber?'':'cursor: pointer'}}" ng-repeat="n in PagingRange(DataPagingDetails.StartPageNumber,DataPagingDetails.EndPageNumber,DataPagingDetails.TotalPages)" ng-click="pageRequest(n,GetApprovedSocietyAssignForIO)"><span>{{n}}</span></li>
+                            <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« {{translation.Next}}</span></li>
+                            <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>«{{translation.Last}} </span></li>
+                            <li ng-if="DataPagingDetails.PageNumber!= DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.PageNumber+1,GetApprovedSocietyAssignForIO)" style="cursor:pointer;">
+                                <span>{{translation.Next}} »</span>
+                            </li>
+                            <li ng-if="DataPagingDetails.PageNumber != DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.TotalPages,GetApprovedSocietyAssignForIO)" style="cursor:pointer;">
+                                <span>{{translation.Last}} »</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div ng-show="showPriView" id="ComplaintForm">
+                <div class="row" style="margin-top:5px;">
+                    <div class="modal-header">
+
+                        @*<h4 class="modal-titmemberle" style="color:black; text-align:center" ng-show="StatusId == '2'"> Complaint Latter Generate For CEO</h4>
+                            <h4 class="modal-titmemberle" style="color:black; text-align:center" ng-show="StatusId != '2'"> IO SUBMIT Report To DR </h4>*@
+
+
+                        <label><input type="radio" name="requesttype" value="1" ng-model="IODetailsRequestType" />{{translation.RequestForTimeLimitExtention}}</label>
+                        <label><input type="radio" name="requesttype" value="2" ng-model="IODetailsRequestType" />{{translation.IssueNoticeForCEO}}</label>
+                        <label ng-show="IsNoticeIssue == 1">
+                            <input type="radio" name="requesttype" value="4" ng-model="IODetailsRequestType" ng-click="GetMembersh()" />{{translation.Hearing}}
+                        </label>
+                        <label ng-show="IsNoticeIssue == 1">
+                            <input type="radio" name="requesttype" value="3" ng-model="IODetailsRequestType" />{{translation.SubmitReportToDR}}
+                        </label>
+
+                    </div>
+                    <form class="dev-search-form" style="overflow: hidden; margin-bottom: 35px;" name="OfficeForm">
+                        <div style="display:none">
+                            <input type="hidden" value="{{item.SocietyID}}" id="SocietyID" ng-model="SocietyID" />
+                        </div>
+                        @*Sanjay*@
+                        <div ng-show="IODetailsRequestType!=''">
+
+                            <div class="col-lg-12 margin-Top20" ng-show="IODetailsRequestType!='4'">
+                                <div class="col-lg-2">
+                                    <label>{{_language == 'en-us' ?'पत्र क्रमांक ':'पत्र क्रमांक '}}<span class="error">*</span></label>
+                                </div>
+                                <div class="col-lg-4">
+                                    <input type="text" id="InvestigationSerialNo" class="form-control" ng-model="IODetails.SerialNo" autocomplete="off" />
+                                </div>
+                            </div>
+                            <div class="col-md-12" style="margin-top:35px" ng-show="IODetailsRequestType==1">
+                                <div class="col-md-2">
+                                    <label> {{translation.DetailedDescription}}</label>
+                                </div>
+                                <div class="col-lg-10 form-group">
+                                    <textarea rows="50" name="HtmlContent" id="HtmlContent" cols="150" ng-model="IODetails">   </textarea>
+                                </div>
+                            </div>
+                            <div class="col-lg-12 margin-Top20" ng-show="IODetailsRequestType==1">
+
+
+                                <div class="col-lg-2">
+                                    <label>Detection period (days)<span class="error">*</span></label>
+                                </div>
+                                <div class="col-lg-4">
+                                    <input type="text" id="InvestigationPeriod" maxlength="3" class="form-control" ng-model="IODetails.Period" autocomplete="off" onKeyPress="return isNumber(event);" />
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div ng-show="IODetailsRequestType!=1">
+                            <div class="col-lg-12 margin-Top20" ng-show="IODetailsRequestType==2">
+                                <div class="col-lg-2" ng-show="IODetailsRequestType==2">
+                                    <label>{{translation.Date}}</label>
+                                </div>
+                                <div class="col-lg-4" ng-show="IODetailsRequestType==2">
+                                    <input name="ComplaintDate" type="text" id="ComplaintDate" dat-val="1" class="form-control devcalender" placeholder="dd/MM/yyyy" ng-model="ComplainUnderSection.ComplainDate" autocomplete="off" onKeyPress="return isNumber(event);" size=10 maxlength=10 />
+                                    @*<input Id="ComplaintDate" class="form-control devcalender" ng-model="ComplainUnderSection.ComplainDate">*@
+                                </div>
+                            </div>
+
+                            <div class="col-lg-12 margin-Top20" ng-show="IODetailsRequestType==2">
+
+
+                                <div class="col-lg-2">
+                                    <label>{{translation.Time}}</label>
+                                </div>
+                                <div class="col-lg-4" ng-show="IODetailsRequestType==2">
+                                    <select class="form-control validateNewAdd" style="float: left;width: 75px;" id="Time_HHs">
+                                        <option value="">HH</option>
+                                        <option value="01">01</option>
+                                        <option value="02">02</option>
+                                        <option value="03">03</option>
+                                        <option value="04">04</option>
+                                        <option value="05">05</option>
+                                        <option value="06">06</option>
+                                        <option value="07">07</option>
+                                        <option value="08">08</option>
+                                        <option value="09">09</option>
+                                        <option value="10">10</option>
+                                        <option value="11">11</option>
+                                        <option value="12">12</option>
+                                    </select>&nbsp;&nbsp;
+                                    <select class="form-control validateNewAdd" style="float: left;width: 75px;" id="Time_MMs">
+                                        <option value="">MM</option>
+                                        <option value="00">00</option>
+                                        <option value="05">05</option>
+                                        <option value="10">10</option>
+                                        <option value="15">15</option>
+                                        <option value="20">20</option>
+                                        <option value="25">25</option>
+                                        <option value="30">30</option>
+                                        <option value="35">35</option>
+                                        <option value="40">40</option>
+                                        <option value="45">45</option>
+                                        <option value="50">50</option>
+                                        <option value="55">55</option>
+                                    </select>&nbsp;
+                                    <select class="form-control validateNewAdd" style="float: left;width: 75px;" id="Time_APs">
+                                        <option value="AM">AM</option>
+                                        <option value="PM">PM</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-lg-12 margin-Top20" ng-show="IODetailsRequestType==3">
+                                <div class="col-lg-2">
+                                    <label>{{translation.Report}}</label>
+                                </div>
+                                <div class="col-lg-4">
+
+                                    <div class="col-lg-12" style="padding-left: 0px;color:black; width: 425px;margin-top: 0px;">
+                                        <div class="col-lg-3" ng-show="!IsUploadReportFileName" style="padding-left: 0px;">
+                                            <input type="file" style="margin-left: 15px;" accept="image/*,application/pdf" dat-val="nocheck" ng-model="ReportFileName" id="ReportFileName" ng-click="AddFile(-1,-1)" validfile />
+                                        </div>
+                                        <div class="col-lg-7" ng-if="IsUploadReportFileName">
+                                            <a href="javascript:void(1);" ng-if="ReportFileName!=''"><i class="fa fa-check-circle-o" style="font-size: 18px;margin-right: 5px;    color: #20cc20;"></i></a>
+                                            <a href="~/Content/pldb/{{ReportFileName}}" ng-if="ReportFileName!=''" target="_blank"><i class="fa fa-eye-slash" style="font-size: 18px;margin-right: 5px;font-weight: bold"></i>View File</a>
+                                            <a href="javascript:void(1);" ng-if="ReportFileName=='' && !IsSubmiApplication" ng-click="UploadFile('ReportFileName',-1,0)"><i class="fa fa-upload" style="font-size: 18px;margin-right: 5px;font-weight: bold"></i>Upload File</a>
+                                            <a href="javascript:void(1);" ng-if="IsUploadReportFileName && !IsSubmiApplication" ng-click="ChangeFile('ReportFileName',-1,-1)"><i class="fa fa-undo" style="font-size: 18px;margin-right: 5px;font-weight: bold"></i>Change File</a>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="col-lg-12 margin-Top20" ng-if="IODetailsRequestType==3||IODetailsRequestType==4">
+                                <div class="col-lg-2" style="margin-top:13px">
+                                    <label>{{translation.Sourceofreport}}</label>
+                                </div>
+                                <div class="col-lg-4" style="margin-top:13px">
+                                    <div class="col-lg-12" style="padding-left: 0px;color:black; width: 425px;margin-top: {{$index>0?'13px':'0px'}};" ng-repeat="item in ComplainTrailFilesList">
+                                        <div class="col-lg-3" ng-show="!item.IsUploadFileName" style="padding-left: 0px;">
+                                            <input type="file" style="margin-left: 15px;" accept="image/*,application/pdf" dat-val="nocheck" ng-model="item.FileName" id="FileName_{{$index}}" ng-click="AddFile(1,$index)" validfile />
+                                        </div>
+                                        <div class="col-lg-7" ng-if="item.IsUploadFileName">
+                                            <a href="javascript:void(1);" ng-if="item.FileName!=''"><i class="fa fa-check-circle-o" style="font-size: 18px;margin-right: 5px;    color: #20cc20;"></i></a>
+                                            <a href="~/Content/pldb/{{item.FileName}}" ng-if="item.FileName!=''" target="_blank"><i class="fa fa-eye-slash" style="font-size: 18px;margin-right: 5px;font-weight: bold"></i>View File</a>
+                                            <a href="javascript:void(1);" ng-if="item.FileName=='' && !IsSubmiApplication" ng-click="UploadFile('FileName_'+$index,1,0)"><i class="fa fa-upload" style="font-size: 18px;margin-right: 5px;font-weight: bold"></i>Upload File</a>
+                                            <a href="javascript:void(1);" ng-if="item.IsUploadFileName && !IsSubmiApplication" ng-click="ChangeFile('FileName_'+$index,1,$index)"><i class="fa fa-undo" style="font-size: 18px;margin-right: 5px;font-weight: bold"></i>Change File</a>
+                                        </div>
+                                        <div class="col-lg-2" ng-if="item.IsUploadFileName&&ComplainTrailFilesList.length>1"><a href="javascript:void(0);" ng-click="deleteFime($index)"><i class="fa fa-trash" style="font-size: 18px;margin-right: 5px;    color: #f01d13;"></i></a></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-12 margin-Top20" ng-show="IODetailsRequestType==2">
+                                <div class="col-lg-2 margin-Top20" ng-show="IODetailsRequestType==2">
+                                    <label>{{translation.Place}}</label>
+                                </div>
+                                <div class="col-lg-4 margin-Top20" ng-show="IODetailsRequestType==2">
+                                    @*सोसाइटी के खिलाफ शिकायत*@
+                                    <textarea id="Place" class="form-control" ng-model="ComplainTrail.Places"></textarea>
+                                </div>
+                            </div>
+                            <div class="col-lg-12 margin-Top20" ng-show="IODetailsRequestType!=''">
+                                <div class="col-lg-2">
+                                    <label>{{translation.Comment}}</label>
+                                </div>
+                                <div class="col-lg-4 margin-Top20">
+                                    @*सोसाइटी के खिलाफ शिकायत*@
+                                    <textarea id="Remark" class="form-control" ng-model="ComplainTrail.Remark"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-12" style="margin-top:10px;" ng-show="IODetailsRequestType==4">
+                            <div class="col-lg-2"><label>{{translation.Attendingmembers}}</label></div>
+                            <div class="col-lg-10">
+                                <div class="table-responsive">
+                                    <table class="table devtable" id="tblLoanAmountDetail">
+                                        <thead>
+                                            <tr>
+                                                <th>{{translation.SRNO}}</th>
+                                                <th>{{translation.IsPresent}}</th>
+                                                <th>{{translation.Name}}</th>
+                                                <th>{{translation.Mobile}}</th>
+                                                <th>{{translation.Address}}</th>
+                                                <th>{{translation.PostHeading}}</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr ng-repeat="item in OtherPersonListHearing">
+                                                <td>{{$index+1}}</td>
+                                                <td><input type="checkbox" ng-model="item.IsChecked" /></td>
+                                                <td>
+                                                    <input type="text" disabled="disabled" name="AccountType" class="form-control" placeholder="{{translation.Name}}" ng-model="item.Name" onkeypress='' autocomplete="off">
+                                                </td>
+                                                <td>
+                                                    <input type="text" disabled="disabled" name="MobileNo" class="form-control" placeholder="{{translation.Mobile}}" ng-model="item.Mobile" onkeypress='' autocomplete="off">
+                                                </td>
+                                                <td>
+                                                    <input type="text" disabled="disabled" name="AccountType" class="form-control" placeholder="{{translation.Address}}" ng-model="item.Address" onkeypress='' autocomplete="off">
+                                                </td>
+                                                <td>
+                                                    <input type="text" disabled="disabled" name="AccountType" class="form-control" placeholder="{{translation.PostHeading}}" ng-model="item.Post" onkeypress='' autocomplete="off">
+                                                </td>
+                                                @*<td style="text-align: right !important">
+                                                        <i class="fa fa-edit" id="Remove_8"  ng-click="RemoveOtherPersonListRow($index)" style=""></i>
+                                                    </td>*@
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-12" style="margin-top:10px;" ng-show="IODetailsRequestType==2">
+                            <div class="col-lg-2"><label>{{translation.NoticeSendTo}}:</label></div>
+                            <div class="col-lg-10">
+                                <div class="table-responsive">
+                                    <table class="table devtable" id="tblLoanAmountDetail">
+                                        <thead>
+                                            <tr>
+                                                <td colspan="6">
+                                                    <div class="col-lg-1"> {{translation.Search}} : </div><div class="col-lg-4"><input type="text" name="q" ng-model="q" class="form-control" /></div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>{{translation.SRNO}}</th>
+                                                <th>{{translation.Select}}</th>
+                                                <th class="thverticalMiddle">{{translation.Name}}</th>
+                                                <th>{{translation.Mobile}}</th>
+                                                <th>{{translation.Address}}</th>
+                                                <th>{{translation.PostHeading}}</th>
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr dir-paginate="item in OtherPersonList | filter: q | orderBy:colsort:reverseSort | itemsPerPage: pageSize" current-page="currentPage" pagination-id="SocietyIdForTbl" ng-if="!item.IsDelete">
+                                                <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                                                <td><input type="checkbox" ng-model="item.IsChecked" /></td>
+                                                <td>
+                                                    <input type="text" id="txtAccountName_{{$index}}" name="AccountType" class="form-control" placeholder="{{translation.Name}}" ng-model="item.Name" onkeypress='' autocomplete="off">
+                                                </td>
+                                                <td>
+                                                    <input type="text" id="txtAccountMobile_{{$index}}" name="MobileNo" class="form-control" placeholder="{{translation.Mobile}}" ng-model="item.Mobile" onkeypress='' autocomplete="off">
+                                                </td>
+
+                                                <td>
+                                                    <input type="text" id="txtAccountAddress_{{$index}}" name="AccountType" class="form-control" placeholder="{{translation.Address}}" ng-model="item.Address" onkeypress='' autocomplete="off">
+                                                </td>
+                                                <td>
+                                                    <input type="text" id="txtAccountPostHeading_{{$index}}" name="AccountType" class="form-control" placeholder="{{translation.PostHeading}}" ng-model="item.Post" onkeypress='' autocomplete="off">
+                                                </td>
+                                                <td style="text-align: right !important">
+                                                    <i class="fa fa-trash clsShowHide btn btn btn-xs btn-danger tooltips rowdeleteBtn" id="Remove_8" ng-if="OtherPersonList.length>1 && item.AdId==0" ng-click="RemoveOtherPersonListRow($index)" style=""></i>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                        <tfoot>
+                                            @*
+                                                <tr>
+                                                    <td colspan="4"></td>
+                                                    <td colspan="2" style="text-align:right;cursor:pointer;" ng-click="AddOtherPersonList()"><i class="fa fa-plus" title="Add New"></i>{{translation.Add}}</td>
+                                                </tr>*@
+                                            <tr>
+                                                <td colspan="6">
+                                                    <dir-pagination-controls boundary-links="true" pagination-id="SocietyIdForTbl" on-page-change="pageChangeHandler(newPageNumber)" template-url="/dirPagination.tpl.html"></dir-pagination-controls>
+
+                                                </td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-12" style="margin-top:10px;" ng-show="IODetailsRequestType==2">
+                            <div class="col-lg-2"><label>{{translation.AnyOtherPerson}}:</label></div>
+                            <div class="col-lg-4">
+                                <input type="checkbox" id="idotherperson" ng-model="ComplainUndeVlaue.AnyOtherPerson" />&nbsp;&nbsp;<span ng-if="ComplainUndeVlaue.AnyOtherPerson">({{translation.ByChifOfficer}})</span>
+                            </div>
+                        </div>
+                        <div class="col-lg-12  clspanal" id="panal_6" ng-if="ComplainUndeVlaue.AnyOtherPerson&&IODetailsRequestType==2">
+                            <div class="col-lg-2"></div>
+                            <div class="col-lg-10">
+                                <div class="table-responsive">
+                                    <table class="table devtable" id="tblLoanAmountDetail">
+                                        <thead>
+                                            <tr>
+                                                <th>{{translation.SRNO}}</th>
+                                                <th class="thverticalMiddle">{{translation.Name}}</th>
+                                                <th>{{translation.Mobile}}</th>
+                                                <th>{{translation.Address}}</th>
+                                                <th>{{translation.PostHeading}}</th>
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr ng-repeat="item in OtherPersonListNew" ng-if="!item.IsDelete">
+                                                <td>{{$index+1}}</td>
+                                                <td>
+                                                    <input type="text" id="txtAccountName_{{$index}}" name="AccountType" class="form-control" placeholder="{{translation.Name}}" ng-model="item.Name" onkeypress='' autocomplete="off">
+                                                </td>
+                                                <td>
+                                                    <input type="text" id="txtAccountMobile_{{$index}}" name="MobileNo" class="form-control" placeholder="{{translation.Mobile}}" ng-model="item.Mobile" onkeypress='' autocomplete="off">
+                                                </td>
+
+                                                <td>
+                                                    <input type="text" id="txtAccountAddress_{{$index}}" name="AccountType" class="form-control" placeholder="{{translation.Address}}" ng-model="item.Address" onkeypress='' autocomplete="off">
+                                                </td>
+                                                <td>
+                                                    <input type="text" id="txtAccountPostHeading_{{$index}}" name="AccountType" class="form-control" placeholder="{{translation.PostHeading}}" ng-model="item.Post" onkeypress='' autocomplete="off">
+                                                </td>
+                                                <td style="text-align: right !important">
+                                                    <i class="fa fa-trash clsShowHide btn btn btn-xs btn-danger tooltips rowdeleteBtn" id="Remove_8" ng-if="OtherPersonList.length>1 && item.AdId==0" ng-click="RemoveOtherPersonListRow($index)" style=""></i>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <td colspan="3"></td>
+                                                <td colspan="2" style="text-align:right;cursor:pointer;" ng-click="AddOtherPersonList()"><i class="fa fa-plus" title="Add New"></i>{{translation.Add}}</td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12" style="margin-top: 20px;">
+                            <div class="dev-menu-btn">
+                                <button type="submit" class="btn btn-primary" ng-show="IODetailsRequestType==2" ng-if="IODetailsRequestType!=1" ng-click="SaveIODetailsUser()">SUBMIT</button>
+                                <button type="submit" class="btn btn-primary" ng-show="IODetailsRequestType==3" ng-if="IODetailsRequestType!=1" ng-click="SaveIODetailsTransferDR()">IO SUBMIT REPORT TO DR</button>
+                                <button type="submit" class="btn btn-primary" ng-if="IODetailsRequestType==1|| IODetailsRequestType==4" ng-click="SaveIODetailsUser()">SUBMIT REQUEST</button>
+
+                                <button type="submit" class="btn btn-primary" ng-click="ResetAddNew()">{{translation.Back}}</button>
+                            </div>
+                        </div>
+
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <div class="dev-popup-body modal fade" id="mdlTrailList" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog" style="width: 50%;">
+            <!-- Modal content-->
+            <div class="modal-content" style="width: 825px!important;">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-titmemberle" style="color:black; text-align:center"> {{translation.Complaintagainstsociety}} </h4>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table id="tblData" class="table table-responsive devtable" style="color:black">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        {{translation.SRNO}}
+                                    </th>
+
+
+                                    <th>  {{translation.ProceesdStatus}}</th>
+                                    <th> {{translation.Remarks}}</th>
+                                    <th> {{translation.InvestigatingOfficer}}</th>
+                                    <th>
+                                        {{translation.File}}
+                                    </th>
+                                    <th> {{translation.Letter}}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="item in ComplainTrailList">
+                                    <td style="display:none"><input type="hidden" value="{{item.SocietyID}}" id="SocietyID" ng-model="SocietyID" /></td>
+                                    <td>{{$index+1}}</td>
+                                    <td>
+                                        {{_language =='en-us' ?  item.StatusName : item.StatusNameHi }}
+                                    </td>
+                                    <td>{{item.Remark}}</td>
+                                    <td>{{_language =='en-us' ?  item.OfficerNameEn : item.OfficerNameHi}}</td>
+                                    <td style="text-align:center;">
+
+                                        <a style="color:#505050;" ng-if="item.FName!=''&&item.ComplaintStatusId!=3" target="_blank" href="../Content/CCSComplaintFiles/{{item.FName}}"><i class="fa fa-download"></i></a>
+                                        <a ng-repeat="itm in item.drFiles" style="margin-left:5px; color:#505050;" ng-if="itm!=''&&item.ComplaintStatusId==3" target="_blank" href="../Content/CCSComplaintFiles/{{itm}}"><i class="fa fa-download"></i></a>
+
+                                    </td>
+                                    <td style="text-align:center;"><a style="color:#505050;" ng-if="item.Letter!=''" target="_blank" href="../Content/CCSComplaintFiles/{{item.Letter}}"><i class="fa fa-download"></i></a></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <input type="hidden" id="hdfLoggedInUserDistrictId" value="@ViewBag.LoggedInUserDistrictId" />
+    @Html.Partial("_AadhaarValidation")
+</div>
+
+

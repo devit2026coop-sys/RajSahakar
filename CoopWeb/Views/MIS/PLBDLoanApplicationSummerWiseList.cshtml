@@ -1,0 +1,161 @@
+﻿@{
+    ViewBag.Title = "PLDB Loan Application Summery Wise List";
+}
+@*<script src="~/Scripts/AngularFramework/PLBDLoanApplicationSectorWiseList.js?v=1.1"></script>*@
+<script src="~/Scripts/AngularFramework/PLBDLoanApplicationSummerWiseList.js?v=1.1"></script>
+<link href="~/Scripts/google_hindi/google_transliteration.css" rel="stylesheet" />
+
+<style>
+    .inputapi-transliterate-indic-suggestion-menu {
+        z-index: 99999 !important;
+        display: block;
+    }
+
+    .table > tbody > tr > td, .table > tbody > tr > th, .table > tfoot > tr > td, .table > tfoot > tr > th, .table > thead > tr > td {
+        padding-right: 5px;
+        padding-left: 5px;
+    }
+
+    .freeze-select {
+        pointer-events: none; /* freeze dropdown */
+        background-color: #ffffff !important; /* normal white */
+        color: #000 !important; /* normal text color */
+        border: 1px solid #ced4da !important; /* normal border */
+        cursor: default !important; /* normal cursor */
+    }
+</style>
+
+
+<script type="text/javascript">
+    var tableToExcel = (function () {
+        var uri = 'data:application/vnd.ms-excel;base64,'
+            , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>'
+            , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) }
+            , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
+        return function (table, name) {
+            if (!table.nodeType) table = document.getElementById(table)
+            var ctx = { worksheet: name || 'Worksheet', table: table.innerHTML }
+            window.location.href = uri + base64(format(template, ctx))
+        }
+    })()
+</script>
+
+
+<div ng-app="ApplicationFlowSummerLoanWiseModule" ng-controller="ApplicationSummerLoanWiseFlowCont" ng-cloak="">
+    <div>
+        <div class="col-md-12">
+            <h3 class="citizen-dash-head ng-binding" style="margin-top:0px;">PLDB Loan Application Summery Wise List</h3>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#"> {{translation.Home}}</a> <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;"> {{translation.New}} </span>
+                        <i class="fa fa-angle-right"> </i>
+                        <span style="margin: 0 5px;"> PLDB Loan Application Summery Wise List </span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div style="margin-top:30px;padding-top:30px">
+            <div class="col-md-12">
+                <div class="citizen-dash-head" style="overflow: hidden;">
+                    <div class="table-dropdown" id="search-filter" style="margin-bottom: 5px;">
+                        <div class="col-lg-12" style="margin-bottom: 5px; padding-left: 0;">
+                            <input type="hidden" id="hdnRoleId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).RoleId)" />
+                            <input type="hidden" id="hdnDistrictId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DistrictId)" />
+                            <input type="hidden" id="hdnPldbId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).PLDBId)" />
+                            <input type="hidden" id="hdnPldbBranchId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).PLDBBrancchId)" />
+                            <input type="hidden" id="hdnUserId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).UserId)" />
+                            <input type="hidden" id="hdnLevelId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).LevelId)" />
+
+                            @*PLDB*@
+                            <div class="form-group col-md-3">
+                                <label for="">PLDB Name</label>
+                                <select name="PLDB_ID" ng-model="PLDB.PldbId" id="Pldb_Id" class="form-control" ng-change="PLDBBranchList('0')" ng-init="PLDB.PldbId='0'" ng-disabled="IsPldbFreezed">
+                                    <option value="0" disabled>--चुनें--</option>
+                                    <option ng-repeat="itemPLDB in PLDBList | orderBy:'PldbId' track by itemPLDB.PldbId " value="{{itemPLDB.PldbId}}">
+                                        {{itemPLDB.PLDBName}}
+                                    </option>
+                                </select>
+                            </div>
+
+                            @*Branch*@
+                            <div class="form-group col-md-3">
+                                <label for="">Branch Name</label>
+                                <select name="BRANCH_ID" ng-model="PLDB.BranchId" id="Branch_Id" class="form-control" ng-init="PLDB.BranchId='0'">
+                                    <option value="0" disabled>--चुनें--</option>
+                                    <option ng-repeat="itemBlock in PLDBBranches | orderBy:'BLOCK_ENG'" value="{{itemBlock.BLOCK_ID}}">
+                                        {{_language =='en-us' ?  itemBlock.BLOCK_ENG : itemBlock.BLOCK_MANGAL}}
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 margin-Top20">
+                                <label>&nbsp;</label><br>
+                                <button type="button" ng-click="searchRequest(PLDBLoanApplicationSectorWiseList)" class="btn btn-primary dev-btn ng-binding">{{translation.Search}}</button>
+                                <button type="button" ng-click="ClearSearch()" class="btn btn-primary dev-btn ng-binding">{{translation.Clear}}</button>
+                                <button type="button" onclick="tableToExcel('PLDBLoanApplicationSectorWise', 'PLDB Loan Summery Wise List');" class="btn btn-success dev-btn">
+                                    <i class="fa fa-file-excel-o"></i> Export Excel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="overflow-x: auto;">
+                        <table id="PLDBLoanApplicationSectorWise"
+                               class="table table-bordered devtable text-center">
+                            <thead>
+                                <!-- HEADER ROW 1 -->
+                                <tr>
+                                    <th rowspan="2" width="80">{{translation.SRNO}}</th>
+                                    <th rowspan="2">PLDB Name</th>
+                                    <th ng-repeat="h in HeaderList" colspan="2"style="min-width: 200px; text-transform: uppercase;">
+                                        {{h}}
+                                    </th>
+                                    <th colspan="2">Total Crop Loan</th>
+                                    <th colspan="2">Total Mortagage Loan</th>
+                                    @*<th colspan="2">TOTAL</th>*@
+                                    <th colspan="2">GRAND TOTAL</th>
+                                </tr>
+                                <!-- HEADER ROW 2 -->
+                                <tr>
+                                    <th ng-repeat-start="h in HeaderList">Count</th>
+                                    <th ng-repeat-end>Amount</th>
+                                    <th>Count</th>
+                                    <th>Amount</th>
+                                    <th>Count</th>
+                                    <th>Amount</th>
+                                    <th>Count</th>
+                                    <th>Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="item in rawData"
+                                    ng-style="item.PLDBName=='TOTAL' && {'font-weight':'bold',   'color':'#fff',    'background':'#466b6d'  }">
+                                    <td><span ng-hide="item.PLDBName=='TOTAL'"> {{$index + 1}} </span> </td>
+                                    <td style="text-transform:uppercase;">{{ item.PLDBName }}</td>
+                                    <td ng-repeat-start="h in HeaderList"> {{ item[h + '_Cnt'] || 0 }}</td>
+                                    <td ng-repeat-end>{{ item[h + '_Amt'] || 0 | number }}</td>
+                                    <td>{{ item.Crop_Loan_Cnt1 || 0 }}</td>
+                                    <td>{{ item.Crop_Loan_Amt1 || 0 | number }}</td>
+                                    <td>{{ item.Mortagage_Loan_Cnt || 0 }}</td>
+                                    <td>{{ item.Mortagage_Loan_Amt || 0 | number }}</td>
+                                    @*<td >{{ item.TOTAL_Count || 0 }}</td>
+                                    <td>{{ item.TOTAL_Amount || 0 | number }}</td>*@
+                                    <td>{{ item.GRAND_TOTAL_Count || 0 }}</td>
+                                    <td>{{ item.GRAND_TOTAL_Amount || 0 | number }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+          </div>
+        <div class="se-pre-con"></div>
+    </div>
+</div>
+

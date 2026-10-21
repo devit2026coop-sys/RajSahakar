@@ -1,0 +1,1029 @@
+CREATE PROCEDURE [dbo].[BudgetMPRTargetAchievementPending]
+	@Action nvarchar(50)= '',
+	@OfficeId int = 0,
+	@SchemeId int = 0,
+	@SubSchemeId int = 0,
+	@ComponentIds nvarchar(max)='',
+	@ActivityIds nvarchar(max)='',
+	@TargetId INT = 0,
+	@Type nvarchar(50) = null,
+	@PhysicalGEN decimal(18,2) = '0.00',
+	@PhysicalSCSP  decimal(18,2) = '0.00',
+	@PhysicalTSP  decimal(18,2) = '0.00',
+	@PhysicalTotal decimal(18,2) = '0.00',
+	@FinancialGEN  decimal(18,2) = '0.00',
+	@FinancialSCSP decimal(18,2) = '0.00',
+	@FinancialTSP  decimal(18,2) = '0.00',
+	@FinancialTotal decimal(18,2) = '0.00',
+	@BillsInTreasury bigint = 0,
+	@BeneficiaryGEN  bigint = 0,
+	@BeneficiarySCSP  bigint = 0,
+	@BeneficiaryTSP  bigint = 0,
+	@BeneficiaryTotal bigint = 0,
+	@Male  bigint = 0,
+	@Female bigint = 0,
+	@Small  bigint = 0,
+	@Marginal bigint = 0,
+	@Other bigint = 0,
+	@OtherParameter nvarchar(500) = '',
+	@UserId int = 0,
+	@PostId int = 0,
+	@MonthId int = 0,
+	@ParameterAchievementId int=0,
+	@AchievementGEN decimal(18,2) = '0.00',
+	@AchievementSC decimal(18,2) = '0.00',
+	@AchievementTSP decimal(18,2) = '0.00',
+	@AchievementTotal decimal(18,2) = '0.00',
+	@AchievementId int =0,
+	@TargetParameterId int=0,
+	@IsActive int=0,
+	@MOn nvarchar(50)=null,
+	@ActivityId int = null,
+	@SubActivityId int=null,
+	@BudgetTargetTableName nvarchar(200)=''
+
+AS
+BEGIN
+
+INSERT INTO SPCallingTraker(SPName,PramasNValues)
+VALUES (ERROR_PROCEDURE(),'@Action='+(case when @Action is null then 'null' else ''''+convert(nvarchar,@Action)+'''' end)
++','+'@OfficeId='+(case when @OfficeId is null then 'null' else ''''+convert(nvarchar,@OfficeId)+'''' end)
++','+'@SchemeId='+(case when @SchemeId is null then 'null' else ''''+convert(nvarchar,@SchemeId)+'''' end)
++','+'@SubSchemeId='+(case when @SubSchemeId is null then 'null' else ''''+convert(nvarchar,@SubSchemeId)+'''' end)
++','+'@ComponentIds='+(case when @ComponentIds is null then 'null' else ''''+convert(nvarchar,@ComponentIds)+'''' end)
++','+'@ActivityIds='+(case when @ActivityIds is null then 'null' else ''''+convert(nvarchar,@ActivityIds)+'''' end)
++','+'@MOn='+(case when @MOn is null then 'null' else ''''+convert(nvarchar,@MOn)+'''' end)
+)
+	IF(@Action = 'GetScheme')
+	BEGIN
+		--SELECT Distinct BS.Scheme_ID, BS.Scheme_Eng, BS.Scheme_Hi 
+		--FROM BudgetMPRTargetAllotment BTA
+		--INNER JOIN Budget_Scheme BS ON BS.Scheme_ID = BTA.schemeid
+		--WHERE OfficeId = @OfficeId
+
+		SELECT Distinct BS.Scheme_ID, BS.Scheme_Eng, BS.Scheme_Hi 
+		FROM Budget_Scheme BS
+		inner JOIN 
+		( SELECT schemeid,subschemeid FROM BudgetTargetPendingLiability WHERE OfficeId=@officeid  and 1= case when LevelId =4 
+		and IsAllotedToAD in (1,2) and DDTargetId is not null then 1  when --LevelId !=4 and 
+		IsAllotedToAD = 2 and DDTargetId is null then 1 else 0 end
+		UNION
+		SELECT schemeid,subschemeid FROM BudgetMPRTargetAllotmentPending WHERE OfficeId=@officeid and 1= case when LevelId =4
+		 and IsAllotedToAD in (1,2) and DDTargetId is not null then 1  when --LevelId !=4 and 
+		 IsAllotedToAD = 2 and DDTargetId is null then 1 else 0 end
+		) res
+		ON BS.Scheme_ID=res.schemeid		
+	END
+	ELSE IF(@Action = 'GetSubScheme')
+	BEGIN
+		--SELECT Distinct BSS.SubScheme_ID, BSS.SubScheme_Eng, BSS.SubScheme_Hi 
+		--FROM BudgetMPRTargetAllotment BTA
+		--INNER JOIN Budget_SubScheme BSS ON BSS.SubScheme_ID = BTA.subschemeid AND BTA.schemeid = @SchemeId
+		--WHERE OfficeId = @OfficeId
+
+		
+		SELECT Distinct BSS.SubScheme_ID, BSS.SubScheme_Eng, BSS.SubScheme_Hi 
+		FROM Budget_SubScheme BSS
+		inner join 
+		( SELECT schemeid,subschemeid FROM BudgetTargetPendingLiability WHERE OfficeId=@officeid  and 1= case when LevelId =4 
+		and IsAllotedToAD in (1,2) and DDTargetId is not null then 1  when --LevelId !=4 and 
+		IsAllotedToAD = 2 and DDTargetId is null then 1 else 0 end
+		UNION
+		SELECT schemeid,subschemeid FROM BudgetMPRTargetAllotmentPending WHERE OfficeId=@officeid and 1= case when LevelId =4 
+		and IsAllotedToAD in (1,2) and DDTargetId is not null then 1  when --LevelId !=4 and 
+		IsAllotedToAD = 2 and DDTargetId is null then 1 else 0 end
+		) res
+		on BSS.SubScheme_ID=res.subschemeid
+		where 
+		 BSS.Scheme_ID = @SchemeId
+	END
+	ELSE IF(@Action = 'GetComponent')
+	BEGIN
+		--SELECT Distinct BC.Component_ID, BC.Component_Eng, BC.Component_Hi, BC.Component_Code 
+		--FROM BudgetMPRTargetAllotment BTA
+		--INNER JOIN Budget_Component BC ON BC.Component_ID = BTA.ComponentId AND BTA.subschemeid = @SubSchemeId AND BTA.schemeid = @SchemeId
+		--WHERE OfficeId = @OfficeId 
+		
+		 SELECT Distinct BC.Component_ID,  case when BC.Component_Sh_Eng!='' then  BC.Component_Code +'-'+BC.Component_Eng+' ('+ (BC.Component_Sh_Eng)+')' else
+		 BC.Component_Code +'-'+BC.Component_Eng end Component_Eng
+		 , BC.Component_Hi, BC.Component_Code 
+		FROM Budget_Component BC
+		left join
+			(select ComponentId,subschemeid,schemeid  from  BudgetTargetPendingLiability WHERE OfficeId=@officeid  and 1= 
+			case when LevelId =4 and IsAllotedToAD in (1,2) and DDTargetId is not null then 1  
+			when --LevelId !=4 and 
+			IsAllotedToAD = 2 and DDTargetId is null then 1 else 0 end
+				Union
+				select ComponentId,subschemeid,schemeid  from  BudgetMPRTargetAllotmentPending WHERE OfficeId=@officeid  and 1= 
+				case when LevelId =4 and IsAllotedToAD in (1,2) and DDTargetId is not null then 1  
+				when --LevelId !=4 and 
+				IsAllotedToAD = 2 and DDTargetId is null then 1 else 0 end
+			)res
+		on BC.Component_ID=res.ComponentId 
+		where
+		res.subschemeid = @SubSchemeId AND res.schemeid = @SchemeId
+	END
+	ELSE IF(@Action = 'GetActivity')
+	BEGIN
+	
+		SELECT  distinct ACT.Activityid, ActivityName_En
+		FROM Budget_OICActivityMap ACT
+		INNER JOIN Budget_ComponentActivities BCA ON ACT.Activityid = BCA.Activityid
+		INNER JOIN 
+		(select ComponentId,subschemeid,schemeid,ActivityId  from  BudgetTargetPendingLiability WHERE OfficeId=@officeid  and 1= case when LevelId =4 and IsAllotedToAD in (1,2) and DDTargetId is not null then 1  when /*LevelId !=4 and*/ IsAllotedToAD = 2 and DDTargetId is null then 1 else 0 end 
+				Union
+				select ComponentId,subschemeid,schemeid,ActivityId  from  BudgetMPRTargetAllotmentPending WHERE OfficeId=@officeid  and 1= case when LevelId =4 and IsAllotedToAD in (1,2) and DDTargetId is not null then 1  when /*LevelId !=4 and*/  IsAllotedToAD = 2 and DDTargetId is null then 1 else 0 end
+			)res
+			on res.ActivityId = ACT.Activityid  
+	
+		INNER JOIN Budget_Component BC 
+			ON BC.Component_ID =@ComponentIds
+			AND res.subschemeid = @SubSchemeId 
+			AND res.schemeid = @SchemeId
+			AND res.ComponentId =@ComponentIds
+			and BCA.isActive=1 and ACT.Is_Active = 1
+	END
+		ELSE IF(@Action = 'GetSubActivity')
+	BEGIN
+		SELECT distinct ACT.ActivitySubId, Isnull(ActivitySubNameEN,'')
+		FROM Budget_SubActivitys ACT
+		INNER JOIN Budget_SubActivityMapping BCA ON BCA.ActivityId in (select item from  SplitString(@ActivityIds,',')) 
+		INNER JOIN BudgetHeadSchemeMapp BTA ON BTA.BudgetSchemeMapId = BCA.BudgetSchemeMappingId	AND BTA.subschemeid = @SubSchemeId 
+			AND BTA.schemeid = @SchemeId	
+		INNER JOIN BudgetMPRTargetAllotmentPending BA ON BA.SubActivityId = ACT.ActivitySubId  		
+		WHERE OfficeId = @OfficeId
+	END
+	ELSE IF(@Action = 'GetTarget')
+	begin
+  Declare @IsSubActAvailable int = 0;
+  Declare @IsOPAvailable int = 0;
+  declare @cumont Nvarchar(10)
+  set @cumont=(select  CASE WHEN CurDD <=10 THEN preM ELSE CurM END ActualMonth from (
+	SELECT DATENAME(MONTH, GETDATE()) CurM ,DATENAME(MONTH, DATEADD(MM, -1, GETDATE())) preM , DATEPART(dd, (SELECT GETDATE())) CurDD) res)
+	--set @cumont=(select DATENAME(mm, GETDATE()));
+	select ActivityName_En, 0 PhysicalGEN,0 PhysicalSC,0 PhysicalTSP,0 PhysicalTotal,FinancialGEN,FinancialSC,FinancialTSP,FinancialTotal from BudgetTargetPendingLiability BA 
+  Inner join Budget_OICActivityMap BOIC on BA.ActivityId=BOIC.Activityid
+  where --targetid not in (select TargetId from BudgetMPRTargetAllotment) and 
+  Schemeid = @SchemeId and Subschemeid = @SubSchemeId and  
+	   Componentid  in (select item from  SplitString(@ComponentIds,',')) and BA.ActivityId =  @ActivityId  and BA.ActivityId>0 and OfficeId =  @OfficeId 
+	   and 1= case when LevelId =4 and IsAllotedToAD in (1,2) and DDTargetId is not null then 1  when /*LevelId !=4 and*/ IsAllotedToAD = 2 and DDTargetId is null then 1 else 0 end--IsAllotedToAD !=0
+
+
+
+			if(@ActivityId > 0)
+			begin
+			Declare @IsAllSubActTargetGiven int;
+			--Declare @IsSubActAvailable int;
+			set @IsAllSubActTargetGiven =(select dbo.GetSubActivityTargetAvailablePending (@SchemeId,@SubSchemeId,@ComponentIds,@ActivityId,@OfficeId,'IfSubActTargetGiven') )
+			set @IsSubActAvailable =(select dbo.GetSubActivityTargetAvailablePending (@SchemeId,@SubSchemeId,@ComponentIds,@ActivityId,@OfficeId,'SubActivityCount') )
+			set @IsOPAvailable = (select dbo.GetSubActivityTargetAvailablePending (@SchemeId,@SubSchemeId,@ComponentIds,@ActivityId,@OfficeId,'OtherParameterCount'))
+			set @IsAllSubActTargetGiven = isnull(@IsAllSubActTargetGiven,0)
+			end
+			if(@ActivityId > 0)
+			begin
+			if(@IsAllSubActTargetGiven = 1 and @IsSubActAvailable > 0 )
+			begin
+			
+			print '1'
+
+			--------------------
+			select 
+		
+		*
+		into #tmp2 from (
+
+select A.*,
+--count(Budget_SubActivityOtherParameterMap.OtherParameterId)
+@IsOPAvailable  as opcount from 
+(
+select OfficeId,BudgetMPRTargetAllotmentPending.ComponentId,ActivityId,SubActivityId,FinancialGENHeadId,FinancialSCHeadId,FinancialTSPHeadId,
+BudgetMPRTargetAllotmentPending.schemeid,BudgetMPRTargetAllotmentPending.subschemeid,BudgetHeadSchemeMapp.BudgetSchememapid,Budgetcodeid,BudgetHeadSchemeMapp.Demandid,'BudgetMPRTargetAllotmentPending' BudgetTargetTableName
+from BudgetMPRTargetAllotmentPending left join
+BudgetHeadSchemeMapp on BudgetMPRTargetAllotmentPending.schemeid = BudgetHeadSchemeMapp.schemeid and BudgetMPRTargetAllotmentPending.subschemeid = BudgetHeadSchemeMapp.Subschemeid
+and BudgetMPRTargetAllotmentPending.ComponentId = BudgetHeadSchemeMapp.Componentid
+and ((BudgetMPRTargetAllotmentPending.FinancialGENHeadId = BudgetHeadSchemeMapp.budgetcodeid) or (BudgetMPRTargetAllotmentPending.FinancialSCHeadId = BudgetHeadSchemeMapp.budgetcodeid) or
+(BudgetMPRTargetAllotmentPending.FinancialTSPHeadId = BudgetHeadSchemeMapp.budgetcodeid))
+where 1= case when LevelId =4 and IsAllotedToAD in (1,2) and DDTargetId is not null  then 1  when /*LevelId !=4 and*/ IsAllotedToAD = 2 and DDTargetId is null then 1 else 0 end--BudgetMPRTargetAllotment.IsAllotedToAD !=0
+) A inner join Budget_SubActivityOtherParameterMap on A.BudgetSchemeMapId = Budget_SubActivityOtherParameterMap.BudgetSchemeMappingId
+and A.ActivityId = Budget_SubActivityOtherParameterMap.Activityid   group by OfficeId,ComponentId,A.ActivityId,SubActivityId,FinancialGENHeadId,FinancialSCHeadId,FinancialTSPHeadId,
+schemeid,subschemeid,BudgetSchememapid,Budgetcodeid,Demandid,BudgetTargetTableName
+
+) tbl1
+
+select *
+into #temp3 from(
+	select 
+		TargetId,
+		isnull(sum(PhysicalGEN),0)	prevPhysicalGEN,
+		isnull(sum(PhysicalSCSP),0) prevPhysicalSC,
+		isnull(sum(PhysicalTSP),0)	prevPhysicalTSP,
+		isnull(sum(PhysicalTotal),0) prevPhysicalTotal,
+		isnull(sum(FinancialGEN),0)	 prevFinancialGEN,
+		isnull(sum(FinancialSCSP),0) prevFinancialSC,
+		isnull(sum(FinancialTSP),0)   prevFinancialTSP,
+		isnull(sum(FinancialTotal),0) prevFinancialTotal,
+		isnull(sum(BeneficiaryGEN),0) prevBeneficiaryGEN,
+		isnull(sum(BeneficiarySCSP),0) prevBeneficiarySCSP,
+		isnull(sum(BeneficiaryTSP),0) prevBeneficiaryTSP,
+		isnull(sum(BeneficiaryTotal),0) prevBeneficiaryTotal,
+		isnull(sum(Male),0)   prevMale,
+		isnull(sum(Female),0) prevFemale,
+		isnull(sum(Small),0)  prevSmall,
+		isnull(sum(Marginal),0) prevMarginal,
+		isnull(sum(Other),0)    prevOther
+
+		from BudgetTargetAchievementDataPending ADT 
+		--where @MOn=datename(month, dateadd(mm, -2, getdate())) 
+		--WHERE UPPER(@MOn) > UPPER(DATENAME(mm, GETDATE()))
+		Where 
+		(UPPER(DATENAME(mm, GETDATE())) = UPPER(MONTH) AND YEAR(CreateDate) < YEAR(GETDATE())) 
+		OR 
+		UPPER(MONTH) <> UPPER(DATENAME(mm, GETDATE()))
+		group by TargetId,Month
+		) tbl3
+	
+
+	select 
+		
+		*
+		into #tmp from (
+		
+					
+select distinct
+		b.TargetId,
+		/*b.PhysicalGEN,
+		b.PhysicalSC,
+		b.PhysicalTSP,
+		b.PhysicalTotal,*/
+		b.FinancialGEN,
+		b.FinancialSC,
+		b.FinancialTSP,
+		b.FinancialTotal,
+		'0' FincancialAllotmentGEN,
+		'0' FincancialAllotmentSCSP,
+		'0' FincancialAllotmentTSP,
+		'0' FincancialAllotmentTotal,
+			
+		isnull(BTAD.PendingAchievementId,0)  AchievementId
+		,Isnull(BTAD.PhysicalGEN,0) AcvmntPhysicalGEN,
+		
+		Isnull(BTAD.PhysicalSCSP,0) AcvmntPhysicalSCSP,
+		Isnull(BTAD.PhysicalTSP,0) AcvmntPhysicalTSP,
+		Isnull(BTAD.PhysicalTotal,0) AcvmntPhysicalTotal,
+		Isnull(BTAD.FinancialGEN,0) AcvmntFinancialGEN,		
+		Isnull(BTAD.FinancialSCSP,0) AcvmntFinancialSCSP,
+		Isnull(BTAD.FinancialTSP,0) AcvmntFinancialTSP,
+        Isnull(BTAD.FinancialTotal,0) AcvmntFinancialTotal,
+		Isnull(BTAD.BillsInTreasury,0) BillsInTreasury,
+		Isnull(BTAD.BeneficiaryGEN,0) BeneficiaryGEN,
+		Isnull(BTAD.BeneficiarySCSP,0) BeneficiarySCSP,
+		Isnull(BTAD.BeneficiaryTSP,0) BeneficiaryTSP,
+		Isnull(BTAD.BeneficiaryTotal,0) BeneficiaryTotal,
+		Isnull(BTAD.Male,0) Male,
+		Isnull(BTAD.Female,0) Female,
+		Isnull(BTAD.Small,0) Small,
+		Isnull(BTAD.Marginal,0) Marginal,
+		Isnull(BTAD.Other,0) Other,
+		Isnull(b.FinancialGENHeadId,0) FinancialGENHeadId,
+		Isnull(b.FinancialSCHeadId,0) FinancialSCHeadId,
+		Isnull(b.FinancialTSPHeadId,0) FinancialTSPHeadId
+		,b.IsAllotedToAD,b.schemeid,b.subschemeid,b.ActivityId,b.SubActivityId,b.ComponentId,b.LevelId,b.FinancialYearId
+		,O.DepartmentId,O.OfficeTypeLov AgriLovValuesId,O.OfficeId, B.BudgetTargetTableName
+		 from (
+select 	distinct
+		 MPRTA.TargetId TargetId,
+		/*MPRTA.PhysicalGEN  PhysicalGEN ,
+		MPRTA.PhysicalSC PhysicalSC,
+		MPRTA.PhysicalTSP PhysicalTSP,
+		MPRTA.PhysicalTotal  PhysicalTotal,*/
+		MPRTA.FinancialGEN FinancialGEN,
+		MPRTA.FinancialSC   FinancialSC,
+		MPRTA.FinancialTSP  FinancialTSP,
+		MPRTA.FinancialTotal  FinancialTotal, 
+	
+		'0' FincancialAllotmentGEN,
+		'0' FincancialAllotmentSCSP,
+		'0' FincancialAllotmentTSP,
+		'0' FincancialAllotmentTotal,
+		 ISNULL(MPRTA.FinancialGENHeadId,'0') FinancialGENHeadId,
+		 ISNULL(MPRTA.FinancialSCHeadId,'0')  FinancialSCHeadId,
+		ISNULL(MPRTA.FinancialTSPHeadId,'0')  FinancialTSPHeadId,
+		IsAllotedToAD  IsAllotedToAD,
+		 MPRTA.schemeid schemeid,
+		MPRTA.subschemeid  subschemeid,
+		 MPRTA.ActivityId  ActivityId,
+		MPRTA.SubActivityId SubActivityId,
+		MPRTA.ComponentId  ComponentId,
+		MPRTA.LevelId  LevelId,
+		MPRTA.FinancialYearId ,
+		MPRTA.TargetId as MPRTATargetId,
+		MPRta.OfficeId  OfficeId,
+		'BudgetMPRTargetAllotmentPending' BudgetTargetTableName
+
+			 from (
+					select 
+					BudgetHeadSchemeMapp.Budgetcodeid,
+					BudgetHeadSchemeMapp.Schemeid,
+					BudgetHeadSchemeMapp.Subschemeid,
+					BudgetHeadSchemeMapp.Componentid,Budget_SubActivityMapping.ActivityId,Budget_SubActivityMapping.SubActivityId from BudgetHeadSchemeMapp left join Budget_SubActivityMapping
+					on BudgetHeadSchemeMapp.BudgetSchemeMapId = Budget_SubActivityMapping.BudgetSchemeMappingId  and Budget_SubActivityMapping.Isactive =1 
+					where BudgetHeadSchemeMapp.Schemeid = @SchemeId and BudgetHeadSchemeMapp.Subschemeid = @SubSchemeId and BudgetHeadSchemeMapp.Componentid  in (select item from  SplitString(@ComponentIds,',')) 
+					and Budget_SubActivityMapping.ActivityId= @ActivityId
+					group by 
+					BudgetHeadSchemeMapp.Budgetcodeid,
+					BudgetHeadSchemeMapp.Schemeid,
+					BudgetHeadSchemeMapp.Subschemeid,
+					BudgetHeadSchemeMapp.Componentid,Budget_SubActivityMapping.ActivityId,Budget_SubActivityMapping.SubActivityId
+					) A left join BudgetMPRTargetAllotmentPending MPRTA on A.Schemeid =MPRTA.schemeid and A.Subschemeid = MPRTA.subschemeid and A.Componentid = MPRTA.ComponentId 
+					and (A.Budgetcodeid = MPRTA.FinancialGENHeadId or A.Budgetcodeid =   MPRTA.FinancialSCHeadId or A.Budgetcodeid =  MPRTA.FinancialTSPHeadId) and A.ActivityId = MPRTA.ActivityId
+					where 1= case when LevelId =4 and IsAllotedToAD in (1,2) and DDTargetId is not null then 1  when /*LevelId !=4 and*/ IsAllotedToAD = 2 and DDTargetId is null then 1 else 0 end--MPRTA.IsAllotedToAD!=0
+					) B 
+					left join BudgetTargetAchievementDataPending BTAD on btad.TargetId =   MPRTATargetId and b.SubActivityId = BTAD.SubActivityId  and BTAD.month= @cumont
+					inner join Offices O on O.OfficeId=B.OfficeId
+where B.officeid = @OfficeId 
+	) tbl
+		
+select  distinct BTA.*,BTA.AchievementId AchievementId,BTA.Other Other,
+case when Isnull(BSA.ActivitySubNameEN,'')!='' then CB.Component_Eng+'/'+BOM.ActivityName_En+'/'+BSA.ActivitySubNameEN 
+when  Isnull(BSA.ActivitySubNameEN,'')='' and  Isnull(BOM.ActivityName_En,'')!='' then CB.Component_Eng+'/'+BOM.ActivityName_En
+when  Isnull(BSA.ActivitySubNameEN,'')='' and  Isnull(BOM.ActivityName_En,'')='' then CB.Component_Eng 
+end combinename
+,Isnull(BSA.ActivitySubNameEN,'') ActivitySubNameEN,
+Isnull(CB.Component_Eng,'') Component_Eng,
+Isnull(BOM.ActivityName_En,'') ActivityName_En,Isnull(BM.UnitEn,'') as UnitId,isnull(SAM.RateOfAssistant,0) Rate,
+isnull(tbl3data.prevPhysicalGEN,0) prevPhysicalGEN,
+isnull(tbl3data.prevPhysicalSC,0) prevPhysicalSC,
+isnull(tbl3data.prevPhysicalTSP,0) prevPhysicalTSP,
+isnull(tbl3data.prevPhysicalTotal,0) prevPhysicalTotal,
+isnull(tbl3data.prevFinancialGEN,0) prevFinancialGEN,
+isnull(tbl3data.prevFinancialSC,0) prevFinancialSC,
+isnull(tbl3data.prevFinancialTSP,0) prevFinancialTSP,
+isnull(tbl3data.prevFinancialTotal,0) prevFinancialTotal,
+isnull(tbl3data.prevBeneficiaryGEN,0) prevBeneficiaryGEN,
+isnull(tbl3data.prevBeneficiarySCSP,0) prevBeneficiarySCSP,
+isnull(tbl3data.prevBeneficiaryTSP,0) prevBeneficiaryTSP,
+isnull(tbl3data.prevBeneficiaryTotal,0) prevBeneficiaryTotal,
+isnull(tbl3data.prevMale,0) prevMale,
+isnull(tbl3data.prevFemale,0) prevFemale,
+isnull(tbl3data.prevSmall,0) prevSmall,
+isnull(tbl3data.prevMarginal,0) prevMarginal,
+isnull(tbl3data.prevOther,0) prevOther
+,isnull(tbl2data.opcount,0) as opcount
+from #tmp BTA
+left join #tmp2 tbl2data on BTA.ActivityId=tbl2data.ActivityId and BTA.ComponentId=tbl2data.ComponentId  and BTA.OfficeId=tbl2data.OfficeId
+	left join #temp3 tbl3data on BTA.TargetId=tbl3data.TargetId	
+		left join Budget_SubActivitys BSA on BSA.ActivitySubId=BTA.SubActivityId
+		inner join Budget_Component CB on CB.Component_ID=BTA.ComponentId
+		left join Budget_OICActivityMap BOM on BOM.Activityid=BTA.ActivityId
+		left join Budget_Unit BM on BM.UnitId = (case when BOM.UnitId is null then CB.UnitId else BOM.UnitId end)
+		left join [Budget_SubActivityMapping] SAM on BSA.ActivitySubId=SAM.[SubActivityId] and SAM.ActivityId=BOM.Activityid
+
+		drop table #tmp
+		drop table #tmp2
+		drop table #temp3
+
+
+			--------------------
+			end
+			else if (@IsAllSubActTargetGiven = 0 and @IsSubActAvailable > 0 )
+			begin
+			
+			print '2'
+
+
+	select 
+		
+		*
+		into #tmp11 from (
+		
+					
+select distinct
+		b.TargetId,
+		
+		b.FinancialGEN,
+		b.FinancialSC,
+		b.FinancialTSP,
+		b.FinancialTotal,
+
+		
+		'0' FincancialAllotmentGEN,
+		'0' FincancialAllotmentSCSP,
+		'0' FincancialAllotmentTSP,
+		'0' FincancialAllotmentTotal,
+			
+		isnull(BTAD.PendingAchievementId,0) AchievementId
+		,Isnull(BTAD.PhysicalGEN,0) AcvmntPhysicalGEN,
+		
+		Isnull(BTAD.PhysicalSCSP,0) AcvmntPhysicalSCSP,
+		Isnull(BTAD.PhysicalTSP,0) AcvmntPhysicalTSP,
+		Isnull(BTAD.PhysicalTotal,0) AcvmntPhysicalTotal,
+		Isnull(BTAD.FinancialGEN,0) AcvmntFinancialGEN,		
+		Isnull(BTAD.FinancialSCSP,0) AcvmntFinancialSCSP,
+		Isnull(BTAD.FinancialTSP,0) AcvmntFinancialTSP,
+        Isnull(BTAD.FinancialTotal,0) AcvmntFinancialTotal,
+		Isnull(BTAD.BillsInTreasury,0) BillsInTreasury,
+		Isnull(BTAD.BeneficiaryGEN,0) BeneficiaryGEN,
+		Isnull(BTAD.BeneficiarySCSP,0) BeneficiarySCSP,
+		Isnull(BTAD.BeneficiaryTSP,0) BeneficiaryTSP,
+		Isnull(BTAD.BeneficiaryTotal,0) BeneficiaryTotal,
+		Isnull(BTAD.Male,0) Male,
+		Isnull(BTAD.Female,0) Female,
+		Isnull(BTAD.Small,0) Small,
+		Isnull(BTAD.Marginal,0) Marginal,
+		Isnull(BTAD.Other,0) Other,
+		Isnull(b.FinancialGENHeadId,0) FinancialGENHeadId,
+		Isnull(b.FinancialSCHeadId,0) FinancialSCHeadId,
+		Isnull(b.FinancialTSPHeadId,0) FinancialTSPHeadId
+		,b.IsAllotedToAD,b.schemeid,b.subschemeid,b.ActivityId,b.SubActivityId,b.ComponentId,b.LevelId,b.FinancialYearId
+		,O.DepartmentId,O.OfficeTypeLov AgriLovValuesId,O.OfficeId, B.BudgetTargetTableName
+		 from (
+select 	distinct
+		MPRTA.TargetId TargetId,
+		
+		MPRTA.FinancialGEN FinancialGEN,
+		MPRTA.FinancialSC   FinancialSC,
+		MPRTA.FinancialTSP  FinancialTSP,
+		MPRTA.FinancialTotal  FinancialTotal, 
+	
+		'0' FincancialAllotmentGEN,
+		'0' FincancialAllotmentSCSP,
+		'0' FincancialAllotmentTSP,
+		'0' FincancialAllotmentTotal,
+		 ISNULL(MPRTA.FinancialGENHeadId,'0') FinancialGENHeadId,
+		 ISNULL(MPRTA.FinancialSCHeadId,'0')  FinancialSCHeadId,
+		ISNULL(MPRTA.FinancialTSPHeadId,'0')  FinancialTSPHeadId,
+		MPRTA.IsAllotedToAD  IsAllotedToAD,
+		 MPRTA.schemeid schemeid,
+		MPRTA.subschemeid  subschemeid,
+		 MPRTA.ActivityId  ActivityId,
+		A.SubActivityId SubActivityId,
+		MPRTA.ComponentId  ComponentId,
+		MPRTA.LevelId  LevelId,
+		MPRTA.FinancialYearId ,
+		MPRTA.TargetId as MPRTATargetId,
+		MPRta.OfficeId  OfficeId,'BudgetTargetAllotmentPending' BudgetTargetTableName
+
+			 from (
+					select 
+					BudgetHeadSchemeMapp.Budgetcodeid,
+					BudgetHeadSchemeMapp.Schemeid,
+					BudgetHeadSchemeMapp.Subschemeid,
+					BudgetHeadSchemeMapp.Componentid,Budget_SubActivityMapping.ActivityId,Budget_SubActivityMapping.SubActivityId 
+					from BudgetHeadSchemeMapp 
+					inner join  Budget_ComponentActivities on
+BudgetHeadSchemeMapp.Budgetcodeid = Budget_ComponentActivities.BudgetHeadId and 
+BudgetHeadSchemeMapp.Componentid = Budget_ComponentActivities.ComponentId  
+					left join Budget_SubActivityMapping
+					on BudgetHeadSchemeMapp.BudgetSchemeMapId = Budget_SubActivityMapping.BudgetSchemeMappingId and Budget_ComponentActivities.activityid = Budget_SubActivityMapping.activityid
+					and Budget_SubActivityMapping.Isactive =1 
+					where BudgetHeadSchemeMapp.Schemeid = @SchemeId and BudgetHeadSchemeMapp.Subschemeid = @SubSchemeId and BudgetHeadSchemeMapp.Componentid  in (select item from  SplitString(@ComponentIds,',')) 
+					and Budget_SubActivityMapping.activityid = @activityid
+					group by 
+					BudgetHeadSchemeMapp.Budgetcodeid,
+					BudgetHeadSchemeMapp.Schemeid,
+					BudgetHeadSchemeMapp.Subschemeid,
+					BudgetHeadSchemeMapp.Componentid,Budget_SubActivityMapping.ActivityId,Budget_SubActivityMapping.SubActivityId
+					) A 
+					inner join BudgetTargetPendingLiability MPRta on MPRta.SchemeId = A.SchemeId and MPRta.subschemeid = A.Subschemeid and MPRta.ComponentId = A.Componentid and A.ActivityId = MPRta.ActivityId
+					where 1= case when LevelId =4 and IsAllotedToAD in (1,2) and DDTargetId is not null then 1  when /*LevelId !=4 and*/ IsAllotedToAD = 2 and DDTargetId is null then 1 else 0 end--mprta.IsAllotedToAD !=0
+					) B 
+					left join BudgetTargetAchievementDataPending BTAD on btad.TargetId =  b.TargetId and b.SubActivityId = BTAD.SubActivityId and BTAD.month= @cumont
+					inner join Offices O on O.OfficeId=B.OfficeId
+where B.officeid = @OfficeId 
+	) tbl
+		
+select  distinct BTA.*,BTA.AchievementId AchievementId,BTA.Other Other,
+case when Isnull(BSA.ActivitySubNameEN,'')!='' then CB.Component_Eng+'/'+BOM.ActivityName_En+'/'+BSA.ActivitySubNameEN 
+when  Isnull(BSA.ActivitySubNameEN,'')='' and  Isnull(BOM.ActivityName_En,'')!='' then CB.Component_Eng+'/'+BOM.ActivityName_En
+when  Isnull(BSA.ActivitySubNameEN,'')='' and  Isnull(BOM.ActivityName_En,'')='' then CB.Component_Eng 
+end combinename, 
+ 
+Isnull(BSA.ActivitySubNameEN,'') ActivitySubNameEN,
+Isnull(CB.Component_Eng,'') Component_Eng,Isnull(BOM.ActivityName_En,'') ActivityName_En,Isnull(BM.UnitEn,'') as UnitId,isnull(SAM.RateOfAssistant,0) Rate,
+isnull(tbl3data.prevPhysicalGEN,0) prevPhysicalGEN,
+isnull(tbl3data.prevPhysicalSC,0) prevPhysicalSC,
+isnull(tbl3data.prevPhysicalTSP,0) prevPhysicalTSP,
+isnull(tbl3data.prevPhysicalTotal,0) prevPhysicalTotal,
+isnull(tbl3data.prevFinancialGEN,0) prevFinancialGEN,
+isnull(tbl3data.prevFinancialSC,0) prevFinancialSC,
+isnull(tbl3data.prevFinancialTSP,0) prevFinancialTSP,
+isnull(tbl3data.prevFinancialTotal,0) prevFinancialTotal,
+isnull(tbl3data.prevBeneficiaryGEN,0) prevBeneficiaryGEN,
+isnull(tbl3data.prevBeneficiarySCSP,0) prevBeneficiarySCSP,
+isnull(tbl3data.prevBeneficiaryTSP,0) prevBeneficiaryTSP,
+isnull(tbl3data.prevBeneficiaryTotal,0) prevBeneficiaryTotal,
+isnull(tbl3data.prevMale,0) prevMale,
+isnull(tbl3data.prevFemale,0) prevFemale,
+isnull(tbl3data.prevSmall,0) prevSmall,
+isnull(tbl3data.prevMarginal,0) prevMarginal,
+isnull(tbl3data.prevOther,0) prevOther
+,isnull(tbl2data.opcount,0) as opcount
+from #tmp11 BTA
+left join #tmp22 tbl2data on BTA.ActivityId=tbl2data.ActivityId and BTA.ComponentId=tbl2data.ComponentId  and BTA.OfficeId=tbl2data.OfficeId
+	left join #temp33 tbl3data on BTA.TargetId=tbl3data.TargetId	
+		left join Budget_SubActivitys BSA on BSA.ActivitySubId=BTA.SubActivityId
+		inner join Budget_Component CB on CB.Component_ID=BTA.ComponentId
+		left join Budget_OICActivityMap BOM on BOM.Activityid=BTA.ActivityId
+		left join Budget_Unit BM on BM.UnitId = (case when BOM.UnitId is null then CB.UnitId else BOM.UnitId end)
+		left join [Budget_SubActivityMapping] SAM on BSA.ActivitySubId=SAM.[SubActivityId] and SAM.ActivityId=BOM.Activityid
+
+		drop table #tmp11
+		drop table #tmp22
+		drop table #temp33
+
+
+			end
+
+			else
+			begin
+
+			print '3'
+			--------------------
+
+				select 
+		
+		*
+		into #tmp2222 from (
+
+select A.*,
+--count(Budget_SubActivityOtherParameterMap.OtherParameterId) 
+ @IsOPAvailable as opcount  from 
+(
+select OfficeId,BudgetMPRTargetAllotmentPending.ComponentId,ActivityId,SubActivityId,FinancialGENHeadId,FinancialSCHeadId,FinancialTSPHeadId,
+BudgetMPRTargetAllotmentPending.schemeid,BudgetMPRTargetAllotmentPending.subschemeid,BudgetHeadSchemeMapp.BudgetSchememapid,Budgetcodeid,BudgetHeadSchemeMapp.Demandid,'BudgetMPRTargetAllotmentPending' BudgetTargetTableName
+from BudgetMPRTargetAllotmentPending left join
+BudgetHeadSchemeMapp on BudgetMPRTargetAllotmentPending.schemeid = BudgetHeadSchemeMapp.schemeid and BudgetMPRTargetAllotmentPending.subschemeid = BudgetHeadSchemeMapp.Subschemeid
+and BudgetMPRTargetAllotmentPending.ComponentId = BudgetHeadSchemeMapp.Componentid
+and ((BudgetMPRTargetAllotmentPending.FinancialGENHeadId = BudgetHeadSchemeMapp.budgetcodeid) or (BudgetMPRTargetAllotmentPending.FinancialSCHeadId = BudgetHeadSchemeMapp.budgetcodeid) or
+(BudgetMPRTargetAllotmentPending.FinancialTSPHeadId = BudgetHeadSchemeMapp.budgetcodeid))
+where 1= case when LevelId =4 and IsAllotedToAD in (1,2) and DDTargetId is not null then 1  when /*LevelId !=4 and*/ IsAllotedToAD = 2 and DDTargetId is null then 1 else 0 end--BudgetMPRTargetAllotment.IsAllotedToAD !=0
+) A inner join Budget_SubActivityOtherParameterMap on A.BudgetSchemeMapId = Budget_SubActivityOtherParameterMap.BudgetSchemeMappingId
+and A.ActivityId = Budget_SubActivityOtherParameterMap.Activityid group by OfficeId,ComponentId,A.ActivityId,SubActivityId,FinancialGENHeadId,FinancialSCHeadId,FinancialTSPHeadId,
+schemeid,subschemeid,BudgetSchememapid,Budgetcodeid,Demandid,BudgetTargetTableName
+
+) tbl1
+
+select *
+into #temp3333 from(
+	select 
+		TargetId,
+		isnull(sum(PhysicalGEN),0)	prevPhysicalGEN,
+		isnull(sum(PhysicalSCSP),0) prevPhysicalSC,
+		isnull(sum(PhysicalTSP),0)	prevPhysicalTSP,
+		isnull(sum(PhysicalTotal),0) prevPhysicalTotal,
+		isnull(sum(FinancialGEN),0)	 prevFinancialGEN,
+		isnull(sum(FinancialSCSP),0) prevFinancialSC,
+		isnull(sum(FinancialTSP),0)   prevFinancialTSP,
+		isnull(sum(FinancialTotal),0) prevFinancialTotal,
+		isnull(sum(BeneficiaryGEN),0) prevBeneficiaryGEN,
+		isnull(sum(BeneficiarySCSP),0) prevBeneficiarySCSP,
+		isnull(sum(BeneficiaryTSP),0) prevBeneficiaryTSP,
+		isnull(sum(BeneficiaryTotal),0) prevBeneficiaryTotal,
+		isnull(sum(Male),0)   prevMale,
+		isnull(sum(Female),0) prevFemale,
+		isnull(sum(Small),0)  prevSmall,
+		isnull(sum(Marginal),0) prevMarginal,
+		isnull(sum(Other),0)    prevOther
+
+		from BudgetTargetAchievementDataPending ADT 
+		--where @MOn=datename(month, dateadd(mm, -2, getdate())) 
+		--WHERE UPPER(@MOn) > UPPER(DATENAME(mm, GETDATE()))
+		Where 
+		(UPPER(DATENAME(mm, GETDATE())) = UPPER(MONTH) AND YEAR(CreateDate) < YEAR(GETDATE())) 
+		OR 
+		UPPER(MONTH) <> UPPER(DATENAME(mm, GETDATE()))
+		group by TargetId,Month
+		) tbl3
+	
+
+	select 
+		
+		*
+		into #tmp1111 from (
+		
+					
+select distinct
+		b.TargetId,
+		
+		b.FinancialGEN,
+		b.FinancialSC,
+		b.FinancialTSP,
+		b.FinancialTotal,
+		'0' FincancialAllotmentGEN,
+		'0' FincancialAllotmentSCSP,
+		'0' FincancialAllotmentTSP,
+		'0' FincancialAllotmentTotal,
+			
+		isnull(BTAD.PendingAchievementId,0) AchievementId
+		,Isnull(BTAD.PhysicalGEN,0) AcvmntPhysicalGEN,
+		
+		Isnull(BTAD.PhysicalSCSP,0) AcvmntPhysicalSCSP,
+		Isnull(BTAD.PhysicalTSP,0) AcvmntPhysicalTSP,
+		Isnull(BTAD.PhysicalTotal,0) AcvmntPhysicalTotal,
+		Isnull(BTAD.FinancialGEN,0) AcvmntFinancialGEN,		
+		Isnull(BTAD.FinancialSCSP,0) AcvmntFinancialSCSP,
+		Isnull(BTAD.FinancialTSP,0) AcvmntFinancialTSP,
+        Isnull(BTAD.FinancialTotal,0) AcvmntFinancialTotal,
+		Isnull(BTAD.BillsInTreasury,0) BillsInTreasury,
+		Isnull(BTAD.BeneficiaryGEN,0) BeneficiaryGEN,
+		Isnull(BTAD.BeneficiarySCSP,0) BeneficiarySCSP,
+		Isnull(BTAD.BeneficiaryTSP,0) BeneficiaryTSP,
+		Isnull(BTAD.BeneficiaryTotal,0) BeneficiaryTotal,
+		Isnull(BTAD.Male,0) Male,
+		Isnull(BTAD.Female,0) Female,
+		Isnull(BTAD.Small,0) Small,
+		Isnull(BTAD.Marginal,0) Marginal,
+		Isnull(BTAD.Other,0) Other,
+		Isnull(b.FinancialGENHeadId,0) FinancialGENHeadId,
+		Isnull(b.FinancialSCHeadId,0) FinancialSCHeadId,
+		Isnull(b.FinancialTSPHeadId,0) FinancialTSPHeadId
+		,b.IsAllotedToAD,b.schemeid,b.subschemeid,b.ActivityId,b.SubActivityId,b.ComponentId,b.LevelId,b.FinancialYearId
+		,O.DepartmentId,O.OfficeTypeLov AgriLovValuesId,O.OfficeId, B.BudgetTargetTableName
+		 from (
+select 	distinct
+		MPRTA.TargetId TargetId,
+		
+		MPRTA.FinancialGEN FinancialGEN,
+		MPRTA.FinancialSC   FinancialSC,
+		MPRTA.FinancialTSP  FinancialTSP,
+		MPRTA.FinancialTotal  FinancialTotal, 
+	
+		'0' FincancialAllotmentGEN,
+		'0' FincancialAllotmentSCSP,
+		'0' FincancialAllotmentTSP,
+		'0' FincancialAllotmentTotal,
+		 ISNULL(MPRTA.FinancialGENHeadId,'0') FinancialGENHeadId,
+		 ISNULL(MPRTA.FinancialSCHeadId,'0')  FinancialSCHeadId,
+		ISNULL(MPRTA.FinancialTSPHeadId,'0')  FinancialTSPHeadId,
+		MPRTA.IsAllotedToAD  IsAllotedToAD,
+		 MPRTA.schemeid schemeid,
+		MPRTA.subschemeid  subschemeid,
+		 MPRTA.ActivityId  ActivityId,
+		0  SubActivityId,
+		MPRTA.ComponentId  ComponentId,
+		MPRTA.LevelId  LevelId,
+		MPRTA.FinancialYearId ,
+		MPRTA.TargetId as MPRTATargetId,
+		MPRta.OfficeId  OfficeId,'BudgetTargetAllotmentPending' BudgetTargetTableName
+
+			 from (
+					select 
+					BudgetHeadSchemeMapp.Budgetcodeid,
+					BudgetHeadSchemeMapp.Schemeid,
+					BudgetHeadSchemeMapp.Subschemeid,
+					BudgetHeadSchemeMapp.Componentid,
+					Budget_ComponentActivities.Activityid
+					from BudgetHeadSchemeMapp 
+					left join  Budget_ComponentActivities on
+					BudgetHeadSchemeMapp.Budgetcodeid = Budget_ComponentActivities.BudgetHeadId and 
+					BudgetHeadSchemeMapp.Componentid = Budget_ComponentActivities.ComponentId  
+				
+					where BudgetHeadSchemeMapp.Schemeid = @SchemeId and BudgetHeadSchemeMapp.Subschemeid = @SubSchemeId 
+					and BudgetHeadSchemeMapp.Componentid  in (select item from  SplitString(@ComponentIds,',')) and  Budget_ComponentActivities.Activityid = @ActivityId
+					
+					group by 
+					BudgetHeadSchemeMapp.Budgetcodeid,
+					BudgetHeadSchemeMapp.Schemeid,
+					BudgetHeadSchemeMapp.Subschemeid,
+					BudgetHeadSchemeMapp.Componentid,
+					Budget_ComponentActivities.Activityid
+					) A 
+					inner join BudgetTargetPendingLiability MPRta on MPRta.SchemeId = A.SchemeId and MPRta.subschemeid = A.Subschemeid and MPRta.ComponentId = A.Componentid and MPRTA.ActivityId = A.Activityid
+					where 1= case when LevelId =4 and IsAllotedToAD in (1,2) and DDTargetId is not null then 1  when /*LevelId !=4 and*/ IsAllotedToAD = 2 and DDTargetId is null then 1 else 0 end--MPRta.IsAllotedToAD !=0
+					) B 
+					left join BudgetTargetAchievementDataPending BTAD on btad.TargetId =  b.TargetId and BTAD.month= @cumont
+					inner join Offices O on O.OfficeId=B.OfficeId
+where B.officeid = @OfficeId 
+	) tbl
+		
+select  distinct BTA.*,BTA.AchievementId AchievementId,BTA.Other Other,
+case when Isnull(BSA.ActivitySubNameEN,'')!='' then CB.Component_Eng+'/'+BOM.ActivityName_En+'/'+BSA.ActivitySubNameEN 
+when  Isnull(BSA.ActivitySubNameEN,'')='' and  Isnull(BOM.ActivityName_En,'')!='' then CB.Component_Eng+'/'+BOM.ActivityName_En
+when  Isnull(BSA.ActivitySubNameEN,'')='' and  Isnull(BOM.ActivityName_En,'')='' then CB.Component_Eng 
+end combinename,
+Isnull(BSA.ActivitySubNameEN,'') ActivitySubNameEN,
+Isnull(CB.Component_Eng,''),Isnull(BOM.ActivityName_En,'') ActivityName_En,Isnull(BM.UnitEn,'') as UnitId,isnull(SAM.RateOfAssistant,0) Rate,
+isnull(tbl3data.prevPhysicalGEN,0) prevPhysicalGEN,
+isnull(tbl3data.prevPhysicalSC,0) prevPhysicalSC,
+isnull(tbl3data.prevPhysicalTSP,0) prevPhysicalTSP,
+isnull(tbl3data.prevPhysicalTotal,0) prevPhysicalTotal,
+isnull(tbl3data.prevFinancialGEN,0) prevFinancialGEN,
+isnull(tbl3data.prevFinancialSC,0) prevFinancialSC,
+isnull(tbl3data.prevFinancialTSP,0) prevFinancialTSP,
+isnull(tbl3data.prevFinancialTotal,0) prevFinancialTotal,
+isnull(tbl3data.prevBeneficiaryGEN,0) prevBeneficiaryGEN,
+isnull(tbl3data.prevBeneficiarySCSP,0) prevBeneficiarySCSP,
+isnull(tbl3data.prevBeneficiaryTSP,0) prevBeneficiaryTSP,
+isnull(tbl3data.prevBeneficiaryTotal,0) prevBeneficiaryTotal,
+isnull(tbl3data.prevMale,0) prevMale,
+isnull(tbl3data.prevFemale,0) prevFemale,
+isnull(tbl3data.prevSmall,0) prevSmall,
+isnull(tbl3data.prevMarginal,0) prevMarginal,
+isnull(tbl3data.prevOther,0) prevOther
+,isnull(tbl2data.opcount,0) as opcount
+from #tmp1111 BTA
+left join #tmp2222 tbl2data on BTA.ActivityId=tbl2data.ActivityId and BTA.ComponentId=tbl2data.ComponentId  and BTA.OfficeId=tbl2data.OfficeId
+	left join #temp3333 tbl3data on BTA.TargetId=tbl3data.TargetId	
+		left join Budget_SubActivitys BSA on BSA.ActivitySubId=BTA.SubActivityId
+		inner join Budget_Component CB on CB.Component_ID=BTA.ComponentId
+		left join Budget_OICActivityMap BOM on BOM.Activityid=BTA.ActivityId
+		left join Budget_Unit BM on BM.UnitId = (case when BOM.UnitId is null then CB.UnitId else BOM.UnitId end)
+		left join [Budget_SubActivityMapping] SAM on BSA.ActivitySubId=SAM.[SubActivityId] and SAM.ActivityId=BOM.Activityid
+
+		drop table #tmp1111
+		drop table #tmp2222
+		drop table #temp3333
+
+
+			--------------------
+			end
+
+
+
+
+
+
+			end
+
+			else 
+			begin
+			print '4'
+
+
+			select 
+		
+		*
+		into #tmp222 from (
+
+select A.*,--count(Budget_SubActivityOtherParameterMap.OtherParameterId) opcount
+ @IsOPAvailable  as opcount  
+from 
+(
+select OfficeId,BudgetMPRTargetAllotment.ComponentId,ActivityId,SubActivityId,FinancialGENHeadId,FinancialSCHeadId,FinancialTSPHeadId,
+BudgetMPRTargetAllotment.schemeid,BudgetMPRTargetAllotment.subschemeid,BudgetHeadSchemeMapp.BudgetSchememapid,Budgetcodeid,BudgetHeadSchemeMapp.Demandid,'BudgetMPRTargetAllotment' BudgetTargetTableName
+from BudgetMPRTargetAllotment left join
+BudgetHeadSchemeMapp on BudgetMPRTargetAllotment.schemeid = BudgetHeadSchemeMapp.schemeid and BudgetMPRTargetAllotment.subschemeid = BudgetHeadSchemeMapp.Subschemeid
+and BudgetMPRTargetAllotment.ComponentId = BudgetHeadSchemeMapp.Componentid
+and ((BudgetMPRTargetAllotment.FinancialGENHeadId = BudgetHeadSchemeMapp.budgetcodeid) or (BudgetMPRTargetAllotment.FinancialSCHeadId = BudgetHeadSchemeMapp.budgetcodeid) or
+(BudgetMPRTargetAllotment.FinancialTSPHeadId = BudgetHeadSchemeMapp.budgetcodeid))
+where 1=  case when LevelId =4 and IsAllotedToAD in (1,2) and DDTargetId is not null then 1  when /*LevelId !=4 and*/ IsAllotedToAD = 2 and DDTargetId is null then 1 else 0 end--MPRta.IsAllotedToAD !=0 --BudgetMPRTargetAllotment.IsAllotedToAD !=0
+) A inner join Budget_SubActivityOtherParameterMap on A.BudgetSchemeMapId = Budget_SubActivityOtherParameterMap.BudgetSchemeMappingId
+and A.ActivityId = Budget_SubActivityOtherParameterMap.Activityid group by OfficeId,ComponentId,A.ActivityId,SubActivityId,FinancialGENHeadId,FinancialSCHeadId,FinancialTSPHeadId,
+schemeid,subschemeid,BudgetSchememapid,Budgetcodeid,Demandid,BudgetTargetTableName
+
+) tbl1
+
+select *
+into #temp333 from(
+	select 
+		TargetId,
+		isnull(sum(PhysicalGEN),0)	prevPhysicalGEN,
+		isnull(sum(PhysicalSCSP),0) prevPhysicalSC,
+		isnull(sum(PhysicalTSP),0)	prevPhysicalTSP,
+		isnull(sum(PhysicalTotal),0) prevPhysicalTotal,
+		isnull(sum(FinancialGEN),0)	 prevFinancialGEN,
+		isnull(sum(FinancialSCSP),0) prevFinancialSC,
+		isnull(sum(FinancialTSP),0)   prevFinancialTSP,
+		isnull(sum(FinancialTotal),0) prevFinancialTotal,
+		isnull(sum(BeneficiaryGEN),0) prevBeneficiaryGEN,
+		isnull(sum(BeneficiarySCSP),0) prevBeneficiarySCSP,
+		isnull(sum(BeneficiaryTSP),0) prevBeneficiaryTSP,
+		isnull(sum(BeneficiaryTotal),0) prevBeneficiaryTotal,
+		isnull(sum(Male),0)   prevMale,
+		isnull(sum(Female),0) prevFemale,
+		isnull(sum(Small),0)  prevSmall,
+		isnull(sum(Marginal),0) prevMarginal,
+		isnull(sum(Other),0)    prevOther
+
+		from BudgetTargetAchievementDataPending ADT 
+		--where @MOn=datename(month, dateadd(mm, -2, getdate())) 
+		--WHERE UPPER(@MOn) > UPPER(DATENAME(mm, GETDATE()))
+		Where 
+		(UPPER(DATENAME(mm, GETDATE())) = UPPER(MONTH) AND YEAR(CreateDate) < YEAR(GETDATE())) 
+		OR 
+		UPPER(MONTH) <> UPPER(DATENAME(mm, GETDATE()))
+		group by TargetId,Month
+		) tbl3
+	
+
+	select 
+		
+		*
+		into #tmp111 from (
+		
+					
+select distinct
+		b.TargetId,
+		
+		b.FinancialGEN,
+		b.FinancialSC,
+		b.FinancialTSP,
+		b.FinancialTotal,
+		'0' FincancialAllotmentGEN,
+		'0' FincancialAllotmentSCSP,
+		'0' FincancialAllotmentTSP,
+		'0' FincancialAllotmentTotal,
+			
+		isnull(BTAD.PendingAchievementId,0) AchievementId
+		,Isnull(BTAD.PhysicalGEN,0) AcvmntPhysicalGEN,
+		
+		Isnull(BTAD.PhysicalSCSP,0) AcvmntPhysicalSCSP,
+		Isnull(BTAD.PhysicalTSP,0) AcvmntPhysicalTSP,
+		Isnull(BTAD.PhysicalTotal,0) AcvmntPhysicalTotal,
+		Isnull(BTAD.FinancialGEN,0) AcvmntFinancialGEN,		
+		Isnull(BTAD.FinancialSCSP,0) AcvmntFinancialSCSP,
+		Isnull(BTAD.FinancialTSP,0) AcvmntFinancialTSP,
+        Isnull(BTAD.FinancialTotal,0) AcvmntFinancialTotal,
+		Isnull(BTAD.BillsInTreasury,0) BillsInTreasury,
+		Isnull(BTAD.BeneficiaryGEN,0) BeneficiaryGEN,
+		Isnull(BTAD.BeneficiarySCSP,0) BeneficiarySCSP,
+		Isnull(BTAD.BeneficiaryTSP,0) BeneficiaryTSP,
+		Isnull(BTAD.BeneficiaryTotal,0) BeneficiaryTotal,
+		Isnull(BTAD.Male,0) Male,
+		Isnull(BTAD.Female,0) Female,
+		Isnull(BTAD.Small,0) Small,
+		Isnull(BTAD.Marginal,0) Marginal,
+		Isnull(BTAD.Other,0) Other,
+		Isnull(b.FinancialGENHeadId,0) FinancialGENHeadId,
+		Isnull(b.FinancialSCHeadId,0) FinancialSCHeadId,
+		Isnull(b.FinancialTSPHeadId,0) FinancialTSPHeadId
+		,b.IsAllotedToAD,b.schemeid,b.subschemeid,b.ActivityId,b.SubActivityId,b.ComponentId,b.LevelId,b.FinancialYearId
+		,O.DepartmentId,O.OfficeTypeLov AgriLovValuesId,O.OfficeId, B.BudgetTargetTableName
+		 from (
+select 	distinct
+		 MPRTA.TargetId TargetId,
+		/*MPRTA.PhysicalGEN  PhysicalGEN ,
+		MPRTA.PhysicalSC PhysicalSC,
+		MPRTA.PhysicalTSP PhysicalTSP,
+		MPRTA.PhysicalTotal  PhysicalTotal,*/
+		MPRTA.FinancialGEN FinancialGEN,
+		MPRTA.FinancialSC   FinancialSC,
+		MPRTA.FinancialTSP  FinancialTSP,
+		MPRTA.FinancialTotal  FinancialTotal, 
+	
+		'0' FincancialAllotmentGEN,
+		'0' FincancialAllotmentSCSP,
+		'0' FincancialAllotmentTSP,
+		'0' FincancialAllotmentTotal,
+		 ISNULL(MPRTA.FinancialGENHeadId,'0') FinancialGENHeadId,
+		 ISNULL(MPRTA.FinancialSCHeadId,'0')  FinancialSCHeadId,
+		ISNULL(MPRTA.FinancialTSPHeadId,'0')  FinancialTSPHeadId,
+		MPRTA.IsAllotedToAD  IsAllotedToAD,
+		 MPRTA.schemeid schemeid,
+		MPRTA.subschemeid  subschemeid,
+		 MPRTA.ActivityId  ActivityId,
+		0  SubActivityId,
+		MPRTA.ComponentId  ComponentId,
+		MPRTA.LevelId  LevelId,
+		MPRTA.FinancialYearId ,
+		MPRTA.TargetId as MPRTATargetId,
+		MPRta.OfficeId  OfficeId,'BudgetTargetAllotmentPending' BudgetTargetTableName
+
+			 from (
+					select 
+					BudgetHeadSchemeMapp.Budgetcodeid,
+					BudgetHeadSchemeMapp.Schemeid,
+					BudgetHeadSchemeMapp.Subschemeid,
+					BudgetHeadSchemeMapp.Componentid
+					from BudgetHeadSchemeMapp 
+					left join  Budget_ComponentActivities on
+BudgetHeadSchemeMapp.Budgetcodeid = Budget_ComponentActivities.BudgetHeadId and 
+BudgetHeadSchemeMapp.Componentid = Budget_ComponentActivities.ComponentId  
+				
+					where BudgetHeadSchemeMapp.Schemeid = @SchemeId and BudgetHeadSchemeMapp.Subschemeid = @SubSchemeId 
+					and BudgetHeadSchemeMapp.Componentid  in (select item from  SplitString(@ComponentIds,',')) 
+					
+					group by 
+					BudgetHeadSchemeMapp.Budgetcodeid,
+					BudgetHeadSchemeMapp.Schemeid,
+					BudgetHeadSchemeMapp.Subschemeid,
+					BudgetHeadSchemeMapp.Componentid
+					) A 
+					inner join BudgetTargetPendingLiability MPRta on MPRta.SchemeId = A.SchemeId and MPRta.subschemeid = A.Subschemeid and MPRta.ComponentId = A.Componentid
+				where 1= case when LevelId =4 and IsAllotedToAD in (1,2) and DDTargetId is not null then 1  when /*LevelId !=4 and*/ IsAllotedToAD = 2 and DDTargetId is null then 1 else 0 end--MPRta.IsAllotedToAD !=0
+--MPRta.IsAllotedToAD !=0
+					) B 
+					left join BudgetTargetAchievementDataPending BTAD on btad.TargetId =  b.TargetId  and BTAD.month= @cumont
+					inner join Offices O on O.OfficeId=B.OfficeId
+where B.officeid = @OfficeId 
+
+
+	) tbl
+		
+select  distinct BTA.*,BTA.AchievementId AchievementId,BTA.Other Other,case when Isnull(BSA.ActivitySubNameEN,'')!='' then CB.Component_Eng+'/'+BOM.ActivityName_En+'/'+BSA.ActivitySubNameEN 
+when  Isnull(BSA.ActivitySubNameEN,'')='' and  Isnull(BOM.ActivityName_En,'')!='' then CB.Component_Eng+'/'+BOM.ActivityName_En
+when  Isnull(BSA.ActivitySubNameEN,'')='' and  Isnull(BOM.ActivityName_En,'')='' then CB.Component_Eng 
+end combinename,Isnull(BSA.ActivitySubNameEN,'') ActivitySubNameEN,
+Isnull(CB.Component_Eng,'') Component_Eng,Isnull(BOM.ActivityName_En,'') ActivityName_En,Isnull(BM.UnitEn,'') as UnitId,isnull(SAM.RateOfAssistant,0) Rate,
+isnull(tbl3data.prevPhysicalGEN,0) prevPhysicalGEN,
+isnull(tbl3data.prevPhysicalSC,0) prevPhysicalSC,
+isnull(tbl3data.prevPhysicalTSP,0) prevPhysicalTSP,
+isnull(tbl3data.prevPhysicalTotal,0) prevPhysicalTotal,
+isnull(tbl3data.prevFinancialGEN,0) prevFinancialGEN,
+isnull(tbl3data.prevFinancialSC,0) prevFinancialSC,
+isnull(tbl3data.prevFinancialTSP,0) prevFinancialTSP,
+isnull(tbl3data.prevFinancialTotal,0) prevFinancialTotal,
+isnull(tbl3data.prevBeneficiaryGEN,0) prevBeneficiaryGEN,
+isnull(tbl3data.prevBeneficiarySCSP,0) prevBeneficiarySCSP,
+isnull(tbl3data.prevBeneficiaryTSP,0) prevBeneficiaryTSP,
+isnull(tbl3data.prevBeneficiaryTotal,0) prevBeneficiaryTotal,
+isnull(tbl3data.prevMale,0) prevMale,
+isnull(tbl3data.prevFemale,0) prevFemale,
+isnull(tbl3data.prevSmall,0) prevSmall,
+isnull(tbl3data.prevMarginal,0) prevMarginal,
+isnull(tbl3data.prevOther,0) prevOther
+,isnull(tbl2data.opcount,0) as opcount
+from #tmp111 BTA
+left join #tmp222 tbl2data on BTA.ActivityId=tbl2data.ActivityId and BTA.ComponentId=tbl2data.ComponentId  and BTA.OfficeId=tbl2data.OfficeId
+	left join #temp333 tbl3data on BTA.TargetId=tbl3data.TargetId	
+		left join Budget_SubActivitys BSA on BSA.ActivitySubId=BTA.SubActivityId
+		inner join Budget_Component CB on CB.Component_ID=BTA.ComponentId
+		left join Budget_OICActivityMap BOM on BOM.Activityid=BTA.ActivityId
+		left join Budget_Unit BM on BM.UnitId = (case when BOM.UnitId is null then CB.UnitId else BOM.UnitId end)
+		left join [Budget_SubActivityMapping] SAM on BSA.ActivitySubId=SAM.[SubActivityId] and SAM.ActivityId=BOM.Activityid
+
+		drop table #tmp111
+		drop table #tmp222
+		drop table #temp333
+
+			end
+	
+
+	select @IsSubActAvailable as IsSubActAvailable,@IsAllSubActTargetGiven as IsGivenSubActivityTarget,@IsOPAvailable as opcount
+	   
+	  
+
+
+
+
+	END
+	ELSE IF(@Action = 'SaveTargetAchievement')
+	BEGIN
+	Declare @Month nvarchar(50)=null;
+	set @Month=(select  CASE WHEN CurDD <=10 THEN preM ELSE CurM END ActualMonth from (
+	SELECT DATENAME(MONTH, GETDATE()) CurM ,DATENAME(MONTH, DATEADD(MM, -1, GETDATE())) preM , DATEPART(dd, (SELECT GETDATE())) CurDD) res)
+
+	--set @Month=( select  CASE WHEN CurDD <=10 THEN preM ELSE CurM END ActualMonth from (
+	--SELECT datename(month, getdate()) CurM ,datename(month, dateadd(dd, -1, getdate())) preM , DATEPART(dd, (SELECT GETDATE())) CurDD) res)
+
+
+
+
+		IF EXISTS(SELECT PendingAchievementId FROM BudgetTargetAchievementDataPending WHERE [Month] = @Month and PendingAchievementId=@AchievementId)
+		BEGIN
+			UPDATE [dbo].[BudgetTargetAchievementDataPending]
+			   SET
+				  [PhysicalGEN] = @PhysicalGEN,
+				  [PhysicalSCSP] = @PhysicalSCSP,
+				  [PhysicalTSP] = @PhysicalTSP,
+				  [PhysicalTotal] = @PhysicalTotal,
+				  [FinancialGEN] = @FinancialGEN,
+				  [FinancialSCSP] = @FinancialSCSP, 
+				  [FinancialTSP] = @FinancialTSP,
+				  [FinancialTotal] = @FinancialTotal,
+				  [BillsInTreasury] = @BillsInTreasury,
+				  [BeneficiaryGEN] = @BeneficiaryGEN, 
+				  [BeneficiarySCSP] = @BeneficiarySCSP, 
+				  [BeneficiaryTSP] = @BeneficiaryTSP,
+				  [BeneficiaryTotal] = @BeneficiaryTotal,
+				  [Male] = @Male,
+				  [Female] = @Female,
+				  [Small] = @Small, 
+				  [Marginal] = @Marginal,
+				   Other = @Other,
+				  OtherParameter = @OtherParameter,
+				  [Modifiedby] = @UserId,
+				  [ModifiedDate] = GETDATE(),
+				  [SubActivityId]=@SubActivityId,
+				  [BudgetTargetTableName]=@BudgetTargetTableName
+			 WHERE [Month] = @Month and PendingAchievementId=@AchievementId
+			 select @AchievementId
+		END
+		ELSE
+		BEGIN
+
+		Declare @resulttoreturn int =0;
+			INSERT INTO [dbo].[BudgetTargetAchievementDataPending]
+				   ([TargetId],[Type],
+				   [PhysicalGEN],[PhysicalSCSP],[PhysicalTSP],[PhysicalTotal],
+				   [FinancialGEN],[FinancialSCSP],[FinancialTSP],[FinancialTotal],
+				   [BillsInTreasury],[BeneficiaryGEN],[BeneficiarySCSP],[BeneficiaryTSP],[BeneficiaryTotal],
+				   [Male],[Female],[Small],[Marginal],[OtherParameter],
+				   [CreateBy],[Modifiedby],[Month],[Other],[SubActivityId],[BudgetTargetTableName])
+			 VALUES
+				   (@TargetId,@Type,
+				    @PhysicalGEN, @PhysicalSCSP, @PhysicalTSP,@PhysicalTotal, 
+				    @FinancialGEN,@FinancialSCSP, @FinancialTSP,@FinancialTotal, 
+				    @BillsInTreasury,@BeneficiaryGEN, @BeneficiarySCSP, @BeneficiaryTSP, @BeneficiaryTotal, 
+				    @Male,@Female,@Small,@Marginal,@OtherParameter,
+				    @UserId,@UserId,@Month,@Other,@SubActivityId,@BudgetTargetTableName)
+
+					set @resulttoreturn=@@IDENTITY;
+		END
+
+		
+		SELECT @resulttoreturn;
+	END
+
+	
+END

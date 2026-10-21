@@ -1,0 +1,231 @@
+﻿
+@*@{
+    ViewBag.Title = "PurchaseSalesSociety";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}*@
+
+
+<script src="~/Scripts/AngularFramework/PurchaseSalesSociety.js"></script>
+<script type="text/javascript" src="~/Scripts/jqueryuitimepicker.js"></script>
+<link href="~/Content/Stylesheets/jqueryuitimepicker.css" rel="stylesheet" />
+
+
+
+
+
+@Html.Hidden("TemplateId")
+<div ng-app="PurchaseSalesSocietyMod">
+    <div ng-controller="PurchaseSalesSocietyCon">
+        <div class="col-md-12">
+            <h3 class="citizen-dash-head">{{translation.KVSSMPRForm}}</h3>
+            <hr style="margin: 0;">
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#"> {{translation.EntryForm}}</a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;"> {{translation.KVSSMPRForm}} </span>
+                    </li>
+                    <li style="float: right;" id="divAddBtn">
+                        <button type="button" ng-click="ShowKVSSContent()" class="btn btn-info btn-lg dev-popup-btn" data-toggle="modal" style="color: #025e63; cursor: pointer; text-decoration:none;  font-weight: bold;" data-target="#myModal">
+                            <h5>&#187; {{translation.NewEntry}}</h5>
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+
+        <div class="citizen-dash-head" ng-show="showtringdiv">
+            <form>
+                <div class="col-lg-12 form-group">
+                    <input type="hidden" ng-model="KVSSForm.KVSSDataId" />
+                    <div class="col-lg-2">{{translation.KVSSName}}</div>
+                    <div class="col-lg-4">
+                        <select ng-model="KVSSForm.KVSSId"  class="form-control" ng-init="KVSSForm.KVSSId='0'">
+                            <option value="0" >{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in KVSSList" value="{{item.Id}}">
+                                {{_language =='en-us' ?  item.KvssNameEn : item.KvssNameHi}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-lg-2">{{translation.YEAR}}</div>
+                    <div class="col-lg-4">
+                        <select class="form-control" id="ddlFYearId" ng-model="KVSSForm.FYearId" ng-init="KVSSForm.FYearId='0'">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in FinancialYearList" value="{{item.FIN_YEAR_MASTR_ID}}">
+                                {{item.FIN_YEAR_NAME}}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-lg-12 form-group">
+                    <div class="col-lg-2">{{ translation.AgriProduction}}<span class="error">*</span></div>
+                    <div class="col-lg-4">
+                        <input type="text" class="form-control" ng-model="KVSSForm.AgriProduction" placeholder={{translation.AgriProduction}}
+                                onkeypress="return ((event.charCode >= 48 && event.charCode <= 57 ) || event.charCode == 46 ||  event.charCode == 8)"  autocomplete="off" />
+                    </div>
+                    <div class="col-lg-2">{{ translation.AgriAadan}}<span class="error">*</span></div>
+                    <div class="col-lg-4">
+                        <input type="text" class="form-control" ng-model="KVSSForm.AgriAadan" placeholder={{translation.AgriAadan}} 
+                                 onkeypress="return ((event.charCode >= 48 && event.charCode <= 57 ) || event.charCode == 46 ||  event.charCode == 8)" autocomplete="off" />
+                    </div>
+                </div>
+                <div class="col-lg-12 form-group">
+                    <div class="col-lg-2">{{translation.MaterialControl}}</div>
+                    <div class="col-lg-4">
+                        <input type='text' ng-model="KVSSForm.MaterialControl" class="form-control devcalender" placeholder="{{translation.MaterialControl}}"
+                                 onkeypress="return ((event.charCode >= 48 && event.charCode <= 57 ) || event.charCode == 46 ||  event.charCode == 8)" />
+                    </div>
+                    <div class="col-lg-2">{{translation.MaterialUncontrol}}</div>
+                    <div class="col-lg-4">
+                        <input type='text' ng-model="KVSSForm.MaterialUncontrol" class="form-control devcalender" placeholder="{{translation.MaterialUncontrol}}"
+                                 onkeypress="return ((event.charCode >= 48 && event.charCode <= 57 ) || event.charCode == 46 ||  event.charCode == 8)" />
+                    </div>
+                </div>
+                <div class="col-lg-12 form-group">
+                    <div class="col-lg-2">{{translation.MaterialMedical}}</div>
+                    <div class="col-lg-4">
+                        <input type='text' ng-model="KVSSForm.MaterialMedical" class="form-control devcalender" placeholder="{{translation.MaterialMedical}}" 
+                                 onkeypress="return ((event.charCode >= 48 && event.charCode <= 57 ) || event.charCode == 46 ||  event.charCode == 8)"/>
+                    </div>
+                    <div class="col-lg-2">{{translation.IsActive}}</div>
+                    <div class="col-lg-4">
+                        <input class="form-check-input" type="checkbox" id="inlineCheckbox1" value="option1" ng-model="KVSSForm.IsActive" ng-checked="KVSSForm.IsActive == 1" />
+                    </div>
+                </div>
+                <div class="form-group col-md-12">
+                    <div class="dev-menu-btn">
+                        <button type="submit" class="btn btn-primary" ng-disabled="MyClassForm.$invalid" ng-click="SaveKVSS(true)">{{translation.Submit}}</button>
+                        <button type="submit" class="btn btn-primary" ng-click="ClearKVSS()">{{translation.Clear}}</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div ng-show="DivtringGrid">
+            <div class="col-md-12">
+                <div class="citizen-dash-head">
+                    <div class="table-dropdown">
+                        <div class="col-md-4">
+                            <label>
+                                {{translation.YEAR}} :
+                            </label>
+                            <select class="form-control" id="ddlFYearId" ng-model="KVSSForm.FYearId" ng-init="KVSSForm.FYearId='0'">
+                                <option value="0" disabled>{{translation.SelectOption}}</option>
+                                <option ng-repeat="item in FinancialYearList" value="{{item.FIN_YEAR_MASTR_ID}}">
+                                    {{item.FIN_YEAR_NAME}}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-lg-4">
+                         
+                        </div>
+                        <div class="col-md-4">
+                            <button type="submit" class="btn btn-primary dev-btn" style="margin-top: 25px;" ng-disabled="KVSSForm.FYearId.$invalid" ng-click="GridData()">{{translation.Show}}</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div class="citizen-dash-head">
+                    <table class="table table-responsive devtable" style="overflow-x:auto;">
+                        <thead>
+                            <tr>
+                                <th>
+                                    {{translation.SRNO}}
+                                </th>
+                                <th>
+                                    {{translation.KVSSName}}
+
+                                </th>
+                                <th>
+                                    {{translation.YEAR}}
+
+                                </th>
+                                <th>
+                                    {{translation.AgriProduction}}
+
+                                </th>
+                                <th>
+                                    {{translation.AgriAadan}}
+                                </th>
+                                <th>
+                                    {{translation.MaterialControl}}
+                                </th>
+                                <th>
+                                    {{translation.MaterialUncontrol}}
+                                </th>
+                                <th>
+                                    {{translation.MaterialMedical}}
+                                </th>
+                                <th>
+                                    {{translation.IsActive}}
+                                </th>
+                                <th>
+                                    {{translation.Edit}}
+                                </th>
+
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr dir-paginate="BData in KVSSData | filter: q | orderBy:colsort:reverseSort | itemsPerPage: pageSize" current-page="currentPage" pagination-id="TrainningFormatPagination">
+                                <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                                <td>
+                                    {{_language =='en-us' ?  BData.KvssNameEn : BData.KvssNameHi}}
+                                </td>
+                                <td>
+                                    {{BData.FIN_YEAR_NAME}}
+                                </td>
+                                <td>
+                                    {{BData.AgriProduction}}
+                                </td>
+                                <td>
+                                    {{BData.AgriAadan}}
+                                </td>
+                                <td>
+                                    {{BData.MaterialControl}}
+                                </td>
+                                <td>
+                                    {{BData.MaterialUncontrol}}
+                                </td>
+                                <td>
+                                    {{BData.MaterialMedical}}
+                                </td>
+                                <td>
+                                    <div class="dev-action">
+                                        <label class="switch">
+                                            <input type="checkbox" ng-checked="BData.IsActive == '1'" ng-click="SetStatus(BData)">
+                                            <span class="slider round"></span>
+                                        </label>
+                                    </div>
+                                </td>
+                                <td>
+                                    <i class="fa fa-edit" data-target="#myModalFeedback" data-toggle="modal" ng-click="update(BData)"></i>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="col-md-10">
+                <div class="text-center">
+                    <dir-pagination-controls boundary-links="true" pagination-id="TrainningFormatPagination" on-page-change="pageChangeHandler(newPageNumber)" template-url="/dirPagination.tpl.html"></dir-pagination-controls>
+                </div>
+            </div>
+            <div class="form-group col-md-12">
+                <div class="dev-align-btn">
+                    <a class="btn btn-primary dev-btn" style="text-transform:capitalize;" href="../User/DashBoard"> Back</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+

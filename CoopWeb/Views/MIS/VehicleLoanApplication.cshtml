@@ -1,0 +1,1710 @@
+﻿@if (((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]) != null)
+{
+    if (((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).UserType == "C")
+    {
+        Layout = "~/Views/Shared/_CitizenLayout.cshtml";
+    }
+    else
+    {
+        Layout = "~/Views/Shared/_Layout.cshtml";
+    }
+}
+else
+{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script>
+    function printpage() {
+        var divToPrint = document.getElementById("printTable");
+        newWin = window.print();
+        newWin.document.write(divToPrint.outerHTML);
+        newWin.print();
+        newWin.close();
+    }
+</script>
+<script src="~/Scripts/AngularFramework/VehicleLoanApplicationForm.js"></script>
+<script src="~/Scripts/jquery.unobtrusive-ajax.min.js"></script>
+<script type="text/javascript">
+    function OnSuccess(data) {
+        $('#preloader').hide();
+        if (data.UserType == 'C') {
+            $('#FormPost').html(data.result);
+            $('#FormPost').find('form').submit();
+        }
+        else {
+            if (data.result == 'Sucess') {
+                alert('Details Save Successful');
+                window.location = "../Citizen/MemberApplicationView?ApplicationIdEnc=" + data.IdEnc;
+            }
+            else {
+                ShowModelAlert("Society Member Registration", 'Issue in Payment Receiveing Please Try after Some time');
+            }
+        }
+    }
+    function OnFailure(data) {
+        $('#preloader').hide();
+        alert(JSON.stringify(data));
+    }
+    function OnBegin() {
+        $('#preloader').show();
+    }
+
+    function isNumber(evt) {
+        var iKeyCode = (evt.which) ? evt.which : evt.keyCode
+        if (iKeyCode != 46 && iKeyCode > 31 && (iKeyCode < 48 || iKeyCode > 57))
+            return false;
+
+        return true;
+    }
+    function ValidateAlpha(evt) {
+        var keyCode = (evt.which) ? evt.which : evt.keyCode
+        if ((keyCode < 65 || keyCode > 90) && (keyCode < 97 || keyCode > 123) && keyCode != 32)
+
+            return false;
+        return true;
+    };
+    $(document).ready(function () {
+        $("select").on("change", function () {
+            $(this).removeClass("notValid");
+        });
+
+
+        $(".expandDetails").click(function () {
+            var panl_id = $(this).attr("dat-val");
+            if ($(this).hasClass("fa-plus-circle")) {
+                $(this).removeClass("fa-plus-circle").addClass("fa-minus-circle")
+            } else {
+                $(this).addClass("fa-plus-circle").removeClass("fa-minus-circle")
+            }
+            $("#" + panl_id).slideToggle("slow");
+        });
+
+    });
+
+    function previewFile(ths) {
+        var indx = ths.id.split('_')[1];
+        var preview = document.querySelector('img_' + indx);
+        var file = ths.files[0];
+        var reader = new FileReader();
+        reader.onloadend = function () {
+            $('#img_' + indx).attr("src", reader.result);
+        }
+
+        if (file) {
+            reader.readAsDataURL(file);
+        }
+    }
+
+</script>
+<style>
+    label {
+        display: inline-block;
+        width: 100% !important;
+        margin-bottom: 5px;
+        font-weight: 700;
+    }
+
+    .zoom {
+        transition: transform .2s; /* Animation */
+        margin: 0 auto;
+    }
+
+        .zoom:hover {
+            padding-left: 30px;
+            transform: scale(2.5); /* (150% zoom - Note: if the zoom is too large, it will go outside of the viewport) */
+        }
+
+
+    ul.pagination {
+        margin: 3px 0 0 0 !important;
+    }
+
+    .dataTables_info {
+        float: left;
+        margin-top: 10px;
+    }
+
+    span.mad {
+    color:red;
+    }
+</style>
+
+<style>
+    @@media print {
+
+        .profile-d1 {
+            color: #000 !important;
+            background: #fff !important;
+            border-radius: 5px !important;
+            margin-bottom: 20px !important;
+        }
+
+        .profile-d1-hr {
+            font-size: 17px !important;
+            background: #025e63 !important;
+            padding: 10px 15px !important;
+            color: #fff !important;
+            border-radius: 4px !important;
+        }
+
+        .dev-spancon {
+            font-size: 13px !important;
+            color: #424242 !important;
+            font-weight: 500 !important;
+        }
+
+        label {
+            color: #025e63 !important;
+            font-size: 14px !important;
+        }
+
+        .devtable thead tr th {
+            background: #64c0c5 !important;
+            color: #fff !important;
+        }
+
+        .col-lg-12, .col-md-12, .col-sm-12, .col-xs-12 {
+            display: block !important;
+            width: auto !important;
+            height: auto !important;
+            overflow: visible !important;
+        }
+
+        .table-responsive {
+            display: block !important;
+            width: auto !important;
+            height: auto !important;
+            overflow: visible !important;
+        }
+
+        .table > tbody > tr > td, .table > tbody > tr > th, .table > tfoot > tr > td, .table > tfoot > tr > th, .table > thead > tr > td, .table > thead > tr > th {
+            border-top: unset !important;
+        }
+
+        .main-header {
+            display: none !important;
+        }
+
+        .sidebar {
+            display: none !important;
+        }
+
+        .dev-toggle-bg {
+            display: none !important;
+        }
+
+        .printhideth {
+            display: none !important;
+        }
+
+        .copydev {
+            display: none !important;
+        }
+
+        .print {
+            display: none !important;
+        }
+
+        .devpage-breadcrumb {
+            display: none !important;
+        }
+
+        .visible-print {
+            display: block !important;
+        }
+
+        table.visible-print {
+            display: table !important;
+        }
+
+        tr.visible-print {
+            display: table-row !important;
+        }
+
+        th.visible-print,
+        td.visible-print {
+            display: table-cell !important;
+        }
+    }
+</style>
+
+<style>
+    @@media print {
+        .visible-print {
+            display: block !important
+        }
+
+        table.visible-print {
+            display: table !important
+        }
+
+        tr.visible-print {
+            display: table-row !important
+        }
+
+        td.visible-print, th.visible-print {
+            display: table-cell !important
+        }
+    }
+
+    .visible-print-block {
+        display: none !important
+    }
+
+    @@media print {
+        .visible-print-block {
+            display: block !important
+        }
+    }
+
+    .visible-print-inline {
+        display: none !important
+    }
+
+    @@media print {
+        .visible-print-inline {
+            display: inline !important
+        }
+    }
+
+    .visible-print-inline-block {
+        display: none !important
+    }
+
+    @@media print {
+        .visible-print-inline-block {
+            display: inline-block !important
+        }
+    }
+
+    @@media print {
+        .hidden-print {
+            display: none !important
+        }
+    }
+
+    .profile-d1 {
+        color: #000;
+        background: #fff;
+        border-radius: 5px;
+        margin-bottom: 20px;
+    }
+
+    .profile-d1-hr {
+        font-size: 17px;
+        background: #025e63;
+        padding: 10px 15px;
+        color: #fff;
+        border-radius: 4px;
+    }
+
+    .dev-spancon {
+        font-size: 13px;
+        color: #424242;
+        font-weight: 500;
+    }
+
+    label {
+        color: #025e63;
+        font-size: 14px;
+    }
+
+    .devtable thead tr th {
+        background: #64c0c5;
+        color: #fff;
+    }
+
+    .table > tbody > tr > td, .table > tbody > tr > th, .table > tfoot > tr > td, .table > tfoot > tr > th, .table > thead > tr > td, .table > thead > tr > th {
+        border-top: unset;
+    }
+</style>
+
+
+<style>
+    a > i.fa.fa-plus-circle {
+        font-size: 25px;
+        cursor: pointer;
+    }
+
+    a:hover > i.fa.fa-plus-circle {
+        font-size: 26px;
+        cursor: pointer;
+    }
+
+    a > i.fa.fa-eye {
+        font-size: 25px;
+        cursor: pointer;
+    }
+
+    a:hover > i.fa.fa-eye {
+        font-size: 26px;
+        cursor: pointer;
+    }
+
+    .add-more {
+    }
+
+    .thCenter {
+        text-align: center !important;
+    }
+
+    .thverticalMiddle {
+        vertical-align: middle !important;
+    }
+
+    .notValid {
+        border: solid 1px red !important
+    }
+
+    .rowdeleteBtn {
+        color: #fff !important;
+        font-weight: bold !important;
+        font-size: 18px !important;
+    }
+</style>
+<div ng-app="LoanApplicationMod">
+    <div ng-controller="LoanApplicationCnt">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <h4 class="citizen-dash-head"> {{translation.VehicleLoanApplicationForm}}</h4>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#"> {{translation.PLDB}} </a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;">{{translation.VehicleLoanApplicationForm}} </span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="col-lg-12">
+            <div class="table-responsive citizen-dash-head">
+                <div id="divUserRegistration1">
+
+                    <div class="dev-masters" name="MyUserForm">
+                        @*<div class="col-lg-12 form-group">
+                                <h4 class="heading-hr ng-binding">  {{translation.MembershipRequest}}</h4>
+                            </div>*@
+                        <div ng-show="divParentDataSelection" ng-if="!IsSubmiApplication">
+                            <div class="col-lg-12 form-group">
+                                <div class="col-lg-2">{{ translation.PLDB}} <span class="error">*</span></div>
+                                <div class="col-lg-4">
+                                    <select ng-model="MemberRegistration.PLDB_ID" ng-disabled="IsSubmiApplication" id="ddlDistrict" class="form-control" ng-init="MemberRegistration.PLDB_ID='0'" ng-change="PLDBBranchList('0')">
+                                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                                        <option ng-repeat="itemPLDB in PLDB | orderBy:'PldbId'" value="{{itemPLDB.PldbId}}">
+                                            {{itemPLDB.PLDBName}}
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="col-lg-2">{{ translation.Branch}} <span class="error">*</span></div>
+                                <div class="col-lg-4">
+                                    <select ng-model="MemberRegistration.Branch_ID" ng-disabled="IsSubmiApplication" id="ddlblock" class="form-control" ng-init="MemberRegistration.Branch_ID='0'" ng-change="GetGramPanchayatData()">
+                                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                                        <option ng-repeat="itemBlock in PLDBBranches | orderBy:'BLOCK_ENG'" value="{{itemBlock.BLOCK_ID}}">
+                                            {{_language =='en-us' ?  itemBlock.BLOCK_ENG : itemBlock.BLOCK_MANGAL}}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="dvLoanApplicationForm" ng-if="LoanApplicationLetter">
+                            <div class="col-lg-12 form-group" ng-if="IsSubmiApplication">
+                                <h4 class="heading-hr ng-binding">{{translation.LoanDetails}} <a ng-show="IsSubmiApplication" href="javascript:void(0);" dat-val="panal_0" class="fa fa-plus-circle expandDetails" style="float:right;font-size: 25px;"></a></h4>
+                            </div>
+                            <div class="col-lg-12 clspanal" id="panal_0" ng-if="IsSubmiApplication">
+                                <div class="col-lg-12">
+                                    <div class="col-lg-1"><label>{{translation.ApplicationNo}}</label></div>
+                                    <div class="col-lg-4">
+                                        {{LoanDetails.application_no}}
+                                    </div>
+                                </div>
+                                <div class="col-lg-12">
+                                    <div class="col-lg-1"><label>{{translation.PLDB}}</label></div>
+                                    <div class="col-lg-4">
+                                        {{GetNameFromList(PLDB,LoanDetails.pldb_id,'District')}}
+                                    </div>
+                                </div>
+                                <div class="col-lg-12">
+                                    <div class="col-lg-1"><label>{{translation.Branch}}</label></div>
+                                    <div class="col-lg-4">
+                                        {{GetNameFromList(PLDBBranches,LoanDetails.branch_id,'Branch')}}
+                                    </div>
+                                </div>
+                                <div class="col-lg-12">
+                                    <div class="col-lg-1"><label>{{translation.Status}}</label></div>
+                                    <div class="col-lg-4">
+                                        {{LoanDetails.status}}
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            @*<div class="col-lg-12 form-group">
+                                    <h4 class="heading-hr ng-binding">{{translation.Members}} <a ng-show="IsSubmiApplication" href="javascript:void(0);" dat-val="panal_1" class="fa fa-plus-circle expandDetails" style="float:right;font-size: 25px;"></a></h4>
+                                </div>*@
+
+
+                            <div class="col-lg-12 form-group">
+                                <h4 class="heading-hr ng-binding">{{translation.LoanAmountDetails}}<a ng-show="IsSubmiApplication" href="javascript:void(0);" dat-val="panal_2" class="fa fa-plus-circle expandDetails" style="float:right;font-size: 25px;"></a></h4>
+                            </div>
+
+                            <div class="col-lg-12  clspanal" id="panal_2">
+                                <div class="table-responsive">
+                                    <table class="table devtable" id="tblLoanAmountDetail">
+                                        <thead>
+                                            <tr>
+                                                <th>{{translation.SRNO}}</th>
+
+                                                <th>{{translation.Scheme}}</th>
+                                                <th>{{translation.Sector}}</th>
+                                                <th>{{translation.PurposeOfLoan}}</th>
+                                                <th>{{translation.LoanType}}</th>
+                                                <th>{{translation.EstimatedTotalAmount}}</th>
+                                                <th>{{translation.LoanAmountApplied}}</th>
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr ng-repeat="item in LoanAmountDetails" ng-if="item.IsDelete==false">
+                                                <td>{{$index+1}}</td>
+                                                <td>
+                                                    <div style="width:100%">
+                                                        @*<select ng-model="item.SchemeId" id="SchemeId" class="form-control" ng-init="item.SchemeId='0'" ng-change="LoadSector(item.SchemeId,$index)">
+                                                            <option value="0" selected="selected">{{translation.SelectOption}}</option>
+                                                            <option ng-repeat="itm in item.LoanSchemeList" value="{{itm.scheme_id}}">
+                                                                {{_language =='en-us' ?  itm.scheme_name_en : itm.scheme_name_hi}}
+                                                            </option>
+                                                        </select>*@
+                                                        <select ng-model="item.SchemeId" id="SchemeId" class="form-control" ng-init="item.SchemeId='0'" ng-change="LoadPurpose(item.SchemeId,$index)">
+                                                            <option value="0" ng-disabled="true" selected="selected">{{translation.SelectOption}}</option>
+                                                            <option ng-repeat="itm in item.LoanSchemeList" ng-disabled="true" value="{{itm.scheme_id}}">
+                                                                {{_language =='en-us' ?  itm.scheme_name_en : itm.scheme_name_hi}}
+                                                            </option>
+                                                        </select>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div style="width:100%">
+                                                        <select ng-model="item.SectorId" id="sector_id" class="form-control" ng-init="item.SectorId='0'" ng-change="LoadPurpose(item.SectorId,$index)">
+                                                            <option value="0" selected="selected">{{translation.SelectOption}}</option>
+                                                            <option ng-repeat="itm in item.LoanSectorList" value="{{itm.sector_id}}">
+                                                                {{_language =='en-us' ?  itm.sector_name_en : itm.sector_name_hi}}
+                                                            </option>
+                                                        </select>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div style="width:100%">
+                                                        <select ng-model="item.PurposeOfLoan" class="form-control" ng-init="item.PurposeOfLoan='0'">
+                                                            <option value="0">{{translation.SelectOption}}</option>
+                                                            <option ng-repeat="itm in item.PurposeOfLoanList" value="{{itm.purpose_id}}">
+                                                                {{_language =='en-us' ?  itm.purpose_name_en : itm.purpose_name_hi}}
+                                                            </option>
+                                                        </select>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div style="width:100%">
+                                                        <select ng-model="item.LoanType" class="form-control" ng-init="item.LoanType='0'">
+                                                            <option value="0">{{translation.SelectOption}}</option>
+                                                            <option ng-repeat="itm in LoanTypeList" value="{{itm.LovValuesId}}">
+                                                                {{_language =='en-us' ?  itm.LovCode : itm.Lovdescription}}
+                                                            </option>
+                                                        </select>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <input type="text" name="EstimatedTotalAmount" class="form-control" placeholder="{{translation.EstimatedTotalAmount}}" ng-model="item.EstimatedTotalAmount" maxlength="10" autocomplete="off" onKeyPress="return isNumber(event);">
+                                                </td>
+                                                <td>
+                                                    <input type="text" name="LoanAmountApplied" class="form-control" placeholder="{{translation.LoanAmountApplied}}" ng-model="item.LoanAmountApplied" maxlength="10" autocomplete="off" onKeyPress="return isNumber(event);">
+                                                </td>
+                                                <td style="text-align: right !important">
+                                                    <i class="fa fa-trash clsShowHide btn btn btn-xs btn-danger tooltips rowdeleteBtn" id="Remove_2" ng-if="LoanAmountDetails.length>1" ng-click="RemoveLoanAmountRow($index)" style=""></i>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                        @*<tfoot>
+                                                <tr>
+                                                    <td colspan="6"></td>
+                                                    <td colspan="2" style="text-align:right;cursor:pointer;" ng-click="AddLandDetail()"><i class="fa fa-plus" title="Add New"></i>{{translation.Add}}</td>
+                                                </tr>
+                                            </tfoot>*@
+                                    </table>
+                                </div>
+                            </div>
+
+
+                            <div class="col-lg-12 form-group">
+                                <h4 class="heading-hr ng-binding">आवेदक का विवरण <a ng-show="IsSubmiApplication" href="javascript:void(0);" dat-val="panal_1" class="fa fa-plus-circle expandDetails" style="float:right;font-size: 25px;"></a></h4>
+                            </div>
+
+                            <div class="col-lg-12 clspanal" id="panal_1">
+                                <div  ng-repeat="item in LoanMembers">
+                                    <div class="row" style="margin-top:5px;">
+                                        <div class="col-lg-3">
+                                            <div class="col-lg-6">
+                                                आधार संख्या<span class="mad">*</span>
+                                            </div>
+                                            <div class="col-lg-6">
+                                                <input type="text" name="MembershipNumber" class="form-control" ng-blur="GetMemberDetails(item.AADHARNo,$index)" placeholder="{{translation.AADHARNo}}" ng-model="item.AADHARNo" autocomplete="off"  onKeyPress="return isNumber(event);">
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-3">
+                                            <div class="col-lg-4">
+                                                बैंक की सदस्य संख्या<span class="mad">*</span>
+                                            </div>
+                                            <div class="col-lg-8">
+                                                <input type="text" name="MembershipNumber" class="form-control" ng-blur="GetMemberDetails(item.MembershipNumber,$index)" placeholder="{{translation.MembershipNumber}}" ng-model="item.MembershipNumber" autocomplete="off" onKeyPress="return isNumber(event);">
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-3" ng-if="ShowApplicanDetails">
+                                            <div class="col-lg-5">
+                                                आवेदक का पूरा नाम<span class="mad">*</span>
+                                            </div>
+                                            <div class="col-lg-7">
+                                                <input type="text" name="Name" disabled class="form-control" placeholder="{{translation.Name}}" title="{{item.Name}}" ng-model="item.Name" autocomplete="off" onKeyPress="return ValidateAlpha(event);">
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-3" ng-if="ShowApplicanDetails">
+                                            <div class="col-lg-5">
+                                                पिता/पति का नाम<span class="mad">*</span>
+                                            </div>
+                                            <div class="col-lg-7">
+                                                <input type="text" class="form-control" placeholder="पिता/पति का नाम" />
+                                                <input type="text" name="FatherName" disabled class="form-control" title="{{item.FatherName}}" placeholder="पिता/पति का नाम" ng-model="item.FatherName" autocomplete="off" onKeyPress="return ValidateAlpha(event);">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row" style="margin-top:5px;" ng-if="ShowApplicanDetails">
+
+                                        <div class="col-lg-3">
+                                            <div class="col-lg-6">
+                                                आयु<span class="mad">*</span>
+                                            </div>
+                                            <div class="col-lg-6">
+                                                <input type="text" name="Age" disabled style="width:55px;" class="form-control" placeholder="{{translation.Age}}" ng-model="item.Age" maxlength="2" autocomplete="off" onKeyPress="return isNumber(event);">
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-3">
+                                            <div class="col-lg-4">
+                                                जाती<span class="mad">*</span>
+                                            </div>
+                                            <div class="col-lg-8">
+                                                <select id="ddlCategory" ng-model="Application.CategoryId" class="form-control" ng-init="Search.CategoryId=''">
+                                                    <option value="">{{translation.SelectOption}}</option>
+                                                    <option ng-repeat="item in CategoryList | orderBy:'CODEID'" value="{{item.CODEID}}">
+                                                        {{_language =='en-us' ?  item.CODENAME : item.CODENAME_MANGAL}}
+                                                    </option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-lg-3">
+                                            <div class="col-lg-5">
+                                                वर्त्तमान में सेवा /व्यवसाय<span class="mad">*</span>
+                                            </div>
+                                            <div class="col-lg-7">
+                                                <input type="text" class="form-control" placeholder="वर्त्तमान में सेवा /व्यवसाय" />
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-3">
+                                            <div class="col-lg-5">
+                                                निवास /व्यवसाय  स्थल का पूर्ण पता<span class="mad">*</span>
+                                            </div>
+                                            <div class="col-lg-7">
+                                                <textarea type="text" rows="1" class="form-control" placeholder="निवास /व्यवसाय  स्थल का पूर्ण पता"></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row" style="margin-top:5px;" ng-if="ShowApplicanDetails">
+                                        <div class="col-lg-3">
+                                            <div class="col-lg-6">
+                                                स्थाई निवास का पूर्ण पता<span class="mad">*</span>
+                                            </div>
+                                            <div class="col-lg-6">
+                                                <textarea type="text" rows="1" class="form-control" placeholder="स्थाई निवास का पूर्ण पता "></textarea>
+
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-3">
+                                            <div class="col-lg-4">
+                                                टेलीफोन निवास
+                                            </div>
+                                            <div class="col-lg-8">
+                                                <input type="text" class="form-control" placeholder="निवास" />
+                                            </div>
+                                        </div>
+
+                                        <div class="col-lg-3">
+                                            <div class="col-lg-5">
+                                                टेलीफोन व्यवसाय
+                                            </div>
+                                            <div class="col-lg-7">
+                                                <input type="text" class="form-control" placeholder="व्यवसाय" />
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                    <div class="row" style="margin-top:5px;" ng-if="ShowApplicanDetails">
+                                        <div class="col-lg-3">
+                                            <div class="col-lg-6">
+                                                आवेदक की शेक्षणिक योग्यता
+                                            </div>
+                                            <div class="col-lg-6">
+                                                <textarea type="text" rows="1" class="form-control" placeholder="आवेदक की शेक्षणिक योग्यता"></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-3">
+                                            <div class="col-lg-4">
+                                                आवेदक की मासिक आय<span class="mad">*</span>
+                                            </div>
+                                            <div class="col-lg-8">
+                                                <input type="text" class="form-control" placeholder="आवेदक की मासिक आय" />
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-3">
+                                            <div class="col-lg-5">
+                                                परिवार के आश्रितों की संख्या
+                                            </div>
+                                            <div class="col-lg-7">
+                                                <input type="text" class="form-control" placeholder="परिवार के आश्रितों की संख्या" />
+                                            </div>
+                                        </div>
+
+                                        <div class="col-lg-3">
+                                            <div class="col-lg-5">
+                                                परिवार के जीवनोपार्जन  हेतु प्रतिमाह न्यूनतम राशि  की आवश्यकता
+                                            </div>
+                                            <div class="col-lg-7">
+                                                <input type="text" class="form-control" placeholder="परिवार के जीवनोपार्जन  हेतु प्रतिमाह न्यूनतम राशि  की आवश्यकता" />
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                             
+
+
+
+                                <div class="row"  ng-if="ShowApplicanDetails">
+                                   
+                                        <div class="col-lg-12">
+                                            <div class="col-lg-6">
+                                                <label><input type="checkbox" style="margin-right: 5px;" ng-model="Applicaion.IsApplicantShared" value="">क्यां आवेदक सांझेदार हैं ? यदि हाँ , तो , रजिस्ट्रेशन /सांझेदारी अभिलेख की प्रमाणित प्रति सलंग्न ली जाय | </label>
+                                            </div>
+                                            <div class="col-lg-6" ng-if="Applicaion.IsApplicantShared">
+                                                <input type="file" />
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-12">
+                                            <div class="col-lg-6">
+                                                <label><input type="checkbox" style="margin-right: 5px;"  ng-model="Applicaion.IsApplicantHasTransportCompany" value="">क्यां आवेदक की ट्रांसपोर्ट की कम्पनी हैं तो , उसकी रजिस्ट्रेशन   प्रति संलग्न की जाय | </label>
+                                            </div>
+                                            <div class="col-lg-6" ng-if="Applicaion.IsApplicantHasTransportCompany">
+                                                <input type="file" />
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-12">
+                                            <div class="col-lg-6">
+                                                <label><input type="checkbox" style="margin-right: 5px;" ng-model="Applicaion.IsDrivinglicense" value="">वाहन को स्वयं चलायेगा अथवा ड्राईवर नियोजित किये जाने हैं | सं.  नाम  एवं ड्राईविंग लाइसेंस  की प्रमाणित  फोटो संलग्न की जाये |</label>
+                                            </div>
+                                            <div class="col-lg-6" ng-if="Applicaion.IsDrivinglicense">
+                                                <input type="file" />
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-12">
+                                            <div class="col-lg-6">
+                                                <label><input type="checkbox"  style="margin-right: 5px;" ng-model="Applicaion.IsProposedRented"  value="">यदि वाहन अन्य संस्था को किराए पर दिया जाना  प्रस्तावित हैं तो सम्बंधित से प्रस्ताव की प्रति  संलग्न की जाये | </label>
+                                            </div>
+                                            <div class="col-lg-6" ng-if="Applicaion.IsProposedRented">
+                                                <input type="file" />
+                                            </div>
+                                        </div>
+
+                                   
+                                </div>
+
+                                @*<table class="table devtable" id="tblLandMemberDetail">
+                                        <thead>
+                                            <tr>
+                                                <th>{{translation.SRNO}}</th>
+                                                <th>{{translation.IsMainMember}}</th>
+                                                <th ng-if="IsSubmiApplication">{{translation.Photo}}</th>
+                                                <th>{{translation.AADHARNo}}</th>
+                                                <th>{{translation.Name}}</th>
+                                                <th>{{translation.NameOfFather}}</th>
+                                                <th>{{translation.Age}}</th>
+                                                <th>{{translation.FarmerCategory}}</th>
+                                                <th>{{translation.CategoryHeading}}</th>
+                                                <th colspan="3">{{translation.Address}}</th>
+                                                <th>{{translation.MobileNo}}</th>
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr ng-repeat="item in LoanMembers" ng-if="item.IsDelete==false">
+                                                <td>{{$index+1}}</td>
+                                                <td><input type="checkbox" name="IsMainMember" ng-model="item.IsMainMember" ng-change="ChooseDefaultMember($index)" /></td>
+                                                <td ng-if="IsSubmiApplication"><img src="{{item.Photo!=''?item.Photo:'../Content/Images/Balnk.png'}}" style="width:80px;height:80px;" /></td>
+                                                <td>
+                                                    <input type="text" name="MembershipNumber" class="form-control" ng-blur="GetMemberDetails(item.MembershipNumber,$index)" placeholder="{{translation.AADHARNo}}" ng-model="item.MembershipNumber" autocomplete="off" onKeyPress="">
+                                                </td>
+                                                <td>
+                                                    <input type="text" name="Name" disabled class="form-control" placeholder="{{translation.Name}}" title="{{item.Name}}" ng-model="item.Name" autocomplete="off" onKeyPress="return ValidateAlpha(event);">
+                                                </td>
+                                                <td>
+                                                    <input type="text" name="FatherName" disabled class="form-control" title="{{item.FatherName}}" placeholder="{{translation.NameOfFather}}" ng-model="item.FatherName" autocomplete="off" onKeyPress="return ValidateAlpha(event);">
+                                                </td>
+                                                <td>
+                                                    <input type="text" name="Age" disabled style="width:55px;" class="form-control" placeholder="{{translation.Age}}" ng-model="item.Age" maxlength="2" autocomplete="off" onKeyPress="return isNumber(event);">
+                                                </td>
+
+                                                <td>
+                                                    <input type="text" name="FarmerCategory" disabled class="form-control" style="width: 110px;" title="{{item.FarmerCategory}}" ng-model="item.FarmerCategory" maxlength="2" autocomplete="off" onKeyPress="return isNumber(event);">
+                                                </td>
+                                                <td>
+                                                    <input type="text" name="Category" disabled class="form-control" tite="{{item.CategoryId}}" style="width: 100px;" placeholder="{{translation.Category}}" ng-model="item.CategoryId" maxlength="2" autocomplete="off" onKeyPress="return isNumber(event);">
+                                                </td>
+
+
+                                                <td>
+                                                    <input type="text" name="Tehsil" disabled class="form-control" placeholder="{{translation.Tehsil}}" title="Tehsil:{{item.Tehsil}}" ng-model="item.Tehsil" maxlength="2" autocomplete="off" onKeyPress="return isNumber(event);">
+
+
+                                                </td>
+                                                <td>
+                                                    <input type="text" name="VillagePanchayat" disabled class="form-control" placeholder="{{translation.VillagePanchayat}}" title="Panchayat:{{item.VillagePanchayat}}" ng-model="item.VillagePanchayat" maxlength="2" autocomplete="off" onKeyPress="return isNumber(event);">
+
+
+                                                </td>
+                                                <td>
+                                                    <input type="text" name="Village" disabled class="form-control" placeholder="{{translation.Village}}" title="Village:{{item.Village}}" ng-model="item.Village" maxlength="2" autocomplete="off" onKeyPress="return isNumber(event);">
+
+
+                                                </td>
+
+
+                                                <td>
+                                                    <input type="text" style="width: 105px;" disabled name="MobileNo" class="form-control" placeholder="{{translation.MobileNo}}" title="{{item.MobileNo}}" ng-model="item.MobileNo" maxlength="15" autocomplete="off" onKeyPress="return isNumber(event);">
+                                                </td>
+                                                <td style="text-align: right !important">
+                                                    <i class="fa fa-trash clsShowHide btn btn btn-xs btn-danger tooltips rowdeleteBtn" id="Remove_2" ng-if="LoanMembers.length>1" ng-click="RemoveMemberRow($index)" style=""></i>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <td colspan="10"></td>
+                                                <td colspan="3" style="text-align:right;cursor:pointer;" ng-click="AddNewMember()"><i class="fa fa-plus" title="Add New"></i>{{translation.Add}}</td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>*@
+                            </div>
+
+
+
+                            <div class="col-lg-12 form-group">
+                                <h4 class="heading-hr ng-binding">आवेदक की भूमि व अन्य सम्पत्ति का विवरण<a ng-show="IsSubmiApplication" href="javascript:void(0);" dat-val="panal_3" class="fa fa-plus-circle expandDetails" style="float:right;font-size: 25px;"></a></h4>
+                            </div>
+
+                            <div class="col-lg-12  clspanal" id="panal_3">
+                                <div class="table-responsive">
+                                    <table class="table devtable" id="tblPropertyDetails">
+                                        <thead>
+                                            <tr>
+                                                <th rowspan="3" class="thverticalMiddle">{{translation.SRNO}}</th>
+                                                <th rowspan="3" class="thverticalMiddle">{{translation.Tehsil}}</th>
+                                                <th rowspan="3" class="thverticalMiddle">{{translation.GramPanchayatHeading}}</th>
+                                                <th rowspan="3" class="thverticalMiddle">{{translation.Village}}</th>
+                                                <th rowspan="3" class="thverticalMiddle">{{translation.KhanKulKita}}</th>
+                                                <th colspan="4" class="thverticalMiddle thCenter">{{translation.TotalArea}}</th>
+                                                <th rowspan="3" class="thverticalMiddle">{{translation.AnyaVivran}}</th>
+                                                <th rowspan="3" class="thverticalMiddle">{{translation.Specifications}}</th>
+                                                <th rowspan="3"></th>
+
+                                            </tr>
+                                            <tr>
+                                                <th colspan="2" class="thverticalMiddle thCenter">{{translation.Chahi}}</th>
+                                                <th colspan="2" class="thverticalMiddle thCenter">{{translation.Barani}}</th>
+
+                                            </tr>
+                                            <tr>
+                                                <th class="thCenter">{{translation.BiHain}}</th>
+                                                <th class="thCenter">{{translation.ViAyear}}</th>
+                                                <th class="thCenter">{{translation.BiHain}}</th>
+                                                <th class="thCenter">{{translation.ViAyear}}</th>
+
+                                            </tr>
+
+
+
+                                        </thead>
+                                        <tbody>
+                                            <tr ng-repeat="item in PropertyDetailsList" ng-if="item.IsDelete==false">
+                                                <td>{{$index+1}}</td>
+                                                <td>
+                                                    <div style="width:100%">
+                                                        <select ng-model="item.Tehsil" class="form-control" ng-init="item.Tehsil" style="width: 110px;" ng-change="GetPropertyDetailsPanchayt($index)">
+                                                            <option value="0">{{translation.Tehsil}}</option>
+                                                            <option ng-repeat="itemBlock in item.TehsilList | orderBy:'BLOCK_ENG'" value="{{itemBlock.BLOCK_ID}}">
+                                                                {{_language =='en-us' ?  itemBlock.BLOCK_ENG : itemBlock.BLOCK_MANGAL}}
+                                                            </option>
+                                                        </select>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div style="width:100%">
+                                                        <select ng-model="item.GramPanchayat" class="form-control" ng-init="item.GramPanchayat" style="width: 110px;" ng-change="GetPropertyDetailsVillages($index)">
+                                                            <option value="0">{{translation.GramPanchayatHeading}}</option>
+                                                            <option ng-repeat="itemGP in item.GramPanchayatList | orderBy:'GramPanchayats'" value="{{itemGP.GP_ID}}">
+                                                                {{_language =='en-us' ?  itemGP.GP_ENG : itemGP.GP_MANGAL}}
+                                                            </option>
+                                                        </select>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div style="width:100%">
+                                                        <select ng-model="item.Village" class="form-control" ng-init="item.Village" style="width: 110px;">
+                                                            <option value="0">{{translation.Village}}</option>
+                                                            <option ng-repeat="itm in item.VillageList" value="{{itm.VILLAGE_ID}}">
+                                                                {{_language =='en-us' ?  itm.VILLAGE_ENG : itm.VILLAGE_MANGAL}}
+                                                            </option>
+                                                        </select>
+                                                    </div>
+                                                </td>
+
+
+                                                <td>
+                                                    <input type="text" name="MembershipNumber" class="form-control" placeholder="{{translation.KhanKulKita}}" ng-model="item.Khasara" autocomplete="off" onKeyPress="">
+                                                </td>
+                                                <td>
+                                                    <input type="text" name="MembershipNumber" class="form-control" placeholder="{{translation.BiHain}}" ng-model="item.ChahiBi" autocomplete="off" onKeyPress="">
+                                                </td>
+                                                <td>
+                                                    <input type="text" name="MembershipNumber" class="form-control" placeholder="{{translation.ViAyear}}" ng-model="item.ChahiVi" autocomplete="off" onKeyPress="">
+                                                </td>
+                                                <td>
+                                                    <input type="text" name="MembershipNumber" class="form-control" placeholder="{{translation.BiHain}}" ng-model="item.BaraniBi" autocomplete="off" onKeyPress="">
+                                                </td>
+
+                                                <td>
+                                                    <input type="text" name="MembershipNumber" class="form-control" placeholder="{{translation.ViAyear}}" ng-model="item.BaraniVi" autocomplete="off" onKeyPress="">
+                                                </td>
+                                                <td>
+                                                    <textarea rows="1" class="form-control" maxlength="150" placeholder="{{translation.OtherDetails}}" ng-model="item.OtherDetails"></textarea>
+                                                </td>
+                                                <td>
+                                                    <textarea rows="1" class="form-control" maxlength="150" placeholder="{{translation.Specifications}}" ng-model="item.Specifications"></textarea>
+                                                </td>
+                                                <td style="text-align: right !important">
+                                                    <i class="fa fa-trash clsShowHide btn btn btn-xs btn-danger tooltips rowdeleteBtn" id="Remove_2" ng-if="PropertyDetailsList.length>1" ng-click="RemovePropertyRow($index)" style=""></i>
+                                                </td>
+
+                                            </tr>
+                                        </tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <td colspan="11"></td>
+                                                <td style="text-align:right;cursor:pointer;" ng-click="AddNewPropertyDetails()"><i class="fa fa-plus" title="Add New"></i>{{translation.Add}}</td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+
+
+
+                            <div class="col-lg-12 form-group">
+                                <h4 class="heading-hr ng-binding">गारण्टरों का विवरण<a ng-show="IsSubmiApplication" href="javascript:void(0);" dat-val="panal_1" class="fa fa-plus-circle expandDetails" style="float:right;font-size: 25px;"></a></h4>
+                            </div>
+
+
+                            <div class="col-lg-12 clspanal" id="panal_1">
+
+                                <div class="row">
+                                    <div class="col-lg-1" style="width:10px;">
+                                        1.
+                                    </div>
+                                    <div class="col-lg-2">
+                                        <div class="col-lg-4">
+                                            नाम<span class="mad">*</span>
+                                        </div>
+                                        <div class="col-lg-8">
+                                            <input type="text" class="form-control" placeholder="नाम" />
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-3">
+                                        <div class="col-lg-4">
+                                            पिता/पति का नाम<span class="mad">*</span>
+                                        </div>
+                                        <div class="col-lg-8">
+                                            <input type="text" class="form-control" placeholder="पिता/पति का नाम" />
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-2">
+                                        <div class="col-lg-4">
+                                            आयु<span class="mad">*</span>
+                                        </div>
+                                        <div class="col-lg-8">
+                                            <input type="text" class="form-control" placeholder="आयु" />
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-2">
+                                        <div class="col-lg-4">
+                                            जाती<span class="mad">*</span>
+                                        </div>
+                                        <div class="col-lg-8">
+                                            <select id="ddlCategory" ng-model="Application.CategoryId" class="form-control" ng-init="Search.CategoryId=''">
+                                                <option value="">{{translation.SelectOption}}</option>
+                                                <option ng-repeat="item in CategoryList | orderBy:'CODEID'" value="{{item.CODEID}}">
+                                                    {{_language =='en-us' ?  item.CODENAME : item.CODENAME_MANGAL}}
+                                                </option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-2">
+                                        <div class="col-lg-4">
+                                            पता<span class="mad">*</span>
+                                        </div>
+                                        <div class="col-lg-8">
+                                            <textarea type="text" class="form-control" rows="1" placeholder="पता"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row" style="margin-top:5px;">
+                                    <div class="col-lg-1" style="width:10px;">
+                                        2.
+                                    </div>
+                                    <div class="col-lg-2">
+                                        <div class="col-lg-4">
+                                            नाम<span class="mad">*</span>
+                                        </div>
+                                        <div class="col-lg-8">
+                                            <input type="text" class="form-control" placeholder="नाम" />
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-3">
+                                        <div class="col-lg-4">
+                                            पिता/पति का नाम<span class="mad">*</span>
+                                        </div>
+                                        <div class="col-lg-8">
+                                            <input type="text" class="form-control" placeholder="पिता/पति का नाम" />
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-2">
+                                        <div class="col-lg-4">
+                                            आयु<span class="mad">*</span>
+                                        </div>
+                                        <div class="col-lg-8">
+                                            <input type="text" class="form-control" placeholder="आयु" />
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-2">
+                                        <div class="col-lg-4">
+                                            जाती<span class="mad">*</span>
+                                        </div>
+                                        <div class="col-lg-8">
+                                            <select id="ddlCategory" ng-model="Application.CategoryId" class="form-control" ng-init="Search.CategoryId=''">
+                                                <option value="" >{{translation.SelectOption}}</option>
+                                                <option ng-repeat="item in CategoryList | orderBy:'CODEID'" value="{{item.CODEID}}">
+                                                    {{_language =='en-us' ?  item.CODENAME : item.CODENAME_MANGAL}}
+                                                </option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-2">
+                                        <div class="col-lg-4">
+                                            पता<span class="mad">*</span>
+                                        </div>
+                                        <div class="col-lg-8">
+                                            <textarea type="text" class="form-control" rows="1" placeholder="पता"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+
+                            <div class="col-lg-12 form-group">
+                                <h4 class="heading-hr ng-binding">गारण्टरों की भूमि व अन्य सम्पत्ति का विवरण<a ng-show="IsSubmiApplication" href="javascript:void(0);" dat-val="panal_3" class="fa fa-plus-circle expandDetails" style="float:right;font-size: 25px;"></a></h4>
+                            </div>
+
+                            <div class="col-lg-12  clspanal" id="panal_3">
+                                <div class="table-responsive">
+                                    <table class="table devtable" id="tblPropertyDetails">
+                                        <thead>
+                                            <tr>
+                                                <th rowspan="3" class="thverticalMiddle">{{translation.SRNO}}</th>
+                                                <th rowspan="3" class="thverticalMiddle">{{translation.Tehsil}}</th>
+                                                <th rowspan="3" class="thverticalMiddle">{{translation.GramPanchayatHeading}}</th>
+                                                <th rowspan="3" class="thverticalMiddle">{{translation.Village}}</th>
+                                                <th rowspan="3" class="thverticalMiddle">{{translation.KhanKulKita}}</th>
+                                                <th colspan="4" class="thverticalMiddle thCenter">{{translation.TotalArea}}</th>
+                                                <th rowspan="3" class="thverticalMiddle">{{translation.AnyaVivran}}</th>
+                                                <th rowspan="3" class="thverticalMiddle">{{translation.Specifications}}</th>
+                                                <th rowspan="3"></th>
+
+                                            </tr>
+                                            <tr>
+                                                <th colspan="2" class="thverticalMiddle thCenter">{{translation.Chahi}}</th>
+                                                <th colspan="2" class="thverticalMiddle thCenter">{{translation.Barani}}</th>
+
+                                            </tr>
+                                            <tr>
+                                                <th class="thCenter">{{translation.BiHain}}</th>
+                                                <th class="thCenter">{{translation.ViAyear}}</th>
+                                                <th class="thCenter">{{translation.BiHain}}</th>
+                                                <th class="thCenter">{{translation.ViAyear}}</th>
+
+                                            </tr>
+
+
+
+                                        </thead>
+                                        <tbody>
+                                            <tr ng-repeat="item in PropertyDetailsList" ng-if="item.IsDelete==false">
+                                                <td>1</td>
+                                                <td>
+                                                    <div style="width:100%">
+                                                        <select ng-model="item.Tehsil" class="form-control" ng-init="item.Tehsil" style="width: 110px;" ng-change="GetPropertyDetailsPanchayt($index)">
+                                                            <option value="0">{{translation.Tehsil}}</option>
+                                                            <option ng-repeat="itemBlock in item.TehsilList | orderBy:'BLOCK_ENG'" value="{{itemBlock.BLOCK_ID}}">
+                                                                {{_language =='en-us' ?  itemBlock.BLOCK_ENG : itemBlock.BLOCK_MANGAL}}
+                                                            </option>
+                                                        </select>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div style="width:100%">
+                                                        <select ng-model="item.GramPanchayat" class="form-control" ng-init="item.GramPanchayat" style="width: 110px;" ng-change="GetPropertyDetailsVillages($index)">
+                                                            <option value="0">{{translation.GramPanchayatHeading}}</option>
+                                                            <option ng-repeat="itemGP in item.GramPanchayatList | orderBy:'GramPanchayats'" value="{{itemGP.GP_ID}}">
+                                                                {{_language =='en-us' ?  itemGP.GP_ENG : itemGP.GP_MANGAL}}
+                                                            </option>
+                                                        </select>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div style="width:100%">
+                                                        <select ng-model="item.Village" class="form-control" ng-init="item.Village" style="width: 110px;">
+                                                            <option value="0">{{translation.Village}}</option>
+                                                            <option ng-repeat="itm in item.VillageList" value="{{itm.VILLAGE_ID}}">
+                                                                {{_language =='en-us' ?  itm.VILLAGE_ENG : itm.VILLAGE_MANGAL}}
+                                                            </option>
+                                                        </select>
+                                                    </div>
+                                                </td>
+
+
+                                                <td>
+                                                    <input type="text" name="MembershipNumber" class="form-control" placeholder="{{translation.KhanKulKita}}" ng-model="item.Khasara" autocomplete="off" onKeyPress="">
+                                                </td>
+                                                <td>
+                                                    <input type="text" name="MembershipNumber" class="form-control" placeholder="{{translation.BiHain}}" ng-model="item.ChahiBi" autocomplete="off" onKeyPress="">
+                                                </td>
+                                                <td>
+                                                    <input type="text" name="MembershipNumber" class="form-control" placeholder="{{translation.ViAyear}}" ng-model="item.ChahiVi" autocomplete="off" onKeyPress="">
+                                                </td>
+                                                <td>
+                                                    <input type="text" name="MembershipNumber" class="form-control" placeholder="{{translation.BiHain}}" ng-model="item.BaraniBi" autocomplete="off" onKeyPress="">
+                                                </td>
+
+                                                <td>
+                                                    <input type="text" name="MembershipNumber" class="form-control" placeholder="{{translation.ViAyear}}" ng-model="item.BaraniVi" autocomplete="off" onKeyPress="">
+                                                </td>
+                                                <td>
+                                                    <textarea rows="1" class="form-control" maxlength="150" placeholder="{{translation.OtherDetails}}" ng-model="item.OtherDetails"></textarea>
+                                                </td>
+                                                <td>
+                                                    <textarea rows="1" class="form-control" maxlength="150" placeholder="{{translation.Specifications}}" ng-model="item.Specifications"></textarea>
+                                                </td>
+                                                <td style="text-align: right !important">
+                                                    <i class="fa fa-trash clsShowHide btn btn btn-xs btn-danger tooltips rowdeleteBtn" id="Remove_2" ng-if="PropertyDetailsList.length>1" ng-click="RemovePropertyRow($index)" style=""></i>
+                                                </td>
+
+                                            </tr>
+                                            <tr ng-repeat="item in PropertyDetailsList" ng-if="item.IsDelete==false">
+                                                <td>2</td>
+                                                <td>
+                                                    <div style="width:100%">
+                                                        <select ng-model="item.Tehsil" class="form-control" ng-init="item.Tehsil" style="width: 110px;" ng-change="GetPropertyDetailsPanchayt($index)">
+                                                            <option value="0">{{translation.Tehsil}}</option>
+                                                            <option ng-repeat="itemBlock in item.TehsilList | orderBy:'BLOCK_ENG'" value="{{itemBlock.BLOCK_ID}}">
+                                                                {{_language =='en-us' ?  itemBlock.BLOCK_ENG : itemBlock.BLOCK_MANGAL}}
+                                                            </option>
+                                                        </select>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div style="width:100%">
+                                                        <select ng-model="item.GramPanchayat" class="form-control" ng-init="item.GramPanchayat" style="width: 110px;" ng-change="GetPropertyDetailsVillages($index)">
+                                                            <option value="0">{{translation.GramPanchayatHeading}}</option>
+                                                            <option ng-repeat="itemGP in item.GramPanchayatList | orderBy:'GramPanchayats'" value="{{itemGP.GP_ID}}">
+                                                                {{_language =='en-us' ?  itemGP.GP_ENG : itemGP.GP_MANGAL}}
+                                                            </option>
+                                                        </select>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div style="width:100%">
+                                                        <select ng-model="item.Village" class="form-control" ng-init="item.Village" style="width: 110px;">
+                                                            <option value="0">{{translation.Village}}</option>
+                                                            <option ng-repeat="itm in item.VillageList" value="{{itm.VILLAGE_ID}}">
+                                                                {{_language =='en-us' ?  itm.VILLAGE_ENG : itm.VILLAGE_MANGAL}}
+                                                            </option>
+                                                        </select>
+                                                    </div>
+                                                </td>
+
+
+                                                <td>
+                                                    <input type="text" name="MembershipNumber" class="form-control" placeholder="{{translation.KhanKulKita}}" ng-model="item.Khasara" autocomplete="off" onKeyPress="">
+                                                </td>
+                                                <td>
+                                                    <input type="text" name="MembershipNumber" class="form-control" placeholder="{{translation.BiHain}}" ng-model="item.ChahiBi" autocomplete="off" onKeyPress="">
+                                                </td>
+                                                <td>
+                                                    <input type="text" name="MembershipNumber" class="form-control" placeholder="{{translation.ViAyear}}" ng-model="item.ChahiVi" autocomplete="off" onKeyPress="">
+                                                </td>
+                                                <td>
+                                                    <input type="text" name="MembershipNumber" class="form-control" placeholder="{{translation.BiHain}}" ng-model="item.BaraniBi" autocomplete="off" onKeyPress="">
+                                                </td>
+
+                                                <td>
+                                                    <input type="text" name="MembershipNumber" class="form-control" placeholder="{{translation.ViAyear}}" ng-model="item.BaraniVi" autocomplete="off" onKeyPress="">
+                                                </td>
+                                                <td>
+                                                    <textarea rows="1" class="form-control" maxlength="150" placeholder="{{translation.OtherDetails}}" ng-model="item.OtherDetails"></textarea>
+                                                </td>
+                                                <td>
+                                                    <textarea rows="1" class="form-control" maxlength="150" placeholder="{{translation.Specifications}}" ng-model="item.Specifications"></textarea>
+                                                </td>
+                                                <td style="text-align: right !important">
+                                                    <i class="fa fa-trash clsShowHide btn btn btn-xs btn-danger tooltips rowdeleteBtn" id="Remove_2" ng-if="PropertyDetailsList.length>1" ng-click="RemovePropertyRow($index)" style=""></i>
+                                                </td>
+
+                                            </tr>
+                                        </tbody>
+                                        @*<tfoot>
+                                                <tr>
+                                                    <td colspan="11"></td>
+                                                    <td style="text-align:right;cursor:pointer;" ng-click="AddNewPropertyDetails()"><i class="fa fa-plus" title="Add New"></i>{{translation.Add}}</td>
+                                                </tr>
+                                            </tfoot>*@
+                                    </table>
+                                </div>
+                            </div>
+
+
+
+                            <div class="col-lg-12 form-group">
+                                <h4 class="heading-hr ng-binding">प्रस्तावित वाहन का विवरण<a ng-show="IsSubmiApplication" href="javascript:void(0);" dat-val="panal_3" class="fa fa-plus-circle expandDetails" style="float:right;font-size: 25px;"></a></h4>
+                            </div>
+
+
+                            <div class="col-lg-12 clspanal" id="panal_1">
+                                <div class="row" style="margin-top:5px;">
+                                    <div class="col-lg-4">
+                                        <div class="col-lg-7">
+                                            वाहन का नाम  एवं प्रकार <span class="mad">*</span>
+                                        </div>
+                                        <div class="col-lg-5">
+                                            <input type="text" class="form-control" placeholder=" वाहन का नाम  एवं प्रकार " />
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="col-lg-4">
+                                            मॉडल <span class="mad">*</span>
+                                        </div>
+                                        <div class="col-lg-8">
+                                            <input type="text" class="form-control" placeholder="मॉडल" />
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="col-lg-6">
+                                            भार वाहन की क्षमता<span class="mad">*</span>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <input type="text" class="form-control" placeholder=" भार वाहन की क्षमता" />
+                                        </div>
+                                    </div>
+                                </div>
+                                    <div class="row" style="margin-top:5px;">
+                                        <div class="col-lg-4">
+                                            <div class="col-lg-7">
+                                                ईंधन की औसत खपत प्रति ली. डीजल/पैट्रोल<span class="mad">*</span>
+                                            </div>
+                                            <div class="col-lg-5">
+                                                <input type="text" class="form-control" placeholder="ईंधन की औसत खपत प्रति ली. डीजल/पैट्रोल" />
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-4">
+                                            <div class="col-lg-4">
+                                                वाहन विक्रेता का नाम <span class="mad">*</span>
+                                            </div>
+                                            <div class="col-lg-8">
+                                                <input type="text" class="form-control" placeholder="वाहन विक्रेता का नाम" />
+                                            </div>
+                                        </div>
+                                    </div>
+                               
+                                <div class="row" style="margin-top:5px;">
+                                    <div class="col-lg-4">
+                                        <div class="col-lg-7">
+                                            चेसिसि का मूल्य<span class="mad">*</span>
+                                        </div>
+                                        <div class="col-lg-5">
+                                            <input type="text" class="form-control" placeholder="चेसिसि का मूल्य" />
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="col-lg-4">
+                                            बॉडी का मूल्य<span class="mad">*</span>
+                                        </div>
+                                        <div class="col-lg-8">
+                                            <input type="text" class="form-control" placeholder="बॉडी का मूल्य " />
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-2">
+                                        <div class="col-lg-4">
+                                            अन्य व्यय
+                                        </div>
+                                        <div class="col-lg-8">
+                                            <input type="text" class="form-control" placeholder="अन्य व्यय " />
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-2">
+                                        <div class="col-lg-3">
+                                            योग
+                                        </div>
+                                        <div class="col-lg-9">
+                                            <input type="text" class="form-control" placeholder="योग" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row" style="margin-top:5px;">
+                                    <div class="col-lg-4">
+                                        <div class="col-lg-7">
+                                            आवेदक का स्वयं का योगदान
+                                        </div>
+                                        <div class="col-lg-5">
+                                            <input type="text" class="form-control" placeholder="आवेदक का स्वयं का योगदान" />
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="col-lg-4">
+                                            वांशित ऋण राशि
+                                        </div>
+                                        <div class="col-lg-8">
+                                            <input type="text" class="form-control" placeholder="वांशित ऋण राशि" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row" style="margin-top:5px;">
+                                    <div class="col-lg-12">
+                                        <h4 class="heading-hr1"><b>वाहन के परिचालन का विवरण</b></h4>
+                                    </div>
+                                </div> 
+
+                                <div class="row" style="margin-top:5px;">
+                                    <div class="col-lg-4">
+                                        <div class="col-lg-7">
+                                            क्षेत्र जहाँ वाहन  चलाया जायेगा
+                                        </div>
+                                        <div class="col-lg-5">
+                                            <input type="text" class="form-control" placeholder=" वाहन का नाम  एवं प्रकार " />
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-5">
+                                        <div class="col-lg-7">
+                                            स्टेट जिसके लिए परमिट/लाइसेंस प्राप्त कर लिया है| यदि हाँ तो परमिट नं. एवं अवधि अंकित करें |
+                                        </div>
+                                        <div class="col-lg-3">
+                                            <input type="text" class="form-control" placeholder="परमिट नं." />
+                                          
+                                        </div>
+                                        <div class="col-lg-2">
+                                           
+                                            <input type="text" class="form-control" placeholder="अवधि" />
+                                        </div>
+
+                                    </div>
+                                </div>
+                                    <div class="row" style="margin-top:5px;">
+                                        <div class="col-lg-4">
+                                            <div class="col-lg-7">
+                                                वाहन से होने वाली अनुमानित मासिक  आय
+                                            </div>
+                                            <div class="col-lg-5">
+                                                <input type="text" class="form-control" placeholder=" भार वाहन की क्षमता" />
+                                            </div>
+                                        </div>                                        
+                                        <div class="col-lg-5">
+                                            <div class="col-lg-7">
+                                                वाहन से क्या-क्या  वस्तुएँ लाई/ले जाई  जाएगी
+                                            </div>
+                                            <div class="col-lg-5">
+                                                <input type="text" class="form-control" placeholder="वाहन विक्रेता का नाम" />
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-3">
+                                            <div class="col-lg-6">
+                                                आय होने पर आधार
+                                            </div>
+                                            <div class="col-lg-6">
+                                                <input type="text" class="form-control" placeholder="ईंधन की औसत खपत प्रति ली. डीजल/पैट्रोल" />
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+
+
+                                <div class="row" style="margin-top:5px;">
+                                    <div class="col-lg-12">
+                                        <h4 class="heading-hr1"><b>वाहन से प्रतिमाह की अनुमानित आय</b></h4>
+                                    </div>
+                                </div>
+
+                                <div class="row" style="margin-top:5px;">
+                                    <div class="col-lg-4">
+                                        <div class="col-lg-7">
+                                            वाहन माह में कितने दिन चलेगा ?
+                                        </div>
+                                        <div class="col-lg-5">
+                                            <input type="text" class="form-control" placeholder=" वाहन माह में कितने दिन चलेगा ?" />
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="col-lg-5">
+                                            वाहन प्रतिदिन कितने कि.मी. चलेगा
+                                        </div>
+                                        <div class="col-lg-7">
+                                            <input type="text" class="form-control" placeholder="वाहन प्रतिदिन कितने कि.मी. चलेगा" />
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="col-lg-7">
+                                            किराया प्रति कि.मी. (भार ढोने की दशा में )
+                                        </div>
+                                        <div class="col-lg-5">
+                                            <input type="text" class="form-control" placeholder="किराया प्रति कि.मी. (भार ढोने की दशा में )" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row" style="margin-top:5px;">                                   
+                                    <div class="col-lg-4">
+                                        <div class="col-lg-7">
+                                            अनुमानित मासिक आय
+                                        </div>
+                                        <div class="col-lg-5">
+                                            <input type="text" class="form-control" placeholder="अनुमानित मासिक आय" />
+                                        </div>
+                                    </div>   
+                                    <div class="col-lg-4">
+                                        <div class="col-lg-5">
+                                            अन्य कोई
+                                        </div>
+                                        <div class="col-lg-7">
+                                            <input type="text" class="form-control" placeholder="अन्य कोई " />
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="col-lg-7">
+                                            योग
+                                        </div>
+                                        <div class="col-lg-5">
+                                            <input type="text" class="form-control" placeholder="योग" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row" style="margin-top:5px;">
+                                    <div class="col-lg-12">
+                                        <h4 class="heading-hr1"><b>प्रति माह व्यय</b></h4>
+                                    </div>
+                                </div>
+
+                                <div class="row" style="margin-top:5px;">
+                                    <div class="col-lg-4">
+                                        <div class="col-lg-7">
+                                            ईंधन (डीजल/पेट्रोल/आयल ) का प्रतिमाह व्यय
+                                        </div>
+                                        <div class="col-lg-5">
+                                            <input type="text" class="form-control" placeholder="ईंधन (डीजल/पेट्रोल/आयल ) का प्रतिमाह व्यय" />
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="col-lg-5">
+                                            कर्मचारी का वेतन/भत्ता
+                                        </div>
+                                        <div class="col-lg-7">
+                                            <input type="text" class="form-control" placeholder="कर्मचारी का वेतन/भत्ता" />
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="col-lg-7">
+                                            पथ परिहन (रोड टेक्स एवं अन्य कर)
+                                        </div>
+                                        <div class="col-lg-5">
+                                            <input type="text" class="form-control" placeholder="पथ परिहन (रोड टेक्स एवं अन्य कर)" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row" style="margin-top:5px;">
+                                    <div class="col-lg-4">
+                                        <div class="col-lg-7">
+                                            मरम्मत एवं रख-रखाव सर्विस
+                                        </div>
+                                        <div class="col-lg-5">
+                                            <input type="text" class="form-control" placeholder="मरम्मत एवं रख-रखाव सर्विस" />
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="col-lg-5">
+                                            बीमा  किस्त
+                                        </div>
+                                        <div class="col-lg-7">
+                                            <input type="text" class="form-control" placeholder="बीमा किस्त" />
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="col-lg-7">
+                                            आयल स्पेयर पार्ट्स
+                                        </div>
+                                        <div class="col-lg-5">
+                                            <input type="text" class="form-control" placeholder=" आयल स्पेयर पार्ट्स" />
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="row" style="margin-top:5px;">
+
+                                    <div class="col-lg-4">
+                                        <div class="col-lg-7">
+                                            अन्य विविध व्यय
+                                        </div>
+                                        <div class="col-lg-5">
+                                            <input type="text" class="form-control" placeholder="अन्य विविध व्यय" />
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-4">
+                                        <div class="col-lg-5">
+                                            गैरेज किराया
+                                        </div>
+                                        <div class="col-lg-7">
+                                            <input type="text" class="form-control" placeholder="गैरेज किराया" />
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-4">
+                                        <div class="col-lg-7">
+                                            छीजत (ह्रास)
+                                        </div>
+                                        <div class="col-lg-5">
+                                            <input type="text" class="form-control" placeholder="छीजत (ह्रास)" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row" style="margin-top:5px;">
+                                    <div class="col-lg-4">
+                                        <div class="col-lg-7">
+                                            ऋण पर ब्याज
+                                        </div>
+                                        <div class="col-lg-5">
+                                            <input type="text" class="form-control" placeholder="ऋण पर ब्याज" />
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-4">
+                                        <div class="col-lg-5">
+                                            कुल व्यय
+                                        </div>
+                                        <div class="col-lg-7">
+                                            <input type="text" class="form-control" placeholder="कुल व्यय" />
+                                        </div>
+                                    </div>
+                                </div>                                     
+
+                            </div>
+
+                               
+                           </div>
+                            
+                                @*<div class="col-lg-12 form-group">
+                <h4 class="heading-hr ng-binding">{{translation.PreLoanDetails}}<a ng-show="IsSubmiApplication" href="javascript:void(0);" dat-val="panal_4" class="fa fa-plus-circle expandDetails" style="float:right;font-size: 25px;"></a></h4>
+            </div>
+
+            <div class="col-lg-12 clspanal" id="panal_4">
+                <div class="table-responsive">
+                    <table class="table devtable" id="tblPreLoanDetails">
+                        <thead>
+                            <tr>
+                                <th rowspan="3" class="thverticalMiddle">{{translation.SRNO}}</th>
+                                <th rowspan="3" class="thverticalMiddle">{{translation.CooperativeBankName}}</th>
+                                <th rowspan="3" class="thverticalMiddle">{{translation.LoanAmount}}</th>
+                                <th rowspan="3" class="thverticalMiddle">{{translation.MonthlyInstallment}}</th>
+                                <th class="thCenter"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="item in PreLoanDetailsList" ng-if="item.IsDelete==false">
+                                <td>{{$index+1}}</td>
+                                <td>
+                                    <input type="text" name="FatherName" class="form-control" placeholder="{{translation.CooperativeBankName}}" ng-model="item.Organization" autocomplete="off" onKeyPress="return ValidateAlpha(event);">
+                                </td>
+                                <td>
+                                    <input type="text" name="Age" class="form-control" placeholder="{{translation.LoanAmount}}" ng-model="item.LoanAmount" maxlength="9" autocomplete="off" onKeyPress="return isNumber(event);">
+                                </td>
+                                <td>
+                                    <input type="text" name="MembershipNumber" class="form-control" placeholder="{{translation.MonthlyInstallment}}" maxlength="9" ng-model="item.MonthlyInstallment" autocomplete="off" onKeyPress="return isNumber(event);">
+                                </td>
+                                <td style="text-align: right !important">
+                                    <i class="fa fa-trash clsShowHide btn btn btn-xs btn-danger tooltips rowdeleteBtn" id="Remove_2" ng-if="PreLoanDetailsList.length>1" ng-click="RemovePreLoanRow($index)" style=""></i>
+                                </td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="4"></td>
+                                <td style="text-align:right;cursor:pointer;" ng-click="AddNewPreLoanDetails()"><i class="fa fa-plus" title="Add New"></i>{{translation.Add}}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>*@
+
+
+                                <div class="form-group col-md-12" style="margin-top:10px;" >
+                                    <center>
+                                        <a class="btn btn-primary dev-btn" style="text-transform:capitalize;" href="javascript:void(0);" ng-click="SowApplicationGrid()">{{translation.Back}}</a>
+                                        <button type="submit" class="btn btn-primary dev-btn" ng-if="IsSubmiApplication==false" ng-click="ShowSelfDeclarationLetter()">&nbsp;&nbsp;{{translation.Next}}</button>
+                                    </center>
+                                </div>
+                            </div>
+
+
+
+
+
+                        <div class="col-lg-12 form-group" style="text-align: center;" ng-if="SelfDeclarationLetter && IsSubmiApplication==false">
+                            <h4 class="heading-hr ng-binding">{{translation.SelfDeclarationLetter}}</h4>
+                        </div>
+                        <div class="col-lg-12 form-group" style="margin-left: 19%; margin-right: 19%;width: 62%;border: 1px solid gray; padding-top: 23px;" id="dvSelfDeclarationLetter" ng-if="SelfDeclarationLetter && IsSubmiApplication==false">
+
+                            <div class="col-lg-12" id="dvMemberPhoto">
+                                <div class="table-responsive">
+                                    <table class="" id="tblLandMemberDetail" cellspacing="1">
+                                        <tr>
+                                            <td ng-repeat="item in LoanMembers" ng-if="item.IsDelete==false">
+                                                <div style="border: 1px solid gray;padding: 5px;margin-left: 20px;">
+                                                    <img id="img_{{$index}}" src="{{item.Photo!=''?item.Photo:'../Content/Images/Balnk.png'}}" style="width: 130px;height: 145px;" />
+                                                </div>
+                                                <a style="margin-left: 138px;position: absolute;top: -3px;" href="javascript:void(0);" class="facebook" title="Add Photo">
+                                                    <i class="fa fa-boxed fa-fw fa-plus-circle"></i><span class="hidden-xs"></span>
+                                                    <input type="file" id="fl_{{$index}}" accept="image/*" style="position: absolute;margin-top: -25px;width: 133px;margin-left: 20px;opacity: 0;" onchange='previewFile(this)' />
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="col-lg-12" style="margin-top:10px">
+                                मै / हम
+                                <ol style="margin-left: 30px;">
+                                    <li ng-repeat="item in LoanMembers" ng-if="item.IsDelete==false">
+                                        <span style="position:absolute;margin-left: 30px;color: #907ae6;font-weight: bold;margin-top: -3px;">{{item.Name}}</span>
+                                        <span style="position:absolute;margin-left: 335px;color: #907ae6;font-weight: bold;margin-top: -3px;">{{item.FatherName}}</span>
+                                        <span style="position:absolute;margin-left: 753px;color: #907ae6;font-weight: bold;margin-top: -3px;">{{item.Village}}</span>
+                                        <span style="position:absolute;margin-left: 30px;color: #907ae6;font-weight: bold;margin-top: 17px;">{{item.Village}}</span>
+                                        <span style="position:absolute;margin-left: 300px;color: #907ae6;font-weight: bold;margin-top: 17px;">{{item.Tehsil}}</span>
+                                        <span style="position:absolute;margin-left: 482px;color: #907ae6;font-weight: bold;margin-top: 17px;">{{GetNameFromList(PLDB,MemberRegistration.PLDB_ID,'District')}}</span>
+                                        <span style="position:absolute;margin-left: 753px;color: #907ae6;font-weight: bold;margin-top: 17px;">{{item.MobileNo}}</span>
+                                        नाम......................................................................... पुत्र श्री/पुत्री श्री ..................................................................................................................  निवासी ग्राम ..............................................................................
+                                        <br /> पोस्ट........................................................................ तहसील  ................................................. जिला .................................................................
+                                        (राज.) मो. नं ..............................................................................
+                                        <br /><br />
+                                    </li>
+                                </ol>
+                                शपथपूर्वक  कथन  करता  हूँ /करती  हूँ  |
+                                <br />         <br />
+                                <ol>
+                                    <li>
+
+                                        <ul style="margin-left: 10px;list-style:none">
+                                            <li ng-repeat="item in PropertyDetailsList" ng-if="item.IsDelete==false">
+                                                <span style="position:absolute;margin-left: 172px;color: #907ae6;font-weight: bold;margin-top: -3px;">{{item.Khasara}}</span>
+                                                <span style="position:absolute;margin-left: 500px;color: #907ae6;font-weight: bold;margin-top: -3px;">{{item.ChahiBi}}, {{item.ChahiVi}}</span>
+                                                <span style="position:absolute;margin-left: 785px;color: #907ae6;font-weight: bold;margin-top: -3px;">{{item.BaraniBi}}, {{item.BaraniVi}}</span>
+                                                <span style="position:absolute;margin-left: 60px;color: #907ae6;font-weight: bold;margin-top: 17px;">{{GetNameFromList(item.VillageList,item.Village,'Village')}}</span>
+                                                <span style="position:absolute;margin-left: 335px;color: #907ae6;font-weight: bold;margin-top: 17px;">{{GetNameFromList(item.TehsilList,item.Tehsil,'Tehsil')}}</span>
+                                                कि आराजी ख.न. के कुल किता ......................................................................... कुल क्षेत्रफल  चाही...............................................................................बारानी................................................................................                                        <br />वाके ग्राम .................................................................  तहसील ............................................................................... का
+                                                <br /> <br />
+                                            </li>
+                                            <li>मैं /हम  खातेदार  काश्तकार  हूं  व  खुद  काश्त  काबिज  हूं |</li>
+                                        </ul>
+                                        <br />
+                                    </li>
+                                    <li style="padding-left:10px;">
+                                        कि  उक्त  भूमि से  मेरे  / हमारे  संयुक्त  परिवार  के सदस्यों  के
+                                        अतिरिक्त  किसी व्यक्ति का कब्ज़ा /स्वत्व /हित /हिस्सा , अधिकार  व  दावा  नहीं है |
+                                        <br />  <br />
+                                    </li>
+                                    <li>
+                                        <ul style="margin-left: 10px;list-style:none">
+                                            <li> मैंने / हमने  निमना  संस्थाओ  से ऋण  ले रखा हैं :-</li>
+                                            <li>
+                                                <table border="1" style="width:1000px;">
+                                                    <tr><th style="text-align: center !important;">नाम संस्था </th><th style="text-align: center !important;">ऋण राशि </th><th style="text-align: center !important;">	मासिक किश्त</th></tr>
+                                                    <tr ng-repeat="item in PreLoanDetailsList" ng-if="item.IsDelete==false">
+                                                        <td style="text-align: center !important;">{{item.Organization}}</td>
+                                                        <td style="text-align: center !important;">{{item.LoanAmount}}</td>
+                                                        <td style="text-align: center !important;">{{item.MonthlyInstallment}}</td>
+                                                    </tr>
+                                                </table>
+                                                <br />
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    <li style="padding-left:10px;">
+                                        कि  उक्त  भूमि के सम्बन्ध  में किसी  न्यायालय  अथवा  कार्यालय  में  किसी प्रकार  का  वाद -विवाद , मिनाफा  नजरानी नजरसानी  आदि  कोई  कारवाही  नहीं  चली  है  और  तजबीज  में नहीं  है |
+                                        <br />  <br />
+                                    </li>
+                                    <li style="padding-left:10px;">
+                                        मैं / हम  ऋण  से सृजित आस्थियों  का बराबर  आवश्यकतानुसार  बीमा  करवाता  रहूंगा /राहूंगी
+                                        <br />  <br />
+                                    </li>
+                                    <li style="padding-left:10px;">
+
+                                        मैं /हम सशपथ  कथन  करता  हूं  / करती  हूं / करते  हैं  कि  उक्त  स्वघोषणा पत्र  में  चरण  1 से 5  तक  कथित तथ्य  मेरी  जानकारी  व  विस्वाश  में  सत्य  तथा  पूर्ण  सत्य  है , के अतिरिक्त कुछ  मिथ्या  नहीं  है |
+                                    </li>
+
+                                </ol>
+                            </div>
+
+                        </div>
+                        <div class="form-group col-md-12" ng-if="SelfDeclarationLetter && IsSubmiApplication==false">
+                            <center>
+                                <a class="btn btn-primary dev-btn" style="text-transform:capitalize;" href="javascript:void(0);" ng-click="ShowLoanApplication()">{{ translation.Back}}</a>
+
+                                <button type="submit" class="btn btn-primary dev-btn" ng-click="SaveLoanApplication(false)">&nbsp;&nbsp;{{translation.PartialSave}}</button>
+
+                                <button type="submit" class="btn btn-success" ng-click="SaveLoanApplication(true)">&nbsp;&nbsp;{{translation.Submit}}</button>
+                            </center>
+                        </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="FormPost">
+    </div>

@@ -1,0 +1,402 @@
+﻿
+<script src="~/Scripts/AngularFramework/CategoryWiseBlockAuditRptbacklog.js"></script>
+<script type="text/javascript" src="~/Scripts/jqueryuitimepicker.js"></script>
+<link href="~/Content/Stylesheets/jqueryuitimepicker.css" rel="stylesheet" />
+<script src="~/Scripts/Excel/jszip_v1.js"></script>
+<script src="~/Scripts/Excel/xlsx.js"></script>
+<script src="~/Scripts/Excel/jszip.js"></script>
+<script src="~/Scripts/Excel/FileSaver.js"></script>
+<script src="~/Scripts/Excel/myexcel.js"></script>
+
+
+
+@Html.Hidden("TemplateId")
+<div ng-app="AppEntryFormCooperativeBankMpr">
+    <div ng-controller="CooperativeBankMprcnt">
+        <div class="col-md-12">
+            <h3 class="citizen-dash-head"> वर्गवार खण्ड की ऑडिट प्रगति ( बैक लॉग - IV ) </h3>
+            <hr style="margin: 0;">
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#"> {{translation.EntryForm}}</a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;"> वर्गवार खण्ड की ऑडिट प्रगति ( बैक लॉग - IV ) </span>
+                    </li>
+                 
+                </ul>
+            </div>
+        </div>
+
+
+  
+
+        <div ng-show="DivtringGrid">
+            <div class="col-md-12" ng-hide="1">
+                <div class="citizen-dash-head" >
+                    <div class="table-dropdown" id="search-filter" style="overflow:inherit; float:left;width: 100%;margin-bottom: 10px;" >
+                        <div class="col-md-2 margin-Top20 y_dropdown" style="padding-left: 0;">
+                            <label for="search" class="ng-binding">{{translation.Month}}:</label>
+                            <input id="txtFromMonth" value="date" type="month" class="form-control" autocomplete="off" onkeypress="return false;" />
+                        </div>
+                        <div class="col-md-2 margin-Top20 y_dropdown" style="padding-left: 0;"  ng-show="sdfhj">
+                            <label>{{ translation.DistrictHeading}}:</label>
+                            <input type="hidden" id="hdnDistrictId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DistrictId)" />
+
+                            <select name="Districtdll" ng-model="DistrictId" class="form-control" ng-init="DistrictId='0'" id="ddrDistrictId">
+                                <option value="0">{{translation.SelectOption}}</option>
+                                <option ng-repeat="district in DistrictList" value="{{district.DISTRICT_ID}}">
+                                    {{_language =='en-us' ?  district.DISTRICT_MANGAL : district.DISTRICT_MANGAL}}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 margin-Top20 y_dropdown" style="padding-left: 0;">
+                            <br />
+                            <button type="submit" class="btn btn-primary dev-btn" ng-click="GridData2()">{{translation.Search}}</button>
+                            <input type="button" class="btn btn-primary dev-btn" ng-click="ExportData()" value="Export to Excel">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div class="citizen-dash-head">
+                    <table class="table table-responsive devtable" style="overflow-x:auto;">
+                        <thead>
+                            <tr>
+                                <th rowspan="2">
+                                    {{translation.SRNO}}
+                                </th>
+
+                                <th>
+                                    {{translation.Division}}
+
+                                </th>
+
+                                <th>
+                                    KVSS
+
+                                </th>
+
+                                <th>
+                                    {{translation.CCB}}
+
+                                </th>
+
+                                <th>
+                                    {{translation.Dairy}}
+
+                                </th>
+
+                                <th>
+                                    Urban Bank
+
+                                </th>
+
+                                <th>
+                                    {{translation.PLDB}}
+
+                                </th>
+
+
+                                @*<th> Holesale</th>*@
+                                <th>
+                                    Wholesale Bhandars
+                                </th>
+
+
+
+                                <th>
+                                    Tilamsangh
+
+                                </th>
+
+                                <th>
+                                    {{translation.Bunkar}}
+
+                                </th>
+                                <th>
+                                    Khaadi
+
+                                </th>
+                                <th>
+                                    {{translation.Industrial}}
+
+                                </th>
+
+                                <th>
+                                    {{translation.GSS}}
+
+                                </th>
+                                <th>
+                                    Multipurpose
+
+                                </th>
+                                <th>
+                                    Total
+
+                                </th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            <tr dir-paginate="BData in CoopBankMprData | filter: q | orderBy:colsort:reverseSort | itemsPerPage: pageSize" current-page="currentPage" pagination-id="TrainningFormatPagination">
+                                <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+
+                                <td style="text-align:center !important">
+                                    {{ BData.DIVISION_ENG}}
+                                </td>
+                                <td style="text-align:center !important">
+                                    {{BData.KVSS}}
+                                </td>
+                                <td style="text-align:center !important">
+                                    {{BData.CCB}}
+                                </td>
+                                <td style="text-align:center !important">
+                                    {{BData.Dairy}}
+                                </td>
+                                <td style="text-align:center !important">
+                                    {{BData.urban}}
+                                </td>
+                                <td style="text-align:center !important">
+                                    {{BData.PLDB}}
+                                </td>
+                                <td style="text-align:center !important">
+                                    {{BData.Holsale}}
+                                </td>
+
+                                <td style="text-align:center !important">
+                                    {{BData.Tilamsangh}}
+                                </td>
+                                <td style="text-align:center !important">
+                                    {{BData.Bunkar}}
+                                </td>
+                                <td style="text-align:center !important">
+                                    {{BData.Khaadi}}
+                                </td>
+                                <td style="text-align:center !important">
+                                    {{BData.Industrial}}
+                                </td>
+                                <td style="text-align:center !important">
+                                    {{BData.GSS}}
+                                </td>
+                                <td style="text-align:center !important">
+                                    {{BData.multipurpose}}
+                                </td>
+                                <td style="text-align:center !important">
+                                    {{BData.multipurpose+BData.GSS+BData.Industrial+BData.Khaadi+BData.Bunkar +BData.Tilamsangh+BData.Holsale+BData.PLDB+BData.urban+BData.CCB+BData.KVSS+BData.Dairy}}
+                                </td>
+
+                            </tr>
+                            <tr>
+
+                                <th></th>
+                                <th style="text-align: center;">{{translation.Yog}} {{translation.Societies}}</th>
+                                <th style="text-align:center;">{{TotKVSS        }}</th>
+                                <th style="text-align:center;">{{TotCCB     }}</th>
+                                <th style="text-align:center;">{{TotDairy   }}</th>
+                                <th style="text-align:center;">{{Toturban}}</th>
+
+                                <th style="text-align:center;">{{TotPLDB        }}</th>
+                                <th style="text-align:center;">{{TotHolsale        }}</th>
+                                <th style="text-align:center;">{{TotTilamsangh     }}</th>
+                                <th style="text-align:center;">{{TotBunkar   }}</th>
+                                <th style="text-align:center;">{{TotKhaadi}}</th>
+
+
+                                <th style="text-align:center;">{{TotIndustrial        }}</th>
+                                <th style="text-align:center;">{{TotGSS     }}</th>
+                                <th style="text-align:center;">{{Totmultipurpose   }}</th>
+                                <th style="text-align:center;">{{toatofcoumn   }}</th>
+
+                            </tr>
+
+                            <tr dir-paginate="BData in CoopBankMprData1 | filter: q | orderBy:colsort:reverseSort | itemsPerPage: pageSize" current-page="currentPage" pagination-id="TrainningFormatPagination">
+                                <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+
+                                <td style="text-align:center !important">
+                                    {{ BData.DIVISION_ENG}}
+                                </td>
+                                <td style="text-align:center !important">
+                                    {{BData.KVSS}}
+                                </td>
+                                <td style="text-align:center !important">
+                                    {{BData.CCB}}
+                                </td>
+                                <td style="text-align:center !important">
+                                    {{BData.Dairy}}
+                                </td>
+                                <td style="text-align:center !important">
+                                    {{BData.urban}}
+                                </td>
+                                <td style="text-align:center !important">
+                                    {{BData.PLDB}}
+                                </td>
+                                <td style="text-align:center !important">
+                                    {{BData.Holsale}}
+                                </td>
+
+                                <td style="text-align:center !important">
+                                    {{BData.Tilamsangh}}
+                                </td>
+                                <td style="text-align:center !important">
+                                    {{BData.Bunkar}}
+                                </td>
+                                <td style="text-align:center !important">
+                                    {{BData.Khaadi}}
+                                </td>
+                                <td style="text-align:center !important">
+                                    {{BData.Industrial}}
+                                </td>
+                                <td style="text-align:center !important">
+                                    {{BData.GSS}}
+                                </td>
+                                <td style="text-align:center !important">
+                                    {{BData.multipurpose}}
+                                </td>
+                                <td style="text-align:center !important">
+                                    {{BData.multipurpose+BData.GSS+BData.Industrial+BData.Khaadi+BData.Bunkar +BData.Tilamsangh+BData.Holsale+BData.PLDB+BData.urban+BData.CCB+BData.KVSS+BData.Dairy}}
+                                </td>
+                            </tr>
+                            <tr>
+
+                                <th></th>
+                                <th style="text-align: center;">{{dateummu}} {{translation.MonthlyAudit}}</th>
+                                <th style="text-align:center;">{{TotKVSS1        }}</th>
+                                <th style="text-align:center;">{{TotCCB1     }}</th>
+                                <th style="text-align:center;">{{TotDairy1   }}</th>
+                                <th style="text-align:center;">{{Toturban1}}</th>
+
+                                <th style="text-align:center;">{{TotPLDB1        }}</th>
+                                <th style="text-align:center;">{{TotHolsale1        }}</th>
+                                <th style="text-align:center;">{{TotTilamsangh1     }}</th>
+                                <th style="text-align:center;">{{TotBunkar1   }}</th>
+                                <th style="text-align:center;">{{TotKhaadi1}}</th>
+
+
+                                <th style="text-align:center;">{{TotIndustrial1        }}</th>
+                                <th style="text-align:center;">{{TotGSS1     }}</th>
+                                <th style="text-align:center;">{{Totmultipurpose1   }}</th>
+                                <th style="text-align:center;">{{toatofcoumn1   }}</th>
+                            </tr>
+
+
+                            <tr dir-paginate="BData in CoopBankMprData2 | filter: q | orderBy:colsort:reverseSort | itemsPerPage: pageSize" current-page="currentPage" pagination-id="TrainningFormatPagination">
+                                <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+
+                                <td style="text-align:center !important">
+                                    {{ BData.DIVISION_ENG}}
+                                </td>
+                                <td style="text-align:center !important">
+                                    {{BData.KVSS}}
+                                </td>
+                                <td style="text-align:center !important">
+                                    {{BData.CCB}}
+                                </td>
+                                <td style="text-align:center !important">
+                                    {{BData.Dairy}}
+                                </td>
+                                <td style="text-align:center !important">
+                                    {{BData.urban}}
+                                </td>
+                                <td style="text-align:center !important">
+                                    {{BData.PLDB}}
+                                </td>
+                                <td style="text-align:center !important">
+                                    {{BData.Holsale}}
+                                </td>
+
+                                <td style="text-align:center !important">
+                                    {{BData.Tilamsangh}}
+                                </td>
+                                <td style="text-align:center !important">
+                                    {{BData.Bunkar}}
+                                </td>
+                                <td style="text-align:center !important">
+                                    {{BData.Khaadi}}
+                                </td>
+                                <td style="text-align:center !important">
+                                    {{BData.Industrial}}
+                                </td>
+                                <td style="text-align:center !important">
+                                    {{BData.GSS}}
+                                </td>
+                                <td style="text-align:center !important">
+                                    {{BData.multipurpose}}
+                                </td>
+                                <td style="text-align:center !important">
+                                    {{BData.multipurpose+BData.GSS+BData.Industrial+BData.Khaadi+BData.Bunkar +BData.Tilamsangh+BData.Holsale+BData.PLDB+BData.urban+BData.CCB+BData.KVSS+BData.Dairy}}
+                                </td>
+                            </tr>
+                            <tr>
+
+                                <th></th>
+                                <th style="text-align: center;">{{translation.AuditBalanceSo}} </th>
+                                <th style="text-align:center;">{{TotKVSS2        }}</th>
+                                <th style="text-align:center;">{{TotCCB2     }}</th>
+                                <th style="text-align:center;">{{TotDairy2   }}</th>
+                                <th style="text-align:center;">{{Toturban2}}</th>
+
+                                <th style="text-align:center;">{{TotPLDB2        }}</th>
+                                <th style="text-align:center;">{{TotHolsale2        }}</th>
+                                <th style="text-align:center;">{{TotTilamsangh2     }}</th>
+                                <th style="text-align:center;">{{TotBunkar2   }}</th>
+                                <th style="text-align:center;">{{TotKhaadi2}}</th>
+
+
+                                <th style="text-align:center;">{{TotIndustrial2        }}</th>
+                                <th style="text-align:center;">{{TotGSS2     }}</th>
+                                <th style="text-align:center;">{{Totmultipurpose2   }}</th>
+                                <th style="text-align:center;">{{toatofcoumn2   }}</th>
+                            </tr>
+
+
+
+                            <tr>
+                                <th></th>
+                                <th style="text-align:center;">  {{translation.Audit_Percentage}}</th>
+                                <th style="text-align:center;">{{((TotKVSS1*100)/TotKVSS ).toFixed(2)       }}</th>
+
+                                <th style="text-align:center;">{{((TotCCB1*100)/TotCCB  ).toFixed(2)     }}</th>
+                                <th style="text-align:center;">{{((TotDairy1*100)/TotDairy ).toFixed(2)    }}</th>
+                                <th style="text-align:center;">{{((Toturban1*100)/Toturban).toFixed(2)  }}</th>
+
+                                <th style="text-align:center;">{{((TotPLDB1      *100)/TotPLDB ).toFixed(2)         }}</th>
+                                <th style="text-align:center;">{{((TotHolsale1   *100)/TotHolsale  ).toFixed(2)        }}</th>
+                                <th style="text-align:center;">{{((TotTilamsangh1*100)/TotTilamsangh ).toFixed(2)      }}</th>
+                                <th style="text-align:center;">{{((TotBunkar1    *100)/TotBunkar  ).toFixed(2)   }}</th>
+                                <th style="text-align:center;">{{((TotKhaadi1    *100)/TotKhaadi).toFixed(2)  }}</th>
+
+                                <th style="text-align:center;">{{((TotIndustrial1  *100)/TotIndustrial ).toFixed(2)         }}</th>
+                                <th style="text-align:center;">{{((TotGSS1         *100)/TotGSS ).toFixed(2)      }}</th>
+                                <th style="text-align:center;">{{((Totmultipurpose1*100)/Totmultipurpose ).toFixed(2)    }}</th>
+                                <th style="text-align:center;">{{((toatofcoumn1    *100)/toatofcoumn ).toFixed(2)    }}</th>
+
+                            </tr>
+
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="col-md-10">
+                <div class="text-center">
+                    <dir-pagination-controls boundary-links="true" pagination-id="TrainningFormatPagination" on-page-change="pageChangeHandler(newPageNumber)" template-url="/dirPagination.tpl.html"></dir-pagination-controls>
+                </div>
+            </div>
+            <div class="form-group col-md-12" ng-if="dss">
+                <div class="dev-align-btn">
+                    <a class="btn btn-primary dev-btn" style="text-transform:capitalize;" href="../mis/CooperativeBankMprRpt"> Back</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

@@ -1,0 +1,235 @@
+﻿<script src="~/Scripts/AngularFramework/Pacs.js"></script>
+<script type="text/javascript">
+    var tableToExcel = (function () {
+        var uri = 'data:application/vnd.ms-excel;base64,'
+            , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>'
+            , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) }
+            , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
+        return function (table, name) {
+            if (!table.nodeType) table = document.getElementById(table)
+            var ctx = { worksheet: name || 'Worksheet', table: table.innerHTML }
+            window.location.href = uri + base64(format(template, ctx))
+        }
+    })()
+
+</script>
+<div ng-app="PacsMastersModule">
+    <div ng-controller="PacsMasterCont">
+        <div class="col-md-12">
+            <h3 class="citizen-dash-head"> PACS </h3>
+            <hr style="margin: 0;">
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#"> {{translation.Master}} </a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        
+                        <span style="margin: 0 5px;"> PACS </span>
+                    </li>
+                    <li style="float: right;">
+                        <button type="button" class="btn btn-info btn-lg dev-popup-btn" data-toggle="modal" data-target="#myModal" ng-click="ClearPacsForm()"> <h5>&#187;Add PACS Details </h5> </button>
+                    </li>
+
+                </ul>
+            </div>
+        </div>
+
+        <div class="dev-popup-body modal fade" id="myModal" role="dialog">
+            <div class="modal-dialog">
+                <!-- Modal content-->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" ng-click="ClearPacsForm()">&times;</button>
+                        <h4 class="modal-title">Add PACS Details </h4>
+                    </div>
+                    <div class="modal-body">
+                        <form class="dev-search-form" style="overflow: hidden; margin-bottom: 35px;" name="CCB_Form">
+
+
+                            <div class="col-md-6 form-group">
+                                <label>
+                                    {{translation.BankName}}
+                                </label>
+                                <select ng-model="CCB.BankID" ng-disabled="IsSubmiApplication" id="BankID" class="form-control" ng-init="CCB.BankID='0'" ng-change="Get_LoanBankBranch(CCB.BankID)">
+                                    <option value="0" disabled>{{translation.SelectOption}}</option>
+                                    <option ng-repeat="itemBlock in BankMasterList | orderBy:'CCBNameEn'" value="{{itemBlock.CCBId}}">
+                                        {{_language =='en-us' ?  itemBlock.CCBNameEn : itemBlock.CCBNameHi}}
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label>
+                                    {{translation.BankBranch}}
+                                </label>
+                                <select ng-model="CCB.BranchId" id="BranchId" class="form-control" ng-init="CCB.BranchId='0'" ng-change="Get_LoanBranch_PACS(CCB.BranchId)">
+                                    <option value="0" disabled>{{translation.SelectOption}}</option>
+                                    <option ng-repeat="itemBlock in PLDBBranches | orderBy:'BranchNameEn'" value="{{itemBlock.Branch_ID}}">
+                                        {{_language =='en-us' ?  itemBlock.BranchNameEn : itemBlock.BranchNameHi}}
+                                    </option>
+                                </select>
+                            </div>
+
+
+                            <div class="form-group col-md-6">
+                                <label>{{translation.PACS_NAME}} En</label>
+                                <input type="text" class="form-control" name="PacsNameEn" ng-model="CCB.PacsNameEn" placeholder={{translation.PACS_NAME}} ng-required="true" autocomplete="off" />
+                                <label ng-show="CCB_Form.PacsNameEn.$error.required && !CCB_Form.PacsNameEn.$pristine" class="help-block">{{translation.PACS_NAME}} - {{translation.Required}}</label>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label>{{translation.PACS_NAME}} Hi</label>
+                                <input type="text" class="form-control" name="PacsNameHi" ng-bind="OfficeNameHi" ng-model="CCB.PacsNameHi" placeholder={{translation.PACS_NAME}} ng-required="true" autocomplete="off" />
+                                <label ng-show="CCB_Form.PacsNameHi.$error.required && !CCB_Form.PacsNameHi.$pristine" class="help-block">{{translation.PACS_NAME}} - {{translation.Required}}</label>
+                            </div>
+
+
+                            <div class="form-group col-md-6">
+                                <label>Pacs Code</label>
+                                <input type="text" class="form-control" name="PacsCode" ng-bind="PacsCode" ng-model="CCB.PacsCode" placeholder="Pacs Code" ng-required="true" autocomplete="off" />
+                                <label ng-show="CCB_Form.PacsCode.$error.required && !CCB_Form.PacsCode.$pristine" class="help-block">PacsCode - {{translation.Required}}</label>
+                            </div>
+
+                            <div class="col-md-12">
+                                <div class="dev-menu-btn">
+                                    <button type="submit" class="btn btn-primary" ng-disabled="CCB_Form.$invalid" ng-click="SavePacsForm()">{{translation.Submit}}</button>
+                                    <button type="submit" class="btn btn-primary" ng-click="ClearPacsForm()">{{translation.Clear}}</button>
+                                    @*<input type="hidden" ng-model="OfficeMaster.OfficeId" />*@
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+
+        <div class="">
+            <div class="col-md-12">
+                <div class="citizen-dash-head">
+                    <div class="table-dropdown">
+                        <div class="col-xs-4">
+                            <label for="search">{{translation.Search}}:</label>
+                            <input ng-model="q" id="search" class="form-control" placeholder={{translation.filttertext}} autocomplete="off">
+                        </div>
+                        <div class="col-xs-4">
+                            <label for="search">{{translation.ItemPerPage}}:</label>
+                            <input type="number" min="1" max="100" class="form-control" onkeypress='return event.charCode >= 48 && event.charCode <= 57' ng-model="pageSize">
+                        </div>
+
+                        <div class="col-md-4 form-group">
+                            <label>
+                                {{translation.BankName}}
+                            </label>
+                            <select ng-model="CCBMaster.BankID" id="BankID" class="form-control" ng-init="CCBMaster.BankID='0'" ng-change="Get_LoanBankBranch(CCBMaster.BankID);SortPacsList();">
+                                <option value="0" >{{translation.SelectOption}}</option>
+                                <option ng-repeat="itemBlock in BankMasterList | orderBy:'BLOCK_ENG'" value="{{itemBlock.CCBId}}">
+                                    {{_language =='en-us' ?  itemBlock.CCBNameEn : itemBlock.CCBNameHi}}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 form-group">
+                            <label>
+                                {{translation.BankBranch}}
+                            </label>
+                            <select ng-model="CCBMaster.BranchId" id="BranchId" class="form-control" ng-init="CCBMaster.BranchId='0'"  ng-change="SortPacsList();">
+                                <option value="0" >{{translation.SelectOption}}</option>
+                                <option ng-repeat="itemBlock in PLDBBranches | orderBy:'BLOCK_ENG'" value="{{itemBlock.Branch_ID}}">
+                                    {{_language =='en-us' ?  itemBlock.BranchNameEn : itemBlock.BranchNameHi}}
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="col-xs-4" style="padding-top: 25px; ">
+                            <input type="button" class="btn btn-primary dev-btn" onclick="tableToExcel('tblgetsuport', 'Pacs Data')" value="Export to Excel">
+                        </div>
+                    </div>
+                    <table class="table devtable" id="tblgetsuport">
+                        <thead>
+                            <tr>
+                                <th>
+                                    {{translation.SRNO}}
+                                </th>
+                                <th ng-click="sortData('PACSNameEn')">
+                                    {{_language =='en-us' ? 'Pacs Name English' : 'पैक्स नाम '}}
+                                    <div ng-class="getSortClass('PACSNameEn')"></div>
+                                </th>
+                                <th ng-click="sortData('PACSNameHi')">
+                                    {{_language =='en-us' ? 'Pacs Name Hindi' : 'पैक्स नाम '}}
+                                    <div ng-class="getSortClass('PACSNameHi')"></div>
+                                </th>
+                                <th ng-click="sortData(_language =='en-us' ? 'BranchNameEn' : 'BranchNameHi')">
+                                    {{_language =='en-us' ? 'Branch Name' : 'पैक्स नाम'}}
+                                    <div ng-class="getSortClass(_language =='en-us' ? 'BranchNameEn' : 'BranchNameHi')"></div>
+                                </th>
+                                <th ng-click="sortData(_language =='en-us' ? 'CCBNameEn' : 'CCBNameHi')">
+                                    {{_language =='en-us' ? 'Bank Name' : 'बैंक का नाम'}}
+                                    <div ng-class="getSortClass(_language =='en-us' ? 'CCBNameEn' : 'CCBNameHi')"></div>
+                                </th>
+                                <th ng-click="sortData('XPACS_ID')">
+                                    {{_language =='en-us' ? 'Pacs Code' : 'पैक्स नाम '}}
+                                    <div ng-class="getSortClass('XPACS_ID')"></div>
+                                </th>
+                                <th>
+                                    {{translation.IsActive}}
+                                </th>
+                             
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr dir-paginate="Class in PacsListData | filter:q | orderBy:colsort:reverseSort | itemsPerPage: pageSize" current-page="currentPage" pagination-id="SubclassPagination">
+                                <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                                <td>{{ Class.PACSNameEn }}</td>
+                                <td>{{ Class.PACSNameHi }}</td>
+                                <td>{{_language =='en-us' ?  Class.BranchNameEn : Class.BranchNameHi}}</td>
+                                <td>{{_language =='en-us' ?  Class.CCBNameEn : Class.OrganisationNameHi}}</td>
+                                <td>{{Class.XPACS_ID }}</td>
+                                <td>
+
+                                    <div class="dev-action">
+
+                                        <label class="switch">
+
+                                            @*<input type="checkbox" ng-checked="Class.IsActive == 1" ng-click="SetStatus(Class.OfficeId,Class.IsActive)">*@
+                                            <input type="checkbox" ng-checked="Class.IsActive == 1" >
+
+                                            <span class="slider round"></span>
+                                        </label>
+                                    </div>
+                                </td>
+                               
+                            </tr>
+                        </tbody>
+                    </table>
+               
+                </div>
+            </div>
+
+            <div class="col-md-10">
+                <div class="text-center">
+                    <dir-pagination-controls boundary-links="true" pagination-id="SubclassPagination" on-page-change="pageChangeHandler(newPageNumber)" template-url="/dirPagination.tpl.html"></dir-pagination-controls>
+                </div>
+            </div>
+            <div class="form-group col-md-12">
+                <div class="dev-align-btn">
+
+                    <a class="btn btn-primary dev-btn" style="text-transform:capitalize;" href="../User/DashBoard"> Back</a>
+                </div>
+
+            </div>
+            <div class="col-md-2">
+                <h5 class="dev-page"> {{translation.Page}}: {{ currentPage }} </h5>
+            </div>
+        </div>
+    </div>
+    <div class="se-pre-con"></div>
+    <div id="stop" class="scrollTop">
+        <span><a href=""><i class="fa fa-arrow-up">Top</i></a></span>
+    </div>
+</div>
+

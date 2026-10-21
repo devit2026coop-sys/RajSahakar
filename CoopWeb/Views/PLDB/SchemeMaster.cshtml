@@ -1,0 +1,381 @@
+﻿@if (((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]) != null)
+{
+    if (((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).UserType == "C")
+    {
+        Layout = "~/Views/Shared/_CitizenLayout.cshtml";
+    }
+    else
+    {
+        Layout = "~/Views/Shared/_Layout.cshtml";
+    }
+}
+else
+{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<script src="~/Scripts/AngularFramework/PLDBLoanMasters.js"></script>
+<script type="text/javascript" src="~/Scripts/1.8.3.jquery.min.js"></script>
+<script type="text/javascript" src="~/Scripts/pdfmake.min.js"></script>
+<script type="text/javascript" src="~/Scripts/html2canvas.min.js"></script>
+
+<link href="~/Scripts/google_hindi/google_transliteration.css" rel="stylesheet" />
+<style>
+    .inputapi-transliterate-indic-suggestion-menu {
+        z-index: 99999 !important;
+        display: block;
+    }
+</style>
+
+<style type="text/css">
+    body {
+        font-family: Arial;
+        font-size: 10pt;
+    }
+
+    table {
+        border: 1px solid #ccc;
+        border-collapse: collapse;
+    }
+
+        table th {
+            background-color: #F7F7F7;
+            color: #333;
+            font-weight: bold;
+        }
+
+        table th, table td {
+            padding: 5px;
+            border: 1px solid #ccc;
+        }
+
+    .NewMemberdob input {
+        float: left;
+        width: 90%;
+    }
+
+    .NewMemberdob button {
+        float: left;
+    }
+
+    .notValid {
+        border: solid 1px red !important
+    }
+</style>
+
+
+<script type="text/javascript">
+
+    function ValidateAlpha(evt) {
+        var keyCode = (evt.which) ? evt.which : evt.keyCode
+        if ((keyCode < 65 || keyCode > 90) && (keyCode < 97 || keyCode > 123) && keyCode != 32)
+
+            return false;
+        return true;
+    };
+ 
+
+</script>
+
+<div ng-app="PLDBLoanMastersMOD" ng-controller="PLDBLoanMastersCONT">
+
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <h3 class="citizen-dash-head">{{translation.SchemeMaster}} </h3>
+    </div>
+
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="devpage-breadcrumb">
+            <ul class="page-breadcrumb">
+                <li class="dev-page-br">
+                    <i class="fa fa-home"> </i>
+                    <a href="../Citizen/Index"> {{translation.Home}} </a>
+                    <i class="fa fa-angle-right"> </i>
+                </li>
+                <li style="float: left">
+                    <span style="margin: 0 5px;"> {{translation.SchemeMaster}} </span>
+                </li>
+
+                <li style="float: right;" id="divAddBtn">
+                    <i class="fa fa-angle-double-right" style="color: #025e63;"></i>
+                    <a ng-click="AddNewSchemeOne();ResetAddNew()" style="color: #025e63; cursor: pointer; text-decoration:none; font-weight: bold;" class="ng-binding">{{translation.AddNew}}</a>
+                </li>
+
+
+            </ul>
+        </div>
+    </div>
+    @*MEMBERS*@
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="table-responsive citizen-dash-head">
+            <div class="table-dropdown" id="search-filter">
+                <input type="hidden" value="Scheme" id="MasterType" />
+                <div class="col-md-4">
+                    <label for="search" class="ng-binding">Search:</label>
+                    <input ng-model="q" id="search" class="form-control ng-pristine ng-valid ng-empty ng-touched" ng-model="Filter.SearchText" placeholder="Filter Text" autocomplete="off">
+                </div>
+
+
+                <div class="col-md-4">
+                    <label>&nbsp;</label><br>
+                    <button type="button" ng-click="searchRequest(GetElectionSocietyListData)" class="btn btn-primary dev-btn ng-binding">{{translation.Search}}</button>
+                    <button type="button" ng-click="ClearSearch()" class="btn btn-primary dev-btn ng-binding">{{translation.Clear}}</button>
+                </div>
+            </div>
+            <table id="example" class="table devtable" style="border:1px solid rgb(222, 221, 221); float: left;">
+                <thead>
+                    <tr>
+                        <th>
+                            #
+                            @*{{translation.SRNO}}*@
+                        </th>
+
+                        @*
+                        <th>
+                            {{translation.Purpose}}
+                        </th>*@
+                        <th>
+                            {{translation.Scheme}}
+                        </th>
+                        <th>
+                            {{translation.Sector}}
+                        </th>
+                        <th>
+                            {{translation.Status}}
+                        </th>
+                        <th>
+                            {{translation.Actions}}
+                        </th>
+
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr dir-paginate="item in LoanSchemeList | filter:q | orderBy:colsort:reverseSort | itemsPerPage: pageSize" current-page="currentPage" pagination-id="ElectionSymbolsPagination">
+                        <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                       
+                        <td>
+                            {{_language =='en-us' ?  item.scheme_name_en : item.scheme_name_hi}}
+                        </td>
+                        
+                        <td>
+                            {{_language =='en-us' ?  item.sector_name_en : item.sector_name_hi}}
+                        </td>
+                        @*
+                        <td>
+                            {{_language =='en-us' ?  item.purpose_name_en : item.purpose_name_hi}}
+                        </td>*@
+                        <td>
+                            <div class="dev-action">
+                                <label class="switch">
+                                    <input type="checkbox" ng-checked="item.is_active == 1" ng-click="SetStatusForscheme(item.scheme_id,item.is_active)">
+                                    <span class="slider round"></span>
+                                </label>
+                            </div>
+                        </td>
+                        <td class="add-more-td">
+                            <a href="javascript:void(0);" ng-click="EditScheme(item)"><i class="fa fa-edit"></i></a>
+                            <a href="javascript:void(0);" ng-click="SetStatusForscheme(item.scheme_id,2)"><i class="fa fa-trash"></i></a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="col-md-12">
+            <div class="text-left">
+                <dir-pagination-controls boundary-links="true" pagination-id="ElectionSymbolsPagination" on-page-change="pageChangeHandler(newPageNumber)" template-url="/dirPagination.tpl.html"></dir-pagination-controls>
+            </div>
+        </div>
+
+
+   
+
+        <div id="PrintDiv1" style="display:none">
+            <div class="table-responsive citizen-dash-head" id="tblCustomers1">
+                <div style="text-align:center">
+                    <h5><u>{{translation.rajsarkas}}</u></h5>
+                    <p>{{translation.EleImpDateHeader}}</p>
+                    <p>{{translation.EleImpDateHeader1}}</p>
+                    <p>{{translation.EleImpDateHeader2}}</p>
+                    <p style="text-align:left">{{translation.PublishHeading}}</p><br />
+                    <p>{{translation.CandidateList}}</p>
+                    <table id="content" class="table devtable" style="margin-top: 30px;border:1px solid rgb(222, 221, 221); float: left;">
+                        <thead>
+                            <tr>
+                                <th>
+                                    {{translation.SRNO}}
+                                </th>
+                                <th>
+                                    {{translation.Photo}}
+                                </th>
+                                <th>
+                                    {{translation.Name}}
+                                </th>
+                                <th>
+                                    {{translation.FatherHusbandName}}
+                                </th>
+                                <th>
+                                    {{translation.Address}}
+                                </th>
+                                <th>
+                                    {{translation.GenderHeading}}
+                                </th>
+                                <th>
+                                    {{translation.CategoryHeading}}
+                                </th>
+                                <th>
+                                    {{translation.ContactNo}}
+                                </th>
+                                <th>
+                                    {{translation.AADHAARNo}}
+                                </th>
+                                <th>
+                                    {{translation.DOB}}
+                                </th>
+                                <th style="display:none">
+                                    {{translation.PostHeading}}
+                                </th>
+
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr dir-paginate="item in EMemberDetailsData   | itemsPerPage: 9000" ng-if="item.IsCandidate">
+
+                                <td>{{$index+1}}</td>
+                                <td> <img src="~/Content/SocietyProfiling/{{item.SocietyDirectory}}/{{item.Photo}}" style="width: 35px;" ng-if="item.Photo!=''" onerror='onUserImageLoadError(this);' /></td>
+                                <td>{{item.Name}}</td>
+                                <td>{{item.FHName}}</td>
+                                <td>{{item.Address}}  </td>
+                                <td>{{item.Gender}}  </td>
+                                <td>{{item.CODENAME}}  </td>
+                                <td>{{item.ContactNo}}</td>
+                                <td>{{item.AadharNo2}}  </td>
+                                <td>{{item.DOB}}</td>
+                                <td style="display:none">{{item.CAD_NAME}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="dev-popup-body modal fade" id="addModal" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title"> {{translation.SchemeMaster}}</h4>
+                </div>
+                <div class="modal-body">
+                    <form class="dev-search-form" style="overflow: hidden; margin-bottom: 35px;" name="OfficeForm">
+                        <input type="hidden" ng-model="MasterModel.master_id" />
+                        
+                        <div class="col-md-12">
+                            <label>
+                                Select Type
+                            </label>
+                            <br />
+                            <input type="radio" id="farming" name="Farming" value="Farming" ng-model="MasterModel.Farming_NonFarming" ng-change="LoadSector('Farming')">
+                            <label>
+                                {{translation.Farming}}
+                            </label>
+
+
+                            <input type="radio" id="farming" name="Farming" value="NonFarming" ng-model="MasterModel.Farming_NonFarming" ng-change="LoadSector('NonFarming')">
+                            <label>
+                                {{translation.NonFarming}}
+                            </label>
+                        </div>
+
+
+                      
+                        <div class="col-lg-12 form-group">
+                            <label>
+                                {{translation.Sector}}
+                            </label>
+                                <select ng-model="MasterModel.sector_id" class="form-control" ng-init="MasterModel.sector_id=''">
+                                    <option value="">{{translation.SelectOption}}</option>
+                                    <option ng-repeat="itm in LoanSectorList" value="{{itm.sector_id}}" ng-if="itm.IsShow">
+                                        {{_language =='en-us' ?  itm.sector_name_en : itm.sector_name_hi}}
+                                    </option>
+                                </select>
+                           
+                        </div>
+                            @*<div class="col-md-12">
+                                <label>
+                                    {{translation.Purpose}}
+                                </label>
+                                <select ng-model="MasterModel.purpose_id" class="form-control" ng-init="MasterModel.purpose_id=''">
+
+                                    <option value="">{{translation.SelectOption}}</option>
+                                    <option ng-repeat="itm in LoanPurposeList" value="{{itm.purpose_id}}">
+                                        {{_language =='en-us' ?  itm.purpose_name_en : itm.purpose_name_hi}}
+                                    </option>
+                                </select>
+                            </div>*@
+
+                            <div class="col-md-12">
+                                <label>
+                                    {{translation.Scheme}} {{translation.Name}} (English)
+                                </label>
+                                <input type="text" id="name_en" name="name_en" class="form-control validateAddMember" placeholder="Scheme Name" ng-model="MasterModel.name_en" maxlength="150" autocomplete="off" onKeyPress="return ValidateAlpha(event);">
+                            </div>
+
+                            <div class="col-md-12">
+                                <label>
+                                    {{translation.Scheme}} {{translation.Name}} (Hindi)
+                                </label>
+                                <input type="text" id="name_hi" name="name_hi" class="form-control validateAddMember" placeholder="योजना का नाम" ng-model="MasterModel.name_hi" maxlength="150" onkeypress='return ValidateAlpha(event);' autocomplete="off">
+                            </div>
+
+                            <div class="col-md-12">
+                                <label>
+                                    {{translation.IsActive}}
+                                </label>
+                                <input type="checkbox" class="" ng-model="MasterModel.is_active">
+                            </div>
+                            <div class="col-md-12" style="margin-top: 10px;">
+                                <div class="dev-menu-btn">
+                                    <button type="submit" class="btn btn-primary" ng-click="SaveSchemeMasterData()">{{translation.Submit}}</button>
+                                    <button type="submit" class="btn btn-primary" ng-click="ResetAddNew()">{{translation.Clear}}</button>
+                                </div>
+                            </div>
+</form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<input type="hidden" name="hdlang" id="hdlang" value="hi-IN" />
+<script src="~/Scripts/google_hindi/google_transapi.js"></script>
+<script type="text/javascript">
+    google.load("elements", "1", {
+        packages: "transliteration"
+    });
+
+    function onLoad() {
+        var content = document.getElementById('content');
+        if (document.getElementById('hdlang').value == "hi-IN") {
+            var options = {
+                sourceLanguage: google.elements.transliteration.LanguageCode.ENGLISH,
+                destinationLanguage: google.elements.transliteration.LanguageCode.HINDI, // available option English, Bengali, Marathi, Malayalam etc.
+                shortcutKey: 'ctrl+g',
+                transliterationEnabled: true
+            };
+        }
+        else {
+            var options = {
+                sourceLanguage: google.elements.transliteration.LanguageCode.ENGLISH,
+                destinationLanguage: google.elements.transliteration.LanguageCode.HINDI, // available option English, Bengali, Marathi, Malayalam etc.
+                shortcutKey: 'ctrl+g',
+                transliterationEnabled: false
+            }
+        }
+        var ids = ["name_hi"];
+        var control = new google.elements.transliteration.TransliterationControl(options);
+        control.makeTransliteratable(ids);
+    }
+    google.setOnLoadCallback(onLoad);
+
+</script>
+
+<script src="~/Scripts/google_hindi/google_transliteration.js"></script>

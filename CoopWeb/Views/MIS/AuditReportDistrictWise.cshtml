@@ -1,0 +1,629 @@
+﻿
+@{
+    ViewBag.Title = "Audit Report District Wise";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<link href="~/Content/Stylesheets/bootstrap.css" rel="stylesheet" />
+<script src="~/Scripts/AngularFramework/AuditReportDistrictWiseClient.js"></script>
+<script src="~/Scripts/zingchart.min.js"></script>
+<script src="~/Scripts/zingchart-angularjs.js"></script>
+<script src="~/Scripts/canvasjs.min.js"></script>
+<script src="~/Scripts/jquery-1.11.1.min.js"></script>
+<script src="~/Scripts/AngularFramework/ng-google-chart.min.js"></script>
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.5/jspdf.min.js"></script>
+
+<link href="~/Content/Stylesheets/tooltip.css" rel="stylesheet" />
+<script src="~/Scripts/tooltip.js"></script>
+
+
+<style>
+    .portlet-fullscreen .div_chart {
+        height: 600px !important;
+    }
+
+    .page-content-wrapper .page-content {
+        padding: 15px 10px 10px;
+    }
+
+    .page-title {
+        margin: 0 0 5px;
+    }
+
+    .col-lg-1, .col-lg-10, .col-lg-11, .col-lg-12, .col-lg-2, .col-lg-3, .col-lg-4, .col-lg-5, .col-lg-6, .col-lg-7, .col-lg-8, .col-lg-9, .col-md-1, .col-md-10, .col-md-11, .col-md-12, .col-md-2, .col-md-3, .col-md-4, .col-md-5, .col-md-6, .col-md-7, .col-md-8, .col-md-9, .col-sm-1, .col-sm-10, .col-sm-11, .col-sm-12, .col-sm-2, .col-sm-3, .col-sm-4, .col-sm-5, .col-sm-6, .col-sm-7, .col-sm-8, .col-sm-9, .col-xs-1, .col-xs-10, .col-xs-11, .col-xs-12, .col-xs-2, .col-xs-3, .col-xs-4, .col-xs-5, .col-xs-6, .col-xs-7, .col-xs-8, .col-xs-9 {
+        padding-left: 5px;
+        padding-right: 5px;
+    }
+
+    .dashboard-stat {
+        margin-bottom: 10px;
+    }
+
+    .dashboard-stat2 {
+        padding: 5px 15px 15px 15px;
+    }
+
+    .portlet {
+        margin-bottom: 10px;
+    }
+
+        .portlet.light {
+            padding: 5px 10px 10px 10px;
+        }
+
+    .modal {
+        display: none; /* Hidden by default */
+        position: fixed; /* Stay in place */
+        z-index: 1; /* Sit on top */
+        padding-top: 100px; /* Location of the box */
+        left: 0;
+        top: 0;
+        width: 100%; /* Full width */
+        height: 100%; /* Full height */
+        overflow: auto; /* Enable scroll if needed */
+        background-color: rgb(0,0,0); /* Fallback color */
+        background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+    }
+
+    /* Modal Content */
+    .modal-content {
+        background-color: #fefefe;
+        margin: auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 90%;
+        min-height: 250px;
+    }
+
+    /* The Close Button */
+    .close {
+        color: #aaaaaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+        .close:hover,
+        .close:focus {
+            color: #000;
+            text-decoration: none;
+            cursor: pointer;
+        }
+</style>
+
+
+
+<style id="compiled-css" type="text/css">
+    .panel-actions {
+        margin-top: -20px;
+        margin-bottom: 0;
+        text-align: right;
+    }
+
+        .panel-actions a {
+            color: #333;
+        }
+
+    .panel-fullscreen {
+        display: block;
+        z-index: 9999;
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        right: 0;
+        left: 0;
+        bottom: 0;
+        overflow: auto;
+    }
+</style>
+
+<style>
+    a.canvasjs-chart-credit {
+        display: none;
+    }
+
+    .FullW {
+        width: 800px !important;
+    }
+</style>
+<style type="text/css">
+    .cont-m1 {
+        background-color: transparent;
+        height: 275px;
+        perspective: 1000px;
+    }
+
+    #card {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        transform-style: preserve-3d;
+        transition: transform 1s;
+        color: white;
+    }
+
+        #card figure {
+            margin: 0;
+            display: block;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+        }
+
+        #card .back {
+            transform: rotateY( 180deg);
+        }
+
+        #card.flipped {
+            transform: rotateY( 180deg);
+        }
+</style>
+
+<div ng-app="AuditReportDistrictWiseModule">
+    <div ng-controller="AuditReportDistrictWiseController">
+        <style>
+            .board .panel {
+                padding: 15px 40px;
+                border: none;
+                background: #fff;
+            }
+
+            .panel-primary {
+                display: inline-block;
+                margin-bottom: 30px;
+                width: 100%;
+            }
+
+            /*.panel {
+                border-radius: 0px;
+            }*/
+
+            .panel-primary {
+                border-color: #337ab7;
+            }
+
+            .panel {
+                margin-bottom: 20px;
+                background-color: #fff;
+                border: 1px solid transparent;
+                border-radius: 4px;
+                -webkit-box-shadow: 0 1px 1px rgba(0,0,0,.05);
+                box-shadow: 0 1px 1px rgba(0,0,0,.05);
+            }
+
+            .board .number {
+                float: left;
+            }
+
+            .number h3 {
+                font-size: 32px;
+                color: #676767;
+            }
+
+            .number small {
+                font-size: 16px;
+                font-weight: 600;
+                text-transform: uppercase;
+                margin: 8px 5px;
+                display: inline-block;
+            }
+
+            .board .icon {
+                float: right;
+            }
+
+            .board .panel .icon .fa {
+                font-size: 35px;
+                color: #FFFFFF;
+                background: #30A5FF;
+                padding: 35px;
+                border-radius: 50%;
+            }
+
+            .dred {
+                background: linear-gradient(60deg,#ffa726,#fb8c00) !important;
+                -webkit-box-shadow: 0 4px 20px 0 rgba(0,0,0,.14), 0 7px 10px -5px rgba(255,152,0,.4);
+                box-shadow: 0 4px 20px 0 rgba(0,0,0,.14), 0 7px 10px -5px rgba(255,152,0,.4);
+            }
+
+            .red-txt {
+                color: #f29918;
+            }
+
+            .green {
+                background: linear-gradient(60deg,#66bb6a,#43a047) !important;
+                -webkit-box-shadow: 0 4px 20px 0 rgba(0,0,0,.14), 0 7px 10px -5px rgba(76,175,80,.4);
+                box-shadow: 0 4px 20px 0 rgba(0,0,0,.14), 0 7px 10px -5px rgba(76,175,80,.4);
+            }
+
+            .green-txt {
+                color: #5ab360;
+            }
+
+            .blue {
+                background: linear-gradient(60deg,#ef5350,#e53935) !important;
+                -webkit-box-shadow: 0 4px 20px 0 rgba(0,0,0,.14), 0 7px 10px -5px rgba(244,67,54,.4);
+                box-shadow: 0 4px 20px 0 rgba(0,0,0,.14), 0 7px 10px -5px rgba(244,67,54,.4);
+            }
+
+            .blue-txt {
+                color: #e94442;
+            }
+
+            .sky {
+                background: linear-gradient(60deg,#26c6da,#00acc1) !important;
+                -webkit-box-shadow: 0 4px 20px 0 rgba(0,0,0,.14), 0 7px 10px -5px rgba(0,188,212,.4);
+                box-shadow: 0 4px 20px 0 rgba(0,0,0,.14), 0 7px 10px -5px rgba(0,188,212,.4);
+            }
+
+            .sky-txt {
+                color: #53c0d4;
+            }
+
+            .lyt-green {
+                background: linear-gradient(60deg,#dd70d4,#bd29e5) !important;
+                -webkit-box-shadow: 0 4px 20px 0 rgba(0,0,0,.14), 0 7px 10px -5px rgb(244, 166, 248);
+                box-shadow: 0 4px 20px 0 rgba(0,0,0,.14), 0 7px 10px -5px rgb(244, 166, 248);
+            }
+
+            .lyt-green-txt {
+                color: #c43ae1;
+            }
+
+            .dark-blue {
+                background: linear-gradient(60deg,#4208f4,#6354d3) !important;
+                -webkit-box-shadow: 0 4px 20px 0 rgba(0,0,0,.14), 0 7px 10px -5px rgb(148, 124, 240);
+                box-shadow: 0 4px 20px 0 rgba(0,0,0,.14), 0 7px 10px -5px rgb(148, 124, 240);
+            }
+
+            .dark-blue-txt {
+                color: #4920ec;
+            }
+
+            .red1:hover .panel {
+                background: #f1930f;
+                transition: 0.5s all;
+            }
+
+            .red1:hover .red-txt, .red1:hover h3 {
+                color: #fff;
+                transition: 0.5s all;
+            }
+
+            .red1:hover .dred {
+                background: #fff !important;
+                transition: 0.5s all;
+            }
+
+            .red1:hover .icon .fa {
+                color: #f1930f;
+                transition: 0.5s all;
+            }
+
+            .green1:hover .panel {
+                background: #66bb6a;
+                transition: 0.5s all;
+            }
+
+            .green1:hover .green-txt, .green1:hover h3 {
+                color: #fff;
+                transition: 0.5s all;
+            }
+
+            .green1:hover .green {
+                background: #fff !important;
+                transition: 0.5s all;
+            }
+
+            .green1:hover .icon .fa {
+                color: #66bb6a;
+                transition: 0.5s all;
+            }
+
+            .blue1:hover .panel {
+                background: #ef5350;
+                transition: 0.5s all;
+            }
+
+            .blue1:hover .blue-txt, .blue1:hover h3 {
+                color: #fff;
+                transition: 0.5s all;
+            }
+
+            .blue1:hover .blue {
+                background: #fff !important;
+                transition: 0.5s all;
+            }
+
+            .blue1:hover .icon .fa {
+                color: #ef5350;
+                transition: 0.5s all;
+            }
+
+            .sky1:hover .panel {
+                background: #26c6da;
+                transition: 0.5s all;
+            }
+
+            .sky1:hover .sky-txt, .sky1:hover h3 {
+                color: #fff;
+                transition: 0.5s all;
+            }
+
+            .sky1:hover .sky {
+                background: #fff !important;
+                transition: 0.5s all;
+            }
+
+            .sky1:hover .icon .fa {
+                color: #26c6da;
+                transition: 0.5s all;
+            }
+
+            .lyt-green1:hover .panel {
+                background: #bd29e5;
+                transition: 0.5s all;
+            }
+
+            .lyt-green1:hover .lyt-green-txt, .lyt-green1:hover h3 {
+                color: #fff;
+                transition: 0.5s all;
+            }
+
+            .lyt-green1:hover .lyt-green {
+                background: #fff !important;
+                transition: 0.5s all;
+            }
+
+            .lyt-green1:hover .icon .fa {
+                color: #bd29e5;
+                transition: 0.5s all;
+            }
+
+            .dark-blue1:hover .panel {
+                background: #4208f4;
+                transition: 0.5s all;
+            }
+
+            .dark-blue1:hover .dark-blue-txt, .dark-blue1:hover h3 {
+                color: #fff;
+                transition: 0.5s all;
+            }
+
+            .dark-blue1:hover .dark-blue {
+                background: #fff !important;
+                transition: 0.5s all;
+            }
+
+            .dark-blue1:hover .icon .fa {
+                color: #4208f4;
+                transition: 0.5s all;
+            }
+        </style>
+        <style type="text/css">
+            .loan-card {
+                /*margin-bottom: 15px;
+                margin-top: 15px;
+                width: 100%;
+                position: relative;
+                display: flex;
+                -ms-flex-direction: column;
+                flex-direction: column;
+                min-width: 0;
+                word-wrap: break-word;
+                background-clip: border-box;
+                transition: 1s all;*/
+                padding: 15px 0;
+                margin: 4px 0;
+                width: 25%;
+                position: relative;
+                /* display: flex; */
+                -ms-flex-direction: column;
+                min-width: 0;
+                /* word-wrap: break-word; */
+                /* background-clip: border-box; */
+                /* transition: 1s all; */
+                float: left;
+                /*background: #f8f9fa;*/
+            }
+
+
+
+            .loan-card-desc {
+                margin: 0 15px;
+                background: #f3c38c;
+                /*position: relative;
+
+                padding: 10px 15px;
+                border-radius: 6px;
+                text-align: right;
+                box-shadow: inset 0 0 10px #ede2cf;
+                transition: 1s all;*/
+                /* margin: 0 15px; */
+                position: relative;
+                /* background: #f8f9fa; */
+                padding: 10px 15px;
+                /* border-radius: 6px; */
+                text-align: center;
+                /* box-shadow: inset 0 0 10px #ede2cf; */
+                transition: 1s all;
+                /*border-right: 1px solid #c8ced3;*/
+            }
+
+            .border-0 {
+                border: 0 !important;
+            }
+
+            .loan-card-heading {
+                /*color: #000;
+                font-size: 18px;
+                font-weight: 600;*/
+                margin: 0;
+                color: #303030;
+                text-transform: uppercase;
+                font-size: 80%;
+                font-weight: 400;
+            }
+
+            .loan-card-title {
+                margin: 6px 0;
+                color: #303030;
+                /*font-size: 16px;
+                font-weight: bold;*/
+                font-size: 1.4125rem;
+                font-weight: 600;
+            }
+
+            .loan-card:hover .loan-card-desc {
+                box-shadow: inset 0 0 10px #a27644;
+            }
+        </style>
+
+
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <h3 class="citizen-dash-head">
+                {{ translation.AuditReportDistrictWise}}
+            </h3>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="../Citizen/Index"> {{translation.Home}} </a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;"> {{translation.MIS}} </span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+
+        
+        <!-- start main-content -->
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="col-md-12">
+                <div class="table-responsive citizen-dash-head">
+                    <div class="table-dropdown">
+                        <div class="col-md-4" style="padding-left: 0;">
+                            <label>{{ translation.Division}}</label>
+                            <select ng-model="AuditReport.DivisionId" class="form-control" ng-init="AuditReport.DivisionId='0'" ng-change="DivisionChange()">
+                                <option value="0" disabled>{{translation.SelectOption}}</option>
+                                <option ng-repeat="itemAct in DivisionList" value="{{itemAct.DIVISION_ID}}">
+                                    {{_language =='en-us' ?  itemAct.DIVISION_ENG : itemAct.DIVISION_MANGAL}}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-4" style="padding-left: 0;">
+                            <label>{{ translation.YEAR}}</label>
+                            <select ng-model="AuditReport.YearId" class="form-control" ng-init="AuditReport.YearId='0'" ng-change="YearChange()">
+                                <option value="0" disabled>{{translation.SelectOption}}</option>
+                                <option ng-repeat="itemAct in FinancialYearList" value="{{itemAct.FIN_YEAR_MASTR_ID}}">
+                                    {{_language =='en-us' ?  itemAct.FIN_YEAR_NAME : itemAct.FIN_YEAR_NAME}}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label>{{ translation.Month}}</label>
+                            <select ng-model="AuditReport.MonthId" class="form-control" ng-init="AuditReport.MonthId='0'" ng-change="GetDistrictData()">
+                                <option value="0" disabled>{{translation.SelectOption}}</option>
+                                <option ng-repeat="itemtype in MonthList" value="{{itemtype.Month_Id}}">
+                                    {{_language =='en-us' ?  itemtype.Month_En : itemtype.Month_Hi}}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <table id="example" class="table devtable" style="margin-top: 30px;border:1px solid rgb(222, 221, 221); float: left;" ng-show="tblDivisionWiseData">
+                        <thead>
+                            <tr>
+                                <th>
+                                    {{translation.SRNO}}
+                                </th>
+                                <th>
+                                    {{translation.District}}
+                                </th>
+                                <th>
+                                    {{translation.AuditableSocieties}}
+                                </th>
+                                <th>
+                                    {{translation.Audited_Societies_Till_Last_Month}}
+                                </th>
+                                <th>
+                                    {{translation.Audited_Societies_Current_Month}}
+                                </th>
+                                <th>
+                                    {{translation.Audited_Societies_Till_Current_Month}}
+                                </th>
+
+                                <th>
+                                    {{translation.Remaining_From_Audit}}
+                                </th>
+                                <th>
+                                    {{translation.Audit_Percentage}}
+                                </th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <tr ng-repeat="item in DistrictReport">
+                                <td>{{$index+1}}</td>
+                                <td>{{_language=='en-us'? item.DISTRICT_ENG : item.DISTRICT_MANGAL}}</td>
+                                <td>{{item.Auditable_Societies}}</td>
+                                <td>{{item.Audited_Societies_Till_Last_Month}}  </td>
+                                <td>{{item.Audited_Societies_Current_Month}}  </td>
+                                <td>{{item.Audited_Societies_Till_Current_Month}}</td>
+                                <td>{{item.Remaining_From_Audit}}</td>
+                                <td>{{item.Audit_Percentage}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <!-- end main-content -->
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        //Toggle fullscreen
+        $("#panel-fullscreen").click(function (e) {
+            e.preventDefault();
+
+            var $this = $(this);
+
+            if ($this.children('i').hasClass('glyphicon-resize-full')) {
+                $this.children('i').removeClass('glyphicon-resize-full');
+                $this.children('i').addClass('glyphicon-resize-small');
+            }
+            else if ($this.children('i').hasClass('glyphicon-resize-small')) {
+                $this.children('i').removeClass('glyphicon-resize-small');
+                $this.children('i').addClass('glyphicon-resize-full');
+            }
+            $(this).closest('.panel').toggleClass('panel-fullscreen');
+        });
+
+        $("#panel-fullscreen1").click(function (e) {
+            e.preventDefault();
+
+            var $this = $(this);
+
+            if ($this.children('i').hasClass('glyphicon-resize-full')) {
+                $this.children('i').removeClass('glyphicon-resize-full');
+                $this.children('i').addClass('glyphicon-resize-small');
+            }
+            else if ($this.children('i').hasClass('glyphicon-resize-small')) {
+                $this.children('i').removeClass('glyphicon-resize-small');
+                $this.children('i').addClass('glyphicon-resize-full');
+            }
+            $(this).closest('.panel').toggleClass('panel-fullscreen');
+        });
+    });
+</script>
+

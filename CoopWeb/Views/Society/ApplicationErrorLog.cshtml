@@ -1,0 +1,198 @@
+﻿
+
+<script src="~/Scripts/AngularFramework/ApplicationErrorLog.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $('.SetCalender').datepicker({
+            showOn: "both",
+            changeMonth: true,
+            buttonImage: "../images/calender.png",
+            changeYear: true,
+            dateFormat: "dd/mm/yy",
+            //minDate: (new Date()).getDate() + '/' + ((new Date()).getMonth()+1) + '/' + ((new Date()).getFullYear()).toString(),
+            //defaultDate: (new Date()).getDate() + '/' + ((new Date()).getMonth() + 1) + '/' + ((new Date()).getFullYear()).toString(),
+        });
+
+
+    });
+</script>
+
+
+<style type="text/css">
+    body {
+        font-family: Arial;
+        font-size: 10pt;
+    }
+
+    /*table {
+        border: 1px solid #ccc;
+        border-collapse: collapse;
+    }
+
+        table th {
+            background-color: #F7F7F7;
+            color: #333;
+            font-weight: bold;
+        }
+
+        table th, table td {
+            padding: 5px;
+            border: 1px solid #ccc;
+        }*/
+
+    .NewMemberdob input {
+        float: left !important;
+        width: 90% !important;
+    }
+
+    .NewMemberdob button {
+        float: left;
+    }
+
+    .notValid {
+        border: solid 1px red !important
+    }
+
+    .NewRequestList td {
+        color: black !important;
+    }
+
+    .rowdeleteBtn {
+        color: #fff !important;
+        font-weight: bold !important;
+        font-size: 12px !important;
+    }
+
+    .margin-Top20 {
+        margin-top: 20px;
+    }
+</style>
+<div ng-app="ApplicationErrorLogModule">
+    <input type="hidden" id="hdnFP" />
+    <div ng-controller="ApplicationErrorLogCont">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <h3 class="citizen-dash-head">Application Error Log</h3>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="../Citizen/Index"> {{translation.Home}} </a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+
+                        <span style="margin: 0 5px;">Application Error Log</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="col-md-12">
+            <div class="citizen-dash-head">
+                <div class="table-dropdown">
+                    <div class="col-lg-12 form-group" id="search-filter">
+                        <div class="col-lg-2">
+                            <label style="color:black">Search :</label>
+                            <input type="text" name="SocietyName" class="form-control" ng-model="MapRegistrationNo" placeholder="{{translation.SocietyRegistrationNo}}">
+                        </div>
+
+                        <div class="col-md-2 NewMemberdob">
+                            <label>
+                                {{translation.FromDate}}
+                            </label>
+                            <input id="txtFromDate" name="FromDate" disabled="disabled" class="form-control SetCalender" ng-model="Filter.FromDate" placeholder="{{translation.FromDate}}" onkeypress="return event.charCode >= 48 &amp;&amp; event.charCode <= 57" autocomplete="off">
+                        </div>
+                        <div class="col-md-2 NewMemberdob">
+                            <label>
+                                {{translation.ToDate}}
+                            </label>
+                            <input id="txtToDate" name="ToDate" disabled="disabled" class="form-control SetCalender" ng-model="Filter.ToDate" placeholder="{{translation.ToDate}}" onkeypress="return event.charCode >= 48 &amp;&amp; event.charCode <= 57" autocomplete="off">
+                        </div>
+                        <div class="col-lg-2">
+                            <label>
+                              &nbsp;
+                            </label>
+                            <button type="submit" style="margin-top: 20px;" class="btn btn-primary dev-btn" ng-click="searchRequest(GetMainErrorList);">Search</button>                           
+                        </div>
+                        <div class="col-lg-4" style="text-align: right;"> 
+                            <label>
+                                &nbsp;
+                            </label>                           
+                            <button type="submit" style="margin-top: 20px;" class="btn btn-primary dev-btn" ng-click="ChangeStatus(item,2);">Remove All Logs</button>
+                        </div>
+                    </div>        
+                    <div class="col-lg-12 form-group">
+                        <input type="checkbox" ng-model="Filter.CriticalIssues" ng-init="false" style="margin: 4px 0 0;line-height: normal;height: 20px; width: 20px;" ng-click="searchRequest(GetMainErrorList)" /><label style="font-size: 17px;margin-left:5px;">Show Critical  Errors</label>
+                    </div>
+                    <table id="tblData" class="table devtable" style="margin-top: 10px;border:1px solid rgb(222, 221, 221); float: left;">
+                        <thead>
+                            <tr>
+                                <th class="info_news_slh_table_fix">Sr No.</th>
+                                <th>Error Message</th>
+                                <th>Error Location</th>
+                                <th>Log Entry Datetime</th>
+                                <th style="width:10%">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="item in MainErrorList" style="{{item.StatusId==null||item.StatusId==0?'':item.StatusId==5?'background: #3d983d;color: #e8d3d3;':item.StatusId==6?'background: #d62a2a;color: #e8d3d3;':''}}">
+                                <td>{{(((DataPagingDetails.PageNumber - 1) * DataPagingDetails.PageSize) + 1)+$index}}</td>
+                                <td>{{item.ErrorMessage}}</td>
+                                <td>{{item.ErrorLocation}}</td>
+                                <td>{{item.LogEntryDatetime}}</td>
+                                <td style="text-align:center;">
+                                    <a title="Remove from list" href="javascript:void(0);" ng-click="ChangeStatus(item,4)"><i class="fa fa-trash" style="{{item.StatusId==null||item.StatusId==0?'':'color: #fff;'}}"></i></a>&nbsp;&nbsp;&nbsp;&nbsp;
+                                    <a title="Sent to critical" ng-if="!Filter.CriticalIssues" href="javascript:void(0);" ng-click="ChangeStatus(item,3)"><i class="fa fa-upload" style="{{item.StatusId==null||item.StatusId==0?'':'color: #fff;'}}"></i></a>&nbsp;&nbsp;&nbsp;&nbsp;
+                                    <a title="Resolved" href="javascript:void(0);" ng-click="ChangeStatus(item,5)"><i class="fa fa-thumbs-up" style="{{item.StatusId==null||item.StatusId==0?'':'color: #fff;'}}"></i></a>&nbsp;&nbsp;&nbsp;&nbsp;
+                                    <a title="Not Resolved " href="javascript:void(0);" ng-click="ChangeStatus(item,6)"><i class="fa fa-thumbs-down" style="{{item.StatusId==null||item.StatusId==0?'':'color: #fff;'}}"></i></a>&nbsp;&nbsp;&nbsp;&nbsp;
+                                    <a title="Reset to not any action" href="javascript:void(0);" ng-click="ChangeStatus(item,0)"><i class="fa fa-undo" style="{{item.StatusId==null||item.StatusId==0?'':'color: #fff;'}}"></i></a>&nbsp;&nbsp;&nbsp;&nbsp;
+                                </td>                                
+                            </tr>
+                            <tr>                                
+                                <td colspan="5">
+                                    <div ng-if="DataPagingDetails.TotalPages>1" class="dataTables_paginate paging_simple_numbers" id="dataTables-example_paginate">                                      
+                                        <div class="col-md-10">                                        
+                                            <ul class="pagination pagination_1" style="margin-left: 10px !important;">
+                                                <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« First</span></li>
+                                                <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« Previous</span></li>
+
+                                                <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest('1',GetMainErrorList)" style="cursor: pointer;">
+                                                    <span>«First</span>
+                                                </li>
+                                                <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest(DataPagingDetails.PageNumber-1,GetMainErrorList)" style="cursor:pointer;">
+                                                    <span>« Previous</span>
+                                                </li>
+                                                <li class="{{n==DataPagingDetails.PageNumber?'active':''}}" style="{{n==DataPagingDetails.PageNumber?'':'cursor: pointer'}}" ng-repeat="n in PagingRange(DataPagingDetails.StartPageNumber,DataPagingDetails.EndPageNumber,DataPagingDetails.TotalPages)" ng-click="pageRequest(n,GetMainErrorList)"><span>{{n}}</span></li>
+                                                <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Next</span></li>
+                                                <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Last</span></li>
+                                                <li ng-if="DataPagingDetails.PageNumber!= DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.PageNumber+1,GetMainErrorList)" style="cursor:pointer;">
+                                                    <span>Next »</span>
+                                                </li>
+                                                <li ng-if="DataPagingDetails.PageNumber != DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.TotalPages,GetMainErrorList)" style="cursor:pointer;">
+                                                    <span>Last »</span>
+                                                </li>
+                                            </ul>
+                                                <div class="col-md-1" id="dataTables-example_info" role="status" aria-live="polite">
+                                                Total Records: {{DataPagingDetails.TotalRecords}}
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>  
+    </div>
+    <div class="se-pre-con"></div>
+    <div id="stop" class="scrollTop">
+        <span><a href=""><i class="fa fa-arrow-up">Top</i></a></span>
+    </div>
+</div>
+
+

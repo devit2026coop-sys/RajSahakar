@@ -1,0 +1,309 @@
+﻿<script src="~/Scripts/AngularFramework/WorkFlowMaster.js?v=1"></script>
+<style>
+    .has-error {
+        border: #F00;
+    }
+</style>
+<div ng-app="WorkFlowMasterMod">
+    <div ng-controller="WorkFlowMasterCnt">
+        <!-- Breadcrumb -->
+        <nav class="hk-breadcrumb" aria-label="breadcrumb">
+            <ol class="breadcrumb breadcrumb-light bg-transparent">
+                <li class="breadcrumb-item"><a href="#"><i class="glyphicon glyphicon-th"></i></a></li>
+                <li class="breadcrumb-item">{{translation.AgriMaster}}</li>
+                <li class="breadcrumb-item active" aria-current="page">{{translation.WorkFlowConfig}}</li>
+            </ol>
+
+        </nav>
+        <button type="button" class="btn btn-primary dev-btn breadcrumb-btn" ng-click="ViewDetails()" style="float: right;" ng-show="isForm">{{translation.View}}</button>
+        <!-- /Breadcrumb -->
+
+
+        <div class="col-md-12">
+            <!-- Title -->
+            <!-- Row -->
+            <div class="row" ng-show="isForm">
+                <div class="col-sm-12">
+                    <div class="card">
+                        <div class="card-body col-sm row mb-0">
+                            @*<div class="col-md-3">
+                                <label> {{translation.DepartmentHeading}} </label>
+
+                                <select ng-model="WorkFlowMaster.DepartmentId" class="form-control" ng-init="WorkFlowMaster.DepartmentId='0'" ng-change="GetSchemeName()">
+                                    <option value="0" disabled>{{translation.SelectOption}}</option>
+                                    <option ng-repeat="item in Departments" value="{{item.ID}}">
+                                        {{_language =='en-us' ?  item.DEPTNAMEENGLISH : item.DEPTNAMEHINDI}}
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label> {{translation.SchemeName}} </label>
+
+                                <select ng-model="WorkFlowMaster.SchemeNameId" class="form-control" ng-init="WorkFlowMaster.SchemeNameId='0'">
+                                    <option value="0" disabled>{{translation.SelectOption}}</option>
+                                    <option ng-repeat="item in SchemeNames" value="{{item.SchemeNameId}}">
+                                        {{_language =='en-us' ?  item.SchemeNameEng : item.SchemeNameHindi}}
+                                    </option>
+                                </select>
+                            </div>*@
+                            <div class="col-md-3">
+                                <label>Module :</label>
+                                <select id="ddlmodule" ng-model="WorkFlowMaster.ModuleNameEn" class="form-control" ng-init="WorkFlowMaster.ModuleNameEn='0'" ng-change="SubModuleList();GetStageList()">
+                                    <option value="0" disabled>{{translation.SelectOption}}</option>
+                                    <option data-ng-repeat="item in ModuleData" value="{{item.ModuleId}}">{{_language == 'en-us' ?  item.ModuleNameEn : item.ModuleNameHi}}</option>
+
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label>Sub Module :</label>
+                                <select id="ddlsubmodule" ng-model="WorkFlowMaster.SubModuleNameEn" class="form-control" ng-init="WorkFlowMaster.SubModuleNameEn='0'">
+                                    <option value="0" disabled>{{translation.SelectOption}}</option>
+                                    <option ng-repeat="item in SubModuleData" value="{{item.SubModuleId}}">
+                                        {{_language =='en-us' ?  item.SubModuleNameEn: item.SubModuleNameHi}}
+                                    </option>
+                                </select>
+                            </div>
+                         
+                            <div class="col-md-3">
+                                <label>Role Level :</label>
+                                <select id="ddllevel" ng-model="WorkFlowMaster.LevelNameEn" class="form-control" ng-init="WorkFlowMaster.LevelNameEn='0'" ng-change="RoleList()">
+                                    <option value="0" disabled>{{translation.SelectOption}}</option>
+                                    <option ng-repeat="item in LevelData" value="{{item.LevelId}}">
+                                        {{_language =='en-us' ?  item.LevelNameEn: item.LevelNameHi}}
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label>Role :</label>
+                                <select id="ddlrole" ng-model="WorkFlowMaster.RoleName_EN" class="form-control" ng-init="WorkFlowMaster.RoleName_EN='0'">
+                                    <option value="0" disabled>{{translation.SelectOption}}</option>
+                                    <option ng-repeat="item in Roles" value="{{item.RoleID}}">
+                                        {{_language =='en-us' ?  item.RoleName_EN: item.RoleName_HI}}
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="col-md-12" style="margin-top:20px; margin-bottom:20px;">
+
+                                <a href="#" class="button" ng-click="addRow()"><img src="~/Images/add.ico" width="20" height="20" />Role Map</a>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="table-wrap">
+                                    <table class="table table-hover w-100 display pb-0 mb-0" id="tblgetsuport">
+                                        <thead>
+
+                                            <tr>
+                                                <th>{{translation.SRNO}}</th>
+                                                <th>Action Head</th>
+                                                <th> {{_language =='en-us' ?  translation.ActionEn: translation.ActionHi}}</th>
+                                                <th>{{translation.ListCode}}</th>
+                                                <th>Role Level</th>
+                                                <th>{{translation.NextUserGroup}}</th>
+                                                <th>{{translation.Priority}}</th>
+                                                <th> Completion Days </th>
+                                                @*<th>Office Group</th>*@
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr ng-repeat="rowContent in rows track by $index">
+                                                <td>{{$index+1}}</td>
+                                                <td>
+                                                    <select id="DDLACTHID{{$index+1}}" class="form-control DDLACTHID" ng-init="0">
+                                                        <option value="0">{{translation.SelectOption}}</option>
+                                                        <option ng-repeat="item in ActionHeadListData" value="{{item.LovListId}}">
+                                                            {{_language =='en-us' ?  item.ListDescription: item.ListDescription}}
+                                                        </option>
+                                                    </select>
+                                                </td>
+                                                <td>
+                                                    <select id="DDLACTID{{$index+1}}" class="form-control DDLACTID" ng-init="0">
+                                                        <option value="0">{{translation.SelectOption}}</option>
+                                                        <option ng-repeat="item in ActionListData" value="{{item.LovValuesId}}">
+                                                            {{_language =='en-us' ?  item.LovCode: item.LovCode}}
+                                                        </option>
+                                                    </select>
+                                                </td>
+                                                <td><input id="actioncode{{$index+1}}" type="text" placeholder="View Code" class="form-control actioncode" onkeypress='return event.charCode >= 48 && event.charCode <= 57' /></td>
+                                                <td>
+                                                    <select id="ddllevel{{$index+1}}" class="form-control  ddllevel" ng-init="0" ng-model="level" ng-change="RoleListE($index+1)">
+                                                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                                                        <option ng-repeat="item in LevelData" value="{{item.LevelId}}">
+                                                            {{_language =='en-us' ?  item.LevelNameEn: item.LevelNameHi}}
+                                                        </option>
+                                                    </select>
+                                                </td>
+                                                <td>
+                                                    <select id="DDLROLEID{{$index+1}}" class="form-control DDLROLEID" ng-init="0" onkeypress='return event.charCode >= 48 && event.charCode <= 57'>
+                                                        <option value="0">{{translation.SelectOption}}</option>
+                                                    </select>
+                                                </td>
+                                                <td><input id="actionpriority{{$index+1}}" type="text" placeholder="Priority" class="form-control actionpriority" /></td>
+                                                <td><input id="completiondays{{$index+1}}" type="text" placeholder="Completion Days" class="form-control completiondays" onkeypress='return event.charCode >= 48 && event.charCode <= 57' /></td>
+                                                @*<td>
+                                                    <select id="DDLOfficeGroupID{{$index+1}}" class="form-control DDLOfficeGroupID" ng-init="0">
+                                                        <option value="0">{{translation.SelectOption}}</option>
+                                                        <option value="-77">I G M P</option>
+                                                        <option value="-88">C A D</option>
+                                                        <option value="-7788">I G M P and C A D Both</option>
+                                                    </select>
+                                                </td>*@
+                                                <td><span id="deleterow{{$index+1}}" ng-click="removeItem($index)" style="cursor:pointer;" class="w3-right w3-margin-right deleterow"><i class="fa fa-trash"></i></span></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                            </div>
+                            <div class="col-md-12" style="margin-top:20px;">
+
+                                <button type="button" class="btn btn-primary dev-btn" ng-click="SaveWorkFlow()">{{translation.Submit}}</button>
+
+                                <input type="hidden" ng-model="WorkFlowMaster.ID" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row" ng-hide="isForm">
+                <div class="col-xl-12">
+                    <div class="card">
+                        <div class="card-body col-sm row mb-0">
+                            <div class="col-md-4">
+                                <label for="search">{{translation.Search}}:</label>
+                                <input ng-model="q" id="search" class="form-control" placeholder={{translation.filttertext}} autocomplete="off">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="search">{{translation.ItemPerPage}}:</label>
+                                <input type="number" min="1" max="100" class="form-control" ng-model="pageSize">
+                            </div>
+                            <div class="col-md-4" style="padding-top: 25px; ">
+                                <input type="button" class="btn btn-primary dev-btn" onclick="tableToExcel('tblgetsuport1', 'Get Support Data')" value="Export to Excel">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card p-0">
+
+                        <div class="table-wrap">
+                            <table class="table table-hover w-100 display pb-0 mb-0 devtable" id="tblgetsuport1">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            {{translation.SRNO}}
+                                        </th>
+                                        <th ng-click="sortData('ModuleNameEn')">
+                                            Module
+                                            <div ng-class="getSortClass('ModuleNameEn')"></div>
+                                        </th>
+                                        <th ng-click="sortData('SubModuleNameEn')">
+                                            SubModule
+                                            <div ng-class="getSortClass('SubModuleNameEn')"></div>
+                                        </th>
+                                       
+                                        <th>
+                                            {{translation.RoleNameEn}}
+                                        </th>
+                                        <th>
+                                            {{translation.IsActive}}
+                                        </th>
+                                        <th>{{translation.Edit}}</th>
+                                        <th>{{translation.Delete}}</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr dir-paginate="items in WorkFlowConfigData | filter:q | orderBy:colsort:reverseSort | itemsPerPage: pageSize" current-page="currentPage" pagination-id="modulePagination">
+                                        <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                                        <td>{{ items.ModuleNameEn }}</td>
+                                        <td>{{ items.SubModuleNameEn }}</td>
+                                      
+                                        <td>{{ items.RoleName_EN }}</td>
+                                        <td>
+                                            <div class="dev-action">
+                                                <label class="switch">
+                                                    <input type="checkbox" ng-checked="items.IsActive == 1" ng-click="SetStatusWorkFlow(items.workflowmasterid,items.IsActive)">
+
+                                                    <span class="slider round"></span>
+                                                </label>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <i class="fa fa-edit" ng-click="UpdateWorkFlow(items)"></i>
+                                        </td>
+                                        <td>
+                                            <i class="fa fa-trash" ng-click="SetStatusWorkFlow(items.workflowmasterid,2)"></i>
+                                        </td>
+                                        <td> <a href="#" data-toggle="modal" ng-click="GetWorkflowDetails(items.workflowmasterid)" data-target="#myModal">{{translation.View}}</a></td>
+
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="row pa-20">
+                            <div class="col-sm-6">
+
+                                <button type="button" class="btn btn-primary dev-btn m-0" ng-click="GoBack()">{{translation.Back}}</button>
+                            </div>
+                            <div class="col-sm-6">
+                                <nav class="pagination-wrap  justify-content-end mb-25" aria-label="Page navigation example">
+                                    <nav class="pagination-wrap d-inline-block mr-40 mt-15 __web-inspector-hide-shortcut__" aria-label="Page navigation example">
+                                        <ul class="pagination">
+                                            <dir-pagination-controls boundary-links="true" pagination-id="modulePagination" on-page-change="pageChangeHandler(newPageNumber)" template-url="/dirPagination.tpl.html"></dir-pagination-controls>
+                                            @*<li class="page-item"><a class="page-link" href="#">{{translation.Page}}: {{ currentPage }}</a></li>*@
+                                        </ul>
+                                    </nav>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="dev-popup-body modal fade" id="myModal" role="dialog" data-backdrop="static" data-keyboard="false">
+                <div class="modal-dialog modal-lg">
+                    <!-- Modal content-->
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title">Role Map </h4>
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        </div>
+                        <div class="modal-body">
+
+                            <form class="dev-search-form" name="MyCode" style="overflow: hidden;">
+                                <div class="form-group">
+                                    <table class="table tablesaw table-bordered table-hover  mb-0" style=" color: #000;">
+                                        <thead>
+                                            <tr>
+                                                <th>{{translation.SRNO}}</th>
+                                                <th>{{_language =='en-us' ?  translation.ActionEn: translation.ActionHi}}</th>
+                                                <th>{{translation.ListCode}}</th>
+                                                <th>{{translation.NextUserGroup}}</th>
+                                                <th>{{translation.Priority}}</th>
+                                                <th> Completion Days </th>
+                                              
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr class="" ng-repeat="item in WorkFlowDetails">
+                                                <td>{{$index+1}}</td>
+                                                <td>{{_language =='en-us' ?  item.LovCode: item.LovCode}}</td>
+                                                <td>{{item.actioncode}}</td>
+                                                <td>{{_language =='en-us' ?  item.RoleName_EN: item.RoleName_HI}}</td>
+                                                <td>{{item.actionpriority}}</td>
+                                                <td>{{item.CompletionDays}}</td>
+                                               
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

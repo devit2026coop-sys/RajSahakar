@@ -1,0 +1,202 @@
+﻿<script src="~/Scripts/AngularFramework/BulkInsert.js"></script>
+<div ng-app="BulkInsertMod" ng-controller="BulkInsertCnt">
+    <div class="col-md-12">
+        <h3 class="citizen-dash-head"> {{translation.UploadCourtCaseExcel}}  </h3>
+    </div>
+
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="devpage-breadcrumb">
+            <ul class="page-breadcrumb">
+                <li class="dev-page-br">
+                    <i class="fa fa-home"> </i>
+                    <a href="#"> {{translation.Home}}</a>
+                    <i class="fa fa-angle-right"> </i>
+                </li>
+                <li style="float: left">
+                   
+                    <i class="fa fa-angle-right"> </i>
+                    <span style="margin: 0 5px;"> {{translation.UploadCourtCaseExcel}} </span>
+                </li>
+
+            </ul>
+        </div>
+    </div>
+
+    <div class="col-lg-12 form-group">
+        <div class="citizen-dash-head">
+            <div class="col-lg-2 btn-lg">{{ translation.UploadExcel}}<span class="error">*</span></div>
+            <div class="col-lg-4">
+                <input type="file" style="width:680px; border:1px solid blue;" filetype='excel' name="File" id="fluBulkInsert" class="btn btn-outline-primary btn-lg active" ng-model="BulkInsert.BulkInsertFileCourt" onchange="angular.element(this).scope().UploadBulkInsertFileCourt(this.files)">
+            </div>
+            <div class="col-lg-4 btn-lg">&nbsp;</div>
+            <div class="col-lg-2">
+                <a href="~/Content/CourtExcel/CourtCase.xlsx">DownLoad Sample</a>
+            </div>
+            <div class="clearfix"></div>
+        </div>
+    </div>
+
+    <div class="form-group col-md-12">
+        <div class="dev-align-btn">
+            <button type="submit" class="btn btn-primary dev-btn" ng-click="SaveBulkInsertCourt()">{{ translation.Submit}}</button>
+            <button type="button" class="btn btn-primary dev-btn" ng-click="ClearBulkInsertForm()">{{ translation.Clear}}</button>
+            <a class="btn btn-primary dev-btn" style="text-transform:capitalize;" href="../User/DashBoard"> Back </a>
+        </div>
+    </div>
+    <div class="se-pre-con"></div>
+    <div class="form-group col-md-12" ng-show="ExlFileShow">
+        <div class="citizen-dash-head table-responsive">
+            <table class="table table-responsive devtable" style="margin-top: 30px;color:black" id="a">
+                <thead>
+                    <tr>
+                        <th>
+                            {{translation.SRNO}}
+                        </th>
+                        <th>
+                            {{translation.File}}
+                        </th>
+                        <th>
+                            {{translation.CreationDate}}
+                        </th>
+                        <th>
+                            {{translation.Total}}
+                        </th>
+                        <th>
+                            {{translation.FailedRecord}}
+                        </th>    
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="itemm in SocityExcelDetailsData">
+                        <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                        <td>
+                            <a href="~/Content/CourtExcel/{{itemm.ExcelSheetName}}">View File</a>
+                        </td>
+                        <td>{{itemm.CreationDate}}</td>
+                        <td><a href="#" ng-click="GetExlSocietyCourt(itemm.Id,1)">{{itemm.TotSocieties}}</a></td>
+                        <td><a href="#" ng-click="GetExlSocietyCourt(itemm.Id,0)">{{itemm.FaildRecord}}</a></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="form-group col-md-12" ng-show="ExlSocietyShow">
+        <div class="citizen-dash-head table-responsive">
+            <table class="table table-responsive devtable" style="margin-top: 30px;color:black" id="a">
+                <thead>
+                    <tr>
+                        <th>{{translation.SRNO}}</th>
+                        <th>{{translation.Court}}</th>
+                        <th>{{translation.Plaintiff}}</th>
+                        <th>{{translation.Defendant}}</th>
+                        <th>{{translation.TypeOfCase}}</th>
+                        <th>{{translation.RegistrationDate}}</th>
+                        <th>{{translation.CaseRegistraionNo}}</th>
+                        <th>{{translation.section}}</th>
+                        <th>{{translation.CaseDescription}}</th>
+                        <th>{{translation.LastHearingDate}}</th>
+                        <th>{{translation.NextHearingDate}}</th>
+                        <th>{{translation.CaseStatus}}</th>
+                        <th>{{translation.Edit}}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="itemm in ExlSocietyDetailsData">
+                        <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                        <td>{{itemm.CourtName}}</td>
+                        <td>{{itemm.Plaintiff}}</td>
+                        <td>{{itemm.Defendant}}</td>
+                        <td>{{itemm.TypeOfCase}}</td>
+                        <td>{{itemm.CaseRegistrationDate}}</td>
+                        <td>{{itemm.CaseRegistrationNumber}}</td>
+                        <td>{{itemm.CourtSection}}</td>
+                        <td>{{itemm.CaseDescription}}</td>
+                        <td>{{itemm.LastHearingDate}}</td>
+                        <td>{{itemm.NextHearingDate}}</td>
+                        <td>{{itemm.CaseCurrentStatus}}</td>
+                        <td><i class="fa fa-edit" data-target="#myModal" data-toggle="modal" ng-click="GetNextHearingDate(itemm)"></i></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    <div class="form-group col-md-12" ng-show="ExlSocietyShowFail">
+        <div class="citizen-dash-head table-responsive">
+            <table class="table table-responsive devtable" style="margin-top: 30px;color:black" id="a">
+                <thead>
+                    <tr>
+                        <th>{{translation.SRNO}}</th>
+                        <th>{{translation.Court}}</th>
+                        <th>{{translation.Plaintiff}}</th>
+                        <th>{{translation.Defendant}}</th>
+                        <th>{{translation.TypeOfCase}}</th>
+                        <th>{{translation.RegistrationDate}}</th>
+                        <th>{{translation.CaseRegistraionNo}}</th>
+                        <th>{{translation.section}}</th>
+                        <th>{{translation.CaseDescription}}</th>
+                        <th>{{translation.LastHearingDate}}</th>
+                        <th>{{translation.NextHearingDate}}</th>
+                        <th>{{translation.CaseStatus}}</th>
+                        <th>{{translation.Reasion}}</th>
+
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="itemm in ExlSocietyDetailsDataFail">
+                        <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                        <td>{{itemm.CourtName}}</td>
+                        <td>{{itemm.plaintiff}}</td>
+                        <td>{{itemm.Defendant}}</td>
+                        <td>{{itemm.TypeOfCase}}</td>
+                        <td>{{itemm.CaseRegistrationDate}}</td>
+                        <td>{{itemm.CaseRegistrationNumber}}</td>
+                        <td>{{itemm.CourtSection}}</td>
+                        <td>{{itemm.CaseBriefDescription}}</td>
+                        <td>{{itemm.LastHearingDate}}</td>
+                        <td>{{itemm.NextHearingDate}}</td>
+                        <td>{{itemm.CaseCurrentStatus}}</td>
+                        <td>{{itemm.Reasion}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+        <div id="stop" class="scrollTop">
+            <span><a href=""><i class="fa fa-arrow-up">Top</i></a></span>
+        </div>
+
+    <div class="dev-popup-body modal fade" id="myModal" role="dialog">
+        <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title"> {{translation.UpdateNextHearingDate}} </h4>
+                </div>
+                <div class="modal-body">
+                    <div class="citizen-dash-head" name="MyRoleForm" style="overflow: hidden;">
+                        <div class="form-group col-md-12" ng-show="ExlSocietyShow">
+                            <div class="col-lg-6 btn-lg">{{ translation.NextHearingDate}}</div>
+                            <div class="col-lg-4">
+                                <input name="RegistrationDate" id="txtRegistrationDate1" class="form-control devcalender SetCalender" disabled="disabled" placeholder="{{translation.Date}}" ng-model="Hearing.NextHearingDate" autocomplete="off" />
+                            </div>
+                            <div class="clearfix"></div>
+                            
+                        </div>
+                        <div class="form-group col-md-12">
+                            <div class="col-lg-6">
+                                <div class="dev-align-btn">
+                                    <button type="submit" class="btn btn-primary dev-btn" ng-click="UpdateNextHearingDate()" style="margin-right:15px;">{{translation.Submit}}</button>
+                                    <button type="button" class="btn btn-primary dev-btn" ng-click="ClearNextHearing()">{{translation.Clear}}</button>
+                                </div>
+                            </div>
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>

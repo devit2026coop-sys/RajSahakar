@@ -1,0 +1,600 @@
+﻿@{
+    ViewBag.Title = "Loanee PR Payment Receipt";
+}
+<script src="~/Scripts/AngularFramework/PLDB_PR_LoanPayment.js?v=1.18"></script>
+<style>
+    label {
+        display: inline-block;
+        width: 100% !important;
+        margin-bottom: 5px;
+        font-weight: 700;
+        font-weight: normal
+    }
+
+    .zoom {
+        transition: transform .2s; /* Animation */
+        margin: 0 auto;
+    }
+
+        .zoom:hover {
+            padding-left: 30px;
+            transform: scale(2.5); /* (150% zoom - Note: if the zoom is too large, it will go outside of the viewport) */
+        }
+
+    a > i.fa.fa-plus-circle {
+        font-size: 25px;
+        cursor: pointer;
+    }
+
+    a:hover > i.fa.fa-plus-circle {
+        font-size: 26px;
+        cursor: pointer;
+    }
+
+    a > i.fa.fa-eye {
+        font-size: 25px;
+        cursor: pointer;
+    }
+
+    a:hover > i.fa.fa-eye {
+        font-size: 26px;
+        cursor: pointer;
+    }
+
+
+    .dvfieldset {
+        border: 1px solid #b0adad;
+        border-radius: 5px;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+        background: #fff;
+        color: #444;
+    }
+
+    .dvlegend {
+        width: auto;
+        padding: 24px;
+        margin-left: 11px;
+        border: 1px solid gray;
+        padding: 5px;
+        border-radius: 14px;
+        font-size: 16px;
+        padding-left: 14px;
+        padding-right: 15px;
+        background: #025e63;
+        color: #fff;
+    }
+
+    .modal-dialog {
+        color: #444;
+    }
+
+    .payment-table {
+        width: 100%;
+    }
+
+        .payment-table td {
+            padding: 5px;
+        }
+</style>
+<div ng-app="pldbApp" ng-controller="pldbCtrl" ng-cloak="">
+    <input type="hidden" id="hdnPldbId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).PLDBId)" />
+    <input type="hidden" id="hdnPldbBranchId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).PLDBBrancchId)" />
+
+    <div class="col-md-12">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 pt-2">
+            <div class="text-right"><button ng-click="BackToPage()" class="btn btn-primary dev-btn">Back To List</button></div>
+            <h5 style="text-align:center;font-size: 17px;background:#025e63;color:#fff;" class="citizen-dash-head">Loanee Repayment Process</h5>
+        </div>
+        <fieldset class="dvfieldset">
+            <legend class="dvlegend">Application Details/आवेदक का विवरण</legend>
+            <div class="col-lg-12">
+                <div class="table-responsive">
+                    <table class="table">
+                        <tr>
+                            <td colspan="8">
+                                <div ng-init="IsAccountClose=0">
+                                    <b>Does A/c close in same day</b>
+                                    <label style="display:inline;"><input type="radio" value="1" name="IsAccountClose" ng-model="IsAccountClose" ng-change="GetApplicationDetails()" ng-disabled="ApplicantDetails.IsDisabledSingleAccountClose==1" /> Yes</label>
+                                    <label style="display:inline;"><input type="radio" value="0" name="IsAccountClose" ng-model="IsAccountClose" ng-change="GetApplicationDetails()" ng-disabled="ApplicantDetails.IsDisabledSingleAccountClose==1" checked /> No</label>
+                                    <input type="date" class="form-control inline datecalculator" style="width:130px" ng-show="IsAccountClose==1" ng-model="AccountCloseDate" ng-change="GetApplicationDetails()" min="2025-04-01" max="{{ today | date:'yyyy-MM-dd' }}" />
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label>{{translation.LoanApplicationNo}} :</label>
+                            </td>
+                            <td>
+                                {{ _language=='en-us' ? ApplicantDetails.LoanAccNo : ApplicantDetails.LoanAccNo }}
+                            </td>
+                            <td>
+                                <label>{{translation.RegistrationNo}} :</label>
+                            </td>
+                            <td>
+                                {{ _language=='en-us' ? ApplicantDetails.NoticeNo : ApplicantDetails.NoticeNo }}
+                            </td>
+                            <td>
+                                <label>{{translation.PLDB}} :</label>
+                            </td>
+                            <td>
+                                {{_language=='en-us' ? ApplicantDetails.PLDBName: ApplicantDetails.PLDBName}}
+                            </td>
+                            <td>
+                                <label>{{translation.PLDBBranch}} :</label>
+                            </td>
+                            <td>
+                                {{_language=='en-us' ? ApplicantDetails.PLDBBranch: ApplicantDetails.PLDBBranch}}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label>{{translation.ApplicantName}} :</label>
+                            </td>
+                            <td>
+                                {{_language=='en-us' ? ApplicantDetails.ApplicantName: ApplicantDetails.ApplicantName}}
+                            </td>
+                            <td>
+                                <label>{{translation.FatherHasbandName}} :</label>
+                            </td>
+                            <td>
+                                {{ _language=='en-us' ? ApplicantDetails.FatherHusbandName : ApplicantDetails.FatherHusbandName }}
+                            </td>
+                            <td>
+                                <label>{{translation.Gender}} :</label>
+                            </td>
+                            <td>
+                                {{_language=='en-us' ? ApplicantDetails.Gender: ApplicantDetails.Gender}}
+                            </td>
+                            <td>
+                                <label>{{translation.MobileNo}} :</label>
+                            </td>
+                            <td>
+                                {{_language=='en-us' ? ApplicantDetails.MobileNo: ApplicantDetails.MobileNo}}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label>Outstanding as on 31-03-2025 (A) :  @*(37+38)*@</label>
+                            </td>
+                            <td>
+                                {{ApplicantDetails.PrincipalOutstandingAs31032025|inrCurrency}}
+                            </td>
+
+                            <td>
+                                <label>{{translation.RateOfInterest}} : </label>
+                            </td>
+                            <td>
+                                {{ApplicantDetails.RateOfInterest}}%
+                            </td>
+
+                            <td>
+                                <label>{{translation.OtherInterestFrom}}(B) : @*(47*RateOFInterest + RateOfInterest*daysFrom1_4_2025)*@</label>
+                            </td>
+                            <td>
+                                {{ApplicantDetails.OtherInterestAmt|inrCurrency}}
+                            </td>
+
+                            <td>
+                                <label>Current Penal Interest (C)</label>
+                            </td>
+                            <td>
+                                {{ApplicantDetails.CurrentPenalInterestAmount|inrCurrency}}
+                            </td>
+
+                        </tr>
+                        <tr>
+                            @*<td>
+                                    <label>Recovery Charges</label>
+                                </td>
+                                <td>
+                                    {{ApplicantDetails.RecoveryCharge|inrCurrency}}
+                                </td>*@
+                            <td>
+                                <label>Recoverable Total Amount : </label>
+                            </td>
+                            <td>
+                                {{ApplicantDetails.EstimatedTotalAmount|inrCurrency}}
+                            </td>
+                            <td>
+                                <label>{{translation.AmountOfRecovery|inrCurrency}} :</label>
+                            </td>
+                            <td>
+                                {{ApplicantDetails.AlreadyPaidAmount|inrCurrency}}
+                            </td>
+                            <td>
+                                <label>Remaining Amount:</label>
+                            </td>
+                            <td>
+                                {{(ApplicantDetails.EstimatedTotalAmount-ApplicantDetails.AlreadyPaidAmount)|inrCurrency}}
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </fieldset>
+        <fieldset class="dvfieldset">
+            <legend class="dvlegend">Payment Details/भुगतान का विवरण</legend>
+            <div class="col-lg-12 profile-d">
+                <div class="col-md-12 table-responsive ">
+                    <div class="text-right">
+                        <a ng-show="(ApplicantDetails.AlreadyPaidAmount)<(ApplicantDetails.EstimatedTotalAmount) && ShowPaymentOption" href="javascript:void(0)" class="btn btn-primary dev-btn mb-4" data-toggle="modal" data-target="#repaymentmodal">New Payment</a>
+                        <a ng-show="ApplicantDetails.AlreadyPaidAmount>=ApplicantDetails.EstimatedTotalAmount && ShowPaymentOption" href="javascript:void(0)" class="btn btn-primary dev-btn mb-4" data-toggle="modal" ng-click="FinalPay()">Final Payment</a>
+                    </div>
+                    <table class="table table-responsive devtable" style="color:black">
+                        <thead>
+                            <tr>
+                                <th> {{translation.SRNO}}</th>
+                                <th>{{translation.ReceiptNo}}</th>
+                                <th>{{translation.PaymentDate}}</th>
+                                <th>{{translation.PaidAmount}}</th>
+                                <th>{{translation.PaymentMode}}</th>
+                                <th>{{translation.UTR_RefNo}}</th>
+                                @*<th>{{translation.Status}}</th>*@
+                                <th>{{translation.DepositorPerson}}</th>
+                                <th>{{translation.Actions}}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="li in paymentSummaryList">
+                                <td>{{$index+1}}</td>
+                                <td><span class="dev-spancon">{{li.ReceiptNo}}</span></td>
+                                <td><span class="dev-spancon">{{li.PaymentDate|date:'dd-MM-yyyy'}}</span></td>
+                                <td><span class="dev-spancon">{{li.PaidAmount1}}</span></td>
+                                <td><span class="dev-spancon">{{li.PaymentMode}}</span></td>
+                                <td>
+                                    <span class="dev-spancon">{{li.UTR_RefNo}}</span>
+                                    <div ng-show="li.PaymentModeId==2">
+                                        Cheque No: {{li.ChequeNo}}
+                                        Cheque Date: {{li.ChequeDate|date:'dd-MM-yyyy'}}
+                                        Remark: {{li.ChequeOther}}
+                                    </div>
+                                </td>
+                                @*<td><span class="dev-spancon">{{li.Status}}</span></td>*@
+                                <td><span class="dev-spancon">{{li.DepositByPerson}}</span></td>
+                                <td><span class="dev-spancon"><button ng-click="DownloadPreLoanPaymentReceipt(li.OTSRePaymentSummaryId)" class="btn btn-xs btn-primary"> <i class="fa fa-print text-white"></i> </button></span></td>
+                            </tr>
+                        </tbody>
+                        <tfoot ng-show="paymentSummaryList==null">
+                            <tr>
+                                <td class="text-danger text-center" colspan="8">No payment has been deposited yet./अभी तक कोई भुगतान जमा नहीं किया गया है।</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </fieldset>
+
+
+        <fieldset class="dvfieldset">
+            <legend class="dvlegend">Ledger Details/खाता बही विवरण</legend>
+            <div class="col-lg-12 clspanal" id="panel_od" ng-show="ApplicantDetails.ODPrincipal>0">
+                <div class="table-responsive">
+                    <table class="table devtable" id="tblPreLoanDetails">
+                        <thead>
+                            <tr>
+                                <th colspan="6" style="text-align:center">{{translation.OD_1_7}}</th>
+                                <th colspan="5" style="text-align:center">{{translation.OD_31_3}}</th>
+                            </tr>
+                            <tr>
+                                <th rowspan="3" class="thverticalMiddle" style="text-align:center">{{translation.DateOfOD}}</th>
+                                <th rowspan="3" class="thverticalMiddle" style="text-align:center">{{translation.ODPrincipal}}</th>
+                                <th rowspan="3" class="thverticalMiddle" style="text-align:center">{{translation.InsurancePremium}}</th>
+                                <th rowspan="3" class="thverticalMiddle" style="text-align:center">{{translation.ODInterest}}</th>
+                                <th rowspan="3" class="thverticalMiddle" style="text-align:center">{{translation.PenalInterest}}</th>
+                                <th rowspan="3" class="thverticalMiddle" style="text-align:center">{{translation.ODTotal}}</th>
+
+                                <!--NOD-->
+                                <th rowspan="3" class="thverticalMiddle" style="text-align:center">{{translation.ODPrincipal}}</th>
+                                <th rowspan="3" class="thverticalMiddle" style="text-align:center">{{translation.InsurancePremium}}</th>
+                                <th rowspan="3" class="thverticalMiddle" style="text-align:center">{{translation.ODInterest}}</th>
+                                <th rowspan="3" class="thverticalMiddle" style="text-align:center">{{translation.PenalInterest}}</th>
+                                <th rowspan="3" class="thverticalMiddle" style="text-align:center">{{translation.ODTotal}}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="text-align:center">{{ApplicantDetails.DateOfOD}}</td>
+                                <td style="text-align:center">{{ApplicantDetails.ODPrincipal}}</td>
+                                <td style="text-align:center">{{ApplicantDetails.ODInsurancePremium}}</td>
+                                <td style="text-align:center">{{ApplicantDetails.ODInterest}}</td>
+                                <td style="text-align:center">{{ApplicantDetails.ODPenalInterast}}</td>
+                                <td style="text-align:center">{{ApplicantDetails.ODTotal}}</td>
+
+                                <!--NOD-->
+                                <td style="text-align:center">{{ApplicantDetails.NODPrincipal}}</td>
+                                <td style="text-align:center">{{ApplicantDetails.NODInsurancePremium}}</td>
+                                <td style="text-align:center">{{ApplicantDetails.NODInterest}}</td>
+                                <td style="text-align:center">{{ApplicantDetails.NODPenalInterest}}</td>
+                                <td style="text-align:center">{{ApplicantDetails.NODTotal}}</td>
+
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="table-responsive">
+                    <table class="table devtable" id="tblPreLoanDetails">
+                        <thead>
+                            <tr>
+                                <th colspan="7" style="text-align:center">{{translation.CurrentDemandCD}}</th>
+                            </tr>
+                            <tr>
+                                <!--cD-->
+                                <th rowspan="3" class="thverticalMiddle" style="text-align:center">{{translation.Principal}}</th>
+                                <th rowspan="3" class="thverticalMiddle" style="text-align:center">{{translation.Interest}}</th>
+                                <th rowspan="3" class="thverticalMiddle" style="text-align:center">{{translation.CDPenalInterest}}</th>
+                                <th rowspan="3" class="thverticalMiddle" style="text-align:center">{{translation.TotalInterest}}</th>
+                                <th rowspan="3" class="thverticalMiddle" style="text-align:center">{{translation.CDTotal}}</th>
+                                <th rowspan="3" class="thverticalMiddle" style="text-align:center">{{translation.PrincipalOutstandingODNOD}}</th>
+                                <th rowspan="3" class="thverticalMiddle" style="text-align:center">{{translation.TotalLoanOutstanding}}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <!--cD-->
+                                <td style="text-align:center">{{ApplicantDetails.CDPrincipal}}</td>
+                                <td style="text-align:center">{{ApplicantDetails.CDInterest}}</td>
+                                <td style="text-align:center">{{ApplicantDetails.CDPenalInterest}}</td>
+                                <td style="text-align:center">{{ApplicantDetails.CDTotalInterest}}</td>
+                                <td style="text-align:center">{{ApplicantDetails.CDTotal}}</td>
+                                <td style="text-align:center">{{ApplicantDetails.PrincipalOutstandingODNOD}}</td>
+                                <td style="text-align:center">{{ApplicantDetails.TotalLoanOutstanding}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+
+            <div id="detailsofcasesunderact103" ng-show="ApplicantDetails.ODPrincipal<=0">
+
+                <div class="col-lg-12 clspanal" id="DetailUndercase103">
+                    <div class="table-responsive">
+                        <table class="table devtable">
+                            <thead>
+                                <tr><th colspan="7" style="text-align:center">{{translation.detailsofcasesunderact103}}</th> </tr>
+                                <tr>
+                                    <th style="text-align:center">{{translation.resolutiondate}}</th>
+                                    <th style="text-align:center">{{translation.principaloutstanding}}</th>
+                                    <th style="text-align:center">{{translation.totalinterestasonresolutiondate}}</th>
+                                    <th style="text-align:center">{{translation.totaloutstandingasonresolutiondate}}</th>
+                                    <th style="text-align:center">{{translation.interestfromresolutionto30062024}}</th>
+                                    <th style="text-align:center">{{translation.interestfrom30062024to31032025}}</th>
+                                    <th style="text-align:center">{{translation.totalrecoverableamount}}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>{{ApplicantDetails.DateOfSettlement}}</td>
+                                    <td>{{ApplicantDetails.PrincipalOutstandingAsOnDateSettlement}}</td>
+                                    <td>{{ApplicantDetails.TotalInterestAsOnDateSettlement}}</td>
+                                    <td>{{ApplicantDetails.TotalLoanOutstandingAsOnDateSettlement}}</td>
+                                    <td>{{ApplicantDetails.InterestFromSettlementPre}}</td>
+                                    <td>{{ApplicantDetails.InterestFromSettlement}}</td>
+                                    <td>{{ApplicantDetails.TotalAmount}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+    </div>
+
+    <div id="repaymentmodal" class="modal fade" role="dialog" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <b class="text-info">New Payment Form</b>
+                    <a data-dismiss="modal" class="pull-right"><i class="fa fa-times"></i></a>
+                </div>
+                <div class="modal-body">
+                    <form id="paymentForm" ng-submit="SavePayment()">
+                        <table class="payment-table">
+                            <thead>
+                                <tr>
+                                    <td colspan="2">
+                                        <label><input type="checkbox" value="1" ng-model="payObj.IsFinalPayment" /> Check, If you want to make final receipt payment</label>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Deposit Amount (in Rupees):</td>
+                                    <td>
+                                        <input type="number" class="form-control" ng-model="payObj.PaidAmount" placeholder="0.00" min="1" required />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Payment Mode</td>
+                                    <td>
+                                        <select class="form-control" ng-model="payObj.PaymentModeId" ng-init="payObj.PaymentModeId=''" required>
+                                            <option value="" disabled>--Select--</option>
+                                            <option value="{{li.PaymentModeId}}" ng-repeat="li in PaymentModeList">{{_language=='en-us' ? li.ModeNameEn: li.ModeNameHi}}</option>
+                                        </select>
+                                    </td>
+
+                                </tr>
+                                <tr ng-hide="payObj.PaymentModeId==1 || payObj.PaymentModeId==2">
+                                    <td>UTR/Ref No.</td>
+                                    <td>
+                                        <input type="text" class="form-control" ng-model="payObj.UTR_RefNo" placeholder="UTR/Ref No." />
+                                    </td>
+                                </tr>
+
+                                <tr ng-show="payObj.PaymentModeId==2">
+                                    <td>Cheque No.</td>
+                                    <td>
+                                        <input type="text" class="form-control" ng-model="payObj.ChequeNo" placeholder="Cheque No." />
+                                    </td>
+                                </tr>
+                                <tr ng-show="payObj.PaymentModeId==2">
+                                    <td>Cheque date</td>
+                                    <td>
+                                        <input type="date" class="form-control" ng-model="payObj.ChequeDate" placeholder="Cheque Date" max="{{ today | date:'yyyy-MM-dd' }}" />
+                                    </td>
+                                </tr>
+                                <tr ng-show="payObj.PaymentModeId==2">
+                                    <td>Cheque Remark</td>
+                                    <td>
+                                        <input type="text" class="form-control" ng-model="payObj.ChequeOther" placeholder="Remark " />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Depositor Type</td>
+                                    <td>
+                                        <select class="form-control" ng-model="payObj.DepositorType" ng-init="payObj.DepositorType=''" required>
+                                            <option value="" disabled>--Select--</option>
+                                            <option value="Self">Self</option>
+                                            <option value="Other">Other</option>
+                                        </select>
+                                    </td>
+                                </tr>
+
+                                <tr ng-show="payObj.DepositorType=='Other'">
+                                    <td>Depositor Person Name</td>
+                                    <td>
+                                        <input type="text" class="form-control" ng-model="payObj.DepositByPerson" ng-init="payObj.DepositorType=='Self' ?'Self':''" placeholder="Depositor Person Name" />
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td>Payment Date</td>
+                                    <td>
+                                        <input type="date" class="form-control" ng-model="payObj.PaymentDate" min="2025-04-01" max="{{ today | date:'yyyy-MM-dd' }}" required />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Remark</td>
+                                    <td>
+                                        <input type="text" id="Remarks" class="form-control" ng-model="payObj.Remark" placeholder="Remark" />
+                                    </td>
+                                </tr>
+                            </thead>
+                            <tbody ng-show="payObj.IsFinalPayment">
+                                <tr>
+                                    <td colspan="2">
+                                        <hr />
+                                        Dues after 01-04-2025
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Interest</td>
+                                    <td>
+                                        <input type="number" class="form-control" ng-model="payObj.InterestAmount" placeholder="0.00" min="0" />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Penal Interest</td>
+                                    <td>
+                                        <input type="number" class="form-control" ng-model="payObj.PenalInterestAmount" placeholder="0.00" min="0" />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Principal</td>
+                                    <td>
+                                        <input type="number" class="form-control" ng-model="payObj.PrincipalAmount" placeholder="0.00" min="0" />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Other Amount</td>
+                                    <td>
+                                        <input type="number" class="form-control" ng-model="payObj.OtherAmount" placeholder="0.00" min="0" />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Final Payment Remark</td>
+                                    <td>
+                                        <input type="text" id="Remarks" class="form-control" ng-model="payObj.FinalRemark" placeholder="Remark" />
+                                    </td>
+                                </tr>
+                            </tbody>
+                            <tbody>
+                                <tr>
+                                    <td><b>वसूली कर्ता का नाम</b></td>
+                                    <td>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>वसूली कर्ता का प्रकार</td>
+                                    <td>
+                                        <select class="form-control" ng-model="payObj.RecoveryPersonType" ng-init="payObj.RecoveryPersonType=''" required>
+                                            <option value="" disabled>--Select--</option>
+                                            <option value="1">बैंक कार्मिक</option>
+                                            <option value="2">पैक्स कार्मिक</option>
+                                        </select>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td>नाम</td>
+                                    <td>
+                                        <input type="text" class="form-control" ng-model="payObj.RecoveryPersonName" placeholder="नाम" required />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>पदनाम</td>
+                                    <td>
+                                        <input type="text" id="Remarks" class="form-control" ng-model="payObj.RecoveryPersonDesignation" placeholder="पदनाम" required />
+                                    </td>
+                                </tr>
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="2" align="center">
+                                        <input type="submit" class="btn btn-primary dev-btn" value="Submit" />
+                                        <input type="button" class="btn btn-danger" value="Cancel" data-dismiss="modal" ng-click="payObj={}" />
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<input type="hidden" name="hdlang" id="hdlang" value="hi-IN" />
+
+<link href="~/Scripts/google_hindi/google_transliteration.css" rel="stylesheet" />
+
+<style>
+    .inputapi-transliterate-indic-suggestion-menu {
+        z-index: 99999 !important;
+        display: block;
+    }
+</style>
+<script src="~/Scripts/google_hindi/google_transapi.js"></script>
+<script type="text/javascript">
+    google.load("elements", "1", {
+        packages: "transliteration"
+    });
+
+    function onLoad() {
+        if (document.getElementById('hdlang').value == "hi-IN") {
+            var options = {
+                sourceLanguage: google.elements.transliteration.LanguageCode.ENGLISH,
+                destinationLanguage: google.elements.transliteration.LanguageCode.HINDI, // available option English, Bengali, Marathi, Malayalam etc.
+                shortcutKey: 'ctrl+g',
+                transliterationEnabled: true
+            };
+        }
+        else {
+            var options = {
+                sourceLanguage: google.elements.transliteration.LanguageCode.ENGLISH,
+                destinationLanguage: google.elements.transliteration.LanguageCode.HINDI, // available option English, Bengali, Marathi, Malayalam etc.
+                shortcutKey: 'ctrl+g',
+                transliterationEnabled: false
+            }
+        }
+        var ids = ["Remarks"];
+        var control = new google.elements.transliteration.TransliterationControl(options);
+        control.makeTransliteratable(ids);
+    }
+    google.setOnLoadCallback(onLoad);
+
+</script>
+
+
+<script src="~/Scripts/google_hindi/google_transliteration.js"></script>
+

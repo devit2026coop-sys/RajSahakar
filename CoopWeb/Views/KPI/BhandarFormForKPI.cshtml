@@ -1,0 +1,192 @@
+﻿<script src="~/Scripts/AngularFramework/BhandarFormForKPI.js?v=@DateTime.Now.Ticks"></script>
+<link href="~/Content/Stylesheets/toastr.min.css" rel="stylesheet" />
+<script src="~/Scripts/toastr.min.js"></script>
+<style>
+    .section-head {
+        font-weight: 600;
+        font-size: 16px;
+        margin: 20px 0 10px 0;
+        border-bottom: 1px solid #ddd;
+        padding-bottom: 5px;
+    }
+
+    .field-label {
+        font-weight: 500;
+    }
+
+    .db-value {
+        color: #555;
+        font-style: italic;
+    }
+
+    .table tbody td {
+        color: #000 !important;
+    }
+
+        .table tbody td input,
+        .table tbody td select {
+            color: #000 !important;
+        }
+
+        .table tbody td label {
+            color: #000 !important;
+        }
+
+    .form-group label {
+        color: #333 !important;
+    }
+</style>
+<div ng-app="ApplicationBhandarKPIModule">
+    <div ng-controller="CooperativeBhandarKPIFormCont">
+
+        <div class="col-md-12">
+            <h3 class="citizen-dash-head" style="margin-top:30px;">
+                जिला सहकारी उपभोक्ता होलसेल भण्डार की {{PreviousMonth}} 2026 तक प्रगति रिपोर्ट
+            </h3>
+        </div>
+
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#">  {{translation.Home}}</a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;"> {{translation.New}} </span>
+                        <i class="fa fa-angle-right"> </i>
+                        <span style="margin: 0 5px;">जिला सहकारी उपभोक्ता होलसेल भण्डार की {{PreviousMonth}} 2026 तक प्रगति रिपोर्ट</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 ">
+            <div class="citizen-dash-head">
+                <input type="hidden" id="hdnOfficeId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).OfficerId)" />
+                <div class="row">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 form-group">
+                        <h2 style=" font-weight: bold; text-align: center; "> {{ DistrictName }} {{OfficeNameEn}}  जिला सहकारी उपभोक्ता होलसेल भण्डार की {{PreviousMonth}} 2026 तक प्रगति रिपोर्ट</h2>
+                        <h3 style=" font-weight: bold; text-align: center; margin: 30px 0;">कार्य प्रदर्शन के आधार पर (केपीआई)</h3>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover table-striped">
+
+                        <thead>
+                            <tr style="background:#64c0c5;color:white;text-align:center;">
+                                <th style="width:5%">KPI No.</th>
+                                <th style="width:20%">KPI Area</th>
+                                <th style="width:45%">Indicator</th>
+                                <th style="width:10%">Instructions to fill Indicators</th>
+                                <th style="width:6%">Progress Percentage</th>
+                                <th style="width:6%">Weight Marks</th>
+                                <th style="width:8%">Obtained</th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            <tr ng-repeat-start="area in KPIAreas">
+
+                                <td rowspan="{{area.Indicators.length}}">
+                                    {{$index+1}}
+                                </td>
+
+                                <td rowspan="{{area.Indicators.length}}">
+                                    {{area.KPIArea}}
+                                </td>
+
+                                <!-- First Indicator -->
+                                <td>
+                                    {{area.Indicators[0].KPIIndicators}}
+                                </td>
+
+                                <td>
+                                    <div ng-if="area.Indicators[0].KPIIndicatorsId == 40 || area.Indicators[0].KPIIndicatorsId == 42" style="display:flex; gap:10px;">
+                                        <input type="number" class="form-control" placeholder="Target" style="width:80px;height:28px;font-size:12px;" ng-model="area.Indicators[0].Target" ng-change="Calculates(area.Indicators[0])" />
+                                        <input type="number" class="form-control" placeholder="Achievement" style="width:120px;height:28px;font-size:12px;" ng-model="area.Indicators[0].Achievement" ng-change="Calculates(area.Indicators[0])" />
+                                    </div>
+
+                                    <!-- Other KPIs -->
+                                    <select ng-if="area.Indicators[0].KPIIndicatorsId != 40 && area.Indicators[0].KPIIndicatorsId != 42" class="form-control" style="width:120px;height:28px;font-size:12px;" ng-model="area.Indicators[0].SelectedOption" ng-change="Calculate(area.Indicators[0])">
+                                        <option value="">--Select--</option>
+                                        <option ng-repeat="item in area.Indicators[0].Options" value="{{item.KPI_KEYId}}">
+                                            {{item.InputType}}
+                                        </option>
+                                    </select>
+                                </td>
+
+                                <td>
+                                    <input ng-if="area.Indicators[0].KPIIndicatorsId == 40 || area.Indicators[0].KPIIndicatorsId == 42 || area.Indicators[0].KPIIndicatorsId == 41 || area.Indicators[0].KPIIndicatorsId == 108 " type="text" class="form-control" ng-model="area.Indicators[0].Progress" readonly tabindex="-1" />
+                                </td>
+
+                                <td class="text-center" style=" vertical-align: middle;">
+                                    {{area.Indicators[0].WeightedMarks || 0}}
+                                </td>
+
+                                <td>
+                                    <input type="text" class="form-control" ng-model="area.Indicators[0].MarksObtained" readonly />
+                                </td>
+
+                            </tr>
+
+                            <!-- Remaining Indicators -->
+
+                            <tr ng-repeat="indicator in area.Indicators.slice(1)" ng-repeat-end>
+
+                                <td>
+                                    {{indicator.KPIIndicators}}
+                                </td>
+
+                                <td>
+                                    <div ng-if="indicator.KPIIndicatorsId == 40 || indicator.KPIIndicatorsId == 42" style="display:flex; gap:10px;">
+                                        <input type="number" class="form-control" placeholder="Target" style="width:80px;height:28px;font-size:12px;" ng-model="indicator.Target" ng-change="Calculates(indicator)" />
+                                        <input type="number" class="form-control" placeholder="Achievement" style="width:120px;height:28px;font-size:12px;" ng-model="indicator.Achievement" ng-change="Calculates(indicator)" />
+                                    </div>
+
+                                    <select ng-if="indicator.KPIIndicatorsId != 40 && indicator.KPIIndicatorsId != 42" class="form-control" ng-model="indicator.SelectedOption" style="width:120px;height:28px;font-size:12px;" ng-change="Calculate(indicator)">
+                                        <option value="">--Select--</option>
+                                        <option ng-repeat="item in indicator.Options" value="{{item.KPI_KEYId}}">  {{item.InputType}} </option>
+                                    </select>
+                                </td>
+
+                                <td>
+                                    <input ng-if="area.Indicators[0].KPIIndicatorsId == 40 || area.Indicators[0].KPIIndicatorsId == 42 || area.Indicators[0].KPIIndicatorsId == 41 || area.Indicators[0].KPIIndicatorsId == 108 " type="text" class="form-control" ng-model="indicator.Progress" readonly tabindex="-1" />
+                                </td>
+
+                                <td class="text-center" style=" vertical-align: middle;">
+                                    {{indicator.WeightedMarks || 0}}
+                                </td>
+
+                                <td>
+                                    <input type="text" class="form-control" ng-model="indicator.MarksObtained" readonly />
+                                </td>
+
+                            </tr>
+
+                            <tr ng-if="!KPIAreas || KPIAreas.length==0">
+                                <td colspan="8" class="text-center">
+                                    No Data Found
+                                </td>
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+                </div>
+                <div class="text-center">
+                    <button type="button" class="btn btn-primary dev-btn" ng-click="IsUpdate ? UpdateKPIResult() : SaveKPIResult()">
+                        {{ IsUpdate ? 'Update' : 'Save' }}
+                    </button>
+
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>

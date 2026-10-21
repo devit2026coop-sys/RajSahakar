@@ -1,0 +1,271 @@
+﻿<script src="~/Scripts/AngularFramework/CCSComplaintTransfer.js?id=1"></script>
+<script src="~/Scripts/jquery-1.11.3.min.js"></script>
+<script type="text/javascript" src="~/Scripts/jqueryuitimepicker.js"></script>
+<link href="~/Content/Stylesheets/jqueryuitimepicker.css" rel="stylesheet" />
+
+
+<script type="text/javascript">
+
+    function ValidateAlpha(evt) {
+        var keyCode = (evt.which) ? evt.which : evt.keyCode
+        if ((keyCode < 65 || keyCode > 90) && (keyCode < 97 || keyCode > 123) && keyCode != 32)
+
+            return false;
+        return true;
+    };
+    function ValidateFloat(th, e) {
+        if (isNaN(th.value + "" + String.fromCharCode(e.charCode)))
+            return false;
+        return true;
+    }
+    function ValidateFloat(th, e) {
+        if (isNaN(th.value + "" + String.fromCharCode(e.charCode)))
+            return false;
+        return true;
+    }
+
+
+
+    $(document).ready(function () {
+
+        $('.Fromdate').datepicker({
+            showOn: "both",
+            changeMonth: true,
+            buttonImage: "../images/calender.png",
+            changeYear: true,
+            dateFormat: "dd/mm/yy",
+            //minDate: (new Date()).getDate() + '/' + ((new Date()).getMonth()+1) + '/' + ((new Date()).getFullYear()).toString(),
+            //defaultDate: (new Date()).getDate() + '/' + ((new Date()).getMonth() + 1) + '/' + ((new Date()).getFullYear()).toString(),
+        });
+
+        $('.CCSDate').datepicker({
+            showOn: "both",
+            changeMonth: true,
+            buttonImage: "../images/calender.png",
+            changeYear: true,
+            dateFormat: "dd/mm/yy",
+            minDate: (new Date()).getDate() + '/' + ((new Date()).getMonth() + 1) + '/' + ((new Date()).getFullYear()).toString(),
+            //defaultDate: (new Date()).getDate() + '/' + ((new Date()).getMonth() + 1) + '/' + ((new Date()).getFullYear()).toString(),
+        });
+
+        $('.ccstimepicker').timepicker({
+            showOn: "both",
+            buttonImage: "../images/Time.png",
+            buttonImageOnly: true,
+            showPeriod: true,
+            showLeadingZero: true
+        });
+
+
+    });
+</script>
+<script> 
+    $(document).ready(function () {
+        $("#ckbCheckAll").click(function () {
+            $(".checkBoxClass").prop('checked', $(this).prop('checked'));
+        });
+
+        $(".checkBoxClass").change(function () {
+            if (!$(this).prop("checked")) {
+                $("#ckbCheckAll").prop("checked", false);
+            }
+        });
+    });
+
+    </script>
+<div ng-app="CCSComplainMod" >
+    <div ng-controller="CCSComplainCnt">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <h3 class="citizen-dash-head">CCS complain Transfer Request</h3>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="../Citizen/Index"> {{translation.Home}} </a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;">CCS complain Transfer Request</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="citizen-dash-head">
+                <div ng-show="!showPriView">
+                    <div class="table-dropdown" id="search-filter">
+                        <div class="row">
+                            <div class="form-group col-md-3" style="margin-bottom: 5px;">
+                                <label>Soceity Type:</label><br />
+                                <input type="radio" name="rdoSelect" value="0" ng-click="ChangeSelction()" ng-checked="true" /> <p style=" display: inline-table;    font-size: 12px;">{{translation.SingleState}}</p>
+                                <input type="radio" name="rdoSelect" value="1" ng-click="ChangeSelction()" /> <p style=" display: inline-table;    font-size: 12px;">{{translation.MultiState}}</p>
+                            </div>
+                            <div class="form-group col-md-3" style="margin-bottom: 5px;">
+                                <label>District</label>
+                                <select name="DISTRICT_ID" ng-model="TransferDetails.TransferDistraict" class="form-control">
+                                    <option value="">{{translation.SelectOption}}</option>
+                                    <option ng-repeat="district in DistrictList" value="{{district.DISTRICT_ID}}">
+                                        {{_language =='en-us' ?  district.DISTRICT_MANGAL : district.DISTRICT_ENG}}
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-3">
+                                <label> {{translation.Search}} </label><br />
+                                <input id="txtSearch" name="searchText" class="form-control" ng-model="Filter.SearchText" placeholder="{{translation.filttertext}}">
+                            </div>
+                            <div class="col-md-2">
+                                <label>&nbsp;</label><br>
+                                <button type="button" ng-click="searchRequest(GetCCSComplaint)" class="btn btn-primary dev-btn ng-binding">{{translation.Search}}</button>
+                                <button type="button" ng-click="ClearSearch()" class="btn btn-primary dev-btn ng-binding">{{translation.Clear}}</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="overflow-x:auto;">
+                        <table id="tblData" class="table table-responsive devtable" style="margin-top: 10px;border:1px solid rgb(222, 221, 221); float: left;">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        {{translation.SRNO}}
+                                    </th>
+                                    <th>
+                                        {{translation.ComplainerName}}
+                                    </th>
+                                    <th>
+                                        {{translation.Address}}
+                                    </th>
+                                    <th>
+                                        {{translation.CCSName}}
+                                    </th>
+                                    <th>
+                                        {{translation.District}}
+                                    </th>
+                                    <th>
+                                        {{translation.BranchName}}
+                                    </th>
+                                    <th>Transfer to district</th>
+                                    <th>Transfer to region</th>
+                                    <th>{{translation.Remarks}}</th>
+                                    <th>Requested By</th>
+                                    <th>Status</th>
+                                    <th>Transfer</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="item in CCSComplaintList">
+                                    <td>{{(((DataPagingDetails.PageNumber - 1) * DataPagingDetails.PageSize) + 1)+$index}}</td>
+                                    <td>{{item.ComplainerName}}</td>
+                                    <td>{{item.Address}}</td>
+                                    <td>{{item.SocietyName}}</td>
+                                    <td>{{_language =='en-us' ?  item.DISTRICT_ENG : item.DISTRICT_MANGAL}}</td>
+                                    <td>{{item.BranchName}}</td>
+                                    <td>{{_language =='en-us' ?  item.TransferToDistrict_ENG : item.TransferToDistrict_MANGAL}}</td>
+                                    <td>{{item.ResionName}}</td>                                   
+                                    <td>{{item.TransferRemarks}}</td>
+                                    <td>{{item.RequestedBy}}</td>
+                                    <td>{{item.TransferStatus}}</td>
+                                    <td><a ng-if="item.TransferStatus==''" href="javascript:void(0);" ng-click="showTransModel(item)"><i class="fa fa-forward"></i></a></td>
+                                </tr>                             
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="col-md-12">
+                        <div ng-if="DataPagingDetails.TotalPages>1" class="dataTables_paginate paging_simple_numbers" id="dataTables-example_paginate">
+                            <div class="dataTables_info" id="dataTables-example_info" role="status" aria-live="polite">
+                                Total Records: {{DataPagingDetails.TotalRecords}}
+                            </div>
+                            <ul class="pagination pagination_1" style="margin-left: 10px !important;">
+                                <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« First</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« Previous</span></li>
+
+                                <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest('1',GetCCSComplaint)" style="cursor: pointer;">
+                                    <span>«First</span>
+                                </li>
+                                <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest(DataPagingDetails.PageNumber-1,GetCCSComplaint)" style="cursor:pointer;">
+                                    <span>« Previous</span>
+                                </li>
+                                <li class="{{n==DataPagingDetails.PageNumber?'active':''}}" style="{{n==DataPagingDetails.PageNumber?'':'cursor: pointer'}}" ng-repeat="n in PagingRange(DataPagingDetails.StartPageNumber,DataPagingDetails.EndPageNumber,DataPagingDetails.TotalPages)" ng-click="pageRequest(n,GetCCSComplaint)"><span>{{n}}</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Next</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Last</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber!= DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.PageNumber+1,GetCCSComplaint)" style="cursor:pointer;">
+                                    <span>Next »</span>
+                                </li>
+                                <li ng-if="DataPagingDetails.PageNumber != DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.TotalPages,GetCCSComplaint)" style="cursor:pointer;">
+                                    <span>Last »</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+   
+        <div class="dev-popup-body modal fade" id="transModals" role="dialog" data-backdrop="static" data-keyboard="false">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" ng-click="ClearMenuForm()">&times;</button>
+                        <h4 class="modal-title"> Transfer Request </h4>
+                        <input type="hidden" ng-modal="transCCSId" />
+                    </div>
+                    <div class="modal-body">
+                        <form class="dev-search-form" name="MySchemeForm" style="overflow: hidden;">
+
+                            <div class="form-group col-md-12" style="margin-bottom: 5px;">
+                                <div class="form-group">
+                                    <label>{{translation.ComplainerName}}:</label>  <br />
+                                    <span style="color: #6d6868; font-weight: bold;">{{TransferDetails.ComplainerName}}</span>
+                                </div>
+                            </div>
+                            <div class="form-group col-md-12" style="margin-bottom: 5px;">
+                                <div class="form-group">
+                                    <label>{{translation.District}}:</label> <br />
+                                    <span style="color: #6d6868; font-weight: bold;">{{_language =='en-us' ?  TransferDetails.DISTRICT_ENG : TransferDetails.DISTRICT_MANGAL}}</span>
+                                </div>
+                            </div>
+                            <div class="form-group col-md-12" style="margin-bottom: 5px;">
+                                <div class="form-group">
+                                    <label>{{translation.BranchName}}:</label> <br />
+                                    <span style="color: #6d6868; font-weight: bold;">{{TransferDetails.BranchName}}</span>
+                                </div>
+                            </div>
+                            <div class="form-group col-md-12" style="margin-bottom: 5px;">
+                                <label>Status</label>
+                                <select name="Status" ng-model="TransferDetails.Status" class="form-control">
+                                    <option value="">{{translation.SelectOption}}</option>
+                                    <option value="Approve and Transfer">Approve and Transfer</option>
+                                    <option value="Reject">Reject</option>
+                                </select>
+                            </div>
+                            <div class="form-group col-md-12" style="margin-bottom: 5px;">
+                                <div class="form-group">
+                                    <label>{{translation.Remarks}}</label>
+                                    <textarea name="AddressEn" id="textareaid" class="form-control validateNewAdd" rows="2" placeholder="description" ng-model="TransferDetails.TransferRemarks" autocomplete="off"> </textarea>
+                                </div>
+                            </div>
+                            <div class="col-lg-12">
+                                <div class="form-group">
+                                    <div class="dev-menu-btn">
+                                        <button type="submit" class="btn btn-primary" ng-click="SubmitTransferRequest()">{{translation.Submit}}</button>
+                                        <button type="submit" class="btn btn-primary" ng-click="ClearTransFormForm()">{{translation.Clear}}</button>
+                                    </div>
+                                </div>
+                            </div>
+                         
+                        </form>
+
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <input type="hidden" id="hdfLoggedInUserDistrictId" value="@ViewBag.LoggedInUserDistrictId" />      
+    </div>
+    </div>
+
+

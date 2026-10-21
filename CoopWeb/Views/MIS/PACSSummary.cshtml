@@ -1,0 +1,160 @@
+﻿@{
+    ViewBag.Title = "PACS Summary";
+}
+<style>
+    .flexEqualCenter {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    a.backBtn {
+        padding: 3px 5px;
+        background: rgb(99,205,219);
+        color: #fff;
+        border: 0px;
+        outline: none;
+        display: inline-block;
+        text-decoration: none;
+    }
+
+        a.backBtn i {
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+    .tblthfont {
+        font-weight: bold;
+    }
+</style>
+<script src="~/Scripts/AngularFramework/PacsSummary.js?v=1"></script>
+<div ng-app="pacsMod" ng-controller="pacsCtrl" ng-cloak="">
+    <div class="container-fluid citizen-dash-head">
+        <input type="hidden" id="hdnDistrictId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DistrictId)" />
+        <input type="hidden" id="hdnPldbId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).PLDBId)" />
+        <input type="hidden" id="hdnPldbBranchId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).PLDBBrancchId)" />
+
+        <div class="panel panel-default">
+            <div class="panel-heading flexEqualCenter">
+                <b><i class="fa fa-th-list"></i> Pacs Registration Detail List </b>
+                <div>
+                    <button type="button" class="btn btn-warning" ng-click="exportExcel()"><i class="fa fa-file-excel-o"></i> Export Excel</button>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="row" id="search-filter">
+                    <div class="col-md-2 form-group">
+                        <label>Report Type</label>
+                        <select ng-model="search.ReportType" class="form-control">
+                            <option value="">{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in reportTypeList" value="{{item.id}}">
+                                {{item.name}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-lg-2 margin-Top20">
+                        <label for="FromDate">From Date</label>
+                        <input type="date" id="FromDate" name="FromDate" ng-model="search.FromDate" class="form-control" />
+                    </div>
+
+                    <div class="col-lg-2 margin-Top20">
+                        <label for="ToDate">To Date</label>
+                        <input type="date" id="ToDate" name="ToDate" ng-model="search.ToDate" class="form-control" />
+                    </div>
+                    <div class="col-lg-4 d-flex align-items-end" style="padding-top: 26px; gap: 10px;">
+                        <button ng-click="getPacsSummaryDetails()" class="btn btn-primary dev-btn">
+                            Search Filter
+                        </button>
+                        <button ng-click="ClearFilter()" class="btn btn-primary dev-btn">
+                            Clear Filter
+                        </button>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="text-dark">{{translation.ItemPerPage}}:</label>
+                        <select ng-model="obj.pageSize" class="form-control" ng-change="pagechange()" ng-init="obj.pageSize='50'">
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                            <option value="200">200</option>
+                            <option value="500">500</option>
+                            <option value="1000">1000</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="table-responsive devtable">
+                    <table class="table table-hover table-striped table-bordered mb-0" id="PacsSummaryDetail">
+                        <thead>
+                            <tr>
+                                <th width="60">Sr.No</th>
+                                <th ng-show="search.ReportType==1||!search.ReportType">Society Name</th>
+                                <th ng-show="search.ReportType==1||!search.ReportType">Registration No.</th>
+                                <th ng-show="search.ReportType==1||!search.ReportType">Registration Date</th>
+                                <th ng-show="search.ReportType==1 || search.ReportType==2 ||!search.ReportType">{{translation.District}}</th>
+                                <th ng-show="search.ReportType==1 ||!search.ReportType">Block</th>
+                                <th ng-show="search.ReportType==1 ||!search.ReportType">Gram Panchayat</th>
+                                <th ng-show="search.ReportType==1 ||!search.ReportType">Society Type</th>
+                                <th ng-show="search.ReportType==2">Total No.</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="item in pacsSummaryDataList" ng-class="{'tblthfont': search.ReportType==2 && item.District=='TOTAL'}">
+                                @*<td><span>{{(((DataPagingDetails.PageNumber - 1) * DataPagingDetails.PageSize) + 1)+$index}}.</span></td>*@
+                                <td>
+                                    <span ng-if="item.District!='TOTAL'">
+                                        {{(((DataPagingDetails.PageNumber - 1) * DataPagingDetails.PageSize) + 1)+$index}}.
+                                    </span>
+                                </td>
+                                <td ng-show="search.ReportType==1">{{item.SocietyName}}</td>
+                                <td ng-show="search.ReportType==1">{{item.RegistrationNo}}</td>
+                                <td ng-show="search.ReportType==1">{{item.RegistrationDate | date : 'dd-MM-yyyy'}}</td>
+                                <td ng-show="search.ReportType==1 || search.ReportType==2">{{item.District}}</td>
+                                <td ng-show="search.ReportType==1 ">{{item.BLOCK_ENG}}</td>
+                                <td ng-show="search.ReportType==1 ">{{item.GP_ENG}}</td>
+                                <td ng-show="search.ReportType==1">{{item.SocietyType}}</td>
+                                <td ng-show="search.ReportType==2">{{item.Cnt}}</td>
+                            </tr>                           
+                            <tr ng-if="search.ReportType==2 && pacsSummaryDataList.length > 0" class="tblthfont">
+                                <td></td>
+                                <td><b>TOTAL</b></td>
+                                <td><b>{{totalCnt}}</b></td>
+                            </tr>
+                            <tr ng-show="isNoRecord">
+                                <td colspan="{{colspan}}" style="text-align: center;">No Records</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div ng-if="DataPagingDetails.TotalPages>1" class="dataTables_paginate paging_simple_numbers" id="dataTables-example_paginate" style="display: flex; align-items: center; justify-content: space-between;">
+                                <div class="dataTables_info" id="dataTables-example_info" role="status" aria-live="polite">
+                                    Total Records: {{DataPagingDetails.TotalRecords}}
+                                </div>
+                                <ul class="pagination pagination_1" style="margin-left: 10px !important; margin:0">
+                                    <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« First</span></li>
+                                    <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« Previous</span></li>
+
+                                    <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest('1',SearchData)" style="cursor: pointer;">
+                                        <span>« First</span>
+                                    </li>
+                                    <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest(DataPagingDetails.PageNumber-1,SearchData)" style="cursor:pointer;">
+                                        <span>« Prev</span>
+                                    </li>
+                                    <li class="{{n==DataPagingDetails.PageNumber?'active':''}}" style="{{n==DataPagingDetails.PageNumber?'':'cursor: pointer'}}" ng-repeat="n in PagingRange(DataPagingDetails.StartPageNumber,DataPagingDetails.EndPageNumber,DataPagingDetails.TotalPages)" ng-click="pageRequest(n,SearchData)"><span>{{n}}</span></li>
+                                    <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Next</span></li>
+                                    <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Last</span></li>
+                                    <li ng-if="DataPagingDetails.PageNumber!= DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.PageNumber+1,SearchData)" style="cursor:pointer;">
+                                        <span>Next »</span>
+                                    </li>
+                                    <li ng-if="DataPagingDetails.PageNumber != DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.TotalPages,SearchData)" style="cursor:pointer;">
+                                        <span>Last »</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+        </div>
+    </div>
+</div>

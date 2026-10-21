@@ -1,0 +1,198 @@
+﻿
+<script src="~/Scripts/AngularFramework/PurchaseCenter.js"></script>
+<script type="text/javascript" src="~/Scripts/1.8.3.jquery.min.js"></script>
+
+
+<div ng-app="PurchaseCenterModule" ng-controller="PurchaseCenterCont">
+
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <h3 class="citizen-dash-head">{{translation.PurchaseCenter}} </h3>
+    </div>
+
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="devpage-breadcrumb">
+            <ul class="page-breadcrumb">
+                <li class="dev-page-br">
+                    <i class="fa fa-home"> </i>
+                    <a href="../Citizen/Index"> {{translation.Home}} </a>
+                    <i class="fa fa-angle-right"> </i>
+                </li>
+                <li style="float: left">
+                    <span style="margin: 0 5px;"> {{translation.PurchaseCenter}} </span>
+                </li>
+                <li style="float: right;" id="divAddBtn">
+                    <i class="fa fa-angle-double-right" style="color: #025e63;"></i>
+                    <a ng-click="AddNew()" style="color: #025e63; cursor: pointer; text-decoration:none; font-weight: bold;" class="ng-binding">{{translation.AddNew}}</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" ng-if="divShowdata">
+        <div class="table-responsive citizen-dash-head">
+
+            <div class="table-dropdown" id="search-filter">
+                <div class="col-lg-4">
+                    <label for="search" class="ng-binding">{{translation.District}}:</label>
+                    <select id="DISTRICT_ID" name="DISTRICT_ID" class="form-control" ng-model="PurchaseCenter.DISTRICT_ID" ng-init="PurchaseCenter.DISTRICT_ID='0'">
+                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                        <option ng-repeat="item in DistrictList" value="{{item.DISTRICT_ID}}">
+                            {{_language =='en-us' ?  item.DISTRICT_ENG : item.DISTRICT_MANGAL}}
+                        </option>
+                    </select>
+                </div>
+                <div class="col-md-4" >
+                    <label for="search" class="ng-binding">{{translation.Search}}:</label>
+                    <input name="searchText" id="search" class="form-control ng-pristine ng-valid ng-empty ng-touched" ng-model="PurchaseCenter.SearchText" placeholder="Filter Text" autocomplete="off">
+                </div>
+
+               
+                <div class="col-md-4">
+                    <label>&nbsp;</label><br>
+                    <button type="button" ng-click="searchRequest(GetPurchaseCenterList)" class="btn btn-primary dev-btn ng-binding">{{translation.Search}}</button>
+                    <button type="button" ng-click="ClearSearch()" class="btn btn-primary dev-btn ng-binding">{{translation.Clear}}</button>
+                </div>
+            </div>
+
+            <table id="example" class="table devtable" style="border:1px solid rgb(222, 221, 221); float: left;">
+                <thead>
+                    <tr>
+                        <th>
+                            {{translation.SRNO}}
+                        </th>
+                        <th>
+                            {{translation.District}}
+                        </th>
+                        <th>
+                            {{_language =='en-us' ?  translation.PurchaseCenterName_En : translation.PurchaseCenterName_Hi}}
+                        </th>
+
+                        <th>
+                            {{translation.Date}}
+                        </th>
+
+                        <th>
+                           Active
+                        </th>
+                        <th>
+                            Edit
+                        </th>
+                        <th>
+                           Delete
+                        </th>
+                     
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="item in PurchaseCenterList">
+                        <td>{{(((DataPagingDetails.PageNumber - 1) * DataPagingDetails.PageSize) + 1)+$index}}</td>
+                        <td>
+                            {{_language =='en-us' ?  item.DISTRICT_ENG : item.DISTRICT_MANGAL}}
+                        </td>
+                        <td>
+                            {{_language =='en-us' ?  item.PurchaseCenterNameEn : item.PurchaseCenterNameHi}}
+                        </td>
+                        
+                        <td>
+                            {{item.Createddate}}
+                        </td>
+                        <td>
+                            <div class="dev-action">
+                                <label class="switch">
+                                    <input type="checkbox" ng-checked="item.IsActive == 1" ng-click="ChangeStatus(item,3)">
+                                    <span class="slider round"></span>
+                                </label>
+                            </div>
+                        </td>
+                        <td>
+                            <i class="fa fa-edit" data-target="#myModal" data-toggle="modal" ng-click="EditRecord(item)"></i>
+                        </td>
+                        <td>
+                            <i class="fa fa-trash" data-target="#myModal" data-toggle="modal" ng-click="ChangeStatus(item,4)"></i>
+                        </td>
+                      
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="col-md-12">
+                <div ng-if="DataPagingDetails.TotalPages>1" class="dataTables_paginate paging_simple_numbers" id="dataTables-example_paginate">
+                    <div class="dataTables_info" id="dataTables-example_info" role="status" aria-live="polite">
+                        Total Records: {{DataPagingDetails.TotalRecords}}
+                    </div>
+                    <ul class="pagination pagination_1" style="margin-left: 10px !important;">
+                        <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« First</span></li>
+                        <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« Previous</span></li>
+
+                        <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest('1',GetPurchaseCenterList)" style="cursor: pointer;">
+                            <span>«First</span>
+                        </li>
+                        <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest(DataPagingDetails.PageNumber-1,GetPurchaseCenterList)" style="cursor:pointer;">
+                            <span>« Previous</span>
+                        </li>
+                        <li class="{{n==DataPagingDetails.PageNumber?'active':''}}" style="{{n==DataPagingDetails.PageNumber?'':'cursor: pointer'}}" ng-repeat="n in PagingRange(DataPagingDetails.StartPageNumber,DataPagingDetails.EndPageNumber,DataPagingDetails.TotalPages)" ng-click="pageRequest(n,GetPurchaseCenterList)"><span>{{n}}</span></li>
+                        <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Next</span></li>
+                        <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Last</span></li>
+                        <li ng-if="DataPagingDetails.PageNumber!= DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.PageNumber+1,GetPurchaseCenterList)" style="cursor:pointer;">
+                            <span>Next »</span>
+                        </li>
+                        <li ng-if="DataPagingDetails.PageNumber != DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.TotalPages,GetPurchaseCenterList)" style="cursor:pointer;">
+                            <span>Last »</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+
+
+
+
+
+    </div>
+
+    
+
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" ng-show="divInsert">
+        <div class="citizen-dash-head">
+            <div class="col-lg-12 form-group">
+             
+                <div class="col-lg-2">{{ translation.District}}<span class="error">*</span></div>
+                <div class="col-lg-4">
+                    <select class="form-control" ng-model="PurchaseCenter.DISTRICT_ID" ng-init="PurchaseCenter.DISTRICT_ID='0'">
+                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                        <option ng-repeat="item in DistrictList" value="{{item.DISTRICT_ID}}">
+                            {{_language =='en-us' ?  item.DISTRICT_ENG : item.DISTRICT_MANGAL}}
+                        </option>
+                    </select>
+                </div>
+
+                <div class="col-lg-2">{{translation.PurchaseCenterName_En}}<span class="error">*</span></div>
+                <div class="col-lg-4">
+                    <input name="PurchaseCenterNameEn" id="PurchaseCenterNameEn" class="form-control" ng-model="PurchaseCenter.PurchaseCenterNameEn" placeholder="Purchase Center Name" >
+                </div>
+            </div>
+
+            <div class="col-lg-12 form-group">
+
+                <div class="col-lg-2">{{translation.PurchaseCenterName_Hi}}<span class="error">*</span></div>
+                <div class="col-lg-4">
+                    <input name="PurchaseCenterNameHi" id="PurchaseCenterNameHi" class="form-control" ng-model="PurchaseCenter.PurchaseCenterNameHi" placeholder="Purchase Center Name(Hindi)">
+                </div>
+                <div class="col-lg-2">{{translation.IsActive}}<span class="error">*</span></div>
+                <div class="col-lg-4">
+                    <input type="checkbox" value="1" id="IsActive" ng-checked="IsActivestatus"  ng-model="PurchaseCenter.IsActive" />&nbsp;&nbsp;{{translation.IsActive}}
+                </div>
+                </div>
+                <div class="form-group col-md-12">
+                    <div class="dev-menu-btn">
+                        <button type="button" class="btn btn-primary" ng-click="SavePurchaseCenter()">{{translation.Submit}}</button>
+                      
+                    </div>
+                </div>
+             
+
+            </div>
+    </div>
+</div>
+

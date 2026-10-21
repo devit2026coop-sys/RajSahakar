@@ -1,0 +1,311 @@
+﻿
+@{
+    Layout = "~/Views/Shared/_LayoutWithoutLogin.cshtml";
+}
+<script src="~/Scripts/AngularFramework/DepartmentalUserRegistrationClient.js"></script>
+<style>
+    .has-error {
+        border: #F00;
+    }
+</style>
+<div ng-app="DepartmenalUserRegistrationMod" ng-controller="DepartmenalUserRegistrationCnt">
+    <form class="dev-masters" name="MyUserForm">
+        <div class="col-md-12">
+            <div class="master-detail" ng-app="User">
+                <h6>{{translation.LoginHeading}}  > <span>{{translation.DeptUserRegistration}}</span> </h6>
+            </div>
+        </div>
+
+
+      
+
+
+        <div class="form-group col-md-6">
+            <label>{{translation.DivisionHeading}}</label>
+            <select ng-model="DeptUserRegistration.DivisionId" name="division" ng-change="DistrictList()" class="form-control" ng-init="DeptUserRegistration.DivisionId ='0'">
+                <option value="0" disabled>{{translation.SelectOption}}</option>
+                <option ng-repeat="item in Divisions" value="{{item.DIVISION_ID}}">
+                    {{_language =='en-us' ?  item.DIVISION_ENG : item.DIVISION_MANGAL}}
+                </option>
+            </select>
+        </div>
+
+        <div class="form-group col-md-6">
+            <label>{{translation.District}}</label>
+            <select ng-model="DeptUserRegistration.DistrictId" class="form-control" ng-init="DeptUserRegistration.DistrictId='0'">
+                <option value="0" disabled>{{translation.SelectOption}}</option>
+                <option ng-repeat="item in Districts" value="{{item.DISTRICT_ID}}">
+                    {{_language =='en-us' ?  item.DISTRICT_ENG : item.DISTRICT_MANGAL}}
+                </option>
+            </select>
+        </div>
+
+        <div class="form-group col-md-6" style="margin-top: 15px;">
+            <div class="form-check form-check-inline col-md-4" style="padding: 0;">
+                <label class="form-check-label" for="inlineRadio1">{{translation.UrbanRural}}</label>
+            </div>
+
+            <div class="form-check form-check-inline col-md-4">
+                <div class="radio-item">
+                    <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1" value="true" ng-model="DeptUserRegistration.IsRuralUrban" ng-change="RuralUrbanBlock()">
+                    <label class="form-check-label option_value" for="inlineRadio1">{{translation.Urban}}</label>
+                </div>
+            </div>
+
+
+            <div class="form-check form-check-inline col-md-4">
+                <div class="radio-item">
+                    <input ng-checked="$first" class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio2" value="false" ng-model="DeptUserRegistration.IsRuralUrban" ng-change="RuralUrbanBlock()">
+                    <label class="form-check-label option_value" for="inlineRadio2">{{translation.Rural}}</label>
+                </div>
+            </div>
+        </div>
+
+        <div ng-show="UrbanDiv">
+            <div class="form-group col-md-6">
+                <label>{{translation.Tehsil}}</label>
+                <select ng-model="DeptUserRegistration.TehsilId" class="form-control" ng-change="GetCity()" ng-init="DeptUserRegistration.TehsilId='0'">
+                    <option value="0" disabled>{{translation.SelectOption}}</option>
+                    <option ng-repeat="item in Tehsil" value="{{item.DISTRICT_ID}}">
+                        {{_language =='en-us' ?  item.TEHSIL_ENG : item.TEHSIL_MANGAL}}
+                    </option>
+                </select>
+            </div>
+            <div class="form-group col-md-6">
+                <label>{{translation.City}}</label>
+                <select ng-model="DeptUserRegistration.CityId" class="form-control" ng-change="WardList()" ng-init="DeptUserRegistration.CityId='0'">
+                    <option value="0" disabled>{{translation.SelectOption}}</option>
+                    <option ng-repeat="item in City" value="{{item.CITY_ID}}">
+                        {{_language =='en-us' ?  item.CITY_ENG : item.CITY_MANGAL}}
+                    </option>
+                </select>
+            </div>
+            <div class="form-group col-md-6">
+                <label>{{translation.Ward}}</label>
+                <select ng-model="DeptUserRegistration.WardId" class="form-control" ng-init="DeptUserRegistration.WardId='0'">
+                    <option value="0" disabled>{{translation.SelectOption}}</option>
+                    <option ng-repeat="item in Ward" value="{{item.WARD_ID}}">
+                        {{_language =='en-us' ?  item.WARD_ENG : item.WARD_MANGAL}}
+                    </option>
+                </select>
+            </div>
+        </div>
+
+
+        <div ng-show="RuralDiv">
+            <div class="form-group col-md-6">
+                <label>{{translation.PanchayatSamiti}}</label>
+                <select ng-model="DeptUserRegistration.BlockId" class="form-control" ng-change="GramPanchayatList()" ng-init="DeptUserRegistration.BlockId='0'">
+                    <option value="0" disabled>{{translation.SelectOption}}</option>
+                    <option ng-repeat="item in Blocks" value="{{item.BLOCK_ID}}">
+                        {{_language =='en-us' ?  item.BLOCK_ENG : item.BLOCK_MANGAL}}
+                    </option>
+                </select>
+            </div>
+            <div class="form-group col-md-6">
+                <label>{{translation.GramPanchayat}}</label>
+                <select ng-model="DeptUserRegistration.GPId" class="form-control" ng-change="VillageList()" ng-init="DeptUserRegistration.GPId='0'">
+                    <option value="0" disabled>{{translation.SelectOption}}</option>
+                    <option ng-repeat="item in GramPanchayats" value="{{item.GP_ID}}">
+                        {{_language =='en-us' ?  item.GP_ENG : item.GP_MANGAL}}
+                    </option>
+                </select>
+            </div>
+            <div class="form-group col-md-6">
+                <label>{{translation.Village}}</label>
+                <select ng-model="DeptUserRegistration.VillageId" class="form-control" ng-init="DeptUserRegistration.VillageId='0'">
+                    <option value="0" disabled>{{translation.SelectOption}}</option>
+                    <option ng-repeat="item in Villages" value="{{item.VILLAGE_ID}}">
+                        {{_language =='en-us' ?  item.VILLAGE_ENG : item.VILLAGE_MANGAL}}
+                    </option>
+                </select>
+            </div>
+        </div>
+
+
+        <div class="form-group col-md-6" ng-class="{ 'has-error' : MyUserForm.OfficerNameEn.$invalid && !MyUserForm.OfficerNameEn.$pristine }">
+            <label>{{translation.OfficerNameEn}}</label>
+            <input type="text" class="form-control" only-letters-input name="OfficerNameEn" ng-model="DeptUserRegistration.OfficerNameEn" placeholder="{{translation.OfficerNameEn}}" ng-minlength="1" maxlength="50" required>
+            <label ng-show="MyUserForm.OfficerNameEn.$error.required && !MyUserForm.OfficerNameEn.$pristine" class="help-block">{{translation.OfficerNameEn}} - {{translation.Required}}</label>
+        </div>
+        <div class="form-group col-md-6" ng-class="{ 'has-error' : MyUserForm.OfficerNameHi.$invalid && !MyUserForm.OfficerNameHi.$pristine }">
+            <label>{{translation.OfficerNameHi}}</label>
+            <input type="text" name="OfficerNameHi" class="form-control" ng-model="DeptUserRegistration.OfficerNameHi" placeholder="{{translation.OfficerNameHi}}" required>
+            <label ng-show="MyUserForm.OfficerNameHi.$error.required && !MyUserForm.OfficerNameHi.$pristine" class="help-block">{{translation.OfficerNameHi}} - {{translation.Required}}</label>
+        </div>
+
+        <div class="form-group col-md-6" ng-class="{ 'has-error' : MyUserForm.PhoneNo.$invalid && !MyUserForm.PhoneNo.$pristine }">
+            <label>{{translation.PhoneNo}}</label>
+            <input type="text" name="PhoneNo" class="form-control" ng-model="DeptUserRegistration.PhoneNo" placeholder="{{translation.PhoneNo}}" maxlength="10" ng-minlength="10" onkeypress='return event.charCode >= 48 && event.charCode <= 57'>
+            <label ng-show="MyUserForm.PhoneNo.$error.minlength && !MyUserForm.PhoneNo.$pristine" class="help-block">{{translation.PhoneNo}} - {{translation.MobileNoLimit}}</label>
+        </div>
+        <div class="form-group col-md-6" ng-class="{ 'has-error' : MyUserForm.MobileNo.$invalid && !MyUserForm.MobileNo.$pristine }">
+            <label>{{translation.MobileNo}}</label>
+            <input type="text" name="MobileNo" class="form-control" ng-model="DeptUserRegistration.MobileNo" placeholder="{{translation.MobileNo}}" maxlength="10" ng-minlength="10" onkeypress='return event.charCode >= 48 && event.charCode <= 57'>
+            <label ng-show="MyUserForm.MobileNo.$error.minlength && !MyUserForm.MobileNo.$pristine" class="help-block">{{translation.MobileNo}} - {{translation.MobileNoLimit}}</label>
+        </div>
+        <div class="form-group col-md-6" ng-class="{ 'has-error' : MyUserForm.email.$invalid && !MyUserForm.email.$pristine }">
+            <label>{{translation.EmailId}}</label>
+            <input type="email" class="form-control" name="email" ng-model="DeptUserRegistration.EmailId" placeholder="{{translation.EmailId}}">
+            <label ng-show="MyUserForm.email.$invalid && !MyUserForm.email.$pristine" class="help-block">{{translation.EmailId}} - {{translation.NotValid}}</label>
+        </div>
+        <div class="form-group col-md-6">
+            <label>{{translation.ImageUpload}}</label>
+            <input type="file" class="form-control" ng-file-select="onFileSelect($files)" ng-model="DeptUserRegistration.ImageUrl">
+        </div>
+
+        <div class="form-group col-md-6" ng-class="{ 'has-error' : MyUserForm.AddressEn.$invalid && !MyUserForm.AddressEn.$pristine }">
+            <label class="control-label"> {{translation.AddressEn}} </label>
+            <textarea name="AddressEn" only-letters-input class="form-control resize" rows="5" placeholder="{{translation.AddressEn}}" ng-model="DeptUserRegistration.AddressEn" maxlength="200" ng-minlength="5" required> </textarea>
+            <label ng-show="MyUserForm.AddressEn.$error.required && !MyUserForm.AddressEn.$pristine" class="help-block">{{translation.AddressEn}} - {{translation.Required}}</label>
+            <label ng-show="MyUserForm.AddressEn.$error.minlength && !MyUserForm.AddressEn.$pristine" class="help-block">{{translation.AddressEn}} - {{translation.NotValid}}</label>
+        </div>
+
+        <div class="form-group col-md-6" ng-class="{ 'has-error' : MyUserForm.AddressHi.$invalid && !MyUserForm.AddressHi.$pristine }">
+            <label class="control-label"> {{translation.AddressHi}} </label>
+            <textarea name="AddressHi" only-letters-input class="form-control resize" rows="5" placeholder="{{translation.AddressHi}}" ng-model="DeptUserRegistration.AddressHi" maxlength="200" ng-minlength="5" required> </textarea>
+            <label ng-show="MyUserForm.AddressHi.$error.required && !MyUserForm.AddressHi.$pristine" class="help-block">{{translation.AddressHi}} - {{translation.Required}}</label>
+            <label ng-show="MyUserForm.AddressHi.$error.minlength && !MyUserForm.AddressHi.$pristine" class="help-block">{{translation.AddressHi}} - {{translation.NotValid}}</label>
+        </div>
+
+        <div class="form-group col-md-6">
+            <label> {{translation.GenderEN}}</label>
+            <select class="form-control" ng-model="DeptUserRegistration.Gender" ng-init="DeptUserRegistration.Gender='0'">
+                <option value="0" disabled>{{translation.SelectOption}}</option>
+                <option value="M">Male</option>
+                <option value="F">Female</option>
+            </select>
+        </div>
+        <div class="form-group col-md-6" ng-class="{ 'has-error' : MyUserForm.PIN.$invalid && !MyUserForm.PIN.$pristine }">
+            <label>{{translation.PIN}}</label>
+            <input type="text" name="PIN" class="form-control" placeholder="{{translation.PIN}}" ng-model="DeptUserRegistration.PIN" maxlength="6" ng-minlength="6" onkeypress='return event.charCode >= 48 && event.charCode <= 57' required>
+            <label ng-show="MyUserForm.PIN.$error.required && !MyUserForm.PIN.$pristine" class="help-block">{{translation.PIN}} - {{translation.Required}}</label>
+            <label ng-show="MyUserForm.PIN.$error.minlength && !MyUserForm.PIN.$pristine" class="help-block">{{translation.PIN}} - {{translation.NotValid}}</label>
+        </div>
+        <div class="form-group col-md-6">
+            <label>{{translation.UserTitle}}</label>
+
+            <select ng-model="DeptUserRegistration.UserTitle" class="form-control" ng-init="DeptUserRegistration.UserTitle='0'">
+                <option value="0" disabled>{{translation.SelectOption}}</option>
+                <option ng-repeat="item in Titles" value="{{item.Id}}">
+                    {{_language =='en-us' ?  item.Title_EN : item.Title_HI}}
+                </option>
+            </select>
+            <input type="hidden" ng-model="DeptUserRegistration.UserId" />
+        </div>
+
+        <div class="form-group col-md-6">
+            <label>{{translation.DepartmentHeading}}</label>
+            <select class="form-control" ng-model="DeptUserRegistration.DEPTCODE" ng-init="DeptUserRegistration.DEPTCODE='0'">
+                <option value="0">{{translation.SelectOption}}</option>
+                <option ng-repeat="item in Departments" value="{{item.DEPTCODE}}">
+                    {{_language =='en-us' ?  item.DEPTNAMEENGLISH : item.DEPTNAMEHINDI}}
+
+                </option>
+            </select>
+        </div>
+
+
+        <div class="form-group col-md-6">
+            <label>{{translation.DesignationHeading}}</label>
+            <select class="form-control" ng-model="DeptUserRegistration.DESIGNATIONCODE" ng-init="DeptUserRegistration.DESIGNATIONCODE='0'">
+                <option selected value="0">{{translation.SelectOption}}</option>
+                <option ng-repeat="item in Designations" value="{{item.DESIGNATIONCODE}}">
+                    {{_language =='en-us' ?  item.DESIGNATIONDESCENGLISH : item.DESIGNATIONDESCHINDI}}
+                </option>
+            </select>
+        </div>
+
+        <div class="form-group col-md-6">
+            <label>{{translation.PostHeading}}</label>
+            <select class="form-control" ng-model="DeptUserRegistration.PostId" ng-init="DeptUserRegistration.PostId='0'">
+                <option selected value="0">{{translation.SelectOption}}</option>
+                <option ng-repeat="item in Posts" value="{{item.CAD_ID}}">
+                    {{_language =='en-us' ?  item.CAD_NAME : item.CAD_NAME}}
+                </option>
+            </select>
+        </div>
+
+        <div class="form-group col-md-6">
+            <label>{{translation.RoleHeading}}</label>
+            <select class="form-control" ng-model="DeptUserRegistration.RoleID" ng-init="DeptUserRegistration.RoleID='0'">
+                <option selected value="0">{{translation.SelectOption}}</option>
+                <option ng-repeat="item in Roles" value="{{item.RoleID}}">
+                    {{_language =='en-us' ?  item.RoleName_EN : item.RoleName_HI}}
+                </option>
+            </select>
+        </div>
+        <div class="form-group col-md-12">
+            <div class="dev-align-btn">
+                <button type="button" class="btn btn-primary dev-btn" ng-disabled="MyUserForm.$invalid" ng-click="SaveDepartmenatalUser()">{{translation.Submit}}</button>
+                <button type="button" class="btn btn-primary dev-btn" ng-click="ClearForm()">{{translation.Clear}}</button>
+            </div>
+        </div>
+
+    </form>
+
+    <div class="col-md-12 dev-search-form">
+        <div class="col-md-2">
+            <h4> {{translation.SRNO}} </h4>
+        </div>
+        <div class="col-md-4">
+            <label for="search">{{translation.Search}}:</label>
+            <input ng-model="q" id="search" class="form-control" placeholder="Filter text">
+        </div>
+        <div class="col-md-4">
+            <label for="search">{{translation.ItemPerPage}}:</label>
+            <input type="number" min="1" max="100" class="form-control" ng-model="pageSize">
+        </div>
+    </div>
+
+    <div class="col-md-12">
+        <div class="table-responsive">
+            <table class="table dev-table" style="margin-top: 30px;">
+                <thead>
+                    <tr>
+                        <th>
+                            {{translation.SRNO}}
+                        </th>
+                        <th>
+                            {{translation.UserHeading}}
+                            <div ng-class="getSortClass('OfficerNameEn')"></div>
+                        </th>
+                        @*<th>
+                            {{translation.Status}}
+                        </th>
+                        <th>{{translation.Edit}}</th>
+                        <th>{{translation.Delete}}</th>*@
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr dir-paginate="item in Users | filter: q | orderBy:colsort:reverseSort | itemsPerPage: pageSize" current-page="currentPage" pagination-id="userPagination">
+                        <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                        <td>{{ language == 'en-us' ? (item.Title_EN + ' ' + item.OfficerNameEn ) : (item.Title_HI + ' ' + item.OfficerNameHi ) }}</td>
+                        @*<td>
+                            <div class="dev-action">
+                                <label class="switch">
+                                    <input type="checkbox" ng-checked="item.IsActive == 1" ng-click="SetStatus(item.UserId,item.IsActive)">
+                                    <span class="slider round"></span>
+                                </label>
+                            </div>
+                            </td>
+                        <td>
+                            <i class="fa fa-edit" ng-click="Update(item.UserId)"></i>
+                        </td>
+                        <td>
+                            <i class="fa fa-trash" ng-click="SetStatus(item.UserId,2)"></i>
+                        </td>*@
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="col-md-12">
+        <div class="text-center">
+            <dir-pagination-controls boundary-links="true" pagination-id="userPagination" on-page-change="pageChangeHandler(newPageNumber)" template-url="/dirPagination.tpl.html"></dir-pagination-controls>
+        </div>
+    </div>
+    @*<div class="se-pre-con"></div>*@
+
+</div>

@@ -1,0 +1,411 @@
+﻿<script src="~/Scripts/AngularFramework/SocietyApplicationTransactionList.js"></script>
+<script type="text/javascript" src="~/Scripts/jqueryuitimepicker.js"></script>
+<link href="~/Content/Stylesheets/jqueryuitimepicker.css" rel="stylesheet" />
+<script type="text/javascript">
+    function printDataJS(Id) {
+        // ExportToPDF(Id, [], '', PDFPageType.Portrait);
+        $('body').prepend("<form method='post' action='../ExportHandler.ashx' id='tempForm'><input type='hidden' name='data' value='" + Id + "' ><input type='hidden' name='PageType' value='" + PDFPagePrintType.Portrait + "' ></form>");
+        $('#tempForm').submit();
+        $("tempForm").remove();
+    }
+    </script>
+  
+
+
+<div ng-app="UploadAuditByAuditorMod" ng-controller="UploadAuditByAuditorCont">
+    <div class="col-md-12">
+        <h3 class="h3heading citizen-dash-head">Society Application Transaction List@*<a target="_blank" style="float:right; font-size:12px" href="~/Content/UserManual/CEO_Audit_Report_Upload.pdf">उपयोगकर्ता पुस्तिका</a>*@</h3>
+    </div>
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="devpage-breadcrumb">
+            <ul class="page-breadcrumb">
+                <li class="dev-page-br">
+                    <i class="fa fa-home"> </i>
+                    <a href="#"> {{translation.Home}}  </a>
+                    <i class="fa fa-angle-right"> </i>
+                </li>
+                <li style="float: left">
+                    <span style="margin: 0 5px;">Society Application Transaction List</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="col-md-12">
+        <form class="dev-search-form citizen-dash-head " style="overflow: hidden;" name="Myauditform">
+            <input type="hidden" id="DivisionId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DivisionId)" />
+            <input type="hidden" id="hdnActId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).ActId)" />
+            <input type="hidden" id="hdnDistrictId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DistrictId)" />
+            <input type="hidden" id="hdnStateId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).StateId)" />
+
+
+
+            <input type="hidden" id="hdnDivisionId" value="@ViewBag.Division_Id " />
+            <input type="hidden" id="hdnDistrict_Id" value="@ViewBag.District_Id" />
+            <div class="col-lg-12 form-group" id="search-filter">
+
+                <div class="col-md-2 margin-Top20" style="padding-left: 0;">
+                    <label>{{ translation.FincialYearHeading}}</label>
+                    <select name="FIN_YEAR_NAME" class="form-control" ng-model="Filter.FinancialYear" ng-init="Filter.FinancialYear=''" ng-change="LoanListBYFIN_Year()">
+                        <option value="">{{translation.SelectOption}}</option>
+                        <option ng-repeat="item in FinancialYearList" value="{{item.FIN_YEAR_NAME}}">
+                            {{item.FIN_YEAR_NAME}}
+                        </option>
+                    </select>
+                </div>
+
+                <div class="col-md-2 margin-Top20" style="padding-left: 0;" ng-show="DivisionBlock==true">
+                    <label>{{ translation.Division}}</label>
+                    <select name="A.Division_Id" ng-model="DIVISION_ID" ng-disabled="IsSubmiApplication" class="form-control" ng-init="Filter.Division_Id=''" id="ddrDivisionId">
+                        <option value="">{{translation.SelectOption}}</option>
+                        <option ng-repeat="division in Divisions" value="{{division.DIVISION_ID}}">
+                            {{_language =='en-us' ?  division.DIVISION_ENG : division.DIVISION_MANGAL}}
+                        </option>
+                    </select>
+                </div>
+
+                <div class="col-md-2 margin-Top20" style="padding-left: 0;">
+                    <label>{{ translation.DistrictHeading}}</label>
+                    <select name="A.DISTRICT_ID" ng-model="Filter.DistrictId" class="form-control" ng-init="Filter.DistrictId=''" id="ddrDistrictId">
+                        <option value="">{{translation.SelectOption}}</option>
+                        <option ng-repeat="district in DistrictList" value="{{district.DISTRICT_ID}}">
+                            {{_language =='en-us' ?  district.DISTRICT_ENG : district.DISTRICT_MANGAL}}
+                        </option>
+                    </select>
+                </div>
+
+                <div class="col-md-2 margin-Top20" style="padding-left: 0;">
+                    <label>{{ translation.SocietyType}}</label>
+                    <select name="Societies.SocietyTypeId" ng-model="Filter.SocietyTypeId" class="form-control" ng-init="Filter.SocietyTypeId=''" id="ddrSocietyTypeId">
+                        <option value="">{{translation.SelectOption}}</option>
+                        <option ng-repeat="SocietyType in SocietyTypeList" value="{{SocietyType.SocietyTypeId}}">
+                            {{_language =='en-us' ?  SocietyType.TypeameEng : SocietyType.TypeNameHin}}
+                        </option>
+                    </select>
+                </div>
+
+                <div class="col-md-2 margin-Top20" style="padding-left: 0;" ng-show="ShowGrou">
+                    <label> Group By</label>
+                    <select name="GroupBy" class="form-control" ng-model="Filter.GroupBy" ng-init="Filter.GroupBy=''">
+                        <option value="">{{translation.SelectOption}}</option>
+                        <option value="1">Division Wise</option>
+                        <option value="2">District Wise</option>
+                        <option value="3"> Society Type Wise</option>
+                    </select>
+                </div>
+
+
+             
+
+
+               
+
+                <div class="col-md-4  margin-Top20">
+                    <label>&nbsp;</label><br>
+                    <button type="button" ng-click="GetlisttransactionList" class="btn btn-primary dev-btn ng-binding">{{translation.Search}}</button>
+                    <button type="button" ng-click="ClearSearch()" class="btn btn-primary dev-btn ng-binding">{{translation.Clear}}</button>
+                </div>
+
+
+
+            </div>
+            <table class="table devtable">
+                <thead>
+                    <tr>
+                         <th> {{translation.SRNO}}</th>
+                                <th>{{translation.RequestID}}</th>
+                                <th>{{translation.SocietyName}}</th>
+                                <th>{{translation.RegistrationNo}}</th>
+                                <th>{{translation.TRANSACTIONSTATUSCODE}}</th>
+                                <th>{{translation.ReceiptNo}}</th>
+                                <th>{{translation.TRANSACTIONID}}</th>
+                                <th>{{translation.Amount}}</th>
+                                <th>{{translation.PaidAmount}}</th>
+                                <th>{{translation.Status}}</th>
+                                <th>{{translation.StatusMsg}}</th>
+                                <th>{{translation.RequestDateTime}}</th>
+                                <th>
+                                    Action
+                                </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="items in SocietyCountList">
+                        <td>{{(((DataPagingDetails.PageNumber - 1) * DataPagingDetails.PageSize) + 1)+$index}}</td>
+                        <td><span class="dev-spancon">{{items.ResponseString.PRN}}</span></td>
+                        <td><span class="dev-spancon">{{items.ResponseString.SocietyName}}</span></td>
+                        <td><span class="dev-spancon">{{items.ResponseString.RegistrationNo}}</span></td>
+
+                        <td><span class="dev-spancon">{{items.ResponseString.TRANSACTIONSTATUSCODE}}</span></td>
+                        <td><span class="dev-spancon">{{items.ResponseString.RECEIPTNO}}</span></td>
+                        <td><span class="dev-spancon">{{items.ResponseString.TRANSACTIONID}}</span></td>
+                        <td><span class="dev-spancon">{{items.ResponseString.AMOUNT}}{{ Payment.ResponseString.TRANSAMT}}</span></td>
+                        <td><span class="dev-spancon">{{items.ResponseString.PAIDAMOUNT}}</span></td>
+                        <td><span class="dev-spancon">{{items.ResponseString.RESPONSEMESSAGE}} {{Payment.ResponseString.TRANSACTIONSTATUS}}</span></td>
+                        <td><span class="dev-spancon">{{items.ResponseString.STATUS}}{{Payment.ResponseString.MSG}}</span></td>
+                        <td><span class="dev-spancon">{{items.CreationDate}}</span></td>
+                        <td>
+                            <i class="fa fa-list-ul" data-target="#myModals" data-toggle="modal" ng-click="Trailhistroy(items.SocietyIdENC)"></i>
+                        </td>
+                    </tr><tr>
+<td colspan="13">
+<div ng-if="DataPagingDetails.TotalPages>1" class="dataTables_paginate paging_simple_numbers" id="dataTables-example_paginate">
+                        <div class="dataTables_info" id="dataTables-example_info" role="status" aria-live="polite">
+                            Total Records: {{DataPagingDetails.TotalRecords}}
+                        </div>
+                        <ul class="pagination pagination_1" style="margin-left: 10px !important;">
+                            <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« First</span></li>
+                            <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« Previous</span></li>
+
+                            <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest('1',GetlisttransactionList)" style="cursor: pointer;">
+                                <span>«First</span>
+                            </li>
+                            <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest(DataPagingDetails.PageNumber-1,GetlisttransactionList)" style="cursor:pointer;">
+                                <span>« Previous</span>
+                            </li>
+                            <li class="{{n==DataPagingDetails.PageNumber?'active':''}}" style="{{n==DataPagingDetails.PageNumber?'':'cursor: pointer'}}" ng-repeat="n in PagingRange(DataPagingDetails.StartPageNumber,DataPagingDetails.EndPageNumber,DataPagingDetails.TotalPages)" ng-click="pageRequest(n,GetlisttransactionList)"><span>{{n}}</span></li>
+                            <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Next</span></li>
+                            <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Last</span></li>
+                            <li ng-if="DataPagingDetails.PageNumber!= DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.PageNumber+1,GetlisttransactionList)" style="cursor:pointer;">
+                                <span>Next »</span>
+                            </li>
+                            <li ng-if="DataPagingDetails.PageNumber != DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.TotalPages,GetlisttransactionList)" style="cursor:pointer;">
+                                <span>Last »</span>
+                            </li>
+                        </ul>
+                    </div>
+</td>
+</tr>
+                </tbody>
+            </table>
+
+        </form>
+    </div>
+    <div class="dev-popup-body modal fade" id="TrailList" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog" style="width: 50%;">
+            <!-- Modal content-->
+            <div class="modal-content" style="width: 825px!important;height:400px; color:black;">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-titmemberle" style="color:black; text-align:center">Scoiety Transaction Details </h4>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-responsive devtable">
+                        <thead>
+                            <tr>
+                                <th>
+                                    KioskID
+                                </th>
+                                <th>
+                                    ReceiptNo
+                                </th>
+                                <th>
+                                    TokenNo
+                                </th>
+                                @*
+                                <th>
+                                    RequestStatus
+                                </th>*@
+                                <th>
+                                    StatusMsg
+                                </th>
+
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="items in GrievancHistoryList">
+                                {{GrievancHistoryList}}
+                                <td>{{$index+1}}</td>
+                                <td> {{ items.KioskID }}   </td>
+                                <td> {{ items.ReceiptNo }}   </td>
+                                <td> {{ items.TokenNo }}   </td>
+                                <td> {{ items.RequestStatus }}   </td>
+                                <td> {{ items.StatusMsg }}   </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <div class="table-responsive citizen-dash-head" ng-show="CountSocietyAuditorList == true">
+        @*<h5 class="heading-hr ng-binding"> {{translation.AuditUploadedSocietyList}} </h5>*@
+        <div class="col-md-4 margin-Top20" style="padding-left: 25px;">
+            <label>{{ translation.Search}}</label>
+            <input name="serachText" class="form-control" ng-model="q" />
+        </div>
+        <div class="col-md-4  margin-Top20">
+            <label>&nbsp;</label><br>
+            <button type="button" ng-click="searchRequest(GetCountSocietyAssignedToAuditorList)" class="btn btn-primary dev-btn ng-binding">{{translation.Search}}</button>
+            <button type="button" ng-click="ClearSearchText()" class="btn btn-primary dev-btn ng-binding">{{translation.Clear}}</button>
+            <input type="button" class="btn btn-primary dev-btn" onclick="tableToExcel('tblgetsuport', 'Get Support Data')" value="Export to Excel">
+        </div>
+        <table class="table devtable" id="tblgetsuport" style="margin-top: 75px!important;">
+            <thead>
+                <tr>
+                    <th>
+                        {{translation.SRNO}}
+                    </th>
+                    <th>
+                        {{translation.SocietyName}}
+                    </th>
+                    <th>
+                        {{translation.RegistrationNo}}
+                    </th>
+                    <th>
+                        {{translation.AuditBy}}
+                    </th>
+                    @*
+                    <th>
+                        {{translation.District}}
+                    </th>*@
+                    <th>
+                        {{translation.AuditorInspector}}
+                    </th>
+                    <th>
+                        {{translation.FincialYearHeading}}
+                    </th>
+
+                    <th>
+                        {{translation.RequestStatus}}
+                    </th>
+                    <th>
+                        {{translation.Date}}
+                    </th>
+                    <th>
+                        {{translation.Order}}
+                    </th>
+                    <th>
+                        {{translation.Document}}
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="items in AssignedAuditor | filter:q">
+                    <td>{{(((DataPagingDetails.PageNumber - 1) * DataPagingDetails.PageSize) + 1)+$index}}</td>
+                    <td>{{ items.SocietyName }}</td>
+                    <td>{{ items.RegistrationNo }}</td>
+                    <td>{{ items.AuditBy}}</td>
+                    @*
+                    <td>{{ items.DISTRICT_ENG }}</td>*@
+                    <td>{{ items.AuditorName }}</td>
+                    <td>{{items.FIN_YEAR_NAME}}</td>
+                    <td>{{ items.RequestStatusText }} </td>
+                    <td>{{ items.RequestDate }}</td>
+                    <td><a ng-show="{{items.AuditorAssignFilePath!=''}}" href="{{items.AuditorAssignFilePath}}" class="fa fa-download" target="_blank"></a> </td>
+                    <td><a ng-click="ViewDocuments(items.Id)" class="fa fa-eye"></a> </td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="col-md-12">
+            <div class="col-md-12">
+                <div ng-if="DataPagingDetails.TotalPages>1" class="dataTables_paginate paging_simple_numbers" id="dataTables-example_paginate">
+                    <div class="dataTables_info" id="dataTables-example_info" role="status" aria-live="polite">
+                        Total Records: {{DataPagingDetails.TotalRecords}}
+                    </div>
+                    <ul class="pagination pagination_1" style="margin-left: 10px !important;">
+                        <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« First</span></li>
+                        <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« Previous</span></li>
+
+                        <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest('1',SearchData)" style="cursor: pointer;">
+                            <span>«First</span>
+                        </li>
+                        <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest(DataPagingDetails.PageNumber-1,SearchData)" style="cursor:pointer;">
+                            <span>« Previous</span>
+                        </li>
+                        <li class="{{n==DataPagingDetails.PageNumber?'active':''}}" style="{{n==DataPagingDetails.PageNumber?'':'cursor: pointer'}}" ng-repeat="n in PagingRange(DataPagingDetails.StartPageNumber,DataPagingDetails.EndPageNumber,DataPagingDetails.TotalPages)" ng-click="pageRequest(n,SearchData)"><span>{{n}}</span></li>
+                        <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Next</span></li>
+                        <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Last</span></li>
+                        <li ng-if="DataPagingDetails.PageNumber!= DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.PageNumber+1,SearchData)" style="cursor:pointer;">
+                            <span>Next »</span>
+                        </li>
+                        <li ng-if="DataPagingDetails.PageNumber != DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.TotalPages,SearchData)" style="cursor:pointer;">
+                            <span>Last »</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            @*<div ng-if="DataPagingDetails.TotalPages>1" class="dataTables_paginate paging_simple_numbers" id="dataTables-example_paginate">
+                <div class="dataTables_info" id="dataTables-example_info" role="status" aria-live="polite">
+                    Total Records: {{DataPagingDetails.TotalRecords}}
+                </div>
+                <ul class="pagination pagination_1" style="margin-left: 10px !important;">
+                    <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« First</span></li>
+                    <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« Previous</span></li>
+
+                    <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest('1',GetSocietyListAssignedToAuditor)" style="cursor: pointer;">
+                        <span>«First</span>
+                    </li>
+                    <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest(DataPagingDetails.PageNumber-1,GetSocietyListAssignedToAuditor)" style="cursor:pointer;">
+                        <span>« Previous</span>
+                    </li>
+                    <li class="{{n==DataPagingDetails.PageNumber?'active':''}}" style="{{n==DataPagingDetails.PageNumber?'':'cursor: pointer'}}" ng-repeat="n in PagingRange(DataPagingDetails.StartPageNumber,DataPagingDetails.EndPageNumber,DataPagingDetails.TotalPages)" ng-click="pageRequest(n,GetSocietyListAssignedToAuditor)"><span>{{n}}</span></li>
+                    <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Next</span></li>
+                    <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Last</span></li>
+                    <li ng-if="DataPagingDetails.PageNumber!= DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.PageNumber+1,GetSocietyListAssignedToAuditor)" style="cursor:pointer;">
+                        <span>Next »</span>
+                    </li>
+                    <li ng-if="DataPagingDetails.PageNumber != DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.TotalPages,GetSocietyListAssignedToAuditor)" style="cursor:pointer;">
+                        <span>Last »</span>
+                    </li>
+                </ul>
+            </div>*@
+        </div>
+    </div>
+
+    <div class="dev-popup-body modal fade" id="myModals" role="dialog">
+        <div class="modal-dialog" style="width: 90%;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Society Transaction Details</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive citizen-dash-head">
+                        <table class="table table-responsive devtable">
+                            <thead>
+                                <tr>
+                                    <th> {{translation.SRNO}}</th>
+                                    <th>{{translation.RequestID}}</th>
+                                    <th>{{translation.TRANSACTIONSTATUSCODE}}</th>
+                                    <th>{{translation.ReceiptNo}}</th>
+                                    <th>{{translation.TRANSACTIONID}}</th>
+                                    <th>{{translation.Amount}}</th>
+                                    <th>{{translation.PaidAmount}}</th>
+                                    <th>{{translation.Status}}</th>
+                                    <th>{{translation.StatusMsg}}</th>
+                                    <th>{{translation.RequestDateTime}}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="items in GrievancHistoryList">
+                                    <td>{{$index+1}}</td>
+                                    <td><span class="dev-spancon">{{items.ResponseString.PRN}}</span></td>
+                                    <td><span class="dev-spancon">{{items.ResponseString.TRANSACTIONSTATUSCODE}}</span></td>
+                                    <td><span class="dev-spancon">{{items.ResponseString.RECEIPTNO}}</span></td>
+                                    <td><span class="dev-spancon">{{items.ResponseString.TRANSACTIONID}}</span></td>
+                                    <td><span class="dev-spancon">{{items.ResponseString.AMOUNT}}{{ Payment.ResponseString.TRANSAMT}}</span></td>
+                                    <td><span class="dev-spancon">{{items.ResponseString.PAIDAMOUNT}}</span></td>
+                                    <td><span class="dev-spancon">{{items.ResponseString.RESPONSEMESSAGE}} {{Payment.ResponseString.TRANSACTIONSTATUS}}</span></td>
+                                    <td><span class="dev-spancon">{{items.ResponseString.STATUS}}{{Payment.ResponseString.MSG}}</span></td>
+                                    <td><span class="dev-spancon">{{items.CreationDate}}</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">{{translation.Close}}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="se-pre-con"></div>
+    <div id="stop" class="scrollTop">
+        <span><a href=""><i class="fa fa-arrow-up">Top</i></a></span>
+    </div>
+</div>

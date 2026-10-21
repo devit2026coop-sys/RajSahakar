@@ -1,0 +1,308 @@
+﻿<script src="~/Scripts/AngularFramework/PLDBLoanMasters.js?id=5"></script>
+<script type="text/javascript">
+    var tableToExcel = (function () {
+        var uri = 'data:application/vnd.ms-excel;base64,'
+            , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>'
+            , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) }
+            , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
+        return function (table, name) {
+            if (!table.nodeType) table = document.getElementById(table)
+            var ctx = { worksheet: name || 'Worksheet', table: table.innerHTML }
+            window.location.href = uri + base64(format(template, ctx))
+        }
+    })()
+</script>
+<div ng-app="PLDBLoanMastersMOD">
+    <div ng-controller="PLDBLoanMastersCONT">
+        <div class="col-md-12">
+            <h3 class="citizen-dash-head">{{translation.CashandBankMaster}}</h3>
+            <hr style="margin: 0;">
+        </div>
+        <div class="col-md-12">
+
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#"> {{translation.Home}} </a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;"> {{translation.CashandBankMaster}} </span>
+                    </li>
+                    <li style="float: right;" id="divAddBtn">
+                        <i class="fa fa-angle-double-right" style="color: #025e63;"></i>
+                        <a ng-click="AddNewCashandBank()" style="color: #025e63; cursor: pointer; text-decoration:none; font-weight: bold;" class="ng-binding">{{translation.AddNew}}</a>
+                    </li>
+                </ul>
+            </div>
+
+        </div>
+
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="table-responsive citizen-dash-head">
+                <div class="table-dropdown" id="search-filter">
+                    <input type="hidden" value="Scheme" id="MasterType" />
+                    <div class="col-md-4">
+                        <label for="search" class="ng-binding">Search:</label>
+                        <input ng-model="q" id="search" class="form-control ng-pristine ng-valid ng-empty ng-touched" ng-model="Filter.SearchText" placeholder="Filter Text" autocomplete="off">
+                    </div>
+
+
+                    <div class="col-md-4">
+                        <label>&nbsp;</label><br>
+                        <button type="button" class="btn btn-primary dev-btn ng-binding">{{translation.Search}}</button>
+                        @*<button type="button" ng-click="ClearSearch()" class="btn btn-primary dev-btn ng-binding">{{translation.Clear}}</button>*@
+                        <input type="button" class="btn btn-primary dev-btn" onclick="tableToExcel('tblgetsuport', 'Get Support Data')" value="Export to Excel">
+                    </div>
+                </div>
+                <table id="example" class="table devtable" style="border:1px solid rgb(222, 221, 221); float: left;">
+                    <thead>
+                        <tr>
+                            <th>
+                                #
+                                @*{{translation.SRNO}}*@
+                            </th>
+                            <th>
+                                {{translation.Type}}
+                            </th>
+                            <th>
+                                {{translation.BookAccountHolder}}
+                            </th>
+                            <th>
+                                {{translation.AccountCode}}
+                            </th>
+                            <th>
+                                {{translation.Accountno}}
+                            </th>
+                            <th>
+                                {{translation.Status}}
+                            </th>
+                            <th>
+                                {{translation.Actions}}
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr @*dir-paginate="item in LoanSchemeList | filter:q | orderBy:colsort:reverseSort | itemsPerPage: pageSize" current-page="currentPage" pagination-id="ElectionSymbolsPagination"*@>
+                            <td>@*{{pageSize *(currentPage-1)+$index+1}}*@1</td>
+                            <td>
+                               @*{{item.scheme_name_hi}}*@ Test
+                            </td>
+                            <td>
+                              @*{{item.scheme_name_hi}}*@  Test
+                            </td>
+                            <td>
+                                @*{{item.scheme_name_hi}}*@  Test123
+                            </td>
+                            <td>
+                                @*{{item.scheme_name_hi}}*@  Test1234
+                            </td>
+                            <td>
+                                <div class="dev-action">
+                                    <label class="switch">
+                                        <input type="checkbox" ng-checked="true">
+                                        <span class="slider round"></span>
+                                    </label>
+                                </div>
+                            </td>
+                            <td class="add-more-td">
+                                <a href="#"><i class="fa fa-edit"></i></a>
+                                <a href="#"><i class="fa fa-trash"></i></a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-md-12">
+                <div class="text-left">
+                    <dir-pagination-controls boundary-links="true" pagination-id="ElectionSymbolsPagination" on-page-change="pageChangeHandler(newPageNumber)" template-url="/dirPagination.tpl.html"></dir-pagination-controls>
+                </div>
+            </div>            
+        </div>
+        <div class="dev-popup-body modal fade" id="addModal" data-backdrop="static" data-keyboard="false" role="dialog">
+            <div class="modal-dialog">
+                <!-- Modal content-->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title"> {{translation.CashandBankMaster}}</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form class="dev-search-form" style="overflow: hidden; margin-bottom: 35px;" name="OfficeForm">
+                            <div class="col-md-12">
+                                <div class="col-md-6">
+                                    <label>
+                                        {{translation.Type}}
+                                    </label>
+                                    <select class="form-control">
+                                        <option value="0">{{translation.SelectOption}}</option>
+                                        @*<option ng-repeat="itm in LoanSectorList" value="{{itm.sector_id}}" ng-if="itm.IsShow">
+                        {{_language =='en-us' ?  itm.sector_name_en : itm.sector_name_hi}}
+                    </option>*@
+                                        <option value="1">Bank</option>
+                                        <option value="2">Bank1</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label>
+                                        {{translation.FaxNo}}
+                                    </label>
+                                    <input type="text" id="FaxNo" name="FaxNo" class="form-control" placeholder={{translation.FaxNo}} autocomplete="off">
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="col-md-6">
+                                    <label>
+                                        {{translation.BookAccountHolder}}
+                                    </label>
+                                    <select class="form-control">
+                                        <option value="0">{{translation.SelectOption}}</option>
+                                        @*<option ng-repeat="itm in LoanSectorList" value="{{itm.sector_id}}" ng-if="itm.IsShow">
+                        {{_language =='en-us' ?  itm.sector_name_en : itm.sector_name_hi}}
+                    </option>*@
+                                        <option value="1">Book Account Holder</option>
+                                        <option value="2">Book Account Holder1</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label>
+                                        {{translation.EmailId}}
+                                    </label>
+                                    <input type="text" id="EmailId" name="EmailId" class="form-control" placeholder={{translation.EmailId}} autocomplete="off">
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="col-md-6">
+                                    <label>
+                                        {{translation.AccountCode}}
+                                    </label>
+                                    <input type="text" id="AccountCode" name="AccountCode" class="form-control" placeholder={{translation.AccountCode}} autocomplete="off">
+                                </div>
+                                <div class="col-md-6">
+                                    <label>
+                                        {{translation.Accountno}}
+                                    </label>
+                                    <input type="text" id="Accountno" name="Accountno" class="form-control" placeholder={{translation.Accountno}} autocomplete="off">
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="col-md-6">
+                                    <label>
+                                        {{translation.AddressLine}} 1
+                                    </label>
+                                    <input type="text" id="AddressLine1" name="AddressLine1" class="form-control" placeholder='{{translation.AddressLine}} 1' autocomplete="off">
+                                </div>
+                                <div class="col-md-6">
+                                    <label>
+                                        {{translation.BranchCode}}
+                                    </label>
+                                    <input type="text" id="BranchCode" name="BranchCode" class="form-control" placeholder={{translation.BranchCode}} autocomplete="off">
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="col-md-6">
+                                    <label>
+                                        {{translation.AddressLine}} 2
+                                    </label>
+                                    <input type="text" id="AddressLine2" name="AddressLine2" class="form-control" placeholder='{{translation.AddressLine}} 2' autocomplete="off">
+                                </div>
+                                <div class="col-md-6">
+                                    <label>
+                                        {{translation.Code}} 1
+                                    </label>
+                                    <input type="text" id="Code1" name="Code1" class="form-control" placeholder='{{translation.Code}} 1' autocomplete="off">
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="col-md-6">
+                                    <label>
+                                        {{translation.AddressLine}} 3
+                                    </label>
+                                    <input type="text" id="AddressLine3" name="AddressLine3" class="form-control" placeholder='{{translation.AddressLine}} 3' autocomplete="off">
+                                </div>
+                                <div class="col-md-6">
+                                    <label>
+                                        {{translation.Code}} 2
+                                    </label>
+                                    <input type="text" id="Code2" name="Code2" class="form-control" placeholder='{{translation.Code}} 2' autocomplete="off">
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="col-md-6">
+                                    <label>
+                                        {{translation.City}}
+                                    </label>
+                                    <input type="text" id="City" name="City" class="form-control" placeholder={{translation.City}} autocomplete="off">
+                                </div>
+                                <div class="col-md-6">
+                                    <label>
+                                        {{translation.Code}} 3
+                                    </label>
+                                    <input type="text" id="Code3" name="Code3" class="form-control" placeholder='{{translation.Code}} 3' autocomplete="off">
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="col-md-6">
+                                    <label>
+                                        {{translation.State}}
+                                    </label>
+                                    <input type="text" id="State" name="State" class="form-control" placeholder={{translation.State}} autocomplete="off">
+                                </div>
+                                <div class="col-md-6">
+                                    <label>
+                                        {{translation.Code}} 4
+                                    </label>
+                                    <input type="text" id="Code4" name="Code4" class="form-control" placeholder='{{translation.Code}} 4' autocomplete="off">
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="col-md-6">
+                                    <label>
+                                        {{translation.STDCODE}}
+                                    </label>
+                                    <input type="text" id="STDCODE" name="STDCODE" class="form-control" placeholder={{translation.STDCODE}} autocomplete="off">
+                                </div>
+                                <div class="col-md-6">
+                                    <label>
+                                        {{translation.Code}} 5
+                                    </label>
+                                    <input type="text" id="Code5" name="Code5" class="form-control" placeholder='{{translation.Code}} 5' autocomplete="off">
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="col-md-6">
+                                    <label>
+                                        {{translation.PhoneNo}}
+                                    </label>
+                                    <input type="text" id="PhoneNo" name="PhoneNo" class="form-control" placeholder={{translation.PhoneNo}} autocomplete="off">
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="col-md-6">
+                                    <label>
+                                        {{translation.IsActive}}
+                                    </label>
+                                    <input type="checkbox" class="">
+                                </div>
+                            </div>
+                                <div class="col-md-12" style="margin-top: 10px;">
+                                    <div class="dev-menu-btn">
+                                        <button type="submit" class="btn btn-primary">{{translation.Submit}}</button>
+                                        <button type="submit" class="btn btn-primary">{{translation.Clear}}</button>
+                                    </div>
+                                </div>
+</form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="se-pre-con"></div>
+    <div id="stop" class="scrollTop">
+        <span><a href=""><i class="fa fa-arrow-up">Top</i></a></span>
+    </div>
+</div>

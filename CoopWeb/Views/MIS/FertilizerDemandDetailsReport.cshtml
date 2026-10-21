@@ -1,0 +1,280 @@
+﻿@{
+    ViewBag.Title = "Fertilizer Demand Details Report";
+}
+
+<script src="~/Scripts/AngularFramework/FertilizerDemandDetailsReport.js?v=@DateTime.Now.Ticks"></script>
+<script src="~/Scripts/xlsx.full.min.js"></script>
+<div ng-app="FertilizerDemandDetailsMod" ng-controller="FertilizerDemandDetailsCtrl" ng-cloak="">
+    <div class="container-fluid citizen-dash-head">
+        <div class="panel panel-default">
+            <div class="panel-heading flexEqualCenter">
+                <b>
+                    <i class="fa fa-th-list"></i>&nbsp;  Fertilizer Demand Details Report
+                </b>
+            </div>
+            <div class="panel-body">
+                <div class="row mb-3" id="search-filter">
+                    <div class="col-md-2">
+                        <label>{{ translation.DistrictHeading}}</label>
+                        <select name="DISTRICT_ID" ng-model="DISTRICT_ID" id="ddlDistrictId" class="form-control" ng-init="DISTRICT_ID='0'">
+                            <option value="0">{{translation.SelectOption}}</option>
+                            <option ng-repeat="district in DistrictList" value="{{district.DISTRICT_ID}}">
+                                {{_language =='en-us' ? district.DISTRICT_ENG : district.DISTRICT_MANGAL}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label>KVSS/GSS</label>
+                        <select name="SocietyType" class="form-control" ng-model="SocietyType" id="ddlSocietyType">
+                            <option value="">All</option>
+                            <option value="KVSS">KVSS</option>
+                            <option value="GSS">GSS</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label>Report Type</label>
+                        <select name="ReportType" class="form-control" ng-model="ReportType" id="ddlReportType">
+                            <option value="1">Demand wise</option>
+                            <option value="2">Credit facility wise</option>
+                            <option value="3">Purchase wise</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2" style="margin-top:25px;">
+                        <button type="button" class="btn btn-primary" style="background-color: #64c0c5; border:0;" ng-click="searchRequest(GetFertilizerDemandDetail)">
+                            Search
+                        </button>
+                        <button type="button" class="btn btn-primary" style="background-color: #64c0c5; border: 0;" ng-click="ClearSearch()">
+                            Clear
+                        </button>
+                        <button type="button" class="btn btn-success" ng-click="exportToExcel()">
+                            <i class="fa fa-file-excel-o"></i>
+                            Excel
+                        </button>
+                    </div>
+                </div>
+
+                <table class="table table-responsive devtable mb-2" id="RP1">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width:60px;">Sr.No</th>
+                            <th class="text-center">Society Name</th>
+                            <th class="text-center">Registration No</th>
+                            <th class="text-center">GSS/KVSS</th>
+                            <th class="text-center">District</th>
+                            <th class="text-center">Block</th>
+                            <th class="text-center">IFMS/POS ID</th>
+                            <th class="text-center">Credit Facility</th>
+                            <th class="text-center">Fertilizer Company</th>
+                            <th class="text-center">Fertilizer Name</th>
+                            <th class="text-center">Fertilizer Quantity (MT)</th>
+                            <th class="text-center">Demand Year</th>
+                            <th class="text-center">Demand Month</th>
+                            <th class="text-center">Request Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="item in FertilizerDataList track by $index">
+                            <td>{{(((DataPagingDetails.PageNumber - 1) * DataPagingDetails.PageSize) + 1)+$index}}</td>
+                            <td>
+                                {{item.SocietyName}}
+                            </td>
+                            <td>
+                                {{item.RegistrationNo}}
+                            </td>
+                            <td>
+                                {{item.SocietyType}}
+                            </td>
+                            <td>
+                                {{item.DistrictName}}
+                            </td>
+                            <td>
+                                {{item.Block}}
+                            </td>
+                            <td>
+                                {{item.POSId}}
+                            </td>
+                            <td>
+                                {{item.IsCreditFacility}}
+                            </td>
+                            <td>
+                                {{item.FertilizerCompany}}
+                            </td>
+                            <td>
+                                {{item.FertilizerName}}
+                            </td>
+                            <td>
+                                {{item.FertilizerQuantity}}
+                            </td>
+                            <td>
+                                {{item.Year}}
+                            </td>
+                            <td>
+                                {{item.Month}}
+                            </td>
+                            <td>
+                                {{item.RequestDate}}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <table class="table table-responsive devtable mb-2" id="RP2">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width:60px;">Sr.No</th>
+                            <th class="text-center">Society Name</th>
+                            <th class="text-center">Registration No</th>
+                            <th class="text-center">GSS/KVSS</th>
+                            <th class="text-center">District</th>
+                            <th class="text-center">Block</th>
+                            <th class="text-center">IFMS/POS ID</th>
+                            <th class="text-center">Credit Facility</th>
+                            <th class="text-center">Fertilizer Name</th>
+                            <th class="text-center">Fertilizer Quantity (MT)</th>
+                            <th class="text-center">Fertilizer Sale</th>
+                            <th class="text-center">Present Availability</th>
+                            <th class="text-center">Credit Limit</th>
+                            <th class="text-center">Demand Year</th>
+                            <th class="text-center">Demand Month</th>
+                            <th class="text-center">Request Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="item in FertilizerCFDataList track by $index">
+                            <td>{{(((DataPagingDetails.PageNumber - 1) * DataPagingDetails.PageSize) + 1)+$index}}</td>
+                            <td>
+                                {{item.SocietyName}}
+                            </td>
+                            <td>
+                                {{item.RegistrationNo}}
+                            </td>
+                            <td>
+                                {{item.SocietyType}}
+                            </td>
+                            <td>
+                                {{item.DistrictName}}
+                            </td>
+                            <td>
+                                {{item.Block}}
+                            </td>
+                            <td>
+                                {{item.POSId}}
+                            </td>
+                            <td>
+                                {{item.IsCreditFacility}}
+                            </td>
+                            <td>
+                                {{item.FertilizerName}}
+                            </td>
+                            <td>
+                                {{item.FertilizerQuantity}}
+                            </td>
+                            <td>
+                                {{item.FertilizerSale}}
+                            </td>
+                            <td>
+                                {{item.PresentAvailability}}
+                            </td>
+                            <td>
+                                {{item.CreditLimit}}
+                            </td>
+                            <td>
+                                {{item.Year}}
+                            </td>
+                            <td>
+                                {{item.Month}}
+                            </td>
+                            <td>
+                                {{item.RequestDate}}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <table class="table table-responsive devtable mb-2" id="RP3">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width:60px;">Sr.No</th>
+                            <th class="text-center">Society Name</th>
+                            <th class="text-center">Registration No</th>
+                            <th class="text-center">GSS/KVSS</th>
+                            <th class="text-center">District</th>
+                            <th class="text-center">Block</th>
+                            <th class="text-center">IFMS/POS ID</th>
+                            <th class="text-center">Credit Facility</th> 
+                            <th class="text-center">Fertilizer Name</th>
+                            <th class="text-center">Fertilizer Quantity (MT)</th> 
+                            <th class="text-center">Request Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="item in FertilizerPDataList track by $index">
+                            <td>{{(((DataPagingDetails.PageNumber - 1) * DataPagingDetails.PageSize) + 1)+$index}}</td>
+                            <td>
+                                {{item.SocietyName}}
+                            </td>
+                            <td>
+                                {{item.RegistrationNo}}
+                            </td>
+                            <td>
+                                {{item.SocietyType}}
+                            </td>
+                            <td>
+                                {{item.DistrictName}}
+                            </td>
+                            <td>
+                                {{item.Block}}
+                            </td>
+                            <td>
+                                {{item.POSId}}
+                            </td>
+                            <td>
+                                {{item.IsCreditFacility}}
+                            </td>
+                            <td>
+                                {{item.FertilizerName}}
+                            </td>
+                            <td>
+                                {{item.FertilizerQuantity}}
+                            </td>
+                            <td>
+                                {{item.RequestDate}}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <div ng-if="DataPagingDetails.TotalPages>1" class="dataTables_paginate paging_simple_numbers" id="dataTables-example_paginate" style="display: flex; align-items: center; justify-content: space-between;">
+                            <div class="dataTables_info" id="dataTables-example_info" role="status" aria-live="polite">
+                                Total Records: {{DataPagingDetails.TotalRecords}}
+                            </div>
+                            <ul class="pagination pagination_1" style="margin-left: 10px !important; margin:0">
+                                <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« First</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« Previous</span></li>
+
+                                <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest('1',SearchData)" style="cursor: pointer;">
+                                    <span>« First</span>
+                                </li>
+                                <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest(DataPagingDetails.PageNumber-1,SearchData)" style="cursor:pointer;">
+                                    <span>« Prev</span>
+                                </li>
+                                <li class="{{n==DataPagingDetails.PageNumber?'active':''}}" style="{{n==DataPagingDetails.PageNumber?'':'cursor: pointer'}}" ng-repeat="n in PagingRange(DataPagingDetails.StartPageNumber,DataPagingDetails.EndPageNumber,DataPagingDetails.TotalPages)" ng-click="pageRequest(n,SearchData)"><span>{{n}}</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Next</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Last</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber!= DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.PageNumber+1,SearchData)" style="cursor:pointer;">
+                                    <span>Next »</span>
+                                </li>
+                                <li ng-if="DataPagingDetails.PageNumber != DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.TotalPages,SearchData)" style="cursor:pointer;">
+                                    <span>Last »</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

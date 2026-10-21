@@ -1,0 +1,941 @@
+﻿@{
+    ViewBag.Title = "KPI Reports List";
+}
+<script src="~/Scripts/AngularFramework/KPIPLDBReports.js?v=1.13"></script>
+<link href="~/Scripts/google_hindi/google_transliteration.css" rel="stylesheet" />
+<link href="~/Content/Stylesheets/toastr.min.css" rel="stylesheet" />
+<script src="~/Scripts/toastr.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+@*<script src="~/Scripts/xlsx.full.min.js"></script>*@
+<script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
+<script>
+
+    async function ExportKPIReportToExcel() {
+
+        var report = document.getElementById("PLDBKPIReportTable");
+
+        if (!report) {
+            alert("Report not found.");
+            return;
+        }
+
+        if (typeof ExcelJS === "undefined") {
+            alert("ExcelJS library is not loaded.");
+            return;
+        }
+
+        var workbook = new ExcelJS.Workbook();
+        var worksheet = workbook.addWorksheet("KPI Report");
+        worksheet.views = [{ showGridLines: false }];
+
+        var COLORS = {
+            BLUE: "FF0070C0",
+            YELLOW: "FFFFD966",
+            PURPLE: "FF6F31A1",
+            A_PLUS: "FF7D9631",
+            A: "FF92D051",
+            B: "FFFFFF01",
+            C: "FFFDC100",
+            D: "FFC11D1C",
+            WHITE: "FFFFFFFF",
+            BLACK: "FF000000",
+            BORDER: "FF1F4E78"
+        };
+
+        function applyBorder(cell) {
+            cell.border = {
+                top: { style: "thin", color: { argb: COLORS.BORDER } },
+                bottom: { style: "thin", color: { argb: COLORS.BORDER } },
+                left: { style: "thin", color: { argb: COLORS.BORDER } },
+                right: { style: "thin", color: { argb: COLORS.BORDER } }
+            };
+        }
+
+        function applyCellStyle(cell, backgroundColor, fontColor, bold) {
+            cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: backgroundColor } };
+            cell.font = { name: "Calibri", size: 11, bold: bold === true, color: { argb: fontColor || COLORS.BLACK } };
+            cell.alignment = { horizontal: "left", vertical: "middle", wrapText: true };
+            applyBorder(cell);
+        }
+
+        function getCriteriaColor(category) {
+
+            category = (category || "").trim();
+
+            switch (category) {
+
+                case "A+":
+                    return COLORS.A_PLUS;
+
+                case "A":
+                    return COLORS.A;
+
+                case "B":
+                    return COLORS.B;
+
+                case "C":
+                    return COLORS.C;
+
+                case "D":
+                    return COLORS.D;
+
+                default:
+                    return COLORS.WHITE;
+            }
+        }
+
+        function addTableToExcel(table, startRow, tableType) {
+
+            var rows = table.querySelectorAll("tr");
+
+            var currentRow = startRow;
+
+            var occupied = {};
+
+            rows.forEach(function (htmlRow) {
+
+                var cells = htmlRow.querySelectorAll(":scope > th, :scope > td");
+                var currentColumn = 1;
+
+                cells.forEach(function (htmlCell) {
+
+                    while (occupied[currentRow + "_" + currentColumn]) {
+                        currentColumn++;
+                    }
+
+                    var rowspan = parseInt(htmlCell.getAttribute("rowspan") || "1", 10);
+                    var colspan = parseInt(htmlCell.getAttribute("colspan") || "1", 10);
+                    var startColumn = currentColumn;
+                    var endColumn = startColumn + colspan - 1;
+                    var startExcelRow = currentRow;
+                    var endExcelRow = startExcelRow + rowspan - 1;
+                    var excelCell = worksheet.getCell(startExcelRow, startColumn);
+                    excelCell.value = htmlCell.innerText.replace(/\s+/g, " ").trim();
+                    var isHeader = htmlCell.tagName.toLowerCase() === "th";
+                    var backgroundColor = COLORS.WHITE;
+                    var fontColor = COLORS.BLACK;
+
+                    if (tableType === "detail") {
+
+                        // Header
+                        if (isHeader) {
+                            backgroundColor = COLORS.BLUE;
+                            fontColor = COLORS.WHITE;
+                        }
+
+                        // Total row
+                        else if (htmlRow.classList.contains("bg-info")) {
+                            backgroundColor = COLORS.BLUE;
+                            fontColor = COLORS.WHITE;
+                        }
+
+                        // Normal rows
+                        else {
+                            backgroundColor = COLORS.YELLOW;
+                            fontColor = COLORS.BLACK;
+                        }
+                    }
+
+                    else if (tableType === "performance") {
+
+                        // Header
+                        if (isHeader) {
+
+                            backgroundColor = COLORS.PURPLE;
+                            fontColor = COLORS.WHITE;
+                        }
+
+                        // Data row - Category Wise Color
+                        else {
+
+                            var performanceCells = htmlRow.querySelectorAll(":scope > td");
+
+                            var performanceCategory = "";
+
+                            // Category is the 6th column
+                            if (performanceCells.length >= 6) {
+                                performanceCategory = performanceCells[5].innerText.trim();
+                            }
+
+                            // Apply category-wise color
+                            if (performanceCategory === "A+") {
+                                backgroundColor = COLORS.A_PLUS;
+                                fontColor = COLORS.WHITE;
+
+                            }
+                            else if (performanceCategory === "A") {
+                                backgroundColor = COLORS.A;
+                                fontColor = COLORS.BLACK;
+
+                            }
+                            else if (performanceCategory === "B") {
+                                backgroundColor = COLORS.B;
+                                fontColor = COLORS.BLACK;
+                            }
+                            else if (performanceCategory === "C") {
+                                backgroundColor = COLORS.C;
+                                fontColor = COLORS.BLACK;
+                            }
+                            else if (performanceCategory === "D") {
+                                backgroundColor = COLORS.D;
+                                fontColor = COLORS.WHITE;
+                            }
+                            else {
+                                backgroundColor = COLORS.WHITE;
+                                fontColor = COLORS.BLACK;
+                            }
+                        }
+                    }
+
+                    else if (tableType === "criteria") {
+
+                        // Header
+                        if (isHeader) {
+                            backgroundColor = COLORS.PURPLE;
+                            fontColor = COLORS.WHITE;
+                        }
+
+                        else {
+                            var rowCells = htmlRow.querySelectorAll(":scope > td");
+
+                            var category = "";
+
+                            if (rowCells.length >= 3) {
+                                category = rowCells[2].innerText.trim();
+                            }
+
+                            backgroundColor = getCriteriaColor(category);
+                            if (category === "D") {
+                                fontColor = COLORS.WHITE;
+                            }
+                        }
+                    }
+
+                    applyCellStyle(excelCell, backgroundColor, fontColor, isHeader);
+
+                    if (rowspan > 1 || colspan > 1) {
+                        worksheet.mergeCells(startExcelRow, startColumn, endExcelRow, endColumn);
+                    }
+
+                    for (var r = startExcelRow; r <= endExcelRow; r++) {
+                        for (var c = startColumn; c <= endColumn; c++) {
+                            occupied[r + "_" + c] = true;
+                        }
+                    }
+                    currentColumn = endColumn + 1;
+                });
+
+                worksheet.getRow(currentRow).height = 32;
+                currentRow++;
+            });
+
+            return currentRow;
+        }
+
+        var heading = report.querySelector("h3");
+        var currentRow = 1;
+
+        if (heading) {
+            var headingCell = worksheet.getCell(currentRow, 1);
+            headingCell.value = heading.innerText.trim();
+            headingCell.font = { name: "Calibri", size: 16, bold: true, color: { argb: COLORS.BLACK } };
+            headingCell.alignment = { horizontal: "center", vertical: "middle" };
+            worksheet.mergeCells(currentRow, 1, currentRow, 8);
+            worksheet.getRow(currentRow).height = 30;
+            currentRow += 2;
+        }
+
+        var detailTable = report.querySelector("#PLDBKPIReportTable");
+
+        if (detailTable) {
+            currentRow = addTableToExcel(detailTable, currentRow, "detail");
+            currentRow += 1;
+        }
+
+        var performanceTable = report.querySelector("#KPIPerformanceTable");
+
+        if (performanceTable) {
+            currentRow = addTableToExcel(performanceTable, currentRow, "performance");
+            currentRow += 1;
+        }
+
+        var criteriaTable = report.querySelector("#KPICriteriaTable");
+
+        if (criteriaTable) {
+            currentRow = addTableToExcel(criteriaTable, currentRow, "criteria");
+        }
+
+        worksheet.getColumn(1).width = 10;
+        worksheet.getColumn(2).width = 38;
+        worksheet.getColumn(3).width = 48;
+        worksheet.getColumn(4).width = 28;
+        worksheet.getColumn(5).width = 20;
+        worksheet.getColumn(6).width = 20;
+        worksheet.getColumn(7).width = 20;
+        worksheet.getColumn(8).width = 20;
+
+        worksheet.views = [{ state: "frozen", ySplit: 3, showGridLines: false }];
+        var buffer = await workbook.xlsx.writeBuffer();
+        var blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+        var url = window.URL.createObjectURL(blob);
+        var link = document.createElement("a");
+        link.href = url;
+        link.download = "KPI_Report.xlsx";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+    }
+
+    async function ExportPLDBKPIReportToPDF() {
+
+        var report = document.getElementById("PLDBKPIReportTable");
+
+        if (!report) {
+            alert("Report not found.");
+            return;
+        }
+
+        if (typeof html2canvas === "undefined") {
+            alert("html2canvas library is not loaded.");
+            return;
+        }
+
+        if (typeof window.jspdf === "undefined") {
+            alert("jsPDF library is not loaded.");
+            return;
+        }
+
+        try {
+
+            /*
+             * ==========================================
+             * WAIT FOR FONTS
+             * ==========================================
+             */
+
+            if (document.fonts && document.fonts.ready) {
+                await document.fonts.ready;
+            }
+
+
+            /*
+             * ==========================================
+             * REPORT DIMENSIONS
+             * ==========================================
+             */
+
+            var reportWidth = report.scrollWidth;
+            var reportHeight = report.scrollHeight;
+
+
+            /*
+             * ==========================================
+             * CREATE CANVAS
+             * ==========================================
+             */
+
+            var canvas = await html2canvas(report, {
+
+                scale: 2,
+
+                useCORS: true,
+
+                allowTaint: false,
+
+                backgroundColor: "#ffffff",
+
+                logging: false,
+
+                width: reportWidth,
+
+                height: reportHeight,
+
+                windowWidth: reportWidth,
+
+                windowHeight: reportHeight,
+
+                scrollX: 0,
+
+                scrollY: 0,
+
+                onclone: function (clonedDocument) {
+
+                    var clonedReport =
+                        clonedDocument.getElementById(
+                            "PLDBKPIReportTable"
+                        );
+
+                    if (!clonedReport) {
+                        return;
+                    }
+
+
+                    /*
+                     * ==========================================
+                     * FORCE FULL WIDTH
+                     * ==========================================
+                     */
+
+                    clonedReport.style.width =
+                        reportWidth + "px";
+
+                    clonedReport.style.maxWidth =
+                        "none";
+
+                    clonedReport.style.minWidth =
+                        reportWidth + "px";
+
+                    clonedReport.style.margin =
+                        "0";
+
+                    clonedReport.style.boxSizing =
+                        "border-box";
+
+
+                    /*
+                     * ==========================================
+                     * REMOVE SCROLL
+                     * ==========================================
+                     */
+
+                    clonedReport.style.overflow =
+                        "visible";
+
+
+                    /*
+                     * ==========================================
+                     * FORCE TABLE FULL WIDTH
+                     * ==========================================
+                     */
+
+                    clonedReport.style.tableLayout =
+                        "auto";
+
+
+                    /*
+                     * ==========================================
+                     * RIGHT ALIGN NUMERIC COLUMNS
+                     * ==========================================
+                     *
+                     * Columns:
+                     *
+                     * TARGET
+                     * ACHIEVEMENT
+                     * WEIGHTED MARKS
+                     * MARKS OBTAINED
+                     * SUB TOTAL
+                     *
+                     */
+
+                    clonedReport
+                        .querySelectorAll("tbody tr")
+                        .forEach(function (row) {
+
+                            var cells =
+                                row.querySelectorAll(
+                                    ":scope > td"
+                                );
+
+                            cells.forEach(function (cell, index) {
+
+                                /*
+                                 * Keep S.NO. centered
+                                 */
+
+                                if (index === 0) {
+
+                                    cell.style.textAlign =
+                                        "center";
+
+                                }
+
+                                /*
+                                 * Numeric columns
+                                 */
+
+                                else if (index >= 2) {
+
+                                    cell.style.textAlign =
+                                        "right";
+
+                                    cell.style.paddingRight =
+                                        "5px";
+                                }
+
+                            });
+
+                        });
+
+
+                    /*
+                     * ==========================================
+                     * HEADER CENTER ALIGN
+                     * ==========================================
+                     */
+
+                    clonedReport
+                        .querySelectorAll("th")
+                        .forEach(function (th) {
+
+                            th.style.textAlign =
+                                "center";
+
+                            th.style.verticalAlign =
+                                "middle";
+                        });
+
+
+                    /*
+                     * ==========================================
+                     * PREVENT TABLE FROM SHRINKING
+                     * ==========================================
+                     */
+
+                    clonedReport
+                        .querySelectorAll("td, th")
+                        .forEach(function (cell) {
+
+                            cell.style.boxSizing =
+                                "border-box";
+
+                        });
+
+                }
+
+            });
+
+
+            /*
+             * ==========================================
+             * CREATE A4 LANDSCAPE PDF
+             * ==========================================
+             */
+
+            var { jsPDF } = window.jspdf;
+
+            var pdf = new jsPDF({
+
+                orientation: "landscape",
+
+                unit: "mm",
+
+                format: "a4",
+
+                compress: true
+
+            });
+
+
+            /*
+             * ==========================================
+             * A4 LANDSCAPE
+             * ==========================================
+             */
+
+            var pageWidth = 297;
+
+            var pageHeight = 210;
+
+            var margin = 5;
+
+
+            var availableWidth =
+                pageWidth - (margin * 2);
+
+            var availableHeight =
+                pageHeight - (margin * 2);
+
+
+            /*
+             * ==========================================
+             * CANVAS DIMENSIONS
+             * ==========================================
+             */
+
+            var imageWidth =
+                canvas.width;
+
+            var imageHeight =
+                canvas.height;
+
+
+            /*
+             * ==========================================
+             * FIT COMPLETE REPORT INTO ONE PAGE
+             * ==========================================
+             */
+
+            var widthRatio =
+                availableWidth / imageWidth;
+
+            var heightRatio =
+                availableHeight / imageHeight;
+
+
+            var fitRatio =
+                Math.min(
+                    widthRatio,
+                    heightRatio
+                );
+
+
+            /*
+             * ==========================================
+             * FINAL PDF IMAGE SIZE
+             * ==========================================
+             */
+
+            var pdfImageWidth =
+                imageWidth * fitRatio;
+
+            var pdfImageHeight =
+                imageHeight * fitRatio;
+
+
+            /*
+             * ==========================================
+             * CENTER IMAGE
+             * ==========================================
+             */
+
+            var x =
+                (pageWidth - pdfImageWidth) / 2;
+
+            var y =
+                (pageHeight - pdfImageHeight) / 2;
+
+
+            /*
+             * ==========================================
+             * CONVERT TO IMAGE
+             * ==========================================
+             */
+
+            var pageImage =
+                canvas.toDataURL(
+                    "image/jpeg",
+                    0.95
+                );
+
+
+            /*
+             * ==========================================
+             * ADD TO PDF
+             * ==========================================
+             */
+
+            pdf.addImage(
+
+                pageImage,
+
+                "JPEG",
+
+                x,
+
+                y,
+
+                pdfImageWidth,
+
+                pdfImageHeight
+
+            );
+
+
+            /*
+             * ==========================================
+             * SAVE PDF
+             * ==========================================
+             */
+
+            pdf.save(
+                "PLDB_KPI_Report.pdf"
+            );
+
+        }
+        catch (error) {
+
+            console.error(
+                "PDF Export Error:",
+                error
+            );
+
+            alert(
+                "Unable to generate PDF."
+            );
+        }
+    }
+</script>
+
+<script type="text/javascript">
+    var tableToExcel = (function () {
+        var uri = 'data:application/vnd.ms-excel;base64,'
+            , template = '<html xmlns: o="urn:schemas-microsoft-com:office:office" xmlns: x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x: ExcelWorkbook><x: ExcelWorksheets><x: ExcelWorksheet><x: Name>{worksheet}</x: Name><x: WorksheetOptions><x: DisplayGridlines /></x: WorksheetOptions></x: ExcelWorksheet></x: ExcelWorksheets></x: ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>'
+            , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) }
+            , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
+        return function (table, name) {
+            if (!table.nodeType) table = document.getElementById(table)
+            var ctx = { worksheet: name || 'Worksheet', table: table.innerHTML }
+            window.location.href = uri + base64(format(template, ctx))
+        }
+    })()
+</script>
+
+<style>
+    .inputapi-transliterate-indic-suggestion-menu {
+        z-index: 99999 !important;
+        display: block;
+    }
+
+    .TpInptCrd {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 15px;
+    }
+
+    .no-left-border {
+        border-left: none !important;
+    }
+
+    @@media (max-width: 1200px) {
+        .TplnptCrd {
+            grid-template-columns: repeat(4, 1fr);
+        }
+    }
+
+    @@media (max-width: 992px) {
+        .TplnptCrd {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+
+    @@media (max-width: 767px) {
+        .TplnptCrd {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .TplnptCrd {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* KPI Detail Report - Excel Style */
+    .kpi-detail-table {
+        border-collapse: collapse !important;
+        width: 100%;
+    }
+
+        /* Header */
+        .kpi-detail-table thead th {
+            background-color: #0070C0 !important;
+            color: #FFFFFF !important;
+            font-weight: bold !important;
+            text-align: center;
+            vertical-align: middle !important;
+            border: 1px solid #1F4E78 !important;
+        }
+
+        /* Data */
+        .kpi-detail-table tbody tr:not(.bg-info) td,
+        .kpi-detail-table tbody tr:not(.bg-info) th {
+            background-color: #FFD966 !important;
+            border: 1px solid #1F4E78 !important;
+            vertical-align: middle !important;
+        }
+
+        /* Total */
+        .kpi-detail-table tbody tr.bg-info td,
+        .kpi-detail-table tbody tr.bg-info th {
+            background-color: #0070C0 !important;
+            color: #FFFFFF !important;
+            font-weight: bold !important;
+            border: 1px solid #1F4E78 !important;
+        }
+
+    .unsatisfactory-row {
+        background: #c11d1c !important;
+    }
+
+    .average-row {
+        background: #fdc100 !important;
+    }
+
+    .good-row {
+        background: #ffff01 !important;
+    }
+
+    .very-good-row {
+        background: #92d051 !important;
+    }
+
+    .outstanding-row {
+        background: #7d9631 !important;
+    }
+
+    .tble-main-row {
+        display: flex;
+        align-items: start;
+        gap: 20px;
+    }
+</style>
+<div ng-app="SocietyKPIPLDBReportModule" ng-controller="SocietKPIPLDBReportECont" ng-cloak="">
+    <div>
+        <div class="col-md-12">
+            <h3 class="citizen-dash-head ng-binding" style="margin-top:0px;">KPI PLDB Category Report List</h3>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#">  {{translation.Home}}</a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;"> {{translation.New}} </span>
+                        <i class="fa fa-angle-right"> </i>
+                        <span style="margin: 0 5px;"> KPI PLDB Category Report List </span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div style="margin-top:30px;padding-top:30px">
+            <div class="col-md-12">
+                <div class="citizen-dash-head" style="overflow: hidden;">
+                    <div class="table-dropdown" id="search-filter" style="margin-bottom: 5px;">
+                        <div class="col-lg-12" style="margin-bottom: 5px; padding-left: 0;">
+                            <input type="hidden" id="hdnRoleId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).RoleId)" />
+                            <input type="hidden" id="hdnDistrictId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DistrictId)" />
+                            <input type="hidden" id="hdnPldbId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).PLDBId)" />
+                            <input type="hidden" id="hdnPldbBranchId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).PLDBBrancchId)" />
+                            <input type="hidden" id="hdnLevelId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).LevelId)" />
+
+                            <div class="row">
+
+                                <div class="col-md-2 form-group" ng-show="ShowSummary">
+                                    <label for="search"> {{translation.FincialYearHeading}}: </label>
+                                    <select ng-model="FinYear" class="form-control" ng-init="FinYear='0'">
+                                        <option value="0">--Select--</option>
+                                        <option value="{{FinYear.FinYearId}}" ng-repeat="FinYear in FinancialYearList">
+                                            {{FinYear.FinYearName}}
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-2 form-group" ng-show="ShowSummary">
+                                    <label for="search"> Month: </label>
+                                    <select class="form-control" ng-model="Month">
+                                        <option value="">--Month--</option>
+                                        <option value="1">January</option>
+                                        <option value="2">February</option>
+                                        <option value="3">March</option>
+                                        <option value="4">April</option>
+                                        <option value="5">May</option>
+                                        <option value="6">June</option>
+                                        <option value="7">July</option>
+                                        <option value="8">August</option>
+                                        <option value="9">September</option>
+                                        <option value="10">October</option>
+                                        <option value="11">November</option>
+                                        <option value="12">December</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-2 form-group">
+                                    <label for=""> KPI Area </label>
+                                    <select name="SelectedKPIArea_Id" ng-model="SelectedKPIAreaId" id="Pldb_Id" class="form-control" ng-init="SelectedKPIAreaId='0'">
+                                        <option value="0" disabled> --चुनें-- </option>
+                                        <option ng-repeat="item in KPIAreaList | orderBy:'PLDBName' track by item.KPIArea" value="{{item.KPIAreaId}}">
+                                            {{item.KPIArea}}
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label>&nbsp;</label><br>
+                                    <button type="button" ng-show="ShowSummary" ng-click="SearchPLDBReport()" class="btn btn-primary dev-btn ng-binding text-center">Search</button>
+                                    <button type="button" ng-show="ShowSummary" ng-click="ClearSearch()" class="btn btn-primary dev-btn ng-binding text-center">Clear</button>
+                                    <button type="button" onclick="tableToExcel('PLDBKPIReportTable', 'PLDB Report Category Wise Detail');" class="btn btn-primary dev-btn text-center">
+                                        Excel Export
+                                    </button>
+                                    <button type="button" onclick="ExportPLDBKPIReportToPDF();" class="btn btn-primary dev-btn text-center">
+                                        PDF Export
+                                    </button>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-center mt-3">
+                        <button type="button" ng-show="ShowDetails" ng-click="BackToSummary()" class="btn btn-primary dev-btn ng-binding">Back</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="se-pre-con"></div>
+
+        <!-- PLDB KPI Report -->
+        <div class="col-md-12">
+            <div class="citizen-dash-head">
+                <div style="overflow-x:auto;">
+                    <table class="table table-bordered table-striped" id="PLDBKPIReportTable" ng-if="ShowPLDBReport">
+                        <thead>
+
+                            <!-- ROW 1 -->
+                            <tr>
+                                <th style="background:#1899a0;color:#fff;" rowspan="3">  S.NO. </th>
+                                <th style="background:#1899a0;color:#fff;" rowspan="3">  PLDB </th>
+                                <th colspan="{{KPIIndicators.length * 4}}" style="text-align:center;background:#1899a0;color:#fff;"> {{SelectedKPIAreaName}} </th>
+                                <th colspan="3" style="text-align:center;background:#1899a0;color:#fff;">  SUB TOTAL </th>
+                            </tr>
+
+                            <!-- ROW 2 -->
+                            <tr>
+                                <th ng-repeat="indicator in KPIIndicators" colspan="4" style="text-align:center;background:#1899a0;color:#fff;">
+                                    {{indicator.KPIIndicators}}
+                                </th>
+                                <th rowspan="2" style="text-align:center;background:#1899a0;color:#fff;"> WEIGHTED<br />MARKS </th>
+                                <th rowspan="2" style="text-align:center;background:#1899a0;color:#fff;"> MARKS<br />OBTAINED </th>
+                                <th rowspan="2" style="text-align:center;background:#1899a0;color:#fff;"> RANK </th>
+                            </tr>
+
+                            <!-- ROW 3 -->
+                            <tr>
+                                <!-- KPI INDICATOR SUB-COLUMNS -->
+                                <th ng-repeat-start="indicator in KPIIndicators" style="text-align:center;background:#1899a0;color:#fff;">  TARGET </th>
+                                <th style="text-align:center;background:#1899a0;color:#fff;"> ACHIEVEMENT </th>
+                                <th style="text-align:center;background:#1899a0;color:#fff;">  WEIGHTED MARKS </th>
+                                <th ng-repeat-end style="text-align:center;background:#1899a0;color:#fff;">  MARKS OBTAINED </th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+                            <tr ng-repeat="pldb in PLDBReportData">
+                                <td class="text-center">  {{$index + 1}} </td>
+                                <td> {{pldb.PLDBName}}  </td>
+                                <td ng-repeat-start="indicator in KPIIndicators" class="text-center">
+                                    <span colspan="5" ng-if="indicator.KPIIndicatorsId == 97"> {{getKPIData(pldb, indicator.KPIIndicatorsId).inputtype}} </span>
+                                    <span ng-if="indicator.KPIIndicatorsId != 97"> {{getKPIData(pldb, indicator.KPIIndicatorsId).Target}}  </span>
+                                </td>
+                                <td class="text-center">
+                                    <span colspan="5" ng-if="indicator.KPIIndicatorsId == 97"> - </span>
+                                    <span ng-if="indicator.KPIIndicatorsId != 97"> {{getKPIData(pldb, indicator.KPIIndicatorsId).Achievement}} </span>
+                                </td>
+                                <td class="text-center"> {{getKPIData(pldb, indicator.KPIIndicatorsId).WeightedMarks}} </td>
+                                <td ng-repeat-end class="text-center">  {{getKPIData(pldb, indicator.KPIIndicatorsId).MarksObtained}} </td>
+                                <td class="text-center"> {{pldb.SubTotalWeightedMarks}} </td>
+                                <td class="text-center"> {{pldb.SubTotalMarksObtained}}  </td>
+                                <td class="text-center">  {{pldb.SubTotalRank}}  </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

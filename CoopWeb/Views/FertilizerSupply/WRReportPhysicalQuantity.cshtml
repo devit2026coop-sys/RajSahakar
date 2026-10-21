@@ -1,0 +1,283 @@
+﻿<script src="~/Scripts/AngularFramework/WRReportPhysicalQuantity.js"></script>
+<script type="text/javascript" src="~/Scripts/jqueryuitimepicker.js"></script>
+<link href="~/Content/Stylesheets/jqueryuitimepicker.css" rel="stylesheet" />
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $('.SetCalender').datepicker({
+            showOn: "both",
+            changeMonth: true,
+            buttonImage: "../images/calender.png",
+            changeYear: true,
+            dateFormat: "dd/mm/yy",
+            //minDate: (new Date()).getDate() + '/' + ((new Date()).getMonth()+1) + '/' + ((new Date()).getFullYear()).toString(),
+            //defaultDate: (new Date()).getDate() + '/' + ((new Date()).getMonth() + 1) + '/' + ((new Date()).getFullYear()).toString(),
+        });
+        var dd = new Date().getDate()
+        var mm = new Date().getMonth() + 1;
+        var yy = new Date().getFullYear();
+
+        var toDaydate = (dd.toString().length == 1 ? ("0" + dd.toString()) : dd.toString()) + "/" + (mm.toString().length == 1 ? ("0" + mm.toString()) : mm.toString()) + "/" + yy.toString();
+        $("#txtToDate").val(toDaydate);
+
+    });
+</script>
+
+<style type="text/css">
+    body {
+        font-family: Arial;
+        font-size: 10pt;
+    }
+
+    /*table {
+        border: 1px solid #ccc;
+        border-collapse: collapse;
+    }
+
+        table th {
+            background-color: #F7F7F7;
+            color: #333;
+            font-weight: bold;
+        }
+
+        table th, table td {
+            padding: 5px;
+            border: 1px solid #ccc;
+        }*/
+
+    .NewMemberdob input {
+        float: left !important;
+        width: 90% !important;
+    }
+
+    .NewMemberdob button {
+        float: left;
+    }
+
+    .notValid {
+        border: solid 1px red !important
+    }
+
+    .NewRequestList td {
+        color: black !important;
+    }
+
+    .rowdeleteBtn {
+        color: #fff !important;
+        font-weight: bold !important;
+        font-size: 12px !important;
+    }
+
+    .margin-Top20 {
+        margin-top: 20px;
+    }
+</style>
+<div ng-app="WRReportMod" ng-controller="WRReportCont">
+    <div class="col-md-12">
+        <h3 class="h3heading citizen-dash-head">WR Physical Quantity Report</h3>
+    </div>
+
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="devpage-breadcrumb">
+            <ul class="page-breadcrumb">
+                <li class="dev-page-br">
+                    <i class="fa fa-home"> </i>
+                    <a href="#"> {{translation.MIS}}  </a>
+                    <i class="fa fa-angle-right"> </i>
+                </li>
+                <li style="float: left">
+                    <span style="margin: 0 5px;">WR Physical Quantity Report</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="table-responsive citizen-dash-head">
+            <div>
+                <div class="table-dropdown" id="search-filter">
+                    <div class="col-md-2 margin-Top20">
+                        <label for="search" class="ng-binding">{{translation.FincialYearHeading}}:</label>
+                        <select name="fy" id="ddFy"  style="" class="form-control" ng-model="Filter.FinancialYear" ng-init="Filter.FinancialYear=''" >
+                            <option value="">{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in FinancialYearList" value="{{item.FIN_YEAR_NAME}}">
+                                {{item.FIN_YEAR_NAME}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 margin-Top20">
+                        <label>Commodity Type</label>
+                        <select name="commoditytype" ng-model="Filter.commoditytype" class="form-control" ng-init="Filter.commoditytype=''">
+                            <option value="">{{translation.SelectOption}}</option>
+                            <option value="1">खरीफ</option>
+                            <option value="0">रबी </option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4 NewMemberdob margin-Top20">
+                        <label>
+                            {{translation.ToDate}}
+                        </label>
+                        <input id="txtToDate" name="ToDate" disabled="disabled" class="form-control SetCalender" ng-model="Filter.ToDate" placeholder="{{translation.ToDate}}" onkeypress="return event.charCode >= 48 &amp;&amp; event.charCode <= 57" autocomplete="off">
+                    </div>
+                    <div class="col-md-4  margin-Top20">
+                        <label>&nbsp;</label><br>
+                        <button type="button" ng-click="searchRequest(SearchData)" class="btn btn-primary dev-btn ng-binding">{{translation.Search}}</button>
+                        <button type="button" ng-click="ClearSearch()" class="btn btn-primary dev-btn ng-binding">{{translation.Clear}}</button>
+                    </div>
+                </div>
+                <table id="tblExport" class="table devtable" style="border:1px solid rgb(222, 221, 221); float: left;">
+                  
+                    <thead>
+                        <tr>
+                            <th>
+                                1
+                            </th>
+                            <th>2</th>
+                            <th>2</th>
+                            <th>4</th>
+                            <th>
+                                5
+                            </th>
+                            <th>
+                                6
+                            </th>
+                            <th>
+                                7
+                            </th>
+                            <th>
+                                8
+                            </th>
+                            <th>9</th>
+                            <th>10</th>
+                            <th>11</th>
+                            <th>12</th>
+                            <th>13</th>
+
+                        </tr>
+                        <tr>
+                            <th>
+                                S.No
+                            </th>
+                            <th>District Name</th>
+                            <th>Name Of Warehouse</th>
+                            <th>Commodity </th>
+                            <th>
+                                No of Physical WRs issued Till the Date
+                            </th>
+                            <th>
+                                Physical Quantity in (MTs) Deposited  till the Date
+                            </th>
+                            <th>
+                                Value in crore rupees of quantity in (Col. 6)
+                            </th>
+                            <th>
+                                No of E-WRs issued Till  the Date
+                            </th>
+                            <th>Quantity(in MTs)</th>
+                            <th>Value (in Crore rupees) of Quantity in (Col. 9)</th>
+                            <th>Difference of Physical WRs issued & E-WRs Issued in No. Till  the Date(Col.5- Col.8)</th>
+                            <th>Diffrence in Quantity (in MTs)(Col.6 - Col.9)</th>
+                            <th>Differnce (in Crore rupees) (Col.7- Col.10)</th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="item in WRDetails">
+                            <td>{{$index+1}}</td>
+                            <td>
+                                {{_language =='en-us' ?  item.DISTRICT_ENG : item.DISTRICT_MANGAL}}
+                            </td>
+
+                            <td>
+                                {{_language =='en-us' ?  item.WareHouseName : item.WareHouseName}}
+                            </td>
+                            <td>
+                                {{_language =='en-us' ?  item.CommodityName : item.CommodityName}}
+                            </td>
+
+                            <td style="text-align:right">
+                                {{item.TotalWR}}
+                            </td>
+                            <td style="text-align:right">
+                                {{item.PhysicalQuantity}}
+                            </td>
+                            <td style="text-align:right">
+                                {{ item.PhysicalTotalValue}}
+                            </td>
+                            <td style="text-align:right">
+                                {{item.EWR}}
+                            </td>
+                            <td style="text-align:right">{{item.EWRQuantity}}</td>
+                            <td style="text-align:right">{{item.EWRValue}}</td>
+                            <td style="text-align:right">{{item.TotalWREWR}}</td>
+
+                            <td style="text-align:right">{{item.PhysicalQuantityEWRValue}}</td>
+                            <td style="text-align:right">{{item.PhysicalTotalValueEWRValue}}</td>
+                        </tr>
+                        <tr  ng-if="WRDetails.length>0">
+                            <th colspan="4" style="text-align:right">Total</th>
+                            <th style="text-align:right">
+                                {{TotalWR}}
+                            </th>
+                            <th style="text-align:right">
+                                {{PhysicalQuantity}}
+                            </th>
+                            <th style="text-align:right">
+                                {{PhysicalTotalValue}}
+                            </th>
+                            <th style="text-align:right">
+                                {{EWR}}
+                            </th>
+                            <th style="text-align:right">{{EWRQuantity}}</th>
+                            <th style="text-align:right">{{EWRValue}}</th>
+                            <th style="text-align:right">{{TotalWREWR}}</th>
+
+                            <th style="text-align:right">{{PhysicalQuantityEWRValue}}</th>
+                            <th style="text-align:right">{{PhysicalTotalValueEWRValue}}</th>
+                           </tr>
+                    </tbody>
+                   
+                </table>
+
+                <div class="col-md-12">
+                    <div ng-if="DataPagingDetails.TotalPages>1" class="dataTables_paginate paging_simple_numbers" id="dataTables-example_paginate">
+                        <div class="dataTables_info" id="dataTables-example_info" role="status" aria-live="polite">
+                            Total Records: {{DataPagingDetails.TotalRecords}}
+                        </div>
+                        <ul class="pagination pagination_1" style="margin-left: 10px !important;">
+                            <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« First</span></li>
+                            <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« Previous</span></li>
+
+                            <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest('1',SearchData)" style="cursor: pointer;">
+                                <span>«First</span>
+                            </li>
+                            <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest(DataPagingDetails.PageNumber-1,SearchData)" style="cursor:pointer;">
+                                <span>« Previous</span>
+                            </li>
+                            <li class="{{n==DataPagingDetails.PageNumber?'active':''}}" style="{{n==DataPagingDetails.PageNumber?'':'cursor: pointer'}}" ng-repeat="n in PagingRange(DataPagingDetails.StartPageNumber,DataPagingDetails.EndPageNumber,DataPagingDetails.TotalPages)" ng-click="pageRequest(n,SearchData)"><span>{{n}}</span></li>
+                            <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Next</span></li>
+                            <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Last</span></li>
+                            <li ng-if="DataPagingDetails.PageNumber!= DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.PageNumber+1,SearchData)" style="cursor:pointer;">
+                                <span>Next »</span>
+                            </li>
+                            <li ng-if="DataPagingDetails.PageNumber != DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.TotalPages,SearchData)" style="cursor:pointer;">
+                                <span>Last »</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <input  type="button" id="btnExport" class="btn btn-primary dev-btn" style="" ng-click="ExportData()" value="Export" />
+
+            </div>
+        </div>
+        <input type="hidden" value="@ViewBag.FromDate" id="fromdateserver" />
+        <input type="hidden" value="@ViewBag.TodateDate" id="todateserver" />
+        <input type="hidden" value="@ViewBag.MinDate" id="mindateserver" />
+    </div>
+</div>
+
+
+

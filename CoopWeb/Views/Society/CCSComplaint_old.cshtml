@@ -1,0 +1,616 @@
+﻿<script src="~/Scripts/AngularFramework/CCSComplaintLetter.js"></script>
+<script src="~/Scripts/jquery-1.11.3.min.js"></script>
+<script type="text/javascript" src="~/Scripts/jqueryuitimepicker.js"></script>
+<link href="~/Content/Stylesheets/jqueryuitimepicker.css" rel="stylesheet" />
+<style>
+    .inputapi-transliterate-indic-suggestion-menu {
+        z-index: 99999 !important;
+        display: block;
+    }
+</style>
+
+<style type="text/css">
+    .modal-ku {
+        width: 750px;
+        margin: auto;
+    }
+    body {
+        font-family: Arial;
+        font-size: 10pt;
+    }
+
+    .ui-timepicker-table th.periods {
+        padding: 0.1em !important;
+        width: 2.2em !important;
+    }
+
+    .ui-timepicker-table td span {
+        display: block !important;
+        padding: 0.2em 0.3em 0.2em 0.5em !important;
+        width: 1.2em !important;
+        text-align: right !important;
+        text-decoration: none !important;
+    }
+    /* anchors for clickable cells */
+    .ui-timepicker-table td a {
+        display: block !important;
+        padding: 0.2em 0.3em 0.2em 0.5em !important;
+        width: 2.2em !important;
+        cursor: pointer !important;
+        text-align: right !important;
+        text-decoration: none !important;
+    }
+    /*table {
+        border: 1px solid #ccc;
+        border-collapse: collapse;
+    }
+
+        table th {
+            background-color: #F7F7F7;
+            color: #333;
+            font-weight: bold;
+        }
+
+        table th, table td {
+            padding: 5px;
+            border: 1px solid #ccc;
+        }*/
+
+    .datecolumn input {
+        float: left;
+        width: 90%;
+    }
+
+    .datecolumn button {
+        float: left;
+    }
+
+    .notValid {
+        border: solid 1px red !important
+    }
+
+    .NewRequestList td {
+        color: black !important;
+    }
+
+    .rowdeleteBtn {
+        color: #fff !important;
+        font-weight: bold !important;
+        font-size: 12px !important;
+    }
+
+    .margin-Top20 {
+        margin-top: 20px;
+    }
+</style>
+
+<script type="text/javascript">
+
+    function ValidateAlpha(evt) {
+        var keyCode = (evt.which) ? evt.which : evt.keyCode
+        if ((keyCode < 65 || keyCode > 90) && (keyCode < 97 || keyCode > 123) && keyCode != 32)
+
+            return false;
+        return true;
+    };
+    function ValidateFloat(th, e) {
+        if (isNaN(th.value + "" + String.fromCharCode(e.charCode)))
+            return false;
+        return true;
+    }
+    function ValidateFloat(th, e) {
+        if (isNaN(th.value + "" + String.fromCharCode(e.charCode)))
+            return false;
+        return true;
+    }
+
+
+
+    $(document).ready(function () {
+
+        $('.Fromdate').datepicker({
+            showOn: "both",
+            changeMonth: true,
+            buttonImage: "../images/calender.png",
+            changeYear: true,
+            dateFormat: "dd/mm/yy",
+            //minDate: (new Date()).getDate() + '/' + ((new Date()).getMonth()+1) + '/' + ((new Date()).getFullYear()).toString(),
+            //defaultDate: (new Date()).getDate() + '/' + ((new Date()).getMonth() + 1) + '/' + ((new Date()).getFullYear()).toString(),
+        });
+
+        $('.CCSDate').datepicker({
+            showOn: "both",
+            changeMonth: true,
+            buttonImage: "../images/calender.png",
+            changeYear: true,
+            dateFormat: "dd/mm/yy",
+            minDate: (new Date()).getDate() + '/' + ((new Date()).getMonth() + 1) + '/' + ((new Date()).getFullYear()).toString(),
+            //defaultDate: (new Date()).getDate() + '/' + ((new Date()).getMonth() + 1) + '/' + ((new Date()).getFullYear()).toString(),
+        });
+
+        $('.ccstimepicker').timepicker({
+            showOn: "both",
+            buttonImage: "../images/Time.png",
+            buttonImageOnly: true,
+            showPeriod: true,
+            showLeadingZero: true
+        });
+
+
+    });
+</script>
+
+<div ng-app="CCSComplainMod" ng-controller="CCSComplainCnt">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <h3 class="citizen-dash-head">{{translation.CCSComplaintLetter}} </h3>
+    </div>
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="devpage-breadcrumb">
+            <ul class="page-breadcrumb">
+                <li class="dev-page-br">
+                    <i class="fa fa-home"> </i>
+                    <a href="../Citizen/Index"> {{translation.Home}} </a>
+                    <i class="fa fa-angle-right"> </i>
+                </li>
+                <li style="float: left">
+                    <span style="margin: 0 5px;"> {{translation.CCSComplaintLetter}} </span>
+                </li>
+            </ul>
+        </div>
+    </div>
+    @*MEMBERS*@
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="table-responsive citizen-dash-head">
+            <div ng-show="!showPriView">
+                <div class="table-dropdown" id="search-filter">
+                    @*<div class="col-lg-2">
+                        <label for="search" class="ng-binding">{{translation.Warehouse}}:</label>
+                        <select name="wharehouse_id" class="form-control ng-pristine ng-valid ng-not-empty ng-touched" ng-model="Filter.Wharehouse_Id" ng-init="Filter.Wharehouse_Id=''" ng-change="searchRequest(GetCCSComplaint)" ">
+                            <option value="" selected="selected">{{translation.SelectOption}}</option>
+                            <option ng-repeat="itm in WarehouseList" value="{{itm.WarehousId}}">
+                                {{_language =='en-us' ?  itm.WarehousNameEn : itm.WarehousNameHi}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-lg-2">
+                        <label for="search" class="ng-binding">{{translation.Commodity}}:</label>
+                        <select name="Item_Kind" class="form-control ng-pristine ng-valid ng-not-empty ng-touched" ng-model="Filter.Item_Kind" ng-change="searchRequest(GetCCSComplaint)" ng-init="Filter.Item_Kind=''">
+                            <option value="" selected="selected">{{translation.SelectOption}}</option>
+                            <option ng-repeat="itm in ItemList" value="{{itm.CommodityId}}">
+                                {{_language =='en-us' ?  itm.CommodityNameEn : itm.CommodityNameHi}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-lg-2">
+                        <label for="search" class="ng-binding">{{translation.RegionalOffice}}:</label>
+                        <select name="RajfedROId " class="form-control ng-pristine ng-valid ng-not-empty ng-touched" ng-model="Filter.RegionalOffice" ng-change="searchRequest(GetCCSComplaint)" ng-init="Filter.RegionalOffice=''">
+                            <option value="" selected="selected">{{translation.SelectOption}}</option>
+                            <option ng-repeat="itm in ROList" value="{{itm.RajfedROId}}">
+                                {{_language =='en-us' ?  itm.RONameEn : itm.RONameHn}}
+                            </option>
+                        </select>
+                    </div>*@
+
+                    <div class="col-md-2">
+                        <label>
+                            {{translation.Search}}
+                        </label>
+                        <input id="txtSearch" name="SearchText" class="form-control" ng-model="Filter.SearchText" placeholder="{{translation.filttertext}}">
+                    </div>
+
+
+                    <div class="col-md-2 datecolumn">
+                        <label>
+                            {{translation.FromDate}}
+                        </label>
+                        <input id="txtFromDate" name="FromDate" disabled="disabled" class="form-control Fromdate" ng-model="Filter.FromDate" placeholder="{{translation.FromDate}}" onkeypress="return event.charCode >= 48 &amp;&amp; event.charCode <= 57" autocomplete="off">
+                    </div>
+                    <div class="col-md-2 datecolumn">
+                        <label>
+                            {{translation.ToDate}}
+                        </label>
+                        <input id="txtToDate" name="ToDate" disabled="disabled" class="form-control Fromdate" ng-model="Filter.ToDate" placeholder="{{translation.ToDate}}" onkeypress="return event.charCode >= 48 &amp;&amp; event.charCode <= 57" autocomplete="off">
+                    </div>
+                    <div class="col-lg-4">
+                        <label>
+                            {{translation.CCSName}}
+                        </label>
+                        <select name="CCSId" ng-model="Filter.CCSId" class="form-control" ng-init="Filter.CCSId=''" ng-change="searchRequest(GetCCSComplaint)">
+                            <option value="">{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in CCSList" value="{{item.SocietyID}}">
+                                {{item.SocietyName}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="dev-popup-body modal fade" id="myModals" role="dialog" data-backdrop="static" data-keyboard="false" >
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" ng-click="ClearMenuForm()">&times;</button>
+                                    <h4 class="modal-title"> CCSComplaintLetter </h4>
+                                </div>
+                                <div class="modal-body">
+                                    <form class="dev-search-form" name="MySchemeForm" style="overflow: hidden;">
+                                        <div class="form-group col-md-12">
+                                            <label>{{translation.ComplainerName}}</label> :&nbsp;&nbsp;
+                                            <label>{{ComplaintIds.ComplainerName}}</label>
+                                        </div>
+
+                                        <div class="form-group col-md-12" ng-show="IsnotShow">
+                                            <label>{{translation.TakeAction}}</label></br>
+                                            <input type="radio" name="name" ng-model="LetterData.actionId" ng-show="Isnext" value="1" ng-click="ShowdatetimeDetails(1)" /><label ng-show="Isnext">{{translation.Rejection}}</label>
+                                            <input type="radio" name="name" ng-model="LetterData.actionId" ng-show="Isnext" value="2" ng-click="ShowdatetimeDetails(2)" /><label ng-show="Isnext">{{translation.dispose}}</label>
+                                            <input type="radio" name="name" ng-model="LetterData.actionId" ng-show="Isnext2" value="3" ng-click="ShowdatetimeDetails(3)" /><label ng-show="Isnext2">{{translation.NextHearing}}</label>
+                                        </div>
+                                        <div ng-show="ShowdatetimeControl">
+                                            <div class="col-md-12" style="padding-right:0;padding-left:0">
+                                                <div class="col-md-12 ">
+                                                    <div class="col-md-5 datecolumn">
+                                                        <label>{{translation.Date}} </label></br>
+                                                        <input Id="From_Dates" disabled="disabled" class="form-control CCSDate validateNewAdd devcalender" ng-model="LetterData.ccsDate">
+                                                    </div>
+                                                    <div class="col-md-7 datecolumn">
+                                                        <div class="col-md-12">
+                                                            <label>{{translation.Time}} </label></br>
+                                                            <select class="form-control validateNewAdd" style="float: left;width: 75px;" id="Time_HHs">
+                                                                <option value="">HH</option>
+                                                                <option value="01">01</option>
+                                                                <option value="02">02</option>
+                                                                <option value="03">03</option>
+                                                                <option value="04">04</option>
+                                                                <option value="05">05</option>
+                                                                <option value="06">06</option>
+                                                                <option value="07">07</option>
+                                                                <option value="08">08</option>
+                                                                <option value="09">09</option>
+                                                                <option value="10">10</option>
+                                                                <option value="11">11</option>
+                                                                <option value="12">12</option>
+                                                            </select>&nbsp;&nbsp;
+                                                            <select class="form-control validateNewAdd" style="float: left;width: 75px;" id="Time_MMs">
+                                                                <option value="">MM</option>
+                                                                <option value="00">00</option>
+                                                                <option value="05">05</option>
+                                                                <option value="10">10</option>
+                                                                <option value="15">15</option>
+                                                                <option value="20">20</option>
+                                                                <option value="25">25</option>
+                                                                <option value="30">30</option>
+                                                                <option value="35">35</option>
+                                                                <option value="40">40</option>
+                                                                <option value="45">45</option>
+                                                                <option value="50">50</option>
+                                                                <option value="55">55</option>
+                                                            </select>&nbsp;
+                                                            <select class="form-control validateNewAdd" style="float: left;width: 75px;" id="Time_APs">
+                                                                <option value="AM">AM</option>
+                                                                <option value="PM">PM</option>
+                                                            </select>
+                                                            @*<input id="From_Time" name="From_Time" class="form-control ccstimepicker devcalender validateNewAdd">*@
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-12 margin-Top20">
+                                                    <div class="col-md-4">
+                                                        <label>{{translation.Place}} </label>
+                                                    </div>
+                                                    <div class="col-md-8 datecolumn">
+                                                        <textarea id="Place" class="form-control validateNewAdd" rows="3" ng-model="LetterData.Places"></textarea>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group col-md-12">
+                                            <div class="form-group" ng-class="{ 'has-error' : MyMenuForm.MenuNameEn.$invalid && !MyMenuForm.MenuNameEn.$pristine }">
+                                                <label>{{translation.Remarks}}</label>
+                                                <textarea name="AddressEn" id="textareaid" class="form-control validateNewAdd" rows="5" placeholder="description" ng-model="LetterData.descriptiondetails" maxlength="200" ng-minlength="5" autocomplete="off"> </textarea>
+                                            </div>
+                                        </div>
+                                    
+                                        <div class="form-group">
+                                            <div class="dev-menu-btn">
+                                                <button type="submit" class="btn btn-primary" ng-show="Isnext3" ng-click="InsertAction()">{{translation.Submit}}</button>
+                                                <button type="submit" class="btn btn-primary" ng-show="Isnext3" ng-click="ClearMenuForm()">{{translation.Clear}}</button>
+                                            </div>
+                                        </div>
+                                        <table class="table devtable">
+                                            <thead>
+                                                <tr>
+                                                    <th>{{translation.ComplainerName}}</th>
+                                                    <th>{{translation.Status}}</th>
+                                                    <th>{{translation.Remarks}}</th>
+                                                    @*
+                                                    <th>{{translation.Datetime}}</th>
+                                                    <th>{{translation.Place}}</th>*@
+                                                    <th>{{translation.CreationDate}}</th>
+
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr ng-repeat="items in ActionDetailsdata">
+                                                    <td>{{items.ComplainerName}}</td>
+                                                    <td ng-if="items.ActionId==1">{{translation.Rejection}}</td>
+                                                    <td ng-if="items.ActionId==2">{{translation.dispose}}</td>
+                                                    <td ng-if="items.ActionId==3">{{translation.NextHearing}}</td>
+                                                    <td>{{items.Description}}</td>
+                                                    @*
+                                                    <td>{{items.Datetime}}</td>
+                                                    <td>{{items.Place}}</td>*@
+                                                    <td>{{items.CreationDate}}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </form>
+                                    
+
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+
+                    <div class="col-md-2">
+                        <label>&nbsp;</label><br>
+                        <button type="button" ng-click="searchRequest(GetCCSComplaint)" class="btn btn-primary dev-btn ng-binding">{{translation.Search}}</button>
+                        <button type="button" ng-click="ClearSearch()" class="btn btn-primary dev-btn ng-binding">{{translation.Clear}}</button>
+                    </div>
+                </div>
+                <table id="tblData" class="table devtable" style="margin-top: 10px;border:1px solid rgb(222, 221, 221); float: left;">
+                    <thead>
+                        <tr>
+                            <th>
+                                {{translation.SRNO}}
+                            </th>
+                            <th ng-if="Filter.CCSId!=''">select</th>
+                            <th>
+                                {{translation.ComplainerName}}
+                            </th>
+                            <th>
+                                {{translation.NameOfFather}}
+                            </th>
+                            <th>
+                                {{translation.Address}}
+                            </th>
+                            <th>
+                                {{translation.District}}
+                            </th>
+                            <th>
+                                {{translation.CCSName}}
+                            </th>
+                            <th>
+                                {{translation.AmountDepoisted}}
+                            </th>
+
+                            <th>{{translation.CEOLetter}}</th>
+                            <th>{{translation.ComplainerLetter}}</th>
+                            <th>{{translation.Details}}</th>
+                            <th>{{translation.Status}}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="item in CCSComplaintList">
+                            <td>{{(((DataPagingDetails.PageNumber - 1) * DataPagingDetails.PageSize) + 1)+$index}}</td>
+                            <td ng-if="Filter.CCSId!=''">
+                                <input type="checkbox" name="{{item.ComplaintId}}" ng-model="item.Ischecked" ng-click="Checkboxvalue()" />
+                            </td>
+                            <td>{{item.ComplainerName}}</td>
+                            <td>{{item.ComplainerFatherName}}</td>
+                            <td>{{item.Address}}</td>
+                            <td>{{_language =='en-us' ?  item.DISTRICT_ENG : item.DISTRICT_MANGAL}}</td>
+                            <td>{{item.SocietyName}}</td>
+                            <td>{{item.AmountDeposited}}</td>
+
+                            <td><a target="_blank" ng-if="item.ceo_letter!=''" href="~/Content/CCSLetter/{{item.ceo_letter}}"><i class="fa fa-download"></i></a></td>
+                            <td><a target="_blank" ng-if="item.complainant_letter!=''" href="~/Content/CCSLetter/{{item.complainant_letter}}"><i class="fa fa-download"></i></a></td>
+                            <td ng-click="getcompid(item);getcompAlldata(item.ComplaintId)"><i class="fa fa-info-circle info-m2" ng-if="item.ceo_letter!='' || item.complainant_letter!='' " data-toggle="modal" data-target="#myModals"></i></td>
+
+
+                            <td ><lable ng-if="item.ceo_letter!='' || item.complainant_letter!='' ">{{item.ActionName}} - {{item.ActionName.indexOf('Next') != -1 ? item.Nextdate : ''}}</lable></td>
+                         
+
+                        </tr>
+                        <tr ng-if="showGenratebutton">
+                            <td colspan="10"> <input type="button" name="name" class="btn btn-primary dev-btn ng-binding" ng-click="ShowDetail(item)" value="Genrate" />  </td>
+                        </tr>
+
+                    </tbody>
+                </table>
+
+                <div class="col-md-12">
+                    <div ng-if="DataPagingDetails.TotalPages>1" class="dataTables_paginate paging_simple_numbers" id="dataTables-example_paginate">
+                        <div class="dataTables_info" id="dataTables-example_info" role="status" aria-live="polite">
+                            Total Records: {{DataPagingDetails.TotalRecords}}
+                        </div>
+                        <ul class="pagination pagination_1" style="margin-left: 10px !important;">
+                            <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« First</span></li>
+                            <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« Previous</span></li>
+
+                            <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest('1',GetCCSComplaint)" style="cursor: pointer;">
+                                <span>«First</span>
+                            </li>
+                            <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest(DataPagingDetails.PageNumber-1,GetCCSComplaint)" style="cursor:pointer;">
+                                <span>« Previous</span>
+                            </li>
+                            <li class="{{n==DataPagingDetails.PageNumber?'active':''}}" style="{{n==DataPagingDetails.PageNumber?'':'cursor: pointer'}}" ng-repeat="n in PagingRange(DataPagingDetails.StartPageNumber,DataPagingDetails.EndPageNumber,DataPagingDetails.TotalPages)" ng-click="pageRequest(n,GetCCSComplaint)"><span>{{n}}</span></li>
+                            <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Next</span></li>
+                            <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Last</span></li>
+                            <li ng-if="DataPagingDetails.PageNumber!= DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.PageNumber+1,GetCCSComplaint)" style="cursor:pointer;">
+                                <span>Next »</span>
+                            </li>
+                            <li ng-if="DataPagingDetails.PageNumber != DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.TotalPages,GetCCSComplaint)" style="cursor:pointer;">
+                                <span>Last »</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="dev-popup-body modal fade" id="addModal" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog" style="width: 50%;">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form class="dev-search-form" style="overflow: hidden; margin-bottom: 35px;" name="OfficeForm">
+                        @*<div class="col-md-12 margin-Top20">
+                            <div class="col-md-2">
+                                <label>{{translation.ComplainerName}} </label>
+                            </div>
+                            <div class="col-md-10 datecolumn">
+                                <input ng-disabled="true" class="form-control" ng-model="LetterData.ComplainerName" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-12 margin-Top20">
+                            <div class="col-md-2">
+                                <label>{{translation.Mobile}} </label>
+                            </div>
+                            <div class="col-md-10 datecolumn">
+                                <input ng-disabled="true" class="form-control" ng-model="LetterData.MobileNo" />
+                            </div>
+                        </div>*@
+                        <div class="clearfix"></div>
+                        <div class="col-md-12 margin-Top20">
+                            <div class="col-md-2">
+                                <label>{{translation.CCSName}} </label>
+                            </div>
+                            <div class="col-md-10 datecolumn">
+                                <input ng-disabled="true" class="form-control" ng-model="LetterData.SocietyName" />
+                            </div>
+                        </div>
+
+                        <div class="clearfix"></div>
+
+
+
+
+                        <div class="col-md-6 margin-Top20">
+                            <div class="col-md-4">
+                                <label>{{translation.Date}} </label>
+                            </div>
+                            <div class="col-md-8 datecolumn">
+
+                                <input Id="From_Date" disabled="disabled" class="form-control CCSDate validateNewAdd devcalender" ng-model="LetterData.ccsDate">
+                            </div>
+                        </div>
+                        <div class="col-md-6 margin-Top20">
+                            <div class="col-md-4">
+                                <label>{{translation.Time}} </label>
+                            </div>
+                            <div class="col-md-8 datecolumn">
+
+                                <select class="form-control validateNewAdd" style="float: left;width: 75px;" id="Time_HH">
+                                    <option value="">HH</option>
+                                    <option value="01">01</option>
+                                    <option value="02">02</option>
+                                    <option value="03">03</option>
+                                    <option value="04">04</option>
+                                    <option value="05">05</option>
+                                    <option value="06">06</option>
+                                    <option value="07">07</option>
+                                    <option value="08">08</option>
+                                    <option value="09">09</option>
+                                    <option value="10">10</option>
+                                    <option value="11">11</option>
+                                    <option value="12">12</option>
+                                </select>&nbsp;:&nbsp;
+                                <select class="form-control validateNewAdd" style="float: left;width: 75px;" id="Time_MM">
+                                    <option value="">MM</option>
+                                    <option value="00">00</option>
+                                    <option value="05">05</option>
+                                    <option value="10">10</option>
+                                    <option value="15">15</option>
+                                    <option value="20">20</option>
+                                    <option value="25">25</option>
+                                    <option value="30">30</option>
+                                    <option value="35">35</option>
+                                    <option value="40">40</option>
+                                    <option value="45">45</option>
+                                    <option value="50">50</option>
+                                    <option value="55">55</option>
+                                </select>&nbsp;
+                                <select class="form-control validateNewAdd" style="float: left;width: 75px;" id="Time_AP">
+                                    <option value="AM">AM</option>
+                                    <option value="PM">PM</option>
+                                </select>
+
+                                @*<input id="From_Time" name="From_Time" class="form-control ccstimepicker devcalender validateNewAdd">*@
+                            </div>
+                        </div>
+                        <div class="col-md-6 margin-Top20">
+                            <div class="col-md-4">
+                                <label>{{translation.Place}} </label>
+                            </div>
+                            <div class="col-md-8 datecolumn">
+                                <textarea id="Place" class="form-control validateNewAdd" ng-model="LetterData.Place"></textarea>
+                            </div>
+                        </div>
+                        <div class="clearfix"></div>
+                        <div class="col-md-6 margin-Top20">
+                            <div class="col-md-4">
+                                <label>{{translation.CEOName}} </label>
+                            </div>
+                            <div class="col-md-8 datecolumn">
+                                <input id="CEOName" class="form-control validateNewAdd" ng-model="LetterData.CEOName" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 margin-Top20">
+                            <div class="col-md-4">
+                                <label>{{translation.Mobile}} </label>
+                            </div>
+                            <div class="col-md-8 datecolumn">
+                                <input id="CEOMobile" class="form-control validateNewAdd" ng-model="LetterData.CEOMobile" />
+                            </div>
+                        </div>
+
+
+                        <div class="col-md-12" style="margin-top: 20px;">
+                            <div class="dev-menu-btn">
+                                <button type="submit" class="btn btn-primary" ng-click="SendOTP()">{{translation.SendOTP}}</button>
+                                @*<button type="submit" class="btn btn-primary" ng-click="ResetAddNew()">{{translation.Clear}}</button>*@
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <input type="hidden" id="hdfLoggedInUserDistrictId" value="@ViewBag.LoggedInUserDistrictId" />
+
+
+
+    <div class="dev-popup-body modal fade" id="myOTPModal" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content citizen-dash-head">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    @*<h4 class="modal-title"> {{translation.AddOffice}} </h4>*@
+                    <label id="lbltrn" style="display:none;"></label>
+                    <label id="lblElectionMasterId" style="display:none;"></label>
+                    <label id="lblSocietyIdEnc" style="display:none;"></label>
+                    <label id="MemberId" style="display:none;"></label>
+                    <label id="CertIndex" style="display:none;"></label>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group col-md-6">
+                        <label>{{translation.EsignWROTPTitel}}</label>
+                        <input type="text" class="form-control" name="OTP" ng-bind="OTP" ng-model="OTP" placeholder={{translation.EsignWROTPTitel}} autocomplete="off" /><br />
+                        <button type="submit" class="btn btn-primary" ng-click="GenerateLetter()">{{translation.Submit}}</button>
+                        <button type="submit" class="btn btn-primary" style="margin-left:50px;" ng-click="SendOTP()">{{translation.ReSendOTP}}</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+

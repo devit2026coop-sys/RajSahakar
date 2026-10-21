@@ -1,0 +1,340 @@
+﻿var societyDistrictwise = angular.module("MPRMainCoopSocietiesmodule", ['angularUtils.directives.dirPagination']);
+societyDistrictwise.controller("MPRMainCoopSocietiesCount", function ($scope, $http) {
+    $scope.currentPage = 1;
+    $scope.pageSize = 100;
+    $scope.DistrictId = 0;
+
+
+
+    debugger;
+
+    $scope.Coop = {
+        DataId: "0",
+        DistrictId: "0",
+        Year: ""
+        ,NoOfSocieties_Apex:"0"
+        ,Membership_Apex:"0"
+        ,ShareCapital_Apex:"0"
+        ,Reserve_Apex:"0"
+        ,Deposits_Apex:"0"
+        ,Borrowing_Apex:"0"
+        ,WorkingCapital_Apex:"0"
+        ,NoOfSocieties_CCBs:"0"
+        ,Membership_CCBs:"0"
+        ,ShareCapital_CCBs:"0"
+        ,Reserve_CCBs:"0"
+        ,Deposits_CCBs:"0"
+        ,Borrowing_CCBs:"0"
+        ,WorkingCapital_CCBs:"0"
+        ,NoOfSocieties_UB:"0"
+        ,Membership_UB:"0"
+        ,ShareCapital_UB:"0"
+        ,Reserve_UB:"0"
+        ,Deposits_UB:"0"
+        ,Borrowing_UB:"0"
+        ,WorkingCapital_UB:"0"
+        ,NoOfSocieties_Agri:"0"
+        ,Membership_Agri:"0"
+        ,ShareCapital_Agri:"0"
+        ,Reserve_Agri:"0"
+        ,Deposits_Agri:"0"
+        ,Borrowing_Agri:"0"
+        ,WorkingCapital_Agri:"0"
+        ,NoOfSocieties_PLDB:"0"
+        ,Membership_PLDB:"0"
+        ,ShareCapital_PLDB:"0"
+        ,Reserve_PLDB:"0"
+        ,Deposits_PLDB:"0"
+        ,Borrowing_PLDB:"0"
+        ,WorkingCapital_PLDB:"0"
+     }
+
+
+
+
+
+    //GET Financial Year
+    $scope.GetFinancialYearList = function () {
+        $http.get(SiteUrl + "/Master/GetMasterData/?MasterType=FINANCIALYEAR&MasterCode=-1").
+            success(function (data, status) {
+                $scope.FinancialYearList = data;
+            }).
+            error(function (data, status) {
+                $scope.FinancialYearList = [];
+            });
+    };
+
+
+
+
+
+    $scope.OnPageLoad = function () {
+       
+        $scope._language = _language;
+        if (_language == 'en-us') {
+           
+            $http.get(SiteUrl + "/Translations/Translation_HI.json").
+                success(function (data, status) {
+                    $scope.translation = data;
+                }).
+                error(function (data, status) {
+                    alert("Error while translation");
+                });
+        }
+        else {
+            $http.get(SiteUrl + "/Translations/Translation_EN.json").
+                success(function (data, status) {
+                    $scope.translation = data;
+                }).
+                error(function (data, status) {
+                    alert("Error while translation");
+                });
+        };
+       
+    };
+  
+
+    //Madhuri
+
+
+
+    $scope.MainCooperativeSocieties = function () {
+
+        //$scope.Coop.RJCoopMovId = $scope.dataid;
+
+       // debugger;
+    
+       
+        if ($scope.MainCooperativeSocietiesValidation()) {
+           // alert("Year:" + $("#txtFromMonth").val());
+            var data = {
+
+                Year: $("#txtFromMonth").val(),
+
+
+                NoOfSocieties_Apex      :$scope.Coop.nos_Ap,
+                Membership_Apex         :$scope.Coop.Mem_Ap,
+                ShareCapital_Apex       :$scope.Coop.SC_Ap,
+                Reserve_Apex            :$scope.Coop.Re_Ap,
+                Deposits_Apex           :$scope.Coop.De_Ap,
+                Borrowing_Apex          :$scope.Coop.Bo_Ap,
+                WorkingCapital_Apex     :$scope.Coop.Wc_Ap,
+                NoOfSocieties_CCBs      :$scope.Coop.nos_CC,
+                Membership_CCBs         :$scope.Coop.Mem_CC,
+                ShareCapital_CCBs       :$scope.Coop.SC_CC ,
+                Reserve_CCBs            :$scope.Coop.Re_CC ,
+                Deposits_CCBs           :$scope.Coop.De_CC ,
+                Borrowing_CCBs          :$scope.Coop.Bo_CC ,
+                WorkingCapital_CCBs     :$scope.Coop.Wc_CC ,
+                NoOfSocieties_UB        :$scope.Coop.nos_UB,
+                Membership_UB           :$scope.Coop.Mem_UB,
+                ShareCapital_UB         :$scope.Coop.SC_UB ,
+                Reserve_UB              :$scope.Coop.Re_UB ,
+                Deposits_UB             :$scope.Coop.De_UB ,
+                Borrowing_UB            :$scope.Coop.Bo_UB ,
+                WorkingCapital_UB       :$scope.Coop.Wc_UB ,
+                NoOfSocieties_Agri      :$scope.Coop.nos_Ag,
+                Membership_Agri         :$scope.Coop.Mem_Ag,
+                ShareCapital_Agri       :$scope.Coop.SC_Ag ,
+                Reserve_Agri            :$scope.Coop.Re_Ag ,
+                Deposits_Agri           :$scope.Coop.De_Ag ,
+                Borrowing_Agri          :$scope.Coop.Bo_Ag ,
+                WorkingCapital_Agri     :$scope.Coop.Wc_Ag ,
+                NoOfSocieties_PLDB      :$scope.Coop.nos_PLDB,
+                Membership_PLDB         :$scope.Coop.Mem_PLDB,
+                ShareCapital_PLDB       :$scope.Coop.SC_PLDB ,
+                Reserve_PLDB            :$scope.Coop.Re_PLDB ,
+                Deposits_PLDB           :$scope.Coop.De_PLDB ,
+                Borrowing_PLDB          :$scope.Coop.Bo_PLDB ,
+                WorkingCapital_PLDB     :$scope.Coop.Wc_PLDB
+
+
+            }
+
+            $(".se-pre-con").fadeIn("slow");
+            $http.post(SiteUrl + "/MIS/SaveMainCoopSocieties", JSON.stringify({ _Model: data })).
+                success(function (data, status) {
+                    // alert("DataValue "+data);
+                    $(".se-pre-con").fadeOut("slow");
+                    var message = '';
+                    if (data > 0) {
+                        message = _language == 'en-us' ? 'Data Save Successfully\n' : 'डेटा सहेजा गया है\n';
+                    }
+                    else if (data == -1) {
+                        message = _language == 'en-us' ? 'Data Update successfully\n' : 'डेटा सफलतापूर्वक अपडेट किया गया है\n';
+                    }
+                    else if (data == -2) {
+                        message = _language == 'en-us' ? 'Duplicate Eentry\n' : 'डुप्लिकेट प्रविष्टि\n';
+                    }
+                    else if (data == -3) {
+                        message = _language == 'en-us' ? 'Data Delete Successfully\n' : 'डेटा सफलतापूर्वक हटाएं\n';
+
+                    }
+                    else {
+                        message = _language == 'en-us' ? 'Some Error  is Occured \n' : 'कुछ त्रुटि हुई है\n';
+                    }
+                    alert(message);
+                    window.location.reload();
+
+                    if (data.Status) {
+                        $scope.ClearLiquidationForm();
+                    }
+                }).
+                error(function (data, status) {
+                    alert("Error while Liquidation Data insert");
+                });
+        }
+
+    };
+
+    //validateAddForm 
+    $scope.MainCooperativeSocietiesValidation = function () {
+        var message = $scope._language == 'en-us' ? 'Validate  following :: ' : 'निम्नलिखित मान्य करें :';
+
+
+        if ($("#txtFromMonth").val() == undefined || $("#txtFromMonth").val() == '') {
+            message += $scope._language == 'en-us' ? '\n <br /> Please Select Financial Year' : '\n <br /> कृपया Financial Year का चयन करे |';
+        }
+
+        if ($scope.Coop.nos_Ap == undefined || $scope.Coop.nos_Ap == '0' ||
+            $scope.Coop.Mem_Ap == undefined || $scope.Coop.Mem_Ap == '0' ||
+            $scope.Coop.SC_Ap == undefined || $scope.Coop.SC_Ap == '0' ||
+            $scope.Coop.Re_Ap == undefined || $scope.Coop.Re_Ap == '0' ||
+            $scope.Coop.De_Ap == undefined || $scope.Coop.De_Ap == '0' ||
+            $scope.Coop.Bo_Ap == undefined || $scope.Coop.Bo_Ap == '0' ||
+            $scope.Coop.Wc_Ap  == undefined || $scope.Coop.Wc_Ap == '0' 
+                      
+            
+            ) {
+            message += $scope._language == 'en-us' ? '\n <br /> Please Fill All Entry For Apex Bank' : '\n <br /> कृपया  एपेक्स बैंक के लिए सभी फ़ील्ड दर्ज करें  दर्ज करें|';
+        }
+        if ($scope.Coop.nos_CC == undefined || $scope.Coop.nos_CC  == '0' ||
+            $scope.Coop.Mem_CC == undefined || $scope.Coop.Mem_CC  == '0' ||
+            $scope.Coop.SC_CC  == undefined || $scope.Coop.SC_CC  == '0' ||
+            $scope.Coop.Re_CC  == undefined || $scope.Coop.Re_CC  == '0' ||
+            $scope.Coop.De_CC  == undefined || $scope.Coop.De_CC  == '0' ||
+            $scope.Coop.Bo_CC  == undefined || $scope.Coop.Bo_CC  == '0' ||
+            $scope.Coop.Wc_CC  == undefined || $scope.Coop.Wc_CC  == '0'
+
+
+        ) {
+            message += $scope._language == 'en-us' ? '\n <br /> Please Fill All Entry For CCBs' : '\n <br /> कृपया  CCBs के लिए सभी फ़ील्ड दर्ज करें  दर्ज करें|';
+        }
+        if ($scope.Coop.nos_UB == undefined || $scope.Coop.nos_UB  == '0' ||
+            $scope.Coop.Mem_UB  == undefined || $scope.Coop.Mem_UB  == '0' ||
+            $scope.Coop.SC_UB  == undefined  || $scope.Coop.SC_UB  == '0' ||
+            $scope.Coop.Re_UB  == undefined  || $scope.Coop.Re_UB  == '0' ||
+            $scope.Coop.De_UB  == undefined  || $scope.Coop.De_UB  == '0' ||
+            $scope.Coop.Bo_UB  == undefined  || $scope.Coop.Bo_UB  == '0' ||
+            $scope.Coop.Wc_UB  == undefined  || $scope.Coop.Wc_UB  == '0'
+
+
+        ) {
+            message += $scope._language == 'en-us' ? '\n <br /> Please Fill All Entry For Urban Banks' : '\n <br /> कृपया  Urban Banks के लिए सभी फ़ील्ड दर्ज करें  दर्ज करें|';
+        }
+        if ($scope.Coop.nos_Ag == undefined || $scope.Coop.nos_Ag  == '0' ||
+            $scope.Coop.Mem_Ag == undefined || $scope.Coop.Mem_Ag  == '0' ||
+            $scope.Coop.SC_Ag  == undefined || $scope.Coop.SC_Ag  == '0' ||
+            $scope.Coop.Re_Ag  == undefined || $scope.Coop.Re_Ag  == '0' ||
+            $scope.Coop.De_Ag  == undefined || $scope.Coop.De_Ag  == '0' ||
+            $scope.Coop.Bo_Ag  == undefined || $scope.Coop.Bo_Ag  == '0' ||
+            $scope.Coop.Wc_Ag  == undefined || $scope.Coop.Wc_Ag  == '0'
+
+
+        ) {
+            message += $scope._language == 'en-us' ? '\n <br /> Please Fill All Entry For Agri. PACS & LAMPS' : '\n <br /> कृपया  Agri. PACS & LAMPS के लिए सभी फ़ील्ड दर्ज करें  दर्ज करें|';
+        }
+        if ($scope.Coop.nos_PLDB == undefined || $scope.Coop.nos_PLDB  == '0' ||
+            $scope.Coop.Mem_PLDB == undefined || $scope.Coop.Mem_PLDB  == '0' ||
+            $scope.Coop.SC_PLDB  == undefined || $scope.Coop.SC_PLDB  == '0' ||
+            $scope.Coop.Re_PLDB  == undefined || $scope.Coop.Re_PLDB  == '0' ||
+            $scope.Coop.De_PLDB  == undefined || $scope.Coop.De_PLDB  == '0' ||
+            $scope.Coop.Bo_PLDB  == undefined || $scope.Coop.Bo_PLDB  == '0' ||
+            $scope.Coop.Wc_PLDB == undefined || $scope.Coop. Wc_PLDB== '0'
+
+
+        ) {
+            message += $scope._language == 'en-us' ? '\n <br /> Please Fill All Entry For PLDB' : '\n <br /> कृपया  PLDB के लिए सभी फ़ील्ड दर्ज करें  दर्ज करें|';
+        }
+
+
+
+        if (message.length > 23) {
+            ShowModelAlert("Cooperative Movement In Rajasthan Form", message);
+            return false;
+        }
+        return true;
+
+    }
+
+
+
+    $scope.showEntryForm = function () {
+
+        $scope.EntryForm = 1;
+        $scope.dataList = 0;
+
+
+    }
+    $scope.back = function () {
+
+        $scope.EntryForm = 0;
+        $scope.dataList = 1;
+
+
+    }
+    
+
+    $scope.GridData = function () {
+
+        $(".se-pre-con").fadeIn("slow");
+        //debugger;
+        $scope.CoopMain = [];
+        $http.post(SiteUrl + "/MIS/GetMainCoopSocietyData?DistrictId=" + 0 + "&Year=" + $("#FY").val()).
+            success(function (data, status) {
+                $(".se-pre-con").fadeOut("slow");
+
+                $scope.CoopMain = data;
+                // $scope.CoopRjData = JSON.parse(data.DataList);
+            }).
+            error(function (data, status) {
+                alert("Error while fetching Year Target Data");
+            });
+    }
+
+
+    $scope.update = function (item) {
+        //alert(item.LiqudationDataId);
+        $scope.showEntryForm = true;
+        $scope.DistrictId = item.DistrictId;
+
+        Year: $("#txtFromMonth").val(),
+            $scope.Coop.Cosoc = item.CooperativeSociety;
+        $scope.Coop.Member = item.Membership;
+        $scope.Coop.shca = item.ShareCapital;
+        $scope.Coop.woca = item.WorkingCapital;
+        $scope.Coop.SLoanAd = item.St_Loan_Advancement;
+        $scope.Coop.SLoanRe = item.St_Loan_Recovered;
+        $scope.Coop.MLoanAd = item.Mt_Loan_Advancement;
+        $scope.Coop.MLoanRe = item.Mt_Loan_Recovered;
+        $scope.Coop.LLoanAd = item.Lt_Loan_Advancement;
+        $scope.Coop.LLoanRe = item.Lt_Loan_Recovered;
+        $scope.Coop.Pur = item.Purchase;
+        $scope.Coop.Sale = item.Sale
+
+
+
+    };
+
+
+
+ 
+ 
+    $scope.dataList = 1;
+
+    $scope.GridData();
+
+    $scope.GetFinancialYearList();
+
+    $scope.OnPageLoad();
+});

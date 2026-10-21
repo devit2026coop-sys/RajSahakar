@@ -1,0 +1,727 @@
+﻿
+    var AppClasses = angular.module("UnitMastersModule", ['angularUtils.directives.dirPagination']);
+    AppClasses.controller("UnitMasterCont", function ($scope, $http, $rootScope) {
+
+        $scope.DataPaging = {
+            searchBoxDivId: 'search-filter',
+            currentPageID: 1,
+            pageSize: 20,
+            sortExpression: '',
+            sortDirection: '1',
+            searchParameters: []
+        }
+        $rootScope.pageRequest = function (pageid, callback) {
+            $scope.DataPaging.currentPageID = parseInt(pageid);
+            $scope.DataPaging.searchParameters.splice(0, $scope.DataPaging.searchParameters.length);
+            var ln = $('#' + $scope.DataPaging.searchBoxDivId).find('input:text,select,input:checkbox').length;
+            var indx = 1;
+            $('#' + $scope.DataPaging.searchBoxDivId).find('input:text,select,input:checkbox').each(function () {
+
+                if ($(this).attr("type") == "checkbox" && $(this).attr('type') != undefined) {
+                    if ($(this).is(":checked")) {
+                        var parameter = { Key: $(this).attr('name') + '#' + indx, Value: $(this).val() }
+                        $scope.DataPaging.searchParameters.push(parameter);
+                    }
+                } else {
+                    if ($(this).val() != '' && $(this).val() != null && $(this).attr('name') != undefined) {
+                        var parameter = { Key: $(this).attr('name'), Value: $(this).val() }
+                        $scope.DataPaging.searchParameters.push(parameter);
+                    }
+                }
+                if (indx == ln) {
+                    //  _currentPageID = 1;
+                    callback();
+                }
+                ++indx;
+            });
+
+
+            //if (($scope.SelectPage.filter(x => x === $scope.DataPaging.currentPageID).length > 0)) {
+            //    $("#chk_all").prop("checked", true);
+            //} else {
+            //    $("#chk_all").prop("checked", false);
+            //}
+        }
+        $rootScope.SetDataPaging = function () {
+            if ($rootScope.DataPagingDetails.TotalRecords > 0) {
+                $rootScope.DataPagingDetails.TotalPages = parseInt(($rootScope.DataPagingDetails.TotalRecords / $rootScope.DataPagingDetails.PageSize)) + (($rootScope.DataPagingDetails.TotalRecords % $rootScope.DataPagingDetails.PageSize == 0) ? 0 : 1);
+                $rootScope.DataPagingDetails.StartRecord = ($rootScope.DataPagingDetails.TotalRecords == 0) ? 0 : ((($rootScope.DataPagingDetails.PageNumber - 1) * $rootScope.DataPagingDetails.PageSize) + 1);
+                $rootScope.DataPagingDetails.EndRecord = ($rootScope.DataPagingDetails.TotalPages == $rootScope.DataPagingDetails.PageNumber || $rootScope.DataPagingDetails.TotalRecords == 0) ? $rootScope.DataPagingDetails.TotalRecords : ((($rootScope.DataPagingDetails.PageNumber - 1) * $rootScope.DataPagingDetails.PageSize) + $rootScope.DataPagingDetails.PageSize);
+
+
+                $rootScope.DataPagingDetails.StartPageNumber = 1;
+                $rootScope.DataPagingDetails.EndPageNumber = $rootScope.DataPagingDetails.TotalPages;
+                if ($rootScope.DataPagingDetails.TotalPages > 5 && $rootScope.DataPagingDetails.PageNumber > 0) {
+                    $rootScope.DataPagingDetails.StartPageNumber = $rootScope.DataPagingDetails.PageNumber == 1 ? 1 : $rootScope.DataPagingDetails.PageNumber - 1;
+                    $rootScope.DataPagingDetails.EndPageNumber = $rootScope.DataPagingDetails.StartPageNumber + 4;
+                    if ($rootScope.DataPagingDetails.EndPageNumber > $rootScope.DataPagingDetails.TotalPages) {
+                        $rootScope.DataPagingDetails.EndPageNumber = $rootScope.DataPagingDetails.TotalPages;
+                        $rootScope.DataPagingDetails.StartPageNumber = $rootScope.DataPagingDetails.StartPageNumber > 4 ? $rootScope.DataPagingDetails.EndPageNumber - 4 : $rootScope.DataPagingDetails.StartPageNumber;
+                    }
+                }
+            }
+            $scope.DataPaging.TotalRecords = $rootScope.DataPagingDetails.TotalRecords
+        }
+        $rootScope.PagingRange = function (startPage, endPage, totalPages, step) {
+            step = step || 1;
+            var input = [];
+
+            for (var tStart = startPage; tStart <= endPage && tStart <= totalPages; tStart++) {
+                input.push(tStart);
+            }
+            return input;
+        };
+        $scope.searchRequest = function (callback) {
+            //$scope.DataPaging.searchParameters = [];
+            $scope.DataPaging.searchParameters.splice(0, $scope.DataPaging.searchParameters.length);
+            var ln = $('#' + $scope.DataPaging.searchBoxDivId).find('input:text,select,input:checkbox').length;
+            var indx = 1;
+            $('#' + $scope.DataPaging.searchBoxDivId).find('input:text,select,input:checkbox').each(function () {
+
+                if ($(this).attr("type") == "checkbox" && $(this).attr('type') != undefined) {
+                    if ($(this).is(":checked")) {
+                        var parameter = { Key: $(this).attr('name') + '#' + indx, Value: $(this).val() }
+                        $scope.DataPaging.searchParameters.push(parameter);
+                    }
+                } else {
+                    if ($(this).val() != '' && $(this).val() != null && $(this).attr('name') != undefined) {
+                        var parameter = { Key: $(this).attr('name'), Value: $(this).val() }
+                        $scope.DataPaging.searchParameters.push(parameter);
+                    }
+                }
+                if (indx == ln) {
+                    $scope.DataPaging.currentPageID = 1;
+                    callback();
+                }
+                ++indx;
+            });
+        }
+        $scope.FilterTypeChange = function () {
+            $scope.Filter.SearchText = "";
+            $scope.Filter.FromDate = "";
+            $scope.Filter.ToDate = "";
+            $scope.Filter.CCSId = '0';
+            if ($scope.Filter.FilterType == 'created_dated') {
+                $scope.showSearchDate = true;
+                $scope.showSearchText = false;
+                // $scope.AddCalender();```1    
+            } else {
+                $scope.showSearchDate = false;
+                $scope.showSearchText = true;
+            }
+        }
+
+    // SCOPE
+    $scope._language = 'en-us';
+    $scope.currentPage = 1;
+    $scope.pageSize = 12;
+    $scope.Department = [];
+    $scope.divClass = false;
+    $scope.UnitmasterData = []; 
+
+    $scope.SaveUnitForm = function () {
+        $http.post(SiteUrl + "/Master/SaveUnitForm", $scope.UnitMaster).
+            success(function (data, status) {
+               // alert(data);
+                if (data > 0) {
+                    alert(_language == 'en-us' ? 'Data Save Sucess\n' : 'डेटा सहेजा गया है\n')
+                        || $scope.ClearUnitForm();
+                }
+                else {
+                    alert(_language == 'en-us' ? 'Some Error  is Occured \n' : 'कुछ त्रुटि हुई है\n') || $scope.ClearUnitForm();
+                    return;
+                }
+                if ($scope.ParentId == '') {
+                    $scope.ParentId = 0;
+                }
+
+                $scope.GetAllSubUnitList();
+                if (data.Status) {
+
+                    $scope.UnitMaster = null;
+                    $scope.ClearUnitForm();
+                    //$scope.GetAllSubClassesList();
+
+
+                }
+            }).
+            error(function (data, status) {
+                alert("Error while subclass insert");
+            });
+
+
+    };
+
+    // on page load
+    $scope.OnPageLoad = function () {
+        if (_language == 'en-us') {
+            $http.get(SiteUrl + "/Translations/Translation_EN.json").
+                success(function (data, status) {
+                    $scope.translation = data;
+                }).
+                error(function (data, status) {
+                    alert("Error while translation");
+                });
+        }
+        else {
+            $http.get(SiteUrl + "/Translations/Translation_HI.json").
+                success(function (data, status) {
+                    $scope.translation = data;
+                }).
+                error(function (data, status) {
+                    alert("Error while translation");
+                });
+
+            $scope.ClearUnitForm = function () {
+                $scope.UnitMaster = null;
+            };
+        }
+
+       
+      
+        $scope.Department = [];
+        //$http.get(SiteUrl + "/Master/GetMasterData/?MasterType=INSPECTOR&MasterCode=-1").
+
+        //    success(function (data, status) {
+               
+        //        $scope.Department = data;
+        //    }).
+        //    error(function (data, status) {
+        //        $scope.Department = [];
+        //    });
+       
+        };
+
+        $scope.backStaushistory = function () {
+            $scope.IsShowAssignForm = false;
+            $scope.iscomplete = true;
+            $scope.InspectorStatus = false;
+        }
+
+        $scope.historyshow = function (item) {
+         
+                $scope.IsShowAssignForm = true;
+                $scope.iscomplete = false;
+                $scope.InspectorStatus = true;
+                $scope.InspactorTargetsId = item.InspactorTargetsId;
+                $scope.GetInspectorStatusList($scope.InspactorTargetsId)
+            }
+        $scope.InspectorStatus = false;
+
+
+        $scope.ComplainTrailFiles = {
+            FileName: "",
+            IsUploadFileName: false,
+        };
+        $scope.AssignNew = function (item) {
+            $scope.cityhide = false;
+            if (item.GP_ENG == '' || item.GP_ENG == null) {
+                $scope.InspectorData.CityName = item.CITY_ENG;
+                $scope.citydisabled = true;
+                $scope.cityhide = true;
+            }
+            else {
+                $scope.gramdisabled = true;
+                $scope.InspectorData.GramPanchayatName = item.GP_ENG;
+                $scope.InspectorData.BlockName = item.BLOCK_ENG;
+            }
+            $scope.InspectorData.PrecentNameGSS = '';
+            $scope.InspectorData.NewGSSName = '';
+            $scope.InspectorData.NoofMember = '';
+            $scope.InspectorData.NewGSSprecious = '';
+            $scope.InspectorData.NewGSSFinanceAmount = '';
+            $scope.InspectorData.Remarks = '';
+
+            $scope.InspectorData.StatusId = '0';
+            $scope.ComplainTrailFilesList = [];
+            $scope.ComplainTrailFilesList.push($scope.ComplainTrailFiles);
+            $scope.iscomplete = true;
+            $scope.InspectorStatus = true;
+            $scope.IsShowAssignForm = true;
+            $scope.statusid = item.InspectorStatusId;
+
+            $scope.InspectorData.Inspector_ID = item.Inspector_ID;
+            $scope.InspectorData.InspactorTargetsId = item.InspactorTargetsId;
+            $scope.GetInspectorStatusList($scope.InspectorData.InspactorTargetsId)
+          
+
+
+        }
+
+
+
+        //GetInspectorStatusList
+        $scope.InspectorStatus = false;
+        $scope.GetInspectorStatusList = function (InspactorTargetsId) {
+           
+            $http.post("/Society/GetInspectorStatusDetails", JSON.stringify({ InspactorTargetsId: InspactorTargetsId })).
+                success(function (data, status) {
+                 
+                    $scope.GetInspectorStatus = JSON.parse(data.DataList);
+                    if ($scope.GetInspectorStatus.length>0) {
+                        $scope.InspectorStatus = true;
+                    }
+                    else {
+                        $scope.InspectorStatus = false;
+                    }
+                }).
+                error(function (data, status) {
+                    $scope.GetInspectorStatus = [];
+                    alert('Error while Society Election Detail data.');
+                });
+        }
+
+        $scope.InspacorData = [];
+        $scope.GSSStatusList = [];
+
+        $scope.GSSStatusList.push({ StatusId: "1", StatusNameEn: "Done Survey", StatusNameHi:"Done Survey"})
+        $scope.GSSStatusList.push({ StatusId: "2", StatusNameEn: "Not Feasible", StatusNameHi: "Not Feasible" })
+
+        $scope.GSSStatusList1 = [];
+        $scope.GSSStatusList1.push({ StatusId: "5", StatusNameEn: "Registered", StatusNameHi: "Registered" })
+     
+
+    $scope.GetInspactor = function () {
+        $(".se-pre-con").fadeIn("slow");
+        $http.get(SiteUrl + "/Master/GetMasterData/?MasterType=INSPECTOR&MasterCode=-1").
+            success(function (data, status) {
+                $scope.InspacorData = data;      
+              
+            }).
+            error(function (data, status) {
+                $scope.AssignedAuditor = [];
+                alert('Error while auditor data list fetch.');
+            });
+        $(".se-pre-con").fadeOut("slow");
+    }
+
+
+    $scope.IsShowAssignForm = false;
+
+
+
+  
+
+    $("#HouseBuildingNo_MemberAdd").parent().hide();
+    $("#LaneStreetName_MemberAdd").parent().hide();
+    $("#Locality_MemberAdd").parent().hide();
+    $("#ddlstate_MemberAdd").parent().hide();
+    $("#ddlDivision_MemberAdd").parent().hide();
+    $("#ddlDivision_MemberAdd").parent().hide();
+    //$("#district_MemberAdd").parent().hide();
+    $("#district_MemberAdd").attr("disabled", "disabled");
+    $("#ddlward_MemberAdd").parent().hide();
+    $("#ddlVillage_MemberAdd").parent().hide();
+    $("#pincode_MemberAdd").parent().hide();
+
+
+
+      
+
+
+    // START : Change Status for SMS / delete SMS,Status
+    $scope.SetStatus = function (UnitId, ActionId) {
+        if (ActionId == 2)
+            if (!confirm($scope.translation.DeleteConfirm))
+                return false;
+
+        $http.post(SiteUrl + "/Master/ChangeStatusunit", { Id: UnitId, Action: ActionId }).
+            success(function (data, status) {
+
+                $scope.GetAllSubUnitList();
+               
+            }).
+            error(function (data, status) {
+            });
+    };
+
+  
+    $scope.update = function (item) {
+        
+        $scope.UnitMaster.DepartmentId = item.departmentId;
+        $scope.UnitMaster.UnitNameEn = item.UnitNameEn;
+        $scope.UnitMaster.UnitNameHi = item.UnitNameHi;
+        $scope.UnitMaster.IsActive = item.IsActive == 1 ? true : false;
+        $scope.UnitMaster.UnitId = item.UnitId;
+    };
+
+    $scope.OnPageLoad();
+    $scope.GetInspactor();
+
+
+    $scope.OtherPersonList = [];
+    $scope.OtherPersonListNew = [];
+    //$scope.OtherPersonList.push({ "PersonId": 0, "AdId": 0, "Name": "", "Address": "", "Post": "", "Mobile": "" });
+    //$scope.OtherPersonListNew.push({ "PersonId": 0, "AdId": 0, "Name": "", "Address": "", "Post": "", "Mobile": "" });
+
+    $scope.OtherPersonListNew.push({ "Inspector": "OM Prakash", "Urban_Rural":"Rural", "City_Block": "Churu", "GramPanchayat": "Jobner", "Inspector_ID": 1, "City_Block_ID": 3, "GramPanchayat_ID": 5 });
+
+
+    $scope.InspactorId = "0";
+    $scope.AddGSS = function () {
+     if ($scope.ValidateAddGSS()) {
+        var data = GetAddressinfo('MemberAdd');
+         var InspacorName = $scope._language == 'en-us' ? $scope.InspacorData.filter(function (x) { return x.MappingID == $scope.InspactorId })[0].OfficerNameEn : $scope.InspacorData.filter(function (x) { return x.MappingID == $scope.InspacorId })[0].OfficerNameHi;
+        $scope.OtherPersonListNew.push({ "Inspector": InspacorName, "Urban_Rural": data.Urban_Rural, "City_Block": data.Checkboxvalue == "2" ? data.Block_Name : data.City_Name, "GramPanchayat": data.Checkboxvalue == "2"? data.Panchayat_Name:"", "Inspector_ID": $scope.InspacorId, "City_Block_ID": data.Checkboxvalue == "2" ? data.BlockId : data.CityId, "GramPanchayat_ID": data.PanchayatId});
+      }
+    }
+
+
+
+        $scope.ClearSearch = function () {
+            
+            $scope.StatusId = '0';
+            $scope.GetInspactorTargetsDetails(-1);
+        }
+        $scope.StatusId = 0;
+        $scope.GetStatuswisedata = function (StatusId) {
+            $scope.StatusId = StatusId;
+            $scope.GetInspactorTargetsDetails(-1);
+        }
+
+
+        $scope.GetInspactorTargetsDetails = function (month) {
+            $(".se-pre-con").fadeIn("slow");
+            var jsonParameters = { "TotalRecords": $scope.DataPaging.TotalRecords, "PageNumber": $scope.DataPaging.currentPageID, "PageSize": $scope.DataPaging.pageSize, "SortingColumn": $scope.DataPaging.sortExpression, "SortingOrder": $scope.DataPaging.sortDirection, "SearchParameter": $scope.DataPaging.searchParameters, "SearchType": $scope.SearchType };
+            $http.post(SiteUrl + "/Society/GetInspactorTargetsDetails", JSON.stringify({ Details: jsonParameters, InspactorId: 0, StatusId: $scope.StatusId, GSSSStatusId: 0, Flag: 1, Month: month })).
+                success(function (data, status) {
+                    $scope.InspactorTargetsListDetils = JSON.parse(data.DataList);
+                    $rootScope.DataPagingDetails = data.DataPaging;
+                    $rootScope.SetDataPaging();
+                    $(".se-pre-con").fadeOut("slow");
+                }).
+                error(function (data, status) {
+                    $(".se-pre-con").fadeOut("slow");
+                    $scope.InspactorTargetsListDetils = [];
+                    alert('Error while Society Election Detail data.');
+                });
+        };
+
+        $scope.GetInspactorTargetsDetails(-1);
+
+
+
+
+        $scope.ValidateInspactor = function () {
+          
+            var message = $scope._language == 'en-us' ? 'Validate following : ' : 'निम्नलिखित मान्य करें :';
+
+            if ($scope.InspectorData.Remarks == "" || $scope.InspectorData.Remarks == undefined) {
+                message += $scope._language == 'en-us' ? '<br />Please Enter Remark.' : '<br />कृपया टिप्पणी दर्ज करें।';
+            }
+            if ($scope.InspectorData.StatusId == undefined || $scope.InspectorData.StatusId == "" || $scope.InspectorData.StatusId=='0') {
+                message += $scope._language == 'en-us' ? '<br />Please  Select Status.' : '<br />कृपया स्थिति चुनें।';
+            }
+            //if ($scope.ComplainTrailFilesList.length == 1 ) {
+            //    message += $scope._language == 'en-us' ? '<br />Please  upload file.' : '<br />कृपया फ़ाइल अपलोड करें।';
+            //}
+
+            if ($scope.InspectorData.StatusId != undefined && $scope.InspectorData.StatusId == "1") {
+
+            if ($scope.InspectorData.PrecentNameGSS == "" || $scope.InspectorData.PrecentNameGSS == undefined) {
+                message += $scope._language == 'en-us' ? '<br />Please Enter Present GSS Name.' : '<br />कृपया वर्तमान ग्राम सेवा सहकारी समिति का नाम दर्ज करें।';
+            }
+            if ($scope.InspectorData.NewGSSName == undefined || $scope.InspectorData.NewGSSName == "" ) {
+                message += $scope._language == 'en-us' ? '<br />Please Enter New GSS Name.' : '<br />कृपया नई प्रस्तावित ग्राम सेवा सहकारी समिति का नाम दर्ज करें।';
+            }
+            if ($scope.InspectorData.NoofMember == "" || $scope.InspectorData.NoofMember == undefined) {
+                message += $scope._language == 'en-us' ? '<br />Please Enter New GSS No.of member.' : '<br />नई प्रस्तावित ग्राम सेवा सहकारी समिति की सदस्य संख्या।';
+            }
+            if ($scope.InspectorData.NewGSSprecious == undefined || $scope.InspectorData.NewGSSprecious == "" ) {
+                message += $scope._language == 'en-us' ? '<br />Please Enter New GSS Amaanat.' : '<br />नई प्रस्तावित ग्राम सेवा सहकारी समिति की अमानत।';
+            }
+            if ($scope.InspectorData.NewGSSFinanceAmount == "" || $scope.InspectorData.NewGSSFinanceAmount == undefined) {
+                message += $scope._language == 'en-us' ? '<br />Please Enter New GSS Share capital.' : '<br />नई प्रस्तावित ग्राम सेवा सहकारी समिति की हिस्सा पूंजी।';
+            }
+
+            }
+
+            if ($scope.InspectorData.StatusId != undefined && $scope.InspectorData.StatusId == "5") {
+
+                if ($scope.InspectorData.RagistrationNo == "" || $scope.InspectorData.RagistrationNo == undefined) {
+                    message += $scope._language == 'en-us' ? '<br />Please Enter Ragistration No.' : '<br />कृपया रजिस्ट्रेशन संख्या दर्ज करें।';
+                }
+                if ($scope.InspectorData.GssName == undefined || $scope.InspectorData.GssName == "") {
+                    message += $scope._language == 'en-us' ? '<br />Please Enter GSS Name.' : '<br />कृपया   ग्राम सेवा सहकारी समिति का नाम दर्ज करें।';
+                }
+                if ($scope.InspectorData.Address == "" || $scope.InspectorData.Address == undefined) {
+                    message += $scope._language == 'en-us' ? '<br />Please Enter Address.' : '<br /> कृपया पता दर्ज करें।';
+                }
+
+            }
+
+            if (message.length > 29) {
+                ShowOkMessage("Society Complaint ", message, function () { });
+                return false;
+            }
+            return true;
+        }
+
+        $scope.SaveInspectorstatus = function () {
+            
+            if ($scope.ValidateInspactor()) {
+           $(".se-pre-con").fadeIn("slow");
+            var Inspectorfile = '';
+            var InspectorFilesList = [];
+            $scope.ComplainTrailFilesList.forEach(function (itm) {
+                if (itm.FileName != '' && itm.FileName != 'undefined') {
+                    Inspectorfile += (Inspectorfile != '' ? ',' : '') + itm.FileName;
+                    // encloserfile += ',';
+                }
+            });
+                $scope.InspectorData.Inspectorfile= Inspectorfile;
+                $http.post(SiteUrl + "/Society/SaveInspactorstausDetails", { "_InspactorStatusDetails": $scope.InspectorData }).
+                success(function (data, status) {
+                    if (data == "1") {
+                        ShowOkMessage("Success", $scope._language == 'en-us' ? " successfully submitted.<br/></b>" : "सफलतापूर्वक जमा कर लिया गया है|<br/></b>", function () {
+                            $scope.StatusId = '0';
+                            $scope.Remarks = '';
+                            $scope.GetInspactorTargetsDetails(-1);
+                             $scope.IsShowAssignForm = false;
+                            $scope.iscomplete = false;
+                            $scope.InspectorStatus = false;
+                            $scope.ComplainTrailFilesList = [];
+                            $scope.ComplainTrailFilesList.push($scope.ComplainTrailFiles);
+                            
+                        });
+                      
+                        $(".se-pre-con").fadeOut("slow");
+                    }
+
+                }).
+                error(function (data, status) {
+                    message = _language == 'en-us' ? 'Some Error  is Occured \n' : 'कुछ त्रुटि हुई है\n';
+                    alert(message);
+                    $(".se-pre-con").fadeOut("slow");
+                })
+            }
+
+        }
+
+
+      
+
+        $scope.backtomove = function () {
+            $scope.IsShowAssignForm = false;
+        }
+
+    $scope.RemoveOtherPersonListRow = function (index) {
+        $scope.OtherPersonListNew.splice(index, 1);
+        $scope.$apply();
+    }
+
+    $scope.ComplainUndeVlaue = {};
+    $scope.ValidateAddGSS = function () {
+        var data = GetAddressinfo('MemberAdd');
+        var message = $scope._language == 'en-us' ? 'Validate following : ' : 'निम्नलिखित मान्य करें :';
+        if ($scope.InspactorId == "0") {
+            message += $scope._language == 'en-us' ? '<br />Please  Select Inspactor.' : '<br />कृपया इंस्पेक्टर चुनें।';
+        }
+
+        if (data.Checkboxvalue == undefined || data.Checkboxvalue == "") {
+            message += $scope._language == 'en-us' ? '<br />Please  Select Urban/Rural.' : '<br />कृपया शहरी/ग्रामीण चुनें।';
+        }
+
+        if (data.Checkboxvalue != undefined && data.Checkboxvalue == "2" && data.BlockId=="0") {
+            message += $scope._language == 'en-us' ? '<br />Please  Select Block.' : '<br />कृपया ब्लॉक चुनें।';
+        }
+
+        if (data.Checkboxvalue != undefined && data.Checkboxvalue == "2" && data.PanchayatId == "0") {
+            message += $scope._language == 'en-us' ? '<br />Please  Select Gram Panchayat.' : '<br />कृपया ग्राम पंचायत चुनें।';
+        }
+
+        if (data.Checkboxvalue != undefined && data.Checkboxvalue == "1" && data.CityId == "0") {
+            message += $scope._language == 'en-us' ? '<br />Please  Select City .' : '<br />कृपया सिटी चुनें।';
+        }
+     
+        if (message.length > 29) {
+            ShowOkMessage("Society Complaint ", message, function () { });
+            return false;
+        }
+        return true;
+    }
+ 
+
+    $scope.ComplainTrailFilesList = [];
+    $scope.ComplainTrailFilesList.push($scope.ComplainTrailFiles);
+        $scope.ComplainTrailFiles = {
+            //IsUploadFileName: "",
+            FileName: "",
+            IsUploadFileName: false,
+        };
+
+        $scope.ComplainTrailFilesList = [];
+        $scope.ComplainTrailFilesList.push($scope.ComplainTrailFiles);
+
+        $scope.FileType = "";
+        $scope.FileIndex = 0;
+
+
+        $scope.AddFile = function (type, index) {
+            $scope.FileType = type;
+            $scope.FileIndex = index;
+        }
+        $scope.ChangeFile = function (id, type, index) {
+            if (type == 1) {
+                $scope.ComplainTrailFilesList[index].IsUploadFileName = false;
+                $scope.ComplainTrailFilesList[index].FileName = "";
+            } else if ($scope.FileType == -1) {
+                //scope.IsUploadReportFileName = true;
+                $scope.ReportFileName = "";
+            }
+            $("#" + id).val("");
+        }
+
+        $scope.UploadFile = function (id, type) {
+            try {
+                // FormData
+                if (window.FormData !== undefined) {
+                    var fileUpload = $("#" + id).get(0);
+                    var files = fileUpload.files;
+                    //var blob = b64toBlob(realData, contentType, 512);
+                    var formData = new FormData();
+                    formData.append("pldbfile", files[0]);
+                    $(".blockUI").show();
+                    $scope.xhr(SiteUrl + "/SocietyComplaintCourtModule/UploadComplainFile", formData, type);
+                } else {
+                    alert("FormData is not supported.");
+                }
+            }
+            catch (ex) { alert(ex) }
+        }
+
+
+
+        $scope.xhr = function (url, data, type) {
+            try {
+                var request = new XMLHttpRequest();
+                request.onreadystatechange = function () {
+                    if (request.readyState == 4 && request.status == 200) {
+                        $(".blockUI").hide();
+                        $("#filuploadProgress").hide();
+                        $("#filuploadProgress").find("div").html("");
+                        $("#filuploadProgress").find("div").attr("aria-valuenow", "1");
+                        $("#filuploadProgress").find("div").attr("style", "width:1%");
+                        if (request.responseText == "") {
+                            ShowOkMessage("Error", $scope == 'en-us' ? "There is some problem in uploading file on server. Please try after some time" : "सर्वर पर फ़ाइल अपलोड करने में कुछ समस्या है। कृपया कुछ देर बाद प्रयास करें", function () { });
+                        } else {
+                            if (type == 1) {
+                                $scope.ComplainTrailFilesList[$scope.FileIndex].FileName = request.responseText;
+
+                                if ($scope.ComplainTrailFilesList.filter(function (x) { return x.IsUploadFileName === false }).length <= 0) {
+                                    $scope.ComplainTrailFilesList.push({
+                                        //IsUploadFileName: "",
+                                        FileName: "",
+                                        IsUploadFileName: false,
+                                    });
+                                }
+                            } else if ($scope.FileType == -1) {
+                                //scope.IsUploadReportFileName = true;
+                                $scope.ReportFileName = request.responseText;
+                            }
+
+                            $scope.$apply();
+                        }
+                    }
+                };
+
+                request.upload.onloadstart = function () {
+                    //percentage.innerHTML = 'Upload started...';
+                };
+                $("#filuploadProgress").show();
+                request.upload.onprogress = function (event) {
+                    $("#filuploadProgress").find("div").html(Math.round(event.loaded / event.total * 100) + "%");
+                    $("#filuploadProgress").find("div").attr("aria-valuenow", Math.round(event.loaded / event.total * 100));
+                    $("#filuploadProgress").find("div").attr("style", "width:" + Math.round(event.loaded / event.total * 100) + "%");
+                };
+
+                request.upload.onload = function (result) {
+                }
+                request.open('POST', url);
+                request.send(data);
+            }
+            catch (ex) { alert(ex) }
+        }
+    $scope.deleteFime = function (index) {
+        var list = $scope.ComplainTrailFilesList;
+        $scope.ComplainTrailFilesList = [];
+        list.forEach(function (item, indx) {
+            if (indx != index) {
+                $scope.ComplainTrailFilesList.push(item);
+            }
+        });
+    }
+
+
+
+});
+
+//AppClasses.directive('validfile', function validFile() {
+//    var validFormats = ['jpg', 'gif'];
+//    return {
+//        require: 'ngModel',
+//        link: function (scope, elem, attrs, ctrl) {
+//            ctrl.$validators.validFile = function () {
+//                elem.on('change', function () {
+//                    if (elem[0].files.length > 0) {
+//                        const fsize = elem[0].files[0].size;
+//                        const file = Math.round((fsize / 1024));
+//                        // The size of the file. 
+//                        if (file >= 4096) {
+//                            ShowOkMessage("Warning", scope == 'en-us' ? "File too Big, please select a file less than 4mb" : "फ़ाइल बहुत बड़ी है, कृपया 4mb से कम फ़ाइल का चयन करें", function () { });
+//                            elem[0].value = "";
+//                        } else {
+//                            if (scope.FileType == 1) {
+//                                deb
+//                                scope.ComplainTrailFilesList[scope.FileIndex].IsUploadFileName = true;
+//                                scope.ComplainTrailFilesList[scope.FileIndex].FileName = "";
+//                            } else if (scope.FileType == -1) {
+//                                scope.IsUploadReportFileName = true;
+//                                scope.ReportFileName = "";
+//                            }
+//                            scope.$apply();
+//                        }
+//                    }
+
+//                });
+//            };
+//        }
+//    };
+//});
+
+
+
+
+AppClasses.directive('validfile', function validFile() {
+    var validFormats = ['jpg', 'gif'];
+    return {
+        require: 'ngModel',
+        link: function (scope, elem, attrs, ctrl) {
+            ctrl.$validators.validFile = function () {
+                elem.on('change', function () {
+                    if (elem[0].files.length > 0) {
+                        const fsize = elem[0].files[0].size;
+                        const file = Math.round((fsize / 1024));
+                        // The size of the file. 
+                        if (file >= 4096) {
+                            ShowOkMessage("Warning", scope == 'en-us' ? "File too Big, please select a file less than 4mb" : "फ़ाइल बहुत बड़ी है, कृपया 4mb से कम फ़ाइल का चयन करें", function () { });
+                            elem[0].value = "";
+                        } else {
+                            if (scope.FileType == 1) {
+
+                                scope.ComplainTrailFilesList[scope.FileIndex].IsUploadFileName = true;
+                                scope.ComplainTrailFilesList[scope.FileIndex].FileName = "";
+                            } else if (scope.FileType == -1) {
+                                scope.IsUploadReportFileName = true;
+                                scope.ReportFileName = "";
+                            }
+                            scope.$apply();
+                        }
+                    }
+
+                });
+            };
+        }
+    };
+});
+

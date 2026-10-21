@@ -1,0 +1,267 @@
+﻿
+<script src="~/Scripts/AngularFramework/Rajfed_Warehouse.js"></script>
+<script type="text/javascript">
+
+    function ValidateAlpha(evt) {
+        var keyCode = (evt.which) ? evt.which : evt.keyCode
+        if ((evt.which == 8 || evt.keyCode == 8 || evt.charCode == 8))
+            return true;
+
+        if (((keyCode < 49 || keyCode > 90) && (keyCode < 97 || keyCode > 123) && keyCode != 32))
+            return false;
+        return true;
+    };
+
+</script>
+
+<div ng-app="WarehouseCnt">
+    <div ng-controller="WarehouseMod">
+        <div class="col-md-12">
+            <h3 class="citizen-dash-head">{{translation.Warehouse}}</h3>
+            <hr style="margin: 0;">
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#"> {{translation.Master}}</a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;"> {{translation.Warehouse}} </span>
+                    </li>
+                    <li style="float: right;" ng-if="WarehouseId==0" id="divAddBtn">
+                        <button type="button" ng-click="ShowDivForInsert()" class="btn btn-info btn-lg dev-popup-btn" data-toggle="modal" style="color: #025e63; cursor: pointer; text-decoration:none;  font-weight: bold;">
+                            <h5>&#187; {{translation.AddNewWarehouse}}</h5>
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" ng-show="divInsert">
+            <form class="citizen-dash-head">
+                <div class="col-lg-12 form-group">
+                    <div class="col-lg-2">{{ translation.WarehouseNameEng}}<span class="error">*</span></div>
+                    <div class="col-lg-4">
+                        <input type="text" class="form-control" ng-model="Warehouse.WarehousNameEn" placeholder={{translation.WarehouseNameEng}} autocomplete="off" onKeyPress="return ValidateAlpha(event);" maxlength="50" />
+                    </div>
+                    <div class="col-lg-2">{{ translation.WarehouseNameHi}}<span class="error">*</span></div>
+                    <div class="col-lg-4">
+                        <input type="text" class="form-control" ng-model="Warehouse.WarehousNameHi" placeholder={{translation.WarehouseNameHi}} autocomplete="off" maxlength="50" />
+                    </div>
+                </div>
+
+                <div class="col-lg-12 form-group">
+                    <div class="col-lg-2">{{ translation.LicenceNo}}<span class="error">*</span></div>
+                    <div class="col-lg-4">
+                        <input type="text" class="form-control" ng-model="Warehouse.LicenceNo" placeholder={{translation.LicenceNo}} autocomplete="off" onKeyPress="return ValidateAlpha(event);" maxlength="50" />
+                    </div>
+                    <div class="col-lg-2">{{ translation.LicenceValidupTo}}<span class="error">*</span></div>
+                    <div class="col-lg-4">
+                        <input style="width:80%" type="text" id="txtLicenceValidUpto" class="form-control SetCalender" placeholder={{translation.LicenceValidupTo}} autocomplete="off" maxlength="50" />
+                    </div>
+                </div>
+
+
+                <div class="col-lg-12 form-group">
+                    <div class="col-lg-2">{{ translation.UrbanRural}}<span class="error">*</span></div>
+                    <div class="col-lg-4">
+                        <input type="radio" name="rdoUrbanRural" value="1" ng-model="Warehouse.UrbanRural" ng-init="Warehouse.UrbanRural=1" ng-change="UrbanRuralChange()" /> &nbsp; {{translation.Urban}} &nbsp; &nbsp;
+                        <input type="radio" name="rdoUrbanRural" value="2" ng-model="Warehouse.UrbanRural" ng-change="UrbanRuralChange()" /> &nbsp; {{translation.Rural}}
+                    </div>
+                    <div class="col-lg-2">{{ translation.IsCentralWarehouse}}<span class="error">*</span></div>
+                    <div class="col-lg-4">
+                        <input type="radio" name="rdoIsCentralWarehouse" value="1" ng-model="Warehouse.IsCentralWarehouse"  /> &nbsp; {{translation.Yes}} &nbsp; &nbsp;
+                        <input type="radio" name="rdoIsCentralWarehouse" value="2" ng-model="Warehouse.IsCentralWarehouse" ng-checked="true" /> &nbsp; {{translation.No}}
+                    </div>
+                </div>
+
+                <div class="col-lg-12 form-group">
+                    <div class="col-lg-2">{{ translation.District}}<span class="error">*</span></div>
+                    <div class="col-lg-4">
+                        <select id="ddlDistrict" ng-model="Warehouse.DistrictId" class="form-control" ng-change="DistrictChange()" ng-disabled="IsDisabled">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in Districts" value="{{item.DISTRICT_ID}}">
+                                {{_language =='en-us' ?  item.DISTRICT_ENG : item.DISTRICT_MANGAL}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-lg-2">{{ translation.Address}}<span class="error">*</span></div>
+                    <div class="col-lg-4">
+                        <input type="text" class="form-control" ng-model="Warehouse.Address" placeholder={{translation.Address}} autocomplete="off" maxlength="200" />
+                    </div>
+                </div>
+
+                <div ng-show="Warehouse.UrbanRural=== 1 || Warehouse.UrbanRural==='1'">
+                    <div class="col-lg-12 form-group">
+                        <div class="col-lg-2">{{ translation.City}}<span class="error">*</span></div>
+                        <div class="col-lg-4">
+                            <select ng-model="Warehouse.CityId" class="form-control" ng-init="Warehouse.CityId='0'">
+                                <option value="0" disabled>{{translation.SelectOption}}</option>
+                                <option ng-repeat="item in CityList" value="{{item.CITY_ID}}">
+                                    {{_language =='en-us' ?  item.CITY_ENG : item.CITY_MANGAL}}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div ng-hide="Warehouse.UrbanRural===1 || Warehouse.UrbanRural==='1'">
+                    <div class="col-lg-12 form-group">
+                        <div class="col-lg-2">{{ translation.BlockHeading}}<span class="error">*</span></div>
+                        <div class="col-lg-4">
+                            <select ng-model="Warehouse.BlockId" class="form-control" ng-init="Warehouse.BlockId='0'">
+                                <option value="0" disabled>{{translation.SelectOption}}</option>
+                                <option ng-repeat="item in Blocks | orderBy:'BLOCK_ENG'" value="{{item.BLOCK_ID}}">
+                                    {{_language =='en-us' ?  item.BLOCK_ENG : item.BLOCK_MANGAL}}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="form-group col-md-12">
+                    <div class="dev-menu-btn">
+                        <button type="submit" class="btn btn-primary" ng-click="Insert()">{{translation.Submit}}</button>
+                        <button type="submit" class="btn btn-primary" ng-click="ClearForm()">{{translation.Clear}}</button>
+                        <a class="btn btn-primary dev-btn" style="text-transform:capitalize;" ng-click="BackToList()"> {{translation.Back}}</a>
+                        <input type="hidden" ng-model="Warehouse.WarehousId" />
+                        <input type="hidden" value="@ViewBag.DistrictId" id="hdnUserDistrict" />
+                        <input type="hidden" value="@ViewBag.UserLevel" id="hdnUserLevel" />
+                        <input type="hidden" value="@ViewBag.WarehouseId" id="hdnWarehouseId" />
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" ng-show="GridWarehouses">
+            <div>
+                <div class="citizen-dash-head">
+                    <div class="table-dropdown">
+                        <div class="col-lg-12 form-group">
+                            <div class="col-md-4" style="padding-left: 0;">
+                                <label for="search">{{translation.Search}}:</label>
+                                <input ng-model="q" id="search" class="form-control" placeholder={{translation.filttertext}} autocomplete="off">
+                            </div>
+                            <div class="col-md-4" style="padding-left: 0;">
+                                <label for="search">{{translation.ItemPerPage}}:</label>
+                                <input type="number" min="1" max="100" class="form-control" onkeypress='return event.charCode >= 48 && event.charCode <= 57' ng-model="pageSize">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-12 form-group">
+                        <h4 class="heading-hr ng-binding">{{ _language === 'en-us' ? 'Total No. of Warehouses' : 'वेयरहाउस की कुल संख्या' }} : {{TotalWarehouses}}</h4>
+                    </div>
+                    <table class="table table-responsive devtable" style="overflow-x:auto;">
+                        <thead>
+                            <tr>
+                                <th>
+                                    {{translation.SRNO}}
+                                </th>
+                                <th>
+                                    {{translation.IsCentralWarehouse}}
+                                </th>
+                                <th>
+                                    {{translation.District}}
+                                </th>
+                                <th>
+                                    {{translation.WarehouseNameEng}}
+                                </th>
+                                <th>
+                                    {{translation.WarehouseNameHi}}
+                                </th>
+                                <th>
+                                    {{translation.LicenceNo}}
+                                </th>
+                                <th>
+                                    {{translation.LicenceValidupTo}}
+                                </th>
+
+                                <th>
+                                    {{translation.UrbanRural}}
+                                </th>
+                                <th>
+                                    {{translation.City}}
+                                </th>
+                                <th>
+                                    {{translation.BlockHeading}}
+                                </th>
+                                <th>
+                                    {{translation.Address}}
+                                </th>
+                                <th>
+                                    {{translation.IsActive}}
+                                </th>
+                                <th>
+                                    {{translation.Edit}}
+                                </th>
+                                <th>
+                                    {{translation.Delete}}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr dir-paginate="item in Warehouses | filter: q | orderBy:colsort:reverseSort | itemsPerPage: pageSize" current-page="currentPage" pagination-id="TrainningFormatPagination">
+                                <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                                <td>
+                                    {{ item.IsCentralWarehouse == 'True' ? translation.Yes : translation.No}}
+                                </td>
+                                <td>
+                                    {{ _language === 'en-us' ? item.DISTRICT_ENG : item.DISTRICT_MANGAL}}
+                                </td>
+                                <td>
+                                    {{ item.WarehousNameEn}}
+                                </td>
+                                <td>
+                                    {{ item.WarehousNameHi}}
+                                </td>
+                                <th>
+                                    {{item.LicenceNo}}
+                                </th>
+                                <th>
+                                    {{item.LicenceValidUpTo}}
+                                </th>
+
+                                <td>
+                                    {{ item.ISCITY == true || item.ISCITY ==='True' ? translation.Urban : translation.Rural }}
+                                </td>
+                                <td>
+                                    {{ _language === 'en-us' ? item.CITY_ENG : item.CITY_MANGAL}}
+                                </td>
+
+                                <td>
+                                    {{ _language === 'en-us' ? item.BLOCK_ENG : item.BLOCK_MANGAL}}
+                                </td>
+                                <td>
+                                    {{ item.Address}}
+                                </td>
+
+                                <td>
+                                    <div class="dev-action">
+                                        <label class="switch">
+                                            <input type="checkbox" ng-checked="item.IsActive === '1' || item.IsActive === 1 || item.IsActive === true" ng-click="SetStatus(item.WarehousId,1)">
+                                            <span class="slider round"></span>
+                                        </label>
+                                    </div>
+                                </td>
+                                <td><a href="javascript:void(0)"><i class="fa fa-edit" aria-hidden="true" ng-click="Edit(item)"></i></a></td>
+                                <td><a href="javascript:void(0)"><i class="fa fa-trash" aria-hidden="true" ng-click="SetStatus(item.WarehousId,2)"></i></a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="col-md-10">
+                <div class="text-center">
+                    <dir-pagination-controls boundary-links="true" pagination-id="TrainningFormatPagination" on-page-change="pageChangeHandler(newPageNumber)" template-url="/dirPagination.tpl.html"></dir-pagination-controls>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

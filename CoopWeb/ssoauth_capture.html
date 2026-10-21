@@ -1,0 +1,50 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>SSOAUTH CAPTURE</title>
+    <meta charset="utf-8" />
+    <!--<meta http-equiv='cache-control' content='no-cache'>
+    <meta http-equiv='expires' content='0'>
+    <meta http-equiv='pragma' content='no-cache'>-->
+    <meta http-equiv="X-UA-Compatible" content="IE=10" />
+    <script type="text/javascript" src="http://ssoauth.rajasthan.gov.in/js/jquery-1.11.0.min.js"></script>
+</head>
+<body>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            var ssoauth_ver = $.now();
+            if ($.QueryString["d"]) {
+                var data = { p: 'https', type: $.QueryString["type"], device: $.QueryString["d"], isHttpsService: $.QueryString["isHttpsService"] };
+                initCapture(data);
+            }
+            else {
+                // Create IE + others compatible event handler
+                var eventMethod = window.addEventListener ? "addEventListener" : "attachEvent";
+                var eventer = window[eventMethod];
+                var messageEvent = eventMethod == "attachEvent" ? "onmessage" : "message";
+                // Listen to message from parent window
+                eventer(messageEvent, function (e) { initCapture(e.data); }, false);
+            }
+
+            function initCapture(d) {
+                $.getScript("/ssoauth_capture.min.js?v=" + ssoauth_ver).done(function (script, textStatus) {
+                    if (textStatus == "success") {
+                        startCaptureRD({ authType: d.type, fpDevice: d.device, env: "P", isHttpsService: d.isHttpsService },
+                            function (data) {
+
+                                alert(data.status)
+                                //alert(JSON.stringify(data));
+                                if (d.p === "http")
+                                    window.parent.postMessage(data, "*");
+                                else
+                                    window.parent.opener.postMessage(data, "*");
+                            });
+                    }
+                });
+            }
+        });
+
+        (function ($) { $.QueryString = (function (a) { if (a == "") return {}; var b = {}; for (var i = 0; i < a.length; ++i) { var p = a[i].split('='); if (p.length != 2) continue; b[p[0]] = decodeURIComponent(p[1].replace(/\+/g, " ")); } return b; })(window.location.search.substr(1).split('&')) })(jQuery);
+    </script>
+</body>
+</html>

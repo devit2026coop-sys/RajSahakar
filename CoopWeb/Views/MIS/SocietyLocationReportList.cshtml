@@ -1,0 +1,162 @@
+@{
+    ViewBag.Title = "Society Location Report List";
+}
+<script src="~/Scripts/AngularFramework/SocietyLocationReportList.js?v=1.13"></script>
+<link href="~/Scripts/google_hindi/google_transliteration.css" rel="stylesheet" />
+<script src="~/Scripts/xlsx.full.min.js"></script>
+
+<style>
+    .inputapi-transliterate-indic-suggestion-menu {
+        z-index: 99999 !important;
+        display: block;
+    }
+
+    .table > tbody > tr > td, .table > tbody > tr > th, .table > tfoot > tr > td, .table > tfoot > tr > th, .table > thead > tr > td {
+        padding: 1px;
+        padding-right: 5px;
+        padding-left: 5px;
+    }
+</style>
+<div ng-app="SocietyLocationModule" ng-controller="SocietyLocationCont" ng-cloak="">
+    <div>
+        <div class="col-md-12">
+            <h3 class="citizen-dash-head ng-binding" style="margin-top:0px;">Society Location Report List</h3>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#">  {{translation.Home}}</a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;"> {{translation.New}} </span>
+                        <i class="fa fa-angle-right"> </i>
+                        <span style="margin: 0 5px;"> Society Location Report List </span>
+                    </li>
+
+                </ul>
+            </div>
+        </div>
+        <div style="margin-top:30px;padding-top:30px">
+            <div class="col-md-12">
+                <div class="citizen-dash-head" style="overflow: hidden;">
+                    <div class="table-dropdown" id="search-filter" style="margin-bottom: 5px;">
+                        <div class="col-lg-12" style="margin-bottom: 5px; padding-left: 0;">
+                            <input type="hidden" id="hdnRoleId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).RoleId)" />
+                            <input type="hidden" id="hdnDistrictId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DistrictId)" />
+                            <input type="hidden" id="hdnPldbId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).PLDBId)" />
+                            <input type="hidden" id="hdnPldbBranchId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).PLDBBrancchId)" />
+                            <input type="hidden" id="hdnLevelId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).LevelId)" />
+
+                            <div class="col-md-2 ">
+
+                                <label>{{ translation.DistrictHeading}}</label>
+                                <select name="DISTRICT_ID" ng-model="DISTRICT_ID" id="ddrDistrictId" class="form-control" ng-init="DISTRICT_ID='0'">
+                                    <option value="0">{{translation.SelectOption}}</option>
+                                    <option ng-repeat="district in DistrictList" value="{{district.DISTRICT_ID}}">
+                                        {{_language =='en-us' ?  district.DISTRICT_ENG : district.DISTRICT_MANGAL}}
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-2">
+                                <label for="search">{{translation.ItemPerPage}}:</label>
+                                <input type="number" min="1" max="1000" class="form-control" ng-model="pageSize">
+                            </div>
+
+                            <div class="col-md-4 margin-Top20">
+                                <label>&nbsp;</label><br>
+                                <button type="button" ng-click="searchRequest(GetSocietyLocationList)" class="btn btn-primary dev-btn ng-binding">{{translation.Search}}</button>
+                                <button type="button" ng-click="ClearSearch()" class="btn btn-primary dev-btn ng-binding">{{translation.Clear}}</button>
+                                <button type="button" ng-click="exportAllToExcel()" class="btn btn-success dev-btn">
+                                    <i class="fa fa-file-excel-o"></i> Export Excel
+                                </button>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div style="overflow-x: auto;">
+                        <table id="OTSListTable" class="table table-responsive devtable" style="">
+
+                            <thead>
+                                <tr>
+                                    <th>Sr.No</th>
+                                    <th>Society Name</th>
+                                    <th>District Name</th>
+                                    <th>Chairman/Administrative Name</th>
+                                    <th>Chairman/Administrative Contact </th>
+                                    <th>CEO Name</th>
+                                    <th>CEO Contact </th>
+                                    <th>Charge Type </th>
+                                    <th>Society Status</th>
+                                    <th>Latitude</th>
+                                    <th>Longitude</th>
+                                    <th>Location By GEO</th>
+                                    <th>Image</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="item in SocietyLocationList">
+                                    <td>{{(((DataPagingDetails.PageNumber - 1) * DataPagingDetails.PageSize) + 1)+$index}}</td>
+                                    <td>{{item.SocietyName }}</td>
+                                    <td>{{item.DISTRICT_ENG }}</td>
+                                    <td>{{item.PresidentName}}</td>
+                                    <td>{{item.PresidentContact}}</td>
+                                    <td>{{item.SecretaryName}}</td>
+                                    <td>{{item.SecretaryContact}}</td>
+                                    <td>{{item.ChargeType}}</td>
+                                    <td>{{item.Status}}</td>
+                                    <td>{{item.Latitude}}</td>
+                                    <td>{{item.Longitude}}</td>
+                                    <td>{{item.locationbygeo }}</td>
+                                    <td class="text-center">
+                                        <a ng-if="item.ImageUrl" ng-href="{{item.ImageUrl}}" target="_blank" title="View Image">
+                                            <i class="fa fa-eye" aria-hidden="true"></i>
+                                        </a>
+                                        <span ng-if="!item.ImageUrl">-</span>
+                                    </td>
+                                    <td>
+                                        {{item.ApprovalStatus}}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-md-12">
+                        <div ng-if="DataPagingDetails.TotalPages>1" class="dataTables_paginate paging_simple_numbers" id="dataTables-example_paginate">
+                            <div class="dataTables_info" id="dataTables-example_info" role="status" aria-live="polite">
+                                Total Records: {{DataPagingDetails.TotalRecords}}
+                            </div>
+                            <ul class="pagination pagination_1" style="margin-left: 10px !important;">
+                                <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« First</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« Previous</span></li>
+
+                                <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest('1',GetSocietyLocationList)" style="cursor: pointer;">
+                                    <span>«First</span>
+                                </li>
+                                <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest(DataPagingDetails.PageNumber-1,GetSocietyLocationList)" style="cursor:pointer;">
+                                    <span>« Previous</span>
+                                </li>
+                                <li class="{{n==DataPagingDetails.PageNumber?'active':''}}" style="{{n==DataPagingDetails.PageNumber?'':'cursor: pointer'}}" ng-repeat="n in PagingRange(DataPagingDetails.StartPageNumber,DataPagingDetails.EndPageNumber,DataPagingDetails.TotalPages)" ng-click="pageRequest(n,GetSocietyLocationList)"><span>{{n}}</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Next</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Last</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber!= DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.PageNumber+1,GetSocietyLocationList)" style="cursor:pointer;">
+                                    <span>Next »</span>
+                                </li>
+                                <li ng-if="DataPagingDetails.PageNumber != DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.TotalPages,GetSocietyLocationList)" style="cursor:pointer;">
+                                    <span>Last »</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="se-pre-con"></div>
+    </div>
+</div>
+

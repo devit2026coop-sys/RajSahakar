@@ -1,0 +1,407 @@
+﻿<script src="~/Scripts/AngularFramework/MPRMainCoopSocieties.js"></script>
+@*<script src="~/Scripts/AngularFramework/PLDBLoanApplicationReport.js"></script>*@
+<script src="~/Scripts/Excel/jszip_v1.js"></script>
+<script src="~/Scripts/Excel/xlsx.js"></script>
+<script src="~/Scripts/Excel/jszip.js"></script>
+<script src="~/Scripts/Excel/FileSaver.js"></script>
+<script src="~/Scripts/Excel/myexcel.js"></script>
+<div ng-app="MPRMainCoopSocietiesmodule" ng-controller="MPRMainCoopSocietiesCount">
+    <div class="col-md-12">
+        <h3 class="h3heading citizen-dash-head">{{translation.MPRMainCoopSocieties}}</h3>
+    </div>
+    <input type="hidden" id="roleid" value="@ViewBag.RoleId" />
+    <div ng-show="@ViewBag.RoleId !=10222" class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="devpage-breadcrumb">
+            <ul class="page-breadcrumb">
+                <li class="dev-page-br">
+                    <i class="fa fa-home"> </i>
+                    <a href="#"> {{translation.MIS}}  </a>
+                    <i class="fa fa-angle-right"> </i>
+                </li>
+                <li style="float: left">
+                    <span style="margin: 0 5px;">{{translation.MPRMainCoopSocieties}}   </span>
+                </li>
+                <li style="float: right;">
+                    <button type="button" ng-click="showEntryForm()" class="btn btn-info btn-lg dev-popup-btn" data-toggle="modal" style="color: #025e63; cursor: pointer; text-decoration:none;  font-weight: bold;" data-target="#myModal">
+                        <h5>&#187; {{translation.NewEntry}}</h5>
+                    </button>
+                </li>
+
+            </ul>
+        </div>
+    </div>
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 dataList" ng-show="dataList">
+        <div class="table-responsive citizen-dash-head">
+            <div class="table-dropdown" id="search-filter" style="overflow:inherit; float:left;width: 100%;margin-bottom: 10px;">
+                <div class="col-sm-4 form-group">
+                    <label>Financial Year</label>
+                    <select class="form-control" ng-click="GetDataByFinancialYear()" ng-init="FY=''" id="FY" ng-model="FY">
+                        <option value="">{{translation.SelectOption}}</option>
+                        <option ng-repeat="district in FinancialYearList" value="{{district.FIN_YEAR_NAME}}">
+                            {{_language =='en-us' ?  district.FIN_YEAR_NAME : district.FIN_YEAR_NAME}}
+                        </option>
+                    </select>
+
+                </div>
+                <div class="col-md-2 margin-Top20 y_dropdown" style="padding-left: 0;">
+                    <br />
+                    <input type="button" class="btn btn-primary dev-btn" ng-click="GridData()" value="Search">
+                </div>
+            </div>
+
+
+            <table class="table devtable" id="tblgetsuport">
+                <thead>
+
+                    <tr>
+                        <th rowspan="2" style="text-align:center">{{translation.TypeOfSocieties}}</th>
+                        <th colspan="7" style="text-align:right !important">
+                            {{translation.FinancialYear}}:{{CoopMain[0].Year}}
+                        </th>
+                    </tr>
+                    <tr>
+                        <th style="text-align: center;">{{translation.NumberOfSocieties}}</th>
+                        <th style="text-align: center;">{{translation.MembershipNos}}</th>
+                        <th style="text-align: center;">{{translation.ShareCapital}} {{translation.In_Thousand}}</th>
+                        <th style="text-align: center;">{{translation.Reserve}} {{translation.In_Thousand}}</th>
+                        <th style="text-align: center;">{{translation.Deposits}} {{translation.In_Thousand}}</th>
+                        <th style="text-align: center;">{{translation.Borrowings}} {{translation.In_Thousand}}</th>
+                        <th style="text-align: center;">{{translation.WorkingCapital}} {{translation.In_Thousand}}</th>
+                    </tr>
+                </thead>
+                <tbody style="text-align:center">
+                    <tr ng-repeat="BData in CoopMain">
+                    <tr>
+                        <td style="text-align: left;">Apex Bank</td>
+                        <td>{{CoopMain[0].NoOfSocieties_Apex}}</td>
+                        <td>{{CoopMain[0].Membership_Apex}}</td>
+                        <td>{{CoopMain[0].ShareCapital_Apex}}</td>
+                        <td>{{CoopMain[0].Reserve_Apex}}</td>
+                        <td>{{CoopMain[0].Deposits_Apex}}</td>
+                        <td>{{CoopMain[0].Borrowing_Apex}}</td>
+                        <td>{{CoopMain[0].WorkingCapital_Apex}}</td>
+
+                    </tr>
+                    <tr>
+                        <td style="text-align: left;">CCBs</td>
+                        <td>{{CoopMain[0].NoOfSocieties_CCBs}}</td>
+                        <td>{{CoopMain[0].Membership_CCBs}}</td>
+                        <td>{{CoopMain[0].ShareCapital_CCBs}}</td>
+                        <td>{{CoopMain[0].Reserve_CCBs}}</td>
+                        <td>{{CoopMain[0].Deposits_CCBs}}</td>
+                        <td>{{CoopMain[0].Borrowing_CCBs}}</td>
+                        <td>{{CoopMain[0].WorkingCapital_CCBs}}</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left;">Urban Bank</td>
+                        <td>{{CoopMain[0].NoOfSocieties_UB}}</td>
+                        <td>{{CoopMain[0].Membership_UB}}</td>
+                        <td>{{CoopMain[0].ShareCapital_UB}}</td>
+                        <td>{{CoopMain[0].Reserve_UB}}</td>
+                        <td>{{CoopMain[0].Deposits_UB}}</td>
+                        <td>{{CoopMain[0].Borrowing_UB}}</td>
+                        <td>{{CoopMain[0].WorkingCapital_UB}}</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left;">Agri. PACS & LAMPS</td>
+                        <td>{{CoopMain[0].NoOfSocieties_Agri}}</td>
+                        <td>{{CoopMain[0].Membership_Agri}}</td>
+                        <td>{{CoopMain[0].ShareCapital_Agri}}</td>
+                        <td>{{CoopMain[0].Reserve_Agri}}</td>
+                        <td>{{CoopMain[0].Deposits_Agri}}</td>
+                        <td>{{CoopMain[0].Borrowing_Agri}}</td>
+                        <td>{{CoopMain[0].WorkingCapital_Agri}}</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left;">PLDBs</td>
+                        <td>{{CoopMain[0].NoOfSocieties_PLDB}}</td>
+                        <td>{{CoopMain[0].Membership_PLDB}}</td>
+                        <td>{{CoopMain[0].ShareCapital_PLDB}}</td>
+                        <td>{{CoopMain[0].Reserve_PLDB}}</td>
+                        <td>{{CoopMain[0].Deposits_PLDB}}</td>
+                        <td>{{CoopMain[0].Borrowing_PLDB}}</td>
+                        <td>{{CoopMain[0].WorkingCapital_PLDB}}</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left;">Housing</td>
+                        <td>{{CoopMain[0].NoOfSocieties_House}}</td>
+                        <td>{{CoopMain[0].Membership_House}}</td>
+                        <td>{{CoopMain[0].ShareCapital_House}}</td>
+                        <td>{{CoopMain[0].Reserve_House}}</td>
+                        <td>{{CoopMain[0].Deposits_House}}</td>
+                        <td>{{CoopMain[0].Borrowing_House}}</td>
+                        <td>{{CoopMain[0].WorkingCapital_House}}</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left;">industrial society</td>
+                        <td>{{CoopMain[0].NoOfSocieties_indsociety}}</td>
+                        <td>{{CoopMain[0].Membership_indsociety}}</td>
+                        <td>{{CoopMain[0].ShareCapital_indsociety}}</td>
+                        <td>{{CoopMain[0].Reserve_indsociety}}</td>
+                        <td>{{CoopMain[0].Deposits_indsociety}}</td>
+                        <td>{{CoopMain[0].Borrowing_indsociety}}</td>
+                        <td>{{CoopMain[0].WorkingCapital_indsociety}}</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left;">labour contract</td>
+                        <td>{{CoopMain[0].NoOfSocieties_labourcontract}}</td>
+                        <td>{{CoopMain[0].Membership_labourcontract}}</td>
+                        <td>{{CoopMain[0].ShareCapital_labourcontract}}</td>
+                        <td>{{CoopMain[0].Reserve_labourcontract}}</td>
+                        <td>{{CoopMain[0].Deposits_labourcontract}}</td>
+                        <td>{{CoopMain[0].Borrowing_labourcontract}}</td>
+                        <td>{{CoopMain[0].WorkingCapital_labourcontract}}</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left;">Marketing</td>
+                        <td>{{CoopMain[0].NoOfSocieties_Marketing}}</td>
+                        <td>{{CoopMain[0].Membership_Marketing}}</td>
+                        <td>{{CoopMain[0].ShareCapital_Marketing}}</td>
+                        <td>{{CoopMain[0].Reserve_Marketing}}</td>
+                        <td>{{CoopMain[0].Deposits_Marketing}}</td>
+                        <td>{{CoopMain[0].Borrowing_Marketing}}</td>
+                        <td>{{CoopMain[0].WorkingCapital_Marketing}}</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left;">Milk Supply</td>
+                        <td>{{CoopMain[0].NoOfSocieties_MilkSupply}}</td>
+                        <td>{{CoopMain[0].Membership_MilkSupply}}</td>
+                        <td>{{CoopMain[0].shareCapital_MilkSupply}}</td>
+                        <td>{{CoopMain[0].Reserve_MilkSupply}}</td>
+                        <td>{{CoopMain[0].Deposits_MilkSupply}}</td>
+                        <td>{{CoopMain[0].Borrowing_MilkSupply}}</td>
+                        <td>{{CoopMain[0].WorkingCapital_MilkSupply}}</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left;">Milk Union</td>
+                        <td>{{CoopMain[0].NoOfSocieties_MilkUnion}}</td>
+                        <td>{{CoopMain[0].Membership_MilkUnion}}</td>
+                        <td>{{CoopMain[0].ShareCapital_MilkUnion}}</td>
+                        <td>{{CoopMain[0].Reserve_MilkUnion}}</td>
+                        <td>{{CoopMain[0].Deposits_MilkUnion}}</td>
+                        <td>{{CoopMain[0].Borrowing_MilkUnion}}</td>
+                        <td>{{CoopMain[0].WorkingCapital_MilkUnion}}</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left;">Other society </td>
+                        <td>{{CoopMain[0].NoOfSocieties_Othersociety}}</td>
+                        <td>{{CoopMain[0].Membership_Othersociety}}</td>
+                        <td>{{CoopMain[0].ShareCapital_Othersociety}}</td>
+                        <td>{{CoopMain[0].Reserve_Othersociety}}</td>
+                        <td>{{CoopMain[0].Deposits_Othersociety}}</td>
+                        <td>{{CoopMain[0].Borrowing_Othersociety}}</td>
+                        <td>{{CoopMain[0].WorkingCapital_Othersociety}}</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left;">Primary Bhandar </td>
+                        <td>{{CoopMain[0].NoOfSocieties_PrimaryBhander}}</td>
+                        <td>{{CoopMain[0].MembershipPrimaryBhandery}}</td>
+                        <td>{{CoopMain[0].ShareCapital_PrimaryBhander}}</td>
+                        <td>{{CoopMain[0].Reserve_PrimaryBhander}}</td>
+                        <td>{{CoopMain[0].Deposits_PrimaryBhander}}</td>
+                        <td>{{CoopMain[0].Borrowing_PrimaryBhander}}</td>
+                        <td>{{CoopMain[0].WorkingCapital_PrimaryBhander}}</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left;">Wholesale Bhandar </td>
+                        <td>{{CoopMain[0].NoOfSocieties_WholesaleBhander}}</td>
+                        <td>{{CoopMain[0].MembershipPWholesaleBhander}}</td>
+                        <td>{{CoopMain[0].ShareCapital_WholesaleBhander}}</td>
+                        <td>{{CoopMain[0].Reserve_WholesaleBhander}}</td>
+                        <td>{{CoopMain[0].Deposits_WholesaleBhander}}</td>
+                        <td>{{CoopMain[0].Borrowing_WholesaleBhander}}</td>
+                        <td>{{CoopMain[0].WorkingCapital_WholesaleBhander}}</td>
+                    </tr>
+                    <tr />
+
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 EntryForm" ng-show="EntryForm">
+        <div class="table-responsive citizen-dash-head">
+            <div class="table-dropdown" id="search-filter" style="overflow:inherit; float:left;width: 100%;margin-bottom: 10px;">
+                <div class="col-sm-4 form-group">
+                    <label>Financial Year</label>
+                    <select class="form-control" ng-click="GetDataByFinancialYear()" ng-init="FIN_YEAR_NAME=''" id="txtFromMonth" ng-model="txtFromMonth">
+                        <option value="">{{translation.SelectOption}}</option>
+                        <option ng-repeat="district in FinancialYearList" value="{{district.FIN_YEAR_NAME}}">
+                            {{_language =='en-us' ?  district.FIN_YEAR_NAME : district.FIN_YEAR_NAME}}
+                        </option>
+                    </select>
+
+                </div>
+            </div>
+            <table class="table devtable" id="tblgetsuport">
+                <thead>
+                    <tr>
+                        <th style="text-align: center;">{{translation.TypeOfSocieties}}</th>
+                        <th style="text-align: center;">{{translation.NumberOfSocieties}}</th>
+                        <th style="text-align: center;">{{translation.MembershipNos}}</th>
+                        <th style="text-align: center;">{{translation.ShareCapital}}</th>
+                        <th style="text-align: center;">{{translation.Reserve}}</th>
+                        <th style="text-align: center;">{{translation.Deposits}}</th>
+                        <th style="text-align: center;">{{translation.Borrowings}}</th>
+                        <th style="text-align: center;">{{translation.WorkingCapital}}</th>
+                    </tr>
+                </thead>
+
+                <tbody style="text-align:center">
+                    <tr>
+                        <td>Apex Bank</td>
+                        <td><input class="form-control" placeholder="Counts" ng-model="Coop.nos_Ap" /></td>
+                        <td><input class="form-control" placeholder="Counts" ng-model="Coop.Mem_Ap" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.SC_Ap" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.Re_Ap" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.De_Ap" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.Bo_Ap" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.Wc_Ap" /></td>
+                    </tr>
+                    <tr>
+                        <td>CCBs</td>
+                        <td><input class="form-control" placeholder="Counts" ng-model="Coop.nos_CC" /></td>
+                        <td><input class="form-control" placeholder="Counts" ng-model="Coop.Mem_CC" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.SC_CC" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.Re_CC" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.De_CC" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.Bo_CC" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.Wc_CC" /></td>
+                    </tr>
+                    <tr>
+                        <td>Urban Bank</td>
+                        <td><input class="form-control" placeholder="Counts" ng-model="Coop.nos_UB" /></td>
+                        <td><input class="form-control" placeholder="Counts" ng-model="Coop.Mem_UB" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.SC_UB" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.Re_UB" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.De_UB" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.Bo_UB" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.Wc_UB" /></td>
+                    </tr>
+                    <tr>
+                        <td>Agri. PACS & LAMPS</td>
+                        <td><input class="form-control" placeholder="Counts" ng-model="Coop.nos_Ag" /></td>
+                        <td><input class="form-control" placeholder="Counts" ng-model="Coop.Mem_Ag" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.SC_Ag" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.Re_Ag" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.De_Ag" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.Bo_Ag" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.Wc_Ag" /></td>
+                    </tr>
+                    <tr>
+                        <td>PLDBs</td>
+                        <td><input class="form-control" placeholder="Counts" ng-model="Coop.nos_PLDB" /></td>
+                        <td><input class="form-control" placeholder="Counts" ng-model="Coop.Mem_PLDB" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.SC_PLDB" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.Re_PLDB" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.De_PLDB" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.Bo_PLDB" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.Wc_PLDB" /></td>
+                    </tr>
+                    <tr>
+                        <td>Housing</td>
+                        <td><input class="form-control" placeholder="Counts" ng-model="Coop.nos_house" /></td>
+                        <td><input class="form-control" placeholder="Counts" ng-model="Coop.Mem_house" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.SC_house" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.Re_house" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.De_house" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.Bo_house" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.Wc_house" /></td>
+                    </tr>
+                    <tr>
+                        <td>industrial society</td>
+                        <td><input class="form-control" placeholder="Counts" ng-model="Coop.nos_IS" /></td>
+                        <td><input class="form-control" placeholder="Counts" ng-model="Coop.Mem_IS" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.SC_IS" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.Re_IS" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.De_IS" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.Bo_IS" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.Wc_IS" /></td>
+                    </tr>
+                    <tr>
+                        <td>labour contract</td>
+                        <td><input class="form-control" placeholder="Counts" ng-model="Coop.nos_LC" /></td>
+                        <td><input class="form-control" placeholder="Counts" ng-model="Coop.Mem_LC" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.SC_LC" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.Re_LC" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.De_LC" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.Bo_LC" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.Wc_LC" /></td>
+                    </tr>
+                    <tr>
+                        <td>Marketing</td>
+                        <td><input class="form-control" placeholder="Counts" ng-model="Coop.nos_mark" /></td>
+                        <td><input class="form-control" placeholder="Counts" ng-model="Coop.Mem_mark" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.SC_mark" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.Re_mark" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.De_mark" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.Bo_mark" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.Wc_mark" /></td>
+                    </tr>
+                    <tr>
+                        <td>Milk Supply</td>
+                        <td><input class="form-control" placeholder="Counts" ng-model="Coop.nos_MS" /></td>
+                        <td><input class="form-control" placeholder="Counts" ng-model="Coop.Mem_MS" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.SC_MS" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.Re_MS" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.De_MS" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.Bo_MS" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.Wc_MS" /></td>
+                    </tr>
+                    <tr>
+                        <td>Milk Union</td>
+                        <td><input class="form-control" placeholder="Counts" ng-model="Coop.nos_MU" /></td>
+                        <td><input class="form-control" placeholder="Counts" ng-model="Coop.Mem_MU" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.SC_MU" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.Re_MU" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.De_MU" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.Bo_MU" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.Wc_MU" /></td>
+                    </tr>
+                    <tr>
+                        <td>Other society </td>
+                        <td><input class="form-control" placeholder="Counts" ng-model="Coop.nos_OS" /></td>
+                        <td><input class="form-control" placeholder="Counts" ng-model="Coop.Mem_OS" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.SC_OS" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.Re_OS" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.De_OS" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.Bo_OS" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.Wc_OS" /></td>
+                    </tr>
+                    <tr>
+                        <td>Primary Bhandar </td>
+                        <td><input class="form-control" placeholder="Counts" ng-model="Coop.nos_PB" /></td>
+                        <td><input class="form-control" placeholder="Counts" ng-model="Coop.Mem_PB" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.SC_PB" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.Re_PB" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.De_PB" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.Bo_PB" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.Wc_PB" /></td>
+                    </tr>
+                    <tr>
+                        <td>Wholesale Bhandar </td>
+                        <td><input class="form-control" placeholder="Counts" ng-model="Coop.nos_WB" /></td>
+                        <td><input class="form-control" placeholder="Counts" ng-model="Coop.Mem_WB" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.SC_WB" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.Re_WB" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.De_WB" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.Bo_WB" /></td>
+                        <td><input class="form-control" placeholder="Amount in thousands" ng-model="Coop.Wc_WB" /></td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="row">
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 text-center">
+                    <button type="submit" class="btn btn-primary dev-btn" ng-click="MainCooperativeSocieties(true)">Save</button>
+                    <button type="button" class="btn btn-primary dev-btn">Reset</button>
+                    <button type="submit" class="btn btn-primary dev-btn" ng-click="back()">Back</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+
+

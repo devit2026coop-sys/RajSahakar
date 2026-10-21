@@ -1,0 +1,1615 @@
+﻿@{
+    ViewBag.Title = "Dashboard";
+}
+
+@*<link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">*@
+<link href="~/Content/Stylesheets/bootstrap.css" rel="stylesheet" />
+<script src="~/Scripts/AngularFramework/Index.js"></script>
+<script src="~/Scripts/zingchart.min.js"></script>
+<script src="~/Scripts/zingchart-angularjs.js"></script>
+<script src="~/Scripts/canvasjs.min.js"></script>
+
+<script src="~/Scripts/jquery.min.js"></script>
+<script src="~/Scripts/AngularFramework/ng-google-chart.min.js"></script>
+<script src="~/Scripts/loader.js"></script>
+<script src="~/Scripts/jspdf.min.js"></script>
+<script src="~/Scripts/globalize.js"></script>
+<script src="~/Scripts/globalize.cultures.js"></script>
+<link href="~/Content/Stylesheets/tooltip.css" rel="stylesheet" />
+<script src="~/Scripts/tooltip.js"></script>
+
+<script>
+    window.onload = function () {
+    }
+    @*var chart = new CanvasJS.Chart("chartContainer", {
+        animationEnabled: true,
+        theme: "light2", // "light1", "dark1", "dark2"
+        exportEnabled: true,
+        title: {
+            text: ""
+        },
+        data: [{
+            type: "column",
+            dataPoints:  @Html.Raw(ViewBag.DataPoints),
+	}]
+});
+    chart.render();
+
+    google.charts.load('current', { 'packages': ['corechart'] });
+
+    }*@
+
+        function formatNumber(num) {
+            Globalize.culture('en-IN');
+            if (isNaN(num))
+                return ('Number not valid');
+            return (Globalize.format(parseInt(num), "n2"));
+        }
+
+
+
+</script>
+<style>
+    .progress {
+        margin: 10px;
+        width: 700px;
+    }
+
+    .popupGraph {
+        position: fixed !important;
+        top: 1% !important;
+        width: 100% !important;
+        height: 600px;
+        z-index: 999 !important;
+        left: 1% !important;
+        right: 1% !important;
+    }
+
+        .popupGraph .card-image div {
+            height: 600px !important;
+        }
+
+        .popupGraph .card-image2 div {
+            height: 600px !important;
+        }
+
+    .DivisionReport {
+        float: left;
+        margin: 0;
+        font-size: 14px;
+    }
+
+    .ReportControl {
+        float: right;
+    }
+
+        .ReportControl .form-control {
+            height: 24px;
+            padding: 2px 12px;
+        }
+
+    .portlet-fullscreen .div_chart {
+        height: 600px !important;
+    }
+
+    .page-content-wrapper .page-content {
+        padding: 15px 10px 10px;
+    }
+
+    .page-title {
+        margin: 0 0 5px;
+    }
+
+    .col-lg-1, .col-lg-10, .col-lg-11, .col-lg-12, .col-lg-2, .col-lg-3, .col-lg-4, .col-lg-5, .col-lg-6, .col-lg-7, .col-lg-8, .col-lg-9, .col-md-1, .col-md-10, .col-md-11, .col-md-12, .col-md-2, .col-md-3, .col-md-4, .col-md-5, .col-md-6, .col-md-7, .col-md-8, .col-md-9, .col-sm-1, .col-sm-10, .col-sm-11, .col-sm-12, .col-sm-2, .col-sm-3, .col-sm-4, .col-sm-5, .col-sm-6, .col-sm-7, .col-sm-8, .col-sm-9, .col-xs-1, .col-xs-10, .col-xs-11, .col-xs-12, .col-xs-2, .col-xs-3, .col-xs-4, .col-xs-5, .col-xs-6, .col-xs-7, .col-xs-8, .col-xs-9 {
+        padding-left: 5px;
+        padding-right: 5px;
+    }
+
+    .dashboard-stat {
+        margin-bottom: 10px;
+    }
+
+    .dashboard-stat2 {
+        padding: 5px 15px 15px 15px;
+    }
+
+    .portlet {
+        margin-bottom: 10px;
+    }
+
+        .portlet.light {
+            padding: 5px 10px 10px 10px;
+        }
+
+    .modal {
+        display: none; /* Hidden by default */
+        position: fixed; /* Stay in place */
+        z-index: 1; /* Sit on top */
+        padding-top: 100px; /* Location of the box */
+        left: 0;
+        top: 0;
+        width: 100%; /* Full width */
+        height: 100%; /* Full height */
+        overflow: auto; /* Enable scroll if needed */
+        background-color: rgb(0,0,0); /* Fallback color */
+        background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+    }
+
+    /* Modal Content */
+    .modal-content {
+        background-color: #fefefe;
+        margin: auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 90%;
+        min-height: 250px;
+    }
+
+    /* The Close Button */
+    .close {
+        color: #aaaaaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+        .close:hover,
+        .close:focus {
+            color: #000;
+            text-decoration: none;
+            cursor: pointer;
+        }
+</style>
+<style id="compiled-css" type="text/css">
+    .panel-actions {
+        margin-top: -20px;
+        margin-bottom: 0;
+        text-align: right;
+    }
+
+        .panel-actions a {
+            color: #333;
+        }
+
+    .panel-fullscreen {
+        display: block;
+        z-index: 9999;
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        right: 0;
+        left: 0;
+        bottom: 0;
+        overflow: auto;
+    }
+</style>
+<style>
+    a.canvasjs-chart-credit {
+        display: none;
+    }
+
+    .FullW {
+        width: 800px !important;
+    }
+</style>
+<style type="text/css">
+    .cont-m1 {
+        background-color: transparent;
+        height: 275px;
+        perspective: 1000px;
+    }
+
+    #card {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        transform-style: preserve-3d;
+        transition: transform 1s;
+        color: white;
+    }
+
+        #card figure {
+            margin: 0;
+            display: block;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            z-index: 999;
+        }
+
+        #card .back {
+            transform: rotateY( 180deg);
+        }
+
+        #card.flipped {
+            transform: rotateY( 180deg);
+        }
+
+    .LandingPageRow {
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+        height: calc(100vh - 200px);
+    }
+
+    .landingCircle {
+        display: flex;
+        justify-content: center;
+        align-content: center;
+        flex-wrap: wrap;
+    }
+
+    .LandingPageRow .FlexBox {
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        align-items: center;
+        width: 300px;
+        height: 300px;
+        box-shadow: 0px 3px 5px #b7b7b7;
+        border-radius: 100%;
+        border: solid 1px #fafafa;
+        margin: 30px;
+    }
+
+        .LandingPageRow .FlexBox:hover {
+            text-decoration: none;
+            color: #4208f4
+        }
+
+        .LandingPageRow .FlexBox h3 {
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .LandingPageRow .FlexBox span {
+            color: #fff;
+            font-size: 12px;
+        }
+
+    .iconLanding {
+        width: 100px;
+        height: 100px;
+        border-radius: 100%;
+        background: #ffffff;
+        border: solid 2px #f2f2f2;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .iconLanding img {
+            width: 70%;
+        }
+
+
+    .landingPageBox1 {
+        background: rgb(133,253,160);
+        background: linear-gradient(90deg, rgba(133,253,160,.80), rgba(27,176,171,.80));
+    }
+
+
+    .landingPageBox2 {
+        background: rgb(253,191,128);
+        background: linear-gradient(90deg, rgba(253,191,128,.80), rgba(251,144,141,.80));
+    }
+
+
+    .landingPageBox3 {
+        background: rgb(99,205,219);
+        background: linear-gradient(90deg, rgba(99,205,219,.80), rgba(97,102,233,.80));
+    }
+
+    @@media screen and (max-width: 767px) {
+        .landingCircle {
+            zoom: .8;
+        }
+
+        .LandingPageRow .FlexBox {
+            width: 200px;
+            height: 200px;
+            margin: 10px;
+        }
+
+        h3, .h3 {
+            font-size: 18px;
+        }
+    }
+</style>
+<script>
+    //window.onload = function () {
+    //    var card = document.querySelector('#card');
+    //    var flipBtn = document.querySelector('#flip');
+    //    flipBtn.addEventListener('click', function () {
+    //        card.classList.toggle('flipped');
+    //    });
+    //}
+</script>
+
+<div ng-app="Indexmod">
+    <div ng-controller="IndexCont">
+        <style>
+            .board .panel {
+                padding: 15px 40px;
+                border: none;
+                background: #fff;
+            }
+
+            .panel-primary {
+                display: inline-block;
+                margin-bottom: 30px;
+                width: 100%;
+            }
+
+            /*.panel {
+                border-radius: 0px;
+            }*/
+
+            .panel-primary {
+                border-color: #337ab7;
+            }
+
+            .panel {
+                margin-bottom: 20px;
+                background-color: #fff;
+                border: 1px solid transparent;
+                border-radius: 4px;
+                -webkit-box-shadow: 0 1px 1px rgba(0,0,0,.05);
+                box-shadow: 0 1px 1px rgba(0,0,0,.05);
+            }
+
+            .board .number {
+                float: left;
+            }
+
+            .number h3 {
+                font-size: 32px;
+                color: #676767;
+            }
+
+            .number small {
+                font-size: 16px;
+                font-weight: 600;
+                text-transform: uppercase;
+                margin: 8px 5px;
+                display: inline-block;
+            }
+
+            .board .icon {
+                float: right;
+            }
+
+            .board .panel .icon .fa {
+                font-size: 35px;
+                color: #FFFFFF;
+                background: #30A5FF;
+                padding: 35px;
+                border-radius: 50%;
+            }
+
+            .dred {
+                background: linear-gradient(60deg,#ffa726,#fb8c00) !important;
+                -webkit-box-shadow: 0 4px 20px 0 rgba(0,0,0,.14), 0 7px 10px -5px rgba(255,152,0,.4);
+                box-shadow: 0 4px 20px 0 rgba(0,0,0,.14), 0 7px 10px -5px rgba(255,152,0,.4);
+            }
+
+            .red-txt {
+                color: #f29918;
+            }
+
+            .green {
+                background: linear-gradient(60deg,#66bb6a,#43a047) !important;
+                -webkit-box-shadow: 0 4px 20px 0 rgba(0,0,0,.14), 0 7px 10px -5px rgba(76,175,80,.4);
+                box-shadow: 0 4px 20px 0 rgba(0,0,0,.14), 0 7px 10px -5px rgba(76,175,80,.4);
+            }
+
+            .green-txt {
+                color: #5ab360;
+            }
+
+            .blue {
+                background: linear-gradient(60deg,#ef5350,#e53935) !important;
+                -webkit-box-shadow: 0 4px 20px 0 rgba(0,0,0,.14), 0 7px 10px -5px rgba(244,67,54,.4);
+                box-shadow: 0 4px 20px 0 rgba(0,0,0,.14), 0 7px 10px -5px rgba(244,67,54,.4);
+            }
+
+            .blue-txt {
+                color: #e94442;
+            }
+
+            .sky {
+                background: linear-gradient(60deg,#26c6da,#00acc1) !important;
+                -webkit-box-shadow: 0 4px 20px 0 rgba(0,0,0,.14), 0 7px 10px -5px rgba(0,188,212,.4);
+                box-shadow: 0 4px 20px 0 rgba(0,0,0,.14), 0 7px 10px -5px rgba(0,188,212,.4);
+            }
+
+            .sky-txt {
+                color: #53c0d4;
+            }
+
+            .lyt-green {
+                background: linear-gradient(60deg,#dd70d4,#bd29e5) !important;
+                -webkit-box-shadow: 0 4px 20px 0 rgba(0,0,0,.14), 0 7px 10px -5px rgb(244, 166, 248);
+                box-shadow: 0 4px 20px 0 rgba(0,0,0,.14), 0 7px 10px -5px rgb(244, 166, 248);
+            }
+
+            .lyt-green-txt {
+                color: #c43ae1;
+            }
+
+            .dark-blue {
+                background: linear-gradient(60deg,#4208f4,#6354d3) !important;
+                -webkit-box-shadow: 0 4px 20px 0 rgba(0,0,0,.14), 0 7px 10px -5px rgb(148, 124, 240);
+                box-shadow: 0 4px 20px 0 rgba(0,0,0,.14), 0 7px 10px -5px rgb(148, 124, 240);
+            }
+
+            .dark-blue-txt {
+                color: #4920ec;
+            }
+
+            .red1:hover .panel {
+                background: #f1930f;
+                transition: 0.5s all;
+            }
+
+            .red1:hover .red-txt, .red1:hover h3 {
+                color: #fff;
+                transition: 0.5s all;
+            }
+
+            .red1:hover .dred {
+                background: #fff !important;
+                transition: 0.5s all;
+            }
+
+            .red1:hover .icon .fa {
+                color: #f1930f;
+                transition: 0.5s all;
+            }
+
+            .green1:hover .panel {
+                background: #66bb6a;
+                transition: 0.5s all;
+            }
+
+            .green1:hover .green-txt, .green1:hover h3 {
+                color: #fff;
+                transition: 0.5s all;
+            }
+
+            .green1:hover .green {
+                background: #fff !important;
+                transition: 0.5s all;
+            }
+
+            .green1:hover .icon .fa {
+                color: #66bb6a;
+                transition: 0.5s all;
+            }
+
+            .blue1:hover .panel {
+                background: #ef5350;
+                transition: 0.5s all;
+            }
+
+            .blue1:hover .blue-txt, .blue1:hover h3 {
+                color: #fff;
+                transition: 0.5s all;
+            }
+
+            .blue1:hover .blue {
+                background: #fff !important;
+                transition: 0.5s all;
+            }
+
+            .blue1:hover .icon .fa {
+                color: #ef5350;
+                transition: 0.5s all;
+            }
+
+            .sky1:hover .panel {
+                background: #26c6da;
+                transition: 0.5s all;
+            }
+
+            .sky1:hover .sky-txt, .sky1:hover h3 {
+                color: #fff;
+                transition: 0.5s all;
+            }
+
+            .sky1:hover .sky {
+                background: #fff !important;
+                transition: 0.5s all;
+            }
+
+            .sky1:hover .icon .fa {
+                color: #26c6da;
+                transition: 0.5s all;
+            }
+
+            .lyt-green1:hover .panel {
+                background: #bd29e5;
+                transition: 0.5s all;
+            }
+
+            .lyt-green1:hover .lyt-green-txt, .lyt-green1:hover h3 {
+                color: #fff;
+                transition: 0.5s all;
+            }
+
+            .lyt-green1:hover .lyt-green {
+                background: #fff !important;
+                transition: 0.5s all;
+            }
+
+            .lyt-green1:hover .icon .fa {
+                color: #bd29e5;
+                transition: 0.5s all;
+            }
+
+            .dark-blue1:hover .panel {
+                background: #4208f4;
+                transition: 0.5s all;
+            }
+
+            .dark-blue1:hover .dark-blue-txt, .dark-blue1:hover h3 {
+                color: #fff;
+                transition: 0.5s all;
+            }
+
+            .dark-blue1:hover .dark-blue {
+                background: #fff !important;
+                transition: 0.5s all;
+            }
+
+            .dark-blue1:hover .icon .fa {
+                color: #4208f4;
+                transition: 0.5s all;
+            }
+        </style>
+        <style type="text/css">
+            .loan-card {
+                /*margin-bottom: 15px;
+                margin-top: 15px;
+                width: 100%;
+                position: relative;
+                display: flex;
+                -ms-flex-direction: column;
+                flex-direction: column;
+                min-width: 0;
+                word-wrap: break-word;
+                background-clip: border-box;
+                transition: 1s all;*/
+                padding: 15px 0;
+                margin: 4px 0;
+                width: 25%;
+                position: relative;
+                /* display: flex; */
+                -ms-flex-direction: column;
+                min-width: 0;
+                /* word-wrap: break-word; */
+                /* background-clip: border-box; */
+                /* transition: 1s all; */
+                float: left;
+                /*background: #f8f9fa;*/
+            }
+
+
+
+            .loan-card-desc {
+                margin: 0 15px;
+                background: #f3c38c;
+                /*position: relative;
+
+                padding: 10px 15px;
+                border-radius: 6px;
+                text-align: right;
+                box-shadow: inset 0 0 10px #ede2cf;
+                transition: 1s all;*/
+                /* margin: 0 15px; */
+                position: relative;
+                /* background: #f8f9fa; */
+                padding: 10px 15px;
+                /* border-radius: 6px; */
+                text-align: center;
+                /* box-shadow: inset 0 0 10px #ede2cf; */
+                transition: 1s all;
+                /*border-right: 1px solid #c8ced3;*/
+            }
+
+            .border-0 {
+                border: 0 !important;
+            }
+
+            .loan-card-heading {
+                /*color: #000;
+                font-size: 18px;
+                font-weight: 600;*/
+                margin: 0;
+                color: #303030;
+                text-transform: uppercase;
+                font-size: 80%;
+                font-weight: 400;
+            }
+
+            .loan-card-title {
+                margin: 6px 0;
+                color: #303030;
+                /*font-size: 16px;
+                font-weight: bold;*/
+                font-size: 1.4125rem;
+                font-weight: 600;
+            }
+
+            .loan-card:hover .loan-card-desc {
+                box-shadow: inset 0 0 10px #a27644;
+            }
+        </style>
+        <div class="progress" style="display:none">
+            <div id="dynamic" class="progress-bar progress-bar-success progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%">
+                <span id="current-progress"></span>
+            </div>
+        </div>
+        @*@if (((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).UserType == "D")
+            {
+                <div class="row LandingPageRow" style="padding:0px 15px">
+                    <div class="col-md-10 landingCircle">
+                        <a href="javascript:void(0);" class="FlexBox landingPageBox2">
+                            <div class="iconLanding">
+                                <img src="~/Images/rajsahkar.png" />
+                            </div>
+                            <h3>Cooprative</h3>
+                            <span>Click Here For Visit</span>
+                        </a>
+                        <a href="javascript:void(0);" class="FlexBox landingPageBox1">
+                            <div class="iconLanding">
+                                <img src="~/Images/CM-Kisan.png" />
+                            </div>
+                            <h3>CM-Kisan</h3>
+                            <span>Click Here For Visit</span>
+                        </a>
+                        <a href="javascript:void(0);" class="FlexBox landingPageBox3">
+                            <div class="iconLanding">
+                                <img src="~/Images/creditCard.png" />
+                            </div>
+                            <h3>Gopal Credit Card</h3>
+                            <span>Click Here For Visit</span>
+                        </a>
+                    </div>
+                </div>
+            }*@
+        <!-- start main-content -->
+        <div class="row">
+            <ul style="padding-left:16px;width:98%">
+                <li class="dev-links-menu">
+                    <ul class="nav nav-tabs">
+                        <li class="active"><a data-toggle="tab" href="#D1" style="border-radius: 25px 0px 0px 25px;">KPI's</a></li>
+                        <li><a data-toggle="tab" href="#D2" ng-click="OK()" style="border-radius: 0px 25px 25px 0px;">Department</a></li>
+                    </ul>
+                    <div class="tab-content">
+                        <div id="D1" class="tab-pane fade in active">
+                            <div class="row">
+                                <div class="col-lg-3 col-md-6 col-sm-6">
+                                    <div class="card card-stats">
+                                        <div class="card-header card-header-info card-header-icon">
+                                            <div class="card-icon">
+                                                <i class="material-icons fa fa-external-link "></i>
+                                            </div>
+                                            <p class="card-category">{{translation.FertilizerGraphTitle}}</p>
+                                            <h3 class="card-title" onclick="tooltip.pop(this, '#tip61');">
+                                                <label style="cursor:pointer;">{{TotalStock}}</label>
+                                            </h3>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-3 col-md-6 col-sm-6">
+                                    <div class="card card-stats">
+                                        <div class="card-header card-header-danger card-header-icon">
+                                            <div class="card-icon">
+                                                <i class="material-icons fa fa-tasks"></i>
+                                            </div>
+                                            <p class="card-category">{{translation.TotalFarmerBenefitedHeader}}</p>
+                                            <h3 class="card-title" onclick="tooltip.pop(this, '#tip10');">
+                                                <label style="cursor:pointer;">{{TotalFarmerBenefited}}</label>
+                                            </h3>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-3 col-md-6 col-sm-6">
+                                    <div class="card card-stats">
+                                        <div class="card-header card-header-danger card-header-icon">
+                                            <div class="card-icon">
+                                                <i class="material-icons fa fa-money"></i>
+                                            </div>
+
+
+                                            @*<h3 class="card-title" onclick="tooltip.pop(this, '#tipMSP');" >
+                                                <label style="cursor:pointer;">{{translation.Rabi}} : {{GrandTotalTipMSP}}</label>*@
+
+                                            <h3 class="card-title">
+                                                {{KharifTitle}} :  <label style="cursor:pointer;" onclick="tooltip.pop(this, '#tipMSPKharif');">{{GrandTotalTipMSPKharif}}</label>
+                                                <br />
+                                                {{RabiTitle}}   :  <label style="cursor:pointer;" onclick="tooltip.pop(this, '#tipMSP');">{{GrandTotalTipMSP}}</label>
+
+                                            </h3>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-3 col-md-6 col-sm-6">
+                                    <div class="card card-stats">
+                                        <div class="card-header card-header-danger card-header-icon">
+                                            <div class="card-icon">
+                                                <i class="material-icons fa fa-thumbs-up"></i>
+                                            </div>
+                                            <p class="card-category">{{translation.APEXSt}} {{translation.ApplicationReceived}}</p>
+                                            <h3 class="card-title" onclick="tooltip.pop(this, '#tip32');">
+                                                <label style="cursor:pointer">{{ApplicationReceived}}</label>
+                                            </h3>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        @*<div class="card-header card-header-info">{{translation.FertilizerProgress}}  (Stock<input type="radio" ng-click="Stock(1)" value="1" ng-model="MSPTS" name="TilamSang" /> Quantity <input type="radio" value="2" ng-model="MSPTS" ng-click="QtyPrice(2)" name="TilamSang" />)</div>*@
+                                        <div class="card-header card-header-info">{{translation.FertilizerProgress}}</div>
+                                        <div class="card-image" style="min-height:150px">
+                                            <div class="collection">
+                                                <a href="javascript:void(0)" onclick="tooltip.pop(this, '#tip61');" class="collection-item">{{translation.OpeningStock}} {{StockOn}}<span class="new badge2">{{TotalStock}}</span></a> @*ng-click="drawVisualizationFertiChart('Stock')"*@
+                                                <a href="javascript:void(0)" class="collection-item">{{translation.QuantitySold}} {{MonthName}}<span class="new badge2">{{TotalQuantitySold}} </span></a>
+                                                @*<a href="javascript:void(0)" ng-click="drawVisualizationFertiChart('Target')" class="collection-item">{{translation.FertilizerTarget}}<span class="new badge2">{{TotalFertilizerTargetInMt}}</span></a>*@
+                                                @*<a href="javascript:void(0)" class="collection-item">{{translation.FertilizerRemainingStock}}<span class="new badge2">{{TotalFertilizerRemainingStock}}</span></a>*@
+                                                <a class="collection-item" target="_blank" href="../MIS/FertilizerReport">{{translation.DetailedReport}}<span class="new badge2 red"><i class="fa fa-table"></i></span></a>
+                                            </div>
+                                            <div style="display:none;">
+                                                <div id="tip61">
+                                                    <h5>
+                                                        <a href="javascript:void(0)" ng-click="drawVisualizationFertilizerOpeningStock('Urea')" class="collection-item"><span class="badge2"></span>{{translation.Urea}} </a><span class="new badge2">{{Urea}}</span><br />
+                                                        <a href="javascript:void(0)" ng-click="drawVisualizationFertilizerOpeningStock('Compost')" class="collection-item"><span class="badge2 red"></span>{{translation.Compost}} </a><span class="new badge2 red">{{Compost}}</span><br />
+                                                        <a href="javascript:void(0)" ng-click="drawVisualizationFertilizerOpeningStock('DAP')" class="collection-item"><span class="badge2 red"></span>{{translation.DAP}} </a><span class="new badge2 red">{{DAP}}</span><br />
+                                                        <a href="javascript:void(0)" ng-click="drawVisualizationFertilizerOpeningStock('MOP')" class="collection-item"><span class="badge2 red"></span>{{translation.MOP}} </a><span class="new badge2 red">{{MOP}}</span><br />
+                                                        <a href="javascript:void(0)" ng-click="drawVisualizationFertilizerOpeningStock('NPKS')" class="collection-item"><span class="badge2 red"></span>{{translation.NPKS}} </a><span class="new badge2 red">{{NPKS}}</span><br />
+                                                        <a href="javascript:void(0)" ng-click="drawVisualizationFertilizerOpeningStock('SSP')" class="collection-item"><span class="badge2 red"></span>{{translation.SSP}} </a><span class="new badge2 red">{{SSP}}</span><br />
+                                                    </h5>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-header card-header-info">{{translation.PMKisan}}</div>
+                                        <div class="card-image" style="min-height:150px">
+                                            <div class="collection">
+                                                <a onclick="tooltip.pop(this, '#tip12');" href="javascript:void(0)" class="collection-item">{{translation.ApplicationReceived}}<span class="new badge2">{{TotAppRec}}</span></a>
+                                                <a onclick="tooltip.pop(this, '#tip10');" href="javascript:void(0)" class="collection-item">{{translation.TotalFarmerBenefited}}<span class="new badge2">{{TotalFarmerBenefited}}</span></a>
+                                                <a onclick="tooltip.pop(this, '#tip11');" href="javascript:void(0)" class="collection-item">{{translation.FundDistributed}}<span class="new badge2 blue">{{TotalFundDistributed}}</span></a>
+                                            </div>
+                                            <div style="display:none;">
+                                                <div id="tip10">
+                                                    <h5>
+                                                        <a href="javascript:void(0)" ng-click="drawVisualizationDistrictwisePMKishan('fr','1')" class="collection-item"><span class="badge2"></span>{{translation.TotalFarmerBenefited}} 1</a><span class="new badge2">{{IstInstallment}}</span><br />
+                                                        <a href="javascript:void(0)" ng-click="drawVisualizationDistrictwisePMKishan('fr','2')" class="collection-item"><span class="badge2 red"></span>{{translation.TotalFarmerBenefited}} 2</a><span class="new badge2 red">{{IIstInstallment}}</span><br />
+                                                        <a href="javascript:void(0)" ng-click="drawVisualizationDistrictwisePMKishan('fr','3')" class="collection-item"><span class="badge2 red"></span>{{translation.TotalFarmerBenefited}} 3</a><span class="new badge2 red">{{IIIrdInstallment}}</span><br />
+                                                        <a href="javascript:void(0)" ng-click="drawVisualizationDistrictwisePMKishan('fr','4')" class="collection-item"><span class="badge2 red"></span>{{translation.TotalFarmerBenefited}} 4</a><span class="new badge2 red">{{IVthInstallment}}</span><br />
+                                                    </h5>
+                                                </div>
+                                                <div id="tip11">
+                                                    <h5>
+                                                        <a href="javascript:void(0)" ng-click="drawVisualizationDistrictwisePMKishan('fd','1')" class="collection-item"><span class="badge2"></span>{{translation.TotalFundDistributed}}</a><span class="new badge2">{{IstInstallmentAmount}}</span><br />
+                                                        <a href="javascript:void(0)" ng-click="drawVisualizationDistrictwisePMKishan('fd','2')" class="collection-item"><span class="badge2 red"></span>{{translation.TotalFundDistributedII}}</a><span class="new badge2 red">{{IIstInstallmentAmount}}</span><br />
+                                                        <a href="javascript:void(0)" ng-click="drawVisualizationDistrictwisePMKishan('fd','3')" class="collection-item"><span class="badge2 red"></span>{{translation.TotalFundDistributedIII}}</a><span class="new badge2 red">{{IIIrdInstallmentAmount}}</span><br />
+                                                        <a href="javascript:void(0)" ng-click="drawVisualizationDistrictwisePMKishan('fd','4')" class="collection-item"><span class="badge2 red"></span>{{translation.TotalFundDistributedIV}}</a><span class="new badge2 red">{{IVthInstallmentAmount}}</span><br />
+                                                    </h5>
+                                                </div>
+                                                <div id="tip12">
+                                                    <h5>
+                                                        <a href="javascript:void(0)" ng-click="drawVisualizationPMCasesVerification('Patwari_Esign')" class="collection-item"><span class="badge2"></span>{{translation.PatwariEsign}} </a><span class="new badge2 green">{{PatwariEsign}}</span><br />
+                                                        <a href="javascript:void(0)" ng-click="drawVisualizationPMCasesVerification('Patwari_Reject')" class="collection-item"><span class="badge2"></span>{{translation.PatwariReject}} </a><span class="new badge2 red">{{PatwariReject}}</span><br />
+                                                        <a href="javascript:void(0)" ng-click="drawVisualizationPMCasesVerification('Tehsildar_Esign')" class="collection-item"><span class="badge2 red"></span>{{translation.TehsildarEsign}} </a><span class="new badge2 green">{{TehsildarEsign}}</span><br />
+                                                        <a href="javascript:void(0)" ng-click="drawVisualizationPMCasesVerification('Tehsildar_Reject')" class="collection-item"><span class="badge2 red"></span>{{translation.TehsildarReject}} </a><span class="new badge2 red">{{TehsildarReject}}</span><br />
+                                                        <a href="javascript:void(0)" ng-click="drawVisualizationPMCasesVerification('Collector_Esign')" class="collection-item"><span class="badge2 red"></span>{{translation.Collectorsign}} </a><span class="new badge2 green">{{Collectorsign}}</span><br />
+                                                        <a href="javascript:void(0)" ng-click="drawVisualizationPMCasesVerification('Collector_Reject')" class="collection-item"><span class="badge2 red"></span>{{translation.CollectorReject}} </a><span class="new badge2 red">{{CollectorReject}}</span><br />
+                                                    </h5>
+                                                </div>
+                                                <div id="tipMSP">
+                                                    <h5>
+                                                        <div ng-repeat="item in ArrayForTipMSP">
+                                                            <a href="javascript:void(0)" class="collection-item"><span class="badge2"></span>{{item.Crop}} </a><span class="new badge2 green">{{item.Value}}</span><br />
+                                                        </div>
+
+                                                    </h5>
+                                                </div>
+                                                <div id="tipMSPKharif">
+                                                    <h5>
+                                                        <div ng-repeat="item in ArrayForTipMSPKharif">
+                                                            <a href="javascript:void(0)" class="collection-item"><span class="badge2"></span>{{item.Crop}} </a><span class="new badge2 green">{{item.Value}}</span><br />
+                                                        </div>
+                                                    </h5>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-header card-header-info">{{translation.Stprogress}}</div>
+                                        <div class="card-image" style="min-height:150px">
+                                            <div class="collection">
+                                                @*<a href="javascript:void(0)" ng-click="drawVisualizationDistrictwiseApex('di')" class="collection-item">{{translation.TotalSTTarget}}<span class="new badge2">{{STTarget}}</span></a>*@
+                                                <a onclick="tooltip.pop(this, '#tip31');" href="javascript:void(0)" class="collection-item">{{translation.TotalSTTarget}}<span class="new badge2">{{STTarget}}</span></a>
+                                                <a onclick="tooltip.pop(this, '#tip32');" href="javascript:void(0)" class="collection-item">{{translation.ApplicationReceived}}<span class="new badge2">{{ApplicationReceived}}</span></a>
+                                                @*<a href="javascript:void(0)" ng-click="drawVisualizationDistrictwiseApex('APP')" class="collection-item">{{translation.ApplicationReceived}}<span class="new badge2">{{ApplicationReceived}}</span></a>*@
+                                                <a href="javascript:void(0)" ng-click="drawVisualizationDistrictwiseApex('Disbursement')" class="collection-item">{{translation.DisbursementbyDCCB}}<span class="new badge2 blue">{{Loan_Disbursement}}</span></a>
+                                            </div>
+                                        </div>
+                                        <div style="display:none;">
+                                            <div id="tip31">
+                                                <h5>
+                                                    <a href="javascript:void(0)" ng-click="drawVisualizationDistrictwiseApex('di')" class="collection-item"><span class="badge2"></span>{{translation.TotalSTTargetk}} </a><span class="new badge2">{{STTargetK}}</span><br />
+                                                    <a class="collection-item"><span class="badge2 red"></span>{{translation.TotalSTTargetr}}</a><span class="new badge2 red">{{STTargetR}}</span><br />
+                                                </h5>
+                                            </div>
+                                            <div id="tip32">
+                                                <h5>
+                                                    <a href="javascript:void(0)" ng-click="drawVisualizationDistrictwiseApex('APP')" class="collection-item"><span class="badge2"></span>{{translation.ApplicationReceived}} </a><span class="new badge2">{{ApplicationReceived}}</span><br />
+                                                    <a href="javascript:void(0)" ng-click="drawVisualizationDistrictwiseApex('Pacs')" class="collection-item"><span class="badge2"></span>{{translation.ApprovedByPacs}} </a><span class="new badge2">{{ApprovedByPacs}}</span><br />
+                                                    <a href="javascript:void(0)" ng-click="drawVisualizationDistrictwiseApex('Branch')" class="collection-item"><span class="badge2 red"></span>{{translation.ApprovedByBranch}}</a><span class="new badge2 red">{{ApprovedByBranch}}</span><br />
+                                                    <a href="javascript:void(0)" ng-click="drawVisualizationDistrictwiseApex('DMR_Credited')" class="collection-item"><span class="badge2 red"></span>{{translation.DMRCreditedAndLoanDisbursement}}</a><span class="new badge2 red">{{DMR_Credited}}</span><br />
+                                                </h5>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-4" id="Graph_FertiChart">
+                                    <div class="card">
+                                        <div class="card-header card-header-info">
+                                            {{translation.FertilizerProgressGraph}}
+                                            <ul class="list-inline panel-actions">
+                                                <li><a href="javascript:void(0)" id="panel-fullscreen" ng-click="PMKisanExpandGraph(2,'Graph_FertiChart')" role="button" title="Toggle fullscreen"><i class="fa fa-expand"></i></a></li>
+                                            </ul>
+                                        </div>
+                                        <div class="card-image2">
+                                            <div style="height: 275px; width: 100%;" id="FertiChart">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4" id="Graph_divChart1">
+                                    <div class="card">
+                                        <div class="card-header card-header-info">
+                                            {{translation.PMKisan}} ({{translation.Graph}})
+                                            <ul class="list-inline panel-actions">
+                                                <li><a href="javascript:void(0)" id="panel-fullscreen" ng-click="PMKisanExpandGraph(4,'Graph_divChart1')" role="button" title="Toggle fullscreen"><i class="fa fa-expand"></i></a></li>
+                                            </ul>
+                                        </div>
+                                        <div class="card-image2">
+                                            <div style="height: 275px; width: 100%;" id="divChart1">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4" id="Graph_ApexChart">
+                                    <div class="card">
+                                        <div class="card-header card-header-info">
+                                            {{translation.APEX}}  ({{translation.Stloanprogess}})
+                                            <ul class="list-inline panel-actions">
+                                                <li><a href="javascript:void(0)" id="panel-fullscreen" ng-click="PMKisanExpandGraph(5,'Graph_ApexChart')" role="button" title="Toggle fullscreen"><i class="fa fa-expand"></i></a></li>
+                                            </ul>
+                                        </div>
+                                        <div class="cont-m1">
+                                            <div id="card">
+                                                <div class="card-image2">
+                                                    <div style="height: 275px; width: 100%;" id="ApexChart">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4" id="Graph_FertilizerDistrictChart">
+                                    <div class="card">
+                                        <div class="card-header card-header-info">
+                                            {{translation.FertilizerProgressGraph}}
+                                            <ul class="list-inline panel-actions">
+                                                <li><a href="javascript:void(0)" id="panel-fullscreen" ng-click="PMKisanExpandGraph(3,'Graph_FertilizerDistrictChart')" role="button" title="Toggle fullscreen"><i class="fa fa-expand"></i></a></li>
+                                            </ul>
+                                        </div>
+                                        <div class="card-image2">
+                                            <div style="height: 275px; width: 100%;" id="FertilizerDistrictChart">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4" id="dvPMKisanExpandGraph">
+                                    <div class="card">
+                                        <div class="card-header card-header-info">
+                                            {{translation.PMKisanCasesVerification}}
+
+                                            <ul class="list-inline panel-actions">
+                                                <li><a href="javascript:void(0)" id="panel-fullscreen1" ng-click="PMKisanExpandGraph(1,'dvPMKisanExpandGraph')" role="button" title="Toggle fullscreen"><i dat-val="dvPMKisanExpandGraph" class="fa fa-expand"></i></a></li>
+                                            </ul>
+                                        </div>
+                                        <div class="card-image">
+                                            <div id="chartPMKisanCasesVerification" style="height: 275px; width: 100%;"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4" id="Graph_chartMSPRajFedQty">
+                                    <div class="card">
+                                        <div class="card-header card-header-info">
+                                            {{translation.MSPREPORT}} ({{translation.AmountK}}<input type="radio" value="1" ng-click="MSPRajFedQty()" ng-model="MSPRAJFED" name="RajFed" /> {{translation.Qmt}} <input type="radio" ng-click="MSPRajFedQty()" value="2" ng-model="MSPRAJFED" name="RajFed" />)
+                                            <ul class="list-inline panel-actions">
+                                                <li><a href="javascript:void(0)" id="panel-fullscreen" ng-click="PMKisanExpandGraph(6,'Graph_chartMSPRajFedQty')" role="button" title="Toggle fullscreen"><i class="fa fa-expand"></i></a></li>
+                                            </ul>
+                                        </div>
+                                        <div class="card-image2">
+                                            <div id="chartMSPRajFedQty" style="height: 266px; width: 100%;"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-header card-header-info">
+                                            {{translation.MSPPurchaseProgress}}  (Amount<input type="radio" ng-click="QtyPrice(1)" value="1" ng-model="MSPTS" name="TilamSang" /> Quantity <input type="radio" value="2" ng-model="MSPTS" ng-click="QtyPrice(2)" name="TilamSang" />)
+
+                                            <ul class="list-inline panel-actions">
+                                                <li><a href="javascript:void(0)" id="panel-fullscreen3" ng-click="TilamSangExpandGraph(1)" role="button" title="Toggle fullscreen"><i class="fa fa-expand"></i></a></li>
+                                            </ul>
+                                        </div>
+                                        <div class="card-image2">
+                                            <div id="chartTilamSangQty" ng-show="TilamSangQty" style="height: 266px; width: 100%;"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-header card-header-info">
+                                            {{translation.ProgOnEbazzar}}({{translation.OverAll}}<input type="radio" value="1" ng-click="Ebazaar()" ng-model="EbazaarData" name="Ebazaar" /> {{translation.CurrentFinancialYear}} <input type="radio" ng-click="Ebazaar()" value="2" ng-model="EbazaarData" name="Ebazaar" />)
+                                            <ul class="list-inline panel-actions">
+                                                <li></li>
+                                            </ul>
+                                        </div>
+                                        <div class="card-image2">
+                                            <div id="chartContainerForConfed" style="height: 275px; width: 100%;"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                @*<div class="col-md-4">
+                                        <div class="card">
+                                            <div class="card-header card-header-info">
+                                                {{translation.BhandarGraphTitle}}
+                                                <ul class="list-inline panel-actions">
+                                                    <li><a href="javascript:void(0)" id="panel-fullscreen" ng-click="ExpandGraph(1)" role="button" title="Toggle fullscreen"><i class="fa fa-expand"></i></a></li>
+                                                </ul>
+                                            </div>
+                                            <div class="card-image2">
+                                                <div style="height: 275px; width: 100%;" id="BhandarChart">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>*@
+                                <div class="col-md-4" id="dvBhandarChart">
+                                    <div class="card">
+                                        <div class="card-header card-header-info">
+                                            {{translation.BhandarGraphTitle}}
+                                            <ul class="list-inline panel-actions">
+                                                <li><a href="javascript:void(0)" id="panel-fullscreen" ng-click="PMKisanExpandGraph(9,'dvBhandarChart')" role="button" title="Toggle fullscreen"><i class="fa fa-expand"></i></a></li>
+                                            </ul>
+                                        </div>
+                                        <div class="card-image2">
+                                            <div style="height: 275px; width: 100%;" id="BhandarChart">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                @*<div class="col-md-4">
+                                            <div class="card">
+                                                <div class="card-header card-header-info">{{translation.SocietyStatustaskpenal}}</div>
+                                                <div class="card-image">
+                                                    <div class="collection">
+                                                        <a href="../ApplicationFlow/ApplicationFlow?StatusID=TS" class="collection-item">{{translation.TotalSociety}}<span class="new badge2" ng-model="RegisteredSociety">{{TOTAL}}</span></a>
+
+                                                        <a href="../ApplicationFlow/ApplicationFlow?StatusID=RS" class="collection-item">{{translation.RegisteredSociety}}<span class="new badge2 red" data-badge-caption="" ng-model="APPROVED">{{APPROVED}}</span></a>
+                                                        <a href="../ApplicationFlow/ApplicationFlow?StatusID=PS" class="collection-item">{{translation.PartialSubmit}}<span class="badge2" data-badge-caption="" ng-model="PartialSubmit">{{PartialSubmit}}</span></a>
+                                                        <a href="../ApplicationFlow/ApplicationFlow?StatusID=UP" class="collection-item">{{translation.UnderProcess}}<span class="new badge2 brown" data-badge-caption="" ng-model="UNDERPROCESS">{{UNDERPROCESS}}</span></a>
+                                                        <a href="../ApplicationFlow/ApplicationFlow?StatusID=PP" class="collection-item">{{translation.PandingforPayment}}<span class="new badge2 green" ng-model="PandingforPayment">{{PandingforPayment}}</span></a>
+                                                        <a href="../ApplicationFlow/ApplicationFlow?StatusID=RejS" class="collection-item">{{translation.RejectedSociety}}<span class="new badge2 blue" ng-model="RejectedSociety">{{REJECTED}}</span></a>
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    <div class="col-md-4">
+                                        <div class="card">
+                                            <div class="card-header card-header-warning">{{translation.SocietyStatustaskpenal}}</div>
+                                            <div class="card-image">
+                                                <div class="collection">
+                                                    <a href="../ApplicationFlow/ApplicationFlow?StatusID=TS" class="collection-item">{{translation.TotalSociety}}<span class="new badge2" ng-model="RegisteredSociety">{{TOTAL}}</span></a>
+
+                                                    <a href="../ApplicationFlow/ApplicationFlow?StatusID=RS" class="collection-item">{{translation.RegisteredSociety}}<span class="new badge2 red" data-badge-caption="" ng-model="APPROVED">{{APPROVED}}</span></a>
+                                                    <a href="../ApplicationFlow/ApplicationFlow?StatusID=PL" class="collection-item">{{translation.PartialSubmit}}<span class="new badge2" data-badge-caption="" ng-model="PartialSubmit">{{PARTIALSUBMITTED}}</span></a>
+                                                    <a href="../ApplicationFlow/ApplicationFlow?StatusID=UP" class="collection-item">{{translation.UnderProcess}}<span class="new badge2 brown" data-badge-caption="" ng-model="UNDERPROCESS">{{UNDERPROCESS}}</span></a>
+                                                    <a href="../ApplicationFlow/ApplicationFlow?StatusID=PP" class="collection-item">{{translation.PandingforPayment}}<span class="new badge2 green" ng-model="PandingforPayment">{{PAYMENTREQUEST}}</span></a>
+                                                    <a href="../ApplicationFlow/ApplicationFlow?StatusID=RejS" class="collection-item">{{translation.RejectedSociety}}<span class="new badge2 blue" ng-model="RejectedSociety">{{REJECTED}}</span></a>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>*@
+                            </div>
+                            @*<div class="row">
+                                    <div class="se-pre-con"></div>
+                                    <div id="stop" class="scrollTop">
+                                        <span><a href=""><i class="fa fa-arrow-up">Top</i></a></span>
+                                    </div>
+                                    <div class="col-lg-12 col-md-12 col-sm-12">
+                                        <div class="card">
+                                            <div class="loan-card-heading card-header-info"> {{translation.LoanwaiverReport2019}}</div>
+                                            <div class="row">
+                                                <div class="col-lg-12 col-md-12 col-sm-12">
+                                                    <div class="loan-card">
+                                                        <div class="loan-card-desc">
+                                                            <h3 class="loan-card-title">
+                                                                <label>{{Total_Head_Office}}</label>
+                                                            </h3>
+                                                            <p class="loan-card-heading ng-binding">{{translation.TotalHeadOffice}}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="loan-card">
+                                                        <div class="loan-card-desc">
+                                                            <h3 class="loan-card-title">
+                                                                <label>{{Total_Branch_Office}}</label>
+                                                            </h3>
+                                                            <p class="loan-card-heading ng-binding">{{translation.TotalBranchOffice}}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="loan-card">
+                                                        <div class="loan-card-desc">
+                                                            <h3 class="loan-card-title">
+                                                                <label>{{Total_PACS}}</label>
+                                                            </h3>
+                                                            <p class="loan-card-heading ng-binding">{{translation.TotalPACS}}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="loan-card">
+                                                        <div class="loan-card-desc border-0">
+                                                            <h3 class="loan-card-title">
+                                                                <label>{{Total_Applications}}</label>
+                                                            </h3>
+                                                            <p class="loan-card-heading ng-binding">{{translation.TotalApplications}}</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-lg-12 col-md-12 col-sm-12">
+                                                    <div class="loan-card">
+                                                        <div class="loan-card-desc">
+                                                            <h3 class="loan-card-title">
+                                                                <label>{{Total_UID_Authentication}}</label>
+                                                            </h3>
+                                                            <p class="loan-card-heading ng-binding">{{translation.TotalUIDAuthentication}}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="loan-card">
+                                                        <div class="loan-card-desc">
+                                                            <h3 class="loan-card-title">
+                                                                <label>{{Total_Cert_Issued}}</label>
+                                                            </h3>
+                                                            <p class="loan-card-heading ng-binding">{{translation.TotalCertIssued}}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="loan-card">
+                                                        <div class="loan-card-desc">
+                                                            <h3 class="loan-card-title">
+                                                                <label>{{Total_Cert_Distributed}}</label>
+                                                            </h3>
+                                                            <p class="loan-card-heading ng-binding">{{translation.TotalCertDistributed}}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="loan-card">
+                                                        <div class="loan-card-desc border-0">
+                                                            <h3 class="loan-card-title">
+                                                                <label>{{Total_Rechecking_Cases}}</label>
+                                                            </h3>
+                                                            <p class="loan-card-heading ng-binding">{{translation.TotalRecheckingCases}}</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-lg-12 col-md-12 col-sm-12">
+                                                    <div class="loan-card">
+                                                        <div class="loan-card-desc">
+                                                            <h3 class="loan-card-title">
+                                                                <label>{{Total_GRA_Cases_Pending}}</label>
+                                                            </h3>
+                                                            <p class="loan-card-heading ng-binding">{{translation.TotalGRACasesPending}}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="loan-card">
+                                                        <div class="loan-card-desc">
+                                                            <h3 class="loan-card-title">
+                                                                <label>{{Total_Not_Eligible_Cases}}</label>
+                                                            </h3>
+                                                            <p class="loan-card-heading ng-binding">{{translation.TotalNotEligibleCases}}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="loan-card">
+                                                        <div class="loan-card-desc">
+                                                            <h3 class="loan-card-title">
+                                                                <label>{{Total_Not_Intrested_Cases}}</label>
+                                                            </h3>
+                                                            <p class="loan-card-heading ng-binding">{{translation.TotalNotIntrestedCases}}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="loan-card">
+                                                        <div class="loan-card-desc border-0">
+                                                            <h3 class="loan-card-title">
+                                                                <label>{{New_Beneficiaries_2019}}</label>
+                                                            </h3>
+                                                            <p class="loan-card-heading ng-binding">{{translation.NewBeneficiaries2019}}</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-lg-12 col-md-12 col-sm-12">
+                                                    <div class="loan-card">
+                                                        <div class="loan-card-desc">
+                                                            <h3 class="loan-card-title">
+                                                                <label>{{NOD_TOTAL_InCrores}}</label>
+                                                            </h3>
+                                                            <p class="loan-card-heading ng-binding">{{translation.NODTOTALInCrores}}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="loan-card">
+                                                        <div class="loan-card-desc">
+                                                            <h3 class="loan-card-title">
+                                                                <label>{{OD_TOTAL_InCrores}}</label>
+                                                            </h3>
+                                                            <p class="loan-card-heading ng-binding">{{translation.ODTOTALInCrores}}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="loan-card">
+                                                        <div class="loan-card-desc border-0">
+                                                            <h3 class="loan-card-title">
+                                                                <label>{{Avg_Loan_Waiver_Amount}}</label>
+                                                            </h3>
+                                                            <p class="loan-card-heading ng-binding">{{translation.AvgLoanWaiverAmount}}</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>*@
+                        </div>
+                        <div id="D2" class="tab-pane fade">
+
+                            <div class="row">
+                                @*<div class="col-lg-3 col-md-6 col-sm-6">
+                                        <div class="card card-stats">
+                                            <div class="card-header card-header-warning card-header-icon">
+                                                <div class="card-icon">
+                                                    <i class="material-icons fa fa-trophy"></i>
+                                                </div>
+                                                <p class="card-category">{{translation.ACT2005}}</p>
+                                                <h3 class="card-title">
+                                                    <label>{{ACT2005}}</label>
+                                                    <small>GB</small>
+                                                </h3>
+                                            </div>
+                                        </div>
+                                    </div>*@
+
+                                <div class="col-lg-3 col-md-6 col-sm-6">
+                                    <div class="card card-stats">
+                                        <div class="card-header card-header-success card-header-icon">
+                                            <div class="card-icon">
+                                                <i class="material-icons fa fa-tasks"></i>
+                                            </div>
+                                            <p class="card-category">{{translation.ApplicationUser}}</p>
+                                            <h3 class="card-title" onclick="tooltip.pop(this, '#tip91');">
+                                                <label style="cursor:pointer;">{{TotalUser}}</label>
+                                            </h3>
+                                        </div>
+                                        <div style="display:none;">
+                                            <div id="tip91">
+                                                <h5>
+                                                    <p class="card-category">{{translation.LevelWiseUserCount}}</p>
+                                                    <div ng-repeat="item in UserLevelWiseCount">
+                                                        <a href="javascript:void(0)" class="collection-item"><span class="badge2"></span>{{item.LevelNameEn}} </a><span class="new badge2 green">{{item.UserCount}}</span><br />
+                                                    </div>
+                                                </h5>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-3 col-md-6 col-sm-6">
+                                    <div class="card card-stats">
+                                        <div class="card-header card-header-danger card-header-icon">
+                                            <div class="card-icon">
+                                                <i class="material-icons fa fa-thumbs-up"></i>
+                                            </div>
+                                            <p class="card-category">{{translation.TotalHousingSociety}}</p>
+                                            <h3 class="card-title">
+                                                <a style="margin-top: 15px; color: #3C4858; font-weight: 300; font-size: 20px;" href="../mis/housingsociety"><label style="cursor:pointer;">441</label></a> @*{{HousingSocietyCount}}*@
+                                            </h3>
+                                        </div>
+                                        <div style="display:none;">
+                                            <div id="tip81">
+                                                <h5>
+                                                    <p class="card-category">{{translation.AuditReportUploded}}</p>
+                                                    <div ng-repeat="item in AuditYearWise">
+                                                        <a href="javascript:void(0)" class="collection-item"><span class="badge2"></span>{{item.FIN_YEAR_NAME}} </a><span class="new badge2 green">{{item.Count}}</span><br />
+                                                    </div>
+                                                </h5>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-3 col-md-6 col-sm-6">
+                                    <div class="card card-stats">
+                                        <div class="card-header card-header-info card-header-icon">
+                                            <div class="card-icon">
+                                                <i class="material-icons fa fa-external-link "></i>
+                                            </div>
+                                            <p class="card-category">{{translation.TotalApplications}}</p>
+                                            <h3 class="card-title" onclick="tooltip.pop(this, '#tip71');">
+                                                <label style="cursor:pointer;">{{TOTAL}}</label>
+                                            </h3>
+                                        </div>
+                                        <div style="display:none;">
+                                            <div id="tip71">
+                                                <h5>
+                                                    <a href="javascript:void(0)" ng-click="drawVisualizationFertilizerOpeningStock('Urea')" class="collection-item"><span class="badge2"></span>{{translation.ACT1958}} </a><span class="new badge2">{{ACT1958}}</span><br />
+                                                    <a href="javascript:void(0)" ng-click="drawVisualizationFertilizerOpeningStock('Compost')" class="collection-item"><span class="badge2 red"></span>{{translation.ACT2001}} </a><span class="new badge2 red">{{ACT2001}}</span><br />
+                                                    <a href="javascript:void(0)" ng-click="drawVisualizationFertilizerOpeningStock('DAP')" class="collection-item"><span class="badge2 red"></span>{{translation.ACT2005}} </a><span class="new badge2 red">{{ACT2005}}</span><br />
+                                                </h5>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-header card-header-info">{{translation.TotalRegistrationRequest}} </div>
+                                        <div class="card-image" style="min-height:150px">
+                                            <div class="collection">
+                                                <a onclick="tooltip.pop(this, '#tip20');" href="javascript:void(0)" class="collection-item">{{translation.TotalSociety}}<span class="new badge2" ng-model="RegisteredSociety">{{TOTAL}}</span></a>
+                                                <a onclick="tooltip.pop(this, '#tip21');" href="javascript:void(0)" class="collection-item">{{translation.OnlineSocietyNew}}<span class="new badge2 blue" ng-model="OnlineTotalAppli">{{OnlineTotalAppli}}</span></a>
+                                                <a onclick="tooltip.pop(this, '#tip22');" href="javascript:void(0)" class="collection-item">{{translation.OfflineSocietyOld}}<span class="new badge2 brown" ng-model="OfflineTotalAppli">{{OfflineTotalAppli}}</span></a>
+                                                <a href="javascript:void(0)" class="collection-item">{{translation.RegisteredSociety}}<span class="new badge2 red" data-badge-caption="" ng-model="APPROVED">{{APPROVED}}</span></a>
+                                                <a href="javascript:void(0)" class="collection-item">{{translation.OnlineRegiApplication}}<span class="new badge2 green" ng-model="OnlineRegiAppli">{{OnlineRegiAppli}}</span></a>
+                                                <a href="javascript:void(0)" class="collection-item">{{translation.OfflineRegiApplication}}<span class="new badge2 " ng-model="OfflineRegiAppli">{{OfflineRegiAppli}}</span></a>
+                                                <a href="javascript:void(0)" class="collection-item"></a>
+                                            </div>
+                                            <div style="display:none;">
+                                                <div id="tip20">
+                                                    <h5>
+                                                        <a href="javascript:void(0)" ng-click="drawVisualizationDistrictwiseSociety('to','ap')" class="collection-item"><span class="badge2"></span>{{translation.Approvable}}</a><span class="new badge2">{{APPROVED}}</span><br />
+                                                        <a href="javascript:void(0)" ng-click="drawVisualizationDistrictwiseSociety('to','re')" class="collection-item"><span class="badge2"></span>{{translation.Rejection}}</a><span class="new badge2 red">{{OnlineRejeAppli+OfflineRejeAppli}}</span><br />
+                                                        <a href="javascript:void(0)" ng-click="drawVisualizationDistrictwiseSociety('to','pe')" class="collection-item"><span class="badge2"></span>{{translation.Pending}}</a><span class="new badge2">{{TOTAL-(APPROVED+OnlineRejeAppli+OfflineRejeAppli)}}</span><br />
+                                                    </h5>
+                                                </div>
+                                                <div id="tip21">
+                                                    <h5>
+                                                        <a href="javascript:void(0)" ng-click="drawVisualizationDistrictwiseSociety('on','ap')" class="collection-item"><span class="badge2"></span>{{translation.Approvable}}</a><span class="new badge2">{{OnlineRegiAppli}}</span><br />
+                                                        <a href="javascript:void(0)" ng-click="drawVisualizationDistrictwiseSociety('on','re')" class="collection-item"><span class="badge2"></span>{{translation.Rejection}}</a><span class="new badge2 red">{{OnlineRejeAppli}}</span><br />
+                                                        <a href="javascript:void(0)" ng-click="drawVisualizationDistrictwiseSociety('on','pe')" class="collection-item"><span class="badge2"></span>{{translation.Pending}}</a><span class="new badge2">{{OnlineTotalAppli-(OnlineRegiAppli+OnlineRejeAppli)}}</span><br />
+                                                    </h5>
+                                                </div>
+                                                <div id="tip22">
+                                                    <h5>
+                                                        <a href="javascript:void(0)" ng-click="drawVisualizationDistrictwiseSociety('of','ap')" class="collection-item"><span class="badge2"></span>{{translation.Approvable}}</a><span class="new badge2">{{OfflineRegiAppli}}</span><br />
+                                                        <a href="javascript:void(0)" ng-click="drawVisualizationDistrictwiseSociety('of','re')" class="collection-item"><span class="badge2"></span>{{translation.Rejection}}</a><span class="new badge2 red">{{OfflineRejeAppli}}</span><br />
+                                                        <a href="javascript:void(0)" ng-click="drawVisualizationDistrictwiseSociety('of','pe')" class="collection-item"><span class="badge2"></span>{{translation.Pending}}</a><span class="new badge2">{{OfflineTotalAppli-(OfflineRegiAppli+OfflineRejeAppli)}}</span><br />
+                                                    </h5>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4" id="Graph_chartContainer">
+                                    <div class="card">
+                                        <div class="card-header card-header-info">
+                                            {{translation.SocietyRegistrationRequestDistictwise}}
+                                            <ul class="list-inline panel-actions">
+                                                <li><a href="javascript:void(0)" id="panel-fullscreen" ng-click="PMKisanExpandGraph(7,'Graph_chartContainer')" role="button" title="Toggle fullscreen"><i class="fa fa-expand"></i></a></li>
+                                            </ul>
+                                        </div>
+                                        <div class="card-image2">
+                                            <div style="height: 275px; width: 100%;" id="chartContainer">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                @*<div class="col-md-4">
+                                        <div class="card">
+                                            <div class="card-header card-header-info">{{translation.SocietyRegistrationRequestDistictwise}}</div>
+                                            <div class="card-image">
+                                                <div id="chartContainer" style="height: 266px; width: 100%;"></div>
+                                            </div>
+                                        </div>
+                                    </div>*@
+
+                                @*PACS*@
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-header card-header-info">Society Update Status @*{{translation.AuditProgress}}*@ </div>
+                                        <div class="card-image" style="min-height:150px">
+                                            <div class="collection">
+                                                <a href="javascript:void(0)" class="collection-item">Total Societies<span class="new badge2" ng-model="RegisteredSociety">{{GetSocietyStatusWiseData[0].TotalSociety}}</span></a>
+                                                <a class="collection-item">{{translation.Active}}<span class="new badge2 green">{{GetSocietyStatusWiseData[0].Active}}</span></a>
+                                                <a class="collection-item">{{translation.InActive}}<span class="new badge2 green">{{GetSocietyStatusWiseData[0].InActive}}</span></a>
+                                                <a class="collection-item">{{translation.liquidation}}<span class="new badge2 green">{{GetSocietyStatusWiseData[0].Reject}}</span></a>
+                                                <a class="collection-item">{{translation.Reject}}<span class="new badge2 red">{{GetSocietyStatusWiseData[0].Liquidation}}</span></a>
+                                                <a class="collection-item">{{translation.NonFunctional}}<span class="new badge2 red">{{GetSocietyStatusWiseData[0].Dysfunctional}}</span></a>
+
+                                                <a class="collection-item" target="_blank" href="#">{{translation.DetailedReport}}<span class="new badge2 red"><i class="fa fa-table"></i></span></a>
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+
+                                    @*<div class="card">
+                                            <div class="card-header card-header-info">{{translation.AuditProgress}} </div>
+                                            <div class="card-image" style="min-height:150px">
+                                                <div class="collection">
+                                                    <a ng-click="AuditProgrssDivisionWise('AuditableSocieties')" href="javascript:void(0)" class="collection-item">{{translation.AuditableSocieties}}<span class="new badge2" ng-model="RegisteredSociety">{{AuditableSocieties}}</span></a>
+                                                    <a ng-click="AuditProgrssDivisionWise('AuditedSocietiesTillLastMonth')" class="collection-item">{{AuditedSocietiesTillLastMonthTitle}}<span class="new badge2 green">{{AuditedSocietiesTillLastMonth}}</span></a>
+                                                    <a ng-click="AuditProgrssDivisionWise('AuditedSocietiesCurrentMonth')" class="collection-item">{{AuditedSocietiesCurrentMonthTitle}}<span class="new badge2 green">{{AuditedSocietiesCurrentMonth}}</span></a>
+                                                    <a ng-click="AuditProgrssDivisionWise('AuditedSocietiesTillCurrentMonth')" class="collection-item">{{AuditedSocietiesTillCurrentMonthTitle}}<span class="new badge2 green">{{AuditedSocietiesTillCurrentMonth}}</span></a>
+                                                    <a ng-click="AuditProgrssDivisionWise('RemainingSocietiesForAudit')" class="collection-item">{{translation.RemainingSocietiesForAudit}}<span class="new badge2 red">{{RemainingSocietiesForAudit}}</span></a>
+
+                                                    <a class="collection-item" target="_blank" href="../MIS/AuditReportShow">{{translation.DetailedReport}}<span class="new badge2 red"><i class="fa fa-table"></i></span></a>
+                                                </div>
+                                            </div>
+                                        </div>*@
+                                </div>
+
+                            </div>
+                            <div class="row">
+                                @*<div class="col-lg-4 col-md-4 col-sm-4">
+
+                                        <div class="card panel panel-default">
+                                            <div class="card-header card-header-info">
+                                                {{translation.InspectionReport}}
+
+                                                <select class="form-control" ng-model="AuditorInspection.FinancialYear" ng-change="drawInspectionVisualization(AuditorInspection.FinancialYear)">
+                                                    <option value="0" disabled>{{translation.SelectOption}}</option>
+                                                    <option ng-repeat="item in FinancialYearList" value="{{item.FIN_YEAR_MASTR_ID}}">
+                                                        {{item.FIN_YEAR_NAME}}
+                                                    </option>
+                                                </select>
+                                            </div>
+                                            <div class="card-image2">
+                                                <div style="height: 275px; width: 100%;" id="InspectionChart">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <div class="card">
+                                            <div class="card-header card-header-info">{{translation.InspectionReportStatistics}} </div>
+                                            <div class="card-image" style="min-height:150px">
+                                                <div class="collection">
+                                                    <a class="collection-item" ng-repeat="item in ActWiseCount">{{item.ActName}}<span class="new badge2">{{item.Count}}</span></a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>*@
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-header card-header-info">{{translation.PacsDetails}}</div>
+                                        <div class="card-image" style="min-height:150px">
+                                            <div class="collection">
+                                                <a onclick="tooltip.pop(this, '#tip51');" ng-click="drawVisualizationPacsGraph('TotalPacs')" href="javascript:void(0)" class="collection-item">{{translation.TotalPacs}}<span class="new badge2" ng-model="RegisteredSociety">{{TOTAL_PACS}}</span></a>
+                                                <a href="javascript:void(0)" class="collection-item" ng-click="drawVisualizationPacsGraph('TotalPacsMember')">{{translation.TotalPacsMember}}<span class="new badge2 blue">{{TOTAL_MEMBER}}</span></a>
+                                                <a href="javascript:void(0)" class="collection-item" ng-click="drawVisualizationPacsGraph('TotalODMember')">{{translation.TotalODMember}}<span class="new badge2 brown">{{TOTAL_OD}}</span></a>
+                                                <a href="javascript:void(0)" class="collection-item" ng-click="drawVisualizationPacsGraph('TotalNODMember')">{{translation.TotalNODMember}}<span class="new badge2 red">{{TOTAL_NOD}}</span></a>
+                                                <a href="javascript:void(0)" class="collection-item"></a>
+                                                <a href="javascript:void(0)" class="collection-item"></a>
+                                                @*<a class="collection-item" target="_blank" href="../MIS/AuditReportShow_Admin">{{translation.DetailedReport}}<span class="new badge2 red"><i class="fa fa-table"></i></span></a>*@
+                                                <a class="collection-item" target="_blank" href="../MIS/PACSReport">{{translation.DetailedReport}}<span class="new badge2 red"><i class="fa fa-table"></i></span></a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4" id="Graph_PacschartContainer">
+                                    <div class="card">
+                                        <div class="card-header card-header-info">
+                                            {{translation.PacsDetailsDccbWise}}
+                                            <ul class="list-inline panel-actions">
+                                                <li><a href="javascript:void(0)" id="panel-fullscreen" ng-click="PMKisanExpandGraph(8,'Graph_PacschartContainer')" role="button" title="Toggle fullscreen"><i class="fa fa-expand"></i></a></li>
+                                            </ul>
+                                        </div>
+                                        <div class="card-image2">
+                                            <div style="height: 275px; width: 100%;" id="PacschartContainer">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                @*<div class="col-md-4">
+                                        <div class="card">
+                                            <div class="card-header card-header-info">{{translation.PacsDetailsDccbWise}}</div>
+                                            <div class="card-image">
+                                                <div id="PacschartContainer" style="height: 266px; width: 100%;"></div>
+                                            </div>
+                                        </div>
+                                    </div>*@
+                                <div class="col-md-4">
+                                    <div class="card">
+
+                                        <div class="card-header card-header-info">{{translation.DivisionWiseAudit}} (<span style="font-size: 9px;">{{AuditProgrssLable}}</span>) </div>
+                                        <div class="card-image" style="min-height:150px">
+                                            <div class="collection">
+                                                <a href="javascript:void(0)" class="collection-item">Total Number of Societies<span class="new badge2" ng-model="RegisteredSociety">{{DashboardCountSocietyAuditprogrss[0].TOTAL}}</span></a>
+                                                <a class="collection-item"> No. of Active Societies<span class="new badge2 green">{{DashboardCountSocietyAuditprogrss[0].TOTAL}}</span></a>
+                                                <a class="collection-item"> Partial Submit<span class="new badge2 green">{{DashboardCountSocietyAuditprogrss[0].PARTIALSUBMIT}}</span></a>
+                                                <a class="collection-item">Final Submit<span class="new badge2 green">{{DashboardCountSocietyAuditprogrss[0].Appointed}}</span></a>
+                                                <a class="collection-item"> Audit Report Upload<span class="new badge2 red">{{DashboardCountSocietyAuditprogrss[0].Completed}}</span></a>
+                                                <a class="collection-item" target="_blank" href="../MIS/SocietyAuditprogress">{{translation.DetailedReport}}<span class="new badge2 red"><i class="fa fa-table"></i></span></a>
+
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    @*<div class="card">
+                                            <div class="card-header card-header-info">{{translation.DivisionWiseAudit}} (<span style="font-size: 9px;">{{AuditProgrssLable}}</span>) </div>
+                                            <div class="card-image" style="min-height:150px">
+                                                <div class="collection">
+                                                    <a ng-click="AuditProgrssDivisionWise('AuditableSocieties')" href="javascript:void(0)" class="collection-item">{{DivisionReportDataCus[0].DivisionName}}<span class="new badge2" ng-model="RegisteredSociety">{{DivisionReportDataCus[0].Result}}</span></a>
+                                                    <a ng-click="AuditProgrssDivisionWise('AuditedSocietiesTillLastMonth')" class="collection-item">{{DivisionReportDataCus[1].DivisionName}}<span class="new badge2 green">{{DivisionReportDataCus[1].Result}}</span></a>
+                                                    <a ng-click="AuditProgrssDivisionWise('AuditedSocietiesCurrentMonth')" class="collection-item">{{DivisionReportDataCus[2].DivisionName}}<span class="new badge2 green">{{DivisionReportDataCus[2].Result}}</span></a>
+                                                    <a ng-click="AuditProgrssDivisionWise('AuditedSocietiesTillCurrentMonth')" class="collection-item">{{DivisionReportDataCus[3].DivisionName}}<span class="new badge2 green">{{DivisionReportDataCus[3].Result}}</span></a>
+                                                    <a ng-click="AuditProgrssDivisionWise('RemainingSocietiesForAudit')" class="collection-item">{{DivisionReportDataCus[4].DivisionName}}<span class="new badge2 red">{{DivisionReportDataCus[4].Result}}</span></a>
+                                                    <a ng-click="AuditProgrssDivisionWise('RemainingSocietiesForAudit')" class="collection-item">{{DivisionReportDataCus[5].DivisionName}}<span class="new badge2 red">{{DivisionReportDataCus[5].Result}}</span></a>
+                                                    <a ng-click="AuditProgrssDivisionWise('RemainingSocietiesForAudit')" class="collection-item">{{DivisionReportDataCus[6].DivisionName}}<span class="new badge2 red">{{DivisionReportDataCus[6].Result}}</span></a>
+
+                                                </div>
+                                            </div>
+                                        </div>*@
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-header card-header-info"> {{translation.SocietyStatusGraph}}</div>
+                                        <div class="card-image2">
+                                            <div style="height: 275px; width: 100%;" id="StatusChart">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-4 col-md-4 col-sm-4">
+                                    <div class="card panel panel-default">
+                                        <div class="card-header card-header-info">{{translation.ApplcationUser}} </div>
+                                        <div class="card-image2" style="min-height:150px">
+                                            <div class="collection">
+                                                <a href="javascript:void(0)" class="collection-item">{{translation.TotalUser}}<span class="new badge2">{{TotalUser}}</span></a>
+                                                <a href="http://rajsahakarapp.rajasthan.gov.in/User/UserRegistrationRequestApprovable" target="_blank" class="collection-item">{{translation.RequestReceive}}<span class="new badge2 blue">{{RequestReceive}}</span></a>
+                                                <a href="http://rajsahakarapp.rajasthan.gov.in/User/UserRoleDeptMapping" target="_blank" class="collection-item">{{translation.TotalActiveUser}}<span class="new badge2 brown">{{TotalActiveUser}}</span></a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-header card-header-info">Society Type Wise Audit Progress ({{GetSocietyTypeWiseAuditProgressList[0].FIN_YEAR_NAME}}) </div>
+                                        <div class="card-image" style="min-height:150px">
+                                            <div class="collection">
+                                                <a ng-repeat="item in GetSocietyTypeWiseAuditProgressList" ng-click="AuditProgrssDivisionWise('AuditableSocieties')" href="javascript:void(0)" class="collection-item">{{item.TypeameEng}}<span class="new badge2" ng-model="RegisteredSociety">{{item.Count}}</span></a>
+                                                <a class="collection-item" target="_blank" href="../MIS/SocietyListAssignedToAuditorReport">{{translation.DetailedReport}}<span class="new badge2 red"><i class="fa fa-table"></i></span></a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <!-- end main-content -->
+    </div>
+</div>
+<style>
+    .modal {
+        z-index: 9999 !important;
+    }
+
+    @@media screen and (min-width: 1266px) {
+        .modal-dialog {
+            width: 850px;
+        }
+    }
+</style>
+
+
+<!-- Modal -->
+<div class="modal fade" id="IframePop" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document" style="left:auto !important">
+        <div class="modal-content modal-lg" style="padding:0px !important;width:100% !important;">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="background: #26c6da !important;opacity: 1;color: #fff;text-shadow: none; padding: 5px 10px;">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <iframe id="myFrssm" name="my-iframess" src="https://jankalyan.rajasthan.gov.in/rajadvt/#/" width="100%" height="420" frameborder="0" style="border:0" allowfullscreen=""></iframe>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        //Toggle fullscreen
+        $("#panel-fullscreen").click(function (e) {
+            e.preventDefault();
+
+            var $this = $(this);
+
+            if ($this.children('i').hasClass('glyphicon-resize-full')) {
+                $this.children('i').removeClass('glyphicon-resize-full');
+                $this.children('i').addClass('glyphicon-resize-small');
+            }
+            else if ($this.children('i').hasClass('glyphicon-resize-small')) {
+                $this.children('i').removeClass('glyphicon-resize-small');
+                $this.children('i').addClass('glyphicon-resize-full');
+            }
+            $(this).closest('.panel').toggleClass('panel-fullscreen');
+        });
+
+        $("#panel-fullscreen1").click(function (e) {
+            e.preventDefault();
+
+            var $this = $(this);
+
+            if ($this.children('i').hasClass('glyphicon-resize-full')) {
+                $this.children('i').removeClass('glyphicon-resize-full');
+                $this.children('i').addClass('glyphicon-resize-small');
+            }
+            else if ($this.children('i').hasClass('glyphicon-resize-small')) {
+                $this.children('i').removeClass('glyphicon-resize-small');
+                $this.children('i').addClass('glyphicon-resize-full');
+            }
+            $(this).closest('.panel').toggleClass('panel-fullscreen');
+        });
+        $(window).on('load', function () {
+            $('#IframePop').modal('show');
+        });
+
+    });
+</script>

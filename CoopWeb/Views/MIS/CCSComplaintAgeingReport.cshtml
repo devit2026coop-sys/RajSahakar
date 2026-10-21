@@ -1,0 +1,167 @@
+﻿
+<script src="~/Scripts/AngularFramework/GetCCSAgeingReport.js?v=@DateTime.Today.Ticks"></script>
+<script type="text/javascript">
+    var tableToExcel = (function () {
+        var uri = 'data:application/vnd.ms-excel;base64,'
+            , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>'
+            , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) }
+            , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
+        return function (table, name) {
+            if (!table.nodeType) table = document.getElementById(table)
+            var ctx = { worksheet: name || 'Worksheet', table: table.innerHTML }
+            window.location.href = uri + base64(format(template, ctx))
+        }
+    })()
+</script>
+<style>
+
+    /* Hover any cell → bold */
+    .total-row td:hover {
+        font-weight: bold;
+    }
+
+    /* ONLY first cell (Total text) → red on hover */
+    .total-row td:first-child:hover {
+        color: red;
+    }
+
+    .total-row td:hover {
+        font-weight: bold;
+        background-color: #f5f5f5;
+    }
+
+    .total-row td {
+        transition: all 0.2s ease;
+    }
+</style>
+
+<div ng-app="GetCCSAgeingReportMod" ng-controller="GetCCSAgeingReportCnt">
+
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 citizen-dash-head mt-3">
+        <h3 class="my-0"> Credit Cooperative Society Complaints Ageing Report  </h3>
+    </div>
+
+    <div class="col-md-12 citizen-dash-head">
+        <div class="table-responsive " id="search-filter">
+            <div class="col-md-2">
+                <label>  {{ translation.FilterType}}:</label><br />
+                <input type="radio" name="rdoSelect" value="0" ng-model="selectState" ng-checked="true" /> <p style=" display: inline-table;    font-size: 12px;">{{translation.SingleState}}</p>
+                <input type="radio" name="rdoSelect" value="1" ng-model="selectState" /> <p style=" display: inline-table;    font-size: 12px;">{{translation.MultiState}}</p>
+            </div>
+            <div class="col-md-2 mb-3">
+                <label>{{ translation.DistrictHeading}}</label>
+                <select name="DISTRICT_ID" ng-model="DISTRICT_ID" id="ddrDistrictId" class="form-control" ng-init="DISTRICT_ID='0'">
+                    <option value="0">{{translation.SelectOption}}</option>
+                    <option ng-repeat="district in DistrictList" value="{{district.DISTRICT_ID}}">
+                        {{_language =='en-us' ?  district.DISTRICT_ENG : district.DISTRICT_MANGAL}}
+                    </option>
+                </select>
+            </div>
+
+            <div class="col-lg-2">
+                <label> {{translation.CCSName}} </label>
+                <select name="CCSId" ng-model="CCSId" class="form-control" ng-init="CCSId='0'">
+                    <option value="0">{{translation.SelectOption}}</option>
+                    <option ng-repeat="item in CCSList" value="{{item.SocietyID}}">
+                        {{item.SocietyName}}
+                    </option>
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <label for="search">{{translation.ItemPerPage}}:</label>
+                <input type="number" min="1" max="5000" class="form-control" ng-model="pageSize">
+
+            </div>
+
+            <div class="col-md-3 mt-2">
+                <br />
+                <button type="button" ng-click="searchRequest(GetCSSComplaintAgeingData)" class="btn btn-primary dev-btn ng-binding">{{translation.Search}}</button>
+                <button type="button" ng-click="ClearSearch()" class="btn btn-primary dev-btn ng-binding">{{translation.Clear}}</button>
+                @*<button type="button" ng-click="exportAllToExcel()" class="btn btn-success dev-btn">
+                    *@
+                    @*<i class="fa fa-file-excel-o"></i> Export Excel*@
+                    @*
+                </button>*@
+            </div>
+
+
+            <table class="table devtable" ng-if="ComplaintAgeingData && ComplaintAgeingData.length > 0">
+                <thead>
+                    <tr>
+                        <th>{{translation.SRNO}} </th>
+                        <th>Complainant Name</th>
+                        <th>{{translation.CCSName}}</th>
+                        <th>Current Status</th>
+                        <th>Notice Isssue</th>
+                        <th>Instgasa Prepared and made available to PP</th>
+                        <th>Not Relevant for Act-2019</th>
+                        <th>Dispose As Per Request From Complainer</th>
+                        <th>Dispose By Cort</th>
+                        <th>Istgasa Submitted to Court</th>
+                        @*
+                        <th>Applicable for FIR</th>*@
+                        <th>FIR Regsitered</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="item in ComplaintAgeingData" ng-if="ComplaintAgeingData.length > 0">
+                        @*
+                        <td>{{$index + 1}}</td>*@
+                        <td>
+                            {{(((DataPagingDetails.PageNumber - 1) * DataPagingDetails.PageSize) + 1)+$index}}
+                        </td>
+                        <td>{{item.ComplainerName}}</td>
+                        <td>{{item.SocietyName}}</td>
+                        <td>{{item.LastAction}}</td>
+                        <td>{{item.NoticeIsssue}}</td>
+                        <td>{{item.InstgasaPreparedandmadeavailabletoPP}}</td>
+                        <td>{{item.NotRelevant}}</td>
+                        <td>{{item.DisposeAsPerRequestFromComplainer}}</td>
+                        <td>{{item.DisposeByCort}}</td>
+                        <td>{{item.IstgasaSubmittedtoCourt}}</td>
+                        @*
+                        <td>{{item.ApplicableforFIR}}</td>*@
+                        <td>{{item.FIRRegistered}}</td>
+                    </tr>
+                    <tr ng-if="!ComplaintAgeingData && ComplaintAgeingData.length ==0">
+                        <td colspan="10" style="text-align:center">No Record</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="col-md-12">
+
+            <div ng-if="DataPagingDetails.TotalPages >1" class="dataTables_paginate paging_simple_numbers" id="dataTables-example_paginate">
+                <div class="dataTables_info" id="dataTables-example_info" role="status" aria-live="polite">
+                    Total Records: {{DataPagingDetails.TotalRecords}}
+                </div>
+                <ul class="pagination pagination_1" style="margin-left: 10px !important;">
+                    <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« First</span></li>
+                    <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« Previous</span></li>
+
+                    <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest('1',GetCSSComplaintAgeingData)" style="cursor: pointer;">
+                        <span>«First</span>
+                    </li>
+                    <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest(DataPagingDetails.PageNumber-1,GetCSSComplaintAgeingData)" style="cursor:pointer;">
+                        <span>« Previous</span>
+                    </li>
+                    <li class="{{n==DataPagingDetails.PageNumber?'active':''}}" style="{{n==DataPagingDetails.PageNumber?'':'cursor: pointer'}}" ng-repeat="n in PagingRange(DataPagingDetails.StartPageNumber,DataPagingDetails.EndPageNumber,DataPagingDetails.TotalPages)" ng-click="pageRequest(n,GetCSSComplaintAgeingData)"><span>{{n}}</span></li>
+                    <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Next</span></li>
+                    <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Last</span></li>
+                    <li ng-if="DataPagingDetails.PageNumber!= DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.PageNumber+1,GetCSSComplaintAgeingData)" style="cursor:pointer;">
+                        <span>Next »</span>
+                    </li>
+                    <li ng-if="DataPagingDetails.PageNumber != DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.TotalPages,GetCSSComplaintAgeingData)" style="cursor:pointer;">
+                        <span>Last »</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+

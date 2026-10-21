@@ -1,0 +1,2481 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    .profile-d1 {
+        color: #000;
+        background: #fff;
+        border-radius: 5px;
+    }
+
+    .profile-d1-hr {
+        font-size: 17px;
+        background: #025e63;
+        padding: 10px 15px;
+        color: #fff;
+        border-radius: 4px;
+    }
+
+    .dev-spancon {
+        font-size: 14px;
+        color: #424242;
+        font-weight: 700;
+    }
+
+    label {
+        color: #025e63;
+        font-size: 14px;
+    }
+
+    .devtable thead tr th {
+        background: #64c0c5;
+        color: #fff;
+    }
+</style>
+<script src="~/Scripts/AngularFramework/SocietyActionView.js?id=715"></script>
+<script src="~/Scripts/jquery.unobtrusive-ajax.min.js"></script>
+<script type="text/javascript">
+    function OnSuccess(data) {
+        $('#preloader').hide();
+        if (data.UserType == 'C') {
+            $('#FormPost').html(data.result);
+            $('#FormPost').find('form').submit();
+        }
+        else {
+            if (data.result == '1') {
+                alert('Payment Successful Received');
+                window.location = "../Citizen/SocietyProfile";
+            }
+            else {
+                ShowModelAlert("Society Administrative Details", 'Issue in Payment Receiveing Please Try after Some time');
+            }
+        }
+    }
+    function OnFailure(data) {
+        $('#preloader').hide();
+    }
+    function OnBegin() {
+        $('#preloader').show();
+    }
+</script>
+
+<style>
+    label {
+        display: inline-block;
+        width: 100% !important;
+        margin-bottom: 5px;
+        font-weight: 700;
+    }
+
+    .zoom {
+        transition: transform .2s; /* Animation */
+        margin: 0 auto;
+    }
+
+        .zoom:hover {
+            padding-left: 30px;
+            transform: scale(2.5); /* (150% zoom - Note: if the zoom is too large, it will go outside of the viewport) */
+        }
+</style>
+<style>
+    a > i.fa.fa-plus-circle {
+        font-size: 25px;
+        cursor: pointer;
+    }
+
+    a:hover > i.fa.fa-plus-circle {
+        font-size: 26px;
+        cursor: pointer;
+    }
+
+    a > i.fa.fa-eye {
+        font-size: 25px;
+        cursor: pointer;
+    }
+
+    a:hover > i.fa.fa-eye {
+        font-size: 26px;
+        cursor: pointer;
+    }
+
+    .add-more {
+    }
+
+    .dvfieldset {
+        border: 1px solid #b0adad;
+        border-radius: 5px;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+        background: #fff;
+    }
+
+    .dvlegend {
+        width: auto;
+        padding: 24px;
+        margin-left: 11px;
+        border: 1px solid gray;
+        padding: 5px;
+        border-radius: 14px;
+        font-size: 16px;
+        padding-left: 14px;
+        padding-right: 15px;
+        background: #025e63;
+        color: #fff;
+    }
+</style>
+<div ng-app="SocietyActionViewMod" ng-controller="SocietyActionViewCnt">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <h5 style="text-align:center;font-size: 17px;background:#025e63;color:#fff;" class="citizen-dash-head" ng-if="SocietyDetailsData.BasicDetails.ActId==1">Registration of Societies under Rajasthan Societies Act, {{SocietyDetailsData.BasicDetails.ActId==1?'1958':SocietyDetailsData.BasicDetails.ActId==3?'2001':SocietyDetailsData.BasicDetails.ActId==7?'2005':''}}/राजस्थान सोसायटी अधिनियम, {{SocietyDetailsData.BasicDetails.ActId==1?'1958':SocietyDetailsData.BasicDetails.ActId==3?'2001':SocietyDetailsData.BasicDetails.ActId==7?'2005':''}} के अंतर्गत सोसायटी का पंजीकरण</h5>
+        <h5 style="text-align:center;font-size: 17px;background:#025e63;color:#fff;" class="citizen-dash-head" ng-if="SocietyDetailsData.BasicDetails.ActId==3">Registration of Cooperative Societies under Rajasthan Cooperative Societies Act, {{SocietyDetailsData.BasicDetails.ActId==1?'1958':SocietyDetailsData.BasicDetails.ActId==3?'2001':SocietyDetailsData.BasicDetails.ActId==7?'2005':''}}/राजस्थान सहकारी सोसायटी अधिनियम, {{SocietyDetailsData.BasicDetails.ActId==1?'1958':SocietyDetailsData.BasicDetails.ActId==3?'2001':SocietyDetailsData.BasicDetails.ActId==7?'2005':''}} के अंतर्गत सहकारी सोसायटी का पंजीकरण</h5>
+        <h5 style="text-align:center;font-size: 17px;background:#025e63;color:#fff;" class="citizen-dash-head" ng-if="SocietyDetailsData.BasicDetails.ActId==7">Registration of Societies under Rajasthan Societies Act, {{SocietyDetailsData.BasicDetails.ActId==1?'1958':SocietyDetailsData.BasicDetails.ActId==3?'2001':SocietyDetailsData.BasicDetails.ActId==7?'2005':''}}/राजस्थान सोसायटी अधिनियम, {{SocietyDetailsData.BasicDetails.ActId==1?'1958':SocietyDetailsData.BasicDetails.ActId==3?'2001':SocietyDetailsData.BasicDetails.ActId==7?'2005':''}} के अंतर्गत सोसायटी का पंजीकरण</h5>
+
+
+
+    </div>
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" id="printTable" ng-show="divSocietyProfilingShow">
+        <fieldset class="dvfieldset">
+            <legend class="dvlegend">Application Details/आवेदन के ब्यौरे:</legend>
+            <div class="fa col-lg-12">
+                <div class="fa col-md-2"><label>{{_language=='en-us' ? translation.SocietyRegistrationNo: translation.SocietyRegistrationNo}} :</label></div>
+                <div class="fa col-md-5">
+                    <span class="dev-spancon">  {{ _language=='en-us' ? SocietyDetailsData.BasicDetails.RegistrationNo : SocietyDetailsData.BasicDetails.RegistrationNo }}</span>
+                </div>
+                <div class="fa col-md-1"><label>{{_language=='en-us' ? translation.Status: translation.Status}} :</label></div>
+                <div class="fa col-md-4">
+                    <span class="dev-spancon">{{ _language =='en-us' ? ApplicationFlowSociety[0].ProceesStatusTextEn : ApplicationFlowSociety[0].ProceesStatusTextHi}}</span>
+                </div>
+            </div>
+            <div class="fa col-lg-12">
+                <div class=" profile-d1" style="margin-top: 30px;">
+                    <div>
+                        <h5 class="profile-d1-hr" style="text-align:center">{{_language=='en-us' ? 'Application Trail': 'आवेदन ट्रेल'}} </h5>
+                    </div>
+                    <div class="col-md-12 table-responsive ">
+                        <table class="table table-responsive devtable" style="color:black" id="a">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        {{translation.SRNO}}
+                                    </th>
+                                    <th>
+                                        {{translation.Status}}
+                                    </th>
+                                    <th>{{translation.AssignTo}}</th>
+                                    <th>
+                                        {{translation.Remarks}}
+                                    </th>
+                                    <th>
+                                        {{translation.CreationDate}}
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr dir-paginate="AppFlowOne in ApplicationFlowSociety | itemsPerPage: 50">
+                                    <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                                    <td>{{ _language =='en-us' ? AppFlowOne.ProceesStatusTextEn : AppFlowOne.ProceesStatusTextHi}}</td>
+                                    <td>{{AppFlowOne.OfficerNameEn}}</td>
+                                    <td>{{AppFlowOne.Remark}}</td>
+                                    <td>{{AppFlowOne.ActionDate}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
+            </div>
+        </fieldset>
+        <fieldset class="dvfieldset">
+            <legend class="dvlegend">Society Details/सोसायटी विवरण</legend>
+            <div class="fa col-lg-12">
+                <div class="col-lg-12 table-responsive">
+                    <table class="col-lg-12 table ">
+
+                        <tr>
+
+                            <td>
+
+                                <label>{{_language=='en-us' ? translation.BRN: translation.BRN}} :</label>
+
+                            </td>
+                            <td>
+
+                                <span class="dev-spancon"> {{ _language=='en-us' ? SocietyDetailsData.BasicDetails.BRN : SocietyDetailsData.BasicDetails.BRN }}</span>
+
+
+                            </td>
+                            <td>
+                                <label>{{_language=='en-us' ? translation.Act: translation.Act}} :</label>
+                            </td>
+                            <td>
+                                <span class="dev-spancon"> {{ _language=='en-us' ? SocietyDetailsData.BasicDetails.ActNameEn : SocietyDetailsData.BasicDetails.ActNameHi }}  </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label>{{_language=='en-us' ? translation.SocietyName: translation.SocietyName}} :</label>
+                            </td>
+                            <td>
+                                <span class="dev-spancon">   {{_language=='en-us' ? SocietyDetailsData.BasicDetails.SocietyName: SocietyDetailsData.BasicDetails.SocietyName}}</span>
+                            </td>
+                            <td>
+                                <label>{{_language=='en-us' ? translation.SocietyRegistrationNo: translation.SocietyRegistrationNo}} :</label>
+
+                            </td>
+                            <td>
+                                <span class="dev-spancon">  {{ _language=='en-us' ? SocietyDetailsData.BasicDetails.RegistrationNo : SocietyDetailsData.BasicDetails.RegistrationNo }}</span>
+                            </td>
+
+                        </tr>
+
+                        <tr>
+                            <td>
+                                <label>{{_language=='en-us' ? translation.RegistrationDate: translation.RegistrationDate}} :</label>
+
+                            </td>
+                            <td>
+                                <span class="dev-spancon" ng-hide="SocietyDetailsData.BasicDetails.RegistrationDate.indexOf('9999') != -1">
+                                    {{ SocietyDetailsData.BasicDetails.RegistrationDate}}
+                                </span>
+                            </td>
+                            <td>
+                                <label>{{_language=='en-us' ? translation.SocietyType: translation.SocietyType}} :</label>
+                            </td>
+                            <td>
+                                <span class="dev-spancon">  {{ _language=='en-us' ? SocietyDetailsData.BasicDetails.TypeameEng : SocietyDetailsData.BasicDetails.TypeNameHin }}</span>
+                            </td>
+                        </tr>
+
+
+                        <tr>
+                            <td>
+                                <label>{{translation.ElectionDate}} :</label>
+
+                            </td>
+                            <td>
+                                <span class="dev-spancon" ng-hide="SocietyDetailsData.BasicDetails.ElectionDate.indexOf('9999') != -1">
+                                    {{ SocietyDetailsData.BasicDetails.ElectionDate }}
+                                </span>
+                            </td>
+                            <td>
+                                <label>{{ translation.Business}} :</label>
+                            </td>
+                            <td>
+                                <span class="dev-spancon">  {{ _language=='en-us' ? SocietyDetailsData.BasicDetails.BusinessNameEn : SocietyDetailsData.BasicDetails.BusinessNameHi }}</span>
+                            </td>
+                        </tr>
+
+
+                        <tr>
+                            <td>
+                                <label>{{translation.GeneralMeetingDate}} :</label>
+
+                            </td>
+                            <td>
+                                <span class="dev-spancon" ng-hide="SocietyDetailsData.BasicDetails.AGMDate.indexOf('9999') != -1">
+                                    {{ SocietyDetailsData.BasicDetails.AGMDate }}
+                                </span>
+                            </td>
+                            <td ng-show="SocietyDetailsData.BasicDetails.ActId=='3'">
+                                <label>{{ translation.LTDSocietyLiablityMember}} :</label>
+                            </td>
+                            <td ng-show="SocietyDetailsData.BasicDetails.ActId=='3'">
+                                <span class="dev-spancon"> {{SocietyDetailsData.BasicDetails.MemberLiablity  }}</span>
+                            </td>
+                        </tr>
+
+                        <tr ng-show="SocietyDetailsData.BasicDetails.ActId!='1'">
+                            <td>
+                                <label>{{ translation.EntranceFeesCollected }} :</label>
+
+                            </td>
+                            <td>
+                                <span class="dev-spancon">  {{  SocietyDetailsData.BasicDetails.EntranceFeesCollected }}</span>
+                            </td>
+                            <td>
+                                <label>{{ translation.Liability}} :</label>
+                            </td>
+                            <td>
+                                <span class="dev-spancon">  {{ _language=='en-us' ? SocietyDetailsData.BasicDetails.LiablityNameEn : SocietyDetailsData.BasicDetails.LiablityNameHi }}</span>
+                            </td>
+                        </tr>
+                        <tr ng-show="SocietyDetailsData.BasicDetails.ActId!='1'">
+                            <td>
+                                <label>{{ translation.SecurityDeposit}} :</label>
+                            </td>
+                            <td>
+                                <span class="dev-spancon">  {{SocietyDetailsData.BasicDetails.SecurityDeposit}}</span>
+                            </td>
+                            
+                            <td>
+                                <label>Working Capital :</label>
+                            </td>
+                            <td>
+                                <span class="dev-spancon">{{SocietyDetailsData.BasicDetails.WorkingCapital}}</span>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>
+                                <label>{{ translation.GenMeetingParticipant}} :</label>
+
+                            </td>
+                            <td>
+                                <span class="dev-spancon">    {{ SocietyDetailsData.BasicDetails.NoOfMemberInAGM }}</span>
+                            </td>
+                            <td>
+                                <label>{{ translation.MembersApplyingForTheSociety}} :</label>
+                            </td>
+                            <td>
+                                <span class="dev-spancon">  {{ SocietyDetailsData.BasicDetails.TotalNumberOfMembers }}</span>
+                            </td>
+                        </tr>
+
+                        <tr ng-show="SocietyDetailsData.BasicDetails.ActId=='3'">
+                            <td>
+                                <label>{{ translation.PaidUpShareCapital}} :</label>
+
+                            </td>
+                            <td>
+                                <span class="dev-spancon">  {{SocietyDetailsData.BasicDetails.PaidUpShareCapital}}</span>
+                            </td>
+                            <td>
+                                <label>{{translation.OneShareValue}} :</label>
+                            </td>
+                            <td>
+                                <span class="dev-spancon">  {{ SocietyDetailsData.BasicDetails.SingleShareValue }}</span>
+                            </td>
+                        </tr>
+
+                        <tr ng-show="SocietyDetailsData.BasicDetails.ActId=='3'">
+                            <td>
+                                <label>{{_language=='en-us' ? translation.SocietyClass: translation.SocietyClass}} :</label>
+
+                            </td>
+                            <td>
+                                <span class="dev-spancon">     {{ _language=='en-us' ? SocietyDetailsData.BasicDetails.ClassNameEn : SocietyDetailsData.BasicDetails.ClassNameHi }}</span>
+                            </td>
+                            <td>
+                                <label>{{_language=='en-us' ? translation.SocietySubClass: translation.SocietySubClass}} :</label>
+                            </td>
+                            <td>
+                                <span class="dev-spancon">   {{ _language=='en-us' ? SocietyDetailsData.BasicDetails.SubClassNameEn : SocietyDetailsData.BasicDetails.SubClassNameHi }}</span>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td ng-show="SocietyDetailsData.BasicDetails.ActId!='1'">
+                                <label>{{_language=='en-us' ? translation.NoOfBranches: translation.NoOfBranches}} :</label>
+
+                            </td>
+                            <td ng-show="SocietyDetailsData.BasicDetails.ActId!='1'">
+                                <span class="dev-spancon">    {{ _language=='en-us' ? SocietyDetailsData.BasicDetails.NoOfBranches : SocietyDetailsData.BasicDetails.NoOfBranches }}</span>
+                            </td>
+                            <td ng-show="showBankstatement">
+                                <label>{{_language=='en-us' ? translation.PaidUpShareCapitals: translation.PaidUpShareCapitals}} :</label>
+                            </td>
+                            <td ng-show="showBankstatement">
+                                <span class="dev-spancon">   {{SocietyDetailsData.BasicDetails.PaidUpShareCapital}}</span>
+                            </td>
+                            <td ng-show="SocietyDetailsData.BasicDetails.ActId=='3'">
+                                <label >Loan Amount:</label>
+                            </td>
+                            <td ng-show="SocietyDetailsData.BasicDetails.ActId=='3'">
+                                <span class="dev-spancon">{{SocietyDetailsData.BasicDetails.LoanAmt}}</span>
+                            </td>
+                        </tr>
+
+                        @*
+                        <tr>
+                            <td>
+                                <label>{{_language=='en-us' ? translation.PaidUpShareCapitals: translation.PaidUpShareCapitals}} :</label>
+                            </td>
+                            <td>
+                                <span class="dev-spancon">   {{SocietyDetailsData.BasicDetails.PaidUpShareCapital}}</span>
+                            </td>
+                        </tr>*@
+
+                    </table>
+                </div>
+            </div>
+        </fieldset>
+
+
+
+        <fieldset class="dvfieldset" ng-show="DivPayment">
+            <legend class="dvlegend">Payment Details/भुगतान का विवरण</legend>
+            @*<div class="fa col-lg-12">
+                <div class="col-lg-12 table-responsive" ng-show="DivPayment">
+                    <table class="table ">
+                        <tr>
+                            <td><label>{{translation.RequestID}} :</label></td>
+                            <td><span class="dev-spancon">{{SocietyDetailsData.PaymentDetails.PRN}}</span></td>
+                            <td><label>{{translation.TRANSACTIONSTATUSCODE}}:</label></td>
+                            <td><span class="dev-spancon">{{SocietyDetailsData.PaymentDetails.TRANSACTIONSTATUSCODE}}</span></td>
+                        </tr>
+                        <tr>
+                            <td><label>{{translation.ReceiptNo}} :</label></td>
+                            <td><span class="dev-spancon">{{SocietyDetailsData.PaymentDetails.RECEIPTNO}}</span></td>
+                            <td><label>{{translation.TRANSACTIONID}} :</label></td>
+                            <td><span class="dev-spancon">{{SocietyDetailsData.PaymentDetails.TRANSACTIONID}}</span></td>
+                        </tr>
+                        <tr>
+                            <td><label>{{translation.Amount}} :</label></td>
+                            <td><span class="dev-spancon">{{SocietyDetailsData.PaymentDetails.AMOUNT}}{{ SocietyDetailsData.PaymentDetails.TRANSAMT}}</span></td>
+                            <td><label>{{translation.PaidAmount}} :</label></td>
+                            <td><span class="dev-spancon">{{SocietyDetailsData.PaymentDetails.PAIDAMOUNT}}</span></td>
+                        </tr>
+                        <tr>
+                            <td><label>{{translation.Status}} :</label></td>
+                            <td><span class="dev-spancon">{{SocietyDetailsData.PaymentDetails.RESPONSEMESSAGE}} {{SocietyDetailsData.PaymentDetails.TRANSACTIONSTATUS}}</span></td>
+                            <td><label>{{translation.StatusMsg}} :</label></td>
+                            <td><span class="dev-spancon">{{SocietyDetailsData.PaymentDetails.STATUS}}{{SocietyDetailsData.PaymentDetails.MSG}}</span></td>
+                        </tr>
+                        <tr>
+                            <td><label>{{translation.RequestDateTime}} :</label></td>
+                            <td><span class="dev-spancon">{{TransDataTime}}</span></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>*@
+
+            <div class="fa col-lg-12 profile-d">
+                <div class="col-md-12 table-responsive ">
+                    <table class="table table-responsive devtable" style="color:black">
+                        <thead>
+                            <tr>
+                                <th> {{translation.SRNO}}</th>
+                                <th>{{translation.RequestID}}</th>
+                                <th>{{translation.TRANSACTIONSTATUSCODE}}</th>
+                                <th>{{translation.ReceiptNo}}</th>
+                                <th>{{translation.TRANSACTIONID}}</th>
+                                <th>{{translation.Amount}}</th>
+                                <th>{{translation.PaidAmount}}</th>
+                                <th>{{translation.Status}}</th>
+                                <th>{{translation.StatusMsg}}</th>
+                                <th>{{translation.RequestDateTime}}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="Payment in SocietyPaymentTransectin">
+                                <td>{{$index+1}}</td>
+                                <td><span class="dev-spancon">{{Payment.ResponseString.PRN}}</span></td>
+                                <td><span class="dev-spancon">{{Payment.ResponseString.TRANSACTIONSTATUSCODE}}</span></td>
+                                <td><span class="dev-spancon">{{Payment.ResponseString.RECEIPTNO}}</span></td>
+                                <td><span class="dev-spancon">{{Payment.ResponseString.TRANSACTIONID}}</span></td>
+                                <td><span class="dev-spancon">{{Payment.ResponseString.AMOUNT}}{{ Payment.ResponseString.TRANSAMT}}</span></td>
+                                <td><span class="dev-spancon">{{Payment.ResponseString.PAIDAMOUNT}}</span></td>
+                                <td><span class="dev-spancon">{{Payment.ResponseString.RESPONSEMESSAGE}} {{Payment.ResponseString.TRANSACTIONSTATUS}}</span></td>
+                                <td><span class="dev-spancon">{{Payment.ResponseString.STATUS}}{{Payment.ResponseString.MSG}}</span></td>
+                                <td><span class="dev-spancon">{{Payment.CreationDate}}</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </fieldset>
+        <fieldset class="dvfieldset" ng-show="DivOther">
+            <legend class="dvlegend">Area of Operations/सोसाइटी का कार्यक्षेत्र</legend>
+            <div class="fa col-lg-12 profile-d1">
+                <div class="col-lg-12 table-responsive">
+                    <table class="table devtable">
+                        <thead>
+                            <tr>
+                                <th>
+                                    {{translation.SRNO}}
+                                </th>
+                                <th>
+                                    {{translation.StateHeading}}
+                                </th>
+                                <th>
+                                    {{translation.Division}}
+                                </th>
+                                <th>
+                                    {{translation.District}}
+                                </th>
+
+                                <th ng-hide="IsRuralUworkscope">
+                                    {{translation.BlockHeading}}
+                                </th>
+                                <th ng-hide="IsRuralUworkscope">
+                                    {{translation.GramPanchayatHeading}}
+                                </th>
+                                <th ng-hide="IsRuralUworkscope">
+                                    {{translation.Village}}
+                                </th>
+                                <th ng-show="IsRuralUworkscope">
+                                    {{translation.CityType}}
+                                </th>
+                                <th ng-show="IsRuralUworkscope">
+                                    {{translation.CityHeading}}
+                                </th>
+                                <th ng-show="IsRuralUworkscope">
+                                    {{translation.Ward}}
+                                </th>
+
+
+                            </tr>
+                        </thead>
+                        <tbody id="myTable">
+                            <tr ng-repeat="items in lstSocietyWorkScope">
+                                <td>{{$index+1}}</td>
+                                <td>{{_language=='en-us' ? items.STATE_Name :items.STATE_MANGAL }}</td>
+                                <td>{{_language=='en-us' ? items.DIVISION_Name : items.DIVISION_MANGAL}}</td>
+                                <td>{{_language=='en-us' ? items.DISTRICT_ENG : items.DISTRICT_MANGAL}}</td>
+                                <td ng-hide="IsRuralUworkscope">{{_language=='en-us' ? items.BLOCK_Name : items.BLOCK_MANGAL}}</td>
+                                <td ng-hide="IsRuralUworkscope">{{_language=='en-us' ? items.GP_ID_Name : items.GP_MANGAL}}</td>
+                                <td ng-hide="IsRuralUworkscope">{{_language=='en-us' ? items.VILLAGE_Name : items.VILLAGE_MANGAL}}</td>
+                                <td ng-show="IsRuralUworkscope">{{items.CityTypes1}}</td>
+                                <td ng-show="IsRuralUworkscope">{{_language=='en-us' ?  items.CITY_Name : items.CITY_MANGAL}}</td>
+                                <td ng-show="IsRuralUworkscope">{{_language=='en-us' ?  items.WARD_Name : items.WARD_MANGAL}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </fieldset>
+       
+        <fieldset class="dvfieldset" ng-if="GetAmendmentHistory.length>0">
+            <legend class="dvlegend">Amendment History/संशोधन इतिहास</legend>
+            <div class="fa col-lg-12 profile-d1">
+                <div class="col-lg-12 table-responsive">
+                    <table class="table devtable" style="">
+                        <thead>
+                            <tr>
+                                
+                                <th>
+                                    {{translation.SRNO}}
+                                </th>
+                                <th> Amendment Type</th>                               
+                               
+                              
+                                <th>
+                                    {{translation.Status}}
+                                </th>
+                                <th>Issued Documents</th>
+                                <th>
+                                    {{translation.Actions}}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="item in GetAmendmentHistory">                               
+                                <td>{{$index+1}}</td>   
+                                <td>
+                                    {{item.AmendmentType}}
+                                </td>  
+                                <td>
+                                    {{item.ProceesStatusTextEn}}
+                                    <br />
+                                    <span style="color:blue" ng-if="item.ProcessStatus==5||item.ProcessStatus==10"> {{item.Remark}}</span>
+                                </td>
+                                <td>
+                                    <a ng-if="item.Section==4 && item.MemberList!=''  && item.MemberList!=null" href="~/Content/SocietyProfiling/{{item.MemberList}}" target="_blank">Member List</a>
+                                    <a ng-if="item.Section!=4 && (item.AmendmentRequest== '2'||item.AmendmentRequest== '1,2,3'||item.AmendmentRequest== '2,3')" href="~/Content/SocietyProfiling/{{item.Certificate}}" target="_blank">Certificate</a>
+                                    <a ng-if="item.Section!=4 && (item.AmendmentRequest== '2'||item.AmendmentRequest== '1,2,3'||item.AmendmentRequest== '2,3')" href="~/Content/SocietyProfiling/{{item.BylawsFile}}" target="_blank"> Bylaws</a>
+                                </td>
+                                <td>
+                                    <a title="{{translation.ShowDetails}}" style="color:#505050;" href="../ApplicationFlow/SocietyActionViewAmendment1958?SocietyIDEnc={{SocietyDetailsData.BasicDetails.SocietyIdEnc}}~_ApplicationFlow_ApplicationFlow~{{item.ChangeID}}" target="_blank"><i class="fa fa-info-circle infoicon-edit"></i></a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </fieldset>
+        
+
+
+            <fieldset class="dvfieldset" ng-show="DivOther">
+                <legend class="dvlegend">Documents/दस्तावेज़</legend>
+                <div class="fa col-lg-12 profile-d1">
+                    <div class="col-lg-12 table-responsive">
+                        <table class="table devtable" style="margin-bottom: 0px;">
+                            <thead>
+                                <tr>
+                                    @*
+                                    <th>
+                                        #
+                                    </th>*@
+                                    <th style="width:60%">
+                                        {{translation.Certificate}}
+                                    </th>
+                                    <th class="printhideth">
+                                        {{translation.Fileview}}
+                                    </th>
+                                    @*
+                                    <th style="width:130px;"></th>*@
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @*Member List*@
+                                <tr ng-hide="SocietyDetailsData.BasicDetails.RegistrationCertificateFile.indexOf('undefined') != -1 || SocietyDetailsData.BasicDetails.RegistrationCertificateFile==''">
+                                    @*
+                                    <td>
+                                        &#8226;
+                                    </td>*@
+                                    <td>
+                                        <div class="col-lg-8">{{ translation.RegistrationCertificate}}<span class="error">*</span></div>
+                                    </td>
+                                    <td class="printhideth">
+                                        <div class="col-lg-12">
+                                            <a style="color:#505050;" target="_blank" href="{{  SocietyDetailsData.BasicDetails.RegistrationCertificateFile }}"><i class="fa fa-download"></i></a>
+                                        </div>
+                                    </td>
+                                    @*
+                                    <td>
+                                        <a ng-show="IsPDFfile(SocietyDetailsData.BasicDetails.RegistrationCertificateFile)" href="javascript:void(0);" ng-click="openesigndocuemnt(SocietyDetailsData.BasicDetails.RegistrationCertificateFile)">Esign Document</a>
+                                    </td>*@
+                                </tr>
+                                <tr ng-show="SocietyDetailsData.BasicDetails.ActId=='1'">
+                                    @*
+                                    <td>
+                                        &#8226;
+                                    </td>*@
+                                    <td>
+                                        <div class="col-lg-8">{{ translation.RulesAndRegulation}}<span class="error">*</span></div>
+                                    </td>
+                                    <td class="printhideth">
+
+                                        <div class="col-lg-12">
+                                            <a style="color:#505050;" target="_blank" href="{{ SocietyDetailsData.BasicDetails.RulesAndRegulationFile}}"><i class="fa fa-download"></i></a>
+                                        </div>
+                                    </td>
+                                    @*
+                                    <td>
+                                        <a ng-show="IsPDFfile(SocietyDetailsData.BasicDetails.RulesAndRegulationFile)" href="javascript:void(0);" ng-click="openesigndocuemnt(SocietyDetailsData.BasicDetails.RulesAndRegulationFile)">Esign Document</a>
+                                    </td>*@
+                                </tr>
+                                <tr ng-show="SocietyDetailsData.BasicDetails.ActId=='3'">
+                                    @*
+                                    <td>
+                                        &#8226;
+                                    </td>*@
+                                    <td>
+                                        <div class="col-lg-8">{{ translation.Bylaws}}<span class="error">*</span></div>
+                                    </td>
+                                    
+                                    <td class="printhideth">
+                                        <div class="col-lg-12">
+                                            <a style="color:#505050;" target="_blank" href="{{ SocietyDetailsData.BasicDetails.BylawsFile}}"><i class="fa fa-download"></i></a>{{SocietyDetailsData.BasicDetails.BylawsFile}}------
+                                        </div>
+                                    </td>
+                                    @*
+                                    <td>
+                                        <a ng-show="IsPDFfile(SocietyDetailsData.BasicDetails.BylawsFile)" href="javascript:void(0);" ng-click="openesigndocuemnt(SocietyDetailsData.BasicDetails.BylawsFile)">Esign Document</a>
+                                    </td>*@
+                                </tr>
+                                <tr ng-show="SocietyDetailsData.BasicDetails.ActId=='1'">
+                                    @*
+                                    <td>
+                                        &#8226;
+                                    </td>*@
+                                    <td>
+                                        <div class="col-lg-8">{{ translation.SocietyObjects}}<span class="error">*</span></div>
+                                    </td>
+                                    <td class="printhideth">
+                                        <div class="col-lg-12">
+                                            <a style="color:#505050;" target="_blank" href="{{ SocietyDetailsData.BasicDetails.ObjectsFile}}"><i class="fa fa-download"></i></a>
+                                        </div>
+                                    </td>
+                                    @*
+                                    <td>
+                                        <a ng-show="IsPDFfile(SocietyDetailsData.BasicDetails.ObjectsFile)" href="javascript:void(0);" ng-click="openesigndocuemnt(SocietyDetailsData.BasicDetails.ObjectsFile)">Esign Document</a>
+                                    </td>*@
+                                </tr>
+                                <tr>
+                                    @*
+                                    <td>
+                                        &#8226;
+                                    </td>*@
+                                    <td>
+                                        <div class="col-lg-8">{{translation.lblUploadMembersList }}<span class="error">*</span></div>
+                                    </td>
+                                    <td class="printhideth">
+                                        <div class="col-lg-12">
+                                            <a style="color:#505050;" target="_blank" href="{{ SocietyDetailsData.BasicDetails.MemberListFile}}"><i class="fa fa-download"></i></a>
+                                        </div>
+                                    </td>
+                                    @*
+                                    <td>
+                                        <a ng-show="IsPDFfile(SocietyDetailsData.BasicDetails.MemberListFile)" href="javascript:void(0);" ng-click="openesigndocuemnt(SocietyDetailsData.BasicDetails.MemberListFile)">Esign Document</a>
+                                    </td>*@
+                                </tr>
+                                <tr ng-show="SocietyDetailsData.BasicDetails.ActId=='3'">
+                                    @*
+                                    <td>
+                                        &#8226;
+                                    </td>*@
+                                    <td>
+                                        <div class="col-lg-8">{{translation.lblSocietyWorkPlanEconomicViability}}<span class="error">*</span></div>
+                                    </td>
+                                    <td class="printhideth">
+                                        <div class="col-lg-12">
+                                            <a style="color:#505050;" target="_blank" href="{{ SocietyDetailsData.BasicDetails.WorkPlanEcoViabilityFile}}"><i class="fa fa-download"></i></a>
+                                        </div>
+                                    </td>
+                                    @*
+                                    <td>
+                                        <a ng-show="IsPDFfile(SocietyDetailsData.BasicDetails.WorkPlanEcoViabilityFile)" href="javascript:void(0);" ng-click="openesigndocuemnt(SocietyDetailsData.BasicDetails.WorkPlanEcoViabilityFile)">Esign Document</a>
+                                    </td>*@
+                                </tr>
+                                <tr ng-show="SocietyDetailsData.BasicDetails.ActId=='3'">
+                                    @*
+                                    <td>
+                                        &#8226;
+                                    </td>*@
+                                    <td>
+                                        <div class="col-lg-8">{{translation.lblGeneralMeetingProcedure}}<span class="error">*</span></div>
+                                    </td>
+                                    <td class="printhideth">
+                                        <div class="col-lg-12">
+                                            <a style="color:#505050;" target="_blank" href="{{ SocietyDetailsData.BasicDetails.GeneralMeetingProcedureFile}}"><i class="fa fa-download"></i></a>
+                                        </div>
+                                    </td>
+                                    @*
+                                    <td>
+                                        <a ng-show="IsPDFfile(SocietyDetailsData.BasicDetails.GeneralMeetingProcedureFile)" href="javascript:void(0);" ng-click="openesigndocuemnt(SocietyDetailsData.BasicDetails.GeneralMeetingProcedureFile)">Esign Document</a>
+                                    </td>*@
+                                </tr>
+                                <tr ng-show="SocietyDetailsData.BasicDetails.ActId=='3'">
+                                    @*
+                                    <td>
+                                        &#8226;
+                                    </td>*@
+                                    <td>
+                                        <div class="col-lg-8">{{translation.lblBalanceSheetUpload}}<span class="error">*</span></div>
+                                    </td>
+                                    <td class="printhideth">
+                                        <div class="col-lg-12">
+                                            <a style="color:#505050;" target="_blank" href="{{ SocietyDetailsData.BasicDetails.BalanceSheetExcelFile}}"><i class="fa fa-download"></i></a>
+                                        </div>
+                                    </td>
+                                    @*
+                                    <td>
+                                        <a ng-show="IsPDFfile(SocietyDetailsData.BasicDetails.BalanceSheetExcelFile)" href="javascript:void(0);" ng-click="openesigndocuemnt(SocietyDetailsData.BasicDetails.BalanceSheetExcelFile)">Esign Document</a>
+                                    </td>*@
+                                </tr>
+
+                                <tr ng-show="showBankstatement">
+                                    @*
+                                    <td>
+                                        &#8226;
+                                    </td>*@
+                                    <td>
+                                        <div class="col-lg-8">{{translation.BankPassBook}}<span class="error">*</span></div>
+                                    </td>
+                                    <td class="printhideth">
+                                        <div class="col-lg-12">
+                                            <a style="color:#505050;" target="_blank" href="{{SocietyDetailsData.BasicDetails.BankPassBookFile}}"><i class="fa fa-download"></i></a>
+                                        </div>
+                                    </td>
+                                    @*
+                                    <td>
+                                        <a ng-show="IsPDFfile(SocietyDetailsData.BasicDetails.BankPassBookFile)" href="javascript:void(0);" ng-click="openesigndocuemnt(SocietyDetailsData.BasicDetails.BankPassBookFile)">Esign Document</a>
+                                    </td>*@
+                                </tr>
+                                <tr ng-hide="SocietyDetailsData.BasicDetails.SOCIETIESAUTHORIZEDPERSONS.indexOf('undefined') != -1 || SocietyDetailsData.BasicDetails.SOCIETIESAUTHORIZEDPERSONS==''">
+                                    @*
+                                    <td>
+                                        &#8226;
+                                    </td>*@
+                                    <td>
+                                        <div class="col-lg-8">{{translation.ElectedMemberListEsign}}</div>
+                                    </td>
+                                    <td class="printhideth">
+                                        <div class="col-lg-12">
+                                            <a style="color:#505050;" target="_blank" href="{{SocietyDetailsData.BasicDetails.SOCIETIESAUTHORIZEDPERSONS}}"><i class="fa fa-download"></i></a>
+                                        </div>
+                                    </td>
+                                    @*
+                                    <td>
+                                        <a ng-show="IsPDFfile(SocietyDetailsData.BasicDetails.SOCIETIESAUTHORIZEDPERSONS)" href="javascript:void(0);" ng-click="openesigndocuemnt(SocietyDetailsData.BasicDetails.SOCIETIESAUTHORIZEDPERSONS)">Esign Document</a>
+                                    </td>*@
+                                </tr>
+                                <tr ng-hide="SocietyDetailsData.BasicDetails.BankOpeningCertificate.indexOf('undefined') != -1 || SocietyDetailsData.BasicDetails.BankOpeningCertificate==''">
+                                    @*
+                                    <td>
+                                        &#8226;
+                                    </td>*@
+                                    <td>
+                                        <div class="col-lg-8">{{ translation.BankOpeningCertificate}}<span class="error">*</span></div>
+                                    </td>
+                                    <td class="printhideth">
+                                        <div class="col-lg-12">
+                                            <a style="color:#505050;" target="_blank" href="{{ SocietyDetailsData.BasicDetails.BankOpeningCertificate}}"><i class="fa fa-download"></i></a>
+                                        </div>
+                                    </td>
+                                    @*
+                                    <td>
+                                        <a ng-show="IsPDFfile(SocietyDetailsData.BasicDetails.BankOpeningCertificate)" href="javascript:void(0);" ng-click="openesigndocuemnt(SocietyDetailsData.BasicDetails.BankOpeningCertificate)">Esign Document</a>
+                                    </td>*@
+                                </tr>
+                                <tr ng-show="SocietyDetailsData.BasicDetails.ActId=='1' && SocietyDetailsData.BasicDetails.OldExecutiveCommittee.length>0">
+                                    @*
+                                    <td>
+                                        &#8226;
+                                    </td>*@
+                                    <td>
+                                        <div class="col-lg-8">{{ translation.UploadOldExecutiveCommittee}} (1 MB)<span class="error">*</span></div>
+                                    </td>
+
+                                    <td>
+                                        <div class="col-lg-12">
+                                            <a style="color:#505050;" target="_blank" href="{{ SocietyDetailsData.BasicDetails.OldExecutiveCommittee}}" ng-show="SocietyDetailsData.BasicDetails.OldExecutiveCommittee.length>0"><i class="fa fa-download"></i></a>
+                                        </div>
+                                    </td>
+                                    @*
+                                    <td></td>*@
+                                </tr>
+                                <tr ng-repeat="item in OldFiles">
+                                    @*
+                                    <td>
+                                        &#8226;
+                                    </td>*@
+                                    <td>
+                                        <div class="col-lg-8">Document {{$index+1}}<span class="error">*</span></div>
+                                    </td>
+
+                                    <td>
+                                        <div class="col-lg-12">
+                                            <a style="color:#505050;" target="_blank" href="{{item}}"><i class="fa fa-download"></i></a>
+                                        </div>
+                                    </td>
+                                    @*
+                                    <td></td>*@
+                                </tr>
+                            </tbody>
+                        </table>
+                        <table class="table devtable">
+                            <tr ng-repeat="item in SocietyOthersDocuments">
+
+                                <td style="width: 60%;">
+                                    <div class="col-lg-8">{{item.FileName}}</div>
+                                </td>
+                                <td>
+                                    <div class="col-lg-12">
+                                        <a style="color:#505050;" target="_blank" href="{{item.Name}}"><i class="fa fa-download"></i></a>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </fieldset>
+            <fieldset class="dvfieldset" ng-show="DivSport">
+                <legend class="dvlegend">{{translation.BasicDetailsSportSociety}}</legend>
+                <div class="fa col-lg-12 profile-d1">
+                    <div class="col-lg-12 table-responsive">
+                        <table class="table ">
+                            <tr>
+                                <td>
+                                    <label>{{ translation.TypeOfAssociation}} : </label>
+                                </td>
+                                <td><span class="dev-spancon"> {{ _language=='en-us' ? SocietyDetailsData.BasicDetails.ISRDSSC : SocietyDetailsData.BasicDetails.ISRDSSC }}</span></td>
+                                <td><label>{{ translation.SportName}} : </label></td>
+                                <td><span class="dev-spancon"> {{ _language=='en-us' ? SocietyDetailsData.BasicDetails.AssociationNameEn : SocietyDetailsData.BasicDetails.AssociationNameEn }}</span></td>
+
+                            </tr>
+                            <tr>
+                                <td>
+                                    <label>{{translation.Act}} : </label>
+                                </td>
+                                <td><span class="dev-spancon">{{ _language=='en-us' ? SocietyDetailsData.BasicDetails.ActNameEn : SocietyDetailsData.BasicDetails.ActNameHi }}</span></td>
+                                <td><label>{{ translation.SocietyRegistrationNo}} : </label></td>
+                                <td><span class="dev-spancon"> {{ _language=='en-us' ? SocietyDetailsData.BasicDetails.RegistrationNo : SocietyDetailsData.BasicDetails.RegistrationNo }}</span></td>
+
+                            </tr>
+
+                            <tr>
+                                <td>
+                                    <label>{{ translation.SocietyName}} :</label>
+                                </td>
+                                <td><span class="dev-spancon">  {{ _language=='en-us' ? SocietyDetailsData.BasicDetails.SocietyName : SocietyDetailsData.BasicDetails.SocietyName }}</span></td>
+                                <td><label>{{ translation.ElectionDate}} : </label></td>
+                                <td><span class="dev-spancon" ng-hide="SocietyDetailsData.BasicDetails.ElectionDate.indexOf('9999') != -1">{{ _language=='en-us' ? SocietyDetailsData.BasicDetails.ElectionDate : SocietyDetailsData.BasicDetails.ElectionDate }}</span></td>
+
+                            </tr>
+
+                            <tr>
+                                <td>
+                                    @*<label>{{_language=='en-us' ? translation.SocietyRegistrationNo: translation.SocietyRegistrationNo}} :</label>*@
+                                </td>
+                                <td>
+                                    @*<span class="dev-spancon"> {{ _language=='en-us' ? SocietyDetailsData.BasicDetails.RegistrationNo : SocietyDetailsData.BasicDetails.RegistrationNo }}</span>*@
+                                </td>
+                                <td><label>{{ translation.AGM}} : </label></td>
+                                <td>
+                                    <span class="dev-spancon" ng-hide="SocietyDetailsData.BasicDetails.AGMDate.indexOf('9999') != -1"> {{ _language=='en-us' ? SocietyDetailsData.BasicDetails.AGMDate : SocietyDetailsData.BasicDetails.AGMDate }}</span>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>
+                                    <label>{{ translation.RegistrationDate}} :</label>
+                                </td>
+                                <td>
+                                    <span class="dev-spancon" ng-hide="SocietyDetailsData.BasicDetails.RegistrationDate.indexOf('9999') != -1"> {{ _language=='en-us' ? SocietyDetailsData.BasicDetails.RegistrationDate : SocietyDetailsData.BasicDetails.RegistrationDate }}</span>
+                                </td>
+                                @*
+                                <td ng-show="TrueDivForPrimarybody"><label>{{ translation.UrbanRural}}qweqewq : </label></td>
+                                <td ng-show="TrueDivForPrimarybody">
+                                    <span class="dev-spancon">  {{ SocietyDetailsData.BasicDetails.IsRural}}</span>
+                                </td>*@
+
+                            </tr>
+
+                            <tr ng-show="IsStatelevelF">
+                                <td>
+                                    <label>{{ translation.DistrictCouncil}} : </label>
+                                </td>
+                                <td ng-show="IsStatelevelF">
+                                    <span class="dev-spancon">   {{ _language=='en-us' ? SocietyDetailsData.BasicDetails.DISTRICT_ENG : SocietyDetailsData.BasicDetails.DISTRICT_MANGAL }}</span>
+                                </td>
+                                <td ng-show="IsRelationSportRSSC"><label>{{ translation.AffiliatedByRSSC}} : </label></td>
+                                <td ng-show="IsRelationSportRSSC">
+                                    <span class="dev-spancon">   {{ _language=='en-us' ? SocietyDetailsData.BasicDetails.IsAffiliatedByRSSC : SocietyDetailsData.BasicDetails.IsAffiliatedByRSSC }}</span>
+                                </td>
+                            </tr>
+
+                            <tr ng-show="IsAffiliationBySLSA">
+                                <td><label>{{ translation.AffiliationBySLSA}} : </label></td>
+                                <td>
+                                    <span class="dev-spancon">   {{ _language=='en-us' ? SocietyDetailsData.BasicDetails.IsAffiliationBySLSA : SocietyDetailsData.BasicDetails.IsAffiliationBySLSA }}</span>
+                                </td>
+                            </tr>
+
+                            <tr ng-show="IsAffiliationBySLSA">
+                                <td>
+                                    <label>{{ translation.AffiliationNumber}} : </label>
+                                </td>
+                                <td>
+                                    <span class="dev-spancon"> {{ SocietyDetailsData.BasicDetails.SLSARegNo}}</span>
+                                </td>
+                                <td><label>{{ translation.AffiliationDate}} : :</label></td>
+                                <td>
+                                    <span class="dev-spancon"> {{ SocietyDetailsData.BasicDetails.SLSAAffiliatedDate}}</span>
+                                </td>
+                            </tr>
+
+                            <tr ng-show="IsRelationSportRSSC">
+                                <td>
+                                    <label>{{ translation.AffiliationNumber}} : </label>
+                                </td>
+                                <td>
+                                    <span class="dev-spancon"> {{ SocietyDetailsData.BasicDetails.RSSCRegNo}}</span>
+                                </td>
+                                <td><label>{{ translation.AffiliationDate}} : :</label></td>
+                                <td>
+                                    <span class="dev-spancon"> {{ SocietyDetailsData.BasicDetails.RSSCAffiliatedDate}}</span>
+                                </td>
+
+                            </tr>
+
+                            <tr ng-show="IsRelationSportDLSC">
+                                <td>
+                                    <label>{{ translation.AffiliationByDLSC}} : </label>
+                                </td>
+                                <td>
+                                    <span class="dev-spancon">  {{ SocietyDetailsData.BasicDetails.IsAffiliatedByDLSC}}</span>
+                                </td>
+                            </tr>
+                            <tr ng-show="IsRelationSportDLSC">
+                                <td><label>{{ translation.AffiliationNumber}} :   </label></td>
+                                <td>
+                                    <span class="dev-spancon">  {{ SocietyDetailsData.BasicDetails.DLSCRegNo}}</span>
+                                </td>
+
+                                <td>
+                                    <label>{{ translation.AffiliationDate}} : </label>
+                                </td>
+                                <td>
+                                    <span class="dev-spancon">  {{ SocietyDetailsData.BasicDetails.DLSCAffiliatedDate}}</span>
+                                </td>
+                            </tr>
+                            <tr ng-show="IsRelationSportSOC">
+                                <td ng-show="SocietyDetailsData.BasicDetails.ISRDSSC=='State Level'"><label>{{translation.AffiliationBySOC}} :</label>@*<label ng-show="Caseofstate">{{translation.OlympicCouncilTypeState}} :</label>*@</td>
+                                <td ng-hide="SocietyDetailsData.BasicDetails.ISRDSSC=='State Level'"><label>{{translation.AffiliationByDOC}} :</label>
+                                <td>
+                                    <span class="dev-spancon"> {{ SocietyDetailsData.BasicDetails.IsAffiliatedBySOC}}</span>
+                                </td>
+                            </tr>
+
+
+                            <tr ng-show="IsRelationSportSOC">
+                                <td>
+                                    <label>{{ translation.AffiliationNumber}} :</label>
+                                </td>
+                                <td>
+                                    <span class="dev-spancon">  {{ SocietyDetailsData.BasicDetails.SOCRegNo}}</span>
+                                </td>
+                                <td><label>{{ translation.AffiliationDate}} :</label></td>
+                                <td>
+                                    <span class="dev-spancon"> {{ SocietyDetailsData.BasicDetails.SOCAffiliatedDate}}</span>
+                                </td>
+
+                            </tr>
+
+                        </table>
+                    </div>
+                </div>
+            </fieldset>
+            <fieldset class="dvfieldset" ng-show="DivSport">
+                <legend class="dvlegend">{{translation.DistrictCouncilrepresenting}}</legend>
+                <div class="fa col-lg-12 profile-d1">
+                    <div class="col-lg-12 table-responsive" ng-show="DivSport">
+                        <table class="table devtable">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        {{translation.SRNO}}
+                                    </th>
+                                    <th>
+                                        {{translation.StateHeading}}
+                                    </th>
+                                    <th ng-show="IsStatelevelRural">
+                                        {{translation.Division}}
+                                    </th>
+                                    <th>
+                                        {{translation.District}}
+                                    </th>
+
+
+                                    <th ng-show="IsStatelevelF">
+                                        {{translation.BlockHeading}}
+                                    </th>
+                                    <th ng-show="IsStatelevelF">
+                                        {{translation.GramPanchayatHeading}}
+                                    </th>
+                                    <th ng-show="IsStatelevelF">
+                                        {{translation.Village}}
+                                    </th>
+                                    @*
+                                    <th ng-show="IsStatelevelF">
+                                        {{translation.CityType}}
+                                    </th>
+                                    <th ng-show="IsStatelevelRural">
+                                        {{translation.CityType}}
+                                    </th>*@
+                                    <th ng-show="IsStatelevelF">
+                                        {{translation.CityHeading}}
+                                    </th>
+                                    <th ng-show="IsStatelevelRural">
+                                        {{translation.CityHeading}}
+                                    </th>
+                                    <th ng-show="IsStatelevelF">
+                                        {{translation.Ward}}
+                                    </th>
+                                    <th ng-show="IsStatelevelRural">
+                                        {{translation.Ward}}
+                                    </th>
+                                    <th ng-show="TrueDivForPrimarybody">
+                                        {{translation.PrimaryBodyName}}
+                                    </th>
+                                    <th>
+                                        {{translation.CEOName}}
+                                    </th>
+                                    <th>
+                                        {{translation.MobileNo}}
+                                    </th>
+
+
+                                </tr>
+                            </thead>
+                            <tbody id="myTable">
+                                <tr ng-repeat="items in lstSocietyWorkScope" class="profile-d1">
+                                    <td>{{$index+1}}</td>
+                                    <td>{{ items.STATE_Name }}</td>
+                                    <td ng-show="IsStatelevelRural">{{items.DIVISION_Name}}</td>
+                                    <td>{{translation.DistirctLevel}} {{ items.DISTRICT_Name }} {{ items.SportsAssociationName}} {{ translation.Gameassoiation}}</td>
+                                    <td ng-show="IsStatelevelF">{{ items.BLOCK_Name }}</td>
+                                    <td ng-show="IsStatelevelRuralNO">{{ items.BLOCK_Name }}</td>
+                                    <td ng-show="IsStatelevelF">{{ items.GP_ID_Name }}</td>
+                                    <td ng-show="IsStatelevelRuralNO">{{ items.GP_ENG }}</td>
+                                    <td ng-show="IsStatelevelF">{{ items.VILLAGE_Name }}</td>
+                                    <td ng-show="IsStatelevelRuralNO">{{ items.VILLAGE_Name }}</td>
+                                    @*
+                                    <td ng-show="IsStatelevelF">{{ items.CityTypes }}</td>
+                                    <td ng-show="IsStatelevelRural">{{ items.CityTypes }}</td>*@
+                                    <td ng-show="IsStatelevelF">{{ items.CITY_Name }}</td>
+                                    <td ng-show="IsStatelevelRural">{{ items.CITY_Name }}</td>
+                                    <td ng-show="IsStatelevelF">{{ items.WARD_Name }}</td>
+                                    <td ng-show="IsStatelevelRural">{{ items.WARD_Name }}</td>
+                                    <td ng-show="TrueDivForPrimarybody">{{ items.SportsAssociationName }}</td>
+                                    <td>{{ items.DirectorName }}</td>
+                                    <td>{{ items.MobileNo }}</td>
+
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </fieldset>
+            <fieldset class="dvfieldset" ng-show="DivSport">
+                <legend class="dvlegend">{{translation.SportsCouncilCertificate}}</legend>
+                <div class="fa col-lg-12 profile-d1">
+                    <div class="col-lg-12 table-responsive" ng-show="DivSport">
+                        <table class="table devtable" style="margin-bottom: 0px;">
+                            <thead>
+                                <tr>
+                                    @*
+                                    <th>
+                                        {{translation.SRNO}}
+                                    </th>*@
+                                    <th style="width: 60%;">
+                                        {{translation.SportsCouncilCertificate}}
+                                    </th>
+                                    <th>
+                                        {{translation.Fileview}}
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="profile-d1">
+                                @*Member List*@
+
+                                <tr ng-hide="SocietyDetailsData.BasicDetails.RegistrationCertificateFile.indexOf('undefined') != -1 || SocietyDetailsData.BasicDetails.RegistrationCertificateFile==''">
+                                    @*
+                                    <td>
+                                        &#8226;
+                                    </td>*@
+                                    <td>
+                                        <div class="col-lg-8">{{ translation.RegistrationCertificate}}<span class="error">*</span></div>
+                                    </td>
+                                    <td>
+
+                                        <a style="color:#505050;" target="_blank" href="{{  SocietyDetailsData.BasicDetails.RegistrationCertificateFile }}"><i class="fa fa-info-circle infoicon-edit"></i></a>
+
+                                    </td>
+                                </tr>
+                                <tr ng-hide="SocietyDetailsData.BasicDetails.SOCIETIESAUTHORIZEDPERSONS.indexOf('undefined') != -1 || SocietyDetailsData.BasicDetails.SOCIETIESAUTHORIZEDPERSONS==''">
+                                    @*
+                                    <td>
+                                        &#8226;
+                                    </td>*@
+                                    <td>
+                                        <div class="col-lg-8">{{translation.ElectedMemberListEsign}}</div>
+                                    </td>
+                                    <td>
+
+                                        <a style="color:#505050;" target="_blank" href="{{SocietyDetailsData.BasicDetails.SOCIETIESAUTHORIZEDPERSONS}}"><i class="fa fa-info-circle infoicon-edit"></i></a>
+
+                                    </td>
+
+                                </tr>
+                                <tr ng-hide="SocietyDetailsData.BasicDetails.MemberListFile.indexOf('undefined') != -1">
+                                    @*
+                                    <td>
+                                        &#8226;
+                                    </td>*@
+                                    <td>
+                                        <div class="col-lg-8">{{ translation.MemberList}}<span class="error">*</span></div>
+                                    </td>
+
+                                    <td>
+                                        <a style="color:#505050;" target="_blank" href="{{ SocietyDetailsData.BasicDetails.MemberListFile }}"><i class="fa fa-info-circle infoicon-edit"></i></a>
+                                    </td>
+                                </tr>
+                                @*Bylaws*@
+                                <tr>
+                                    @*
+                                    <td>
+                                        &#8226;
+                                    </td>*@
+                                    <td>
+                                        <div class="col-lg-8">{{ translation.Bylaws}}<span class="error">*</span></div>
+                                    </td>
+                                    <td>
+                                        <a style="color:#505050" target="_blank" href="{{ SocietyDetailsData.BasicDetails.BylawsFile}}"><i class="fa fa-info-circle infoicon-edit"></i></a>
+                                    </td>
+                                </tr>
+                                <tr ng-show="IsRelationSportRSSC">
+                                    @*
+                                    <td>
+                                        &#8226;
+                                    </td>*@
+                                    <td>
+                                        <div class="col-lg-8">{{ translation.RSSCFileName}}<span class="error">*</span></div>
+                                    </td>
+                                    <td>
+                                        <a style="color:#505050;" target="_blank" href="{{SocietyDetailsData.BasicDetails.RSSCFileName}}"><i class="fa fa-info-circle infoicon-edit"></i></a>
+                                    </td>
+                                </tr>
+                                @*State Olympic Council*@
+                                <tr ng-show="IsRelationSportSOC">
+                                    @*
+                                    <td>
+                                        &#8226;
+                                    </td>*@
+                                    <td>
+                                        <div class="col-lg-8">{{SocietyRegistration.IsStatLevel==='Yes' ? translation.AffiliationBySOC : translation.AffiliationByDOC}}<span class="error">*</span></div>
+                                    </td>
+
+                                    <td>
+                                        <a style="color:#505050;" target="_blank" href="{{ SocietyDetailsData.BasicDetails.SOCFileName }}"><i class="fa fa-info-circle infoicon-edit"></i></a>
+                                    </td>
+                                </tr>
+                                @*District Level Sports Council*@
+
+                                <tr ng-show="caseState">
+                                    @*
+                                    <td>
+                                        &#8226;
+                                    </td>*@
+                                    <td>
+                                        <div class="col-lg-8">{{translation.DLSCFileName}}<span class="error">*</span></div>
+                                    </td>
+
+                                    <td>
+                                        <a style="color:#505050;" target="_blank" href="{{ SocietyDetailsData.BasicDetails.DLSCFileName}}"><i class="fa fa-info-circle infoicon-edit"></i></a>
+                                    </td>
+                                </tr>
+                                <tr ng-show="IsAffiliationBySLSA">
+                                    @*
+                                    <td>
+                                        &#8226;
+                                    </td>*@
+                                    <td>
+                                        <div class="col-lg-8">{{translation.AffiliationBySLSA}}<span class="error">*</span></div>
+                                    </td>
+
+                                    <td>
+                                        <a style="color:#505050;" target="_blank" href="{{ SocietyDetailsData.BasicDetails.SLSAFileName }}"><i class="fa fa-info-circle infoicon-edit"></i></a>
+                                    </td>
+                                </tr>
+                            </tbody>
+
+                        </table>
+                        <table class="table devtable">
+                            <tr ng-repeat="item in SocietyOthersDocuments">
+
+                                <td style="width: 60%;">
+                                    <div class="col-lg-8">{{item.FileName}}</div>
+                                </td>
+                                <td>
+                                    <div class="col-lg-12">
+                                        <a style="color:#505050;" target="_blank" href="{{item.Name}}"><i class="fa fa-download"></i></a>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </fieldset>
+    </div>
+    <div class="tab-pane" role="tabpanel" id="step22">
+        <div ng-show="SubOtherDivShow">
+            <fieldset class="dvfieldset" ng-if="SocietyAmendment.IsAmendment && SocietyAmendment.ChaneExecutiveMember">
+                <legend class="dvlegend">New Executive Committee</legend>
+                <div class="fa col-lg-12 profile-d1">
+                    <div class="col-lg-12 table-responsive">
+                        <table class="table devtable">
+                            <thead>
+                                <tr>
+                                    
+                                    <th>
+                                        {{translation.SRNO}}
+                                    </th>
+                                    <th>
+                                        {{translation.AADHAARNo}}
+                                    </th>
+                                    <th>
+                                        {{translation.DirectorsName}}
+                                    </th>
+                                    <th>
+                                        {{translation.FatherHasbandName}}
+                                    </th>
+                                    <th>
+                                        {{translation.ContactNo}}
+                                    </th>
+                                    <th>
+                                        {{translation.DOB}}
+                                    </th>
+                                    <th>
+                                        {{translation.GenderHeading}}
+                                    </th>
+                                    <th>
+                                        {{translation.CategoryHeading}}
+                                    </th>
+                                    <th>
+                                        {{translation.PostHeading}}
+                                    </th>
+                                    <th>
+                                        {{translation.Photo}}
+                                    </th>
+                                    <th>
+                                        {{translation.Occupation}}
+                                    </th>
+
+                                    <th ng-show="TwoThousandOneProfilling">
+                                        {{translation.MembershipNo}}
+                                    </th>
+                                    <th ng-show="TwoThousandOneProfilling">
+                                        {{translation.ShareAllotted}}
+                                    </th>
+                                    <th ng-show="TwoThousandOneProfilling">
+                                        {{translation.ShareCapitalAmount}}
+                                    </th>
+                                    <th ng-show="TwoThousandOneProfilling">
+                                        {{translation.loaneenonloanee}}
+                                    </th>
+
+                                    <th style="width:200px;">
+                                        {{translation.Address}}
+                                    </th>
+                                    <th>
+                                        {{translation.ElectedMemberCheck}}
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr id="{{item.Id}}" ng-repeat="item in ExecutiveMemberAmendmentList">
+                                    <td style="color:#505050;">{{$index+1}}</td>
+                                    <td>
+                                        <label style="width:40% !important;">{{item.AadharNo}}</label>
+                                    </td>
+                                    <td>
+                                        <label style="width:40% !important;">{{item.Name}}</label>
+                                    </td>
+                                    <td>
+                                        <label style="width:40% !important;">{{item.FatherName}}</label>
+                                    </td>
+                                    <td>
+                                        <label style="width:40% !important;">{{item.ContactNo}}</label>
+                                    </td>
+                                    <td>
+                                        <label style="width:40% !important;">{{item.DOB}}</label>
+                                    </td>
+                                    <td>
+                                        <div style="width:100%">
+                                            <label style="width:40% !important;">{{item.Gender}}</label>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div style="width:100%">
+                                            <label style="width:40% !important;">{{item.CategoryName}}</label>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div style="width:100%">
+                                            <label style="width:40% !important;">{{item.POSTNAME}}</label>
+                                        </div>
+                                    </td>
+                                    <td><img class="img-thumbnail" src='{{item.Photo1}}' height="50" width="50" /></td>
+                                    <td><label style="width:40% !important;">{{item.Occupation}}</label></td>
+                                    <td ng-show="TwoThousandOneProfilling"><label style="width:40% !important;">{{item.MembershipNo}}</label></td>
+                                    <td ng-show="TwoThousandOneProfilling"><label style="width:40% !important;">{{item.ShareAllotted}}</label></td>
+                                    <td ng-show="TwoThousandOneProfilling"><label style="width:40% !important;">{{item.ShareCapitalAmount}}</label></td>
+                                    <td ng-show="TwoThousandOneProfilling"><label style="width:40% !important;">{{item.loaneeType}}</label></td>
+                                    
+                                    <td>{{item.Address}}</td>
+                                    <td><label style="width:40% !important;">{{item.MEMBERTYPE}}</label></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </fieldset>
+
+            <fieldset class="dvfieldset" ng-show="DivOther22">
+                <legend class="dvlegend">{{ SocietyAmendment.IsAmendment && SocietyAmendment.ChaneExecutiveMember?"Old Executive Committee" :"Executive Committee"}}</legend>
+                <div class="fa col-lg-12 profile-d1">
+                    <div class="col-lg-12 table-responsive">
+                        <table class="table devtable">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        {{translation.SRNO}}
+                                    </th>
+                                    <th  ng-show="showApex">
+                                        Name Of Society
+                                    </th>
+                                    <th  ng-show="showApex">
+                                        Post In Society
+
+                                    </th>
+                                    <th>
+                                        {{translation.AADHAARNo}}
+                                    </th>
+                                    <th>
+                                        {{translation.DirectorsName}}
+                                    </th>
+                                    <th>
+                                        {{translation.FatherHasbandName}}
+                                    </th>
+                                    <th>
+                                        {{translation.ContactNo}}
+                                    </th>
+                                    <th>
+                                        {{translation.DOB}}
+                                    </th>
+                                    <th>
+                                        {{translation.GenderHeading}}
+                                    </th>
+                                    <th>
+                                        {{translation.CategoryHeading}}
+                                    </th>
+                                    <th>
+                                        {{translation.PostHeading}}
+                                    </th>
+                                    <th>
+                                        {{translation.Photo}}
+                                    </th>
+                                    <th>
+                                        {{translation.Occupation}}
+                                    </th>
+
+                                    <th ng-show="TwoThousandOneProfilling">
+                                        {{translation.MembershipNo}}
+                                    </th>
+                                    <th ng-show="TwoThousandOneProfilling">
+                                        {{translation.ShareAllotted}}
+                                    </th>
+                                    <th ng-show="TwoThousandOneProfilling">
+                                        {{translation.ShareCapitalAmount}}
+                                    </th>
+                                    <th ng-show="TwoThousandOneProfilling">
+                                        {{translation.loaneenonloanee}}
+                                    </th>
+                                    <th style="width:200px;">
+                                        {{translation.Address}}
+                                    </th>
+                                    <th>
+                                        {{translation.ElectedMemberCheck}}
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr id="{{item.Id}}" ng-repeat="item in TableData10">
+                                    <td style="color:#505050;">{{$index+1}}</td>
+                                    <td ng-show="showApex">
+                                        <label style="width:40% !important;">{{item.NameOfSociety}}</label>
+                                    </td>
+                                    <td  ng-show="showApex">
+                                        <label style="width:40% !important;">{{item.PostinSociety}}</label>
+                                    </td>
+                                    <td>
+                                        <label style="width:40% !important;">{{item.Aadh}}</label>
+                                    </td>
+
+                                    <td>
+                                        <label style="width:40% !important;">{{item.Name}}</label>
+                                    </td>
+                                    <td>
+                                        <label style="width:40% !important;">{{item.FatherName}}</label>
+                                    </td>
+                                    <td>
+                                        <label style="width:40% !important;">{{item.ContactNo}}</label>
+                                    </td>
+                                    <td>
+                                        <label style="width:40% !important;">{{item.DOB}}</label>
+                                    </td>
+                                    <td>
+                                        <div style="width:100%">
+                                            <label style="width:40% !important;">{{item.Gender}}</label>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div style="width:100%">
+                                            <label style="width:40% !important;">{{item.CategoryName}}</label>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div style="width:100%">
+                                            <label style="width:40% !important;">{{item.POSTNAME}}</label>
+                                        </div>
+                                    </td>
+                                    <td><img class="img-thumbnail" src={{item.Photo==''?'~/Content/Images/Balnk.png':item.Photo}} height="50" width="50" /></td>
+                                    <td><label style="width:40% !important;">{{item.Occupation}}</label></td>
+                                    <td ng-show="TwoThousandOneProfilling"><label style="width:40% !important;">{{item.MembershipNo}}</label></td>
+                                    <td ng-show="TwoThousandOneProfilling"><label style="width:40% !important;">{{item.ShareAllotted}}</label></td>
+                                    <td ng-show="TwoThousandOneProfilling"><label style="width:40% !important;">{{item.ShareCapitalAmount}}</label></td>
+                                    <td ng-show="TwoThousandOneProfilling"><label style="width:40% !important;">{{item.loaneeType}}</label></td>
+                                    <td>{{item.Address}}</td>
+                                    <td><label style="width:40% !important;">{{item.MEMBERTYPE}}</label></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </fieldset>
+
+
+            <fieldset class="dvfieldset" ng-show="DivNominated">
+                <legend class="dvlegend">{{translation.NominatedMember}}</legend>
+                <div class="fa col-lg-12 profile-d1">
+                    <div class="col-lg-12 table-responsive">
+                        <table class="table devtable">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        {{translation.SRNO}}
+                                    </th>
+
+                                    <th>
+                                        {{translation.AADHAARNo}}
+                                    </th>
+                                    <th>
+                                        {{translation.DirectorsName}}
+                                    </th>
+
+                                    <th>
+                                        {{translation.ContactNo}}
+                                    </th>
+
+                                    <th>
+                                        {{translation.DOB}}
+                                    </th>
+                                    <th>
+                                        {{translation.GenderHeading}}
+                                    </th>
+                                    <th>
+                                        {{translation.CategoryHeading}}
+                                    </th>
+                                    <th>
+                                        {{translation.PostHeading}}
+                                    </th>
+
+                                    <th>
+                                        {{translation.Photo}}
+                                    </th>
+                                    <th>
+                                        {{translation.NominatedByWhom}}
+                                    </th>
+                                    <th>
+                                        {{translation.Address}}
+                                    </th>
+                                    <th>
+                                        {{translation.MemberType}}
+                                    </th>
+
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <tr id="{{item.Id}}" ng-repeat="item in TableNominatedMembers">
+                                    <td style="color:#505050;">{{$index+1}}</td>
+                                    <td>
+                                        <label style="width:40% !important;">{{item.Aadh}}</label>
+                                    </td>
+                                    <td>
+                                        <label style="width:40% !important;">{{item.Name}}</label>
+                                    </td>
+
+                                    <td>
+                                        <label style="width:40% !important;">{{item.ContactNo}}</label>
+                                    </td>
+                                    <td>
+                                        <label style="width:40% !important;">{{item.DOB}}</label>
+                                    </td>
+                                    <td>
+                                        <div style="width:100%">
+                                            <label style="width:40% !important;">{{item.Gender}}</label>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div style="width:100%">
+                                            <label style="width:40% !important;">{{item.CategoryName}}</label>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div style="width:100%">
+                                            <label style="width:40% !important;">{{item.POSTNAME}}</label>
+                                        </div>
+                                    </td>
+
+                                    <td><img class="img-thumbnail" src={{item.Photo==''?'~/Content/Images/Balnk.png':item.Photo}} height="50" width="50" /></td>
+                                    <td>
+                                        <div style="width:100%">
+                                            <label style="width:40% !important;">{{item.NominatedBy}}</label>
+                                        </div>
+                                    </td>
+                                    <td>{{item.Address}}</td>
+                                    <td><label style="width:40% !important;">{{item.MEMBERTYPE}}</label></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </fieldset>
+            <fieldset class="dvfieldset" ng-show="IsAdministratorAppointed">
+                <legend class="dvlegend">{{translation.AdministratorAppointed}}</legend>
+                <div class="fa col-lg-12 profile-d1">
+                    <div class="col-lg-12 table-responsive" ng-show="IsAdministratorAppointed">
+                        <table class="table ">
+                            <tr>
+                                <td><label>{{translation.Name}} :</label></td>
+                                <td><span class="dev-spancon">{{SocietyDetailsData.Administrator.Name}}</span></td>
+                                <td><label>{{translation.PostHeading}} :</label></td>
+                                <td><span class="dev-spancon">{{SocietyDetailsData.Administrator.POSTNAME}}</span></td>
+                            </tr>
+                            <tr>
+                                <td><label>{{translation.DateofOrder}} :</label></td>
+                                <td><span class="dev-spancon">{{SocietyDetailsData.Administrator.AppointedDate}}</span></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </fieldset>
+            <fieldset class="dvfieldset" ng-show="ShowLiquidator">
+                <legend class="dvlegend">{{translation.Liquidator}}</legend>
+                <div class="fa col-lg-12 profile-d1">
+                    <div class="col-lg-12 table-responsive" ng-show="ShowLiquidator">
+                        <table class="table ">
+                            <tr>
+                                <td><label>{{translation.liquidatorName}} :</label></td>
+                                <td><span class="dev-spancon">{{SocietyDetailsData.liq.Name}}</span></td>
+                                <td><label>{{translation.ContactNo}} :</label></td>
+                                <td><span class="dev-spancon">{{SocietyDetailsData.liq.ContactNo}}</span></td>
+                            </tr>
+                            <tr>
+                                <td><label>{{translation.PostHeading}} :</label></td>
+                                <td><span class="dev-spancon">{{SocietyDetailsData.liq.POSTNAME}}</span></td>
+                                <td><label>{{translation.AppointedDate}} :</label></td>
+                                <td><span class="dev-spancon">{{SocietyDetailsData.liq.AppointedDate}}</span></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+        <div class="profile-d1" ng-show="DivMemberList">
+          
+    <fieldset class="dvfieldset" ng-if="false">
+        <legend class="dvlegend">{{translation.MemberList}}</legend>
+        <div class="fa col-lg-12 profile-d1">
+            <div class="col-lg-12 table-responsive">
+                <table class="table devtable">
+                    <thead>
+                        <tr>
+                            <th>
+                                {{translation.SRNO}}
+                            </th>
+                            <th>
+                                {{translation.AADHAARNo}}
+                            </th>
+                            <th>
+                                {{translation.DirectorsName}}
+                            </th>
+                            <th>
+                                {{translation.FatherHasbandName}}
+                            </th>
+                            <th>
+                                {{translation.ContactNo}}
+                            </th>
+                            <th>
+                                {{translation.DOB}}
+                            </th>
+                            <th>
+                                {{translation.GenderHeading}}
+                            </th>
+                            <th>
+                                {{translation.CategoryHeading}}
+                            </th>
+                            <th>
+                                {{translation.PostHeading}}
+                            </th>
+                            <th>
+                                {{translation.Photo}}
+                            </th>
+                            <th>
+                                {{translation.Occupation}}
+                            </th>
+
+                            <th ng-show="TwoThousandOneProfilling">
+                                {{translation.MembershipNo}}
+                            </th>
+                            <th ng-show="TwoThousandOneProfilling">
+                                {{translation.ShareAllotted}}
+                            </th>
+                            <th ng-show="TwoThousandOneProfilling">
+                                {{translation.ShareCapitalAmount}}
+                            </th>
+                            <th ng-show="TwoThousandOneProfilling">
+                                {{translation.loaneenonloanee}}
+                            </th>
+                            
+                            <th style="width:200px;">
+                                {{translation.Address}}
+                            </th>
+                            <th>
+                                {{translation.ElectedMemberCheck}}
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr id="{{item.Id}}" ng-repeat="item in GeneralMemberAmendmentList">
+                            <td style="color:#505050;">{{$index+1}}</td>
+                            <td>
+                                <label style="width:40% !important;">{{item.AadharNo}}</label>
+                            </td>
+                            <td>
+                                <label style="width:40% !important;">{{item.Name}}</label>
+                            </td>
+                            <td>
+                                <label style="width:40% !important;">{{item.FatherName}}</label>
+                            </td>
+                            <td>
+                                <label style="width:40% !important;">{{item.ContactNo}}</label>
+                            </td>
+                            <td>
+                                <label style="width:40% !important;">{{item.DOB}}</label>
+                            </td>
+                            <td>
+                                <div style="width:100%">
+                                    <label style="width:40% !important;">{{item.Gender}}</label>
+                                </div>
+                            </td>
+                            <td>
+                                <div style="width:100%">
+                                    <label style="width:40% !important;">{{item.CategoryName}}</label>
+                                </div>
+                            </td>
+                            <td>
+                                <div style="width:100%">
+                                    <label style="width:40% !important;">{{item.POSTNAME}}</label>
+                                </div>
+                            </td>
+                            <td><img class="img-thumbnail" src='{{item.Photo1}}' height="50" width="50" /></td>
+                            <td><label style="width:40% !important;">{{item.Occupation}}</label></td>
+                            <td ng-show="TwoThousandOneProfilling"><label style="width:40% !important;">{{item.MembershipNo}}</label></td>
+                            <td ng-show="TwoThousandOneProfilling"><label style="width:40% !important;">{{item.ShareAllotted}}</label></td>
+                            <td ng-show="TwoThousandOneProfilling"><label style="width:40% !important;">{{item.ShareCapitalAmount}}</label></td>
+                            <td ng-show="TwoThousandOneProfilling"><label style="width:40% !important;">{{item.loaneeType}}</label></td>                            
+                            <td>{{item.Address}}</td>
+                            <td><label style="width:40% !important;">{{item.MEMBERTYPE}}</label></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </fieldset>
+
+    <fieldset class="dvfieldset" ng-show="DivMemberList">
+        <legend class="dvlegend">{{translation.MemberList}}</legend>
+        <div class="fa col-lg-12 profile-d1">
+            <div class="col-lg-12 table-responsive">
+                <table class="table devtable">
+                    <thead>
+                        <tr>
+                            <th>
+                                {{translation.SRNO}}
+                            </th>
+                            <th  ng-show="showApex">
+                                Name Of Society
+                            </th>
+                            <th  ng-show="showApex">
+                                Post In Society
+
+                            </th>
+
+                            <th>
+                                {{translation.AADHAARNo}}
+                            </th>
+                            <th>
+                                {{translation.DirectorsName}}
+                            </th>
+                            <th>
+                                {{translation.FatherHasbandName}}
+                            </th>
+                            <th>
+                                {{translation.ContactNo}}
+                            </th>
+                            <th>
+                                {{translation.DOB}}
+                            </th>
+                            <th>
+                                {{translation.GenderHeading}}
+                            </th>
+                            <th>
+                                {{translation.CategoryHeading}}
+                            </th>
+                            <th>
+                                {{translation.PostHeading}}
+                            </th>
+                            <th>
+                                {{translation.Photo}}
+                            </th>
+                            <th>
+                                {{translation.Occupation}}
+                            </th>
+                            <th ng-show="TwoThousandOneProfilling">
+                                {{translation.MembershipNo}}
+                            </th>
+                            <th ng-show="TwoThousandOneProfilling">
+                                {{translation.ShareAllotted}}
+                            </th>
+                            <th ng-show="TwoThousandOneProfilling">
+                                {{translation.ShareCapitalAmount}}
+                            </th>
+                            <th ng-show="TwoThousandOneProfilling">
+                                {{translation.loaneenonloanee}}
+                            </th>
+
+                            <th style="width:200px;">
+                                {{translation.Address}}
+                            </th>
+                            <th>
+                                {{translation.ElectedMemberCheck}}
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr id="{{item.Id}}" ng-repeat="item in TableData10All">
+                            <td style="color:#505050;">{{$index+1}}</td>
+                            <td  ng-show="showApex">
+                                <label style="width:40% !important;">{{item.NameOfSociety}}</label>
+                            </td>
+                            <td  ng-show="showApex">
+                                <label style="width:40% !important;">{{item.PostinSociety}}</label>
+                            </td>
+                            <td>
+                                <label style="width:40% !important;">{{item.Aadh}}</label>
+                            </td>
+                            <td>
+                                <label style="width:40% !important;">{{item.Name}}</label>
+                            </td>
+                            <td>
+                                <label style="width:40% !important;">{{item.FatherName}}</label>
+                            </td>
+                            <td>
+                                <label style="width:40% !important;">{{item.ContactNo}}</label>
+                            </td>
+                            <td>
+                                <label style="width:40% !important;">{{item.DOB}}</label>
+                            </td>
+                            <td>
+                                <div style="width:100%">
+                                    <label style="width:40% !important;">{{item.Gender}}</label>
+                                </div>
+                            </td>
+                            <td>
+                                <div style="width:100%">
+                                    <label style="width:40% !important;">{{item.CategoryName}}</label>
+                                </div>
+                            </td>
+                            <td>
+                                <div style="width:100%">
+                                    <label style="width:40% !important;">{{item.POSTNAME}}</label>
+                                </div>
+                            </td>
+                            <td><img class="img-thumbnail" src={{item.Photo==''?'~/Content/Images/Balnk.png':item.Photo}} height="50" width="50" /></td>
+                            <td><label style="width:40% !important;">{{item.Occupation}}</label></td>
+                            <td ng-show="TwoThousandOneProfilling"><label style="width:40% !important;">{{item.MembershipNo}}</label></td>
+                            <td ng-show="TwoThousandOneProfilling"><label style="width:40% !important;">{{item.ShareAllotted}}</label></td>
+                            <td ng-show="TwoThousandOneProfilling"><label style="width:40% !important;">{{item.ShareCapitalAmount}}</label></td>
+                            <td ng-show="TwoThousandOneProfilling"><label style="width:40% !important;">{{item.loaneeType}}</label></td>
+
+                            <td>
+                                {{item.Address}}
+                            </td>
+                            <td><label style="width:40% !important;">{{item.MEMBERTYPE}}</label></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </fieldset>
+</div>
+        <div ng-show="DivSport">
+            <fieldset class="dvfieldset" ng-show="DivSport">
+                <legend class="dvlegend">{{translation.AdministrativeDetails}}</legend>
+                <div class="fa col-lg-12 profile-d1">
+                    <div class="col-md-12 table-responsive">
+                        <table class="table devtable ng-show">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        {{translation.SRNO}}
+                                    </th>
+
+                                    <th>
+                                        {{translation.Name}}
+                                    </th>
+                                    <th>
+                                        {{translation.ContactNo}}
+                                    </th>
+                                    <th>
+                                        {{translation.AADHAARNo}}
+                                    </th>
+                                    <th>
+                                        {{translation.DOB}}
+                                    </th>
+                                    <th>
+                                        {{translation.GenderHeading}}
+                                    </th>
+                                    <th>
+                                        {{translation.CategoryHeading}}
+                                    </th>
+                                    <th>
+                                        {{translation.PostHeading}}
+                                    </th>
+                                    <th>
+                                        {{translation.FileUpload}}
+                                    </th>
+                                    <th>
+                                        {{translation.ElectedMemberCheck}}
+                                    </th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="myTable">
+                                <tr ng-repeat="item in TableData10">
+                                    <td style="color:#505050;">{{$index+1}}</td>
+                                    <td>
+                                        <label style="color:#505050;">{{item.Name}}</label>
+                                    </td>
+                                    <td>
+                                        <label style="color:#505050;">{{item.ContactNo}}</label>
+                                    </td>
+                                    <td>
+                                        <label style="color:#505050;">{{item.Aadh}}</label>
+                                    </td>
+                                    <td>
+                                        <label style="color:#505050;">{{item.DOB}}</label>
+                                    </td>
+                                    <td>
+                                        <label style="color:#505050;">{{item.Gender}}</label>
+                                    </td>
+                                    <td>
+                                        <label style="color:#505050;">{{item.CategoryName}}</label>
+                                    </td>
+                                    <td>
+                                        <label style="color:#505050;">{{item.POSTNAME}}</label>
+                                    </td>
+                                    <td>
+                                        <div class="zoom">
+                                            <img src="{{item.Photo}}" height="50" width="50" />
+                                        </div>
+                                    </td>
+                                    <td><label style="width:40% !important;">{{item.MEMBERTYPE}}</label></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </fieldset>
+            <fieldset class="dvfieldset" ng-show="DivSport">
+                <legend class="dvlegend">{{translation.MemberList}}</legend>
+                <div class="fa col-lg-12 profile-d1">
+                    <div class="col-md-12 table-responsive" ng-show="DivSport">
+                        <table class="table devtable">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        {{translation.SRNO}}
+
+                                    </th>
+
+                                    <th>
+                                        {{translation.Name}}
+                                    </th>
+                                    <th>
+                                        {{translation.ContactNo}}
+                                    </th>
+                                    <th>
+                                        {{translation.AADHAARNo}}
+                                    </th>
+                                    <th>
+                                        {{translation.DOB}}
+                                    </th>
+                                    <th>
+                                        {{translation.GenderHeading}}
+                                    </th>
+                                    <th>
+                                        {{translation.CategoryHeading}}
+                                    </th>
+                                    <th>
+                                        {{translation.PostHeading}}
+                                    </th>
+                                    <th>
+                                        {{translation.FileUpload}}
+                                    </th>
+                                    <th>
+                                        {{translation.ElectedMemberCheck}}
+                                    </th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="myTable">
+                                <tr id="{{item.Id}}" ng-repeat="item in TableData10All">
+                                    <td style="color:#505050;">{{$index+1}}</td>
+                                    <td>
+                                        <label style="color:#505050;">{{item.Name}} </label>
+                                    </td>
+                                    <td>
+                                        <label style="color:#505050;">{{item.ContactNo}} </label>
+                                    </td>
+                                    <td>
+                                        <label style="color:#505050;">{{item.Aadh}}</label>
+                                    </td>
+                                    <td>
+                                        <label style="color:#505050;">{{item.DOB}} </label>
+                                    </td>
+                                    <td>
+                                        <label style="color:#505050;">{{item.Gender}} </label>
+                                    </td>
+                                    <td>
+                                        <label style="color:#505050;">{{item.CategoryName}} </label>
+                                    </td>
+                                    <td>
+                                        <label style="color:#505050;">{{item.POSTNAME}}</label>
+                                    </td>
+                                    <td>
+                                        <div class="zoom">
+                                            <img src="{{item.Photo}}" height="50" width="50" />
+                                        </div>
+                                    </td>
+                                    <td><label style="width:40% !important;">{{item.MEMBERTYPE}}</label></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+    </div>
+
+    <!-- start show details t -->
+
+
+
+    <div class="tab-pane" role="tabpanel" id="step33">
+        <fieldset class="dvfieldset" ng-if="ApplicantDetails.length>0">
+            <legend class="dvlegend">Applicant Details/आवेदक का विवरण</legend>
+            <div class="fa col-lg-12 profile-d">
+                <div class="col-md-12 table-responsive ">
+                    <table class="table table-responsive devtable" style="color:black">
+                        <thead>
+                            <tr>
+                                <th>{{translation.SRNO}}</th>
+                                <th>{{translation.Name}}</th>
+                                <th>{{translation.SSOID}}</th>
+                                <th>{{translation.PostHeading}}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="ApDetails in ApplicantDetails">
+                                <td>{{$index+1}}</td>
+                                <td><span class="dev-spancon">{{ApDetails.ApplicantName}}</span></td>
+                                <td><span class="dev-spancon">{{ApDetails.SSOID}}</span></td>
+                                <td><span class="dev-spancon">{{ApDetails.ApploicantPost}}</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </fieldset>
+
+        <fieldset class="dvfieldset">
+            <legend class="dvlegend">Office Address/कार्यालय पता</legend>
+            <div class="fa col-lg-12 profile-d1">
+                <div class="col-lg-12 table-responsive">
+                    <table class="table ">
+                        <tr>
+                            <td><label>{{translation.UrbanRural}} :</label></td>
+                            <td><span class="dev-spancon">{{SocietyDetailsData.OfficeDeatils.dtab.ISRDural}}</span></td>
+                            <td><label>{{translation.HouseBuildingNo}} :</label></td>
+                            <td><span class="dev-spancon">{{SocietyDetailsData.OfficeDeatils.dtab.HouseBuildingNo}}</span></td>
+                        </tr>
+                        <tr>
+                            <td><label>{{translation.LaneStreetName}} :</label></td>
+                            <td><span class="dev-spancon">{{SocietyDetailsData.OfficeDeatils.dtab.LaneStreetName}}</span></td>
+                            <td><label>{{translation.Locality}} :</label></td>
+                            <td><span class="dev-spancon">{{SocietyDetailsData.OfficeDeatils.dtab.Locality}}</span></td>
+                        </tr>
+                        <tr>
+                            <td><label>{{translation.State}} :</label></td>
+                            <td><span class="dev-spancon">{{SocietyDetailsData.OfficeDeatils.dtab.STATE_ENG}}</span></td>
+                            <td ng-show="SocietyDetailsData.OfficeDeatils.dtab.ISRDural == 'Rural'"><label>{{translation.District}} :</label></td>
+                            <td ng-show="SocietyDetailsData.OfficeDeatils.dtab.ISRDural == 'Rural'"><span class="dev-spancon">{{SocietyDetailsData.OfficeDeatils.dtab.DISTRICT_ENG}}</span></td>
+
+                        </tr>
+
+                        <tr>
+                            <td ng-show="SocietyDetailsData.OfficeDeatils.dtab.ISRDural != 'Rural'"><label>{{translation.City}} :</label></td>
+                            <td ng-show="SocietyDetailsData.OfficeDeatils.dtab.ISRDural != 'Rural'"><span class="dev-spancon">{{SocietyDetailsData.OfficeDeatils.dtab.CITY_ENG}}</span></td>
+                            <td ng-show="SocietyDetailsData.OfficeDeatils.dtab.ISRDural == 'Rural'"><label>{{translation.BlockHeading}} :</label></td>
+                            <td ng-show="SocietyDetailsData.OfficeDeatils.dtab.ISRDural == 'Rural'"><span class="dev-spancon">{{SocietyDetailsData.OfficeDeatils.dtab.BLOCK_ENG}}</span></td>
+
+                        </tr>
+
+                        <tr>
+                            <td ng-show="SocietyDetailsData.OfficeDeatils.dtab.ISRDural != 'Rural'"><label>{{translation.Ward}} :</label></td>
+                            <td ng-show="SocietyDetailsData.OfficeDeatils.dtab.ISRDural != 'Rural'"><span class="dev-spancon">{{SocietyDetailsData.OfficeDeatils.dtab.WARD_ENG}}</span></td>
+                            <td ng-show="SocietyDetailsData.OfficeDeatils.dtab.ISRDural == 'Rural'"><label>{{translation.GramPanchayat}} :</label></td>
+                            <td ng-show="SocietyDetailsData.OfficeDeatils.dtab.ISRDural == 'Rural'"><span class="dev-spancon">{{SocietyDetailsData.OfficeDeatils.dtab.GP_ENG}}</span></td>
+
+                        </tr>
+
+                        @*
+                        <tr>
+                            <td ng-show="SocietyDetailsData.OfficeDeatils.dtab.ISRDural == 'Urban'"><label>{{translation.Ward}} :</label></td>
+                            <td ng-show="SocietyDetailsData.OfficeDeatils.dtab.ISRDural == 'Urban'"><span class="dev-spancon">{{SocietyDetailsData.OfficeDeatils.dtab.WARD_ENG}}</span></td>
+                        </tr>*@
+                        <tr>
+                            <td ng-show="SocietyDetailsData.OfficeDeatils.dtab.ISRDural == 'Rural'"><label>{{translation.Village}} :</label></td>
+                            <td ng-show="SocietyDetailsData.OfficeDeatils.dtab.ISRDural == 'Rural'"><span class="dev-spancon">{{SocietyDetailsData.OfficeDeatils.dtab.VILLAGE_ENG}}</span></td>
+                            <td><label>{{translation.PIN}} :</label></td>
+                            <td><span class="dev-spancon">{{SocietyDetailsData.OfficeDeatils.dtab.PinCode}}</span></td>
+
+                        </tr>
+
+
+                    </table>
+                </div>
+            </div>
+        </fieldset>
+        <fieldset class="dvfieldset" ng-if="SocietyDetailsData.OfficeDeatils[0].UserType!=3">
+            <legend class="dvlegend">Chairman Address/अध्यक्ष का पता</legend>
+            <div class="fa col-lg-12 profile-d1">
+                <div class="col-lg-12 table-responsive">
+                    <table class="table">
+                        <tr>
+                            <td><label>{{translation.UrbanRural}} :</label></td>
+                            <td><span class="dev-spancon">{{SocietyDetailsData.OfficeDeatils.dtabnew.ISRDural}}</span></td>
+                            <td><label>{{translation.HouseBuildingNo}} :</label></td>
+                            <td><span class="dev-spancon">{{SocietyDetailsData.OfficeDeatils.dtabnew.HouseBuildingNo}}</span></td>
+
+                        </tr>
+
+                        <tr>
+                            <td><label>{{translation.LaneStreetName}} :</label></td>
+                            <td><span class="dev-spancon">{{SocietyDetailsData.OfficeDeatils.dtabnew.LaneStreetName}}</span></td>
+                            <td><label>{{translation.Locality}} :</label></td>
+                            <td><span class="dev-spancon">{{SocietyDetailsData.OfficeDeatils.dtabnew.Locality}}</span></td>
+
+                        </tr>
+                        <tr>
+                            <td><label>{{translation.State}} :</label></td>
+                            <td><span class="dev-spancon">{{SocietyDetailsData.OfficeDeatils.dtabnew.STATE_ENG}}</span></td>
+                            <td ng-show="SocietyDetailsData.OfficeDeatils.dtabnew.ISRDural == 'Rural'"><label>{{translation.District}} :</label></td>
+                            <td ng-show="SocietyDetailsData.OfficeDeatils.dtabnew.ISRDural == 'Rural'"><span class="dev-spancon">{{SocietyDetailsData.OfficeDeatils.dtabnew.DISTRICT_ENG}}</span></td>
+
+                        </tr>
+
+                        <tr>
+                            <td ng-show="SocietyDetailsData.OfficeDeatils.dtabnew.ISRDural == 'Urban'"><label>{{translation.City}} :</label></td>
+                            <td ng-show="SocietyDetailsData.OfficeDeatils.dtabnew.ISRDural == 'Urban'"><span class="dev-spancon">{{SocietyDetailsData.OfficeDeatils.dtabnew.CITY_ENG}}</span></td>
+                            <td ng-show="SocietyDetailsData.OfficeDeatils.dtabnew.ISRDural == 'Rural'"><label>{{translation.BlockHeading}} :</label></td>
+                            <td ng-show="SocietyDetailsData.OfficeDeatils.dtabnew.ISRDural == 'Rural'"><span class="dev-spancon">{{SocietyDetailsData.OfficeDeatils.dtabnew.BLOCK_ENG}}</span></td>
+                        </tr>
+
+                        <tr>
+                            <td ng-show="SocietyDetailsData.OfficeDeatils.dtabnew.ISRDural == 'Urban'"><label>{{translation.Ward}} :</label></td>
+                            <td ng-show="SocietyDetailsData.OfficeDeatils.dtabnew.ISRDural == 'Urban'"><span class="dev-spancon">{{SocietyDetailsData.OfficeDeatils.dtabnew.WARD_ENG}}</span></td>
+                            <td ng-show="SocietyDetailsData.OfficeDeatils.dtabnew.ISRDural == 'Rural'"><label>{{translation.GramPanchayat}} :</label></td>
+                            <td ng-show="SocietyDetailsData.OfficeDeatils.dtabnew.ISRDural == 'Rural'"><span class="dev-spancon">{{SocietyDetailsData.OfficeDeatils.dtabnew.GP_ENG}}</span></td>
+                        </tr>
+                        <tr>
+                            <td ng-show="SocietyDetailsData.OfficeDeatils.dtabnew.ISRDural == 'Rural'"><label>{{translation.Village}} :</label></td>
+                            <td ng-show="SocietyDetailsData.OfficeDeatils.dtabnew.ISRDural == 'Rural'"><span class="dev-spancon">{{SocietyDetailsData.OfficeDeatils.dtabnew.VILLAGE_ENG}}</span></td>
+                            <td><label>{{translation.PIN}} :</label></td>
+                            <td><span class="dev-spancon">{{SocietyDetailsData.OfficeDeatils.dtabnew.PinCode}}</span></td>
+
+                        </tr>
+
+
+                    </table>
+                </div>
+            </div>
+        </fieldset>
+        <fieldset class="dvfieldset" ng-show="DivSport">
+            <legend class="dvlegend">{{translation.Secretary}}</legend>
+            <div class="fa col-lg-12 profile-d1">
+                <div class="col-lg-12 table-responsive">
+                    <table class="table ">
+                        <tr>
+                            <td><label>{{translation.UrbanRural}} 12122:</label></td>
+                            <td><span class="dev-spancon">{{SocietyDetailsData.OfficeDeatils.Newscetrat.ISRDural}}</span></td>
+                            <td><label>{{translation.HouseBuildingNo}} :</label></td>
+                            <td><span class="dev-spancon">{{SocietyDetailsData.OfficeDeatils.Newscetrat.HouseBuildingNo}}</span></td>
+                        </tr>
+                        <tr>
+                            <td><label>{{translation.LaneStreetName}} :</label></td>
+                            <td><span class="dev-spancon">{{SocietyDetailsData.OfficeDeatils.Newscetrat.LaneStreetName}}</span></td>
+                            <td><label>{{translation.Locality}} :</label></td>
+                            <td><span class="dev-spancon">{{SocietyDetailsData.OfficeDeatils.Newscetrat.Locality}}</span></td>
+
+                        </tr>
+                        <tr>
+                            <td><label>{{translation.State}} :</label></td>
+                            <td><span class="dev-spancon">{{SocietyDetailsData.OfficeDeatils.Newscetrat.STATE_ENG}}</span></td>
+                            <td ng-show="SocietyDetailsData.OfficeDeatils.Newscetrat.ISRDural == 'Rural'"><label>{{translation.District}} :</label></td>
+                            <td ng-show="SocietyDetailsData.OfficeDeatils.Newscetrat.ISRDural == 'Rural'"><span class="dev-spancon">{{SocietyDetailsData.OfficeDeatils.Newscetrat.DISTRICT_ENG}}</span></td>
+
+                        </tr>
+
+                        <tr>
+                            <td ng-show="SocietyDetailsData.OfficeDeatils.Newscetrat.ISRDural != 'Rural'"><label>{{translation.City}} :</label></td>
+                            <td ng-show="SocietyDetailsData.OfficeDeatils.Newscetrat.ISRDural != 'Rural'"><span class="dev-spancon">{{SocietyDetailsData.OfficeDeatils.Newscetrat.CITY_ENG}}</span></td>
+                            <td ng-show="SocietyDetailsData.OfficeDeatils.Newscetrat.ISRDural == 'Rural'"><label>{{translation.BlockHeading}} :</label></td>
+                            <td ng-show="SocietyDetailsData.OfficeDeatils.Newscetrat.ISRDural == 'Rural'"><span class="dev-spancon">{{SocietyDetailsData.OfficeDeatils.Newscetrat.BLOCK_ENG}}</span></td>
+
+                        </tr>
+
+                        <tr>
+                            <td ng-show="SocietyDetailsData.OfficeDeatils.Newscetrat.ISRDural != 'Rural'"><label>{{translation.Ward}} :</label></td>
+                            <td ng-show="SocietyDetailsData.OfficeDeatils.Newscetrat.ISRDural != 'Rural'"><span class="dev-spancon">{{SocietyDetailsData.OfficeDeatils.Newscetrat.WARD_ENG}}</span></td>
+                            <td ng-show="SocietyDetailsData.OfficeDeatils.Newscetrat.ISRDural == 'Rural'"><label>{{translation.GramPanchayat}} :</label></td>
+                            <td ng-show="SocietyDetailsData.OfficeDeatils.Newscetrat.ISRDural == 'Rural'"><span class="dev-spancon">{{SocietyDetailsData.OfficeDeatils.Newscetrat.GP_ENG}}</span></td>
+
+                        </tr>
+                        <tr>
+                            <td ng-show="SocietyDetailsData.OfficeDeatils.Newscetrat.ISRDural == 'Rural'"><label>{{translation.Village}} :</label></td>
+                            <td ng-show="SocietyDetailsData.OfficeDeatils.Newscetrat.ISRDural == 'Rural'"><span class="dev-spancon">{{SocietyDetailsData.OfficeDeatils.Newscetrat.VILLAGE_ENG}}</span></td>
+                            <td><label>{{translation.PIN}} :</label></td>
+                            <td><span class="dev-spancon">{{SocietyDetailsData.OfficeDeatils.Newscetrat.PinCode}}</span></td>
+
+                        </tr>
+
+
+                    </table>
+                </div>
+            </div>
+        </fieldset>
+        <fieldset class="dvfieldset" ng-show="DivSport">
+            <legend class="dvlegend">{{translation.Treasurer}}</legend>
+            <div class="fa col-lg-12 profile-d1">
+                <div class="col-lg-12 table-responsive">
+                    <table class="table ">
+                        <tr>
+                            <td><label>{{translation.UrbanRural}} :</label></td>
+                            <td><span class="dev-spancon">{{SocietyDetailsData.OfficeDeatils.newTreasurer.ISRDural}}</span></td>
+                            <td><label>{{translation.HouseBuildingNo}} :</label></td>
+                            <td><span class="dev-spancon">{{SocietyDetailsData.OfficeDeatils.newTreasurer.HouseBuildingNo}}</span></td>
+
+                        </tr>
+
+                        <tr>
+                            <td><label>{{translation.LaneStreetName}} :</label></td>
+                            <td><span class="dev-spancon">{{SocietyDetailsData.OfficeDeatils.newTreasurer.LaneStreetName}}</span></td>
+                            <td><label>{{translation.Locality}} :</label></td>
+                            <td><span class="dev-spancon">{{SocietyDetailsData.OfficeDeatils.newTreasurer.Locality}}</span></td>
+
+                        </tr>
+                        <tr>
+                            <td><label>{{translation.State}} :</label></td>
+                            <td><span class="dev-spancon">{{SocietyDetailsData.OfficeDeatils.newTreasurer.STATE_ENG}}</span></td>
+                            <td ng-show="SocietyDetailsData.OfficeDeatils.newTreasurer.ISRDural == 'Rural'"><label>{{translation.District}} :</label></td>
+                            <td ng-show="SocietyDetailsData.OfficeDeatils.newTreasurer.ISRDural == 'Rural'"><span class="dev-spancon">{{SocietyDetailsData.OfficeDeatils.newTreasurer.DISTRICT_ENG}}</span></td>
+
+                        </tr>
+
+                        <tr>
+                            <td ng-show="SocietyDetailsData.OfficeDeatils.newTreasurer.ISRDural == 'Urban'"><label>{{translation.City}} :</label></td>
+                            <td ng-show="SocietyDetailsData.OfficeDeatils.newTreasurer.ISRDural == 'Urban'"><span class="dev-spancon">{{SocietyDetailsData.OfficeDeatils.newTreasurer.CITY_ENG}}</span></td>
+                            <td ng-show="SocietyDetailsData.OfficeDeatils.newTreasurer.ISRDural == 'Rural'"><label>{{translation.BlockHeading}} :</label></td>
+                            <td ng-show="SocietyDetailsData.OfficeDeatils.newTreasurer.ISRDural == 'Rural'"><span class="dev-spancon">{{SocietyDetailsData.OfficeDeatils.newTreasurer.BLOCK_ENG}}</span></td>
+
+                        </tr>
+
+                        <tr>
+                            <td ng-show="SocietyDetailsData.OfficeDeatils.newTreasurer.ISRDural == 'Urban'"><label>{{translation.Ward}} :</label></td>
+                            <td ng-show="SocietyDetailsData.OfficeDeatils.newTreasurer.ISRDural == 'Urban'"><span class="dev-spancon">{{SocietyDetailsData.OfficeDeatils.newTreasurer.WARD_ENG}}</span></td>
+                            <td ng-show="SocietyDetailsData.OfficeDeatils.newTreasurer.ISRDural == 'Rural'"><label>{{translation.GramPanchayat}} :</label></td>
+                            <td ng-show="SocietyDetailsData.OfficeDeatils.newTreasurer.ISRDural == 'Rural'"><span class="dev-spancon">{{SocietyDetailsData.OfficeDeatils.newTreasurer.GP_ENG}}</span></td>
+
+                        </tr>
+
+                        <tr>
+                            <td ng-show="SocietyDetailsData.OfficeDeatils.newTreasurer.ISRDural == 'Rural'"><label>{{translation.Village}} :</label></td>
+                            <td ng-show="SocietyDetailsData.OfficeDeatils.newTreasurer.ISRDural == 'Rural'"><span class="dev-spancon">{{SocietyDetailsData.OfficeDeatils.newTreasurer.VILLAGE_ENG}}</span></td>
+                            <td><label>{{translation.PIN}} :</label></td>
+                            <td><span class="dev-spancon">{{SocietyDetailsData.OfficeDeatils.newTreasurer.PinCode}}</span></td>
+
+                        </tr>
+
+
+                    </table>
+                </div>
+            </div>
+        </fieldset>
+    </div>
+
+
+
+    <div class=" profile-d1" style="margin-top: 30px;">
+        <fieldset class="dvfieldset" ng-show="showSocietyReportFile">
+            <table class="table table-responsive devtable" style="margin-top: 30px;color:black">
+                <tr>
+                    <td>
+                        1
+                    </td>
+                    <td>
+                        <div class="col-lg-8">{{translation.File}}</div>
+                    </td>
+                    <td class="printhideth">
+                        <a style="color:#505050;" target="_blank" href="{{SocietyDetailsData.BasicDetails.SocietyReportFile}}"><i class="fa fa-info-circle infoicon-edit"></i></a>
+                    </td>
+                </tr>
+            </table>
+        </fieldset>     
+        <fieldset class="dvfieldset" ng-show="BaseUserId==ApplicationFlowMaster.UserId">
+            <legend class="dvlegend">{{translation.ApplicationFlow}}</legend>
+            <div class="fa col-lg-12 profile-d1">
+
+                <form class="dev-search-form" name="MyClassForm" ng-show="BaseUserId==ApplicationFlowMaster.UserId" style="overflow: hidden; margin-bottom:35px;">
+                    <div class="col-md-6" ng-hide="ShowOTPDiv">
+                        <label>
+                            {{translation.Status}} :
+                        </label>
+                        <select ng-model="ApplicationFlowMaster.StatusId" class="form-control" ng-init="ApplicationFlowMaster.StatusId='0'" ng-change="GetRoleList()">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in SocietyProceesStatus" value="{{item.SocietyProceesStatusId}}">
+                                {{_language =='en-us' ?  item.ProceesStatusTextEn : item.ProceesStatusTextHi}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-md-6" ng-hide="ShowOTPDiv">
+                        <div ng-show="ApplicationFlowMaster.StatusId==3 || ApplicationFlowMaster.StatusId==9 || ApplicationFlowMaster.StatusId==12 || ApplicationFlowMaster.StatusId==19 || ApplicationFlowMaster.StatusId==23 || ApplicationFlowMaster.StatusId==35|| ApplicationFlowMaster.StatusId==36|| ApplicationFlowMaster.StatusId == 1058 || ApplicationFlowMaster.StatusId == 1053">
+                            <label>
+                                {{translation.RoleHeading}} :
+                            </label>
+                            <select ng-model="RoleId" class="form-control" id="ddlRole" ng-init="RoleId=0" ng-change="GetOfficer()">
+                                <option value="0" disabled>{{translation.SelectOption}}</option>
+                                <option ng-repeat="item in RoleList " value="{{item.RoleID}}">
+                                    {{ item.RoleName_EN }}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6" ng-hide="ShowOTPDiv">
+                        <div ng-show="ApplicationFlowMaster.StatusId==3 || ApplicationFlowMaster.StatusId==9 || ApplicationFlowMaster.StatusId==12 || ApplicationFlowMaster.StatusId==19 || ApplicationFlowMaster.StatusId==23 || ApplicationFlowMaster.StatusId==35 || ApplicationFlowMaster.StatusId==36|| ApplicationFlowMaster.StatusId == 1058 || ApplicationFlowMaster.StatusId == 1053">
+                            <label>
+                                {{translation.Officer}} :
+                            </label>
+                            <select ng-model="ApplicationFlowMaster.OfficeId" id="ddlOffice" class="form-control" ng-init="ApplicationFlowMaster.OfficeId='0'">
+                                <option value="0" disabled>{{translation.SelectOption}}</option>
+                                <option ng-repeat="item in OfficerData " value="{{item.userid}}">
+                                    {{ item.OfficerNameEn }}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group col-md-12" ng-hide="ShowOTPDiv">
+                        <label>{{translation.Remarks}}</label>
+                        <textarea type="text" rows="4" cols="50" class="form-control" id="Remarks" name="Remarks" ng-bind="Remarks" ng-model="ApplicationFlowMaster.Remark" placeholder={{translation.Remarks}}></textarea>
+                        <code style="float: left;">
+                        </code>
+                        @*<input type="hidden" class="form-control hindiFont" id="txtRemark" ng-bind="Remarks" ng-model="ApplicationFlowMaster.Remark" />
+                        <textarea type="text" rows="4" cols="50" class="form-control hindiFont" name="Remarks" onblur="convert_to_unicode(this,'txtRemark')" placeholder={{translation.Remarks}}></textarea>*@
+                    </div>
+
+                    <div class="form-group col-md-12" ng-hide="ShowOTPDiv" ng-if="ApplicationFlowMaster.StatusId==1065">
+                        <label>{{translation.Amount}}</label>
+                        <input type="text" rows="4" cols="50" class="form-control" id="AmendmendAmount" name="AmendmendAmount" ng-model="ApplicationFlowMaster.AmendmendAmount" placeholder={{translation.Amount}} />
+                    </div>
+                    <div class="form-group col-md-12" ng-hide="ShowOTPDiv" ng-if="ApplicationFlowMaster.StatusId==1065">
+                        <label>{{translation.ReceiptNumber }}</label>
+                        <input type="text" rows="4" cols="50" class="form-control" id="AmendmendAmountReceipt" name="AmendmendAmountReceipt" ng-model="ApplicationFlowMaster.ReceiptNumber" placeholder={{translation.ReceiptNumber}} />
+                    </div>
+
+                    <div class="form-group col-md-12" ng-hide="ShowOTPDiv">
+                        <div ng-show="ApplicationFlowMaster.StatusId==36">
+                            <div class="col-md-3">
+                                <label>
+                                    {{translation.File}} :
+                                </label>
+                            </div>
+                            <div class="col-md-8" style="text-align:left">
+                                <input type="file" name="File" filetype='pdf' id="flReportFile" class="form-control" ng-model="ApplicationFlowMaster.ReportFile" onchange="angular.element(this).scope().UploadReportFile(this.files)">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group col-md-12" ng-hide="ShowOTPDiv">
+                        <div class="citizen-dash-head col-md-3" ng-show="ApplicationFlowMaster.StatusId==5 || ApplicationFlowMaster.StatusId==10 || ApplicationFlowMaster.StatusId==20">
+                            <label>{{translation.ObjectionBelongTo}}</label>
+                        </div>
+                        <div class="citizen-dash-head col-md-9" style="text-align:left" ng-show="ApplicationFlowMaster.StatusId==5 || ApplicationFlowMaster.StatusId==10 || ApplicationFlowMaster.StatusId==20">
+                            <input type="checkbox" style="" name="Basic" ng-model="ObjectionFlagBasic">{{translation.SocietyDetails}}
+                            <input type="checkbox" style="padding-left:15px;margin-left:15px" name="Administrative" ng-model="ObjectionFlagAdmin">{{translation.AdministrativeDetails}}
+                            <input type="checkbox" style="padding-left:15px;margin-left:15px" name="Office" ng-model="ObjectionFlagOffice"> {{translation.SocietyOfficeDetails}}
+                        </div>
+                    </div>
+                    <div class="form-group col-md-12" ng-hide="ShowOTPDiv">
+                        <div class="dev-menu-btn">
+                            <button type="submit" class="btn btn-primary" ng-click="SaveSocietyApplicationFlowStatus()">{{translation.Submit}}</button>
+                            <button type="submit" class="btn btn-primary" ng-click="BackToPage()">{{translation.Back}}</button>
+                        </div>
+                    </div>
+                    <div class="form-group col-md-6" ng-show="ShowOTPDiv">
+                        <label>{{translation.EnterOTP}}</label>
+                        <input type="text" class="form-control" name="Remarks" ng-bind="OTP" ng-model="ApplicationFlowMaster.OTP" placeholder={{translation.EnterOTP}} autocomplete="off" /><br />
+                        <button type="submit" class="btn btn-primary" ng-click="VerifyOTP()">{{translation.Submit}}</button>
+
+                        <button type="submit" class="btn btn-primary" ng-click="SaveSocietyApplicationFlowStatus()">{{translation.ReSendOTP}}</button>
+
+                    </div>
+                </form>
+                @*<div class="dev-menu-btn" style="margin-top: 20px" ng-show="BaseUserId!=ApplicationFlowMaster.UserId">
+                    <button type="submit" class="btn btn-primary dev-btn" ng-click="BackToPage()">{{translation.Back}}</button>
+                </div>*@
+            </div>
+        </fieldset>
+        <div class="dev-menu-btn" style="margin-top: 20px" ng-show="BaseUserId!=ApplicationFlowMaster.UserId">
+            <button type="submit" class="btn btn-primary dev-btn" ng-click="BackToPage()">{{translation.Back}}</button>
+        </div>
+    </div>
+    <!-- end  show details -->
+    <div id="stop" class="scrollTop">
+        <span><a href=""><i class="fa fa-arrow-up">Top</i></a></span>
+    </div>
+    @Html.Partial("_AadhaarValidation")
+</div>
+<input type="hidden" name="hdlang" id="hdlang" value="hi-IN" />
+
+<link href="~/Scripts/google_hindi/google_transliteration.css" rel="stylesheet" />
+
+<style>
+    .inputapi-transliterate-indic-suggestion-menu {
+        z-index: 99999 !important;
+        display: block;
+    }
+</style>
+<script src="~/Scripts/google_hindi/google_transapi.js"></script>
+<script type="text/javascript">
+    google.load("elements", "1", {
+        packages: "transliteration"
+    });
+
+    function onLoad() {
+        var content = document.getElementById('content');
+        if (document.getElementById('hdlang').value == "hi-IN") {
+            var options = {
+                sourceLanguage: google.elements.transliteration.LanguageCode.ENGLISH,
+                destinationLanguage: google.elements.transliteration.LanguageCode.HINDI, // available option English, Bengali, Marathi, Malayalam etc.
+                shortcutKey: 'ctrl+g',
+                transliterationEnabled: true
+            };
+        }
+        else {
+            var options = {
+                sourceLanguage: google.elements.transliteration.LanguageCode.ENGLISH,
+                destinationLanguage: google.elements.transliteration.LanguageCode.HINDI, // available option English, Bengali, Marathi, Malayalam etc.
+                shortcutKey: 'ctrl+g',
+                transliterationEnabled: false
+            }
+        }
+        var ids = ["Remarks"];
+        var control = new google.elements.transliteration.TransliterationControl(options);
+        control.makeTransliteratable(ids);
+    }
+    google.setOnLoadCallback(onLoad);
+
+</script>
+
+
+<script src="~/Scripts/google_hindi/google_transliteration.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+

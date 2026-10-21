@@ -1,0 +1,158 @@
+﻿<script src="~/Scripts/AngularFramework/CaseRegistraion.js"></script>
+<script src="~/Scripts/AngularFramework/AuditInspectionReportClient.js"></script>
+
+<script type="text/javascript">
+    var tableToExcel = (function () {
+        var uri = 'data:application/vnd.ms-excel;base64,'
+            , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>'
+            , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) }
+            , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
+        return function (table, name) {
+            if (!table.nodeType) table = document.getElementById(table)
+            var ctx = { worksheet: name || 'Worksheet', table: table.innerHTML }
+            window.location.href = uri + base64(format(template, ctx))
+        }
+    })()
+</script>
+<div ng-app="AuditInspectionReportModule">
+    <div ng-controller="AuditInspectionReportCont">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <h3 class="citizen-dash-head">{{translation.InspectionReport}}</h3>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#"> {{translation.MIS}} </a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;">{{translation.InspectionReport}} </span>
+
+                    </li>
+                    <li style="float: right;" id="divAddBtn">
+                        &nbsp;
+                    </li>
+
+                </ul>
+            </div>
+        </div>
+
+        <div class="col-lg-12">
+            <div class="citizen-dash-head">
+                <div class="table-dropdown">
+                    <div class="col-lg-12 form-group">
+                        <div class="col-lg-4" style="padding-left: 0;">
+                            <label for="search">{{translation.FinYear}}:</label>
+                            <select ng-model="Inspection.FinancialYearId" class="form-control" ng-init="Inspection.FinancialYearId='0'">
+                                <option value="0" disabled>{{translation.SelectOption}}</option>
+                                <option ng-repeat="item in FinancialYearList" value="{{item.FIN_YEAR_MASTR_ID}}">
+                                    {{item.FIN_YEAR_NAME}}
+                                </option>
+                            </select>
+                        </div>
+
+
+                        <div class="col-lg-4" style="padding-left: 0;">
+                            <label for="search">{{translation.Act}}:</label>
+                            <select ng-model="Inspection.ActId" class="form-control" ng-init="Inspection.ActId='0'">
+                                <option value="0">{{translation.SelectOption}}</option>
+                                <option ng-repeat="item in ActList" value="{{item.ActId}}">
+                                    {{_language =='en-us' ?  item.ActNameEn : item.ActNameHi}}
+                            </select>
+                        </div>
+
+                        <div class="col-lg-4" style="padding-left: 0;">
+                            <label for="search">{{translation.District}}:</label>
+                            <select ng-model="Inspection.DistrictId" class="form-control" ng-init="Inspection.DistrictId='0'">
+                                <option value="0">{{translation.SelectOption}}</option>
+                                <option ng-repeat="item in DistrictList" value="{{item.DISTRICT_ID}}">
+                                    {{_language =='en-us' ?  item.DISTRICT_ENG : item.DISTRICT_MANGAL}}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-12 form-group">
+                        <div class="col-md-3">
+                            <button type="submit" class="btn btn-primary dev-btn" style="margin-top: 25px;" ng-click="GetInspectionReport(0,0)">{{translation.Show}}</button>
+                            <button type="submit" class="btn btn-primary dev-btn" style="margin-top: 25px;" ng-click="Clear()">{{translation.Clear}}</button>                           
+                            <a class="btn btn-primary dev-btn" style="text-transform:capitalize; margin-top: 25px;" href="../User/DashBoard"> Back</a>                            
+                        </div>
+                    </div>
+
+                    <div class="col-md-12" style="padding-top: 10px;padding-bottom:10px; float: right" >                        
+                        <i style="float:right" ng-show="btnExportToExcel" onclick="tableToExcel('tblInspectionReport', 'Get Inspection Data')" class="fa fa-file-excel-o" aria-hidden="true" ></i>
+                    </div>
+
+                    <div style="min-width:100%;overflow-x :scroll;" ng-show="divInspectionReport">
+                        <table class="table table-responsive devtable" id="tblInspectionReport">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        {{translation.SRNO}}
+                                    </th>
+                                    <th>
+                                        {{translation.District}}
+                                    </th>
+                                    <th>
+                                        {{translation.Total}}
+                                    </th>
+                                    <th>
+                                        {{translation.AssignAuditor}}
+                                    </th>
+                                    <th>
+                                        {{translation.AuditComplete}}
+
+                                    </th>
+                                    <th>
+                                        {{translation.AuditRemaining}}
+
+                                    </th>
+
+                                    <th>
+                                        {{translation.AuditorNotAssigned}}
+                                    </th>
+
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="items in InspectionReportData">
+                                    <td>{{$index+1}}</td>
+                                    <td>{{ items.DISTRICT_MANGAL }}</td>
+                                    <td><a href="#" ng-click="GetInspectionReport(5,items.DISTRICT_ID)">{{ items.TotalSocieties}}</a> </td>
+                                    <td><a href="#" ng-click="GetInspectionReport(1,items.DISTRICT_ID)">{{ items.NoOfAuditorAssigned}}</a> </td>
+                                    <td><a href="#" ng-click="GetInspectionReport(2,items.DISTRICT_ID)">{{ items.NoOfAuditComplete}}</a> </td>
+                                    <td><a href="#" ng-click="GetInspectionReport(3,items.DISTRICT_ID)">{{ items.NoOfRemaining}}</a> </td>
+                                    <td><a href="#" ng-click="GetInspectionReport(4,items.DISTRICT_ID)">{{ items.NoOfAuditorNotAssigned}}</a> </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div style="min-width:100%;overflow-x :scroll;" ng-show="divSocietyDetail">
+                        <table class="table table-responsive devtable">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        {{translation.SRNO}}
+                                    </th>
+                                    <th>
+                                        {{translation.Society}}
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="items in SocietyData">
+                                    <td>{{$index+1}}</td>
+                                    <td>{{ items.SocietyName }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

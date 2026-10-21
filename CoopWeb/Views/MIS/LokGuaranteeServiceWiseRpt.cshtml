@@ -1,0 +1,447 @@
+﻿<script src="~/Scripts/AngularFramework/LokGuaranteeServiceWiseRpt.js"></script>
+<script type="text/javascript" src="~/Scripts/jqueryuitimepicker.js"></script>
+<link href="~/Content/Stylesheets/jqueryuitimepicker.css" rel="stylesheet" />
+<script type="text/javascript">
+    function printDataJS(Id) {
+        // ExportToPDF(Id, [], '', PDFPageType.Portrait);
+        $('body').prepend("<form method='post' action='../ExportHandler.ashx' id='tempForm'><input type='hidden' name='data' value='" + Id + "' ><input type='hidden' name='PageType' value='" + PDFPagePrintType.Portrait + "' ></form>");
+        $('#tempForm').submit();
+        $("tempForm").remove();
+    }
+    var PDFPagePrintType = {
+        Default: 'Default',
+        Portrait: 'Portrait',
+        Landscape: 'Landscape'
+    }
+
+    var tableToExcel = (function () {
+        var uri = 'data:application/vnd.ms-excel;base64,'
+            , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>'
+            , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) }
+            , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
+        return function (table, name) {
+            if (!table.nodeType) table = document.getElementById(table)
+            var ctx = { worksheet: name || 'Worksheet', table: table.innerHTML }
+            window.location.href = uri + base64(format(template, ctx))
+        }
+    })
+    AutoselectMonth = function () {
+
+        var DT = new Date();
+        var date = "";
+        if ((DT.getMonth() + 1) < 10) {
+            date = DT.getFullYear() + '-0' + (DT.getMonth() + 1);
+        }
+        else {
+            date = DT.getFullYear() + '-' + (DT.getMonth() + 1);
+        }
+        $("#txtFromMonth").val(date);
+    };
+    AutoselectFromMonth = function () {
+
+        var DT = new Date();
+        var date = "";
+        if ((DT.getMonth() + 1) < 10) {
+            date = DT.getFullYear() + '-0' + (DT.getMonth() + 1);
+        }
+        else {
+            date = DT.getFullYear() + '-' + (DT.getMonth() + 1);
+        }
+        $("#txtFromMonth").val(date);
+    };
+
+    AutoselectToMonth = function () {
+
+        var DT = new Date();
+        var date = "";
+        if ((DT.getMonth() + 1) < 10) {
+            date = DT.getFullYear() + '-0' + (DT.getMonth() + 1);
+        }
+        else {
+            date = DT.getFullYear() + '-' + (DT.getMonth() + 1);
+        }
+        $("#txtToMonth").val(date);
+    };
+
+   
+    window.onload = function () {
+        AutoselectToMonth();
+        AutoselectMonth();
+        AutoselectFromMonth();
+    };
+
+    
+
+</script>
+
+<div ng-app="LokGuaraanteeService" ng-controller="LokGuaraanteeServiceCont">
+    <div class="col-md-12">
+        <h3 class="h3heading citizen-dash-head">{{translation.LokGuaranteeServicewise}}@*<a target="_blank" style="float:right; font-size:12px" href="~/Content/UserManual/CEO_Audit_Report_Upload.pdf">उपयोगकर्ता पुस्तिका</a>*@</h3>
+    </div>
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="devpage-breadcrumb">
+            <ul class="page-breadcrumb">
+                <li class="dev-page-br">
+                    <i class="fa fa-home"> </i>
+                    <a href="#"> {{translation.Home}}  </a>
+                    <i class="fa fa-angle-right"> </i>
+                </li>
+                <li style="float: left">
+                    <span style="margin: 0 5px;">{{translation.LokGuaranteeServicewise}}   </span>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="col-md-12">
+        <form class="dev-search-form citizen-dash-head " style="overflow: hidden;" name="Myauditform">
+            <div class="col-lg-12 form-group" id="search-filter">
+
+
+                @*<div class="col-lg-4 form-group">
+                    <div class="col-lg-2 ng-binding"style=" margin-top: 7px;"> <label>{{translation.Month}}</label></div>
+                    <div class="col-lg-6">
+                        <input id="txtMonth" value="date" type="date" class="form-control" autocomplete="off" onkeypress="return false;" />
+                    </div>
+                </div>*@
+
+                <div class="col-lg-5 form-group">
+                    <div class="col-lg-1 ng-binding" style=" margin-top: 7px;"> <label>अवधि:</label></div>
+                    <div class="col-lg-4">
+                        <input id="txtFromMonth" value="date" type="date" class="form-control" autocomplete="off" onkeypress="return false;" />
+                    </div>        
+                    <div class="col-lg-1 ng-binding" style="margin-left: -23px;    margin-top: 7px;">  से </div>
+                    <div class="col-lg-4">
+                      <input id="txtToMonth" value="date" type="date" class="form-control" autocomplete="off" onkeypress="return false;" />
+                    </div>
+                    <div class="col-lg-1 ng-binding" style="margin-left: -23px;    margin-top: 7px;">तक</div>
+                </div>
+
+                <div class="col-lg-3 form-group">
+                    <button type="button" ng-click="searchRequest(GetMonthlySummary)" class="btn btn-primary dev-btn ng-binding">{{translation.Search}}</button>
+                    @*<button type="button" ng-click="ClearSearch()" class="btn btn-primary dev-btn ng-binding">{{translation.Clear}}</button>*@
+                </div>
+                
+               
+            </div>
+            <div class="table-dropdown" style="overflow:inherit; float:left;">
+                <table id="divExportPrint" class="table devtable" style="width:100%;border:1px solid rgb(222, 221, 221); float: left; margin-bottom:0;">
+                    <thead>
+                       
+                        <tr>
+                            <th rowspan="2" style="text-align:center;"> {{translation.SRNO}}</th>
+                            <th rowspan="2" style="text-align:center;width:110px;"> {{translation.OfficeNameHin}}</th>
+                            <th rowspan="2" style="text-align:center;">{{translation.TypeOfService}}</th>
+                            <th colspan="3" style="text-align:center;">दिनांक {{todaydatefrom}} से {{todaydateTo}} तक</th>
+                            <th rowspan="2" style="text-align:center;"> {{translation.TotRecevedCasesInCurMonth}}</th>
+                            <th rowspan="2" style="text-align:center;">{{translation.TotalBasedOncolumn}}</th>
+                            <th rowspan="2" style="text-align:center;">{{translation.DisposedApplInCurrMonth}}</th>
+
+                            <th colspan="3" style="text-align:center;">{{translation.PendingCasesInCurrMontEnd}} </th>
+                        </tr>
+                        <tr>
+                            <th style="text-align:center;">  {{translation.TotNumOfCases}}</th>
+                            <th style="text-align:center;">{{translation.TotDisposedCases}}</th>
+                            <th style="text-align:center;">{{translation.PendingCases}}</th>
+                            <th style="text-align:center;">{{translation.PendingCasesCurrMonthOutOfTimeLimit}}</th>
+                            <th style="text-align:center;">{{translation.PendingCasesCurrMonthUnderTimeLimit}}</th>
+                            <th style="text-align:center;">{{translation.TotalBasedOnCol9and10}}</th>
+                        </tr>
+
+                        <tr>
+                            <th style="text-align:center">1</th>
+                            <th style="text-align:center">2</th>
+                            <th style="text-align:center">3</th>
+                            <th style="text-align:center">4</th>
+                            <th style="text-align:center">5</th>
+                            <th style="text-align:center">6</th>
+                            <th style="text-align:center">7</th>
+                            <th style="text-align:center">8</th>
+                            <th style="text-align:center">9</th>
+                            <th style="text-align:center">10</th>
+                            <th style="text-align:center">11</th>
+                            <th style="text-align:center">12</th>
+
+                        </tr>
+
+                    </thead>
+                 
+                    <tbody>
+                        @{ int i = 1; }
+
+                          
+                        <tr ng-repeat="item in RjApexBody">
+                            <td style="text-align:center;background-color:#fff;"> {{$index +1}} </td>
+                           
+                            <th style="text-align:center;background-color:#fff;">{{item.Office}}</th>
+                            <td style="text-align:center;background-color:#fff;">{{item.Act}}</td>
+                            <td style="text-align:center;background-color:#fff;">{{item.totalRecivedLastMonth}}</td>
+                            <td style="text-align:center;background-color:#fff;">{{item.totalApprovedLastMonth}}</td>
+                            <td style="text-align:center;background-color:#fff;">{{item.totalPandingLastMonth}}</td>
+                            <td style="text-align:center;background-color:#fff;">{{item.totalRecivedCurrMonth}}</td>
+                            <td style="text-align:center;background-color:#fff;">{{item.totalPandingLastMonth+item.totalRecivedCurrMonth}}</td>
+                            <td style="text-align:center;background-color:#fff;">{{item.totalApprovedCurrMonth}}</td>
+                            <td style="text-align:center;background-color:#fff;">{{item.OutOfTimeLimit}}</td>
+                            <td style="text-align:center;background-color:#fff;">{{item.UnderTimeLimit}}</td>
+                            <td style="text-align:center;background-color:#fff;">{{item.OutOfTimeLimit+item.UnderTimeLimit}}</td>
+                        </tr>
+
+                        <tr ng-repeat="item in OfficeListData" ngchange="ind(item.Type)">
+                            @*{{OfficeListData}}*@
+                            @{ int y = @i; }
+
+                            <td ng-if="item.Type==2" style="text-align:center;background-color:#fff;">{{$index +2}} </td>
+                            <th ng-if="item.Type==2" style="text-align:center;background-color:#fff;">{{item.Office}}</th>
+                            <td ng-if="item.Type==2" style="text-align:center;background-color:#fff;">{{item.Act}}</td>
+                            <td ng-if="item.Type==2" style="text-align:center;background-color:#fff;">{{item.totalRecivedLastMonth}}</td>
+                            <td ng-if="item.Type==2" style="text-align:center;background-color:#fff;">{{item.totalApprovedLastMonth}}</td>
+                            <td ng-if="item.Type==2" style="text-align:center;background-color:#fff;">{{item.totalPandingLastMonth}}</td>
+                            <td ng-if="item.Type==2" style="text-align:center;background-color:#fff;">{{item.totalRecivedCurrMonth}}</td>
+                            <td ng-if="item.Type==2" style="text-align:center;background-color:#fff;">{{item.totalPandingLastMonth+item.totalRecivedCurrMonth}}</td>
+                            <td ng-if="item.Type==2" style="text-align:center;background-color:#fff;">{{item.totalApprovedCurrMonth}}</td>
+                            <td ng-if="item.Type==2" style="text-align:center;background-color:#fff;">{{item.OutOfTimeLimit}}</td>
+                            <td ng-if="item.Type==2" style="text-align:center;background-color:#fff;">{{item.UnderTimeLimit}}</td>
+                            <td ng-if="item.Type==2" style="text-align:center;background-color:#fff;">{{item.OutOfTimeLimit+item.UnderTimeLimit}}</td>
+
+
+
+                            <td ng-if="item.Type==3 &&item.isRow=='1'"style="text-align:center;background-color:#fff;">{{$index+2}}</td>
+
+                            <td ng-if="item.Type==3 &&item.isRow=='0'" style="text-align:center;background-color:#fff;" ng-hide="item.isRow">{{$index+2}}</td>
+
+                            <td ng-if="item.Type==3 &&item.isRow=='1'" rowspan="2" style="text-align:center;background-color:#fff;">{{item.Office}}</td>
+                            <td ng-if="item.Type==3" style="text-align:center;background-color:#fff;">{{item.Act}}  </td>
+                            <td ng-if="item.Type==3" style="text-align:center;background-color:#fff;">{{item.totalRecivedLastMonth}}</td>
+                            <td ng-if="item.Type==3" style="text-align:center;background-color:#fff;">{{item.totalApprovedLastMonth}}</td>
+                            <td ng-if="item.Type==3" style="text-align:center;background-color:#fff;">{{item.totalPandingLastMonth}}</td>
+                            <td ng-if="item.Type==3" style="text-align:center;background-color:#fff;">{{item.totalRecivedCurrMonth}}</td>
+                            <td ng-if="item.Type==3" style="text-align:center;background-color:#fff;">{{item.totalPandingLastMonth+item.totalRecivedCurrMonth}}</td>
+                            <td ng-if="item.Type==3" style="text-align:center;background-color:#fff;">{{item.totalApprovedCurrMonth}}</td>
+                            <td ng-if="item.Type==3" style="text-align:center;background-color:#fff;">{{item.OutOfTimeLimit}}</td>
+                            <td ng-if="item.Type==3" style="text-align:center;background-color:#fff;">{{item.UnderTimeLimit}}</td>
+                            <td ng-if="item.Type==3" style="text-align:center;background-color:#fff;">{{item.OutOfTimeLimit+item.UnderTimeLimit}}</td>
+
+
+                        </tr>
+
+
+                        @*
+                        <tr ng-repeat="item in RjCentraBody">
+                            <td style="text-align:center;">{{$index+1}} </td>
+                            <th style="text-align:left;">{{item.Office}}</th>
+                            <td style="text-align:left;">{{item.Act}}</td>
+                            <td style="text-align:center;">{{item.totalRecivedLastMonth}}</td>
+                            <td style="text-align:center;">{{item.totalApprovedLastMonth}}</td>
+                            <td style="text-align:center;">{{item.totalPandingLastMonth}}</td>
+                            <td style="text-align:center;">{{item.totalRecivedCurrMonth}}</td>
+                            <td style="text-align:center;">{{item.totalPandingLastMonth+item.totalRecivedCurrMonth}}</td>
+                            <td style="text-align:center;">{{item.totalApprovedCurrMonth}}</td>
+                            <td style="text-align:center;">{{item.OutOfTimeLimit}}</td>
+                            <td style="text-align:center;">{{item.UnderTimeLimit}}</td>
+                            <td style="text-align:center;">{{item.OutOfTimeLimit+item.UnderTimeLimit}}</td>
+                        </tr>*@
+
+                        @*
+                        <tr ng-repeat="item in MonthlySummaryRegister">
+                            <td style="text-align:left;" class="{{item.dt1=='Total'||item.dt2=='Total'||item.dt3=='Total'?'BoldCount':''}}">{{$index+1}} </td>
+                            <td style="text-align:left;" class="{{item.dt1=='Total'||item.dt2=='Total'||item.dt3=='Total'?'BoldCount':''}}">{{item.dt2}}</td>
+                            <td style="text-align:left;" class="{{item.dt1=='Total'||item.dt2=='Total'||item.dt3=='Total'?'BoldCount':''}}">{{item.dt3}}</td>
+                            <td style="text-align:left;" class="{{item.dt1=='Total'||item.dt2=='Total'||item.dt3=='Total'?'BoldCount':''}}">{{item.dt4}}</td>
+                            <td style="text-align:left;" class="{{item.dt1=='Total'||item.dt2=='Total'||item.dt3=='Total'?'BoldCount':''}}">{{item.dt5}}</td>
+                            <td style="text-align:right;" class="{{item.dt1=='Total'||item.dt2=='Total'||item.dt3=='Total'?'BoldCount':''}}">{{item.dt6}}</td>
+                            <td style="text-align:right;" class="{{item.dt1=='Total'||item.dt2=='Total'||item.dt3=='Total'?'BoldCount':''}}">{{item.dt7}}</td>
+                            <td style="text-align:right;" class="{{item.dt1=='Total'||item.dt2=='Total'||item.dt3=='Total'?'BoldCount':''}}">{{item.dt8}}</td>
+                            <td style="text-align:right;" class="{{item.dt1=='Total'||item.dt2=='Total'||item.dt3=='Total'?'BoldCount':''}}">{{item.dt9}}</td>
+                            <td style="text-align:right;" class="{{item.dt1=='Total'||item.dt2=='Total'||item.dt3=='Total'?'BoldCount':''}}">{{item.dt10}}</td>
+                            <td style="text-align:right;" class="{{item.dt1=='Total'||item.dt2=='Total'||item.dt3=='Total'?'BoldCount':''}}">{{item.dt11}}</td>
+                            <td style="text-align:right;" class="{{item.dt1=='Total'||item.dt2=='Total'||item.dt3=='Total'?'BoldCount':''}}">{{item.dt12}}</td>
+                        </tr>*@
+                    </tbody>
+                </table>
+            </div>
+        </form>
+    </div>
+
+
+
+    <div class="table-responsive citizen-dash-head" ng-show="CountSocietyAuditorList == true">
+        @*<h5 class="heading-hr ng-binding"> {{translation.AuditUploadedSocietyList}} </h5>*@
+        <div class="col-md-4 margin-Top20" style="padding-left: 25px;">
+            <label>{{ translation.Search}}</label>
+            <input name="serachText" class="form-control" ng-model="q" />
+        </div>
+        <div class="col-md-4  margin-Top20">
+            <label>&nbsp;</label><br>
+            <button type="button" ng-click="searchRequest(GetCountSocietyAssignedToAuditorList)" class="btn btn-primary dev-btn ng-binding">{{translation.Search}}</button>
+            <button type="button" ng-click="ClearSearchText()" class="btn btn-primary dev-btn ng-binding">{{translation.Clear}}</button>
+            <input type="button" class="btn btn-primary dev-btn" onclick="tableToExcel('tblgetsuport', 'Get Support Data')" value="Export to Excel">
+        </div>
+        <table class="table devtable" id="tblgetsuport" style="margin-top: 75px!important;">
+            <thead>
+                <tr>
+                    <th>
+                        {{translation.SRNO}}
+                    </th>
+                    <th>
+                        {{translation.SocietyName}}
+                    </th>
+                    <th>
+                        {{translation.RegistrationNo}}
+                    </th>
+                    <th>
+                        {{translation.AuditBy}}
+                    </th>
+                    <th>
+                        {{translation.AuditorInspector}}
+                    </th>
+                    <th>
+                        {{translation.FincialYearHeading}}
+                    </th>
+
+                    <th>
+                        {{translation.RequestStatus}}
+                    </th>
+                    <th>
+                        {{translation.Date}}
+                    </th>
+                    <th>
+                        {{translation.Order}}
+                    </th>
+                    <th>
+                        {{translation.Document}}
+                    </th>
+                </tr>
+           
+            </thead>
+            <tbody>
+                <tr ng-repeat="items in AssignedAuditor | filter:q">
+
+                    @*<td>{{(((DataPagingDetails.PageNumber - 1) * DataPagingDetails.PageSize) + 1)+$index}}</td>*@
+
+                    <td>{{$index+1}}</td>
+
+                    <td>{{ items.SocietyName }}</td>
+                    <td>{{ items.RegistrationNo }}</td>
+                    <td>{{ items.AuditBy}}</td>
+                    @*
+                    <td>{{ items.DISTRICT_ENG }}</td>*@
+                    <td>{{ items.AuditorName }}</td>
+                    <td>{{items.FIN_YEAR_NAME}}</td>
+                    <td>{{ items.RequestStatusText }} </td>
+                    <td>{{ items.RequestDate }}</td>
+                    <td><a ng-show="{{items.AuditorAssignFilePath!=''}}" href="{{items.AuditorAssignFilePath}}" class="fa fa-download" target="_blank"></a> </td>
+                    <td><a ng-click="ViewDocuments(items.Id)" class="fa fa-eye"></a> </td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="col-md-12">
+            <div class="col-md-12">
+                <div ng-if="DataPagingDetails.TotalPages>1" class="dataTables_paginate paging_simple_numbers" id="dataTables-example_paginate">
+                    <div class="dataTables_info" id="dataTables-example_info" role="status" aria-live="polite">
+                        Total Records: {{DataPagingDetails.TotalRecords}}
+                    </div>
+                    <ul class="pagination pagination_1" style="margin-left: 10px !important;">
+                        <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« First</span></li>
+                        <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« Previous</span></li>
+
+                        <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest('1',SearchData)" style="cursor: pointer;">
+                            <span>«First</span>
+                        </li>
+                        <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest(DataPagingDetails.PageNumber-1,SearchData)" style="cursor:pointer;">
+                            <span>« Previous</span>
+                        </li>
+                        <li class="{{n==DataPagingDetails.PageNumber?'active':''}}" style="{{n==DataPagingDetails.PageNumber?'':'cursor: pointer'}}" ng-repeat="n in PagingRange(DataPagingDetails.StartPageNumber,DataPagingDetails.EndPageNumber,DataPagingDetails.TotalPages)" ng-click="pageRequest(n,SearchData)"><span>{{n}}</span></li>
+                        <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Next</span></li>
+                        <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Last</span></li>
+                        <li ng-if="DataPagingDetails.PageNumber!= DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.PageNumber+1,SearchData)" style="cursor:pointer;">
+                            <span>Next »</span>
+                        </li>
+                        <li ng-if="DataPagingDetails.PageNumber != DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.TotalPages,SearchData)" style="cursor:pointer;">
+                            <span>Last »</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            @*<div ng-if="DataPagingDetails.TotalPages>1" class="dataTables_paginate paging_simple_numbers" id="dataTables-example_paginate">
+                <div class="dataTables_info" id="dataTables-example_info" role="status" aria-live="polite">
+                    Total Records: {{DataPagingDetails.TotalRecords}}
+                </div>
+                <ul class="pagination pagination_1" style="margin-left: 10px !important;">
+                    <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« First</span></li>
+                    <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« Previous</span></li>
+
+                    <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest('1',GetSocietyListAssignedToAuditor)" style="cursor: pointer;">
+                        <span>«First</span>
+                    </li>
+                    <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest(DataPagingDetails.PageNumber-1,GetSocietyListAssignedToAuditor)" style="cursor:pointer;">
+                        <span>« Previous</span>
+                    </li>
+                    <li class="{{n==DataPagingDetails.PageNumber?'active':''}}" style="{{n==DataPagingDetails.PageNumber?'':'cursor: pointer'}}" ng-repeat="n in PagingRange(DataPagingDetails.StartPageNumber,DataPagingDetails.EndPageNumber,DataPagingDetails.TotalPages)" ng-click="pageRequest(n,GetSocietyListAssignedToAuditor)"><span>{{n}}</span></li>
+                    <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Next</span></li>
+                    <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Last</span></li>
+                    <li ng-if="DataPagingDetails.PageNumber!= DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.PageNumber+1,GetSocietyListAssignedToAuditor)" style="cursor:pointer;">
+                        <span>Next »</span>
+                    </li>
+                    <li ng-if="DataPagingDetails.PageNumber != DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.TotalPages,GetSocietyListAssignedToAuditor)" style="cursor:pointer;">
+                        <span>Last »</span>
+                    </li>
+                </ul>
+            </div>*@
+        </div>
+    </div>
+
+    <div class="dev-popup-body modal fade" id="myModal" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">{{translation.UploadeddocumentList}}</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive citizen-dash-head">
+                        <table class="table devtable">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        {{translation.SRNO}}
+                                    </th>
+                                    <th>
+                                        {{translation.Name}}
+                                    </th>
+                                    <th ng-repeat="item in DocumentList.DocumentTypes">
+                                        {{(item === 'docx' || item === 'doc') ? translation.WORD : ( (item === 'xls' || item === 'xlsx') ? translation.EXCEL : (item === 'pdf' ? translation.PDF : ''))}}
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="items in DocumentList.DocumentList">
+                                    <td>{{$index+1}}</td>
+                                    <td>
+                                        {{ _language =='en-us' ? items.DocumentNameEnglish  : items.DocumentNameHindi}}
+                                    </td>
+                                    <td ng-repeat="item2 in items.DocumenTypeDetails">
+                                        <a ng-show="item2.URL !=''" href="{{item2.URL}}" target="_blank" style="color:#505050;" class="fa fa-download"></a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">{{translation.Close}}</button>
+                </div>
+
+
+
+
+
+            </div>
+        </div>
+    </div>
+
+
+    <div class="se-pre-con"></div>
+    <div id="stop" class="scrollTop">
+        <span><a href=""><i class="fa fa-arrow-up">Top</i></a></span>
+    </div>
+</div>

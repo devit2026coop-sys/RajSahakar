@@ -1,0 +1,126 @@
+﻿@{
+    Layout = "~/Views/Shared/_CitizenLayout.cshtml";
+}
+<script src="~/Scripts/AngularFramework/Emitra.js?id=2"></script>
+<div ng-app="EmitraModule" ng-controller="EmitraCont">
+    <div class="col-md-12">
+        <h3 class="h3heading citizen-dash-head">{{translation.FeeVerification}}</h3>
+    </div>
+
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="devpage-breadcrumb">
+            <ul class="page-breadcrumb">
+                <li class="dev-page-br">
+                    <i class="fa fa-home"> </i>
+                    <a href="#"> {{translation.Home}}  </a>
+                    <i class="fa fa-angle-right"> </i>
+                </li>
+                <li style="float: left">
+                    <span style="margin: 0 5px;">{{translation.FeeVerification}}   </span>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="col-md-12">
+        <form class="dev-search-form citizen-dash-head " style="overflow: hidden;" name="Myauditform">
+            <div class="col-lg-12 form-group">
+                <div class="col-lg-2">
+                    <label>{{translation.Type}}</label>
+                </div>
+                <div class="col-lg-4">
+                    <select class="form-control" ng-model="FailedTransaction.VerificationId" ng-init="FailedTransaction.VerificationId='0'">
+                        <option value="0">{{translation.SelectOption}}</option>
+                        <option ng-repeat="item in VerificationList" value="{{item.Id}}">
+                            {{item.VerificationFor}}
+                        </option>
+                    </select>
+                </div>
+
+                <div class="col-lg-2">
+                    <label>{{translation.SocietyName}}</label>
+                </div>
+                <div class="col-lg-4">
+                    <select class="form-control" ng-model="FailedTransaction.SocietyIdENC" ng-init="FailedTransaction.SocietyIdENC='0'" ng-change="FailedTransactionDetails()">
+                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                        <option ng-repeat="item in SocietyList" value="{{item.SocietyIdENC}}">
+                            {{item.SocietyName}}
+                        </option>
+                    </select>
+                </div>
+
+                @if(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).UserType=="K")
+                {
+                <div class="col-lg-12" style="margin-top:10px;">
+
+                </div>
+                <div class="col-lg-2">
+                    <label>{{translation.Search}} {{item.SocietyName}}</label>
+                </div>
+                <div class="col-lg-4">
+                    <input class="form-control" ng-model="SearchText" placeholder="{{translation.RegistrationNo}}" />
+                </div>
+                <div class="col-lg-4">
+                    <button type="button" ng-click="GetSocietyList()" class="btn btn-primary dev-btn ng-binding">{{translation.Search}}</button>
+                </div>
+                }
+
+            </div>
+            <div class="col-lg-12" ng-show="ShowTable">
+                @*ng-show="ShowFaildTrans"*@
+                <div class="col-lg-12 form-group">
+                    <h5 class="heading-hr ng-binding">  {{translation.FailedTransactionHistory}}</h5>
+                </div>
+                <div class="col-lg-12 table-responsive">
+                    <table class="table devtable">
+                        <thead>
+                            <tr>
+                                <th>
+                                    {{translation.SRNO}}
+                                </th>
+                                <th>
+                                    {{translation.RegistrationNo}}
+                                </th>
+
+                                <th>
+                                    {{translation.Date}}
+                                </th>
+                                <th>
+                                    {{translation.Status}}
+                                </th>
+                                <th>
+                                    {{translation.Actions}}
+                                </th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <tr dir-paginate="Transaction in FailedTransactionList | filter: q | orderBy:colsort:reverseSort  | itemsPerPage: pageSize" current-page="currentPage" pagination-id="MenuPagination">
+                                <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                                <td>{{ Transaction.RegistrationNo | uppercase }}</td>
+                                <td>{{ Transaction.CreationDate | uppercase }}</td>
+                                <td>{{ Transaction.StatusMsg | uppercase }}</td>
+                                <td>
+                                    <div class="dev-action">
+                                        <button type="button" class="btn btn-primary dev-btn" style="margin-top: 25px;" ng-click="GetFeeVerification(Transaction.SocietyIdENC,Transaction.EMitraAppRequestID,Transaction.SERICEID,Transaction.UniqueId,Transaction.RegistrationNo)">{{translation.VerifyTransaction}}</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="form-group col-md-12">
+                <div class="dev-align-btn">
+
+                    <a class="btn btn-primary dev-btn" style="text-transform:capitalize;" href="../Citizen/Index"> Back</a>
+                </div>
+
+            </div>
+        </form>
+    </div>
+</div>
+<div class="se-pre-con"></div>
+<div id="stop" class="scrollTop">
+    <span><a href=""><i class="fa fa-arrow-up">Top</i></a></span>
+</div>

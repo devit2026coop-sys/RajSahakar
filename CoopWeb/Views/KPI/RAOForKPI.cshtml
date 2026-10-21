@@ -1,0 +1,185 @@
+﻿<script src="~/Scripts/AngularFramework/RAOForKPI.js"></script>
+<link href="~/Content/Stylesheets/toastr.min.css" rel="stylesheet" />
+<script src="~/Scripts/toastr.min.js"></script>
+<style>
+    .section-head {
+        font-weight: 600;
+        font-size: 16px;
+        margin: 20px 0 10px 0;
+        border-bottom: 1px solid #ddd;
+        padding-bottom: 5px;
+    }
+
+    .field-label {
+        font-weight: 500;
+    }
+
+    .db-value {
+        color: #555;
+        font-style: italic;
+    }
+</style>
+<div ng-app="ApplicationRAOKPIModule" ng-controller="CooperativeRAOKPIFormCont" ng-cloak="">
+    <div class="col-md-12">
+        <h3 class="citizen-dash-head ng-binding" style="margin-top:0px;">क्षेत्रीय अंकेक्षण अधिकारी का मासिक प्रगति रिपोर्ट कार्ड (RAO)</h3>
+    </div>
+
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="devpage-breadcrumb">
+            <ul class="page-breadcrumb">
+                <li class="dev-page-br">
+                    <i class="fa fa-home"> </i>
+                    <a href="#">  {{translation.Home}}</a>
+                    <i class="fa fa-angle-right"> </i>
+                </li>
+                <li style="float: left">
+                    <span style="margin: 0 5px;"> {{translation.New}} </span>
+                    <i class="fa fa-angle-right"> </i>
+                    <span style="margin: 0 5px;">क्षेत्रीय अंकेक्षण अधिकारी का मासिक प्रगति रिपोर्ट कार्ड (RAO)</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div style="margin-top:30px;padding-top:30px">
+        <div class="col-md-12">
+            <div class="citizen-dash-head" style="overflow: hidden;">
+                <div class="col-md-12">
+                    <table class="table table-bordered table-hover table-striped disableTbl">
+                        <thead>
+                            <tr>
+                                <th colspan="8">
+                                    <h2 style=" font-weight: bold; text-align: center;">क्षेत्रीय अंकेक्षण अधिकारी का मासिक प्रगति रिपोर्ट कार्ड (RAO)</h2>
+                                    <h4 style=" font-weight: bold; text-align: center;">कार्य प्रदर्शन के आधार पर (केपीआई)</h4>
+                                    <h5 ng-if="PendingDistrictMessage" style="color:red; font-weight:600">
+                                        Note : Regional Office – {{UserDetails.DISTRICT_ENG}} के अंतर्गत {{PendingDistrictMessage}} SA Offices की KPI प्रविष्टि लंबित है। सभी SA Offices की KPI पूर्ण होने के बाद ही Regional Office स्तर की KPI प्रविष्टि की जा सकेगी!
+                                    </h5>
+                                </th>
+                            </tr>
+                            <tr style="font-weight:bold;font-size:20px;">
+                                <th style="text-align:center;"></th>
+                                <th style="text-align:center;">
+                                    {{UserDetails.OfficeNameEn}}
+                                </th>
+                                <th style="text-align:center;">
+                                    {{UserDetails.DISTRICT_ENG}}
+                                </th>
+                                <th style="text-align:center;">माह</th>
+                                <th style="text-align:center;">
+                                    {{PreviousMonth}}
+                                </th>
+                                <th colspan="2"></th>
+                            </tr>
+
+                            <tr style="background-color: #64c0c5; font-size: 17px; color: #fff; text-align: center; ">
+                                <th style="width:5%;">KPI No.</th>
+                                <th style="width:20%;">Key Task / KPI Area</th>
+                                <th style="width:30%;">Details of Indicators</th>
+                                <th style="width:10%;">Cumulative Target upto Month</th>
+                                <th style="width:10%;">Cumulative Achievement upto Month</th>
+                                <th style="width:8%;">Progress %</th>
+                                <th style="width:8%;">Weighted Marks</th>
+                                <th style="width:9%;">Marks Obtained</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            <tr ng-repeat-start="area in KPIAreas track by area.KPIAreaId">
+
+                                <td rowspan="{{area.Indicators.length}}" class="text-center">
+                                    {{$index + 1}}
+                                </td>
+
+                                <td rowspan="{{area.Indicators.length}}" style="vertical-align:top;">
+                                    {{area.KPIArea}}
+                                </td>
+
+                                <td>
+                                    {{area.Indicators[0].KPIIndicators}}
+                                </td>
+
+                                <td>
+                                    @*<input type="number" class="form-control" ng-model="area.Indicators[0].Target" ng-change="Calculate(area.Indicators[0])" ng-disabled="IsDivisionKPIDisabled" min="0" />*@
+                                    <input type="number" class="form-control" ng-model="area.Indicators[0].Target" ng-change="Calculate(area.Indicators[0])" ng-disabled="IsDivisionKPIDisabled || area.Indicators[0].KPIIndicatorsId == 19" min="0" />
+                                </td>
+
+                                <td>
+                                    <select ng-if="area.Indicators[0].KPIIndicatorsId == 19" class="form-control" ng-model="area.Indicators[0].Achievement" ng-change="Calculate(area.Indicators[0])" ng-disabled="IsDivisionKPIDisabled">
+                                        <option value="">--Select--</option>
+                                        <option value="1.00">Less than 5 Hours</option>
+                                        <option value="2.00">5 Hrs to Less than 6 Hrs</option>
+                                        <option value="3.00">6 Hrs to Less than 7 Hrs</option>
+                                        <option value="4.00">7 Hrs to Less than 8 Hrs</option>
+                                        <option value="5.00">8 Hrs to Less than 9 Hrs</option>
+                                        <option value="6.00">9 Hrs and Greater than 9 Hrs</option>
+                                    </select>
+
+                                    <input ng-if="area.Indicators[0].KPIIndicatorsId != 19" type="number" class="form-control" ng-model="area.Indicators[0].Achievement" ng-change="Calculate(area.Indicators[0])" ng-disabled="IsDivisionKPIDisabled" min="0" />
+
+                                </td>
+
+                                <td>
+                                    <input type="text" class="form-control" ng-model="area.Indicators[0].Progress" readonly tabindex="-1" ng-disabled="IsDivisionKPIDisabled" />
+                                </td>
+
+                                <td class="text-center" style="vertical-align:middle;" tabindex="-1">
+                                    @*<input type="text" class="form-control" ng-model="area.Indicators[0].WeightedMarks" readonly tabindex="-1" ng-disabled="IsDivisionKPIDisabled" />*@
+                                    {{area.Indicators[0].WeightedMarks}}
+                                </td>
+
+                                <td>
+                                    <input type="text" class="form-control" ng-model="area.Indicators[0].MarksObtained" readonly tabindex="-1" ng-disabled="IsDivisionKPIDisabled" />
+                                </td>
+
+                            </tr>
+
+                            <tr ng-repeat="indicator in area.Indicators.slice(1) track by indicator.KPIIndicatorsId" ng-repeat-end>
+                                <td>
+                                    {{indicator.KPIIndicators}}
+                                </td>
+                                <td>
+                                    @*<input type="number" class="form-control" ng-model="indicator.Target" ng-change="Calculate(indicator)" ng-disabled="IsDivisionKPIDisabled" />*@
+                                    <input type="number" class="form-control" ng-model="indicator.Target" ng-change="Calculate(indicator)" ng-disabled="IsDivisionKPIDisabled || indicator.KPIIndicatorsId == 19" />
+                                </td>
+                                <td>
+                                    <input type="number" class="form-control" ng-model="indicator.Achievement" ng-change="Calculate(indicator)" ng-disabled="IsDivisionKPIDisabled" />
+                                </td>
+
+                                <td>
+                                    <input type="text" class="form-control" ng-model="indicator.Progress" readonly tabindex="-1" ng-disabled="IsDivisionKPIDisabled" />
+                                </td>
+
+                                <td class="text-center" tabindex="-1">
+                                    @*<input type="text" class="form-control" ng-model="indicator.WeightedMarks" readonly tabindex="-1" ng-disabled="IsDivisionKPIDisabled" />*@
+                                    {{indicator.WeightedMarks}}
+                                </td>
+
+                                <td>
+                                    <input type="text" class="form-control" ng-model="indicator.MarksObtained" readonly tabindex="-1" ng-disabled="IsDivisionKPIDisabled" />
+                                </td>
+                            </tr>
+
+                            <tr ng-if="!KPIAreas || KPIAreas.length == 0">
+                                <td colspan="8" class="text-center">
+                                    No Data Found
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="text-center" style="margin-top:20px;">
+                        <div class="text-center" style="margin-top:20px;">
+                            <button type="button" class="btn btn-primary dev-btn" ng-click="IsUpdate ? UpdateKPIResult() : SaveKPIResult()">
+                                {{ IsUpdate ? 'Update' : 'Save' }}
+                            </button>
+                        </div>
+                        @*<button type="button"  class="btn btn-primary" ng-click="GetSAKPISAODetails()">  Clear  </button>*@
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <div class="se-pre-con"></div>
+    </div>
+</div>

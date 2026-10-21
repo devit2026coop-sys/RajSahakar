@@ -1,0 +1,790 @@
+﻿<script src="~/Scripts/AngularFramework/InspactorGSS.js?v=@DateTime.Now.Ticks"></script>
+<script src="~/Scripts/AngularFramework/commonEsign.js?v=@DateTime.Now.Ticks"></script>
+
+<style>
+
+    .text-black {
+        color: #000 !important;
+    }
+
+    .payment-table {
+        width: 100%;
+    }
+
+        .payment-table td {
+            padding: 5px;
+        }
+
+    .modal-dialog {
+        color: #444;
+    }
+</style>
+
+
+<div ng-app="UnitMastersModule" ng-controller="UnitMasterCont">
+    <div class="row">
+        <div class="col-md-12">
+            <h3 class="citizen-dash-head">Formation Of M.PACS</h3>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#"> {{translation.Home}} </a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;"> Formation Of M.PACS </span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="col-md-12" ng-show="!IsShowAssignForm">
+            <div class="citizen-dash-head" style="overflow: hidden;">
+                <div class="col-md-12">
+                    <input type="hidden" id="DivisionId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DivisionId)" />
+                    <input type="hidden" id="hdnActId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).ActId)" />
+                    <input type="hidden" id="hdnDistrictId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DistrictId)" />
+
+                    <div class="table-dropdown" id="search-filter">
+                        <div class="col-xs-4">
+                            <label for="search">{{translation.Status}}:</label>
+                            <select name="StatusId" id="CaseStatusId" class="form-control" ng-init="StatusId='0'" ng-model="StatusId">
+                                <option value="0">{{translation.SelectOption}}</option>
+                                <option ng-repeat="itm in GSSStatusList" value="{{itm.StatusId}}">
+                                    {{_language =='en-us' ?  itm.StatusNameEn : itm.StatusNameHi}}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 ">
+                            <label>&nbsp;</label><br>
+                            <button type="button" ng-click="GetStatuswisedata(StatusId)" class="btn btn-primary dev-btn ng-binding">{{translation.Search}}</button>
+                            <button type="button" ng-click="ClearSearch()" class="btn btn-primary dev-btn ng-binding">{{translation.Clear}}</button>
+                        </div>
+                    </div>
+                </div>
+                <br>
+
+
+                <div class="col-md-12">
+                    <div class="table-responsive">
+                        <table class="table table-responsive devtable" style="margin-top: 30px;">
+                            <thead>
+                                <tr>
+                                    <th>{{translation.SRNO}}</th>
+                                    <th> Inspector</th>
+                                    <th> {{translation.Month}}</th>
+                                    <th> {{translation.TypeOfArea}}</th>
+                                    <th>{{translation.Urban}}/{{translation.Rural}}</th>
+                                    <th>{{translation.District}}</th>
+                                    <th>{{translation.BlockHeading}}</th>
+                                    @*
+                                        <th>{{translation.City}}</th>*@
+                                    <th> {{translation.GramPanchayat}}</th>
+                                    <th> {{translation.CreationDate}}</th>
+                                    <th> Survey Date</th>
+                                    <th> {{translation.Document}}</th>
+                                    <th>{{translation.Status}}</th>
+                                    <th>Action</th>
+                                    <th>History</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="item in InspactorTargetsListDetils">
+                                    @*<td>{{$index+1}}</td>*@
+
+                                    <td> {{DataPaging.pageSize *(DataPaging.currentPageID-1)+$index+1}}  </td>
+                                    <td>{{item.InspacorName}}</td>
+
+
+                                    <td>
+                                        {{ ["","January","February","March","April","May","June","July", "August","September","October","November","December"][+item.MonthId] }}
+                                    </td>
+                                    <td>
+                                        {{item.IsTspArea==1 ? 'TSP' : 'NonTSP'}}-{{ item.AreaType == 1 ? 'General': item.AreaType == 2 ? 'Mining': item.AreaType == 3 ? 'CAD': '' }}
+                                    </td>
+                                    <td>
+                                        {{item.Urban_Rural}}
+                                    </td>
+                                    <td>
+                                        {{item.DISTRICT_ENG}}
+                                    </td>
+                                    <td>
+                                        {{item.BLOCK_ENG}}
+                                    </td>
+                                    @*
+                                        <td>
+                                            {{item.CITY_ENG}}
+                                        </td>*@
+                                    <td>
+                                        {{item.GP_ENG}}
+                                    </td>
+                                    <td> {{item.CreationDate | date:'dd/MM/yyyy'}} </td>
+                                    <td> {{item.SurveyDate | date:'dd/MM/yyyy'}} </td>
+                                    <td>
+                                        <a href="~/Content/InspactorDocument/{{item.Document}}" ng-if="item.Document!=null && item.Document!=''" target="_blank">
+                                            View File
+                                        </a>
+                                    </td>
+                                    <td>
+                                        {{item.Status}}
+
+                                    </td>
+
+                                    @*<td>
+                                            <i ng-if="item.InspectorStatusId=='1' || item.InspectorStatusId ==''|| item.InspectorStatusId ==null || item.InspectorStatusId=='3' || item.InspectorStatusId=='0' || item.InspectorStatusId=='8'" class="fa fa-edit clsShowHide btn btn btn-xs  tooltips " id="Remove_8" ng-click="AssignNew(item)" style=""></i>
+                                        </td>*@
+
+                                    <td>
+                                        <i ng-if="item.InspectorStatusId ==''|| item.InspectorStatusId ==null || item.InspectorStatusId=='0' || item.InspectorStatusId=='14'  " class="fa fa-edit clsShowHide btn btn btn-xs  tooltips " id="Remove_8" ng-click="AssignNew(item)" style=""></i>
+                                        <i ng-if=" item.InspectorStatusId=='13'" class="fa fa-edit clsShowHide btn btn btn-xs  tooltips " id="Remove_8" ng-click="EditForm(item)" style=""></i>
+                                        <i ng-if="item.InspectorStatusId =='16' " class="fa fa-clipboard clsShowHide btn btn btn-xs  tooltips " title="Generate Notice" id="Remove_8" ng-click="ActionforGN(item)" style=""></i>
+                                        <i ng-if="item.InspectorStatusId =='18' " class="fa fa-clipboard clsShowHide btn btn btn-xs  tooltips " title="Re-Generate Notice" id="Remove_8" ng-click="ActionforGN(item)" style=""></i>
+                                        <i ng-if="item.InspectorStatusId =='17' " class="fa fa-clipboard clsShowHide btn btn btn-xs  tooltips " title="AGM Formation" id="Remove_8" ng-click="ActionforAGMFormation(item)" style=""></i>
+                                        <!-- VIEW FILE -->
+                                        <a ng-if="item.AGMNotice" href="/Content/AGMNotice/GSSProfiling/{{item.AGMNotice}}" target="_blank" title="View"
+                                           style="margin-left:8px;">
+                                            <i class="fa fa-eye"></i>
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <i ng-if=" item.InspectorStatusId=='2' || item.InspectorStatusId=='3' || item.InspectorStatusId=='4' || item.InspectorStatusId=='5' || item.InspectorStatusId=='6'|| item.InspectorStatusId=='8'|| item.InspectorStatusId=='7'" class="fa fa-history clsShowHide btn btn btn-xs  tooltips " id="Remove_8" ng-click="historyshow(item)" style=""></i>
+                                    </td>
+
+                                </tr>
+                                <tr>
+                                    <td colspan="13">
+                                        <div ng-if="DataPagingDetails.TotalPages>1" class="dataTables_paginate paging_simple_numbers" id="dataTables-example_paginate">
+                                            <div class="dataTables_info" id="dataTables-example_info" role="status" aria-live="polite">
+                                                Total Records: {{DataPagingDetails.TotalRecords}}
+                                            </div>
+                                            <ul class="pagination pagination_1" style="margin-left: 10px !important;">
+                                                <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« First</span></li>
+                                                <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« Previous</span></li>
+
+                                                <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest('1',GetInspactorTargetsDetails)" style="cursor: pointer;">
+                                                    <span>«First</span>
+                                                </li>
+                                                <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest(DataPagingDetails.PageNumber-1,GetInspactorTargetsDetails)" style="cursor:pointer;">
+                                                    <span>« Previous</span>
+                                                </li>
+                                                <li class="{{n==DataPagingDetails.PageNumber?'active':''}}" style="{{n==DataPagingDetails.PageNumber?'':'cursor: pointer'}}" ng-repeat="n in PagingRange(DataPagingDetails.StartPageNumber,DataPagingDetails.EndPageNumber,DataPagingDetails.TotalPages)" ng-click="pageRequest(n,GetInspactorTargetsDetails)"><span>{{n}}</span></li>
+                                                <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Next</span></li>
+                                                <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Last</span></li>
+                                                <li ng-if="DataPagingDetails.PageNumber!= DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.PageNumber+1,GetInspactorTargetsDetails)" style="cursor:pointer;">
+                                                    <span>Next »</span>
+                                                </li>
+                                                <li ng-if="DataPagingDetails.PageNumber != DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.TotalPages,GetInspactorTargetsDetails)" style="cursor:pointer;">
+                                                    <span>Last »</span>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <div class="col-md-12" ng-show="IsShowAssignForm">
+            <div class="citizen-dash-head" style="overflow: hidden;">
+
+                <div class="row" ng-show="iscomplete">
+                    <div class="col-lg-4" ng-show="statusid!='8'">
+                        <label>
+                            {{translation.Status}}:
+                        </label>
+                        <select name="StatusId" id="CaseStatusId" class="form-control" ng-init="InspectorData.StatusId='0'" ng-model="InspectorData.StatusId">
+                            <option value="0">{{translation.SelectOption}}</option>
+                            <option ng-repeat="itm in GSSStatusList" value="{{itm.StatusId}}">
+                                {{_language =='en-us' ?  itm.StatusNameEn : itm.StatusNameHi}}
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="col-lg-4" ng-show="statusid=='8'">
+                        <label>
+                            {{translation.Status}}:
+                        </label>
+                        <select name="StatusId" id="CaseStatusId" class="form-control" ng-init="InspectorData.StatusId='0'" ng-model="InspectorData.StatusId">
+                            <option value="0">{{translation.SelectOption}}</option>
+                            <option ng-repeat="itm in GSSStatusList1" value="{{itm.StatusId}}">
+                                {{_language =='en-us' ?  itm.StatusNameEn : itm.StatusNameHi}}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row" ng-show="statusid=='8' && false">
+                    <div class="col-md-4">
+                        <label>
+                            {{translation.RagistrationNo}}:
+                        </label>
+                        <input type="text" class="form-control" placeholder="RagistrationNo" ng-model="InspectorData.RagistrationNo" autocomplete="off" />
+                    </div>
+
+                    <div class="col-md-4">
+                        <label>
+                            {{translation.GSSName}}:
+                        </label>
+                        <input type="text" class="form-control" placeholder="Gss Name" ng-model="InspectorData.GssName" autocomplete="off" />
+                    </div>
+
+                    <div class="col-md-4">
+                        <label>
+                            {{translation.AddressEn}}:
+                        </label>
+                        <input type="text" class="form-control" placeholder="Address" ng-model="InspectorData.Address" autocomplete="off" />
+                    </div>
+
+                </div>
+                <div class="clearfix"></div>
+
+                <div class="row" ng-show="InspectorData.StatusId=='1'&& statusid!='8'">
+                    <div class="col-md-4" ng-show="!cityhide">
+                        <label>
+                            {{translation.GramPanchayat}}:
+                        </label>
+                        <input type="text" ng-disabled="gramdisabled" class="form-control" ng-model="InspectorData.GramPanchayatName" autocomplete="off" />
+                    </div>
+                    <div class="col-md-4" ng-show="!cityhide">
+                        <label>
+                            {{translation.Block}}:
+                        </label>
+                        <input type="text" class="form-control" ng-disabled="gramdisabled" ng-model="InspectorData.BlockName" autocomplete="off" />
+                    </div>
+                    <div class="col-md-4" ng-show="cityhide">
+                        <label>
+                            {{translation.City}}:
+                        </label>
+                        <input type="text" class="form-control" ng-disabled="citydisabled" ng-model="InspectorData.CityName" autocomplete="off" />
+                    </div>
+                    <div class="col-lg-4 mt-4" style="padding-left:30px;">
+                        <label>
+                            <input type="checkbox" ng-model="IsMahilaMpacs" ng-checked="IsMahilaMpacs" ng-disabled="isEditMode"> {{translation.IsMahilaMpacs}}
+                        </label>
+
+                    </div>
+
+                    @*<div class="col-lg-6" >
+                            <label>
+                                {{translation.PrecentNameGSS_M}}:<span class="error">*</span>
+                            </label>
+                            <input type="text" placeholder="{{translation.PrecentNameGSS_M}}" class="form-control" ng-model="InspectorData.PrecentNameGSS" autocomplete="off" />
+                        </div>*@
+
+
+
+                    <div class="col-md-12" id="search-societies">
+                        <div class="form-group">
+                            <h5 class="heading-hr ng-binding"> {{translation.PrecentNameGSS_M}}</h5>
+                        </div>
+                        <div class="row">
+                            <!-- District Selection -->
+                            <div class="col-lg-6">
+                                <label>
+                                    Mention the number of existing M.PACS from which the porposed M.PACS is being constituted :<span class="error">*</span>
+                                </label>
+                                <select ng-model="NoOfAddMpacs" name="NoOfAddMpacs" id="NoOfAddMpacs" class="form-control"
+                                        ng-init="NoOfAddMpacs='1'">
+                                    <option ng-repeat="n in [].constructor(10) track by $index" value="{{$index + 1}}">
+                                        {{$index + 1}}
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <!-- District Selection -->
+                            <div class="col-lg-2">
+                                <label>{{translation.District}}</label>
+                                <select ng-model="DistrictId" name="DistrictId" id="ddlDistrict" ng-init="DistrictId='0'" class="form-control"
+                                        ng-change="getBlock()">
+                                    <option value="0">{{translation.SelectOption}}</option>
+                                    <option ng-repeat="item in DistrictLst" value="{{item.DISTRICT_ID}}">
+                                        {{_language =='en-us' ? item.DISTRICT_ENG : item.DISTRICT_MANGAL}}
+                                    </option>
+                                </select>
+                            </div>
+
+                            <!-- Block Selection -->
+                            <div class="col-lg-2">
+                                <label>Block</label>
+                                <select ng-model="BlockId" name="BlockId" id="ddlBlock" class="form-control"
+                                        ng-init="BlockId='0'" ng-change="getGrampanchyat()">
+                                    <option value="0">{{translation.SelectOption}}</option>
+                                    <option ng-repeat="item in BlockDataList" value="{{item.BLOCK_ID}}">
+                                        {{_language =='en-us' ? item.BLOCK_ENG : item.BLOCK_ENG}}
+                                    </option>
+                                </select>
+                            </div>
+
+                            <!-- Gram Panchayat Selection -->
+                            <div class="col-lg-2 ">
+                                <label>Gram Panchayat</label>
+                                <select ng-model="PanchayatId" name="PanchayatId" id="ddlGramPanchayat" class="form-control"
+                                        ng-init="PanchayatId='0'" ng-change="getPresentGSS()">
+                                    <option value="0">{{translation.SelectOption}}</option>
+                                    <option ng-repeat="item in GramPancyatList" value="{{item.GP_ID}}">
+                                        {{_language =='en-us' ? item.GP_ENG : item.GP_ENG}}
+                                    </option>
+                                </select>
+                            </div>
+
+
+                            <div class="col-lg-2  ">
+                                <label>Filter</label>
+                                <div style=" display:inline;">
+                                    <label>
+                                        <input type="radio" name="FilterType" ng-model="FilterType" value="1" ng-init="FilterType='1'" checked> By Name
+                                    </label>
+                                    <label>
+                                        <input type="radio" name="FilterType" ng-model="FilterType" value="0">By RegistrationNo
+                                    </label>
+                                </div>
+
+
+                                <input type="text" ng-model="SearchMPACS" name="filtertext" placeholder="Search Society Name/RegNo " class="form-control" autocomplete="off" />
+                            </div>
+                            <div class="col-lg-2" style="margin-top:20px">
+                                <button type="button" class="btn btn-primary" ng-click="societysearch(validateGSS)">Search</button>
+                            </div>
+                        </div>
+
+                        <div class="clearfix"></div>
+                        <div class="row">
+                            <div class="col-md-5 mt-4" ng-show="PresentGSSList.length > 0">
+                                <label>
+                                    {{translation.PrecentNameGSS_M}}:<span class="error">*</span>
+                                </label>
+                                <div style="display:flex;gap:10px">
+                                    <select ng-model="InspectorData.PrecentNameGSS" id="ddlPresentGSS" class="form-control">
+                                        <option value="0">{{translation.SelectOption}}</option>
+                                        <option ng-repeat="gss in PresentGSSList" value="{{gss.SocietyId}}">
+                                            {{_language =='en-us' ? gss.SocietyName : gss.SocietyName}}
+                                        </option>
+                                    </select>
+                                    <button type="button" class="btn btn-success" ng-show="InspectorData.PrecentNameGSS >0 "
+                                            ng-click="addGSS(InspectorData.PrecentNameGSS)">
+                                        Add
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Table to display multiple added items -->
+                        <div class="row mt-12" ng-show="AddedGSSList.length > 0">
+                            <div class="col-md-12 mt-12">
+                                <table class="table table-bordered table-striped">
+                                    <thead style="color: #fff; background: cadetblue;">
+                                        <tr>
+                                            <th width="80">#</th>
+                                            <th>Existing M.PACS Name</th>
+                                            <th>Registration NO</th>
+                                            <th>District</th>
+                                            <th>Block</th>
+                                            <th>Gram Panchayat</th>
+                                            <th>Village</th>
+
+                                            <th width="100">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="item in AddedGSSList track by $index">
+                                            <td>{{$index + 1}}</td>
+                                            <td>{{_language =='en-us' ? item.SocietyName : item.SocietyName}}</td>
+                                            <td>{{_language =='en-us' ? item.RegistrationNo : item.RegistrationNo}}</td>
+                                            <td>{{_language =='en-us' ? item.DISTRICT_ENG : item.DISTRICT_ENG}}</td>
+                                            <td>{{_language =='en-us' ? item.BLOCK_ENG : item.BLOCK_ENG}}</td>
+                                            <td>{{_language =='en-us' ? item.GP_ENG : item.GP_ENG}}</td>
+                                            <td>{{_language =='en-us' ? item.VILLAGE_ENG : item.VILLAGE_ENG}}</td>
+                                            <td>
+                                                <button type="button" class="btn btn-danger btn-sm"
+                                                        ng-click="removeGSS($index)">
+                                                    Remove
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 mt-4">
+                        <label>
+                            {{translation.NewGSSName_M}}:<span class="error">*</span>
+                        </label>
+                        <input type="text" class="form-control" placeholder="{{translation.NewGSSName_M}}" ng-model="InspectorData.NewGSSName" autocomplete="off" />
+                    </div>
+
+                    <div class="col-md-6 mt-4">
+                        <label>
+                            {{translation.NewGSSMemNo_M}}:<span class="error">*</span>
+                        </label>
+                        <input type="text" class="form-control" placeholder="{{translation.NewGSSMemNo_M}}" ng-model="InspectorData.NoofMember" onkeypress='return event.charCode >= 48 && event.charCode <= 57' autocomplete="off" />
+                    </div>
+                    <div class="col-md-6 mt-4">
+                        <label>
+                            {{translation.NewGSSAmanat_M}}:<span class="error">*</span>
+                        </label>
+                        <input type="text" class="form-control" placeholder="{{translation.NewGSSAmanat_M}}" ng-model="InspectorData.NewGSSprecious" onkeypress='return event.charCode >= 48 && event.charCode <= 57' autocomplete="off" />
+                    </div>
+                    <div class="col-md-6 mt-4">
+                        <label>
+                            {{translation.NewGssAmount_M}}:<span class="error">*</span>
+                        </label>
+                        <input type="text" class="form-control" placeholder="{{translation.NewGssAmount_M}}" ng-model="InspectorData.NewGSSFinanceAmount" onkeypress='return event.charCode >= 48 && event.charCode <= 57' autocomplete="off" />
+                    </div>
+                    <div class="col-md-6 mt-4">
+                        <label>
+                            {{translation.Remark}}:<span class="error">*</span>
+                        </label>
+                        <textarea class="form-control" placeholder="{{translation.Remark}}" ng-model="InspectorData.Remarks"></textarea>
+                    </div>
+
+
+                    <div class="col-md-6 mt-4" ng-show="statusid!='8'">
+                        @*<label>{{translation.Sourceofreport}}   </label><br />*@
+                        <label>
+                            {{translation.UploadSurveyReport}}<span class="error">*</span>
+                        </label><br />
+                        <div class="col-lg-4" style="margin-top:13px">
+                            <div class="col-lg-12" style="padding-left: 0px;color:black; width: 425px;margin-top: {{$index>0?'13px':'0px'}};" ng-repeat="item in ComplainTrailFilesList">
+                                <div class="col-lg-3" ng-show="!item.IsUploadFileName " style="padding-left: 0px;">
+                                    <input type="file" style="margin-left: 15px;" accept="application/pdf" dat-val="nocheck" ng-model="item.FileName" id="FileName_{{$index}}" ng-click="AddFile(1,$index)" validfile />
+                                </div>
+                                <div class="col-lg-7" ng-if="item.IsUploadFileName">
+                                    <a href="javascript:void(1);" ng-if="item.FileName!=''"><i class="fa fa-check-circle-o" style="font-size: 18px;margin-right: 5px;    color: #20cc20;"></i></a>
+                                    <a href="~/Content/InspactorDocument/{{item.FileName}}" ng-if="item.FileName!=''" target="_blank"><i class="fa fa-eye-slash" style="font-size: 18px;margin-right: 5px;font-weight: bold"></i>View File</a>
+                                    <a href="javascript:void(1);" ng-if="item.FileName=='' " ng-click="UploadFile('FileName_'+$index,1,0)"><i class="fa fa-upload" style="font-size: 18px;margin-right: 5px;font-weight: bold"></i>Upload File</a>
+                                    <a href="javascript:void(1);" ng-if="item.IsUploadFileName " ng-click="ChangeFile('FileName_'+$index,1,$index)"><i class="fa fa-undo" style="font-size: 18px;margin-right: 5px;font-weight: bold"></i>Change File</a>
+                                </div>
+                                @*<div class="col-lg-2" ng-if="item.IsUploadFileName&&ComplainTrailFilesList.length>1"><a href="javascript:void(0);" ng-click="deleteFime($index)"><i class="fa fa-trash" style="font-size: 18px;margin-right: 5px;    color: #f01d13;"></i></a></div>*@
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-12" style="margin-top: 20px;">
+                        <div class="dev-menu-btn">
+                            <button type="submit" class="btn btn-primary" ng-click="SaveInspectorstatus()">{{translation.Submit}}</button>
+                            @*<button type="submit" class="btn btn-primary" ng-click="backtomove()">{{translation.Back}}</button>*@
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="col-md-12" style="margin-top: 10px;" ng-show="InspectorStatus">
+
+                <div class="panel panel-default text-black">
+                    <div class="panel-heading">
+                        <strong>Details</strong>
+                    </div>
+                    <div class="panel-body">
+
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <label>{{translation.InspectorName}}:</label>
+
+                                <span>{{GetInspectorStatus[0].InspacorName}}</span>
+                            </div>
+                            <div class="col-md-6">
+                                <label>{{translation.PrecentNameGSS_M}}:</label>
+                                <span>{{GetInspectorStatus[0].PrecentNameGSS}}</span>
+                            </div>
+
+                        </div>
+
+
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <label>{{translation.NewGSSName_M}}:</label>
+                                <span>{{GetInspectorStatus[0].NewGSSName}}</span>
+                            </div>
+                            <div class="col-md-6">
+                                <label>{{translation.NewGSSMemNo_M}}:</label>
+                                <span>{{GetInspectorStatus[0].NoofMember}}</span>
+                            </div>
+                        </div>
+
+
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <label>{{translation.NewGSSAmanat_M}}:</label>
+                                <span>{{GetInspectorStatus[0].NewGSSprecious}}</span>
+                            </div>
+                            <div class="col-md-6">
+                                <label>{{translation.NewGssAmount_M}}:</label>
+                                <span>{{GetInspectorStatus[0].NewGSSFinanceAmount}}</span>
+                            </div>
+                        </div>
+
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <label>{{translation.SurveyDate}} : </label>
+                                <span>{{GetInspectorStatus[0].SurveyDate | date:'dd/MM/yyyy' }}</span>
+                            </div>
+                            <div class="col-md-6">
+                                <label>{{translation.DateOfSubmission}} : </label>
+                                <span>{{GetInspectorStatus[0].DateOfSubmission | date:'dd/MM/yyyy' }}</span>
+                            </div>
+                        </div>
+
+
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <label>{{translation.DateOfApproval}} : </label>
+                                <span>{{GetInspectorStatus[0].DateOfApproval | date:'dd/MM/yyyy' }}</span>
+                            </div>
+                            <div class="col-md-6">
+                                <label>{{translation.CompetentAcceptanceLetter}} : </label>
+                                <a ng-if="GetInspectorStatus[0].CompetentAcceptanceLetter" ng-href="../Content/InspactorDocument/{{GetInspectorStatus[0].CompetentAcceptanceLetter}}" target="_blank">
+                                    View File
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="row mt-4">
+
+                            <div class="col-md-6">
+                                <label>{{translation.AllotmentLetter}} : </label>
+                                <a ng-if="GetInspectorStatus[0].AllotmentLetter" ng-href="../Content/InspactorDocument/{{GetInspectorStatus[0].AllotmentLetter}}" target="_blank">
+                                    View File
+                                </a>
+
+                            </div>
+                            <div class="col-md-6">
+                                <label>{{translation.SanctionLetter}} : </label>
+                                <a ng-if="GetInspectorStatus[0].SanctionLetter" ng-href="../Content/InspactorDocument/{{GetInspectorStatus[0].SanctionLetter}}" target="_blank">
+                                    View File
+                                </a>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+
+
+                <div class="table-responsive">
+                    <table class="table table-responsive devtable" style="margin-top: 30px;">
+                        <thead>
+                            <tr>
+                                <th>{{translation.SRNO}}</th>
+                                <th>{{translation.CreationDate}}</th>
+                                <th>{{translation.Remarks}}</th>
+                                <th>{{translation.Status}}</th>
+                                <th>{{translation.Document}}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="item in GetInspectorStatus" style="color: black;">
+                                <td>{{$index+1}}</td>
+
+                                <td>
+                                    {{item.CreationDate | date:'dd/MM/yyyy' }}
+                                </td>
+                                <td>
+                                    {{item.Remark}}
+                                </td>
+                                <td>
+                                    {{item.status}}
+                                </td>
+                                <td>
+                                    <a ng-if="item.Documentname" ng-href="../Content/InspactorDocument/{{item.Documentname}}" download="{{item.Documentname}}">
+                                        <i class="fa fa-download"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+
+
+            </div>
+            <div class="col-md-12">
+                <button type="button" ng-click="backStaushistory()" class="btn btn-primary dev-btn ng-binding">{{translation.Back}}</button>
+
+            </div>
+
+        </div>
+    </div>
+
+
+    <div class="se-pre-con"></div>
+    <div id="stop" class="scrollTop">
+        <span><a href=""><i class="fa fa-arrow-up">Top</i></a></span>
+    </div>
+
+    <div id="Actionmodal_GN" class="modal fade" role="dialog" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog modal-lg-custom">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <b class="text-info">GENERATE AGM NOTICE</b>
+                    <a data-dismiss="modal" class="pull-right"><i class="fa fa-times"></i></a>
+                </div>
+                <div class="modal-body">
+                    @*<form id="paymentForm" ng-submit="SaveforGN()">*@
+                    <form id="paymentForm" ng-submit="RedirectToESPportal()">
+                        <table class="payment-table">
+                            <thead>
+                                <tr>
+                                    <td><label>AGM Date</label></td>
+                                    <td>
+                                        <input type="date" class="form-control" ng-model="actionObj.AGMDate" required />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><label>AGM Time</label></td>
+                                    <td>
+                                        <input type="time" class="form-control" ng-model="actionObj.AGMTime" required />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><label>AGM Place</label></td>
+                                    <td>
+                                        <textarea name="AGMPlace" id="AGMPlace" class="form-control" ng-model="actionObj.AGMPlace" placeholder="AGM Place" required rows="3"></textarea>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><label>{{translation.action}}</label></td>
+                                    <td>
+                                        <select name="StatusId" id="CaseStatusId" class="form-control" ng-init="actionObj.StatusId" ng-model="actionObj.StatusId" disabled required>
+                                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                                            <option ng-repeat="itm in GSSStatusList" value="{{itm.GSSSStatusId}}">
+                                                {{_language =='en-us' ?  itm.StatusNameEn : itm.StatusNameHi}}
+                                            </option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><label>Remark</label></td>
+                                    <td>
+                                        <textarea name="Remarks" id="Remarks" class="form-control" ng-model="actionObj.Remarks" placeholder="Remark" required rows="3"></textarea>
+                                    </td>
+                                </tr>
+                            </thead>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="2" align="center">
+                                        <input type="submit" class="btn btn-primary dev-btn" value="Submit" />
+                                        @*<input type="button" class="btn btn-primary dev-btn" value="Submit" ng-click="OpenOTPModal()" />*@
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="Actionmodal_AGMF" class="modal fade" role="dialog" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog modal-lg-custom">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <b class="text-info">AGM FORMATION</b>
+                    <a data-dismiss="modal" class="pull-right"><i class="fa fa-times"></i></a>
+                </div>
+                <div class="modal-body">
+                    <form id="paymentForm" ng-submit="SaveAGMFormation()">
+                        <table class="payment-table">
+                            <thead>
+                                <tr>
+                                    <td><label>AGM Conducted</label></td>
+                                    <td>
+                                        <input type="radio" name="AGMConducted" ng-model="actionObjAGMF.IsAGMConduct" value="1"> YES
+                                        <input type="radio" name="AGMConducted" ng-model="actionObjAGMF.IsAGMConduct" value="0"> NO
+                                    </td>
+                                </tr>
+                                <tr ng-show="actionObjAGMF.IsAGMConduct==1">
+                                    <td><label>Conducted Date</label></td>
+                                    <td>
+                                        <input type="date" class="form-control" ng-model="actionObjAGMF.AGMConductDate" />
+                                    </td>
+                                </tr>
+                                <tr ng-show="actionObjAGMF.IsAGMConduct==0">
+                                    <td><label>Reasons</label></td>
+                                    <td>
+                                        <textarea name="AGMReasons" id="AGMReasons" class="form-control" ng-model="actionObjAGMF.AGMReasons" placeholder="AGM Not Conducted Reasons" rows="4"></textarea>
+                                    </td>
+                                </tr>
+                                <tr ng-show="actionObjAGMF.IsAGMConduct==1">
+                                    <td><label>{{translation.action}}</label></td>
+                                    <td>
+                                        <select name="StatusId" id="CaseStatusId" class="form-control" ng-init="actionObjAGMF.StatusId" ng-model="actionObjAGMF.StatusId">
+                                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                                            <option ng-repeat="itm in GSSStatusList" value="{{itm.GSSSStatusId}}">
+                                                {{_language =='en-us' ?  itm.StatusNameEn : itm.StatusNameHi}}
+                                            </option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr ng-show="actionObjAGMF.IsAGMConduct==1">
+                                    <td><label>Remark</label></td>
+                                    <td>
+                                        <textarea name="Remarks" id="Remarks" class="form-control" ng-model="actionObjAGMF.Remarks" placeholder="Remark" rows="3"></textarea>
+                                    </td>
+                                </tr>
+                                <tr ng-show="actionObjAGMF.IsAGMConduct==1">
+                                    <td><label>Upload Document</label></td>
+                                    <td>
+                                        <div style="display:flex; align-items:center; gap:10px;">
+                                            <input type="file" accept="application/pdf" class="form-control" id="flReportFiles" ng-model="actionObjAGMF.UploadDocument"
+                                                   onchange="angular.element(this).scope().SelectReceiptFile(this.files)">
+
+                                            <!-- View -->
+                                            <a target="_blank" ng-if="actionObjAGMF.UploadDocument" href="../Content/AGMDocument/UploadDocument/{{actionObjAGMF.UploadDocument}}" title="View Document">
+                                                <i class="fa fa-eye" style="font-size:18px;"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </thead>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="2" align="center">
+                                        <input type="submit" class="btn btn-primary dev-btn" value="Submit" />
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="otpmodal" class="modal fade" role="dialog" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <b class="text-info">Verify OTP</b>
+                    <a data-dismiss="modal" class="pull-right"><i class="fa fa-times"></i></a>
+                </div>
+                <div class="modal-body">
+                    <form style="display:inline-block;width:100%" ng-submit="SaveGSSApplicationFlowStatus(false)">
+                        <div class="row">
+                            <div class="form-group col-md-6">
+                                <div class="form-group">
+                                    <label>{{translation.EnterOTP}}</label>
+                                    <input type="text" class="form-control" name="Remarks" ng-bind="OTP" ng-model="ApplicationFlowMaster.OTP" placeholder={{translation.EnterOTP}} autocomplete="off" /><br />
+                                    <button type="button" class="btn btn-primary" ng-click="VerifyOTP(true)">{{translation.Submit}}</button>
+                                    <button type="button" class="btn btn-primary" ng-click="SaveGSSApplicationFlowStatus(false)">{{translation.ReSendOTP}}</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+

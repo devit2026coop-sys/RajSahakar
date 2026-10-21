@@ -1,0 +1,483 @@
+﻿@if (((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]) != null)
+{
+    if (((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).UserType == "C")
+    {
+        Layout = "~/Views/Shared/_CitizenLayout.cshtml";
+    }
+    else
+    {
+        Layout = "~/Views/Shared/_Layout.cshtml";
+    }
+}
+else
+{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script src="~/Scripts/AngularFramework/ElectionSymbol.js"></script>
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.22/pdfmake.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js"></script>
+
+<link href="~/Scripts/google_hindi/google_transliteration.css" rel="stylesheet" />
+<style>
+    .inputapi-transliterate-indic-suggestion-menu {
+        z-index: 99999 !important;
+        display: block;
+    }
+</style>
+<script type="text/javascript">
+    $("body").on("click", "#btnExport", function () {
+        $("#PrintDiv").css("display", "block");
+        html2canvas($('#tblCustomers')[0], {
+            onrendered: function (canvas) {
+                var data = canvas.toDataURL();
+                var docDefinition = {
+                    content: [{
+                        image: data,
+                        width: 500
+                    }]
+                };
+                pdfMake.createPdf(docDefinition).download("CandidateList.pdf");
+                $("#PrintDiv").css("display", "none");
+            }
+        });
+    });
+    $("body").on("click", "#btnExportSelected", function () {
+        $("#PrintDiv1").css("display", "block");
+        html2canvas($('#tblCustomers1')[0], {
+            onrendered: function (canvas) {
+                var data = canvas.toDataURL();
+                var docDefinition = {
+                    content: [{
+                        image: data,
+                        width: 500
+                    }]
+                };
+                pdfMake.createPdf(docDefinition).download("CandidateList.pdf");
+                $("#PrintDiv1").css("display", "none");
+            }
+        });
+    });
+
+
+
+</script>
+<style type="text/css">
+    body {
+        font-family: Arial;
+        font-size: 10pt;
+    }
+
+    table {
+        border: 1px solid #ccc;
+        border-collapse: collapse;
+    }
+
+        table th {
+            background-color: #F7F7F7;
+            color: #333;
+            font-weight: bold;
+        }
+
+        table th, table td {
+            padding: 5px;
+            border: 1px solid #ccc;
+        }
+
+    .NewMemberdob input {
+        float: left;
+        width: 90%;
+    }
+
+    .NewMemberdob button {
+        float: left;
+    }
+
+    .notValid {
+        border: solid 1px red !important
+    }
+</style>
+
+
+<script type="text/javascript">
+    function RemoveRowAdminiAct2001(Control, row) {
+        if (confirm("Are you sure to remove this file?")) {
+            var id = $(Control).attr('id').replace("Remove_", '');
+            var File = $(Control).parents('#myTable2 tr').find('[Id^="File_' + id + '"]');
+            for (var temRowNo = 0; temRowNo < ImageDataList.length; temRowNo++) {
+                if (ImageDataList[temRowNo].RowNo == row) {
+                    ImageDataList.splice(temRowNo);
+                }
+            }
+            for (var temRowNo1 = 0; temRowNo1 < PDFDataList.length; temRowNo1++) {
+                if (PDFDataList[temRowNo1].RowNo == row) {
+                    PDFDataList.splice(temRowNo1);
+                }
+            }
+            $(Control).closest('tr').remove();
+            $("#Remove_" + (row - 1)).show();
+        }
+    };
+
+    function ValidateAlpha(evt) {
+        var keyCode = (evt.which) ? evt.which : evt.keyCode
+        if ((keyCode < 65 || keyCode > 90) && (keyCode < 97 || keyCode > 123) && keyCode != 32)
+
+            return false;
+        return true;
+    };
+    $(document).ready(function () {
+        $('.SearchDate').datepicker({
+            showOn: "both",
+            changeMonth: true,
+            buttonImage: "../images/calender.png",
+            changeYear: true,
+            dateFormat: "dd/mm/yy",
+            //maxDate: '0D',
+            //defaultDate: (new Date()).getDate() + '/' + ((new Date()).getMonth()) + '/' + ((new Date()).getFullYear() - 18).toString(),
+            //yearRange: "-100:-18"
+        });
+    });
+    function previewFile(ths) {
+        var preview = document.querySelector('imgPreview');
+        var file = ths.files[0];
+        var reader = new FileReader();
+
+        reader.onloadend = function () {
+            $("#imgPreview").attr("src", reader.result);
+            $("#imgPreview").show();
+            //alert(1);
+        }
+
+        if (file) {
+            reader.readAsDataURL(file);
+        } else {
+            newMemberPhoto = "";
+        }
+    }
+
+</script>
+
+<div ng-app="ElectionSymbolMod" ng-controller="ElectionSymbolCnt">
+
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <h3 class="citizen-dash-head">{{translation.ElectionSymbols}} </h3>
+    </div>
+
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="devpage-breadcrumb">
+            <ul class="page-breadcrumb">
+                <li class="dev-page-br">
+                    <i class="fa fa-home"> </i>
+                    <a href="../Citizen/Index"> {{translation.Home}} </a>
+                    <i class="fa fa-angle-right"> </i>
+                </li>
+                <li style="float: left">
+                    <span style="margin: 0 5px;"> {{translation.ElectionSymbols}} </span>
+                </li>
+
+                <li style="float: right;" id="divAddBtn">
+                    <i class="fa fa-angle-double-right" style="color: #025e63;"></i>
+                    <a ng-click="AddNewSymbols()" style="color: #025e63; cursor: pointer; text-decoration:none; font-weight: bold;" class="ng-binding">{{translation.AddNew}}</a>
+                </li>
+
+
+            </ul>
+        </div>
+    </div>
+    @*MEMBERS*@
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="table-responsive citizen-dash-head">
+            <div class="table-dropdown" id="search-filter">
+
+                <div class="col-md-4">
+                    <label for="search" class="ng-binding">Search:</label>
+                    <input ng-model="q" id="search" class="form-control ng-pristine ng-valid ng-empty ng-touched" ng-model="Filter.SearchText" placeholder="Filter Text" autocomplete="off">
+                </div>
+
+
+                <div class="col-md-4">
+                    <label>&nbsp;</label><br>
+                    <button type="button" ng-click="searchRequest(GetElectionSocietyListData)" class="btn btn-primary dev-btn ng-binding">{{translation.Search}}</button>
+                    <button type="button" ng-click="ClearSearch()" class="btn btn-primary dev-btn ng-binding">{{translation.Clear}}</button>
+                </div>
+            </div>
+            <table id="example" class="table devtable" style="border:1px solid rgb(222, 221, 221); float: left;">
+                <thead>
+                    <tr>
+                        <th>
+                            #
+                            @*{{translation.SRNO}}*@
+                        </th>
+                        <th>
+                            {{translation.SymbolName}}(English)
+                        </th>
+                        <th>
+                            {{translation.SymbolName}}(Hindi)
+                        </th>
+                        <th>
+                            {{translation.SymboleImage}}
+                        </th>
+                        <th>
+                            {{translation.Status}}
+                        </th>
+                        <th>
+                            {{translation.Actions}}
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr dir-paginate="item in ElectionSymbolsList | filter:q | orderBy:colsort:reverseSort | itemsPerPage: pageSize" current-page="currentPage" pagination-id="ElectionSymbolsPagination">
+                        <td>{{$index+1}}</td>
+                        <td>
+                            {{item.symbol_name_en }}
+                        </td>
+                        <td>
+                            {{item.symbol_name_hi}}
+                        </td>
+                        <td>
+                            <img src="/Content/ElectioSymbol/{{item.symbol_url}}" style="width:60px;" />
+                        </td>
+                        <td>{{item.is_active?'Active':'InActive'}}</td>
+                        <td class="add-more-td">
+                            <a href="javascript:void(0);" ng-click="EditSymbol($index)"><i class="fa fa-edit"></i></a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="col-md-12">
+            <div class="text-left">
+                <dir-pagination-controls boundary-links="true" pagination-id="ElectionSymbolsPagination" on-page-change="pageChangeHandler(newPageNumber)" template-url="/dirPagination.tpl.html"></dir-pagination-controls>
+            </div>
+        </div>
+
+
+        <div id="PrintDiv" style="display:none">
+            <div class="table-responsive citizen-dash-head" id="tblCustomers">
+                <div style="text-align:center">
+                    <h5><u>{{translation.rajsarkas}}</u></h5>
+                    <p>{{translation.EleImpDateHeader}}</p>
+                    <p>{{translation.EleImpDateHeader1}}</p>
+                    <p>{{translation.EleImpDateHeader2}}</p>
+                    <p style="text-align:left">{{translation.PublishHeading}}</p><br />
+                    <p>{{translation.CandidateList}}</p>
+                    <table id="content" class="table devtable" style="margin-top: 30px;border:1px solid rgb(222, 221, 221); float: left;">
+                        <thead>
+                            <tr>
+                                <th>
+                                    {{translation.SRNO}}
+                                </th>
+                                <th>
+                                    {{translation.Photo}}
+                                </th>
+                                <th>
+                                    {{translation.Name}}
+                                </th>
+                                <th>
+                                    {{translation.FatherHusbandName}}
+                                </th>
+                                <th>
+                                    {{translation.Address}}
+                                </th>
+                                <th>
+                                    {{translation.GenderHeading}}
+                                </th>
+                                <th>
+                                    {{translation.CategoryHeading}}
+                                </th>
+                                <th>
+                                    {{translation.ContactNo}}
+                                </th>
+                                <th>
+                                    {{translation.AADHAARNo}}
+                                </th>
+                                <th>
+                                    {{translation.DOB}}
+                                </th>
+                                <th style="display:none">
+                                    {{translation.PostHeading}}
+                                </th>
+
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr dir-paginate="item in EMemberDetailsData   | itemsPerPage: 9000">
+
+                                <td>{{$index+1}}</td>
+                                <td> <img src="~/Content/SocietyProfiling/{{item.SocietyDirectory}}/{{item.Photo}}" style="width: 35px;" ng-if="item.Photo!=''" onerror='onUserImageLoadError(this);' /></td>
+                                <td>{{item.Name}}</td>
+                                <td>{{item.FHName}}</td>
+                                <td>{{item.Address}}  </td>
+                                <td>{{item.Gender}}  </td>
+                                <td>{{item.CODENAME}}  </td>
+                                <td>{{item.ContactNo}}</td>
+                                <td>{{item.AadharNo2}}  </td>
+                                <td>{{item.DOB}}</td>
+                                <td style="display:none">{{item.CAD_NAME}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="PrintDiv1" style="display:none">
+            <div class="table-responsive citizen-dash-head" id="tblCustomers1">
+                <div style="text-align:center">
+                    <h5><u>{{translation.rajsarkas}}</u></h5>
+                    <p>{{translation.EleImpDateHeader}}</p>
+                    <p>{{translation.EleImpDateHeader1}}</p>
+                    <p>{{translation.EleImpDateHeader2}}</p>
+                    <p style="text-align:left">{{translation.PublishHeading}}</p><br />
+                    <p>{{translation.CandidateList}}</p>
+                    <table id="content" class="table devtable" style="margin-top: 30px;border:1px solid rgb(222, 221, 221); float: left;">
+                        <thead>
+                            <tr>
+                                <th>
+                                    {{translation.SRNO}}
+                                </th>
+                                <th>
+                                    {{translation.Photo}}
+                                </th>
+                                <th>
+                                    {{translation.Name}}
+                                </th>
+                                <th>
+                                    {{translation.FatherHusbandName}}
+                                </th>
+                                <th>
+                                    {{translation.Address}}
+                                </th>
+                                <th>
+                                    {{translation.GenderHeading}}
+                                </th>
+                                <th>
+                                    {{translation.CategoryHeading}}
+                                </th>
+                                <th>
+                                    {{translation.ContactNo}}
+                                </th>
+                                <th>
+                                    {{translation.AADHAARNo}}
+                                </th>
+                                <th>
+                                    {{translation.DOB}}
+                                </th>
+                                <th style="display:none">
+                                    {{translation.PostHeading}}
+                                </th>
+
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr dir-paginate="item in EMemberDetailsData   | itemsPerPage: 9000" ng-if="item.IsCandidate">
+
+                                <td>{{$index+1}}</td>
+                                <td> <img src="~/Content/SocietyProfiling/{{item.SocietyDirectory}}/{{item.Photo}}" style="width: 35px;" ng-if="item.Photo!=''" onerror='onUserImageLoadError(this);' /></td>
+                                <td>{{item.Name}}</td>
+                                <td>{{item.FHName}}</td>
+                                <td>{{item.Address}}  </td>
+                                <td>{{item.Gender}}  </td>
+                                <td>{{item.CODENAME}}  </td>
+                                <td>{{item.ContactNo}}</td>
+                                <td>{{item.AadharNo2}}  </td>
+                                <td>{{item.DOB}}</td>
+                                <td style="display:none">{{item.CAD_NAME}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="dev-popup-body modal fade" id="addModal" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title"> {{translation.ElectionSymbols}}</h4>
+                </div>
+                <div class="modal-body">
+                    <form class="dev-search-form" style="overflow: hidden; margin-bottom: 35px;" name="OfficeForm">
+                        <input type="hidden" ng-model="AddNewSymbol.symbol_id" />
+                        <div class="col-md-12">
+                            <label>
+                                {{translation.SymbolName}}
+                            </label>
+                            <input type="text" id="AddSymbolName" name="DirectorsName" class="form-control validateAddMember" placeholder="{{translation.SymbolName}}" ng-model="AddNewSymbol.symbol_name_en" autocomplete="off" onKeyPress="return ValidateAlpha(event);">
+                        </div>
+
+                        <div class="col-md-12">
+                            <label>
+                                चुनाव प्रतीक का नाम
+                            </label>
+                            <input type="text" id="symbol_name_hi" name="symbol_name_hi" class="form-control validateAddMember" placeholder="चुनाव प्रतीक का नाम" ng-model="AddNewSymbol.symbol_name_hi" maxlength="50"  onkeypress='return ValidateAlpha(event);' autocomplete="off">
+                        </div>
+
+                        <div class="col-md-12">
+                            <label>
+                                {{translation.SymboleImage}}
+                            </label>
+                            <input type="hidden" ng-model="AddNewSymbol.symbol_url" />
+                            <input type="file" filetype="image" name="File" accept="image/*" class="form-control validateAddMember" id="AddSymbolImg" ng-model="AddNewSymbol.NewsymbolImg" onchange="previewFile(this)">
+
+                        </div>
+                        <div class="col-md-12">
+                            <img src="/Content/ElectioSymbol/{{AddNewSymbol.symbol_url}}" id="imgPreview" style="display:none; width:100px;" />
+                        </div>
+                        <div class="col-md-12">
+                            <label>
+                                Is Active
+                            </label>
+                            <input type="checkbox" class="" ng-model="AddNewSymbol.is_active">
+                        </div>
+                        <div class="col-md-12" style="margin-top: 10px;">
+                            <div class="dev-menu-btn">
+                                <button type="submit" class="btn btn-primary" ng-click="SaveElectionSymbol()">{{translation.Submit}}</button>
+                                <button type="submit" class="btn btn-primary" ng-click="ResetAddNew()">{{translation.Clear}}</button>
+                                <input type="hidden" ng-model="OfficeMaster.OfficeId" />
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<input type="hidden" name="hdlang" id="hdlang" value="hi-IN" />
+<script src="~/Scripts/google_hindi/google_transapi.js"></script>
+<script type="text/javascript">
+    google.load("elements", "1", {
+        packages: "transliteration"
+    });
+
+    function onLoad() {
+        var content = document.getElementById('content');
+        if (document.getElementById('hdlang').value == "hi-IN") {
+            var options = {
+                sourceLanguage: google.elements.transliteration.LanguageCode.ENGLISH,
+                destinationLanguage: google.elements.transliteration.LanguageCode.HINDI, // available option English, Bengali, Marathi, Malayalam etc.
+                shortcutKey: 'ctrl+g',
+                transliterationEnabled: true
+            };
+        }
+        else {
+            var options = {
+                sourceLanguage: google.elements.transliteration.LanguageCode.ENGLISH,
+                destinationLanguage: google.elements.transliteration.LanguageCode.HINDI, // available option English, Bengali, Marathi, Malayalam etc.
+                shortcutKey: 'ctrl+g',
+                transliterationEnabled: false
+            }
+        }
+        var ids = ["symbol_name_hi"];
+        var control = new google.elements.transliteration.TransliterationControl(options);
+        control.makeTransliteratable(ids);
+    }
+    google.setOnLoadCallback(onLoad);
+
+</script>
+
+
+<script src="~/Scripts/google_hindi/google_transliteration.js"></script>

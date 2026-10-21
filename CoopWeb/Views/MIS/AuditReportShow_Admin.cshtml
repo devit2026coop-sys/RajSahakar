@@ -1,0 +1,208 @@
+﻿
+@{
+    ViewBag.Title = "Audit Report Show";
+    Layout = "~/Views/Shared/LayoutForPS.cshtml";
+}
+
+<script src="~/Scripts/AngularFramework/ExcelUploadForAuditReportDashboardClient.js"></script>
+<script type="text/javascript">
+    var tableToExcel = (function () {
+        var uri = 'data:application/vnd.ms-excel;base64,'
+            , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>'
+            , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) }
+            , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
+        return function (table, name) {
+            if (!table.nodeType) table = document.getElementById(table)
+            var ctx = { worksheet: name || 'Worksheet', table: table.innerHTML }
+            window.location.href = uri + base64(format(template, ctx))
+        }
+    })()
+</script>
+<div ng-app="AuditReportForDashboardMod" ng-controller="AuditReportForDashboardCnt">
+    <div class="col-md-12">
+        <h3 class="citizen-dash-head"> {{translation.AuditProgressMPR}} <a target="_blank" style="float:right; font-size:12px" href="~/Content/UserManual/BulkUpload.pdf"></a></h3>
+    </div>
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="devpage-breadcrumb">
+            <ul class="page-breadcrumb">
+                <li class="dev-page-br">
+                    <i class="fa fa-home"> </i>
+                    <a href="#"> {{translation.Home}}</a>
+                    <i class="fa fa-angle-right"> </i>
+                </li>
+                <li style="float: left">
+                    <span style="margin: 0 5px;">  {{translation.MIS}}</span>
+                    <i class="fa fa-angle-right"> </i>
+                    <span style="margin: 0 5px;"> {{translation.AuditProgressMPR}} </span>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="col-lg-12 form-group">
+        <div class="citizen-dash-head">
+            <div class="col-lg-2 btn-lg">
+            <label for="search">{{translation.AuditStatus}}:</label><span class="error">*</span></div>
+            <div class="col-lg-6">
+                <input type="radio" name="rdoUploadType" ng-model="ReportType.TypeId" value="1" ng-change="TypeChange()" /> &nbsp;&nbsp; {{translation.AuditReportRegionWise}}
+                <input type="radio" name="rdoUploadType" ng-model="ReportType.TypeId" value="2" ng-change="TypeChange()" /> &nbsp;&nbsp; {{translation.AuditReportHeadWise}}
+            </div>
+            <div class="col-lg-2 btn-lg">&nbsp;</div>
+            <div class="col-lg-2">
+
+            </div>
+            <div class="clearfix"></div>
+        </div>
+    </div>
+
+    <div class="se-pre-con"></div>
+    <div>
+        <div class="col-lg-12 form-group">
+            <div class="citizen-dash-head">
+                <div class="col-lg-2 btn-lg">{{ translation.YEAR}}<span class="error">*</span></div>
+                <div class="col-lg-4">
+                    <select ng-model="AuditReport.Year" class="form-control" ng-init="AuditReport.Year='0'">
+                        <option value="0" disabled>{{translation.SelectOption}}-</option>
+                        <option ng-repeat="item in FinancialYearList" value="{{item.YearId}}">
+                            {{_language =='en-us' ?  item.FIN_YEAR_NAME : item.FIN_YEAR_NAME}}
+                        </option>
+                    </select>
+                </div>
+                <div class="col-lg-2 btn-lg">{{ translation.Month}}<span class="error">*</span></div>
+                <div class="col-lg-4">
+                    <select ng-model="AuditReport.Month" class="form-control" ng-init="AuditReport.Month='0'">
+                        <option value="0" disabled>{{translation.SelectOption}}-</option>
+                        <option ng-repeat="item in MonthList" value="{{item.Month_Id}}">
+                            {{_language =='en-us' ?  item.Month_En : item.Month_Hi}}
+                        </option>
+                    </select>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+        </div>
+        <div class="form-group col-md-12">
+            <div class="dev-align-btn">
+                <button type="submit" class="btn btn-primary dev-btn" ng-disabled="AuditReport.Month=='0'" ng-click="GetAuditReport()">{{ translation.Submit}}</button>
+                <button type="button" class="btn btn-primary dev-btn" ng-click="ClearReport()">{{ translation.Clear}}</button>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="form-group col-md-12" ng-show="ExlSocietyShow">
+        <div class="citizen-dash-head table-responsive ">
+            <div class="col-md-12" style="padding-top: 10px;padding-bottom:10px; float: right">
+                <i style="float:right" onclick="tableToExcel('tblAuditReportDistrictWise', 'AuditReportDistrictWise')" class="fa fa-file-excel-o" aria-hidden="true"></i>
+            </div>
+            
+            <table class="table table-responsive devtable col-md-12" style="margin-top: 30px;color:black" id="tblAuditReportDistrictWise">
+                <thead>
+                    <tr>
+                        <th>{{translation.SRNO}}</th>
+                        <th>{{translation.Division}}</th>
+                        <th>{{translation.District}}</th>
+                        <th>{{translation.AuditableSocieties}}</th>
+                        <th>{{translation.Audited_Societies_Till_Last_Month}}</th>
+                        <th>{{translation.Audited_Societies_Current_Month}}</th>
+                        <th>{{translation.Audited_Societies_Till_Current_Month}}</th>
+                        <th>{{translation.Remaining_From_Audit}}</th>
+                        <th>{{translation.Audit_Percentage}}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="itemm in ExlSocietyDetailsData">
+                        <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                        <td>{{ _language=='en-us' ? itemm.DIVISION_ENG : itemm.DIVISION_MANGAL}}</td>
+                        <td>{{_language=='en-us' ? itemm.DISTRICT_ENG : itemm.DISTRICT_MANGAL}}</td>
+                        <td>{{itemm.AuditableSocieties}}</td>
+                        <td>{{itemm.AuditedSocietiesTillLastMonth}}</td>
+                        <td>{{itemm.AuditedSocietiesCurrentMonth}}</td>
+                        <td>{{ itemm.Audited_Societies_Till_Current_Month }}</td>
+                        <td>{{itemm.Remaining_From_Audit }}</td>
+                        <td>{{itemm.AuditPercentage}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div ng-show="divAuditReportHeadWise">
+        <div class="form-group col-md-12">
+            <div class="citizen-dash-head table-responsive" style="width:100%;overflow:scroll">
+                <div class="col-md-12" style="padding-top: 10px;padding-bottom:10px; float: right">
+                    <i style="float:right" onclick="tableToExcel('tblAuditReportHeadWise', 'tblAuditReportHeadWise')" class="fa fa-file-excel-o" aria-hidden="true"></i>
+                </div>
+                
+                <table class="table table-responsive devtable" style="margin-top: 30px;color:black" id="tblAuditReportHeadWise">
+                    <thead>
+                        <tr>
+                            <th>{{translation.SRNO}}</th>
+                            @*<th>{{translation.Type}}</th>*@
+                            <th>{{translation.DivisionHeading}}</th>
+                            <th>{{translation.District}}</th>
+                            <th>{{translation.Apex}}</th>
+                            <th>{{translation.CCB}}</th>
+                            <th>{{translation.MilkFederation}}</th>
+                            <th>{{translation.PLDB}}</th>
+                            <th>{{translation.UrbanBank}}</th>
+                            <th>{{translation.WholeSale}}</th>
+                            <th>{{translation.BuySell}}</th>
+                            <th>{{translation.DistrictUnion}}</th>
+                            <th>{{translation.HouseDevelopment}}</th>
+                            <th>{{translation.VillageService}}</th>
+                            <th>{{translation.PrimaryDairy}}</th>
+                            <th>{{translation.OilSeed}}</th>
+                            <th>{{translation.Salary}}</th>
+                            <th>{{translation.Credit}}</th>
+                            <th>{{translation.Women}}</th>
+                            <th>{{translation.PrimaryStorage}}</th>
+                            <th>{{translation.Industrial}}</th>
+                            <th>{{translation.Khadi}}</th>
+                            <th>{{translation.Bunkar}}</th>
+                            <th>{{translation.Agriculture}}</th>
+                            <th>{{translation.MultiplePurpose}}</th>
+                            <th>{{translation.Others}}</th>
+                            <th>{{translation.GrandTotal}}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="itemm in ExlDashboardShowHead">
+                            <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                            @*<th>{{translation.Type}}</th>*@
+                            <td>{{_language =='en-us' ?  itemm.DIVISION_ENG : itemm.DIVISION_MANGAL}}</td>
+                            <td>{{_language =='en-us' ?  itemm.DISTRICT_ENG : itemm.DISTRICT_MANGAL}}</td>
+                            <th>{{itemm.Apex}}</th>
+                            <th>{{itemm.CCB}}</th>
+                            <th>{{itemm.MilkFederation}}</th>
+                            <th>{{itemm.PLDB}}</th>
+                            <th>{{itemm.Urban}}</th>
+                            <th>{{itemm.WholeSale}}</th>
+                            <th>{{itemm.BuySell}}</th>
+                            <th>{{itemm.DistrictUnion}}</th>
+                            <th>{{itemm.HouseDevelopment}}</th>
+                            <th>{{itemm.Village}}</th>
+                            <th>{{itemm.PrimaryDairy}}</th>
+                            <th>{{itemm.OilSeed}}</th>
+                            <th>{{itemm.Salary}}</th>
+                            <th>{{itemm.Credit}}</th>
+                            <th>{{itemm.Women}}</th>
+                            <th>{{itemm.PrimaryStorage}}</th>
+                            <th>{{itemm.Industrial}}</th>
+                            <th>{{itemm.Khadi}}</th>
+                            <th>{{itemm.Bunkar}}</th>
+                            <th>{{itemm.Agriculture}}</th>
+                            <th>{{itemm.Multipurpose}}</th>
+                            <th>{{itemm.Others}}</th>
+                            <th>{{itemm.GrandTotal}}</th>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="stop" class="scrollTop">
+        <span><a href=""><i class="fa fa-arrow-up">Top</i></a></span>
+    </div>
+</div>
+

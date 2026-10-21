@@ -1,0 +1,330 @@
+﻿@{
+    ViewBag.Title = "Former Details List";
+}
+<script src="~/Scripts/AngularFramework/MMPBYFarmerDetailsReport.js?v=1.14"></script>
+<link href="~/Scripts/google_hindi/google_transliteration.css" rel="stylesheet" />
+
+<style>
+    .inputapi-transliterate-indic-suggestion-menu {
+        z-index: 99999 !important;
+        display: block;
+    }
+
+    .view-btn i {
+        color: #fff;
+    }
+
+    .table > tbody > tr > td, .table > tbody > tr > th, .table > tfoot > tr > td, .table > tfoot > tr > th, .table > thead > tr > td {
+        padding: 1px;
+        padding-right: 5px;
+        padding-left: 5px;
+    }
+</style>
+
+<script type="text/javascript">
+    var tableToExcel = (function () {
+        var uri = 'data:application/vnd.ms-excel;base64,'
+            , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>'
+            , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) }
+            , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
+        return function (table, name) {
+            if (!table.nodeType) table = document.getElementById(table)
+            var ctx = { worksheet: name || 'Worksheet', table: table.innerHTML }
+            window.location.href = uri + base64(format(template, ctx))
+        }
+    })()
+</script>
+<div ng-app="FarmerDetailsModule" ng-controller="FarmerDetailsCtrl" ng-cloak="">
+
+    @*<div ng-show="isLoading" class="loader"></div>*@
+    <div class="col-md-12">
+        <h3 class="citizen-dash-head ng-binding" style="margin-top:0px;">MMPBY Report </h3>
+    </div>
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="devpage-breadcrumb">
+            <ul class="page-breadcrumb">
+                <li class="dev-page-br">
+                    <i class="fa fa-home"> </i>
+                    <a href="#">  {{translation.Home}}</a>
+                    <i class="fa fa-angle-right"> </i>
+                </li>
+                <li style="float: left">
+                    <span style="margin: 0 5px;"> {{translation.New}} </span>
+                    <i class="fa fa-angle-right"> </i>
+                    <span style="margin: 0 5px;">MMPBY Report</span>
+                </li>
+
+            </ul>
+        </div>
+    </div>
+    <div style="margin-top:30px;padding-top:30px">
+        <div class="col-md-12">
+            <div class="citizen-dash-head">
+                <div class="table-dropdown" id="search-filter" style="margin-bottom: 5px;">
+
+
+                    <div class="col-lg-12" style="margin-bottom: 5px; padding-left: 0;">
+                        <input type="hidden" id="hdnRoleId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).RoleId)" />
+                        <input type="hidden" id="hdnDistrictId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DistrictId)" />
+                        <input type="hidden" id="hdnPldbId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).PLDBId)" />
+                        <input type="hidden" id="hdnPldbBranchId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).PLDBBrancchId)" />
+                        <input type="hidden" id="hdnLevelId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).LevelId)" />
+
+                        @*<div class="form-group col-md-3">
+            <label for="">PLDB</label>
+            <select ng-model="PLDB.PldbId"
+                    name="PLDB_ID"
+                    id="ddlDistrict"
+                    class="form-control"
+                    ng-change="PLDBBranchList('0')"
+                    ng-disabled="IsPLDBFreezed">
+                <option value="" disabled>--चुनें--</option>
+                <option ng-repeat="itemPLDB in PLDBList | orderBy:'PLDBName' track by itemPLDB.PldbId " value="{{itemPLDB.PldbId}}">
+                    {{itemPLDB.PLDBName}}
+                </option>
+            </select>
+        </div>
+
+        <div class="form-group col-md-3">
+            <label for="">PLDB Branch</label>
+            <select ng-model="PLDB.BranchId"
+                    id="branchid"
+                    name="BLOCK_ID"
+                    class="form-control"
+                    ng-init="PLDB.BranchId='0'" ng-disabled="IsBranchFreezed">
+                <option value="0" disabled>--चुनें--</option>
+                <option ng-repeat="itemBlock in PLDBBranches | orderBy:'BLOCK_ENG'" value="{{itemBlock.BLOCK_ID}}">
+                    {{_language =='en-us' ?  itemBlock.BLOCK_ENG : itemBlock.BLOCK_MANGAL}}
+                </option>
+            </select>
+        </div>*@
+                        @*<div class="col-md-3">
+            <label>District</label>
+
+            <select class="form-control" name="District_ID"
+                    ng-model="Search.DISTRICT_ID"
+                    ng-options="d.DISTRICT_ENG as d.DISTRICT_ENG for d in DistrictList">
+
+                <option value="">-- Select  --</option>
+
+            </select>
+        </div>*@
+                        <div class="col-md-2 margin-Top20" style="padding-left: 0;" id="ddrDistrictId">
+                            <label>{{ translation.DistrictHeading}}:</label>
+                            <select name="DISTRICT_ID" ng-model="DISTRICT_ID" class="form-control"
+                                    required>
+                                <option value="">{{translation.SelectOption}}</option>
+                                <option ng-repeat="district in DistrictList" value="{{district.DISTRICT_ID}}">
+
+                                    {{_language =='en-us' ?  district.DISTRICT_ENG : district.DISTRICT_MANGAL}}
+                                </option>
+                            </select>
+                        </div>
+                        @*ng-change="PLDBListData('0')"*@
+                        @*<div class="col-md-2 margin-Top20" style="padding-left:0;" id="ddrDistrictId">
+            <label>{{ translation.DistrictHeading}}:</label>
+
+            <select name="DISTRICT_ID"
+                    ng-model="DISTRICT_ID"
+                    class="form-control"
+                    required>
+
+                <option value="">{{translation.SelectOption}}</option>
+
+                <option ng-repeat="district in DistrictList"
+                        value="{{district.DISTRICT_ID}}">
+                    {{_language =='en-us' ? district.DISTRICT_ENG : district.DISTRICT_MANGAL}}
+                </option>
+
+            </select>
+        </div>*@
+
+                        @*<div class="col-md-2">
+            <label for="search">Jan Aadhaar:</label>
+            <input ng-model="JanAadhaarNo"
+                   name="SearchText"
+                   id="search"
+                   class="form-control"
+                   placeholder="Enter Jan Aadhaar No"
+                   autocomplete="off">
+        </div>*@
+                    
+                        <div class="col-md-2">
+                            <label for="search">{{translation.Search}}:</label>
+                            <input ng-model="q" name="SearchText" id="search" class="form-control" placeholder={{translation.filttertext}} autocomplete="off">
+                        </div>
+
+                        <div class="col-md-1">
+                            <label for="search">{{translation.ItemPerPage}}:</label>
+                            <input type="number" min="1" max="1000" class="form-control" ng-model="pageSize">
+
+                        </div>
+                   
+
+
+
+                        <div class="col-md-3 mt-2">
+                            <br />
+                            @*<button type="button" ng-click="searchRequest(GetOTSList)" class="btn btn-primary dev-btn ng-binding">{{translation.Search}}</button>*@
+                            <button type="button"
+                                    ng-click="searchRequest(GetOTSList)"
+                                    class="btn btn-primary dev-btn">
+                                {{translation.Search}}
+                            </button>
+                            @*<button type="button"
+                ng-click="searchRequest(GetOTSList)"
+                class="btn btn-primary dev-btn">
+            {{translation.Search}}
+        </button>*@
+                            <button type="button" ng-show="showClearButton" ng-click="ClearSearch()" class="btn btn-primary dev-btn ng-binding">{{translation.Clear}}</button>
+                            <button type="button" ng-click="exportAllToExcel()" class="btn btn-success">Export To Excel</button>
+                            @*<a href="~/PLDB/PLDBLoanApplicationForm" class="btn btn-primary dev-btn">
+            <i class="fa fa-plus"></i> Add Application
+        </a>*@
+                        </div>
+
+
+                        </div>
+                        <div>
+                            <table class="table table-responsive devtable" ng-if="OTSList.length > 0" style="">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            {{translation.SRNO}}
+                                        </th>
+                                        @*<th ng-click="sortData('ApplicantName')">
+                         {{translation.ApplicantName}}
+                        </th>*@
+                                        <th style=" min-width: 125px;">
+                                            JanAadhaarNo
+                                        </th>
+                                        <th style=" min-width: 125px;">
+                                            JanAadhaarMemberId
+                                        </th>
+                                        <th style=" min-width: 125px;">
+                                            FullName
+                                        </th>
+                                        <th style=" min-width: 125px;">
+                                            Mobile No.
+                                        </th>
+                                        <th style=" min-width: 125px;">
+                                            Address
+                                        </th>
+                                        <th style=" min-width: 125px;">
+                                            District Name
+                                        </th>
+                                        <th>
+                                            IsRural
+                                        </th>
+                                        <th>
+                                            BlockName
+                                        </th>
+                                        <th>
+                                            PolicyNo.
+                                        </th>
+                                        <th>
+                                            StartDate
+                                        </th>
+                                        <th>
+                                            EndDate
+                                        </th>
+                                        @*<th>
+                            IsActive
+                        </th>*@
+                                        @*<th>
+                            policy_no
+                        </th>*@
+
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="item in OTSList">
+                                        <td>
+                                            {{(((DataPagingDetails.PageNumber - 1) * DataPagingDetails.PageSize) + 1)+$index}}
+                                        </td>
+                                        <td style="text-transform:uppercase;">
+                                            <b> <i>{{item.jan_aadhaar_no }}</i></b>
+                                            <br />
+
+                                        </td>
+                                        <td>  {{item.jan_aadhaar_member_id}}</td>
+                                        <td>{{item.full_name}}  </td>
+                                        <td>{{item.mobile_number}}  </td>
+                                        <td>{{item.address}}  </td>
+                                        <td>{{item.district_name}}  </td>
+                                        <td>{{item.isrural }}</td>
+                                        <td>{{item.city_block_name }}</td>
+                                        <td>{{item.policy_no }}</td>
+                                        <td>{{item.start_date }}</td>
+                                        <td>{{item.end_date }}</td>
+                                        @*<td>{{item.is_active }}</td>*@
+                                        <!-- ACTION BUTTONS -->
+                                        <!--<td style="width:120px;">-->
+                                        @*Edit*@
+                                        <!--<button ng-if="item.IsFinalSubmit == 0 " type="button" class="btn btn-sm "
+                            ng-click="EditLoanApplication(item.encGccid)">
+                        <i class="fa fa-edit"></i>
+                    </button>-->
+                                        @*View*@
+                                        <!--<button type="button" class="btn btn-sm view-btn btn-primary"
+                                ng-click="ViewLoanApplication(item.encGccid)">
+                            <i class="fa fa-eye"></i>
+                        </button>
+                    </td>-->
+                                    </tr>
+
+                                    <!-- SHOW "RECORD NOT FOUND" WHEN LIST EMPTY -->
+                                    <tr ng-if="OTSList.length === 0">
+                                        <td colspan="11" class="text-center text-danger">
+                                            Record not found
+                                        </td>
+                                    </tr>
+
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="col-md-12">
+
+                            <div ng-if="DataPagingDetails.TotalPages >1" class="dataTables_paginate paging_simple_numbers" id="dataTables-example_paginate">
+                                <div class="dataTables_info" id="dataTables-example_info" role="status" aria-live="polite">
+                                    Total Records: {{DataPagingDetails.TotalRecords}}
+                                </div>
+                                <ul class="pagination pagination_1" style="margin-left: 10px !important;">
+                                    <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off">
+                                        <span>« First</span>
+                                    </li>
+                                    <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off">
+                                        <span>« Previous</span>
+                                    </li>
+
+                                    <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest('1',GetOTSList)" style="cursor: pointer;">
+                                        <span>«First</span>
+                                    </li>
+                                    <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest(DataPagingDetails.PageNumber-1,GetOTSList)" style="cursor:pointer;">
+                                        <span>« Previous</span>
+                                    </li>
+                                    <li class="{{n==DataPagingDetails.PageNumber?'active':''}}" style="{{n==DataPagingDetails.PageNumber?'':'cursor: pointer'}}" ng-repeat="n in PagingRange(DataPagingDetails.StartPageNumber,DataPagingDetails.EndPageNumber,DataPagingDetails.TotalPages)" ng-click="pageRequest(n,GetOTSList)">
+                                        <span>{{n}}</span>
+                                    </li>
+                                    <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next">
+                                        <span>« Next</span>
+                                    </li>
+                                    <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next">
+                                        <span>« Last</span>
+                                    </li>
+                                    <li ng-if="DataPagingDetails.PageNumber!= DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.PageNumber+1,GetOTSList)" style="cursor:pointer;">
+                                        <span>Next »</span>
+                                    </li>
+                                    <li ng-if="DataPagingDetails.PageNumber != DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.TotalPages,GetOTSList)" style="cursor:pointer;">
+                                        <span>Last »</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+

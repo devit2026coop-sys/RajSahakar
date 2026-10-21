@@ -1,0 +1,202 @@
+﻿@{
+    ViewBag.Title = "Reports for Call Center";
+}
+<style>
+    .flexEqualCenter {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    a.backBtn {
+        padding: 3px 5px;
+        background: rgb(99,205,219);
+        color: #fff;
+        border: 0px;
+        outline: none;
+        display: inline-block;
+        text-decoration: none;
+    }
+
+        a.backBtn i {
+            display: inline-block;
+            margin-right: 5px;
+        }
+</style>
+<script src="~/Scripts/AngularFramework/PLDBCallCenterReport.js?v=1.3"></script>
+<div ng-app="BeneficiaryListMod" ng-controller="BeneficiaryListCnt" ng-cloak="">
+    <div class="container-fluid citizen-dash-head">
+        <input type="hidden" id="hdnDistrictId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DistrictId)" />
+        <input type="hidden" id="hdnPldbId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).PLDBId)" />
+        <input type="hidden" id="hdnPldbBranchId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).PLDBBrancchId)" />
+
+        <div class="panel panel-default">
+            <div class="panel-heading flexEqualCenter">
+                <b><i class="fa fa-th-list"></i>&nbsp; Report for Call Center</b>
+                <div class="text-right">
+                    <button ng-click="BackToPage()" class="btn btn-primary dev-btn">Back To List</button>
+                    <button type="button" class="btn btn-warning" ng-click="exportExcel()"><i class="fa fa-file-excel-o"></i> Export Excel</button>
+                </div>
+            </div>
+
+            <div class="panel-body">
+                <input type="hidden" id="hdnDistrictId" ng-model="search.LoanDistrictId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DistrictId)" />
+                <div class="row">
+                    <div class="col-md-6 form-group">
+                        <label class="help-block-gender">
+                            <input type="radio" id="NormalSummary" name="ReportType" ng-value="1" ng-model="ReportType" ng-change="GetPldbCallSummary(false) " selected> Normal Case
+                        </label>
+                        <label class="help-block-gender">
+                            <input type="radio" id="Under103CaseSummary" ng-value="2" name="ReportType" ng-model="ReportType" ng-change="GetPldbCallSummary(false)">  103 Case
+                        </label>
+                        <label class="help-block-gender">
+                            <input type="radio" id="PldbBothSummary" ng-value="3" name="ReportType" ng-model="ReportType" ng-change="GetPldbCallSummary(false)">  Both
+                        </label>
+                    </div>
+                    <div class="col-md-6 form-group">
+                    </div>
+                </div>
+
+
+                <div class="row" id="search-filter">
+                    @*<div class="col-md-2">
+                            <label for="search">{{translation.Search}}:</label>
+                            <input ng-model="q" name="SearchText" id="search" class="form-control" placeholder={{translation.filttertext}} autocomplete="off">
+                        </div>*@
+                    <div class="col-md-2">
+                        <label for="search">{{translation.ItemPerPage}}:</label>
+                        <input type="number" min="1" max="1000" class="form-control" ng-model="pageSize" ng-change="pagechange()">
+                    </div>
+
+                    <div class="col-md-2 form-group" ng-show="false">
+                        <label>{{ translation.District}}<span class="error">*</span></label>
+                        <select id="DISTRICT_ID" ng-model="search.DISTRICT_ID" class="form-control" ng-init="search.DISTRICT_ID='0'" ng-change="PLDBListData(0)">
+                            <option value="0">{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in DistrictList" value="{{item.DISTRICT_ID}}">
+                                {{_language =='en-us' ?  item.DISTRICT_ENG : item.DISTRICT_MANGAL}}
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="col-lg-2 margin-Top20" style="padding-left: 0;" id="ddlPLDBID">
+                        <label for="PLDB_ID">{{ translation.PLDB}} </label>
+                        <select id="PLDB_ID" name="PLDB_ID" ng-model="search.PLDB_ID" class="form-control" ng-init="PLDB_ID='0'" ng-change="PLDBBranchList('0')">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="itemPLDB in PLDBList  track by itemPLDB.PldbId " value="{{itemPLDB.PldbId}}">
+                                {{itemPLDB.PLDBName}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-lg-2 margin-Top20" style="padding-left: 0;" id="ddlPldbBranchID">
+                        <label for="PLDB_Branch_ID">{{ translation.Branch}}</label>
+                        <select ng-model="search.PLDB_Branch_ID" name="PLDB_Branch_ID" id="PLDB_Branch_ID" class="form-control" ng-init="PLDB_Branch_ID='0'" ng-change="GetPldbCallSummary(false)">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="itemBlock in PLDBBranches " value="{{itemBlock.BLOCK_ID}}">
+                                {{_language =='en-us' ?  itemBlock.BLOCK_ENG : itemBlock.BLOCK_MANGAL}}
+                            </option>
+                        </select>
+                    </div>
+
+                </div>
+
+
+                <div class="clearfix"></div>
+                <div class="row " style="padding-top:10px">
+                    <div class="table-responsive devtable ">
+                        <table class="table table-hover table-striped table-bordered mb-0">
+                            <thead>
+                                <tr>
+                                    <th style="text-align:center" width="60">{{translation.SRNO}}</th>
+                                    <th style="text-align:center">{{_language =='en-us' ? 'Primary Bank': 'प्राथमिक बैंक' }}</th>
+                                    <th style="text-align:center">{{_language =='en-us' ? 'Bank Branch': 'बैंक शाखा' }}</th>
+                                    <th>{{translation.Notice}}</th>
+                                    <th>{{translation.ApplicantName}}</th>
+                                    <th>{{translation.FarmerFatherHusbandName}}</th>
+                                    <th>{{translation.LoanApplicationNo}}</th>
+                                    <th>{{translation.MobileNo}}</th>
+                                    <th>{{translation.Village}}</th>
+                                    <th>{{translation.District}}</th>
+                                    <th>{{translation.Sector}}</th>
+                                    <th>{{translation.Purpose}}</th>
+                                    <th>{{_language =='en-us' ? 'To be Deposited by Loanee': 'ऋणदाता द्वारा जमा किया जाना है' }}</th>
+                                    <th>{{_language =='en-us' ? 'Waiver': 'ऋण माफ़ी' }}</th>
+
+                                    <th>{{translation.Total}}</th>
+                                    @*<th>{{_language == 'en-us' ? '25% of loanee part' : '25% लाभार्थी हिस्सा'}}</th>*@
+                                    <th>{{_language == 'en-us' ? 'Recovered Amount' : 'वसूल की गई राशि'}}</th>
+                                    <th>{{_language == 'en-us' ? 'Relief Amount' : 'राहत राशि'}}</th>
+                                    <th>{{_language == 'en-us' ? 'Total (Recovered+ Relief Amount)' : 'कुल (राहत + वसूली राशि'}}</th>
+                                    @*<th>{{_language == 'en-us' ? 'Remaining Amt' : 'शेष राशि'}}</th>*@
+
+                                </tr>
+
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="item in GetPldbSummary">
+                                    <td align="center">   {{(((DataPagingDetails.PageNumber - 1) * DataPagingDetails.PageSize) + 1)+$index}} @*{{$index+1}}*@</td>
+                                    <td>{{item.PLDBName}}</td>
+                                    <td>{{item.BranchName_En}}</td>
+                                    <td>{{item.NoticeNo}}</td>
+                                    <td style="text-transform:uppercase;">{{item.ApplicantName}}</td>
+                                    <td style="text-transform:uppercase;">{{item.FatherHusbandName}}</td>
+                                    <td>{{item.LoanAccNo}}</td>
+                                    <td>{{item.MobileNo}}</td>
+                                    <td>{{item.VName}}</td>
+                                    <td>{{item.DISTRICT}}</td>
+                                    <td>{{item.Sector}}</td>
+                                    <td>{{item.Purpose}}</td>
+                                    <td>{{item.DepositedByLoanee|inrCurrency}}</td>
+                                    <td>{{item.Waiver|inrCurrency}}</td>
+                                    <td>{{item.TotalDepositedByLoaneeWaiver|inrCurrency}}</td>
+                                    @*<td>{{item.LoaneePart|inrCurrency}}</td>*@
+                                    <td>{{item.Recovery|inrCurrency}}</td>
+                                    <td>
+                                        {{item.ReliefAmount|inrCurrency}}
+                                    </td>
+                                    <td>
+                                            {{item.Total|inrCurrency}}
+                                    </td>
+                                    @*<td>{{item.RemainingAmt|inrCurrency}}</td>*@
+                                </tr>
+                            </tbody>
+
+                        </table>
+                    </div>
+                </div>
+
+                <div class="clearfix"></div>
+                <div class="col-md-12">
+                    <div ng-if="DataPagingDetails.TotalPages>1" class="dataTables_paginate paging_simple_numbers" id="dataTables-example_paginate">
+                        <div class="dataTables_info" id="dataTables-example_info" role="status" aria-live="polite">
+                            Total Records: {{DataPagingDetails.TotalRecords}}
+                        </div>
+                        <ul class="pagination pagination_1" style="margin-left: 10px !important;">
+                            <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« First</span></li>
+                            <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« Previous</span></li>
+
+                            <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest('1',GetPldbCallSummary)" style="cursor: pointer;">
+                                <span>«First</span>
+                            </li>
+                            <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest(DataPagingDetails.PageNumber-1,GetPldbCallSummary)" style="cursor:pointer;">
+                                <span>« Previous</span>
+                            </li>
+                            <li class="{{n==DataPagingDetails.PageNumber?'active':''}}" style="{{n==DataPagingDetails.PageNumber?'':'cursor: pointer'}}" ng-repeat="n in PagingRange(DataPagingDetails.StartPageNumber,DataPagingDetails.EndPageNumber,DataPagingDetails.TotalPages)" ng-click="pageRequest(n,GetPldbCallSummary)"><span>{{n}}</span></li>
+                            <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Next</span></li>
+                            <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Last</span></li>
+                            <li ng-if="DataPagingDetails.PageNumber!= DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.PageNumber+1,GetPldbCallSummary)" style="cursor:pointer;">
+                                <span>Next »</span>
+                            </li>
+                            <li ng-if="DataPagingDetails.PageNumber != DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.TotalPages,GetPldbCallSummary)" style="cursor:pointer;">
+                                <span>Last »</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+
+
+
+            </div>
+        </div>
+    </div>
+</div>

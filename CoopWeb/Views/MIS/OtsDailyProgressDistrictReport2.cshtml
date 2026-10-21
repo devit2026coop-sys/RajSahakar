@@ -1,0 +1,173 @@
+﻿@{
+    ViewBag.Title = "District Wise OTS DPR With Possible Recovery";
+}
+<style>
+    .flexEqualCenter {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    a.backBtn {
+        padding: 3px 5px;
+        background: rgb(99,205,219);
+        color: #fff;
+        border: 0px;
+        outline: none;
+        display: inline-block;
+        text-decoration: none;
+    }
+
+        a.backBtn i {
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+    .tblthfont {
+        font-weight: bold;
+    }
+
+    .devtable thead tr th {
+        vertical-align: middle;
+    }
+</style>
+<script src="~/Scripts/xlsx.full.min.js"></script>
+<script src="~/Scripts/AngularFramework/OtsDailyProgressDistrictReport2.js?v=1.5"></script>
+<div ng-app="otsMod" ng-controller="otsCtrl" ng-cloak="">
+    <div class="container-fluid citizen-dash-head">
+        <input type="hidden" id="hdnDistrictId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DistrictId)" />
+        <input type="hidden" id="hdnPldbId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).PLDBId)" />
+        <input type="hidden" id="hdnPldbBranchId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).PLDBBrancchId)" />
+
+        <div class="panel panel-default">
+            <div class="panel-heading flexEqualCenter">
+                <b><i class="fa fa-th-list"></i>&nbsp; District Wise OTS DPR With Possible Recovery</b>
+                <div class="text-right">
+                    <button class="btn btn-primary dev-btn" ng-show="otsDPR!=null && otsDPR.length>0" ng-click="ReportDownload()">Export Excel</button>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-md-12 form-group">
+                        <label class="help-block-gender">
+                            <input type="radio" name="ReportType" ng-value="1" ng-model="ReportType" ng-change="GetOtsDailyProgressReport() " selected> DPR Overall
+                        </label>
+                        <label class="help-block-gender">
+                            <input type="radio" ng-value="2" name="ReportType" ng-model="ReportType" ng-change="GetOtsDailyProgressReport()"> Daily 5 लाख से अधिक OD
+                        </label>
+                        <label class="help-block-gender">
+                            <input type="radio" ng-value="3" name="ReportType" ng-model="ReportType" ng-change="GetOtsDailyProgressReport()"> Daily 10 लाख से अधिक OD
+                        </label>
+                        <label class="help-block-gender">
+                            <input type="radio" ng-value="4" name="ReportType" ng-model="ReportType" ng-change="GetOtsDailyProgressReport()"> Daily 10 से 15 लाख के मध्य OD
+                        </label>
+                        <label class="help-block-gender">
+                            <input type="radio" ng-value="5" name="ReportType" ng-model="ReportType" ng-change="GetOtsDailyProgressReport()"> Daily 15 लाख से अधिक OD
+                        </label>
+                        <label class="help-block-gender">
+                            <input type="radio" ng-value="6" name="ReportType" ng-model="ReportType" ng-change="GetOtsDailyProgressReport()"> 1 लाख से कम अवधिपार (ऋणी से वसूली योग्य राशि)
+                        </label>
+                    </div>
+                    <div class="col-md-12 form-group">
+                        <label class="help-block-gender">
+                            <input type="radio" ng-value="0" name="AmountType" ng-model="AmountType"> मूल रूप में राशि देखें
+                        </label>
+                        <label class="help-block-gender">
+                            <input type="radio" name="AmountType" ng-value="1" ng-model="AmountType"> लाख में राशि देखें
+                        </label>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-2 form-group" ng-show="false">
+                        <label>{{ translation.District}}<span class="error">*</span></label>
+                        <select id="DISTRICT_ID" ng-model="search.DISTRICT_ID" class="form-control" ng-init="search.DISTRICT_ID='0'">
+                            <option value="0">{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in DistrictList" value="{{item.DISTRICT_ID}}">
+                                {{_language =='en-us' ?  item.DISTRICT_ENG : item.DISTRICT_MANGAL}}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+                <div class="table-responsive devtable">
+                    <table class="table table-hover table-striped table-bordered mb-0" id="dprTable">
+                        <thead>
+                            <tr><th colspan="20" style="text-align:center;">मुख्यमंत्री अवधिपार ब्याज राहत एकमुश्त समझौता योजना 2025-26 अन्तर्गत वसूली की दैनिक प्रगति रिपोर्ट</th></tr>
+                            <tr>
+                                <th rowspan="3">क्र.सं.</th>
+                                <th rowspan="3">ज़िला</th>
+                                <th rowspan="3">पात्र ऋणियों की<br />संख्या</th>
+                                <th rowspan="2" colspan="3" style="text-align:center;">दिनांक 31.03.2025 तक<br />ऋणी की कुल मांग राशि</th>
+                                <th colspan="7" style="text-align:center;">वसूली (दिनांक <span style="color:#f00;">{{search.ReportDate|date:'dd-MM-yyyy'}}</span> तक)</th>
+                                <th rowspan="3" style="text-align:center;">वसूली प्रतिशत<br />कुल मांग राशि से </th>
+                                <th rowspan="2" colspan="3" style="text-align:center;">आंशिक ऋणियों से सम्भावित वसूली</th>
+                                <th rowspan="2" colspan="3" style="text-align:center;">01.04.2025 के पश्चात प्राप्त वसूली</th>
+                            </tr>
+                            <tr>
+                                <th colspan="2" style="text-align:center;">आंशिक</th>
+                                <th colspan="4" style="text-align:center;">पूर्ण</th>
+                                <th rowspan="2">योग</th>
+                            </tr>
+                            <tr>
+                                <th>ऋणी से वसूली योग्य</th>
+                                <th>राहत राशि</th>
+                                <th>योग</th>
+                                <th>संख्या</th>
+                                <th>ऋणी द्वारा जमा</th>
+                                <th>संख्या</th>
+                                <th>ऋणी द्वारा जमा</th>
+                                <th>प्रदत्त राहत राशि</th>
+                                <th>योग</th>
+                                <th>ऋणी से वसूली योग्य</th>
+                                <th>राहत</th>
+                                <th>योग</th>
+                                <th>असल</th>
+                                <th>ब्याज / दं.ब्याज / अन्य</th>
+                                <th>योग</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-if="otsDPR && otsDPR.length > 0" ng-repeat="item in otsDPR track by $index" ng-style="(item.DistrictName == 'Total') && {'font-weight': 'bold', 'color': '#fdfdfd', 'background': '#466b6d'}">
+                                <th><span ng-hide="item.DistrictName=='Total'">{{$index+1}}</span></th>
+                                <th>{{item.DistrictName}}</th>
+                                <td>
+                                    <span ng-show="item.EligibleBorrowers==0">{{item.EligibleBorrowers}}</span>
+                                    <span ng-show="item.DistrictName=='Total'">{{item.EligibleBorrowers}}</span>
+                                    <a ng-show="item.EligibleBorrowers>0 && item.DistrictName!='Total'" href="~/MIS/OtsDailyProgressViewDistrictDetails2?did={{item.PldbId}}&vid={{search.PLDB_Branch_ID}}&rt={{ReportType}}&at=1&rn=4" target="_blank">{{item.EligibleBorrowers}}</a>
+                                </td>
+                                <td>{{item.ToBeReceived | ShowInLac:AmountType}}</td>
+                                <td>{{item.Relief | ShowInLac:AmountType}}</td>
+                                <td>{{item.TotalDemand | ShowInLac:AmountType}}</td>
+                                <td>
+                                    <span ng-show="item.PartialCount==0">{{item.PartialCount}}</span>
+                                    <span ng-show="item.DistrictName=='Total'">{{item.PartialCount}}</span>
+                                    <a ng-show="item.PartialCount>0 && item.DistrictName!='Total'" href="~/MIS/OtsDailyProgressViewDistrictDetails2?did={{item.PldbId}}&vid={{search.PLDB_Branch_ID}}&rt={{ReportType}}&at=2&rn=4" target="_blank">{{item.PartialCount}}</a>
+                                </td>
+                                <td>{{item.PartialAmount | ShowInLac:AmountType}}</td>
+                                <td>
+                                    <span ng-show="item.FullyCount==0">{{item.FullyCount}}</span>
+                                    <span ng-show="item.DistrictName=='Total'">{{item.FullyCount}}</span>
+                                    <a ng-show="item.FullyCount>0 && item.DistrictName!='Total'" href="~/MIS/OtsDailyProgressViewDistrictDetails2?did={{item.PldbId}}&vid={{search.PLDB_Branch_ID}}&rt={{ReportType}}&at=3&rn=4" target="_blank">{{item.FullyCount}}</a>
+                                </td>
+                                <td>{{item.FullAmount | ShowInLac:AmountType}}</td>
+                                <td>{{item.ReliefGiven | ShowInLac:AmountType}}</td>
+                                <td>{{item.TotalRecovery | ShowInLac:AmountType}}</td>
+                                <td>{{item.Total | ShowInLac:AmountType}}</td>
+                                <td>{{item.RecoveryPercentage}}</td>
+                                <td>{{item.PossibleRecovery | ShowInLac:AmountType}}</td>
+                                <td>{{item.PossibleRelief | ShowInLac:AmountType}}</td>
+                                <td>{{item.PossibleRecoveryTotal | ShowInLac:AmountType}}</td>
+                                <td>{{item.ManualPrincipal | ShowInLac:AmountType}}</td>
+                                <td>{{item.ManualInterest | ShowInLac:AmountType}}</td>
+                                <td>{{item.ManualTotal | ShowInLac:AmountType}}</td>
+                            </tr>
+                            <tr ng-show="(!otsDPR || otsDPR.length === 0)">
+                                <td ng-show="(!otsDPR || otsDPR.length === 0)" colspan="20" class="text-center">No records found</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+        </div>
+    </div>
+</div>

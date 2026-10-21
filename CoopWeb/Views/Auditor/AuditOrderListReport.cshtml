@@ -1,0 +1,221 @@
+﻿@if (((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]) != null)
+{
+    if (((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).UserType == "C")
+    {
+        Layout = "~/Views/Shared/_CitizenLayout.cshtml";
+    }
+    else
+    {
+        Layout = "~/Views/Shared/_Layout.cshtml";
+    }
+}
+else
+{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<script src="~/Scripts/AngularFramework/AuditOrderListReport.js"></script>
+<script type="text/javascript" src="~/Scripts/1.8.3.jquery.min.js"></script>
+<script type="text/javascript" src="~/Scripts/pdfmake.min.js"></script>
+<script type="text/javascript" src="~/Scripts/html2canvas.min.js"></script>
+
+<link href="~/Scripts/google_hindi/google_transliteration.css" rel="stylesheet" />
+<style>
+    .inputapi-transliterate-indic-suggestion-menu {
+        z-index: 99999 !important;
+        display: block;
+    }
+</style>
+
+<style type="text/css">
+    body {
+        font-family: Arial;
+        font-size: 10pt;
+    }
+
+    table {
+        border: 1px solid #ccc;
+        border-collapse: collapse;
+    }
+
+        table th {
+            background-color: #F7F7F7;
+            color: #333;
+            font-weight: bold;
+        }
+
+        table th, table td {
+            padding: 5px;
+            border: 1px solid #ccc;
+        }
+
+    .NewMemberdob input {
+        float: left;
+        width: 90%;
+    }
+
+    .NewMemberdob button {
+        float: left;
+    }
+
+    .notValid {
+        border: solid 1px red !important
+    }
+</style>
+
+
+<script type="text/javascript">
+
+    function ValidateAlpha(evt) {
+        var keyCode = (evt.which) ? evt.which : evt.keyCode
+        if ((keyCode < 65 || keyCode > 90) && (keyCode < 97 || keyCode > 123) && keyCode != 32)
+
+            return false;
+        return true;
+    };
+
+</script>
+
+<div ng-app="AuditOrderListmod" ng-controller="AuditOrdercnt">
+   
+            <div class="col-md-12">
+                <h3 class="citizen-dash-head">Audit Order List Report</h3>
+                <hr style="margin: 0;">
+            </div>
+
+     
+            <div class="">
+                <div class="col-md-12">
+                    <div class="citizen-dash-head">
+                        <div class="table-dropdown">
+                            <div class="col-md-4">
+                                <label for="search">{{translation.Search}}:</label>
+                                <input ng-model="q" id="search" class="form-control" placeholder={{translation.filttertext}} autocomplete="off">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="search">{{translation.ItemPerPage}}:</label>
+                                <input type="number" min="1" max="1000" class="form-control" ng-model="pageSize">
+                            </div>
+                            <div class="col-md-4">
+
+                                <input type="radio" ng-model="Rejected" name="UserType" ng-click="OrderDataList(1)" value="1"><label style="">Rejected</label>
+                                <input type="radio" ng-model="other" name="UserType" ng-click="OrderDataList(2)" value="2"><label style="">Genrated</label>
+
+                            </div>
+                        </div>
+                        <div class="dev-popup-body modal modal modal_Popup fade" id="myModal" data-backdrop="static" data-keyboard="false" role="dialog">
+                            <div class="modal-dialog">
+                                <div class="modal-content citizen-dash-head">
+
+                                    <table class="table table-responsive devtable">
+                                        <thead>
+                                            <tr>
+                                                <th>
+                                                    {{translation.SRNO}}
+                                                </th>
+                                                <th>Society Name</th>
+                                                <th>District Name</th>
+
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr dir-paginate="item in SocietyList | filter: q | orderBy:colsort:reverseSort  | itemsPerPage: pageSize" current-page="currentPage" pagination-id="MenuPagination">
+                                                <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                                                <td>
+                                                    {{item.SocietyName }}
+                                                </td>
+                                                <td>
+                                                    {{item.DISTRICT_ENG}}
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <input type="button" name="name" value="Close" ng-click="ClosePop()" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="dev-popup-body modal modal modal_Popup fade" id="myModalforDelete" data-backdrop="static" data-keyboard="false" role="dialog">
+                            <div class="modal-dialog">
+                                <div class="modal-content citizen-dash-head">
+                                    <h5 class="citizen-dash-head" style="text-align:center">Resion For Delete</h5>
+                                    <div class="form-group col-md-12">
+                                        <div class="col-md-1" style="padding-left: 0;">
+                                            <label for="search" class="ng-binding">Remark</label>
+                                        </div>
+                                        <div class="form-group col-md-6">
+                                            <textarea name="DeleteRemark" ng-model="DeleteResions" rows="4" cols="50"></textarea>
+                                        </div>
+                                    </div>
+                                    <input type="hidden" name="name" value="" ng-model="Orderno"/>
+
+                                    <div class="form-group col-md-12">
+                                        <div class="form-group col-md-6">
+                                            <button type="button" class="btn btn-primary" ng-click="GoForDelete()">&nbsp;{{translation.Submit}}</button>
+                                            <button type="button" class="btn btn-success" ng-click="CloseForDelete()">&nbsp;{{translation.Close}}</button>
+                                        </div>
+                                    </div>                                   
+                                </div>
+                            </div>
+                        </div>
+                        <table class="table table-responsive devtable">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        {{translation.SRNO}}
+                                    </th>
+                                    <th>Order No</th>
+                                    <th>SSOID</th>
+                                    <th>Scoiety Count</th>
+                                    <th>Auditor Name</th>
+                                    <th>AuditTillDate</th>
+                                    <th>Action</th>
+
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr dir-paginate="item in OrderReport | filter: q | orderBy:colsort:reverseSort  | itemsPerPage: pageSize" current-page="currentPage" pagination-id="MenuPagination">
+                                    <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+
+                                    <td>
+                                        {{item.OrderNo }}
+                                    </td>
+                                    <td>
+                                        {{item.SSOId}}
+                                    </td>
+                                    <td>
+                                        <a href="#" ng-click="SocietyList(item.OrderNo)">{{item.SocietyCount}}</a>
+                                    </td>
+                                    <td>
+                                        {{item.OfficerNameEn }}
+                                    </td>
+                                    <td>
+                                        {{item.AuditTillDate }}
+                                    </td>
+                                    <td>
+                                        <i class="fa fa-trash" ng-click="DeleteResion(item.OrderNo)"></i>
+                                        <a href="{{item.AuditorAssignFilePath}}" target="_blank" class="fa fa-eye"></a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+
+                    </div>
+                </div>
+                <div class="col-md-10">
+                    <div class="text-center">
+                        <dir-pagination-controls boundary-links="true" pagination-id="MenuPagination" on-page-change="pageChangeHandler(newPageNumber)" template-url="/dirPagination.tpl.html"></dir-pagination-controls>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <h5 class="dev-page"> {{translation.Page}}: {{ currentPage }} </h5>
+                </div>
+            </div>
+        </div>
+     
+
+
+
+
+
+

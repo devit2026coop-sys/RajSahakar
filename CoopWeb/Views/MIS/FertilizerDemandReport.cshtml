@@ -1,0 +1,463 @@
+﻿@{
+    ViewBag.Title = "Fertilizer Demand Report ";
+}
+
+<script src="~/Scripts/AngularFramework/FertilizerDemandReport.js?v=@DateTime.Now.Ticks"></script>
+<script src="~/Scripts/xlsx.full.min.js"></script>
+<div ng-app="FertilizerDemandMod" ng-controller="FertilizerDemandCtrl" ng-cloak="">
+    <div class="container-fluid citizen-dash-head">
+        <div class="panel panel-default">
+            <div class="panel-heading flexEqualCenter">
+                <b>
+                    <i class="fa fa-th-list"></i>&nbsp;  Fertilizer Demand Report
+                </b>
+            </div>
+
+            <div class="panel-body">
+                <div class="row mb-3" id="search-filter">
+                    <!-- District -->
+                    <div class="col-md-2">
+                        <label>{{ translation.DistrictHeading}}</label>
+                        <select name="DISTRICT_ID" ng-model="DISTRICT_ID" id="ddlDistrictId" class="form-control" ng-init="DISTRICT_ID='0'">
+                            <option value="0">{{translation.SelectOption}}</option>
+                            <option ng-repeat="district in DistrictList" value="{{district.DISTRICT_ID}}">
+                                {{_language =='en-us' ? district.DISTRICT_ENG : district.DISTRICT_MANGAL}}
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- KVSS / GSS -->
+                    <div class="col-md-2">
+                        <label>KVSS/GSS</label>
+                        <select name="SocietyType" class="form-control" ng-model="SocietyType" id="ddlSocietyType">
+                            <option value="">All</option>
+                            <option value="KVSS">KVSS</option>
+                            <option value="GSS">GSS</option>
+                        </select>
+                    </div>
+
+                    <!-- Search -->
+                    <div class="col-md-2" style="margin-top:25px;">
+                        <button type="button" class="btn btn-primary" style="background-color: #64c0c5; border:0;" ng-click="searchRequest(GetFertilizerDemandDetail)">
+                            Search
+                        </button>
+                        <button type="button" class="btn btn-primary" style="background-color: #64c0c5; border: 0;" ng-click="ClearSearch()">
+                            Clear
+                        </button>
+                        <button type="button" class="btn btn-success" ng-click="exportToExcel()">
+                            <i class="fa fa-file-excel-o"></i>
+                            Excel
+                        </button>
+                    </div>
+                </div>
+                <table class="table table-responsive devtable mb-2">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width:60px;">Sr.No</th>
+                            <th class="text-center"> District Name </th>
+                            <th class="text-center"> Block Name </th>
+                            <th class="text-center"> Society Name </th>
+                            <th class="text-center">Registration No</th>
+                            <th class="text-center">KVSS/GSS</th>
+                            <th class="text-center">Secretary Mobile No.</th>
+                            <th class="text-center">Secretary Name</th>
+                            <th class="text-center">Credit Facility</th>
+                            <th class="text-center">License No</th>
+                            <th class="text-center">POS Id</th>
+                            <th class="text-center">Fertilizer Details</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="item in FertilizerDataList track by $index">
+                            <td>{{(((DataPagingDetails.PageNumber - 1) * DataPagingDetails.PageSize) + 1)+$index}}</td>
+                            <td>
+                                {{item.DistrictName}}
+                            </td>
+                            <td>
+                                {{item.Block}}
+                            </td>
+                            <td>
+                                {{item.SocietyName}}
+                            </td>
+                            <td>
+                                {{item.RegistrationNo}}
+                            </td>
+                            <td>
+                                {{item.KvssOrGss}}
+                            </td>
+                            <td>
+                                {{item.SecretaryMobNo}}
+                            </td>
+                            <td>
+                                {{item.SecretaryName}}
+                            </td>
+                            <td>
+                                {{item.IsCreditFacility}}
+                            </td>
+                            <td>
+                                {{item.LicenseNo}}
+                            </td>
+                            <td>
+                                {{item.POSId}}
+                            </td>
+                            <td>
+                                @*<a href="javascript:void(0);" class="btn btn-sm btn-success" title="View" ng-click="ViewDemandRequest(item)">
+                                        <i class="fa fa-eye"></i>
+                                    </a>
+
+                                    <a ng-if="item.IsCreditFacility=='No'" href="javascript:void(0);" class="btn btn-sm btn-info" title="View" ng-click="ViewCreditRequest(item)">
+                                        <i class="fa fa-eye"></i>
+                                    </a>
+
+                                    <a href="javascript:void(0);" class="btn btn-sm btn-primary" title="View" ng-click="ViewPurchaseRequest(item)">
+                                        <i class="fa fa-eye"></i>
+                                    </a>*@
+
+                                <a href="javascript:void(0);" class="btn btn-sm btn-success" title="View" ng-click="ViewDetails(item)">
+                                    <i class="fa fa-eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <div ng-if="DataPagingDetails.TotalPages>1" class="dataTables_paginate paging_simple_numbers" id="dataTables-example_paginate" style="display: flex; align-items: center; justify-content: space-between;">
+                            <div class="dataTables_info" id="dataTables-example_info" role="status" aria-live="polite">
+                                Total Records: {{DataPagingDetails.TotalRecords}}
+                            </div>
+                            <ul class="pagination pagination_1" style="margin-left: 10px !important; margin:0">
+                                <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« First</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« Previous</span></li>
+
+                                <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest('1',SearchData)" style="cursor: pointer;">
+                                    <span>« First</span>
+                                </li>
+                                <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest(DataPagingDetails.PageNumber-1,SearchData)" style="cursor:pointer;">
+                                    <span>« Prev</span>
+                                </li>
+                                <li class="{{n==DataPagingDetails.PageNumber?'active':''}}" style="{{n==DataPagingDetails.PageNumber?'':'cursor: pointer'}}" ng-repeat="n in PagingRange(DataPagingDetails.StartPageNumber,DataPagingDetails.EndPageNumber,DataPagingDetails.TotalPages)" ng-click="pageRequest(n,SearchData)"><span>{{n}}</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Next</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Last</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber!= DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.PageNumber+1,SearchData)" style="cursor:pointer;">
+                                    <span>Next »</span>
+                                </li>
+                                <li ng-if="DataPagingDetails.PageNumber != DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.TotalPages,SearchData)" style="cursor:pointer;">
+                                    <span>Last »</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal fade" id="fertilizerDemandModal" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false">
+                    <div class="modal-dialog modal-lg" role="document">
+
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">
+                                    <i class="fa fa-detail"></i>
+                                    Fertilizer Details
+                                    <button type="button" class="close" data-dismiss="modal">
+                                        <span>&times;</span>
+                                    </button>
+                                </h5>
+                            </div>
+                            <div class="modal-body">
+                                <div class="table-responsive">
+                                    <div class="col-lg-12 form-group MarginTop20 flexForm">
+                                        <div class="col-md-12 form-group MarginTop20">
+                                            <label> Society Name:- </label>
+                                            <label>{{ SocietyNamemdl }}</label>
+                                        </div>
+                                        <div class="col-md-6 form-group MarginTop20">
+                                            <label> Registration No:- </label>
+                                            <label>{{ RegistrationNomdl }}</label>
+                                        </div>
+                                        <div class="col-md-6 form-group MarginTop20">
+                                            <label> KVSS/GSS:- </label>
+                                            <label>{{ KvssOrGssmdl }}</label>
+                                        </div>
+                                        <div class="col-md-6 form-group MarginTop20">
+                                            <label> District Name:- </label>
+                                            <label>{{ DistrictNamemdl }}</label>
+                                        </div>
+                                        <div class="col-md-6 form-group MarginTop20">
+                                            <label> Block Name:- </label>
+                                            <label>{{ Blockmdl }}</label>
+                                        </div>
+                                        <div class="col-md-6 form-group MarginTop20">
+                                            <label> License No:- </label>
+                                            <label>{{ LicenseNomdl }}</label>
+                                        </div>
+                                        <div class="col-md-6 form-group MarginTop20">
+                                            <label> POS Id:- </label>
+                                            <label>{{ POSIdmdl }}</label>
+                                        </div>
+                                        <div class="col-md-6 form-group MarginTop20">
+                                            <label> Secretary Name:- </label>
+                                            <label>{{ SecretaryNamemdl }}</label>
+                                        </div>
+                                        <div class="col-md-6 form-group MarginTop20">
+                                            <label> Mobile No:- </label>
+                                            <label>{{ SecretaryMobNomdl }}</label>
+                                        </div>
+                                    </div>
+                                    <h5 class="modal-title">Demand Details </h5>
+                                    <table class="table table-bordered table-striped devtable">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Sr.No</th>
+                                                <th>Fertilizer Name</th>
+                                                <th>Year</th>
+                                                <th>Month</th>
+                                                <th>Fertilizer Company</th>
+                                                <th>Quantity</th> 
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr ng-repeat="detail in FertilizerDemandList track by $index" ng-style="detail.FertilizerName == 'Grand Total' && {'font-weight':'bold','color':'black'}">
+                                                <td><span ng-hide="detail.FertilizerName == 'Grand Total'">{{$index + 1 }}</span></td>
+                                                <td>
+                                                    {{detail.FertilizerName}}
+                                                </td>
+                                                <td>
+                                                    <span ng-hide="detail.FertilizerName == 'Grand Total'">
+                                                        {{detail.YearName}}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <span ng-hide="detail.FertilizerName == 'Grand Total'">
+                                                        {{detail.MonthsName}}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <span ng-hide="detail.FertilizerName == 'Grand Total'">
+                                                        {{detail.FertilizerCompany}}
+                                                    </span>
+                                                </td>
+                                                <td class="text-right">
+                                                    {{detail.FertilizerQuantity}}
+                                                </td> 
+                                            </tr>
+
+                                            <tr ng-if="!FertilizerDemandList || FertilizerDemandList.length == 0">
+                                                <td colspan="8" class="text-center">
+                                                    No fertilizer details found.
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+
+                                    <h5 class="modal-title">Credit facility Details </h5>
+                                    <table class="table table-bordered table-striped devtable">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Sr.No</th>
+                                                <th>Fertilizer Name</th>
+                                                <th>Year</th>
+                                                <th>Month</th>
+                                                <th>Fertilizer Sale</th>
+                                                <th>Quantity</th> 
+                                                <th>Present Availability</th>
+                                                <th>Credit Limit</th> 
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr ng-repeat="detail in FertilizerCreditList track by $index" ng-style="detail.FertilizerName == 'Grand Total' && {'font-weight':'bold','color':'black'}">
+                                                <td><span ng-hide="detail.FertilizerName == 'Grand Total'">{{$index + 1 }}</span></td>
+                                                <td>
+                                                    {{detail.FertilizerName}}
+                                                </td>
+                                                <td>
+                                                    <span ng-hide="detail.FertilizerName == 'Grand Total'">
+                                                        {{detail.YearName}}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <span ng-hide="detail.FertilizerName == 'Grand Total'">
+                                                        {{detail.MonthsName}}
+                                                    </span>
+                                                </td>
+                                                <td class="text-right">
+                                                    {{detail.FertilizerSale | number}}
+                                                </td>
+
+                                                <td class="text-right">
+                                                    {{detail.FertilizerQuantity | number}}
+                                                </td> 
+                                                <td class="text-right">
+                                                    {{detail.PresentAvailability | number}}
+                                                </td>
+
+                                                <td class="text-right">
+                                                    {{detail.CreditLimit | number}}
+                                                </td> 
+                                            </tr>
+                                            <tr ng-if="!FertilizerCreditList || FertilizerCreditList.length == 0">
+                                                <td colspan="10" class="text-center">
+                                                    No credit facility details found.
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+
+                                    <h5 class="modal-title">Purchase Details </h5>
+                                    <table class="table table-bordered table-striped devtable">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Sr.No</th>
+                                                <th>Fertilizer Name</th>
+                                                <th>Quantity</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr ng-repeat="detail in FertilizerPurchaseList track by $index" ng-style="detail.FertilizerName == 'Grand Total' && {'font-weight':'bold','color':'black'}">
+                                                <td><span ng-hide="detail.FertilizerName == 'Grand Total'">{{$index + 1 }}</span></td>
+                                                <td>
+                                                    {{detail.FertilizerName}}
+                                                </td>
+
+                                                <td class="text-right">
+                                                    {{detail.FertilizerQuantity}}
+                                                </td>
+                                            </tr>
+
+                                            <tr ng-if="!FertilizerPurchaseList || FertilizerPurchaseList.length == 0">
+                                                <td colspan="8" class="text-center">
+                                                    No Purchase details found.
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                @*<div class="modal fade" id="fertilizerCreditModal" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false">
+                        <div class="modal-dialog modal-lg" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">
+                                        <i class="fa fa-credit-card"></i>
+                                        Fertilizer Credit Facility Details
+
+                                        <button type="button" class="close" data-dismiss="modal">
+                                            <span>&times;</span>
+                                        </button>
+                                    </h5>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered table-striped devtable">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Sr.No</th>
+                                                    <th>Fertilizer Name</th>
+                                                    <th>Year</th>
+                                                    <th>Month</th>
+                                                    <th>Fertilizer Sale</th>
+                                                    <th>Quantity</th>
+                                                    <th>Present Availability</th>
+                                                    <th>Credit Limit</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr ng-repeat="detail in FertilizerCreditList track by $index" ng-style="detail.FertilizerName == 'Grand Total' && {'font-weight':'bold','color':'black'}">
+                                                    <td><span ng-hide="detail.FertilizerName == 'Grand Total'">{{$index + 1 }}</span></td>
+                                                    <td>
+                                                        {{detail.FertilizerName}}
+                                                    </td>
+                                                    <td>
+                                                        <span ng-hide="detail.FertilizerName == 'Grand Total'">
+                                                            {{detail.YearName}}
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <span ng-hide="detail.FertilizerName == 'Grand Total'">
+                                                            {{detail.MonthsName}}
+                                                        </span>
+                                                    </td>
+                                                    <td class="text-right">
+                                                        {{detail.FertilizerSale | number}}
+                                                    </td>
+
+                                                    <td class="text-right">
+                                                        {{detail.FertilizerQuantity | number}}
+                                                    </td>
+                                                    <td class="text-right">
+                                                        {{detail.PresentAvailability | number}}
+                                                    </td>
+
+                                                    <td class="text-right">
+                                                        {{detail.CreditLimit | number}}
+                                                    </td>
+                                                </tr>
+                                                <tr ng-if="!FertilizerCreditList || FertilizerCreditList.length == 0">
+                                                    <td colspan="10" class="text-center">
+                                                        No credit facility details found.
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal fade" id="fertilizerPurchaseModal" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false">
+                        <div class="modal-dialog modal-lg" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">
+                                        <i class="fa fa-detail"></i>
+                                        Fertilizer Purchase Details
+                                        <button type="button" class="close" data-dismiss="modal">
+                                            <span>&times;</span>
+                                        </button>
+                                    </h5>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered table-striped devtable">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Sr.No</th>
+                                                    <th>Fertilizer Name</th>
+                                                    <th>Quantity</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr ng-repeat="detail in FertilizerPurchaseList track by $index" ng-style="detail.FertilizerName == 'Grand Total' && {'font-weight':'bold','color':'black'}">
+                                                    <td><span ng-hide="detail.FertilizerName == 'Grand Total'">{{$index + 1 }}</span></td>
+                                                    <td>
+                                                        {{detail.FertilizerName}}
+                                                    </td>
+
+                                                    <td class="text-right">
+                                                        {{detail.FertilizerQuantity}}
+                                                    </td>
+                                                </tr>
+
+                                                <tr ng-if="!FertilizerPurchaseList || FertilizerPurchaseList.length == 0">
+                                                    <td colspan="8" class="text-center">
+                                                        No Purchase details found.
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>*@
+
+            </div>
+        </div>
+    </div>
+</div>

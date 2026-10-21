@@ -1,0 +1,222 @@
+﻿@{
+    ViewBag.Title = "NCD Basic Details List";
+}
+
+<style>
+    .form-control {
+        border-radius: 0;
+        box-shadow: none;
+        border-color: #d2d6de;
+    }
+
+        .form-control:not(select) {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+
+    .ncd-box {
+        background: #ecf8ee !important;
+        border: 1px dashed #ccc !important;
+        padding: 20px;
+        margin-bottom: 30px;
+        width: 100%;
+    }
+
+    fieldset legend {
+        border: none;
+        background: #bf8313;
+        width: auto;
+        color: #ffffff;
+        padding: 2px 10px;
+    }
+
+    .flexEqualCenter {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    a.backBtn {
+        padding: 3px 5px;
+        background: rgb(99,205,219);
+        color: #fff;
+        border: 0px;
+        outline: none;
+        display: inline-block;
+        text-decoration: none;
+    }
+
+        a.backBtn i {
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+    .tblthfont {
+        font-weight: bold;
+    }
+
+    .d-flex {
+        display: flex;
+    }
+</style>
+<script src="~/Scripts/AngularFramework/NcdBasicDetailsList.js?v=@DateTime.Now.Ticks"></script>
+<script src="~/Scripts/xlsx.full.min.js"></script>
+
+<div ng-app="ncdMod" ng-controller="ncdCtrl" ng-cloak="">
+    <input type="hidden" id="hdnDistrictId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DistrictId)" />
+    <div class="container-fluid citizen-dash-head">
+        <div class="panel panel-default">
+            <div class="panel-heading flexEqualCenter">
+                <b>
+                    <i class="fa fa-th-list"></i>&nbsp; Cooperative Society
+                </b>
+            </div>
+            <div class="panel-body">
+                <div class="row mb-4" id="search-filter">
+                    <div class="col-sm-3 mt-2">
+                        <label class="text-gray-800 text-sm font-medium inline-block">
+                            Society Name
+                        </label>
+                        <input type="text" name="cooperative_society_name" class="form-control" placeholder="Enter society name" ng-model="cooperative_society_name" autocomplete="off" />
+                    </div>
+                    <div class="col-md-3 mt-2">
+                        <label class="text-gray-800 text-sm font-medium inline-block">
+                            Registration Number
+                        </label>
+                        <input type="text" name="registrationNo" class="form-control" placeholder="Enter registration number" ng-model="registration_number" autocomplete="off" />
+                    </div>
+                    <div class="col-md-3 mt-2">
+                        <label for="sector_operation">Sector of Operation</label>
+                        <select name="sectorOperation" id="sector_operation" ng-model="ncd.sector_of_operation_type" class="form-control" ng-change="filterPrimaryActivity(ncd.sector_of_operation_type)">
+                            <option value="" disabled>{{translation.SelectOption}}</option>
+                            <option value="1">Credit</option>
+                            <option value="2">Non-Credit</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mt-2" ng-init="GetSectorDetail();sectorOperationcode='0'">
+                        <label for="primary_activity">Primary Activity</label>
+                        <select name="sectorOperationcode" id="primary_activity" ng-model="sectorOperationcode" class="form-control" ng-change="searchRequest(GetListData)">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option value="{{li.id}}" ng-repeat="li in FilteredNCDSectorDetails">{{li.name}}</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mt-2">
+                        <label for="prsent_functional_status">Present Functional Status</label>
+                        <select name="FunctionalStatus" id="prsent_functional_status" ng-model="FunctionalStatus" class="form-control" ng-change="searchRequest(GetListData)">
+                            <option value="" disabled>{{translation.SelectOption}}</option>
+                            <option value="{{li.Id}}" ng-repeat="li in SocietyFunctionalStatusList">{{li.FunctionalName}}</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mt-2" ng-show="DISTRICT_ID ==null || DISTRICT_ID==0">
+                        <label for="district">District</label>
+                        <select name="districtcode" id="district" ng-model="ncd.districtcode" class="form-control" ng-change="searchRequest(GetListData)">
+                            <option value="" disabled selected>{{translation.SelectOption}}</option>
+                            <option value="{{li.district_code}}" ng-repeat="li in NCDDistrictDetails">{{li.district_name}}</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-3 mt-2 p-2">
+                        <br />
+                        <button type="button" class="btn btn-primary dev-btn ng-binding" ng-click="searchRequest(GetListData)">Search</button>
+                        <button type="button" class="btn btn-primary dev-btn ng-binding" ng-click="ClearSearch()">Reset</button>
+                        <button type="button" class="btn btn-primary dev-btn" ng-click="exportToExcel()">
+                            Export to Excel
+                        </button>
+                    </div>
+                </div>
+                @*List Start here*@
+                <table class="table table-responsive devtable mb-2">
+                    <thead>
+                        <tr>
+                            <th>
+                                {{translation.SRNO}}
+                            </th>
+                            <th>Cooperative Society Name</th>
+                            @*<th>Location</th>*@
+                            <th>District Name</th>
+                            <th>Block / Urban Local Body</th>
+                            <th>Sector Name</th>
+                            <th>Registration No</th>
+                            <th>No of Member</th>
+                            <th>Functional Status</th>
+                            <th>Cooperative ID (NCD ID)</th>
+                            @*<th>Reference Year</th>*@
+                            <th>Date of Registration</th>
+                            @*<th>Created Date</th>*@
+                            <th width="200">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="item in  NcdListData">
+                            <td>{{(((DataPagingDetails.PageNumber - 1) * DataPagingDetails.PageSize) + 1)+$index}}</td>
+                            <td>{{ item.cooperative_society_name }}</td>
+                            @*<td>{{ item.operation_area_location }}</td>*@
+                            <td>{{ item.DistrictName }}</td>
+                            <td>{{ item.blockname }}</td>
+                            <td>{{ item.Sectorname}}</td>
+                            <td>{{ item.registration_number }}</td>
+                            <td>{{ item.members_of_society }}</td>
+                            <td>{{ item.FunctionalStatus}}</td>
+                            <td>{{ item.cooperative_id }}</td>
+                            @*<td>{{ item.reference_year }}</td>*@
+                            <td>{{ item.date_registration| date:'dd-MM-yyyy' }}</td>
+                            @*<td>{{ item.CreatedDate| date:'dd-MM-yyyy'  }}</td>*@
+                            <td>
+                                <a class="btn btn-sm btn-primary"
+                                   title="Edit"
+                                   href="../NCDData/NcdBasicDetails?cooperativeId={{item.cooperative_id}}" target="_blank">
+                                    <i class="fa fa-edit text-white"></i>
+                                </a>
+                                <a class="btn btn-sm btn-warning"
+                                   title="View"
+                                   href="../NCDData/NcdBasicDetails?ncdId={{item.cooperative_id}}" target="_blank">
+                                    <i class="fa fa-eye text-white"></i>
+                                </a>
+                                <a class="btn btn-sm btn-primary" title="Board of Director" ng-click="openDirector(item)">
+                                    <i class="fa fa-user-plus text-white"></i>
+                                </a>
+                                <a class="btn btn-sm btn-danger" title="Remove" ng-click="confirmRemoveSocietyDetail(item)">
+                                    <i class="fa fa-trash text-white"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        <tr ng-show="isNoRecord">
+                            <td colspan="{{colspan}}" style="text-align: center;">
+                                No Records
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div ng-if="DataPagingDetails.TotalPages>1" class="dataTables_paginate paging_simple_numbers" id="dataTables-example_paginate" style="display: flex; align-items: center; justify-content: space-between;">
+                            <div class="dataTables_info" id="dataTables-example_info" role="status" aria-live="polite">
+                                Total Records: {{DataPagingDetails.TotalRecords}}
+                            </div>
+                            <ul class="pagination pagination_1" style="margin-left: 10px !important; margin:0">
+                                <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« First</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« Previous</span></li>
+
+                                <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest('1',SearchData)" style="cursor: pointer;">
+                                    <span>« First</span>
+                                </li>
+                                <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest(DataPagingDetails.PageNumber-1,SearchData)" style="cursor:pointer;">
+                                    <span>« Prev</span>
+                                </li>
+                                <li class="{{n==DataPagingDetails.PageNumber?'active':''}}" style="{{n==DataPagingDetails.PageNumber?'':'cursor: pointer'}}" ng-repeat="n in PagingRange(DataPagingDetails.StartPageNumber,DataPagingDetails.EndPageNumber,DataPagingDetails.TotalPages)" ng-click="pageRequest(n,SearchData)"><span>{{n}}</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Next</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Last</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber!= DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.PageNumber+1,SearchData)" style="cursor:pointer;">
+                                    <span>Next »</span>
+                                </li>
+                                <li ng-if="DataPagingDetails.PageNumber != DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.TotalPages,SearchData)" style="cursor:pointer;">
+                                    <span>Last »</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

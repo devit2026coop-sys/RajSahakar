@@ -1,0 +1,1704 @@
+﻿@{
+    ViewBag.Title = "PLBD Loan Application Form";
+}
+
+<script src="~/Scripts/AngularFramework/PLDBLoanApplicationForm.js?v=1.23"></script>
+<script src="~/Scripts/jquery.unobtrusive-ajax.min.js"></script>
+<script type="text/javascript">
+
+    function OnBegin() {
+        $('#preloader').show();
+    }
+
+    function isNumber(evt) {
+        var iKeyCode = (evt.which) ? evt.which : evt.keyCode
+        if (iKeyCode != 46 && iKeyCode > 31 && (iKeyCode < 48 || iKeyCode > 57))
+            return false;
+
+        return true;
+    }
+    function ValidateAlpha(evt) {
+        var keyCode = (evt.which) ? evt.which : evt.keyCode
+        if ((keyCode < 65 || keyCode > 90) && (keyCode < 97 || keyCode > 123) && keyCode != 32)
+
+            return false;
+        return true;
+    };
+
+    function isAlphaNumeric(e) { // Alphanumeric only
+        var k;
+        document.all ? k = e.keycode : k = e.which;
+        return ((k > 47 && k < 58) || (k > 64 && k < 91) || (k > 96 && k < 123) || k == 0 || k == 32 || k == 44);
+    }
+
+
+    $(document).ready(function () {
+        $("select").on("change", function () {
+            $(this).removeClass("notValid");
+        });
+
+
+        $(".expandDetails").click(function () {
+            var panl_id = $(this).attr("dat-val");
+            if ($(this).hasClass("fa-plus-circle")) {
+                $(this).removeClass("fa-plus-circle").addClass("fa-minus-circle")
+            } else {
+                $(this).addClass("fa-plus-circle").removeClass("fa-minus-circle")
+            }
+            $("#" + panl_id).slideToggle("slow");
+        });
+        var date = (new Date()).getDate() + '/' + ((new Date()).getMonth() + 1) + '/' + ((new Date()).getFullYear()).toString();
+
+        $('.devcalender').datepicker({
+            showOn: "both",
+            changeMonth: true,
+            buttonImage: "../images/calender.png",
+            changeYear: true,
+            dateFormat: "dd/mm/yy",
+            // minDate: '0'
+            yearRange: "c-10:c+0"
+        });
+
+    });
+    function validateInput(input, maxLength, maxDecimalPlaces) {
+        let value = input.value;
+        if (value) {
+            // Check for decimal places
+            let parts = value.split('.');
+            if (parts.length > 1 && parts[1].length > maxDecimalPlaces) {
+                value = parseFloat(value).toFixed(maxDecimalPlaces);
+                input.value = value;
+            }
+
+            // Check for overall length (excluding decimal point and decimal places)
+            let integerPartLength = parts[0].length;
+            let totalLength = integerPartLength + (parts[1] ? parts[1].length : 0);
+            if (totalLength > maxLength) {
+                input.value = input.value.slice(0, maxLength);
+            }
+        }
+    }
+    function DateCheck() {
+
+        return true;
+    }
+
+</script>
+
+<style>
+    label {
+        display: inline-block;
+        width: 100% !important;
+        margin-bottom: 5px;
+        font-weight: 700;
+        text-transform: capitalize;
+    }
+
+    .zoom {
+        transition: transform .2s; /* Animation */
+        margin: 0 auto;
+    }
+
+        .zoom:hover {
+            padding-left: 30px;
+            transform: scale(2.5); /* (150% zoom - Note: if the zoom is too large, it will go outside of the viewport) */
+        }
+
+
+    ul.pagination {
+        margin: 3px 0 0 0 !important;
+    }
+
+    .dataTables_info {
+        float: left;
+        margin-top: 10px;
+    }
+
+    span.mad {
+        color: red;
+    }
+
+
+    .table-responsive .form-group {
+        margin-bottom: 0px;
+        margin-top: 10px;
+    }
+
+        .table-responsive .form-group .heading-hr {
+            margin-bottom: 0px;
+        }
+</style>
+
+<style>
+    @@media print {
+
+        .profile-d1 {
+            color: #000 !important;
+            background: #fff !important;
+            border-radius: 5px !important;
+            margin-bottom: 20px !important;
+        }
+
+        .profile-d1-hr {
+            font-size: 17px !important;
+            background: #025e63 !important;
+            padding: 10px 15px !important;
+            color: #fff !important;
+            border-radius: 4px !important;
+        }
+
+        .dev-spancon {
+            font-size: 13px !important;
+            color: #424242 !important;
+            font-weight: 500 !important;
+        }
+
+        label {
+            color: #025e63 !important;
+            font-size: 14px !important;
+        }
+
+        .devtable thead tr th {
+            background: #64c0c5 !important;
+            color: #fff !important;
+        }
+
+        .col-lg-12, .col-md-12, .col-sm-12, .col-xs-12 {
+            display: block !important;
+            width: auto !important;
+            height: auto !important;
+            overflow: visible !important;
+        }
+
+        .table-responsive {
+            display: block !important;
+            width: auto !important;
+            height: auto !important;
+            overflow: visible !important;
+        }
+
+        .table > tbody > tr > td, .table > tbody > tr > th, .table > tfoot > tr > td, .table > tfoot > tr > th, .table > thead > tr > td, .table > thead > tr > th {
+            border-top: unset !important;
+        }
+
+        .main-header {
+            display: none !important;
+        }
+
+        .sidebar {
+            display: none !important;
+        }
+
+        .dev-toggle-bg {
+            display: none !important;
+        }
+
+        .printhideth {
+            display: none !important;
+        }
+
+        .copydev {
+            display: none !important;
+        }
+
+        .print {
+            display: none !important;
+        }
+
+        .devpage-breadcrumb {
+            display: none !important;
+        }
+
+        .visible-print {
+            display: block !important;
+        }
+
+        table.visible-print {
+            display: table !important;
+        }
+
+        tr.visible-print {
+            display: table-row !important;
+        }
+
+        th.visible-print,
+        td.visible-print {
+            display: table-cell !important;
+        }
+    }
+</style>
+
+<style>
+    @@media print {
+        .visible-print {
+            display: block !important
+        }
+
+        table.visible-print {
+            display: table !important
+        }
+
+        tr.visible-print {
+            display: table-row !important
+        }
+
+        td.visible-print, th.visible-print {
+            display: table-cell !important
+        }
+    }
+
+    .visible-print-block {
+        display: none !important
+    }
+
+    @@media print {
+        .visible-print-block {
+            display: block !important
+        }
+    }
+
+    .visible-print-inline {
+        display: none !important
+    }
+
+    @@media print {
+        .visible-print-inline {
+            display: inline !important
+        }
+    }
+
+    .visible-print-inline-block {
+        display: none !important
+    }
+
+    @@media print {
+        .visible-print-inline-block {
+            display: inline-block !important
+        }
+    }
+
+    @@media print {
+        .hidden-print {
+            display: none !important
+        }
+    }
+
+    .profile-d1 {
+        color: #000;
+        background: #fff;
+        border-radius: 5px;
+        margin-bottom: 20px;
+    }
+
+    .profile-d1-hr {
+        font-size: 17px;
+        background: #025e63;
+        padding: 10px 15px;
+        color: #fff;
+        border-radius: 4px;
+    }
+
+    .dev-spancon {
+        font-size: 13px;
+        color: #424242;
+        font-weight: 500;
+    }
+
+    label {
+        color: #025e63;
+        font-size: 14px;
+    }
+
+    .devtable thead tr th {
+        background: #64c0c5;
+        color: #fff;
+    }
+
+    .table > tbody > tr > td, .table > tbody > tr > th, .table > tfoot > tr > td, .table > tfoot > tr > th, .table > thead > tr > td, .table > thead > tr > th {
+        border-top: unset;
+    }
+</style>
+
+
+<style>
+    a > i.fa.fa-plus-circle {
+        font-size: 25px;
+        cursor: pointer;
+    }
+
+    a:hover > i.fa.fa-plus-circle {
+        font-size: 26px;
+        cursor: pointer;
+    }
+
+    a > i.fa.fa-eye {
+        font-size: 25px;
+        cursor: pointer;
+    }
+
+    a:hover > i.fa.fa-eye {
+        font-size: 26px;
+        cursor: pointer;
+    }
+
+    .add-more {
+    }
+
+    .thCenter {
+        text-align: center !important;
+    }
+
+    .thverticalMiddle {
+        vertical-align: middle !important;
+    }
+
+    .notValid {
+        border: solid 1px red !important
+    }
+
+    .rowdeleteBtn {
+        color: #fff !important;
+        font-weight: bold !important;
+        font-size: 18px !important;
+    }
+
+    .radio-button-box {
+        display: flex;
+        gap: 10px;
+        width: fit-content;
+        white-space: nowrap;
+        padding: 2px 0 0;
+    }
+
+        .radio-button-box label {
+            color: #737373;
+        }
+</style>
+
+
+
+<script language=javascript>
+    //var name1 = $name1;
+    //var name2 = $name2;
+    var X;
+    var multical = "false";
+    if (multical == "false") {
+        var convfactor1 = 6.1772;
+    }
+    else {
+        var convfactor1 = "6.1772";
+    }
+    var convfactor2 = 0.161885643981;
+</script>
+
+
+<div ng-app="PLDBLoanApplicationMod">
+    <div ng-controller="PLDBLoanApplicationCnt">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <h4 class="citizen-dash-head">PLBD Loan Application Form</h4>
+        </div>
+
+        <div class="col-lg-12">
+            <div class="table-responsive citizen-dash-head">
+                <div id="divUserRegistration1">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="text-align:right">
+                        <a href="../PLDB/PldbLoanApplicationDetailsList" class="btn btn-primary">
+                            Back
+                        </a>
+                    </div>
+
+                    <div class="dev-masters" name="MyUserForm">
+                        <div ng-show="!IsSubmiApplication">
+                            <input type="hidden" id="hdnUserlevel" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).LevelId)" />
+                            <input type="hidden" id="hdnUserType" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).UserType.ToUpper())" />
+                            <input type="hidden" id="hdnPLDBId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).PLDBId)" />
+                            <input type="hidden" id="hdnBranchId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).PLDBBrancchId)" />
+                            <input type="hidden" id="hdnDistrictId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DistrictId)" />
+                            <input type="hidden" id="hdnLevelId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).LevelId)" />
+                        </div>
+                        <div ng-show="PLDBMemberDatail=true">
+                            <div class="form-group col-md-12">
+                                @*<h5 class="heading-hr ng-binding">वित्तीय वर्ष 2025–26 के लिए वितरित ऋण का विवरण  </h5>*@
+                                <h5 class="heading-hr ng-binding">वित्तीय वर्ष 2025–26 एवं इसके उपरांत के लिए वितरित ऋण का विवरण  </h5>
+                            </div>
+                            <div class="form-group col-md-12">
+
+                                @*Loannee details 1*@
+
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <label>वित्तीय वर्ष<span class="error">*</span></label>
+                                        <select class="form-control" ng-model="PLDB.FinancialYearId" ng-init="PLDB.FinancialYearId='0'">
+                                            <option value="0">--चुनें--</option>
+                                            <option ng-repeat="item in FinancialYearList" value="{{item.FIN_YEAR_MASTR_ID}}">
+                                                {{item.FIN_YEAR_NAME}}
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-3 form-group">
+                                        <label for="PLDB.Name">ऋणी का नाम<span class="error">*</span></label>
+                                        <input type="text" id="PLDB.Name" class="form-control applicant-name" ng-disabled="isViewMode" placeholder="ऋणी का नाम" ng-model="PLDB.ApplicantName" autocomplete="off" required>
+                                        <!-- Error Message -->
+                                        <span class="text-danger"
+                                              ng-show="PLDBForm.ApplicantName.$touched && PLDBForm.ApplicantName.$invalid">
+                                            Applicant name is required.
+                                        </span>
+                                    </div>
+                                    <div class="col-lg-3 form-group">
+                                        <label for="PLDB.FatherHusbandName">पति / पिता का नाम<span class="error">*</span></label>
+                                        <input type="text" id="PLDB.FatherHusbandName" class="form-control father-name" ng-disabled="isViewMode" placeholder="पति / पिता का नाम" ng-model="PLDB.FatherHusbandName" autocomplete="off" required onKeyPress="return ValidateAlpha(event);" maxlength="50">
+                                    </div>
+                                    <div class="col-lg-3 form-group">
+                                        <label for="PLDB.Gender">लिंग:<span class="error">*</span></label>
+                                        <div class="radio-button-box" ng-init="PLDB.Gender='M'">
+                                            <label>
+                                                <input type="radio" name="Gender" value="M" ng-model="PLDB.Gender" class="gender">Male
+                                            </label>
+                                            <label>
+                                                <input type="radio" value="F" name="Gender" ng-model="PLDB.Gender" class="gender">Female
+                                            </label>
+                                            <label>
+                                                <input type="radio" value="T" name="Gender" ng-model="PLDB.Gender" class="gender">Trans Gender
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-3 form-group">
+                                        <label for="PLDB.Name">ऋणी की उम्र<span class="error">*</span></label>
+                                        <input type="number" id="LoanneAge" name="LoanneAge" class="form-control" ng-disabled="isViewMode" placeholder="ऋणी की उम्र" min="0" ng-model="PLDB.LoanneAge">
+                                        <!-- Error Message -->
+                                        <span class="text-danger"
+                                              ng-show="PLDBForm.LoanneAge.$touched && PLDBForm.LoanneAge.$invalid">
+                                            Loanne Age is required.
+                                        </span>
+                                    </div>
+                                </div>
+
+
+                                @*Loanee details 2*@
+
+                                <div class="row">
+                                    <div class="col-lg-3 form-group">
+                                        <label for="PLDB.Name">ऋणी 2 का नाम</label>
+                                        <input type="text" id="PLDB.Name" class="form-control applicant-name" ng-disabled="isViewMode" placeholder="ऋणी का नाम" ng-model="PLDB.ApplicantName2" autocomplete="off" required>
+                                    </div>
+                                    <div class="col-lg-3 form-group">
+                                        <label for="PLDB.FatherHusbandName">पति / पिता का नाम</label>
+                                        <input type="text" id="PLDB.FatherHusbandName" class="form-control father-name" ng-disabled="isViewMode" placeholder="पति / पिता का नाम" ng-model="PLDB.FatherHusbandName2" autocomplete="off" required onKeyPress="return ValidateAlpha(event);" maxlength="50">
+                                    </div>
+                                    <div class="col-lg-3 form-group">
+                                        <label for="PLDB.Gender2">लिंग:</label>
+                                        <div class="radio-button-box" ng-init="PLDB.Gender2='M'">
+                                            <label>
+                                                <input type="radio" name="Gender2" value="M" ng-model="PLDB.Gender2" class="gender">Male
+                                            </label>
+                                            <label>
+                                                <input type="radio" value="F" name="Gender2" ng-model="PLDB.Gender2" class="gender">Female
+                                            </label>
+                                            <label>
+                                                <input type="radio" value="T" name="Gender2" ng-model="PLDB.Gender2" class="gender">Trans Gender
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-3 form-group">
+                                        <label for="PLDB.Name">ऋणी की उम्र</label>
+                                        <input type="number" id="LoanneAge" name="LoanneAge" class="form-control" ng-disabled="isViewMode" placeholder="ऋणी की उम्र" min="0" ng-model="PLDB.LoanneAge2">
+                                    </div>
+                                </div>
+
+                                @*Loanee deatils 3*@
+                                <div class="row">
+                                    <div class="col-lg-3 form-group">
+                                        <label for="PLDB.Name">ऋणी 3 का नाम</label>
+                                        <input type="text" id="PLDB.Name" class="form-control applicant-name" ng-disabled="isViewMode" placeholder="ऋणी का नाम" ng-model="PLDB.ApplicantName3" autocomplete="off" required>
+                                    </div>
+                                    <div class="col-lg-3 form-group">
+                                        <label for="PLDB.FatherHusbandName">पति / पिता का नाम</label>
+                                        <input type="text" id="PLDB.FatherHusbandName" class="form-control father-name" ng-disabled="isViewMode" placeholder="पति / पिता का नाम" ng-model="PLDB.FatherHusbandName3" autocomplete="off" required onKeyPress="return ValidateAlpha(event);" maxlength="50">
+                                    </div>
+                                    <div class="col-lg-3 form-group">
+                                        <label for="PLDB.Gender3">लिंग:</label>
+                                        <div class="radio-button-box" ng-init="PLDB.Gender3='M'">
+                                            <label>
+                                                <input type="radio" name="Gender3" value="M" ng-model="PLDB.Gender3" class="gender">Male
+                                            </label>
+                                            <label>
+                                                <input type="radio" value="F" name="Gender3" ng-model="PLDB.Gender3" class="gender">Female
+                                            </label>
+                                            <label>
+                                                <input type="radio" value="T" name="Gender3" ng-model="PLDB.Gender3" class="gender">Trans Gender
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-3 form-group">
+                                        <label for="PLDB.Name">ऋणी की उम्र</label>
+                                        <input type="number" id="LoanneAge" name="LoanneAge" class="form-control" ng-disabled="isViewMode" placeholder="ऋणी की उम्र" min="0" ng-model="PLDB.LoanneAge3">
+                                    </div>
+                                </div>
+
+
+                                @*Loanee details 4*@
+
+                                <div class="row">
+                                    <div class="col-lg-3 form-group">
+                                        <label for="PLDB.Name">ऋणी 4 का नाम</label>
+                                        <input type="text" id="PLDB.Name" class="form-control applicant-name" ng-disabled="isViewMode" placeholder="ऋणी का नाम" ng-model="PLDB.ApplicantName4" autocomplete="off" required>
+                                    </div>
+                                    <div class="col-lg-3 form-group">
+                                        <label for="PLDB.FatherHusbandName">पति / पिता का नाम</label>
+                                        <input type="text" id="PLDB.FatherHusbandName" class="form-control father-name" ng-disabled="isViewMode" placeholder="पति / पिता का नाम" ng-model="PLDB.FatherHusbandName4" autocomplete="off" required onKeyPress="return ValidateAlpha(event);" maxlength="50">
+                                    </div>
+                                    <div class="col-lg-3 form-group">
+                                        <label for="PLDB.Gender4">लिंग:</label>
+                                        <div class="radio-button-box" ng-init="PLDB.Gender4='M'">
+                                            <label>
+                                                <input type="radio" name="Gender4" value="M" ng-model="PLDB.Gender4" class="gender">Male
+                                            </label>
+                                            <label>
+                                                <input type="radio" value="F" name="Gender4" ng-model="PLDB.Gender4" class="gender">Female
+                                            </label>
+                                            <label>
+                                                <input type="radio" value="T" name="Gender4" ng-model="PLDB.Gender4" class="gender">Trans Gender
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-3 form-group">
+                                        <label for="PLDB.Name">ऋणी की उम्र</label>
+                                        <input type="number" id="LoanneAge" name="LoanneAge" class="form-control" ng-disabled="isViewMode" placeholder="ऋणी की उम्र" min="0" ng-model="PLDB.LoanneAge4">
+                                    </div>
+                                </div>
+
+                                @*Loanee details 5*@
+
+                                <div class="row">
+                                    <div class="col-lg-3 form-group">
+                                        <label for="PLDB.Name">ऋणी 5 का नाम</label>
+                                        <input type="text" id="PLDB.Name" class="form-control applicant-name" ng-disabled="isViewMode" placeholder="ऋणी का नाम" ng-model="PLDB.ApplicantName5" autocomplete="off" required>
+                                    </div>
+                                    <div class="col-lg-3 form-group">
+                                        <label for="PLDB.FatherHusbandName">पति / पिता का नाम</label>
+                                        <input type="text" id="PLDB.FatherHusbandName" class="form-control father-name" ng-disabled="isViewMode" placeholder="पति / पिता का नाम" ng-model="PLDB.FatherHusbandName5" autocomplete="off" required onKeyPress="return ValidateAlpha(event);" maxlength="50">
+                                    </div>
+                                    <div class="col-lg-3 form-group">
+                                        <label for="PLDB.Gender5">लिंग:</label>
+                                        <div class="radio-button-box" ng-init="PLDB.Gender5='M'">
+                                            <label>
+                                                <input type="radio" name="Gender5" value="M" ng-model="PLDB.Gender5" class="gender">Male
+                                            </label>
+                                            <label>
+                                                <input type="radio" value="F" name="Gender5" ng-model="PLDB.Gender5" class="gender">Female
+                                            </label>
+                                            <label>
+                                                <input type="radio" value="T" name="Gender5" ng-model="PLDB.Gender5" class="gender">Trans Gender
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-3 form-group">
+                                        <label for="PLDB.Name">ऋणी की उम्र</label>
+                                        <input type="number" id="LoanneAge" name="LoanneAge" class="form-control" ng-disabled="isViewMode" placeholder="ऋणी की उम्र" min="0" ng-model="PLDB.LoanneAge5">
+                                    </div>
+
+                                    <div class="col-lg-3 form-group">
+                                        <label for="ddlCategory">श्रेणी <span class="error">*</span> </label>
+                                        <select id="ddlCategory" ng-model="PLDB.CategoryName" class="form-control caste-category" ng-init="PLDB.CategoryName='0'">
+                                            <option value="0" disabled>--चुनें--</option>
+                                            <option ng-repeat="item in CategoryList | orderBy:'CODEID'" value="{{item.CODEID}}">
+                                                {{_language =='en-us' ?  item.CODENAME : item.CODENAME_MANGAL}}
+                                            </option>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-lg-3 form-group">
+                                        <label for="PLDB.FarmerType">कृषक की श्रेणी <span class="error">*</span> </label>
+                                        <select id="PLDB.FarmerType" class="form-control" ng-model="PLDB.FarmerType">
+                                            <option value="">-- चुनें --</option>
+                                            <option value="SF">SF (Small Farmer)</option>
+                                            <option value="MF">MF (Marginal Farmers)</option>
+                                            <option value="Other">Other</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-md-3 form-group">
+                                        <label for="txtJanAadharNumber">आधार संख्या:</label>
+                                        <input type="text" id="txtJanAadharNumber" ng-model="PLDB.AadharNumber" ng-value="PLDB.AadharNumber" placeholder="आधार संख्या" onpaste="return false;" ondrop="return false;" ng-minlength="10" maxlength="12" onkeypress="return event.charCode >= 48 && event.charCode <= 57" class="form-control janaadharno" />
+                                    </div>
+
+                                    <div class="col-lg-3 form-group">
+                                        <label for="PLDB.MobileNo">मोबाइल नंबर <span class="error">*</span> </label>
+                                        <input type="text" class="form-control mobileno" placeholder="मोबाइल नंबर" id="PLDB.MobileNo" ng-model="PLDB.MobileNo" autocomplete="off" required maxlength="10" min="10" onkeypress='return event.charCode >= 48 && event.charCode <= 57'>
+                                    </div>
+
+                                    <div class="col-lg-3 form-group">
+                                        <label for="PLDB.PANNumber">पैन कार्ड संख्या (यदि हो)</label>
+                                        <input type="text" class="form-control" ng-model="PLDB.PANNumber" placeholder="पैन कार्ड संख्या" autocomplete="off" required title="Please enter a valid 10-character PAN number (e.g., ABCDE1234F)">
+                                    </div>
+
+
+                                    <div class="col-md-3 form-group">
+                                        <label for="LoanAccNo">ऋण खाता संख्या:<span class="error">*</span></label>
+                                        <input type="text" id="LoanAccNo" ng-model="PLDB.LoanAccNo" ng-value="PLDB.NoOfLoaneeBen" placeholder="ऋण खाता संख्या" class="form-control" required />
+                                        <input type="hidden" name="name" ng-model="Pldb.EMitraTransactionId" />
+                                        <input type="hidden" class="form-control" name="HouseBuildingNo" ng-model="Pldb.ActId" placeholder="{{translation.HouseBuildingNo}}" autocomplete="off">
+
+                                    </div>
+
+                                    <div class="form-group col-md-3">
+                                        <label for="">पीएलडीबी नाम<span class="error">*</span></label>
+                                        <select ng-model="PLDB.PldbId"
+                                                id="ddlDistrict"
+                                                class="form-control"
+                                                ng-change="PLDBBranchList('0')"
+                                                ng-disabled="IsPLDBFreezed">
+                                            <option value="0" disabled>--चुनें--</option>
+                                            <option ng-repeat="itemPLDB in PLDBList | orderBy:'PLDBName' track by itemPLDB.PldbId " value="{{itemPLDB.PldbId}}">
+                                                {{itemPLDB.PLDBName}}
+                                            </option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group col-md-3">
+                                        <label for="">शाखा का नाम<span class="error">*</span></label>
+                                        <select ng-model="PLDB.BranchId"
+                                                id="branchid"
+                                                class="form-control"
+                                                ng-init="PLDB.BranchId='0'" ng-disabled="IsBranchFreezed">
+                                            <option value="0" disabled>--चुनें--</option>
+                                            <option ng-repeat="itemBlock in PLDBBranches | orderBy:'BLOCK_ENG'" value="{{itemBlock.BLOCK_ID}}">
+                                                {{_language =='en-us' ?  itemBlock.BLOCK_ENG : itemBlock.BLOCK_MANGAL}}
+                                            </option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group col-md-3">
+                                        <label for="">ज़िला<span class="error">*</span></label>
+                                        <select ng-model="PLDB.DistrictId"
+                                                id="ddlDistrict"
+                                                class="form-control"
+                                                ng-change="OnDistrictChange()"
+                                                ng-init="PLDB.DistrictId='0'" ng-disabled="isViewMode">
+                                            <option value="0" disabled>--चुनें--</option>
+                                            <option ng-repeat="item in DistrictList | orderBy:'DISTRICT_ENG'" value="{{item.DISTRICT_ID}}">
+                                                {{_language == 'en-us' ? item.DISTRICT_ENG : item.DISTRICT_MANGAL}}
+                                            </option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group col-md-3">
+                                        <label for="AssemblyId"> विधानसभा क्षेत्र <span class="error">*</span></label>
+
+                                        <select class="form-control"
+                                                name="Assembly"
+                                                id="AssemblyId"
+                                                ng-model="PLDB.AssemblyId"
+                                                ng-options="t.ASSEMBLY_ID as t.AC_ENG for t in AssemblyList">
+                                            <option value="">--चुनें--</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="form-group col-md-3">
+                                        <label> Urban / Rural <span class="error">*</span></label>
+                                        <div class="radio-button-box">
+                                            <label class="radio-inline">
+                                                <input type="radio" ng-model="PLDB.AreaType" value="Urban" ng-change="onAreaTypeChange()"> Urban
+                                            </label>
+
+                                            <label class="radio-inline">
+                                                <input type="radio" ng-model="PLDB.AreaType" value="Rural" ng-init="PLDB.AreaType='Rural'" ng-change="onAreaTypeChange()"> Rural
+                                            </label>
+                                        </div>
+
+                                    </div>
+
+                                    <div class="form-group col-md-3" ng-show="PLDB.AreaType == 'Rural'">
+                                        <label for="">ब्लॉक <span class="error">*</span></label>
+                                        <select ng-model="PLDB.BlockId" id="ddlblocki" class="form-control" ng-init="PLDB.BlockId='0'" ng-change="GramPanchayatList(1)">
+                                            <option value="0" disabled>--चुनें--</option>
+                                            <option ng-repeat="item in Blocksdata | orderBy:'BLOCK_ENG'" value="{{item.BLOCK_ID}}">
+                                                {{_language =='en-us' ?  item.BLOCK_ENG : item.BLOCK_MANGAL}}
+                                            </option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group col-md-3" ng-show="PLDB.AreaType == 'Rural'" ng-if="!PLDB.IsOtherGramPanchayat">
+                                        <label for="">ग्राम पंचायत <span class="error">*</span></label>
+
+                                        <select ng-model="PLDB.GP_ID" id="ddlGP" class="form-control" ng-init="PLDB.GP_ID='0'" ng-change="VillageList(1)">
+                                            <option value="0" disabled>--चुनें--</option>
+                                            <option ng-repeat="item in GramPanchayats | orderBy:'GramPanchayats'" value="{{item.GP_ID}}">
+                                                {{_language =='en-us' ?  item.GP_ENG : item.GP_MANGAL}}
+                                            </option>
+                                        </select>
+
+                                    </div>
+
+                                    <div class="form-group col-md-3" ng-show="PLDB.AreaType == 'Rural'" style="min-height: 59px;">
+                                        <label>  <input type="checkbox" ng-true-value="1" ng-false-value="0" ng-change="ClearOtherGPFields()" ng-model="PLDB.IsOtherGramPanchayat" /> यदि ग्राम पंचायत उपलब्ध नहीं है  </label>
+                                    </div>
+
+                                    <div class="form-group col-md-3" ng-if="PLDB.IsOtherGramPanchayat">
+                                        <label>ग्राम पंचायत का नाम </label>
+                                        <input type="text" class="form-control" ng-model="PLDB.GP_Other" placeholder="ग्राम पंचायत का नाम" />
+                                    </div>
+
+                                    <div class="form-group col-md-3" ng-if="PLDB.IsOtherGramPanchayat">
+                                        <label> ग्राम का नाम</label>
+                                        <input type="text" class="form-control" ng-model="PLDB.Village_Other" placeholder="ग्राम का नाम" />
+                                    </div>
+
+                                    <div class="form-group col-md-3" ng-show="PLDB.AreaType == 'Rural'">
+                                        <label for="Tehsil">तहसील <span class="error">*</span></label>
+
+                                        <select class="form-control"
+                                                name="Tehsil"
+                                                id="Tehsil"
+                                                ng-model="PLDB.TehsilId"
+                                                ng-options="t.TEHSIL_ID as t.TEHSIL_ENG for t in Tehsil">
+                                            <option value="">--चुनें--</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group col-md-3" ng-show="PLDB.AreaType == 'Rural'" ng-if="!PLDB.IsOtherGramPanchayat">
+                                        <label for="">ग्राम <span class="error">*</span></label>
+                                        <select ng-model="PLDB.VId" id="ddlVillage" class="form-control" ng-init="PLDB.VId='0'">
+                                            <option value="0" disabled>--चुनें--</option>
+                                            <option ng-repeat="item in Villages | orderBy:'VILLAGE_ENG'" value="{{item.VILLAGE_ID}}">
+                                                {{_language =='en-us' ?  item.VILLAGE_ENG : item.VILLAGE_MANGAL}}
+                                            </option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group col-md-3" ng-show="PLDB.AreaType == 'Urban'">
+                                        <label for=""> शहर <span class="error">*</span></label>
+                                        <select ng-model="PLDB.CityId" class="form-control" id="ddlCity" ng-change="GetWardListbySociety()" ng-init="PLDB.CityId='0'">
+                                            <option value="0" disabled>--चुनें--</option>
+                                            <option ng-repeat="itemCity in CityListdata" value="{{itemCity.CITY_ID}}">
+                                                {{_language =='en-us' ?  itemCity.CITY_ENG : itemCity.CITY_MANGAL}}
+                                            </option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group col-md-3" ng-show="PLDB.AreaType == 'Urban'">
+                                        <label for=""> वार्ड <span class="error">*</span></label>
+                                        <select ng-model="PLDB.WardId" id="ddlward" class="form-control" ng-init="PLDB.WardId='0'">
+                                            <option value="0" disabled>--चुनें--</option>
+                                            <option ng-repeat="itemWard in Ward" value="{{itemWard.WARD_ID}}">
+                                                {{_language =='en-us' ?  itemWard.WARD_ENG : itemWard.WARD_MANGAL}}
+                                            </option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group col-md-3">
+                                        <label for="Parliamentary">संसदीय क्षेत्र </label>
+                                        <input type="text" class="form-control" name="Parliamentary" id="Parliamentary" ng-model="PLDB.ParliamentaryConstituency" placeholder="सांसदीय क्षेत्र" autocomplete="off">
+                                    </div>
+
+                                    <div class="form-group col-md-3">
+                                        <label>ऋण आवेदन प्राप्ति दिनांक </label>
+                                        <input type="date" class="form-control" ng-model="PLDB.LoanApplicationDate" />
+                                    </div>
+
+                                    <div class="form-group col-md-3">
+                                        <label for="LoanNo">ऋण आवेदन संख्या </label>
+                                        <input type="text" class="form-control" ng-model="PLDB.LoanApplicationNo" placeholder="ऋण आवेदन संख्या " autocomplete="off" ng-maxlength="20">
+                                    </div>
+
+                                    @*sector 1*@
+                                    <div class="col-lg-3 form-group">
+                                        <label for="Pldbsectornew">सेक्टर 1 <span class="error">*</span></label>
+                                        <select id="sector_id" ng-model="PLDB.SectorId" class="form-control caste-category" ng-init="PLDB.SectorId='0'" ng-change="LoadPurposeByShemeId(PLDB.SectorId,$index)">
+                                            <option value="0" disabled>--चुनें--</option>
+                                            <option ng-repeat="itm in LoanSectorList" value="{{itm.sector_id}}">
+                                                {{_language =='en-us' ?  itm.sector_name_en : itm.sector_name_hi}}
+                                            </option>
+                                        </select>
+                                    </div>
+
+                                    @*purpose 1*@
+                                    <div class="col-lg-3 form-group">
+                                        <label for="Pldbsectornew">ऋण उद्देश्य 1 <span class="error">*</span></label>
+                                        <select ng-model="PLDB.PurposeId" class="form-control caste-category" ng-init="PLDB.PurposeId='0'">
+                                            <option value="0" disabled>--चुनें--</option>
+                                            <option ng-repeat="itm in PurposeOfLoanList" value="{{itm.PLDB_OTS_LoanPurposeID}}">
+                                                {{_language =='en-us' ?  itm.PurposeNameEN : itm.PurposeNameHI}}
+                                            </option>
+                                        </select>
+                                    </div>
+
+                                    @*sector 2*@
+                                    <div class="col-lg-3 form-group">
+                                        <label for="Pldbsectornew2"> सेक्टर 2 </label>
+                                        <select id="sector_id2" ng-model="PLDB.SectorId2" class="form-control caste-category" ng-init="PLDB.SectorId2='0'" ng-change="LoadPurposeByShemeId2(PLDB.SectorId2,$index)">
+                                            <option value="0" disabled>--चुनें--</option>
+                                            <option ng-repeat="itm in LoanSectorList" value="{{itm.sector_id}}">
+                                                {{_language =='en-us' ?  itm.sector_name_en : itm.sector_name_hi}}
+                                            </option>
+                                        </select>
+                                    </div>
+
+                                    @*purpose 2*@
+                                    <div class="col-lg-3 form-group">
+                                        <label for="Pldbsectornew2"> ऋण उद्देश्य 2 </label>
+                                        <select ng-model="PLDB.PurposeId2" class="form-control caste-category" ng-init="PLDB.PurposeId2='0'">
+                                            <option value="0" disabled>--चुनें--</option>
+                                            <option ng-repeat="itm in PurposeOfLoanList2" value="{{itm.PLDB_OTS_LoanPurposeID}}">
+                                                {{_language =='en-us' ?  itm.PurposeNameEN : itm.PurposeNameHI}}
+                                            </option>
+                                        </select>
+                                    </div>
+
+                                    @*sector 3*@
+                                    <div class="col-lg-3 form-group">
+                                        <label for="Pldbsectornew3"> सेक्टर 3 </label>
+                                        <select id="sector_id3" ng-model="PLDB.SectorId3" class="form-control caste-category" ng-init="PLDB.SectorId3='0'" ng-change="LoadPurposeByShemeId3(PLDB.SectorId3,$index)">
+                                            <option value="0" disabled>--चुनें--</option>
+                                            <option ng-repeat="itm in LoanSectorList" value="{{itm.sector_id}}">
+                                                {{_language =='en-us' ?  itm.sector_name_en : itm.sector_name_hi}}
+                                            </option>
+                                        </select>
+                                    </div>
+
+                                    @*purpose 3*@
+                                    <div class="col-lg-3 form-group">
+                                        <label for="Pldbsectornew3"> ऋण उद्देश्य 3 </label>
+                                        <select ng-model="PLDB.PurposeId3" class="form-control caste-category" ng-init="PLDB.PurposeId3='0'">
+                                            <option value="0" disabled>--चुनें--</option>
+                                            <option ng-repeat="itm in PurposeOfLoanList3" value="{{itm.PLDB_OTS_LoanPurposeID}}">
+                                                {{_language =='en-us' ?  itm.PurposeNameEN : itm.PurposeNameHI}}
+                                            </option>
+                                        </select>
+                                    </div>
+
+                                    @*sector 4*@
+                                    <div class="col-lg-3 form-group">
+                                        <label for="Pldbsectornew4"> सेक्टर 4 </label>
+                                        <select id="sector_id4" ng-model="PLDB.SectorId4" class="form-control caste-category" ng-init="PLDB.SectorId4='0'" ng-change="LoadPurposeByShemeId4(PLDB.SectorId4,$index)">
+                                            <option value="0" disabled>--चुनें--</option>
+                                            <option ng-repeat="itm in LoanSectorList" value="{{itm.sector_id}}">
+                                                {{_language =='en-us' ?  itm.sector_name_en : itm.sector_name_hi}}
+                                            </option>
+                                        </select>
+                                    </div>
+
+                                    @*purpose 4*@
+                                    <div class="col-lg-3 form-group">
+                                        <label for="Pldbsectornew4"> ऋण उद्देश्य 4 </label>
+                                        <select ng-model="PLDB.PurposeId4" class="form-control caste-category" ng-init="PLDB.PurposeId4='0'">
+                                            <option value="0" disabled>--चुनें--</option>
+                                            <option ng-repeat="itm in PurposeOfLoanList4" value="{{itm.PLDB_OTS_LoanPurposeID}}">
+                                                {{_language =='en-us' ?  itm.PurposeNameEN : itm.PurposeNameHI}}
+                                            </option>
+                                        </select>
+                                    </div>
+
+
+                                    @*sector 5*@
+                                    <div class="col-lg-3 form-group">
+                                        <label for="Pldbsectornew4"> सेक्टर 5 </label>
+                                        <select id="sector_id5" ng-model="PLDB.SectorId5" class="form-control caste-category" ng-init="PLDB.SectorId5='0'" ng-change="LoadPurposeByShemeId5(PLDB.SectorId5,$index)">
+                                            <option value="0" disabled>--चुनें--</option>
+                                            <option ng-repeat="itm in LoanSectorList" value="{{itm.sector_id}}">
+                                                {{_language =='en-us' ?  itm.sector_name_en : itm.sector_name_hi}}
+                                            </option>
+                                        </select>
+                                    </div>
+
+                                    @*purpose 5*@
+                                    <div class="col-lg-3 form-group">
+                                        <label for="Pldbsectornew5"> ऋण उद्देश्य 5 </label>
+                                        <select ng-model="PLDB.PurposeId5" class="form-control caste-category" ng-init="PLDB.PurposeId5='0'">
+                                            <option value="0" disabled>--चुनें--</option>
+                                            <option ng-repeat="itm in PurposeOfLoanList5" value="{{itm.PLDB_OTS_LoanPurposeID}}">
+                                                {{_language =='en-us' ?  itm.PurposeNameEN : itm.PurposeNameHI}}
+                                            </option>
+                                        </select>
+                                    </div>
+
+                                    @*sector 6*@
+                                    <div class="col-lg-3 form-group">
+                                        <label for="Pldbsectornew6"> सेक्टर 6 </label>
+                                        <select id="sector_id6" ng-model="PLDB.SectorId6" class="form-control caste-category" ng-init="PLDB.SectorId6='0'" ng-change="LoadPurposeByShemeId6(PLDB.SectorId6,$index)">
+                                            <option value="0" disabled>--चुनें--</option>
+                                            <option ng-repeat="itm in LoanSectorList" value="{{itm.sector_id}}">
+                                                {{_language =='en-us' ?  itm.sector_name_en : itm.sector_name_hi}}
+                                            </option>
+                                        </select>
+                                    </div>
+
+                                    @*purpose 6*@
+                                    <div class="col-lg-3 form-group">
+                                        <label for="Pldbsectornew6"> ऋण उद्देश्य 6 </label>
+                                        <select ng-model="PLDB.PurposeId6" class="form-control caste-category" ng-init="PLDB.PurposeId6='0'">
+                                            <option value="0" disabled>--चुनें--</option>
+                                            <option ng-repeat="itm in PurposeOfLoanList6" value="{{itm.PLDB_OTS_LoanPurposeID}}">
+                                                {{_language =='en-us' ?  itm.PurposeNameEN : itm.PurposeNameHI}}
+                                            </option>
+                                        </select>
+                                    </div>
+
+
+                                    @*sector 7*@
+                                    <div class="col-lg-3 form-group">
+                                        <label for="Pldbsectornew7"> सेक्टर 7 </label>
+                                        <select id="sector_id7" ng-model="PLDB.SectorId7" class="form-control caste-category" ng-init="PLDB.SectorId7='0'" ng-change="LoadPurposeByShemeId7(PLDB.SectorId7,$index)">
+                                            <option value="0" disabled>--चुनें--</option>
+                                            <option ng-repeat="itm in LoanSectorList" value="{{itm.sector_id}}">
+                                                {{_language =='en-us' ?  itm.sector_name_en : itm.sector_name_hi}}
+                                            </option>
+                                        </select>
+                                    </div>
+
+                                    @*purpose 7*@
+                                    <div class="col-lg-3 form-group">
+                                        <label for="Pldbsectornew7"> ऋण उद्देश्य 7 </label>
+                                        <select ng-model="PLDB.PurposeId7" class="form-control caste-category" ng-init="PLDB.PurposeId7='0'">
+                                            <option value="0" disabled>--चुनें--</option>
+                                            <option ng-repeat="itm in PurposeOfLoanList7" value="{{itm.PLDB_OTS_LoanPurposeID}}">
+                                                {{_language =='en-us' ?  itm.PurposeNameEN : itm.PurposeNameHI}}
+                                            </option>
+                                        </select>
+                                    </div>
+
+
+                                    <div class="form-group col-md-3">
+                                        <label>परियोजना लागत राशि </label>
+                                        <input type="number" class="form-control" ng-model="PLDB.ProjectCostAmount" min="0" step="0.01" placeholder="परियोजना लागत राशि" />
+                                    </div>
+
+                                    <div class="form-group col-md-3">
+                                        <label>आवेदित ऋण राशि </label>
+                                        <input type="number" class="form-control" ng-model="PLDB.AppliedLoanAmount" min="0" step="0.01" placeholder="आवेदित ऋण राशि" />
+                                    </div>
+
+                                    <div class="form-group col-md-3">
+                                        <label>ऋणी का अंशदान राशि <span class="error">*</span></label>
+                                        <input type="number" class="form-control" ng-model="PLDB.SubsidyLoanAmount" min="0" step="0.01" placeholder="ऋणी का अंशदान राशि" />
+                                    </div>
+
+                                    <div class="col-lg-3 form-group">
+                                        <label>आवेदन पत्र पर फोटो सत्यापनकर्ता नाम </label>
+                                        <input type="text" class="form-control" ng-model="PLDB.PhotoVerifierName" placeholder="आवेदन पत्र पर फोटो सत्यापनकर्ता नाम">
+                                    </div>
+
+                                    <div class="col-lg-3 form-group">
+                                        <label>आवेदन पत्र पर फोटो सत्यापनकर्ता पद </label>
+                                        <input type="text" class="form-control" ng-model="PLDB.PhotoVerifierDesignation" placeholder="आवेदन पत्र पर फोटो सत्यापनकर्ता पद">
+                                    </div>
+
+                                    <div class="col-lg-3 form-group">
+                                        <label>नाबकयात प्रमाण पत्र प्राप्त किए गए हैं अथवा नहीं </label>
+                                        <div class="radio-button-box" ng-init="PLDB.IsRegistrationCertificateReceived=0">
+                                            <label class="help-block-gender">
+                                                <input type="radio" name="IsRegistrationCertificateReceived" value="1" ng-model="PLDB.IsRegistrationCertificateReceived">हाँ
+
+                                            </label>
+                                            <label class="help-block-gender">
+                                                <input type="radio" value="0" name="IsRegistrationCertificateReceived" ng-model="PLDB.IsRegistrationCertificateReceived">नहीं
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group col-md-3">
+                                        <label>तकमीना / कोटेशन संलग्न है अथवा नहीं (यदि लागू हो)</label>
+                                        <div class="radio-button-box" ng-init="PLDB.IsEstimateQuotationAttached=0">
+                                            <label class="help-block-gender">
+                                                <input type="radio" name="IsEstimateQuotationAttached" value="1" ng-model="PLDB.IsEstimateQuotationAttached">हाँ
+
+                                            </label>
+                                            <label class="help-block-gender">
+                                                <input type="radio" value="0" name="IsEstimateQuotationAttached" ng-model="PLDB.IsEstimateQuotationAttached">नहीं
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group col-md-12">
+                                        <h5 class="heading-hr ng-binding">रहन हेतु प्रस्तावित कृषि भूमि के संबंध में विवरण</h5>
+                                    </div>
+
+                                    <div class="form-group col-md-3">
+                                        <label> नवीनतम जमाबन्दी संल्गन है अथवा नहीं </label>
+                                        <div class="radio-button-box" ng-init="PLDB.AIsJamabandiAttached=0">
+                                            <label class="help-block-gender">
+                                                <input type="radio" name="AIsJamabandiAttached" value="1" ng-model="PLDB.AIsJamabandiAttached">हाँ
+
+                                            </label>
+                                            <label class="help-block-gender">
+                                                <input type="radio" value="0" name="AIsJamabandiAttached" ng-model="PLDB.AIsJamabandiAttached">नहीं
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group col-md-3">
+                                        <label> चालू खसरा गिरदावरी की नक़ल (गत 3 वर्ष) संलग्न है अथवा नहीं </label>
+                                        <div class="radio-button-box" ng-init="PLDB.AIsKhasraGirdawariCopyAttached=0">
+                                            <label class="help-block-gender">
+                                                <input type="radio" name="AIsKhasraGirdawariCopyAttached" value="1" ng-model="PLDB.AIsKhasraGirdawariCopyAttached">हाँ
+
+                                            </label>
+                                            <label class="help-block-gender">
+                                                <input type="radio" value="0" name="AIsKhasraGirdawariCopyAttached" ng-model="PLDB.AIsKhasraGirdawariCopyAttached">नहीं
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group col-md-3">
+                                        <label> भूमि का नक्शा (ट्रेस) संलग्न है अथवा नहीं </label>
+                                        <div class="radio-button-box" ng-init="PLDB.AIsLandMapAttached=0">
+                                            <label class="help-block-gender">
+                                                <input type="radio" name="AIsLandMapAttached" value="1" ng-model="PLDB.AIsLandMapAttached">हाँ
+
+                                            </label>
+                                            <label class="help-block-gender">
+                                                <input type="radio" value="0" name="AIsLandMapAttached" ng-model="PLDB.AIsLandMapAttached">नहीं
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group col-md-3">
+                                        <label> प्रार्थी के स्वामित्व का शपथ पत्र / स्वघोषणा पत्र संलग्न है या नहीं </label>
+                                        <div class="radio-button-box" ng-init="PLDB.AIsOwnershipAffidavitAttached=0">
+                                            <label class="help-block-gender">
+                                                <input type="radio" name="AIsOwnershipAffidavitAttached" value="1" ng-model="PLDB.AIsOwnershipAffidavitAttached">हाँ
+
+                                            </label>
+                                            <label class="help-block-gender">
+                                                <input type="radio" value="0" name="AIsOwnershipAffidavitAttached" ng-model="PLDB.AIsOwnershipAffidavitAttached">नहीं
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group col-md-12">
+                                        <h5 class="heading-hr ng-binding">रहन हेतु प्रस्तावित अन्य अचल संपत्ति के संबंध में विवरण</h5>
+                                    </div>
+
+                                    <div class="form-group col-md-3">
+                                        <label>आवेदक के स्वामित्व को प्रमाणित करने वाले आवश्यक दस्तावेजों की मूल प्रतियां तथा पंजीयनशुदा पट्टा, लीज डीड इत्यादि संलग्न है अथवा नहीं </label>
+                                        <div class="radio-button-box" ng-init="PLDB.BApplicantregistrationAttact=0">
+                                            <label class="help-block-gender">
+                                                <input type="radio" name="BApplicantregistrationAttact" value="1" ng-model="PLDB.BApplicantregistrationAttact">हाँ
+
+                                            </label>
+                                            <label class="help-block-gender">
+                                                <input type="radio" value="0" name="BApplicantregistrationAttact" ng-model="PLDB.BApplicantregistrationAttact">नहीं
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group col-md-3">
+                                        <label> संपत्ति का नक्शा संलग्न है अथवा नहीं </label>
+                                        <div class="radio-button-box" ng-init="PLDB.BAIsLandMapAttached=0">
+                                            <label class="help-block-gender">
+                                                <input type="radio" name="BAIsLandMapAttached" value="1" ng-model="PLDB.BAIsLandMapAttached">हाँ
+
+                                            </label>
+                                            <label class="help-block-gender">
+                                                <input type="radio" value="0" name="BAIsLandMapAttached" ng-model="PLDB.BAIsLandMapAttached">नहीं
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group col-md-3">
+                                        <label>प्राथमिक बैंक द्वारा अधिकृत मान्यता प्राप्त मूल्यांकनकर्ता का नाम एवं पद </label>
+                                        <input type="text"
+                                               class="form-control"
+                                               ng-model="PLDB.BBankApprovedValuerName"
+                                               placeholder="प्राथमिक बैंक द्वारा  नाम एवं पद"
+                                               required
+                                               autocomplete="off">
+                                    </div>
+
+
+                                    <div class="form-group col-md-3">
+                                        <label>रहन हेतु प्रस्तावित भूमि (हेक्टेयर में)</label>
+                                        <input type="text" class="form-control"
+                                               ng-model="PLDB.ProposedMortgageLand"
+                                               placeholder="रहन हेतु प्रस्तावित भूमि (हेक्टेयर में)"
+                                               autocomplete="off">
+                                    </div>
+                                    <div class="form-group col-md-12"></div>
+
+                                    <div class="form-group col-md-3">
+                                        <label>भूमि की प्रति हेक्टेयर औसत दर (डीएलएस दरों के आधार पर)</label>
+                                        <input type="number" class="form-control"
+                                               ng-model="PLDB.AverageLandRatePerHectare" min="0"
+                                               step="0.01"
+                                               placeholder="भूमि की प्रति हेक्टेयर औसत दर ">
+                                    </div>
+
+                                    <div class="form-group col-md-3">
+                                        <label>प्रस्तावित रहन भूमि का कुल मूल्य</label>
+                                        <input type="number" class="form-control"
+                                               ng-model="PLDB.TotalLandRatePerHectare" min="0"
+                                               step="0.01"
+                                               placeholder="प्रस्तावित रहन भूमि का कुल मूल्य ">
+                                    </div>
+
+                                    <div class="form-group col-md-3">
+                                        <label>एल.वी.ओ. रिपोर्ट के अनुसार ऋण क्षमता (राशि) <span class="error">*</span></label>
+                                        <input type="number" class="form-control"
+                                               ng-model="PLDB.LVOReportLoanValue"
+                                               min="0"
+                                               placeholder="एल.वी.ओ. रिपोर्ट के अनुसार ऋण क्षमता (राशि)">
+                                    </div>
+
+                                    <div class="form-group col-md-3">
+                                        <label>एल.वी.ओ. रिपोर्ट के अनुसार ऋणी की चुकौती क्षमता (राशि) <span class="error">*</span></label>
+                                        <input type="number" class="form-control"
+                                               ng-model="PLDB.LVOReportLoanPayValue"
+                                               min="0"
+                                               placeholder="एल.वी.ओ. रिपोर्ट के अनुसार ऋणी की चुकौती क्षमता (राशि)">
+                                    </div>
+
+
+
+                                    <div class="form-group col-md-3">
+                                        <label>ऋण स्वीकृति विवरण दिनांक<span class="error">*</span></label>
+                                        <input type="date" class="form-control" ng-model="PLDB.LoanAcceptDate" placeholder="Select Loan Acceptance Date" />
+                                    </div>
+
+                                    <div class="form-group col-md-3">
+                                        <label>ऋण स्वीकृति विवरण राशि <span class="error">*</span></label>
+                                        <input type="number" class="form-control" ng-model="PLDB.LoanAcceptPay" min="0" step="0.01" placeholder="ऋण स्वीकृति विवरण राशि" />
+                                    </div>
+
+                                    <div class="form-group col-md-3">
+                                        <label>ब्याज दर <span class="error">*</span></label>
+                                        <input type="number" class="form-control" ng-model="PLDB.Interestrate" step="0.01" placeholder="परियोजना लागत राशि" />
+                                    </div>
+
+                                    <div class="form-group col-md-3">
+                                        <label>ऋण स्वीकृति / अस्वीकृति आदेश दिनांक</label>
+                                        <input type="date" class="form-control" ng-model="PLDB.Accept_NAccpetDate" placeholder="Select Date" />
+                                    </div>
+
+                                    <div class="form-group col-md-3">
+                                        <label>बैंक पक्ष में नामांतरण क्रमांक</label>
+                                        <input type="number" class="form-control" ng-model="PLDB.bankPartyEnrollementNumber" min="0" step="0.01" placeholder="बैंक पक्ष में नामांतरण क्रमांक" />
+                                    </div>
+
+                                    <div class="form-group col-md-3">
+                                        <label>बैंक पक्ष में नामांतरण क्रमांक दिनांक</label>
+                                        <input type="date" class="form-control" ng-model="PLDB.bankPartyEnrollementNumberDate" placeholder="Select Date" />
+                                    </div>
+
+                                    <div class="form-group col-md-3">
+                                        <label>फर्म/कंपनी/संयुक्त ऋणी में भुगतान के संबंध में अधिकार पत्र देने का दिनांक </label>
+                                        <input type="date" class="form-control" ng-model="PLDB.AuthorizationLetterIssueDate">
+                                    </div>
+
+                                    <div class="form-group col-md-3">
+                                        <label>फर्म/कंपनी/संयुक्त ऋणी में भुगतान के संबंध में अधिकृत ऋणी का नाम </label>
+                                        <input type="text" class="form-control" ng-model="PLDB.FarmCompanyAuthorizedLoanName" placeholder="अधिकृत ऋणी का नाम">
+                                    </div>
+
+                                    <div class="col-md-12"></div>
+                                    <div class="form-group col-md-3">
+                                        <label>अग्रिम MICR चेक लिए गए हैं अथवा नहीं</label>
+                                        <div class="radio-button-box" ng-init="PLDB.IsLoanDetailsAgrimMICRCheckTaken=0">
+                                            <label class="help-block-gender">
+                                                <input type="radio" name="IsLoanDetailsAgrimMICRCheckTaken" value="1" ng-model="PLDB.IsLoanDetailsAgrimMICRCheckTaken">हाँ
+
+                                            </label>
+                                            <label class="help-block-gender">
+                                                <input type="radio" value="0" name="IsLoanDetailsAgrimMICRCheckTaken" ng-model="PLDB.IsLoanDetailsAgrimMICRCheckTaken">नहीं
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div ng-show="PLDB.IsLoanDetailsAgrimMICRCheckTaken == 1">
+                                        <div class="form-group col-md-3">
+                                            <label>चेक संख्या</label>
+                                            <input type="text" class="form-control" ng-model="PLDB.ChequeNo" maxlength="55" placeholder="चेक संख्या" />
+                                        </div>
+
+                                        <div class="form-group col-md-3">
+                                            <label>बैंक</label>
+                                            <input type="text" class="form-control" ng-model="PLDB.Bankdetails" maxlength="155" placeholder="बैंक" />
+                                        </div>
+
+                                        <div class="form-group col-md-3">
+                                            <label>शाखा</label>
+                                            <input type="text" class="form-control" ng-model="PLDB.BankBranch" maxlength="150" placeholder="शाखा" />
+                                        </div>
+
+
+
+                                    </div>
+
+                                    <div class="form-group col-md-3">
+                                        <button type="button" ng-if="!isViewMode && IsSubmiApplication==false" class="btn btn-primary" ng-click="Save_PLDBForm(false)">
+                                            Partial Save
+                                        </button>
+                                    </div>
+
+
+                                    <div class="form-group col-md-12">
+                                        <h5 class="heading-hr ng-binding"> प्रथम जमानतदार (गारंटर) का विवरण </h5>
+                                    </div>
+
+                                    <div class="form-group col-md-3">
+                                        <label>नाम</label>
+                                        <input type="text" class="form-control" ng-model="PLDB.GuarantorDetails.First_Name" placeholder="नाम">
+                                    </div>
+
+                                    <div class="form-group col-md-3">
+                                        <label>मोबाइल नंबर</label>
+                                        <input type="text" class="form-control" ng-model="PLDB.GuarantorDetails.First_MobileNo" placeholder="मोबाइल नंबर" autocomplete="off" required maxlength="10" min="10" onkeypress='return event.charCode >= 48 && event.charCode <= 57'>
+                                    </div>
+
+                                    <div class="form-group col-md-3">
+                                        <label>आधार संख्या</label>
+                                        <input type="text" class="form-control" ng-model="PLDB.GuarantorDetails.First_AadharNo" placeholder="आधार संख्या" required ng-pattern="/^[0-9]{12}$/" maxlength="12">
+                                    </div>
+
+                                    <div class="form-group col-md-3">
+                                        <label>कृषि भूमि संपत्ति रकबा </label>
+                                        <input type="text" class="form-control" ng-model="PLDB.GuarantorDetails.First_Bhumi_Area" placeholder="कृषि भूमि संपत्ति रकबा">
+                                    </div>
+
+                                    <div class="form-group col-md-3">
+                                        <label>कृषि भूमि संपत्ति मूल्य </label>
+                                        <input type="number" min="0" class="form-control" ng-model="PLDB.GuarantorDetails.First_Bhumi_Mulyaa" placeholder="कृषि भूमि संपत्ति मूल्य">
+                                    </div>
+
+                                    <div class="form-group col-md-3">
+                                        <label>अन्य अचल संपत्ति क्षेत्रफल</label>
+                                        <input type="text" class="form-control" ng-model="PLDB.GuarantorDetails.First_Other_Area" placeholder="अन्य अचल संपत्ति क्षेत्रफल">
+                                    </div>
+
+                                    <div class="form-group col-md-3">
+                                        <label>अन्य अचल संपत्ति मूल्य</label>
+                                        <input type="number" min="0" class="form-control" ng-model="PLDB.GuarantorDetails.First_Other_Mulyaa" placeholder="अन्य अचल संपत्ति मूल्य">
+                                    </div>
+
+                                    <div class="form-group col-md-3">
+                                        <label>व्यवसाय </label>
+                                        <select class="form-control" ng-model="PLDB.GuarantorDetails.First_OccupationOrServiceTypeId">
+                                            <option value="">-- चयन करें --</option>
+                                            <option value="1">राजकीय सेवा</option>
+                                            <option value="2">व्यवसायिक</option>
+                                            <option value="3">निजी सेवा</option>
+                                            <option value="4">स्वयं नियोजित</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group col-md-3">
+                                        <label>अग्रिम MICR चेक लिए गए हैं अथवा नहीं</label>
+
+                                        <div class="radio-button-box" ng-init="PLDB.GuarantorDetails.IsFirstAgrimMICRCheckTaken=0">
+                                            <label class="help-block-gender">
+                                                <input type="radio" name="IsFirstAgrimMICRCheckTaken" value="1" ng-model="PLDB.GuarantorDetails.IsFirstAgrimMICRCheckTaken">हाँ
+
+                                            </label>
+                                            <label class="help-block-gender">
+                                                <input type="radio" value="0" name="IsFirstAgrimMICRCheckTaken" ng-model="PLDB.GuarantorDetails.IsFirstAgrimMICRCheckTaken">नहीं
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div ng-show="PLDB.GuarantorDetails.IsFirstAgrimMICRCheckTaken == 1">
+                                        <div class="form-group col-md-3">
+                                            <label> चेक संख्या</label>
+                                            <input type="text" class="form-control" ng-model="PLDB.GuarantorDetails.First_ChequeNumber" placeholder="चेक संख्या">
+                                        </div>
+                                        <div class="form-group col-md-3">
+                                            <label> बैंक</label>
+                                            <input type="text" class="form-control" ng-model="PLDB.GuarantorDetails.First_Bank" placeholder="बैंक">
+                                        </div>
+                                        <div class="form-group col-md-3">
+                                            <label> शाखा</label>
+                                            <input type="text" class="form-control" ng-model="PLDB.GuarantorDetails.First_Branch" placeholder="शाखा">
+                                        </div>
+                                    </div>
+                                    <div class="form-group col-md-12">
+                                        <h5 class="heading-hr ng-binding">द्वितीय जमानतदार (गारंटर) का विवरण </h5>
+                                    </div>
+
+
+                                    <div class="form-group col-md-3">
+                                        <label>नाम</label>
+                                        <input type="text" class="form-control" ng-model="PLDB.GuarantorDetails.Second_Name" placeholder="नाम">
+                                    </div>
+
+                                    <div class="form-group col-md-3">
+                                        <label>मोबाइल नंबर</label>
+                                        <input type="text" class="form-control" ng-model="PLDB.GuarantorDetails.Second_MobileNo" placeholder="मोबाइल नंबर" autocomplete="off" required maxlength="10" min="10" onkeypress='return event.charCode >= 48 && event.charCode <= 57'>
+                                    </div>
+
+                                    <div class="form-group col-md-3">
+                                        <label>आधार संख्या</label>
+                                        <input type="text" class="form-control" ng-model="PLDB.GuarantorDetails.Second_AadharNo" placeholder="आधार संख्या" required ng-pattern="/^[0-9]{12}$/" maxlength="12">
+                                    </div>
+
+                                    <div class="form-group col-md-3">
+                                        <label>कृषि भूमि संपत्ति रकबा </label>
+                                        <input type="text" class="form-control" ng-model="PLDB.GuarantorDetails.Second_Bhumi_Area" placeholder="कृषि भूमि संपत्ति रकबा">
+                                    </div>
+
+                                    <div class="form-group col-md-3">
+                                        <label>कृषि भूमि संपत्ति मूल्य </label>
+                                        <input type="number" min="0" class="form-control" ng-model="PLDB.GuarantorDetails.Second_Bhumi_Mulyaa" placeholder="कृषि भूमि संपत्ति मूल्य">
+                                    </div>
+
+                                    <div class="form-group col-md-3">
+                                        <label>अन्य अचल संपत्ति क्षेत्रफल</label>
+                                        <input type="text" class="form-control" ng-model="PLDB.GuarantorDetails.Second_Other_Area" placeholder="अन्य अचल संपत्ति क्षेत्रफल">
+                                    </div>
+
+                                    <div class="form-group col-md-3">
+                                        <label>अन्य अचल संपत्ति मूल्य</label>
+                                        <input type="number" min="0" class="form-control" ng-model="PLDB.GuarantorDetails.Second_Other_Mulyaa" placeholder="अन्य अचल संपत्ति मूल्य">
+                                    </div>
+
+                                    <div class="form-group col-md-3">
+                                        <label>व्यवसाय </label>
+                                        <select class="form-control" ng-model="PLDB.GuarantorDetails.Second_OccupationOrServiceTypeId">
+                                            <option value="">-- चयन करें --</option>
+                                            <option value="1">राजकीय सेवा</option>
+                                            <option value="2">व्यवसायिक</option>
+                                            <option value="3">निजी सेवा</option>
+                                            <option value="4">स्वयं नियोजित</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group col-md-3">
+                                        <label>अग्रिम MICR चेक लिए गए हैं अथवा नहीं</label>
+
+                                        <div class="radio-button-box" ng-init="PLDB.GuarantorDetails.IsSecondAgrimMICRCheckTaken=0">
+                                            <label class="help-block-gender">
+                                                <input type="radio" name="IsSecondAgrimMICRCheckTaken" value="1" ng-model="PLDB.GuarantorDetails.IsSecondAgrimMICRCheckTaken">हाँ
+                                            </label>
+                                            <label class="help-block-gender">
+                                                <input type="radio" value="0" name="IsSecondAgrimMICRCheckTaken" ng-model="PLDB.GuarantorDetails.IsSecondAgrimMICRCheckTaken">नहीं
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div ng-show="PLDB.GuarantorDetails.IsSecondAgrimMICRCheckTaken == 1">
+                                        <div class="form-group col-md-3">
+                                            <label>चेक संख्या</label>
+                                            <input type="text" class="form-control" ng-model="PLDB.GuarantorDetails.Second_ChequeNumber" placeholder="चेक संख्या">
+                                        </div>
+                                        <div class="form-group col-md-3">
+                                            <label>बैंक</label>
+                                            <input type="text" class="form-control" ng-model="PLDB.GuarantorDetails.Second_Bank" placeholder="बैंक">
+                                        </div>
+                                        <div class="form-group col-md-3">
+                                            <label>शाखा</label>
+                                            <input type="text" class="form-control" ng-model="PLDB.GuarantorDetails.Second_Branch" placeholder="शाखा">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group col-md-3">
+                                        <button type="button" ng-if="!isViewMode && IsSubmiApplication==false" class="btn btn-primary" ng-click="Save_PLDBForm(false)">
+                                            Partial Save
+                                        </button>
+                                    </div>
+
+
+                                    <div class="form-group col-md-12">
+                                        <h5 class="heading-hr ng-binding">ऋण वितरण स्वीकृत</h5>
+                                    </div>
+
+                                    <div class="form-group col-md-3">
+                                        <label>ऋण वितरण की स्वीकृति नोटशीट पर है अथवा नहीं, यदि हाँ तो?</label>
+                                        <div class="radio-button-box" ng-init="PLDB.LoanDisbursement.IsApprovalOnNotesheet=0">
+                                            <label class="help-block-gender">
+                                                <input type="radio" name="IsApprovalOnNotesheet" value="1" ng-model="PLDB.LoanDisbursement.IsApprovalOnNotesheet">हाँ
+
+                                            </label>
+                                            <label class="help-block-gender">
+                                                <input type="radio" value="0" name="IsApprovalOnNotesheet" ng-model="PLDB.LoanDisbursement.IsApprovalOnNotesheet">नहीं
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div ng-show="PLDB.LoanDisbursement.IsApprovalOnNotesheet == 1" class="row">
+
+                                            <!-- First Installment Date -->
+                                            <div class="form-group col-md-4">
+                                                <label>प्रथम किस्त दिनांक</label>
+                                                <input type="date" class="form-control"
+                                                       ng-model="PLDB.LoanDisbursement.FirstInstallmentDate" max="{{maxCertDate}}">
+                                            </div>
+
+                                            <!-- First Installment Money -->
+                                            <div class="form-group col-md-4">
+                                                <label>प्रथम किस्त राशि</label>
+                                                <input type="number" class="form-control"
+                                                       ng-model="PLDB.LoanDisbursement.FirstInstallmentMoney"
+                                                       placeholder="प्रथम किस्त राशि">
+                                            </div>
+
+                                            <!-- Second Installment Date -->
+                                            <div class="form-group col-md-4">
+                                                <label>द्वितीय किस्त दिनांक</label>
+                                                <input type="date" class="form-control"
+                                                       ng-model="PLDB.LoanDisbursement.SecondInstallmentDate">
+                                            </div>
+
+                                            <!-- Second Installment Money -->
+                                            <div class="form-group col-md-4">
+                                                <label>द्वितीय किस्त राशि</label>
+                                                <input type="number" class="form-control"
+                                                       ng-model="PLDB.LoanDisbursement.SecondInstallmentMoney"
+                                                       placeholder="द्वितीय किस्त राशि">
+                                            </div>
+
+                                            <!-- Third Installment Date -->
+                                            <div class="form-group col-md-4">
+                                                <label>तृतीय किस्त दिनांक</label>
+                                                <input type="date" class="form-control"
+                                                       ng-model="PLDB.LoanDisbursement.ThirdInstallmentDate">
+                                            </div>
+
+                                            <!-- Third Installment Money -->
+                                            <div class="form-group col-md-4">
+                                                <label>तृतीय किस्त राशि</label>
+                                                <input type="number" class="form-control"
+                                                       ng-model="PLDB.LoanDisbursement.ThirdInstallmentMoney"
+                                                       placeholder="तृतीय किस्त राशि">
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                    <!-- Cheque Number -->
+                                    <div class="form-group col-md-4">
+                                        <label> विक्रेता को किए गए भुगतान के संबंध में चेक संख्या </label>
+                                        <input type="text" class="form-control" ng-model="PLDB.LoanDisbursement.VendorChequeNumber" placeholder="चेक संख्या ">
+                                    </div>
+
+                                    <!-- Receipt Number -->
+                                    <div class="form-group col-md-4">
+                                        <label> विक्रेता को किए गए भुगतान के संबंध में रसीद संख्या</label>
+                                        <input type="text" class="form-control" ng-model="PLDB.LoanDisbursement.ReceiptNumber" placeholder="रसीद संख्या">
+                                    </div>
+
+                                    <!-- Vendor Amount -->
+                                    <div class="form-group col-md-4">
+                                        <label>विक्रेता को किए गए भुगतान के संबंध में राशि</label>
+                                        <input type="number" class="form-control" ng-model="PLDB.LoanDisbursement.VendorAmount" placeholder="भुगतान के संबंध में राशि">
+                                    </div>
+
+                                    <!-- Bill Number -->
+                                    <div class="form-group col-md-4">
+                                        <label>बिल का विवरण क्रमांक</label>
+                                        <input type="text" class="form-control" ng-model="PLDB.LoanDisbursement.BillNumber" placeholder="बिल का विवरण क्रमांक">
+                                    </div>
+
+                                    <!-- GST Number -->
+                                    <div class="form-group col-md-4">
+                                        <label>जीएसटी नंबर</label>
+                                        <input type="text" class="form-control" ng-model="PLDB.LoanDisbursement.GSTNo" placeholder=" GST No">
+                                    </div>
+
+                                    <!-- Bill Date -->
+                                    <div class="form-group col-md-4">
+                                        <label> बिल का दिनांक</label>
+                                        <input type="date" class="form-control" ng-model="PLDB.LoanDisbursement.BillDate">
+                                    </div>
+
+                                    <!-- Loan Time (Years) -->
+                                    <div class="form-group col-md-4">
+                                        <label>ऋण अदायगी की अवधि (वर्ष में)</label>
+                                        <input type="number" class="form-control" ng-model="PLDB.LoanDisbursement.LoanTimeInYear" placeholder="ऋण अदायगी की अवधि (वर्ष में)">
+                                    </div>
+
+                                    <div class="form-group col-md-4">
+                                        <label>किस्त आवृत्ति</label>
+                                        <select class="form-control" ng-model="PLDB.LoanDisbursement.InstallmentYearWiseId">
+                                            <option value="">-- चुनें --</option>
+                                            <option value="4">वार्षिक</option>
+                                            <option value="1">अर्धवार्षिक</option>
+                                            <option value="2">त्रैमासिक</option>
+                                            <option value="3">मासिक</option>
+                                        </select>
+                                    </div>
+
+
+                                    <!-- Certificate First Installment Date -->
+                                    <div class="form-group col-md-4">
+                                        <label>किस्तवार ऋण उपयोगिता प्रमाण पत्र प्रथम किस्त (दिनांक)</label>
+                                        <input type="date" class="form-control" ng-model="PLDB.LoanDisbursement.CertificateFirstInstallmentDate" max="{{maxCertDate}}">
+                                    </div>
+
+                                    <!-- Certificate Second Installment Date -->
+                                    <div class="form-group col-md-4">
+                                        <label>किस्तवार ऋण उपयोगिता प्रमाण पत्र द्वितीय किस्त (दिनांक)</label>
+                                        <input type="date" class="form-control" ng-model="PLDB.LoanDisbursement.CertificateSecondInstallmentDate">
+                                    </div>
+
+                                    <!-- Certificate Third Installment Date -->
+                                    <div class="form-group col-md-4">
+                                        <label>किस्तवार ऋण उपयोगिता प्रमाण पत्र तृतीय किस्त (दिनांक)</label>
+                                        <input type="date" class="form-control" ng-model="PLDB.LoanDisbursement.CertificateThirdInstallmentDate">
+                                    </div>
+
+                                    <!-- Insurance Medical Certificate -->
+                                    <div class="form-group col-md-4">
+                                        <label>ऋण उद्देश्य से संबंधित आवश्यक विवरण(R.C., Insurance, Medical Certificate आदि)</label>
+                                        <input type="text" class="form-control" ng-model="PLDB.LoanDisbursement.InsuranceMedicalCertificate" placeholder="ऋण उद्देश्य से संबंधित आवश्यक विवरण">
+                                    </div>
+
+                                    <!-- Insurance Medical Certificate Bhavesh Singh-->
+                                    <div class="form-group col-md-3">
+                                        <label>क्या ऋण को पासबुक जारी की गई है?</label>
+                                        <div class="radio-button-box" ng-init="PLDB.LoanDisbursement.IsIssueofPassbook=0">
+                                            <label class="help-block-gender">
+                                                <input type="radio" name="IsIssueofPassbook" value="1" ng-model="PLDB.LoanDisbursement.IsIssueofPassbook">हाँ
+
+                                            </label>
+                                            <label class="help-block-gender">
+                                                <input type="radio" value="0" name="IsIssueofPassbook" ng-model="PLDB.LoanDisbursement.IsIssueofPassbook">नहीं
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group col-md-12">
+                                        <h5 class="heading-hr ng-binding">ऋण स्वीकृति हेतु उत्तरदायी कार्मिक / सचिव / ऋण उपसमिति के सदस्यों का नाम</h5>
+                                    </div>
+
+                                    <!-- Loan Supervisor Name -->
+                                    <div class="form-group col-md-4">
+                                        <label>ऋण पर्यवेक्षक का नाम</label>
+                                        <input type="text" class="form-control" ng-model="PLDB.LoanDisbursement.LoanSupervisorName" placeholder="ऋण पर्यवेक्षक का नाम">
+                                    </div>
+
+                                    <!-- Branch Secretary Name -->
+                                    <div class="form-group col-md-4">
+                                        <label>शाखा सचिव का नाम</label>
+                                        <input type="text" class="form-control" ng-model="PLDB.LoanDisbursement.BranchSecretaryName" placeholder="शाखा सचिव का नाम">
+                                    </div>
+
+                                    <!-- Secretary Name -->
+                                    <div class="form-group col-md-4">
+                                        <label>सचिव का नाम </label>
+                                        <input type="text" class="form-control" ng-model="PLDB.LoanDisbursement.SecretaryName" placeholder="सचिव का नाम">
+                                    </div>
+
+                                    <div class="form-group col-md-4">
+                                        <label>ऋण उपसमिति के सदस्य 1 का नाम</label>
+                                        <input type="text" class="form-control" ng-model="PLDB.LoanDisbursement.Member1" placeholder="सदस्य 1 का नाम">
+                                    </div>
+
+                                    <div class="form-group col-md-4">
+                                        <label>ऋण उपसमिति के सदस्य 2 का नाम</label>
+                                        <input type="text" class="form-control" ng-model="PLDB.LoanDisbursement.Member2" placeholder="सदस्य 2 का नाम">
+                                    </div>
+
+                                    <div class="form-group col-md-4">
+                                        <label>ऋण उपसमिति के सदस्य 3 का नाम</label>
+                                        <input type="text" class="form-control" ng-model="PLDB.LoanDisbursement.Member3" placeholder="सदस्य 3 का नाम">
+                                    </div>
+
+                                    <div class="form-group col-md-4">
+                                        <label>ऋण उपसमिति के सदस्य 4 का नाम</label>
+                                        <input type="text" class="form-control" ng-model="PLDB.LoanDisbursement.Member4" placeholder="सदस्य 4 का नाम">
+                                    </div>
+
+                                    <div class="form-group col-md-4">
+                                        <label>ऋण उपसमिति के सदस्य 5 का नाम</label>
+                                        <input type="text" class="form-control" ng-model="PLDB.LoanDisbursement.Member5" placeholder="सदस्य 5 का नाम">
+                                    </div>
+
+                                    <!-- Administrator Name -->
+                                    <div class="form-group col-md-4">
+                                        <label>प्रशासक / अध्यक्ष का नाम</label>
+                                        <input type="text" class="form-control" ng-model="PLDB.LoanDisbursement.AdministratorName" placeholder="प्रशासक / अध्यक्ष का नाम">
+                                    </div>
+
+                                    <div class="form-group col-md-4">
+                                        <label ng-hide="isViewMode">सम्पूर्ण ऋण पत्रावली अपलोड करें (PDF)</label>
+                                        <div style="display:flex; align-items:center; gap:5px;">
+                                            <input type="file" accept="application/pdf" class="form-control" id="LoanDocument" ng-model="PLDB.LoanDisbursement.LoanDocument" ng-hide="isViewMode"
+                                                   onchange="angular.element(this).scope().SelectReceiptFile(this.files)">
+                                            <div style="display:flex; align-items:center; gap:5px;">
+                                                <button ng-hide="isViewMode" type="button" class="btn btn-primary mt-2" ng-click="Save_PLDBFormUploadDoc(false)">  Upload Document </button>
+                                                <div ng-if="PLDB.LoanDisbursement.LoanDocument" style="display:flex; align-items:center; gap:5px" class="mt-2">
+                                                    <a target="_blank" class="btn btn-success" href="../Content/PLDB/LoanDocuments/{{PLDB.LoanDisbursement.LoanDocument}}" title="View Document">
+                                                        <i class="fa fa-file-o"></i>
+                                                    </a>
+                                                    <a href="javascript:void(0)" class="btn btn-danger" ng-click="RemoveLoanDocument()" ng-hide="isViewMode" title="Remove Document">
+                                                        <i class="fa fa-trash"></i>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+
+                                    <!-- Document 2 -->
+                                    <div class="col-md-4 form-group">  
+                                        <label ng-hide="isViewMode">अपलोड करें</label>
+                                        <div style="display:flex; align-items:center; gap:5px;">
+                                            <input type="file" accept="application/pdf" class="form-control" id="LoanDocument2" ng-model="PLDB.LoanDisbursement.LoanDocument2" ng-hide="isViewMode"
+                                                   onchange="angular.element(this).scope().SelectReceiptFile2(this.files)">
+
+                                            <div style="display:flex; align-items:center; gap:5px;">
+                                                <button ng-hide="isViewMode" type="button" class="btn btn-primary mt-2" ng-click="Save_PLDBFormUploadDoc(false)"> Upload Document </button>
+                                                <div ng-if="PLDB.LoanDisbursement.LoanDocument2" style="display:flex; align-items:center; gap:5px" class="mt-2">
+                                                    <a target="_blank" class="btn btn-success" href="../Content/PLDB/LoanDocument2/LoanDocuments/{{PLDB.LoanDisbursement.LoanDocument2}}" title="View Document">
+                                                        <i class="fa fa-file-o"></i>
+                                                    </a>
+                                                    <a href="javascript:void(0)" class="btn btn-danger" ng-click="RemoveLoanDocument2()" ng-hide="isViewMode" title="Remove Document">
+                                                        <i class="fa fa-trash"></i>
+                                                    </a>
+
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                    <!-- Document 3 -->
+                                    <div class="col-md-4 form-group">
+
+
+                                        <label ng-hide="isViewMode">अपलोड करें</label>
+                                        <div style="display:flex; align-items:center; gap:5px;">
+                                            <input type="file" accept="application/pdf" class="form-control" id="LoanDocument3" ng-model="PLDB.LoanDisbursement.LoanDocument3" ng-hide="isViewMode"
+                                                   onchange="angular.element(this).scope().SelectReceiptFile3(this.files)">
+
+                                            <div style="display:flex; align-items:center; gap:5px;">
+                                                <button ng-hide="isViewMode" type="button" class="btn btn-primary mt-2" ng-click="Save_PLDBFormUploadDoc(false)">  Upload Document  </button>
+                                                <div ng-if="PLDB.LoanDisbursement.LoanDocument3" style="display:flex; align-items:center; gap:5px" class="mt-2">
+                                                    <a target="_blank" class="btn btn-success" href="../Content/PLDB/LoanDocument3/LoanDocuments/{{PLDB.LoanDisbursement.LoanDocument3}}" title="View Document">
+                                                        <i class="fa fa-file-o"></i>
+                                                    </a>
+                                                    <a href="javascript:void(0)" class="btn btn-danger" ng-click="RemoveLoanDocument3()" ng-hide="isViewMode" title="Remove Document">
+                                                        <i class="fa fa-trash"></i>
+                                                    </a>
+
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+
+
+                                    <div class="form-group col-md-3">
+                                        <button type="button" ng-if="!isViewMode && IsSubmiApplication==false" class="btn btn-primary" ng-click="Save_PLDBForm(false)">
+                                            Partial Save
+                                        </button>
+                                    </div>
+
+                                </div>
+                                @*</div>*@
+                            </div>
+                            <br />
+                        </div>
+                        <div class="form-group col-md-12 text-center" style="margin-top: 25px; padding-top: 10px; background-color: white; padding-bottom: 10px;">
+                            <center>
+                                <input type="hidden" ng-model="PLDB.PLDB_OTS_SchemeID" />
+                                @*Partial Save Button*@
+                                @*<button type="button" class="btn btn-primary" ng-if="!isViewMode && IsSubmiApplication==false" ng-disabled="PLDB.IsFinalSubmit" ng-click="Save_PLDBForm(false)"> Partial Save </button>*@
+                                @*Final Save Button*@
+                                <button type="button" class="btn btn-success" ng-if="!isViewMode && IsSubmiApplication==false && PLDB.IsFinalSubmit != 1" ng-disabled="PLDB.IsFinalSubmit" ng-click="Save_PLDBForm(true)"> Final Submit </button>
+                            </center>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+

@@ -1,0 +1,340 @@
+﻿<script src="~/Scripts/AngularFramework/MPRStateCoopBank.js"></script>
+@*<script src="~/Scripts/AngularFramework/PLDBLoanApplicationReport.js"></script>*@
+<script src="~/Scripts/Excel/jszip_v1.js"></script>
+<script src="~/Scripts/Excel/xlsx.js"></script>
+<script src="~/Scripts/Excel/jszip.js"></script>
+<script src="~/Scripts/Excel/FileSaver.js"></script>
+<script src="~/Scripts/Excel/myexcel.js"></script>
+
+<div ng-app="MPRStateCoopBankmodule" ng-controller="MPRStateCoopBankCnt">
+    <div class="col-md-12">
+        <h3 class="h3heading citizen-dash-head">{{translation.StateCoopBankMPR}}</h3>
+    </div>
+
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="devpage-breadcrumb">
+            <ul class="page-breadcrumb">
+                <li class="dev-page-br">
+                    <i class="fa fa-home"> </i>
+                    <a href="#"> {{translation.MIS}}  </a>
+                    <i class="fa fa-angle-right"> </i>
+                </li>
+                <li style="float: left">
+                    <span style="margin: 0 5px;">{{translation.StateCoopBankMPR}}   </span>
+                </li>
+                <li style="float: right;">
+                    <button type="button" ng-click="showEntryForm()" class="btn btn-info btn-lg dev-popup-btn" data-toggle="modal" style="color: #025e63; cursor: pointer; text-decoration:none;  font-weight: bold;" data-target="#myModal">
+                        <h5>&#187; {{translation.NewEntry}}</h5>
+                    </button>
+                </li>
+                
+            </ul>
+        </div>
+    </div>
+
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 dataList" ng-show="dataList">
+        <div class="table-responsive citizen-dash-head">
+            <div class="table-dropdown" id="search-filter" style="overflow:inherit; float:left;width: 100%;margin-bottom: 10px;">
+                <div class="col-sm-4 form-group">
+                    <label>Financial Year</label>
+                    <select class="form-control" ng-click="GetDataByFinancialYear()" ng-init="FY=''" id="FY" ng-model="FY">
+                        <option value="">{{translation.SelectOption}}</option>
+                        <option ng-repeat="district in FinancialYearList" value="{{district.FIN_YEAR_NAME}}">
+                            {{_language =='en-us' ?  district.FIN_YEAR_NAME : district.FIN_YEAR_NAME}}
+                        </option>
+                    </select>
+
+                </div>
+                <div class="col-md-2 margin-Top20 y_dropdown" style="padding-left: 0;">
+                    <br />
+                    <input type="button" class="btn btn-primary dev-btn" ng-click="GridData()" value="Search">
+                </div>
+            </div>
+            <table class="table devtable" id="tblgetsuport">
+                <thead>
+                    <tr>
+
+                        <th colspan="4" style="text-align:right !important">
+                            {{translation.FinancialYear}}:{{CoopStateData[0].Year}}
+                        </th>
+                    </tr>
+                    <tr>
+                        <th>{{translation.SRNO}}</th>
+                        <th style="text-align:center;">{{translation.Item}}</th>
+                        <th style="text-align:center;">{{translation.Unit}}</th>
+                        <th style="text-align:center;">Values   @*{{translation.FinancialYear}}:{{CoopStateData[0].Year}}*@</th>
+
+                    </tr>
+                </thead>
+                <tbody style="text-align:center">
+                 
+                    <tr ng-repeat="BData in CoopStateData">
+                       
+                    <tr>
+                        <td rowspan="4" style="vertical-align:top !important">1.</td>
+                        <td style="text-align:left;">Number</td>
+                        <td style="text-align: center;"> Numbers </td>
+                        <td>{{CoopStateData[0].Number}}</td>
+
+                    </tr>
+                    <tr>
+                        <td style="text-align:left;" colspan="2">Membership</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td style="text-align:left;">(i) Govt.</td>
+                        <td style="text-align: center;"> Numbers </td>
+                        <td>{{CoopStateData[0].Membership_Gov}}</td>
+                        
+                    </tr>
+                    <tr>
+                        <td style="text-align:left;">(ii) Societies</td>
+                        <td style="text-align: center;"> Numbers </td>
+                        <td>{{CoopStateData[0].Membership_Soc}}</td>
+                       
+                    </tr>
+                    <tr>
+                        <td rowspan="3" style="vertical-align:top !important;">2.</td>
+                        <td style="text-align:left;" colspan="2">Share Capital</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td style="text-align:left;">(i) Govt.</td>
+                        <td style="text-align: center;"> In Thousands </td>
+                        <td>{{CoopStateData[0].ShareCapital_Gov}}</td>
+                        
+                    </tr>
+                    <tr>
+                        <td style="text-align:left;">(ii) Societies</td>
+                        <td style="text-align: center;"> In Thousands </td>
+                        <td>{{CoopStateData[0].ShareCapital_Soc}}</td>
+
+                    </tr>
+                    <tr>
+                        <td>3.</td>
+                        <td style="text-align:left;">Deposit</td>
+                        <td style="text-align: center;"> In Thousands </td>
+                        <td>{{CoopStateData[0].Deposit}}</td>
+                        
+                    </tr>
+                    <tr>
+                        <td>4.</td>
+                        <td style="text-align:left;">Reserves</td>
+                        <td style="text-align: center;"> In Thousands </td>
+                        <td>{{CoopStateData[0].Reserve}}</td>
+                        
+                    </tr>
+                    <tr>
+                        <td>5.</td>
+                        <td style="text-align:left;">Owned Funds</td>
+                        <td style="text-align: center;"> In Thousands </td>
+                        <td>{{CoopStateData[0].OwnedFunds}}</td>
+                        
+                    </tr>
+                    <tr>
+                        <td>6.</td>
+                        <td style="text-align:left;">Borrowings</td>
+                        <td style="text-align: center;"> In Thousands </td>
+                        <td>{{CoopStateData[0].Borrowing}}</td>
+                        
+                    </tr>
+
+
+                    <tr>
+                        <td>7.</td>
+                        <td style="text-align:left;">Working Capital</td>
+                        <td style="text-align: center;"> In Thousands </td>
+                        <td>{{CoopStateData[0].WorkingCapital}}</td>
+                        
+                    </tr>
+                    <tr>
+                        <td>8.</td>
+                        <td style="text-align:left;">Loans Advances</td>
+                        <td style="text-align: center;"> In Thousands </td>
+                        <td>{{CoopStateData[0].LoanAdvances}}</td>
+                        
+                    </tr>
+                    <tr>
+                        <td>9.</td>
+                        <td style="text-align:left;">Loan Recoveries</td>
+                        <td style="text-align: center;"> In Thousands </td>
+                        <td>{{CoopStateData[0].LoanRecoveries}}</td>
+                        
+                    </tr>
+                    <tr>
+                        <td>10.</td>
+                        <td style="text-align:left;">Loan Outstanding</td>
+                        <td style="text-align: center;"> In Thousands </td>
+
+                        <td>{{CoopStateData[0].LoanAdvances-CoopStateData[0].LoanRecoveries}}</td>
+                       
+                    </tr>
+                    <tr>
+                        <td>11.</td>
+                        <td style="text-align:left;">Profit During the year</td>
+                        <td style="text-align: center;"> In Thousands </td>
+                        <td>{{CoopStateData[0].ProfitDuringTheYear}}</td>
+                       
+                    </tr>
+               
+                </tbody>
+            </table>
+          
+        </div>
+    </div>
+
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 EntryForm" ng-show="EntryForm">
+        <div class="table-responsive citizen-dash-head">
+            <div class="table-dropdown" id="search-filter" style="overflow:inherit; float:left;width: 100%;margin-bottom: 10px;">
+                @*<div class="col-md-2 margin-Top20 y_dropdown" style="padding-left: 0;">
+                    <label>{{ translation.FinYear}}:</label>
+                    <select class="form-control">
+                        <option>--Select Year--</option>
+                        <option>2020-21</option>
+                        <option>2021-22</option>
+                        <option>2022-23</option>
+                    </select>
+                </div>*@
+                <div class="col-sm-4 form-group">
+                    <label>Financial Year</label>
+                    <select class="form-control" ng-click="GetDataByFinancialYear()" ng-init="FIN_YEAR_NAME=''" id="txtFromMonth" ng-model="txtFromMonth">
+                        <option value="">{{translation.SelectOption}}</option>
+                        <option ng-repeat="district in FinancialYearList" value="{{district.FIN_YEAR_NAME}}">
+                            {{_language =='en-us' ?  district.FIN_YEAR_NAME : district.FIN_YEAR_NAME}}
+                        </option>
+                    </select>
+
+                </div>
+            </div>
+            <table class="table devtable" id="tblgetsuport">
+                <thead>
+                    <tr>
+                        <th>{{translation.SRNO}}</th>
+                        <th style="text-align:center;">{{translation.Item}}</th>
+                        <th style="text-align:center;">{{translation.Unit}}</th>
+                        <th style="text-align:center;">Values</th>
+                    </tr>
+                </thead>
+                <tbody style="text-align:center">
+                    <tr>
+                        <td rowspan="4" style="vertical-align:top !important">1.</td>
+                        <td style="text-align:left;">Number</td>
+                        <td style="text-align:center;">Numbers</td>
+                        <td><input class="form-control" placeholder="Number(Unit)" ng-model="Coop.Number" /></td>
+                       
+                    </tr>
+                    <tr>
+                        <td style="text-align:left;" colspan="2">Membership</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td style="text-align:left;">(i) Govt.</td>
+                        <td style="text-align:center;">Numbers</td>
+                        <td><input class="form-control" placeholder="Number(Unit)" ng-model="Coop.MemGov" /></td>
+                        
+                    </tr>
+                    <tr>
+                        <td style="text-align:left;">(ii) Societies</td>
+                        <td style="text-align:center;">Numbers</td>
+                        <td><input class="form-control" placeholder="Number(Unit)" ng-model="Coop.Mem_Soc" /></td>
+                        
+                    </tr>
+                    <tr>
+                        <td rowspan="3" style="vertical-align:top !important;">2.</td>
+                        <td style="text-align:left;" colspan="2">Share Capital</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td style="text-align:left;">(i) Govt.</td>
+                        <td style="text-align: center;"> In Thousands </td>
+                        <td><input class="form-control" placeholder="Rs.'000" ng-model="Coop.Sh_G" /></td>
+                        
+                    </tr>
+                   
+                    <tr>
+                        <td style="text-align:left;">(ii) Societies</td>
+                        <td style="text-align: center;"> In Thousands </td>
+                        <td><input class="form-control" placeholder="Rs.'000" ng-model="Coop.Sh_soc" /></td>
+                        
+                    </tr>
+                    <tr>
+                        <td>3.</td>
+                        <td style="text-align:left;">Deposit</td>
+                        <td style="text-align: center;"> In Thousands </td>
+                        <td><input class="form-control" placeholder="Rs.'000" ng-model="Coop.Dep" /></td>
+                        
+                    </tr>
+                    <tr>
+                        <td>4.</td>
+                        <td style="text-align:left;">Reserves</td>
+                        <td style="text-align: center;"> In Thousands </td>
+                        <td><input class="form-control" placeholder="Rs.'000" ng-model="Coop.Res" /></td>
+                        
+                    </tr>
+                    <tr>
+                        <td>5.</td>
+                        <td style="text-align:left;">Owned Funds</td>
+                        <td style="text-align: center;"> In Thousands </td>
+                        <td><input class="form-control" placeholder="Rs.'000" ng-model="Coop.Ow_f" /></td>
+                        
+                    </tr>
+                    <tr>
+                        <td>6.</td>
+                        <td style="text-align:left;">Borrowings</td>
+                        <td style="text-align: center;"> In Thousands </td>
+                        <td><input class="form-control" placeholder="Rs.'000" ng-model="Coop.Borr" /></td>
+                        
+                    </tr>
+                    <tr>
+                        <td>7.</td>
+                        <td style="text-align:left;">Working Capital</td>
+                        <td style="text-align: center;"> In Thousands </td>
+                        <td><input class="form-control" placeholder="Rs.'000" ng-model="Coop.Woc" /></td>
+                        
+                    </tr>
+                    <tr>
+                        <td>8.</td>
+                        <td style="text-align:left;">Loans Advances</td>
+                        <td style="text-align: center;"> In Thousands </td>
+                        <td><input class="form-control" placeholder="Rs.'000" ng-model="Coop.LoAd" /></td>
+                        
+                    </tr>
+                    <tr>
+                        <td>9.</td>
+                        <td style="text-align:left;">Loan Recoveries</td>
+                        <td style="text-align: center;"> In Thousands </td>
+                        <td><input class="form-control" placeholder="Rs.'000" ng-model="Coop.LoRe" /></td>
+                        
+                    </tr>
+                    <tr>
+                        <td>10.</td>
+                        <td style="text-align:left;">Loan Outstanding</td>
+                        <td style="text-align: center;"> In Thousands </td>
+                        <td style="text-align:left;">{{Coop.LoAd-Coop.LoRe}}</td>
+                        
+                    </tr>
+                    <tr>
+                        <td>11.</td>
+                        <td style="text-align:left;">Profit During the year</td>
+                        <td style="text-align: center;"> In Thousands </td>
+                        <td><input class="form-control" placeholder="Rs.'000" ng-model="Coop.Profit" /></td>
+                        
+                    </tr>
+
+                </tbody>
+            </table>
+            <div class="row">
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 text-center">
+                    <button type="submit" class="btn btn-primary dev-btn" ng-click="SaveCoopState(true)">Save</button>
+                    <button type="button" class="btn btn-primary dev-btn">Reset</button>
+                    <button type="submit" class="btn btn-primary dev-btn" ng-click="back(true)">Back</button>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+
+

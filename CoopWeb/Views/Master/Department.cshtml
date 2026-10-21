@@ -1,0 +1,182 @@
+﻿<script src="~/Scripts/AngularFramework/MastersClient.js"></script>
+<script type="text/javascript">
+    var tableToExcel = (function () {
+        var uri = 'data:application/vnd.ms-excel;base64,'
+            , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>'
+            , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) }
+            , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
+        return function (table, name) {
+            if (!table.nodeType) table = document.getElementById(table)
+            var ctx = { worksheet: name || 'Worksheet', table: table.innerHTML }
+            window.location.href = uri + base64(format(template, ctx))
+        }
+    })()
+</script>
+<div ng-app="MastersDepartmentModule">
+    <div ng-controller="MasterDepartmentCont">
+        <div class="col-md-12">
+            <h3 class="citizen-dash-head">{{translation.DepartmentHeading}}</h3>
+            <hr style="margin: 0;">
+        </div>
+
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#"> {{translation.Master}} </a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;"> {{translation.Department}} </span>
+                    </li>
+                    <li style="float: right;">
+                        <button type="button" class="btn btn-info btn-lg dev-popup-btn" data-toggle="modal" data-target="#myModal" ng-click="ClearDepartmentForm()"> <h5>&#187; {{translation.AddDepartment}}</h5> </button>
+                    </li>
+                    @*<li style="float: right;" id="divAddBtn">
+                            <a ng-click="AddNewSociety()" style="color: #025e63; cursor: pointer; text-decoration:none; font-weight: bold;" class="ng-binding">» नई सोसायटी प्रोफाइल जोड़ें</a>
+                        </li>*@
+                </ul>
+            </div>
+        </div>
+
+        <div class="dev-popup-body modal fade" id="myModal" role="dialog">
+            <div class="modal-dialog">
+                <!-- Modal content-->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" ng-click="ClearDepartmentForm()">&times;</button>
+                        <h4 class="modal-title"> {{translation.DepartmentHeading}} </h4>
+                    </div>
+                    <div class="modal-body">
+                        <form class="dev-search-form" style="overflow: hidden; margin-bottom: 35px;" name="DepartmentForm">
+
+
+                            <div class="form-group col-md-6">
+                                <label>{{translation.DEPTNAMEENGLISH}}</label>
+                                <input type="text" class="form-control" name="DEPTNAMEENGLISH1" ng-model="DepartmentMaster.DEPTNAMEENGLISH" placeholder={{translation.DEPTNAMEENGLISH}} ng-required="true" autocomplete="off" />
+                                <label ng-show="DepartmentForm.DEPTNAMEENGLISH.$error.required && !DepartmentForm.DEPTNAMEENGLISH.$pristine" class="help-block">{{translation.DEPTNAMEENGLISH}} - {{translation.Required}}</label>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label>{{translation.DEPTNAMEHINDI}}</label>
+                                <input type="text" class="form-control" name="DEPTNAMEHINDI" ng-bind="DEPTNAMEHINDI" ng-model="DepartmentMaster.DEPTNAMEHINDI" placeholder={{translation.DEPTNAMEHINDI}} ng-required="true" autocomplete="off" />
+                                <label ng-show="DepartmentForm.DEPTNAMEHINDI.$error.required && !DepartmentForm.DEPTNAMEHINDI.$pristine" class="help-block">{{translation.DEPTNAMEHINDI}} - {{translation.Required}}</label>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <div class="form-check form-check-inline col-md-4" style="padding: 0;">
+                                    <label class="check-box" for="inlineRadio1"> {{translation.IsActive}} </label>
+                                </div>
+                                <div class="check-item col-md-2">
+
+                                    <input class="form-check-input ng-pristine ng-untouched ng-valid ng-not-empty" type="checkbox" id="inlineCheckbox1" ng-true-value="true" ng-false-value="false" ng-model="DepartmentMaster.IsActive" ng-checked="DepartmentMaster.IsActive">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+
+                                <button type="submit" class="btn btn-primary" ng-disabled="DepartmentForm.$invalid" ng-click="SaveDepartmentForm()">{{translation.Submit}}</button>
+                                <button type="submit" class="btn btn-primary" ng-click="ClearDepartmentForm()">{{translation.Clear}}</button>
+                                <input type="hidden" ng-model="DepartmentMaster.ID" />
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-md-12">
+            <div class="citizen-dash-head">
+                <div class="table-dropdown">
+                    <div class="col-md-4">
+                        <label for="search">{{translation.Search}}:</label>
+                        <input ng-model="q" id="search" class="form-control" placeholder={{translation.filttertext}} autocomplete="off">
+                    </div>
+                    <div class="col-md-4">
+                        <label for="search">{{translation.ItemPerPage}}:</label>
+                        <input type="number" min="1" max="100" class="form-control" ng-model="pageSize">
+                    </div>
+                    <div class="col-md-4" style="padding-top: 25px; ">
+                        <input type="button" class="btn btn-primary dev-btn" onclick="tableToExcel('tblgetsuport', 'Get Support Data')" value="Export to Excel">
+                    </div>
+                </div>
+
+                <div class="col-md-12">
+                    <div class="table-responsive citizen-dash-head">
+                        <table class="table devtable"      id="tblgetsuport">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        {{translation.SRNO}}
+                                    </th>
+                                    <th ng-click="sortData('DEPTNAMEENGLISH')">
+                                        {{translation.DEPTNAMEENGLISH}}
+                                        <div ng-class="getSortClass('DEPTNAMEENGLISH')"></div>
+                                    </th>
+                                    <th ng-click="sortData('DEPTNAMEHINDI')">
+                                        {{translation.DEPTNAMEHINDI}}
+                                        <div ng-class="getSortClass('DEPTNAMEHINDI')"></div>
+                                    </th>
+                                    <th>
+                                        {{translation.IsActive}}
+                                    </th>
+                                    <th>
+                                        {{translation.Edit}}
+                                    </th>
+                                    <th>
+                                        {{translation.Delete}}
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr dir-paginate="items in Departments | filter:q | orderBy:colsort:reverseSort | itemsPerPage: pageSize" current-page="currentPage" pagination-id="departmentPagination">
+                                    <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                                    <td>{{ items.DEPTNAMEENGLISH }}</td>
+                                    <td>{{ items.DEPTNAMEHINDI }}</td>
+                                    <td>
+
+                                        <div class="dev-action">
+
+                                            <label class="switch">
+
+                                                <input type="checkbox" ng-checked="items.IsActive == 1" ng-click="SetStatusDep(items.ID,items.IsActive)">
+
+                                                <span class="slider round"></span>
+                                            </label>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <i class="fa fa-edit" data-target="#myModal" data-toggle="modal" ng-click="update(items)"></i>
+                                    </td>
+                                    <td>
+                                        <i class="fa fa-trash" ng-click="SetStatusDep(items.ID,2)"></i>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="col-md-10">
+                    <div class="text-center">
+                        <dir-pagination-controls boundary-links="true" pagination-id="departmentPagination" on-page-change="pageChangeHandler(newPageNumber)" template-url="/dirPagination.tpl.html"></dir-pagination-controls>
+                    </div>
+                </div>
+                <div class="form-group col-md-12">
+                    <div class="dev-align-btn">
+
+                        <a class="btn btn-primary dev-btn" style="text-transform:capitalize;" href="../User/DashBoard"> Back</a>
+                    </div>
+
+                </div>
+                <div class="col-md-2">
+                    <h5 class="dev-page"> {{translation.Page}}: {{ currentPage }} </h5>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div class="se-pre-con"></div>
+    <div id="stop" class="scrollTop">
+        <span><a href=""><i class="fa fa-arrow-up">Top</i></a></span>
+    </div>
+</div>

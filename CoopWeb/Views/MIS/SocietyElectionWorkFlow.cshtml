@@ -1,0 +1,239 @@
+﻿@{
+    ViewBag.Title = "Society Election Flow List";
+}
+<script src="~/Scripts/AngularFramework/SocietyElectionWorkFlow.js?v=1.13"></script>
+<link href="~/Scripts/google_hindi/google_transliteration.css" rel="stylesheet" />
+<script src="~/Scripts/xlsx.full.min.js"></script>
+
+<style>
+    .inputapi-transliterate-indic-suggestion-menu {
+        z-index: 99999 !important;
+        display: block;
+    }
+
+    .table > tbody > tr > td, .table > tbody > tr > th, .table > tfoot > tr > td, .table > tfoot > tr > th, .table > thead > tr > td {
+        padding: 1px;
+        padding-right: 5px;
+        padding-left: 5px;
+    }
+
+    .close.close-btn {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        color: #000;
+        opacity: 1;
+    }
+</style>
+<div ng-app="SocietyElectionFlowModule" ng-controller="SocietyElectionFlowCont" ng-cloak="">
+    <div>
+        <div class="col-md-12">
+            <h3 class="citizen-dash-head ng-binding" style="margin-top:0px;">Society Election Flow List</h3>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#">  {{translation.Home}}</a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;"> {{translation.New}} </span>
+                        <i class="fa fa-angle-right"> </i>
+                        <span style="margin: 0 5px;"> Society Election Flow   </span>
+                    </li>
+
+                </ul>
+            </div>
+        </div>
+        <div style="margin-top:30px;padding-top:30px">
+            <div class="col-md-12">
+                <div class="citizen-dash-head" style="overflow: hidden;">
+                    <div class="table-dropdown" id="search-filter" style="margin-bottom: 5px;">
+                        <div class="col-lg-12" style="margin-bottom: 5px; padding-left: 0;">
+                            <input type="hidden" id="hdnRoleId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).RoleId)" />
+                            <input type="hidden" id="hdnDistrictId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DistrictId)" />
+                            <input type="hidden" id="hdnPldbId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).PLDBId)" />
+                            <input type="hidden" id="hdnPldbBranchId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).PLDBBrancchId)" />
+                            <input type="hidden" id="hdnLevelId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).LevelId)" />
+
+
+                            <div class="col-md-2">
+                                <label for="search">{{translation.Search}}:</label>
+                                <input ng-model="q" name="SearchText" id="search" class="form-control" placeholder={{translation.filttertext}} autocomplete="off">
+                            </div>
+                            <div class="col-md-2">
+                                <label for="search">{{translation.ItemPerPage}}:</label>
+                                <input type="number" min="1" max="1000" class="form-control" ng-model="pageSize">
+                            </div>
+
+                            <div class="col-md-4 margin-Top20">
+                                <label>&nbsp;</label><br>
+                                <button type="button" ng-click="searchRequest(GetSocietyElectionList)" class="btn btn-primary dev-btn ng-binding">{{translation.Search}}</button>
+                                <button type="button" ng-click="ClearSearch()" class="btn btn-primary dev-btn ng-binding">{{translation.Clear}}</button>
+                                <button type="button" ng-click="exportAllToExcel()" class="btn btn-success dev-btn">
+                                    <i class="fa fa-file-excel-o"></i> Export Excel
+                                </button>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div style="overflow-x: auto;">
+                        <table id="OTSListTable" class="table table-responsive devtable" style="">
+
+                            <thead>
+                                <tr>
+                                    <th>क्रं. सं</th>
+                                    <th>संस्था का वर्ग</th>
+                                    <th>संस्था का नाम</th>
+                                    <th colspan="2">पंजीयन </th>
+                                    <th>संचालक मंडल की गत निर्वाचन की दिनांक </th>
+                                    <th>निर्वाचन की ड्यू दिनांक  </th>
+                                    <th>संस्था की स्थिति </th>
+                                    <th colspan="1">संस्था की स्थिति </th>
+                                    <th> निर्वाचन ड्यू होने पर भी निर्वाचन नहीं होने का कारण</th>
+                                    <th colspan="3"> समिति के संचालक मंडल में यदि आकस्मिक रिक्ति है तो दिनांक सहित विवरण (धारा 27(4 ) के क्रम में  </th>
+                                    <th><b>संस्था द्वारा भेजी गई अभ्यर्थना मय इकाई/आंचलिक रिटर्निंग अधिकारी की अभिशंषा</b> </th>
+                                    <th><b>संस्था के उपनियम</b> </th>
+                                    @if (((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).RoleId != 10081
+                                    && ((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).RoleId != 10227)
+                                    {
+                                        <th>Action</th>
+                                    }
+                                </tr>
+                                <tr>
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                    <th> क्रमांक </th>
+                                    <th> दिनांक </th>
+                                    <th> </th>
+                                    <th> </th>
+                                    <th> प्रशासक नियुक्ति दिनांक </th>
+                                    <th> अवसायन दिनांक </th>
+                                    <th> </th>
+                                    <th> पद</th>
+                                    <th> रिक्ति दिनांक</th>
+                                    <th>रिक्ति का कारण मृत्यु /त्यागपत्र / अधिनयम अन्तर्गत कार्यवाही </th>
+                                    <th> </th>
+                                    <th> </th>
+                                    @if (((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).RoleId != 10081
+                                      && ((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).RoleId != 10227)
+                                    {
+                                        <th> </th>
+                                    }
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="item in SocietyElectionList">
+                                    <td>{{(((DataPagingDetails.PageNumber - 1) * DataPagingDetails.PageSize) + 1)+$index}}</td>
+                                    <td>{{ item.SocietyCategoryName }}</td>
+                                    <td>{{item.SocietyName}}</td>
+                                    <td>{{item.RegistrationNo}}</td>
+                                    <td>{{item.RegistrationDate}}</td>
+                                    <td>{{item.LastElectionDate}}</td>
+                                    <td>{{item.ElectionDate}}</td>
+                                    <td>{{item.AdminAppointmentDate}}</td>
+                                    <td>{{item.DeputyAdminAppointmentDate}}</td>
+                                    <td>{{item.ReasonForNonElection}}</td>
+                                    <td></td>
+                                    <td>{{item.VacancyDate}}</td>
+                                    <td>{{item.Lovdescription}}</td>
+                                    <td>
+                                        <a ng-show="item.ExcludedVoterListDocument" href="/Content/Election/VoterDocuments/{{item.ExcludedVoterListDocument}}" target="_blank" title="Download Voter Document">
+                                            <i class="fa fa-download fa-lg"></i>
+                                        </a>
+                                    </td>
+
+                                    <td>
+                                        <a ng-show="item.BylawsDocument" href="/Content/Election/BylawsDocument/{{item.BylawsDocument}}" target="_blank" title="Download Bylaws Document">
+                                            <i class="fa fa-download fa-lg"></i>
+                                        </a>
+                                    </td>
+
+                                    @if (((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).RoleId != 10081
+                                     && ((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).RoleId != 10227)
+                                    {
+                                        <td>
+                                            <button type="button" class="btn btn-primary btn-sm" ng-click="OpenActionPopup(item)">
+                                                Action
+                                            </button>
+                                        </td>
+                                    }
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="modal fade" id="ActionModal">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h4>Take Action</h4>
+                                    <button class="close close-btn" data-dismiss="modal">x</button>
+                                </div>
+
+                                <div class="modal-body">
+                                    <div class=" form-group">
+                                        <label> Status</label>
+                                        <select class="form-control" id="ddlMT" ng-model="Action.StatusId">
+                                            <option value="">--Select--</option>
+                                            <option ng-repeat="item in ElectionStatusList" value="{{item.LovValuesId}}">
+                                                {{item.Lovdescription}}
+                                            </option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>Remark</label>
+                                        <textarea class="form-control" ng-model="Action.Remark">  </textarea>
+                                    </div>
+
+                                </div>
+
+                                <div class="modal-footer" style=" text-align: center;">
+                                    <button type="submit" class="btn btn-success" ng-click="SaveWorkflowAction()">
+                                        Save
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="col-md-12">
+                        <div ng-if="DataPagingDetails.TotalPages>1" class="dataTables_paginate paging_simple_numbers" id="dataTables-example_paginate">
+                            <div class="dataTables_info" id="dataTables-example_info" role="status" aria-live="polite">
+                                Total Records: {{DataPagingDetails.TotalRecords}}
+                            </div>
+                            <ul class="pagination pagination_1" style="margin-left: 10px !important;">
+                                <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« First</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« Previous</span></li>
+
+                                <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest('1',GetSocietyElectionList)" style="cursor: pointer;">
+                                    <span>«First</span>
+                                </li>
+                                <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest(DataPagingDetails.PageNumber-1,GetSocietyElectionList)" style="cursor:pointer;">
+                                    <span>« Previous</span>
+                                </li>
+                                <li class="{{n==DataPagingDetails.PageNumber?'active':''}}" style="{{n==DataPagingDetails.PageNumber?'':'cursor: pointer'}}" ng-repeat="n in PagingRange(DataPagingDetails.StartPageNumber,DataPagingDetails.EndPageNumber,DataPagingDetails.TotalPages)" ng-click="pageRequest(n,GetSocietyElectionList)"><span>{{n}}</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Next</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Last</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber!= DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.PageNumber+1,GetSocietyElectionList)" style="cursor:pointer;">
+                                    <span>Next »</span>
+                                </li>
+                                <li ng-if="DataPagingDetails.PageNumber != DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.TotalPages,GetSocietyElectionList)" style="cursor:pointer;">
+                                    <span>Last »</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="se-pre-con"></div>
+    </div>
+</div>
+

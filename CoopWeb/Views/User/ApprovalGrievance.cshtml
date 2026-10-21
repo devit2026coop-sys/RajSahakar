@@ -1,0 +1,386 @@
+﻿
+@{
+    ViewBag.Title = "ApprovalGrievance";
+    Layout = "~/Views/Shared/_CitizenLayout.cshtml";
+}
+<script src="~/Scripts/AngularFramework/ApprovalGrievance.js?id=1"></script>
+
+<link href="/Scripts/jquery-ui-1.10.3/themes/base/jquery.ui.datepicker.css" rel="stylesheet" />
+<script>
+    $(document).ready(function () {
+
+        $('.devcalender').datepicker({
+            showOn: "both",
+            changeMonth: true,
+            buttonImage: "../images/calender.png",
+            changeYear: true,
+            dateFormat: "dd/mm/yy",
+            // minDate: '0'
+            yearRange: "c-10:c+0"
+        });
+    });
+</script>
+
+
+
+<div ng-app="ApprovalGrievanceMod">
+    <div ng-controller="ApprovalGrievanceCnt">
+
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <h4 class="citizen-dash-head"> {{translation.ApprovalGrievance}}</h4>
+
+        </div>
+
+
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#"> {{translation.OtherServices}} </a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;">{{translation.ApprovalGrievance}} </span>
+
+                    </li>
+
+                </ul>
+            </div>
+        </div>
+
+
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+
+            <div class="citizen-dash-head" id="search-filter">
+
+                <div class="col-lg-12 margin-Top20" style="margin-top:20px;">
+
+
+                    <div class="col-lg-2">
+                        <label>Grievance Status<span class="error">*</span>:</label>
+                    </div>
+                    <div class="col-lg-2">
+                        <select id="ddlstatusId" name="ddlstatusId" ng-model="SearchValue.Statusid" class="form-control" ng-init="Statusid='0'">
+                            <option value="0">{{translation.SelectOption}}</option>
+                            <option value="1">New Request</option>
+                            <option value="2">Open</option>
+                            <option value="3">Reopen</option>
+                            <option value="4">Reject</option>
+                            <option value="5">Close</option>
+                        </select>
+                    </div>
+                    <div class="col-lg-2">
+                        <label>Grievance Category<span class="error">*</span></label>
+                    </div>
+                    <div class="form-group col-lg-2">
+                        <select id="ddlCategoryId" name="ddlCategoryId" ng-model="SearchValue.GCategoryId" class="form-control" ng-init="GCategoryId='0'">
+                            <option value="0">{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in GrievanceCategoryList | orderBy:'CategoryNameEn'" value="{{item.GCategoryId}}">
+                                {{_language =='en-us' ?  item.CategoryNameEn : item.CategoryNameHi}}
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="col-lg-2">
+
+                        <input type="text" name="SocietyName" id="SocietyName" class="form-control" placeholder="Search By Society Name" ng-model="SearchValue.SocietyName">
+
+                    </div>
+
+
+                </div>
+
+
+                <div class="col-lg-12 margin-Top20" style="margin-top:15px;">
+                    <div class="col-lg-2">
+                        <label>
+                            {{translation.FromDate}}
+                        </label>
+                    </div>
+                    <div class="col-lg-2">
+
+
+                        <input name="FromDate" type="text" id="FromDate" dat-val="1" class="form-control devcalender" placeholder="dd/MM/yyyy" ng-model="SearchValue.SearchTodate" autocomplete="off" onKeyPress="return isNumber(event);" size=10 maxlength=10 />
+                    </div>
+                    <div class="col-lg-2">
+                        <label>
+                            {{translation.ToDate}}
+                        </label>
+                    </div>
+                    <div class="col-lg-2">
+
+                        <input name="ToDate" type="text" id="ToDate" dat-val="1" class="form-control devcalender" placeholder="dd/MM/yyyy" ng-model="SearchValue.Searchfromdate" autocomplete="off" onKeyPress="return isNumber(event);" size=10 maxlength=10 />
+                    </div>
+
+                    <div class="col-lg-2">
+                        <button type="submit" class="btn btn-primary" ng-click="searchRequest(GetGrievanceList)">{{translation.Search}}</button>
+                        <button type="submit" class="btn btn-primary" ng-click="ClearSearch()">{{translation.Clear}}</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+
+
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+
+                    <div class="citizen-dash-head">
+                        <table class="table table-responsive devtable">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        {{translation.SRNO}}
+                                    </th>
+                                    <th>
+                                        {{translation.SocietyName}}
+                                    </th>
+                                    <th>
+                                        {{translation.RegistrationNo}}
+                                    </th>
+                                    <th>
+                                        {{translation.District}}
+                                    </th>
+                                    <th>
+                                        {{translation.SSOID}}
+                                    </th>
+                                    <th>
+                                        {{translation.MobileNo}}
+                                    </th>
+                                    <th>
+                                        {{translation.Description}}
+                                    </th>
+                                    <th>
+                                        {{translation.Datetime}}
+                                    </th>
+
+                                    <th> {{translation.GrievanceStatus}} </th>
+
+                                    <th>
+                                        {{translation.File}}
+                                    </th>
+
+                                    <th>
+                                        {{translation.Trail}}
+                                    </th>
+                                    <th>
+                                        {{translation.TakeAction}}
+                                    </th>
+                                    <th>
+                                        {{translation.View}}
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="Item in GrievanceDetailList">
+                                    <td>{{$index+1}}</td>
+                                    <td>{{ Item.SocietyName | uppercase }}</td>
+
+                                    <td>{{ Item.RegistrationNo | uppercase }}</td>
+                                    <td>{{ Item.DISTRICT_ENG | uppercase }}</td>
+
+                                    <td>{{ Item.SSO_ID | uppercase }}</td>
+                                    <td>{{ Item.MobileNo }}</td>
+                                    <td>{{ Item.Discription | uppercase }}</td>
+                                    <td>{{ Item.CreationDate }}</td>
+                                    <td ng-if="Item.CurrentStatusId=='1'">New Request</td>
+                                    <td ng-if="Item.CurrentStatusId=='2'">Open</td>
+                                    <td ng-if="Item.CurrentStatusId=='3'">Reopen</td>
+                                    <td ng-if="Item.CurrentStatusId=='4'">Reject</td>
+                                    <td ng-if="Item.CurrentStatusId=='5'">Close</td>
+
+                                    <td>
+                                        <a target="_blank" ng-if="Item.AttachmentFileName!=''" href="{{Item.AttachmentFileName}}"><i class="fa fa-download"></i></a>
+                                    </td>
+
+                                    <td>
+                                        <i class="fa fa-list-ul" data-target="#myModal" data-toggle="modal" ng-click="Trailhistroy(Item)"></i>
+                                    </td>
+
+                                    <td>
+                                        <i class="fa fa-edit" data-target="#myModal" data-toggle="modal" ng-click="ApprovalProcess(Item)"></i>
+                                    </td>
+                                    <td>
+                                        <a href="../User/SocietyApplicationView?SocietyIDEnc={{Item.SocietyIDInc}}~_Citizen_SocietyProfile~undefined"><i class="fa fa-eye"></i></a>
+                                    </td>
+                                </tr>
+                                <tr ng-if="DataPagingDetails.TotalPages>1">
+                                    <td colspan="8">
+                                        <div ng-if="DataPagingDetails.TotalPages>1" class="dataTables_paginate paging_simple_numbers" id="dataTables-example_paginate">
+                                            <div class="dataTables_info" id="dataTables-example_info" role="status" aria-live="polite">
+                                                Total Records: {{DataPagingDetails.TotalRecords}}
+                                            </div>
+                                            <ul class="pagination pagination_1" style="margin-left: 10px !important;">
+                                                <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« First</span></li>
+                                                <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« Previous</span></li>
+
+                                                <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest('1',GetGrievanceList)" style="cursor: pointer;">
+                                                    <span>«First</span>
+                                                </li>
+                                                <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest(DataPagingDetails.PageNumber-1,GetGrievanceList)" style="cursor:pointer;">
+                                                    <span>« Previous</span>
+                                                </li>
+                                                <li class="{{n==DataPagingDetails.PageNumber?'active':''}}" style="{{n==DataPagingDetails.PageNumber?'':'cursor: pointer'}}" ng-repeat="n in PagingRange(DataPagingDetails.StartPageNumber,DataPagingDetails.EndPageNumber,DataPagingDetails.TotalPages)" ng-click="pageRequest(n,GetGrievanceList)"><span>{{n}}</span></li>
+                                                <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Next</span></li>
+                                                <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Last</span></li>
+                                                <li ng-if="DataPagingDetails.PageNumber!= DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.PageNumber+1,GetGrievanceList)" style="cursor:pointer;">
+                                                    <span>Next »</span>
+                                                </li>
+                                                <li ng-if="DataPagingDetails.PageNumber != DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.TotalPages,GetGrievanceList)" style="cursor:pointer;">
+                                                    <span>Last »</span>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+
+
+
+
+                <div class="dev-popup-body modal fade" id="ApprovalList" data-backdrop="static" data-keyboard="false" role="dialog">
+                    <div class="modal-dialog" style="width: 50%;">
+                        <!-- Modal content-->
+                        <div class="modal-content" style="height:350px;color:black;">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                <h4 class="modal-titmemberle" style="color:black; text-align:center">{{translation.GrievanceProcess}}  </h4>
+                            </div>
+                            <div class="modal-body">
+
+                                <div class="col-lg-12 margin-Top20" style="color:black;">
+                                    <div class="col-lg-3">
+                                        <label>{{translation.GrievanceStatus}} <span class="error">*</span>:</label>
+                                    </div>
+                                    <div class="col-lg-2" style="color:black;">
+                                        <input type="radio" name="member" value="2" ng-model="ComplainStatus" />{{translation.open}}
+                                    </div>
+                                    <div class="col-lg-2" ng-show="Reopenshow">
+                                        <input type="radio" name="member" value="3"  ng-model="ComplainStatus" />{{translation.reopen}}
+                                    </div>
+                                    <div class="col-lg-2">
+                                        <input type="radio" name="member" value="4" ng-model="ComplainStatus" />{{translation.Rejection}}
+                                    </div>
+                                    <div class="col-lg-2">
+                                        <input type="radio" name="member" value="5" ng-model="ComplainStatus" />{{translation.Close}}
+                                    </div>
+
+                                </div>
+
+                                <div class="col-lg-12 margin-Top20" style="margin-top:20px;">
+
+
+                                    <div class="col-lg-3">
+                                        <label>{{translation.Description}}<span class="error">*</span>:</label>
+                                    </div>
+                                    <div class="col-lg-9">
+                                        <textarea id="Remark" class="form-control" ng-model="Description"></textarea>
+                                    </div>
+
+
+
+
+                                </div>
+
+
+                                <div class="col-lg-12 margin-Top20" style="margin-top:20px;">
+                                    <div class="col-lg-3">
+                                        <label>{{translation.UploadFile}}: </label>
+                                    </div>
+                                    <div class="col-lg-5">
+                                        <div class="col-lg-12" style="color:black; width: 425px;">
+
+                                            <div class="col-lg-5" ng-show="!IsUploadFileName" style="padding-left: 0px;">
+                                                <input type="file" accept="image/*,application/pdf" dat-val="nocheck" ng-model="FileName" id="FileName" ng-click="AddFile1(1,0)" validfile1 />
+                                            </div>
+                                            <div class="col-lg-7" ng-if="IsUploadFileName">
+                                                <a href="javascript:void(1);" ng-if="FileName!=''"><i class="fa fa-check-circle-o" style="font-size: 18px;margin-right: 5px;    color: #20cc20;"></i></a>
+                                                <a href="~/Content/CCSComplaintFiles/{{FileName}}" ng-if="FileName!=''" target="_blank"><i class="fa fa-eye-slash" style="font-size: 18px;margin-right: 5px;font-weight: bold"></i>View File</a>
+                                                <a href="javascript:void(1);" ng-if="FileName=='' && !IsSubmiApplication" ng-click="UploadFile_new('FileName',1,0)"><i class="fa fa-upload" style="font-size: 18px;margin-right: 5px;font-weight: bold"></i>Upload File</a>
+                                                <a href="javascript:void(1);" ng-if="IsUploadFileName && !IsSubmiApplication" ng-click="ChangeFile1(1,0)"><i class="fa fa-undo" style="font-size: 18px;margin-right: 5px;font-weight: bold"></i>Change File</a>
+                                            </div>
+
+
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-12" style="margin-top:20px;">
+                                    <div class="form-group">
+                                        <div class="dev-menu-btn">
+                                            <button type="submit" class="btn btn-primary" ng-click="SaveGrievanceApproval()">{{translation.Submit}}</button>
+
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+
+                <div class="dev-popup-body modal fade" id="TrailList" data-backdrop="static" data-keyboard="false" role="dialog">
+                    <div class="modal-dialog" style="width: 50%;">
+                        <!-- Modal content-->
+                        <div class="modal-content" style="width: 825px!important;height:400px; color:black;">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                <h4 class="modal-titmemberle" style="color:black; text-align:center">{{translation.GrievanceHistory}} </h4>
+                            </div>
+                            <div class="modal-body">
+                                <table class="table table-responsive devtable">
+                                    <thead>
+                                        <tr>
+                                            <th> {{translation.SRNO}} </th>
+                                            <th>{{translation.Description}}</th>
+                                            <th> {{translation.GrievanceStatus}} </th>
+                                            <th> {{translation.Datetime}} </th>
+                                            <th> {{translation.File}}  </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="Item in GrievancHistoryList">
+                                            <td>{{$index+1}}</td>
+                                            <td>{{ Item.Description }}</td>
+                                            <td ng-if="Item.ApprovalStatus=='1'">New Request</td>
+                                            <td ng-if="Item.ApprovalStatus=='2'">Open</td>
+                                            <td ng-if="Item.ApprovalStatus=='3'">Reopen</td>
+                                            <td ng-if="Item.ApprovalStatus=='4'">Reject</td>
+                                            <td ng-if="Item.ApprovalStatus=='5'">Close</td>
+
+                                           
+                                            <td>{{ Item.CreationDate }}</td>
+                                            <td>
+                                                <a target="_blank" ng-if="Item.AttachmentFileName!=''" href="../Content/GrievanceDocuments/{{Item.AttachmentFileName}}"><i class="fa fa-download"></i></a>
+                                            </td>
+
+                                        </tr>
+
+                                    </tbody>
+                                </table>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+
+
+
+            </div>
+        </div>
+
+
+
+
+

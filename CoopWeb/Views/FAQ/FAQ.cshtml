@@ -1,0 +1,315 @@
+﻿@if (((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]) != null)
+{
+    if (((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).UserType == "C")
+    {
+        Layout = "~/Views/Shared/_CitizenLayout.cshtml";
+    }
+    else
+    {
+        Layout = "~/Views/Shared/_Layout.cshtml";
+    }
+}
+else
+{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<script src="~/Scripts/AngularFramework/FAQ.js"></script>
+<script type="text/javascript" src="~/Scripts/1.8.3.jquery.min.js"></script>
+<script type="text/javascript" src="~/Scripts/pdfmake.min.js"></script>
+<script type="text/javascript" src="~/Scripts/html2canvas.min.js"></script>
+
+<link href="~/Scripts/google_hindi/google_transliteration.css" rel="stylesheet" />
+<style>
+    .inputapi-transliterate-indic-suggestion-menu {
+        z-index: 99999 !important;
+        display: block;
+    }
+</style>
+
+<style type="text/css">
+    body {
+        font-family: Arial;
+        font-size: 10pt;
+    }
+
+    table {
+        border: 1px solid #ccc;
+        border-collapse: collapse;
+    }
+
+        table th {
+            background-color: #F7F7F7;
+            color: #333;
+            font-weight: bold;
+        }
+
+        table th, table td {
+            padding: 5px;
+            border: 1px solid #ccc;
+        }
+
+    .NewDate input {
+        float: left;
+        width: 90%;
+    }
+
+    .NewDate button {
+        float: left;
+    }
+
+    .notValid {
+        border: solid 1px red !important
+    }
+</style>
+
+<style>
+    @@media (min-width: 768px) {
+
+        .modal-dialog {
+            width: 836px !important;
+            margin: 30px auto !important;
+        }
+    }
+</style>
+<script type="text/javascript">
+
+    function ValidateAlpha(evt) {
+        var keyCode = (evt.which) ? evt.which : evt.keyCode
+        if ((keyCode < 65 || keyCode > 90) && (keyCode < 97 || keyCode > 123) && keyCode != 32)
+
+            return false;
+        return true;
+    };
+
+    function ValidateFloat(th, e) {
+        if (isNaN(th.value + "" + String.fromCharCode(e.charCode)))
+            return false;
+        return true;
+    }
+
+    function isAlphaNumeric(e) { // Alphanumeric only
+        var k;
+        document.all ? k = e.keycode : k = e.which;
+        return ((k > 47 && k < 58) || (k > 64 && k < 91) || (k > 96 && k < 123) || k == 0 || k == 32 || k == 44);
+    }
+
+    function isNumber(evt) {
+        var iKeyCode = (evt.which) ? evt.which : evt.keyCode
+        if (iKeyCode != 46 && iKeyCode > 31 && (iKeyCode < 48 || iKeyCode > 57))
+            return false;
+
+        return true;
+    }
+
+</script>
+
+<div ng-app="PLDBLoanMastersMOD" ng-controller="PLDBLoanMastersCONT">
+
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <h3 class="citizen-dash-head">FAQ</h3>
+    </div>
+
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="devpage-breadcrumb">
+            <ul class="page-breadcrumb">
+                <li class="dev-page-br">
+                    <i class="fa fa-home"> </i>
+                    <a href="../Citizen/Index"> {{translation.Home}} </a>
+                    <i class="fa fa-angle-right"> </i>
+                </li>
+                <li style="float: left">
+                    <span style="margin: 0 5px;">FAQ </span>
+                </li>
+
+                <li style="float: right;" id="divAddBtn">
+                    <i class="fa fa-angle-double-right" style="color: #025e63;"></i>
+                    <a ng-click="AddNewFAQ();ResetAddNew()" style="color: #025e63; cursor: pointer; text-decoration:none; font-weight: bold;" class="ng-binding">{{translation.AddNew}}</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="table-responsive citizen-dash-head">
+            <div class="table-dropdown" id="search-filter">
+                <div class="col-md-4">
+                    <label for="search" class="ng-binding">{{translation.Search}}:</label>
+                    <input id="search" ng-model="q" class="form-control ng-pristine ng-valid ng-empty ng-touched" placeholder="Filter Text" autocomplete="off">
+                </div>
+
+                <div class="col-md-4">
+                    <label for="search">{{translation.ItemPerPage}}:</label>               
+                    <input type="number" min="1" max="100" class="form-control" ng-model="pageSize">
+                </div>
+
+                <div class="col-md-4" style="    padding-left: 35px;">
+                    <label>&nbsp;</label><br>
+                    <button type="button" ng-click="searchRequest()" class="btn btn-primary dev-btn ng-binding">{{translation.Search}}</button>
+                    <button type="button" ng-click="ClearSearch()" class="btn btn-primary dev-btn ng-binding">{{translation.Clear}}</button>
+                </div>
+            </div>
+            <table id="example" class="table devtable" style="border:1px solid rgb(222, 221, 221); float: left;">
+                <thead>
+                    <tr>
+                        <th>
+                            #
+                            @*{{translation.SRNO}}*@
+                        </th>
+                        <th>
+                            {{translation.Question}}
+                        </th>                      
+                        <th>
+                            {{translation.Answer}}
+                        </th>
+                        <th>
+                            {{translation.Priority}}
+                        </th>
+                        <th>
+                            {{translation.IsActive}}
+                        </th>
+                        <th>
+                            {{translation.Actions}}
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr dir-paginate="item in FAQList | filter:q | orderBy:colsort:reverseSort | itemsPerPage: pageSize" current-page="currentPage" pagination-id="ElectionSymbolsPagination">
+                        <td>{{$index+1}}</td>
+                        <td>
+                            {{_language =='en-us' ?  item.QuestionEN : item.QuestionHin}}
+                        </td>
+                        <td>
+                            {{_language =='en-us' ?  item.AnswerEN : item.AnswerHin}}
+                        </td>
+                        <td>
+                            {{item.Priority}}
+                        </td>
+
+                        <td>
+                            <div class="dev-action">
+                                <label class="switch">
+                                    <input type="checkbox" ng-checked="item.IsActive == 1" ng-click="SetStatus(item.Id,item.IsActive)">
+                                    <span class="slider round"></span>
+                                </label>
+                            </div>
+                        </td>
+                        <td class="add-more-td">
+                            <a href="javascript:void(0);" ng-click="update(item)"><i class="fa fa-edit"></i></a>
+                            <a href="javascript:void(0);" ng-click="SetStatus(item.Id,2)"><i class="fa fa-trash"></i></a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="col-md-12">
+            <div class="text-left">
+                <dir-pagination-controls boundary-links="true" pagination-id="ElectionSymbolsPagination" on-page-change="pageChangeHandler(newPageNumber)" template-url="/dirPagination.tpl.html"></dir-pagination-controls>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="dev-popup-body modal fade" id="addModal" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">FAQ</h4>
+                </div>
+                <div class="modal-body">
+                    <form class="dev-search-form" style="overflow: hidden; margin-bottom: 35px;" name="OfficeForm">
+                        <input type="hidden" ng-model="FAQModel.Id" />
+                        <div class="col-md-12 form-group">
+                            <div class="col-md-6">
+                                <label>                                    
+                                        {{translation.Question}} ({{translation.English}})                               
+                                </label>
+                                <input type="text" id="QuestionEN" name="QuestionEN" class="form-control validateAddMember" placeholder="Question English" ng-model="FAQModel.QuestionEN" maxlength="500" autocomplete="off" onKeyPress="return ValidateAlpha(event);">
+                            </div>
+
+                                <div class="col-md-6">
+                                    <label>
+                                        {{translation.Question}} ({{translation.Hindi}})                                      
+                                    </label>
+                                    <input type="text" id="QuestionHin" name="QuestionHin" class="form-control validateAddMember" placeholder=" Question Hindi" ng-model="FAQModel.QuestionHin" maxlength="1000" onkeypress='return ValidateAlpha(event);' autocomplete="off">
+                                </div>
+                            </div>
+                       
+                        <div class="col-md-12 form-group">
+                            <div class="col-md-6">
+                                <label>
+                                    {{translation.Answer}}  ({{translation.English}})                                  
+                                </label>
+                                <input type="text" id="AnswerEN" name="AnswerEN" class="form-control validateAddMember" placeholder="Answer English" ng-model="FAQModel.AnswerEN" maxlength="500" autocomplete="off" onKeyPress="return ValidateAlpha(event);">
+                            </div>
+                                <div class="col-md-6">
+                                    <label>
+                                        {{translation.Answer}}  ({{translation.Hindi}})                                       
+                                    </label>
+                                    <input type="text" id="AnswerHin" name="AnswerHin" class="form-control validateAddMember" placeholder="Answer Hindi" ng-model="FAQModel.AnswerHin" maxlength="1000" onkeypress='return ValidateAlpha(event);' autocomplete="off">
+                                </div>
+                            </div>
+
+                        <div class="col-md-12 form-group">
+                            <div class="col-md-6">
+                                <label>
+                                    {{translation.Priority}}
+                                </label>
+                                <input type="text" id="Priority" name="Priority" class="form-control validateAddMember" placeholder="Priority" ng-model="FAQModel.Priority" maxlength="50" onKeyPress="return isNumber(event);" autocomplete="off">
+                            </div>
+                            <div class="col-md-6"    style="padding-top: 30px;">                              
+                                    <label>
+                                        {{translation.IsActive}}
+                                    </label>
+                                    <input type="checkbox" class="" ng-model="FAQModel.IsActive">                                
+                            </div>
+                        </div>
+
+                        <div class="col-md-12" style="margin-top: 10px;">
+                            <div class="dev-menu-btn">
+                                <button type="submit" class="btn btn-primary" ng-click="SaveFAQ()">{{translation.Submit}}</button>
+                                <button type="submit" class="btn btn-primary" ng-click="ResetAddNew()">{{translation.Clear}}</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<input type="hidden" name="hdlang" id="hdlang" value="hi-IN" />
+<script src="~/Scripts/google_hindi/google_transapi.js"></script>
+@*<script type="text/javascript">
+        google.load("elements", "1", {
+            packages: "transliteration"
+        });
+
+        function onLoad() {
+            var content = document.getElementById('content');
+            if (document.getElementById('hdlang').value == "hi-IN") {
+                var options = {
+                    sourceLanguage: google.elements.transliteration.LanguageCode.ENGLISH,
+                    destinationLanguage: google.elements.transliteration.LanguageCode.HINDI, // available option English, Bengali, Marathi, Malayalam etc.
+                    shortcutKey: 'ctrl+g',
+                    transliterationEnabled: true
+                };
+            }
+            else {
+                var options = {
+                    sourceLanguage: google.elements.transliteration.LanguageCode.ENGLISH,
+                    destinationLanguage: google.elements.transliteration.LanguageCode.HINDI, // available option English, Bengali, Marathi, Malayalam etc.
+                    shortcutKey: 'ctrl+g',
+                    transliterationEnabled: false
+                }
+            }
+            var ids = ["name_hi"];
+            var control = new google.elements.transliteration.TransliterationControl(options);
+            control.makeTransliteratable(ids);
+        }
+        google.setOnLoadCallback(onLoad);
+
+    </script>*@
+<script src="~/Scripts/google_hindi/google_transliteration.js"></script>

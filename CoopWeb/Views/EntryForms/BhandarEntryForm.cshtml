@@ -1,0 +1,237 @@
+﻿
+<script src="~/Scripts/AngularFramework/EntryFormBhandar.js"></script>
+<script type="text/javascript" src="~/Scripts/jqueryuitimepicker.js"></script>
+<link href="~/Content/Stylesheets/jqueryuitimepicker.css" rel="stylesheet" />
+
+
+
+
+
+@Html.Hidden("TemplateId")
+<div ng-app="AppEntryFormBhandar">
+    <div ng-controller="Bhandar">
+        <div class="col-md-12">
+            <h3 class="citizen-dash-head">{{translation.BhandarMPRForm}}</h3>
+            <hr style="margin: 0;">
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#"> {{translation.EntryForm}}</a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;"> {{translation.BhandarMPRForm}} </span>
+                    </li>
+                    <li style="float: right;" id="divAddBtn">
+                        <button type="button" ng-click="ShowBhandarContent()" class="btn btn-info btn-lg dev-popup-btn" data-toggle="modal" style="color: #025e63; cursor: pointer; text-decoration:none;  font-weight: bold;" data-target="#myModal">
+                            <h5>&#187; {{translation.NewEntry}}</h5>
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+
+        <div class="citizen-dash-head" ng-show="showtringdiv">
+            <form>
+                <div class="col-lg-12 form-group">
+                    <input type="hidden" ng-model="BhandarForm.BhandarDataId" />
+                    <div class="col-lg-2">{{translation.BhandarName}}</div>
+                    <div class="col-lg-4">
+                        <select ng-model="BhandarForm.BhandarId" disabled class="form-control" ng-init="BhandarForm.BhandarId='0'">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in BhandarList" value="{{item.DISTRICT_ID}}">
+                                {{_language =='en-us' ?  item.DISTRICT_ENG : item.DISTRICT_MANGAL}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-lg-2">{{translation.YEAR}}</div>
+                    <div class="col-lg-4">
+                        <select class="form-control" id="ddlFYearId" ng-model="BhandarForm.FYearId" ng-change="GetYearTargetData()" ng-init="BhandarForm.FYearId='0'">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in FinancialYearList" value="{{item.FIN_YEAR_MASTR_ID}}">
+                                {{item.FIN_YEAR_NAME}}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-lg-12 form-group">
+                    <div class="col-lg-2">{{ translation.ControlledBusinessTarget}}<span class="error">*</span></div>
+                    <div class="col-lg-4">
+                        <input type="text" class="form-control" ng-bind="ProgrammeNameEn" ng-model="BhandarForm.ControlledBusinessTarget" placeholder={{translation.BlanckAmount}} autocomplete="off" />
+                    </div>
+                    <div class="col-lg-2">{{ translation.UnControlledBusinessTarget}}<span class="error">*</span></div>
+                    <div class="col-lg-4">
+                        <input type="text" class="form-control" name="ProgrammeNameHi" ng-bind="ProgrammeNameHi" ng-model="BhandarForm.UnControlledBusinessTarget" placeholder={{translation.BlanckAmount}} autocomplete="off" />
+                    </div>
+                </div>
+                <div class="col-lg-12 form-group">
+                    <div class="col-lg-2">{{translation.Month}}</div>
+                    <div class="col-lg-4">
+                        <select class="form-control" ng-model="BhandarForm.MonthId" ng-init="BhandarForm.MonthId='0'">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in MonthList" value="{{item.Month_Id}}">
+                                {{_language =='en-us' ?  item.Month_En : item.Month_Hi}}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-lg-12 form-group">
+                    <div class="col-lg-2">{{translation.ControlledBusinessFulfillment}}</div>
+                    <div class="col-lg-4">
+                        <input type='text' ng-model="BhandarForm.ControlledBusinessfulfillment" class="form-control devcalender" placeholder="{{translation.BlanckAmount}}" />
+                    </div>
+                    <div class="col-lg-2">{{translation.UnControlledBusinessFulfillment}}</div>
+                    <div class="col-lg-4">
+                        <input type='text' ng-model="BhandarForm.UnControlledBusinessFulfillment" class="form-control devcalender" placeholder="{{translation.BlanckAmount}}" />
+                    </div>
+                </div>
+                <div class="col-lg-12 form-group">
+                    <div class="col-lg-2">{{translation.IsActive}}</div>
+                    <div class="col-lg-4">
+                        <input class="form-check-input" type="checkbox" id="inlineCheckbox1" value="option1" ng-model="BhandarForm.IsActive" ng-checked="BhandarForm.IsActive == 1" />
+                    </div>
+                </div>
+                <div class="form-group col-md-12">
+                    <div class="dev-menu-btn">
+                        <button type="submit" class="btn btn-primary" ng-disabled="MyClassForm.$invalid" ng-click="SaveBhandar(true)">{{translation.Submit}}</button>
+                        <button type="submit" class="btn btn-primary" ng-click="ClearBhandarForm()">{{translation.Clear}}</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div  ng-show="DivtringGrid">
+            <div class="col-md-12">
+                <div class="citizen-dash-head">
+                    <div class="table-dropdown">
+                        <div class="col-md-4">
+                            <label>
+                                {{translation.YEAR}} :
+                            </label>
+                            <select class="form-control" id="ddlFYearId" ng-model="BhandarForm.FYearId" ng-init="BhandarForm.FYearId='0'">
+                                <option value="0" disabled>{{translation.SelectOption}}</option>
+                                <option ng-repeat="item in FinancialYearList" value="{{item.FIN_YEAR_MASTR_ID}}">
+                                    {{item.FIN_YEAR_NAME}}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-lg-4">
+                            <label>{{translation.Month}}:</label>
+                            <select class="form-control" ng-model="BhandarForm.MonthId" ng-init="BhandarForm.MonthId='0'">
+                                <option value="0" disabled>{{translation.SelectOption}}</option>
+                                <option ng-repeat="item in MonthList" value="{{item.Month_Id}}">
+                                    {{_language =='en-us' ?  item.Month_En : item.Month_Hi}}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="submit" class="btn btn-primary dev-btn" style="margin-top: 25px;" ng-disabled="BhandarForm.MonthId.$invalid" ng-click="GridData()">{{translation.Show}}</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12">                
+                <div class="citizen-dash-head">
+                    <table class="table table-responsive devtable" style="overflow-x:auto;">
+                        <thead>
+                            <tr>
+                                <th>
+                                    {{translation.SRNO}}
+                                </th>
+                                <th>
+                                    {{translation.BhandarName}}
+
+                                </th>
+                                <th>
+                                    {{translation.YEAR}}
+
+                                </th>
+                                <th>
+                                    {{translation.Month}}
+
+                                </th>
+                                <th>
+                                    {{translation.ControlledBusinessTarget}}
+
+                                </th>
+                                <th>
+                                    {{translation.UnControlledBusinessTarget}}
+
+                                </th>
+
+                                <th>
+                                    {{translation.ControlledBusinessFulfillment}}
+
+                                </th>
+                                <th>
+                                    {{translation.UnControlledBusinessFulfillment}}
+                                </th>
+                                <th>
+                                    {{translation.IsActive}}
+                                </th>
+                                <th>
+                                    {{translation.Edit}}
+                                </th>
+
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr dir-paginate="BData in BhandarData | filter: q | orderBy:colsort:reverseSort | itemsPerPage: pageSize" current-page="currentPage" pagination-id="TrainningFormatPagination">
+                                <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                                <td>
+                                    {{_language =='en-us' ?  BData.DISTRICT_ENG : BData.DISTRICT_MANGAL}}
+                                </td>
+                                <td>
+                                    {{BData.FIN_YEAR_NAME}}
+                                </td>
+                                <td>
+                                    {{_language =='en-us' ?  BData.Month_En : BData.Month_Hi}}
+                                </td>
+                                <td>
+                                    {{BData.ControlledBusinessTarget}}
+                                </td>
+                                <td>
+                                    {{BData.UnControlledBusinessTarget}}
+                                </td>
+
+                                <td>
+                                    {{BData.ControlledBusinessfulfillment}}
+                                </td>
+                                <td>
+                                    {{BData.UnControlledBusinessFulfillment}}
+                                </td>
+                                <td>
+                                    <div class="dev-action">
+                                        <label class="switch">
+                                            <input type="checkbox" ng-checked="BData.IsActive == 1" ng-click="SetStatus(BData)">
+                                            <span class="slider round"></span>
+                                        </label>
+                                    </div>
+                                </td>
+                                <td>
+                                    <i class="fa fa-edit" data-target="#myModalFeedback" data-toggle="modal" ng-click="update(BData)"></i>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="col-md-10">
+                <div class="text-center">
+                    <dir-pagination-controls boundary-links="true" pagination-id="TrainningFormatPagination" on-page-change="pageChangeHandler(newPageNumber)" template-url="/dirPagination.tpl.html"></dir-pagination-controls>
+                </div>
+            </div>
+            <div class="form-group col-md-12">
+                <div class="dev-align-btn">
+                    <a class="btn btn-primary dev-btn" style="text-transform:capitalize;" href="../User/DashBoard"> Back</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

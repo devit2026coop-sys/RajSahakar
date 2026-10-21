@@ -1,0 +1,233 @@
+﻿@{
+    ViewBag.Title = "Society Data Cleansing Report";
+}
+<style>
+    .flexEqualCenter {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    a.backBtn {
+        padding: 3px 5px;
+        background: rgb(99,205,219);
+        color: #fff;
+        border: 0px;
+        outline: none;
+        display: inline-block;
+        text-decoration: none;
+    }
+
+        a.backBtn i {
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+    .tbl-excel-line {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .form-row {
+        display: flex;
+        align-items: end;
+        flex-wrap: wrap;
+    }
+</style>
+
+<script type="text/javascript">
+    var tableToExcel = (function () {
+        var uri = 'data:application/vnd.ms-excel;base64,'
+            , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>'
+            , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) }
+            , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
+        return function (table, name) {
+            if (!table.nodeType) table = document.getElementById(table)
+            var ctx = { worksheet: name || 'Worksheet', table: table.innerHTML }
+            window.location.href = uri + base64(format(template, ctx))
+        }
+    })()
+</script>
+<script src="~/Scripts/xlsx.full.min.js"></script>
+
+<script src="~/Scripts/AngularFramework/SocietyMergeReport.js?v=1.5"></script>
+<div ng-app="SocietyMergeListMod" ng-controller="SocietyMergeListCnt" ng-cloak="">
+    <div class="container-fluid citizen-dash-head">
+        <div class="row">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <h3 class="citizen-dash-head ng-binding">Society Data Cleansing Report</h3>
+            </div>
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <div class="panel panel-default" ng-show="ShowSummary">
+                    <div class="panel-heading flexEqualCenter">
+                        <b><i class="fa fa-filter"></i>&nbsp; Filters</b>
+                    </div>
+
+                    <div class="panel-body" id="search-filter">
+                        <input type="hidden" id="hdnDistrictId" ng-model="search.LoanDistrictId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DistrictId)" />
+
+                        <div class="row form-row">
+                            <div class="col-md-3">
+                                <label>{{translation.District}}:</label>
+                                <select ng-model="search.districtId" name="DistrictId" class="form-control" ng-init="search.districtId='0'" ng-disabled="isLBDisabled">
+                                    <option value="0">{{translation.SelectOption}}</option>
+                                    <option ng-repeat="li in DistrictList | orderBy:'DISTRICT_ENG'" value="{{li.DISTRICT_ID}}" ng-selected="li.DISTRICT_ID==selectedDistrictId">
+                                        {{_language =='en-us' ?  li.DISTRICT_ENG : li.DISTRICT_MANGAL}}
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-3">
+                                <button class="btn btn-success dev-btn" ng-hide="isLBDisabled" ng-show="ShowSummary" ng-click="searchRequest(GetSocietyMergeReport)">Search</button>
+                                <button class="btn btn-success dev-btn" ng-hide="isLBDisabled" ng-show="ShowSummary" ng-click="Clear()">Clear</button>
+                            </div>
+                        </div>
+
+                        <div class="clearfix"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                @*Society Merge List*@
+                <div class="panel panel-default" ng-show="ShowSummary">
+                    <div class="panel-heading tbl-excel-line">
+                        <b><i class="fa fa-th-list"></i>Society Data Cleansing Report</b>
+                        <button type="button" ng-show="ShowSummary" onclick="tableToExcel('SocietyMergeReport', 'Society Data Cleansing Report');" class="btn btn-success dev-btn">
+                            <i class="fa fa-file-excel-o"></i> Export Excel
+                        </button>
+                    </div>
+                    <div class="panel-body">
+                        <div class="table-responsive devtable">
+                            <table class="table table-hover table-striped table-bordered mb-0" id="SocietyMergeReport">
+                                <thead>
+                                    <tr>
+                                        <th valign="middle" width="60">Sr. No.</th>
+                                        <th class="text-center">District Name</th>
+                                        <th class="text-center">Total Society</th>
+                                        <th class="text-center">Merge Action Taken</th>
+                                        <th class="text-center">Duplicate Society Found</th>
+                                        <th class="text-center">Total Remaining Societies</th>
+                                        <th class="text-center">Update</th>
+                                        <th class="text-center">Pending Societies</th>
+                                        @*<th class="text-center">Merged</th>
+                                        <th class="text-center">Update</th>*@
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="item in SocietySummary">
+                                        <td>{{$index + 1}}</td>
+                                        <td>{{item.DISTRICT_ENG}}</td>
+                                        @*<td>{{item.TotalSociety}}</td>*@
+                                        <td>
+                                            <a href="" ng-if="item.TotalActiveSociety > 0" ng-click="GetDetails(item.DISTRICT_ID,5)"> {{item.TotalActiveSociety}}  </a>
+                                            <span ng-if="item.TotalActiveSociety == 0">{{item.TotalActiveSociety}}</span>
+                                        </td>
+                                        <td>
+                                            <a href="" ng-if="item.TotalMerge > 0" ng-click="GetDetails(item.DISTRICT_ID,1)"> {{item.TotalMerge}}  </a>
+                                            <span ng-if="item.TotalMerge == 0">{{item.TotalMerge}}</span>
+                                        </td>
+                                        <td>
+                                            <a href="" ng-if="item.TotalCleansedCount > 0" ng-click="GetDetails(item.DISTRICT_ID,7)"> {{item.TotalCleansedCount}}  </a>
+                                            <span ng-if="item.TotalCleansedCount == 0">{{item.TotalCleansedCount}}</span>
+                                        </td>
+                                        <td>
+                                            <a href="" ng-if="item.TotalRemainingSociety > 0" ng-click="GetDetails(item.DISTRICT_ID,8)"> {{item.TotalRemainingSociety}}  </a>
+                                            <span ng-if="item.TotalRemainingSociety == 0">{{item.TotalRemainingSociety}}</span>
+                                        </td>
+                                        <td>
+                                            <a href="" ng-if="item.TotalMergeUpdate > 0" ng-click="GetDetails(item.DISTRICT_ID,4)"> {{item.TotalMergeUpdate}}  </a>
+                                            <span ng-if="item.TotalMergeUpdate == 0">{{item.TotalMergeUpdate}}</span>
+                                        </td>
+                                        <td>
+                                            <a href="" ng-if="item.TotalNoAction > 0" ng-click="GetDetails(item.DISTRICT_ID,6)"> {{item.TotalNoAction}}  </a>
+                                            <span ng-if="item.TotalNoAction == 0">{{item.TotalNoAction}}</span>
+                                        </td>
+                                        @*<td>
+                                            <a href="" ng-if="item.TotalActiveMerge > 0" ng-click="GetDetails(item.DISTRICT_ID,2)"> {{item.TotalActiveMerge}}  </a>
+                                            <span ng-if="item.TotalActiveMerge == 0">{{item.TotalActiveMerge}}</span>
+                                        </td>
+                                        <td>
+                                            <a href="" ng-if="item.TotalUpdate > 0" ng-click="GetDetails(item.DISTRICT_ID,3)"> {{item.TotalUpdate}}  </a>
+                                            <span ng-if="item.TotalUpdate == 0">{{item.TotalUpdate}}</span>
+                                        </td>*@
+                                    </tr>
+                                    @*
+                                    <tr ng-if="SocietySummary.length > 0" style="font-weight:bold; background-color:#f5f5f5;">
+                                        <td colspan="2" class="text-center">Total</td>
+                                        <td>{{TotalCount}}</td>
+                                    </tr>*@
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                @*Society Details Table*@
+                <div class="panel panel-default " ng-show="!ShowSummary" ng-if="DetailList.length > 0">
+                    <div class="panel-heading">
+                        <b> <button class=" " style="border:0;" ng-show="!ShowSummary" ng-click="Back()"><i class="fa fa-arrow-circle-o-left"></i></button> Society Details</b>
+                        <button type="button" ng-show="!ShowSummary" onclick="tableToExcel('SocietyDetailsReport', 'Society Details Report');" class="btn btn-success dev-btn">
+                            <i class="fa fa-file-excel-o"></i> Export Excel
+                        </button>
+                    </div>
+                    <div class="panel-body">
+                        <table id="SocietyDetailsReport" class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Sr.No</th>
+                                    <th>Society Name</th>
+                                    <th>Registration No</th>
+                                    <th>District</th>
+                                    <th>Registration Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="d in DetailList">
+                                    <td>{{ DataPaging.pageSize * (DataPaging.currentPageID-1)+$index+1 }}</td>
+                                    <td>{{ d.SocietyName }}</td>
+                                    <td>{{ d.RegistrationNo }}</td>
+                                    <td>{{ d.DISTRICT_ENG }}</td>
+                                    <td>{{ d.RegistrationDate | date:'dd/MM/yyyy' }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        @*<div class="col-md-12">
+                            <div ng-if="DataPagingDetails.TotalPages >1" class="dataTables_paginate paging_simple_numbers" id="dataTables-example_paginate">
+                                <div class="dataTables_info" id="dataTables-example_info" role="status" aria-live="polite">
+                                    Total Records: {{DataPagingDetails.TotalRecords}}
+                                </div>
+                                <ul class="pagination pagination_1" style="margin-left: 10px !important;">
+                                    <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« First</span></li>
+                                    <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« Previous</span></li>
+
+                                    <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest('1',GetDetails)" style="cursor: pointer;">
+                                        <span>«First</span>
+                                    </li>
+                                    <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest(DataPagingDetails.PageNumber-1,GetDetails)" style="cursor:pointer;">
+                                        <span>« Previous</span>
+                                    </li>
+                                    <li class="{{n==DataPagingDetails.PageNumber?'active':''}}" style="{{n==DataPagingDetails.PageNumber?'':'cursor: pointer'}}" ng-repeat="n in PagingRange(DataPagingDetails.StartPageNumber,DataPagingDetails.EndPageNumber,DataPagingDetails.TotalPages)" ng-click="pageRequest(n,GetDetails)"><span>{{n}}</span></li>
+                                    <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Next</span></li>
+                                    <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Last</span></li>
+                                    <li ng-if="DataPagingDetails.PageNumber!= DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.PageNumber+1,GetDetails)" style="cursor:pointer;">
+                                        <span>Next »</span>
+                                    </li>
+                                    <li ng-if="DataPagingDetails.PageNumber != DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.TotalPages,GetDetails)" style="cursor:pointer;">
+                                        <span>Last »</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>*@
+                    </div>
+                    <div class="form-group col-md-12" ng-show="!ShowSummary">
+                        <div class="dev-align-btn">
+                            <a class="btn btn-primary dev-btn" style="text-transform:capitalize;" ng-click="Back()">{{ translation.Back}}</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

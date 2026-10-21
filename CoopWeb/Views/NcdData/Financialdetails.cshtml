@@ -1,0 +1,214 @@
+﻿@{
+    ViewBag.Title = "Financial Trunover & Profit/Loss Report";
+}
+<style>
+    .flexEqualCenter {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    a.backBtn {
+        padding: 3px 5px;
+        background: rgb(99,205,219);
+        color: #fff;
+        border: 0px;
+        outline: none;
+        display: inline-block;
+        text-decoration: none;
+    }
+
+        a.backBtn i {
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+    .tblthfont {
+        font-weight: bold;
+    }
+
+    .header-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 15px;
+        border-bottom: 1px solid #1e2cff;
+        background: #fff;
+    }
+
+    .header-left {
+        font-size: 16px;
+        font-weight: 600;
+    }
+
+    .header-right {
+        text-align: right;
+    }
+</style>
+<script src="~/Scripts/AngularFramework/Financialdetails.js?v=2"></script>
+<div ng-app="finaMod" ng-controller="finaCtrl" ng-cloak="">
+    <div class="container-fluid citizen-dash-head">
+        <div class="panel panel-default">
+            <div class="panel-heading flexEqualCenter">
+                <b><i class="fa fa-th-list"></i> Details of Updated Turnover & Profit/Loss</b>
+                <div class="text-right">
+                    <a href="javascript:void(0)" class="btn btn-primary dev-btn" ng-click="ClearFilter()"><i class="fa fa-angle-left"></i> Back</a>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="row" id="search-filter">
+                    <div class="col-md-3 form-group">
+                        <label>Society Name</label>
+                        <div class="form-group">
+                            <input type="text" ng-model="search.societyname" class="form-control" placeholder="Cooperative Society Name" />
+                        </div>
+                    </div>
+                    <div class="col-md-3 form-group">
+                        <label>Location</label>
+                        <div class="form-group">
+                            <select ng-model="search.location" class="form-control" required ng-options="item.id as item.name for item in areaDataList">
+                                <option value="" selected>--Select--</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3 form-group">
+                        <label>District</label>
+                        <div class="form-group">
+                            <select ng-model="search.districtcode" class="form-control" required ng-options="d.district_code as d.district_name for d in districtDataList" ng-change="getFinacialTrunOverDetail()">
+                                <option value="" selected>--Select--</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3 form-group">
+                        <label>Primary Activity</label>
+                        <div class="form-group">
+                            <select ng-model="search.sectorcode" class="form-control" required ng-init="search.sectorcode=''">
+                                <option value="">{{translation.SelectOption}}</option>
+                                <option ng-repeat="item in SectorDataList " value="{{item.id}}">
+                                    {{item.name}}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3 form-group" ng-if="search.financial_update!==null">
+                        <label> Form Updated</label>
+                        <div class="form-group">
+                            <select ng-model="search.financial_update" class="form-control" required>
+                                <option value="">{{translation.SelectOption}}</option>
+                                <option ng-repeat="item in FinancialUpdatedList" value="{{item.id}}">
+                                    {{item.name}}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-3">
+                    </div>
+                    <div class="col-md-4 d-flex justify-content-end" style="gap: 10px;">
+                        <button ng-click="searchFilterFinancialData()" class="btn btn-primary dev-btn">
+                            <i class="fa fa-search"></i> Search
+                        </button>
+                        <button ng-click="ClearFilter()" class="btn btn-primary dev-btn">
+                            Reset
+                        </button>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <div class="header-bar">
+                            <div class="header-left">
+                                <label class="text-dark">{{translation.ItemPerPage}}:</label>
+                                <select ng-model="obj.pageSize" class="form-control" ng-change="pagechange()" ng-init="obj.pageSize='50'">
+                                    <option value="50">50</option>
+                                    <option value="100">100</option>
+                                    <option value="200">200</option>
+                                    <option value="500">500</option>
+                                    <option value="1000">1000</option>
+                                </select>
+                            </div>
+                            <div class="header-right" ng-if="FinancialDataList && FinancialDataList.length >0">
+                                <button type="button" class="btn btn-primary" ng-click="exportExcel()">
+                                    <i class="fa fa-file-excel-o"></i> Export to Excel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-responsive devtable">
+                    <table class="table table-hover table-striped table-bordered mb-0">
+                        <thead>
+                            <tr>
+                                <th width="60">Sr.No</th>
+                                <th>Cooperatives Societies</th>
+                                <th>District</th>
+                                <th>Location</th>
+                                <th>Block/Urban Local Body</th>
+                                <th>Primary Activity</th>
+                                <th ng-show="isCell ==1">Profit Making	</th>
+                                <th ng-show="isCell ==1">Audit Year</th>
+                                <th>Annual Turnover</th>
+                                <th>Profit</th>
+                                <th>Loss</th>
+                                <th>Updated</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="item in FinancialDataList">
+                                <td>{{(((DataPagingDetails.PageNumber - 1) * DataPagingDetails.PageSize) + 1)+$index}}</td>
+                                <td>{{item.SocietyName}}</td>
+                                <td>{{item.DistrictName}}</td>
+                                <td>{{item.Location}}</td>
+                                <td>{{item.BlockUrbanLocalBody}}</td>
+                                <td>{{item.SectorName}}</td>
+                                <td ng-show="isCell ==1">{{item.ProfitMaking}}</td>
+                                <td ng-show="isCell ==1">{{item.AuditCompleteYear}}</td>
+                                <td>{{item.AnnualTurnover|inrCurrency}}</td>
+                                <td>{{item.AnnualProfit|inrCurrency}}</td>
+                                <td>{{item.AnnualLoss|inrCurrency}}</td>
+                                <td>{{item.Updated}}</td>
+                            </tr>
+                            <tr ng-show="isNoRecord">
+                                <td colspan="{{colspan}}" style="text-align: center;">
+                                    No Records
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div ng-if="DataPagingDetails.TotalPages>1" class="dataTables_paginate paging_simple_numbers" id="dataTables-example_paginate" style="display: flex; align-items: center; justify-content: space-between;">
+                            <div class="dataTables_info" id="dataTables-example_info" role="status" aria-live="polite">
+                                Total Records: {{DataPagingDetails.TotalRecords}}
+                            </div>
+                            <ul class="pagination pagination_1" style="margin-left: 10px !important; margin:0">
+                                <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« First</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« Previous</span></li>
+
+                                <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest('1',SearchData)" style="cursor: pointer;">
+                                    <span>« First</span>
+                                </li>
+                                <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest(DataPagingDetails.PageNumber-1,SearchData)" style="cursor:pointer;">
+                                    <span>« Prev</span>
+                                </li>
+                                <li class="{{n==DataPagingDetails.PageNumber?'active':''}}" style="{{n==DataPagingDetails.PageNumber?'':'cursor: pointer'}}" ng-repeat="n in PagingRange(DataPagingDetails.StartPageNumber,DataPagingDetails.EndPageNumber,DataPagingDetails.TotalPages)" ng-click="pageRequest(n,SearchData)"><span>{{n}}</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Next</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Last</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber!= DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.PageNumber+1,SearchData)" style="cursor:pointer;">
+                                    <span>Next »</span>
+                                </li>
+                                <li ng-if="DataPagingDetails.PageNumber != DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.TotalPages,SearchData)" style="cursor:pointer;">
+                                    <span>Last »</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+        </div>
+    </div>
+</div>

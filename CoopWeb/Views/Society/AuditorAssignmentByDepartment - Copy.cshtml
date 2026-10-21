@@ -1,0 +1,1135 @@
+﻿<script src="~/Scripts/AngularFramework/AuditorAssignmentByDepartment.js?ID=0"></script>
+<link href="~/Content/Stylesheets/bootstrap-multiselect.css" rel="stylesheet" type="text/css" />
+<script src="~/Scripts/bootstrap-multiselect.js" type="text/javascript"></script>
+<script type="text/javascript" src="~/Scripts/jqueryuitimepicker.js"></script>
+<link href="~/Content/Stylesheets/jqueryuitimepicker.css" rel="stylesheet" />
+<script>
+    $(document).ready(function(){
+        $('.devcalender').datepicker({
+            showOn: "both",
+            changeMonth: true,
+            buttonImage: "../images/calender.png",
+            changeYear: true,
+            dateFormat: "dd/mm/yy"
+            // minDate: '0'
+          //  yearRange: "c-10:c+0"
+        });
+    })
+</script>
+<style>
+    .lh-30 {
+        line-height: 30px !important;
+    }
+    .open > .dropdown-menu {
+        display: block;
+        position: relative;
+    }
+    .auditsection label {
+        margin-right: 5px;
+    }
+
+    .auditsection input {
+    }
+
+    .auditsection select {
+    }
+
+    .mr-5 {
+        margin-right: 5px;
+    }
+
+    .ml-15 {
+        margin-left: 15px;
+    }
+
+    .mt-5 {
+        margin-top: 5px;
+    }
+
+    .audit_main label {
+        margin-top: 3px;
+    }
+
+    .modal_Popup {
+        z-index: 1071;
+    }
+
+    .modal_SubPopup {
+        z-index: 1070;
+    }
+</style>
+<div ng-app="AuditorAssignByDepart">
+    <div ng-controller="AuditorAssignByDepartCnt">
+        <div class="col-md-12 padding_zero">
+            <h3 class="citizen-dash-head">{{translation.AuditorAssignmentByDepartment}}</h3>
+            <input type="hidden" id="ELevelId" value="@ViewBag.LevelId" />
+            <input type="hidden" id="EDivID" value="@ViewBag.DivisionId" />
+            <input type="hidden" id="EDisID" value="@ViewBag.DistrictId" />
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding_zero">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#"> {{translation.Home}} </a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+
+                        <i class="fa fa-angle-right"> </i>
+                        <span style="margin: 0 5px;"> {{translation.AuditorAssignmentByDepartment}} </span>
+                    </li>
+
+                </ul>
+            </div>
+        </div>
+
+
+        <div class="dev-popup-body modal modal modal_Popup fade" id="myModal" data-backdrop="static" data-keyboard="false" role="dialog">
+            <div class="modal-dialog">
+                <!-- Modal content-->
+                <div class="modal-content citizen-dash-head">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title"> {{translation.OtpVeryfication}} </h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group col-md-6">
+                            <label>{{translation.EnterOTP}}</label>
+                            <input type="text" class="form-control" name="OTP" ng-bind="OTP" ng-model="OTP" placeholder={{translation.EnterOTP}} autocomplete="off" /><br />
+                            <button type="submit" class="btn btn-primary" ng-click="VerifyOTP()">{{translation.Submit}}</button>
+                            <button type="button" class="btn btn-success ng-binding" ng-click="GenOtpForEsign()">&nbsp;&nbsp;{{translation.ReSendOTP}}</button>
+                            <div class="col-lg-2"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="dev-popup-body modal fade" id="RejectModal" data-backdrop="static" data-keyboard="false" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content citizen-dash-head">
+                    <div class="modal-header">
+                        <h5 class="modal-head">{{translation.AuditorAssignmentByDepartment}}</h5>
+                    </div>
+                    <table class="table devtable col-md-10">
+                        <caption>
+                            <h2>{{translate.TehsilHeading}}</h2>
+                        </caption>
+                        <thead>
+                            <tr>
+                                <th>
+                                    {{translation.SRNO}}
+                                </th>
+                                <th>
+                                    {{translation.SocietyName}}
+                                </th>
+                                <th>
+                                    {{translation.FincialYearHeading}}
+                                </th>
+                                <th>
+                                    {{translation.AuditBy}}
+                                </th>
+                                <th>
+                                    {{translation.Firm}}
+                                </th>
+                                <th>
+                                    {{translation.Delete}}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="items in RejectAssignedAuditor">
+                                <td>{{$index+1}}</td>
+                                <td>{{ items.SocietyName }}</td>
+                                <td>{{ items.FIN_YEAR_NAME }}</td>
+                                <td>{{ items.IsEmpanelledCA == 'True' ? translation.ByEmpanelledAgency : translation.ByDepartment}}</td>
+                                <td>{{ items.FirmName}}</td>
+                                <td> <i class="fa fa-trash" ng-click="RemoveRow($index)" aria-hidden="true"></i> </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="form-group col-md-12">
+                        <div class="col-md-2">
+                            <label >{{translation.Remarks}}</label>
+                        </div>
+                        <div class="form-group col-md-9">
+                            <textarea name="DeleteRemark" ng-model="DeleteResion" rows="4" cols="70"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-group col-md-12">
+                        <div class="form-group col-md-6">
+                            <button type="button" class="btn btn-primary" ng-click="GoForDelete()">&nbsp;{{translation.Submit}}</button>
+                            <button type="button" class="btn btn-success" ng-click="CloseForReject()">&nbsp;{{translation.Close}}</button>
+                        </div>
+                    </div>
+
+
+                    <div class="form-group col-md-12" ng-if="GoforDelete">
+                        <div class="form-group col-md-3">
+                            <label>{{translation.SendOTP}}</label>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <button type="button" class="btn btn-success ng-binding" ng-click="GenOtpForEsign()">&nbsp;{{translation.SendOTP}}</button>
+                        </div>
+                    </div>
+                    <div class="form-group col-md-12" ng-if="GoforDelete">
+                        <div class="form-group col-md-3">
+                            <label>{{translation.EnterOTP}}</label>
+                        </div>
+                        <div class="form-group col-md-3">
+                            <input type="text" class="form-control" name="OTP" ng-bind="OTP" ng-model="OTP" placeholder={{translation.EnterOTP}} autocomplete="off" />
+                        </div>
+                        <div class="form-group col-md-6">
+                            <button type="submit" class="btn btn-primary" ng-click="VerifyOTP()">{{translation.Submit}}</button>
+                            <button type="button" class="btn btn-success ng-binding" ng-click="GenOtpForEsign()">&nbsp;{{translation.ReSendOTP}}</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="dev-popup-body modal modal_SubPopup fade" id="ReviewAssignedAuditorModal" data-backdrop="static" data-keyboard="false" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content citizen-dash-head col-md-12">
+                    <div class="col-md-12">
+                        <h5 class="citizen-dash-head">{{translation.AuditorAssignmentByDepartment}}</h5>
+
+                    </div>
+                    <table class="table devtable col-md-10">
+                        <caption>
+                            <h2>{{translate.TehsilHeading}}</h2>
+                        </caption>
+                        <thead>
+                            <tr>
+                                <th>
+                                    {{translation.SRNO}}
+                                </th>
+                                <th ng-click="sortData('SocietyName')">
+                                    {{translation.SocietyName}}
+                                    <div ng-class="getSortClass('SubClassNameEn')"></div>
+                                </th>
+                                <th>
+                                    {{translation.AuditType}}
+                                </th>
+                                <th>
+                                    {{translation.District}}
+                                </th>
+                                <th>
+                                    {{translation.Delete}}
+                                </th>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="Class in ForReviewAssignedAuditor">
+                                <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                                <td>{{ Class.SocietyName }}</td>
+                                <td ng-show="Class.IsFirm == 3">Pending</td>
+                                <td>{{ _language == 'en-us' ?  Class.DISTRICT_ENG : Class.DISTRICT_MANGAL }}</td>
+                                <td> <i class="fa fa-trash" ng-click="RemoveRowForReviewAssignedAuditor($index)" aria-hidden="true"></i> </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+
+                    <div class="form-group col-md-12">
+                        <div class="form-group col-md-6">
+                            <button type="button" class="btn btn-primary" ng-click="SaveAuditAssignbydeprtNotReqst(2)">&nbsp;{{translation.Submit}}</button>
+                            <button type="button" class="btn btn-success" ng-click="CloseForDelete()">&nbsp;{{translation.Close}}</button>
+                        </div>
+                    </div>
+
+
+                    <div class="form-group col-md-12" ng-if="GoforDelete">
+                        <div class="form-group col-md-3">
+                            <label>{{translation.SendOTP}}</label>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <button type="button" class="btn btn-success ng-binding" ng-click="GenOtpForEsign()">&nbsp;{{translation.SendOTP}}</button>
+                        </div>
+                    </div>
+                    <div class="form-group col-md-12" ng-if="GoforDelete">
+                        <div class="form-group col-md-3">
+                            <label>{{translation.EnterOTP}}</label>
+                        </div>
+                        <div class="form-group col-md-3">
+                            <input type="text" class="form-control" name="OTP" ng-bind="OTP" ng-model="OTP" placeholder={{translation.EnterOTP}} autocomplete="off" />
+                        </div>
+                        <div class="form-group col-md-6">
+                            <button type="submit" class="btn btn-primary" ng-click="VerifyOTP()">{{translation.Submit}}</button>
+                            <button type="button" class="btn btn-success ng-binding" ng-click="GenOtpForEsign()">&nbsp;{{translation.ReSendOTP}}</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @*POPUP*@
+        <div class="citizen-dash-head">
+            <div class="col-lg-12 padding_zero">
+                <h5 class="heading-hr ng-binding"> Search Society </h5>
+            </div>
+            <div class="col-lg-12 form-group">
+                @*<div class="col-md-4" style="margin-top:10px;">
+                    <label>
+                        {{translation.District}} :
+                    </label>
+                    <select class="form-control" ng-model="ddlDistrct" ng-change="BlockList()" ng-options="_language == 'en-us' ?  item.DISTRICT_ENG : item.DISTRICT_MANGAL for item in Districts">
+                        <option value="" disabled>{{translation.SelectOption}}-</option>
+                    </select>
+                </div>*@
+                <div class="col-lg-8" style="margin-top:10px;">
+                    <label style="color:black">Please enter society Registration No/Society Name/BRN :</label>
+                    <input ng-disabled="disableTxtRegNo" type="text" name="SocietyName" class="form-control" ng-model="SocietyRegistration.SocietyRegistrationNo" placeholder="society Registration No/Society Name/BRN " autocomplete="off">
+                    <input ng-hide="true" type="text" name="SocietyName" class="form-control" ng-model="MemberRegistration.RegNo" autocomplete="off">
+                </div>
+                <div class="col-md-4" style="margin-top:-15px;">
+                    <label>&nbsp;</label><br />
+                    <button style="margin-top: 25px;" type="submit" class="btn btn-primary dev-btn" ng-click="SearchSociety();" ng-disabled="SocietyRegistration.SocietyRegistrationNo==undefined || SocietyRegistration.SocietyRegistrationNo==''">{{translation.GetSocieties}}</button>
+                </div>
+            </div>
+            <div class="col-lg-12">
+               
+                <div id="dvProfiling" class="col-lg-12"  ng-show="SocietyRegdata.length>0">                   
+                    <table class="table table-responsive devtable">
+                        <thead>
+                            <tr>
+                                <th>
+                                    {{translation.SRNO}}
+                                </th>
+                                <th>
+                                    {{translation.SocietyName}}
+                                </th>
+                                @*<th>
+            {{translation.Act}}
+        </th>*@
+                                <th>
+                                    {{translation.SocietyRegistrationNo}}
+                                </th>
+                                <th>
+                                    {{translation.SocietyTyped}}
+                                </th>
+                                <th>
+                                    {{translation.SocietyCategory}}
+                                </th>
+                                <th>
+                                    {{translation.District}}
+                                </th>
+                                <th>
+                                    {{translation.Status}}
+                                </th>
+                                <th>
+                                    {{translation.Edit}}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @*SocietyRegdata*@ 
+                            <tr dir-paginate="items in SocietyRegdata | orderBy:colsort:reverseSort | itemsPerPage: 10" current-page="currentPage" pagination-id="SocietyIdForTbl">
+                                @*<td><input type="checkbox" name="name" ng-click="SelectSocietyForVerify(items,$index)" ng-model="items.ischecked" value="{{ items.SocietyID }}" /> </td>*@
+                                <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                                <td>{{ items.SocietyName }}</td>
+                                @*<td>{{ items.ActNameEn }}</td>*@
+                                <td>{{ items.ApplicationNo }}</td>
+                                <td>{{ items.TypeameEng }}</td>
+                                <td>{{ items.CategoryNameEn }}</td>
+                                <td>{{ items.District }}</td>
+                                <td>{{ items.Status }}</td>
+                                <td><a href="javascript:void(0);" ng-click="GetSocietyDetails(items.SocietyIDInc);"><i class="fa fa-edit"></i></a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="col-md-10">
+                        <div class="text-center">
+                            <dir-pagination-controls boundary-links="true" pagination-id="SocietyIdForTbl" on-page-change="pageChangeHandler(newPageNumber)" template-url="/dirPagination.tpl.html"></dir-pagination-controls>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div ng-show="GridNewRequest">
+            <div class="table-responsive citizen-dash-head" style="overflow: hidden;">
+                <div class="col-lg-12 padding_zero">
+                    <input type="radio" ng-model="NewRequestY" name="UserType" ng-click="ChangeGridType(1,1)" value="1"><label style="">{{translation.NewRequest}}</label>
+                    <input type="radio" ng-model="NewRequestN" name="UserType" ng-click="ChangeGridType(1,2)" value="2"><label style="">{{translation.ApprovedRequest}}</label>
+                </div>
+                <div class="col-lg-12 padding_zero">
+                    <h5 class="heading-hr ng-binding"> {{translation.SocietyListOfAuditorRequest}} </h5>
+                </div>
+                <div class="col-lg-12 padding_zero" style="margin-top:5px;">
+                    <div class="col-md-1">
+                        <label style="margin-right: 15px;">{{translation.AuditBy}}</label>
+                    </div>
+                    <div class="col-md-8">
+                        <input class="form-check-input" type="radio" name="inlineRadioOptions1" value="false" ng-model="AuditBy" ng-change="SetAuditType(0)" style="margin-left: 30px;">
+                        <label class="form-check-label option_value" style="margin-right: 15px;">{{translation.ByDepartment}}</label>
+
+                        <input class="form-check-input" ng-show="AfterMay" type="radio" name="inlineRadioOptions1" value="All" ng-model="AuditBy" ng-change="SetAuditType(2)">
+                        <label class="form-check-label option_value" ng-show="AfterMay" style="margin-right: 15px;">{{translation.ByDepartment}} ({{translation.NotRequested}})</label>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 padding_zero" style="margin-top:5px;" ng-show="FYear">
+                    <div class="col-lg-4">
+                        <label for="search">{{translation.FincialYearHeading}}<span class="error">*</span>:</label>
+                    </div>
+                    <div class="col-lg-8">
+                        <select id="ddlFinancialYear" class="form-control" ng-model="FinancialYear" ng-init="FinancialYear='0'" ng-change="ShowBackLogWarning()">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in FinancialYearList" value="{{item.FIN_YEAR_MASTR_ID}}">
+                                {{item.FIN_YEAR_NAME}}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-lg-4 padding_zero" style="margin-top:5px;">
+                    <div class="col-lg-4">
+                        <label for="search">{{translation.Category}}:</label>
+                    </div>
+                    <div class="col-lg-8">
+                        <select id="ddlCategory" class="form-control" ng-model="CategoryId" ng-init="CategoryId='0'">
+                            <option value="0">{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in CentralCategoryList" value="{{item.CategoryId}}">
+                                {{ _language == 'en-us' ?  item.CategoryNameEn : item.CategoryNameHi }}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+                @if (ViewBag.LevelId == 1)
+                {
+                    <div class="col-lg-4 padding_zero" style="margin-top:5px;">
+                        <div class="col-lg-4">
+                            <label for="search">{{translation.Division}}:</label>
+                        </div>
+                        <div class="col-lg-8">
+                            <select class="form-control" ng-disabled="IsDivisionLevelUser" ng-model="Filter.DivisionId" ng-init="Filter.DivisionId='0'" ng-change="BindDistrict(Filter.DivisionId);">
+                                <option value="0">{{translation.SelectOption}}</option>
+                                <option ng-repeat="item in FilterDivisions" value="{{item.DIVISION_ID}}">
+                                    {{_language =='en-us' ?  item.DIVISION_ENG : item.DIVISION_MANGAL}}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                }
+                @if (ViewBag.LevelId == 1|| ViewBag.LevelId == 2)
+                {
+                    <div class="col-lg-4 padding_zero" style="margin-top:5px;">
+                        <div class="col-lg-4">
+                            <label for="search">{{translation.District}}:</label>
+                        </div>
+                        <div class="col-lg-8">
+                            <select class="form-control" ng-disabled="IsDivisionLevelUser" ng-model="Filter.DistrictId" ng-init="Filter.DistrictId='0'" ng-change="BindResion(Filter.DistrictId);">
+                                <option value="0">{{translation.SelectOption}}</option>
+                                <option ng-repeat="item in FilterDistrict" value="{{item.DISTRICT_ID}}">
+                                    {{_language =='en-us' ?  item.DISTRICT_ENG : item.DISTRICT_MANGAL}}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                }
+                    <div class="col-lg-4 padding_zero" style="margin-top:5px;">
+                        <div class="col-lg-4">
+                            <label for="search">Resion:</label>
+                        </div>
+                        <div class="col-lg-8">
+                            <select class="form-control" ng-disabled="IsDivisionLevelUser" ng-model="Filter.ResionId" ng-init="Filter.ResionId='0'">
+                                <option value="0">{{translation.SelectOption}}</option>
+                                <option ng-repeat="item in FilterResion" value="{{item.ResionId}}">
+                                    {{_language =='en-us' ?  item.ResionName : item.ResionNameHi}}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4 padding_zero" style="margin-top:5px;">
+                        <div class="col-lg-4">
+                            <label for="search">{{translation.Search}}:</label>
+                        </div>
+                        <div class="col-lg-8">
+                            <input ng-model="q" id="search" class="form-control mb-10" placeholder={{translation.filttertext}} autocomplete="off">
+                        </div>
+                    </div>
+
+                    <div class="form-group col-md-12">
+                        <div class="dev-align-btn">
+                            <button type="submit" class="btn btn-primary dev-btn" ng-disabled="MyUserForm.$invalid" ng-click="GetGridData()">{{translation.Search}}</button>
+                        </div>
+                    </div>
+                    <div class="col-lg-12 bg-warning" ng-show="IsBackLogWarning" style="margin-top: 30px; color:red;">
+                        नोट : निम्न  समितियों में ऑडिटर अपॉइंटमेंट (बैक लॉग ) के तहत की जा रही है
+                    </div>
+                    <div class="col-lg-12 bg-warning" ng-show="IsBackLogWarning" style="margin-top: 30px; color:red;">
+
+                    </div>
+
+                    @*<div ng-show="GetAllAuditorAssignmentByDepartmentdata.length>0">
+                    *@
+
+
+
+                    <div class="col-lg-12 padding_zero" style="float:left; width:100%;">
+
+
+                        <table class="table devtable" style="margin-top: 30px;" id="a">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        {{translation.SRNO}}
+                                    </th>
+                                    <th ng-click="sortData('SocietyName')">
+                                        {{translation.SocietyName}}
+                                        <div ng-class="getSortClass('SubClassNameEn')"></div>
+                                    </th>
+                                    <th>
+                                        {{translation.RegistrationNo}}
+                                    </th>
+                                    <th>
+                                        {{translation.SocietyCategory}}
+                                    </th>
+
+                                    <th>
+                                        {{translation.FincialYearHeading}}
+                                    </th>
+                                    <th>
+                                        {{translation.AuditType}}
+                                    </th>
+                                    <th>
+                                        {{translation.District}}
+                                    </th>
+                                    <th>
+                                        {{translation.RequestDate}}
+                                    </th>
+                                    <th>
+                                        {{translation.ResolutionOrder}}
+                                    </th>
+                                    <th ng-show="IsByEmpanelledFlag">
+                                        {{translation.AuditorData}}
+                                    </th>
+                                    <th>
+                                        {{translation.Approvable}}
+                                    </th>
+                                    <th> {{translation.Edit}} {{translation.Society}}</th>
+                                    @*<th> {{translation.Delete}}</th>*@
+                            </thead>
+
+                            <tbody>
+                                <tr dir-paginate="Class in GetAllAuditorAssignmentByDepartmentdata | filter:q | orderBy:colsort:reverseSort | itemsPerPage: pageSize" current-page="currentPage" pagination-id="SubclassPagination">
+                                    <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                                    <td>{{ Class.SocietyName }}</td>
+                                    <td>{{ Class.RegistrationNo }}</td>
+                                    <td>{{ _language == 'en-us' ?  Class.CategoryNameEn : Class.CategoryNameHi }}</td>
+                                    <td>{{ Class.FIN_YEAR_NAME }}</td>
+                                    <td ng-show="Class.IsFirm == 0">{{  translation.Firm }}</td>
+                                    <td ng-show="Class.IsFirm == 1">{{ translation.Individual}}</td>
+                                    <td ng-show="Class.IsFirm == 2">{{ translation.ByDepartment }}</td>
+                                    <td ng-show="Class.IsFirm == 3">Pending</td>
+
+                                    <td>{{ _language == 'en-us' ?  Class.DISTRICT_ENG : Class.DISTRICT_MANGAL }}</td>
+                                    <td>{{ Class.CreationDate }}</td>
+                                    <td> <a ng-hide="Class.ResolutionPDF=='' || Class.ResolutionPDF==null" href="{{Class.ResolutionPDF}}" target="_blank" style="color:#505050;" class="fa fa-download"></a></td>
+                                    <td ng-show="IsByEmpanelledFlag">{{ Class.FirmName }}</td>
+                                    <td>
+                                        <input type="checkbox" name="Accept" ng-model="Class.IsChecked" id="{{Class.Id}}" ng-change="ShowInspacotrDiv(Class);GetInspactorName(Class.DISTRICT_ID)" />
+                                        @*<input type="checkbox" name="Accept" ng-model="Class.IsChecked" id="{{Class.Id}}" data-target="#RequestModal" data-toggle="modal" ng-change="ShowInspacotrDiv(Class);GetInspactorName(Class.DISTRICT_ID)" />*@
+                                    </td>
+                                    <td><a href="javascript:void(0);" ng-click="OpenChangeStatus(Class,1,2);"><i class="fa fa-edit"></i></a></td>
+                                    @*<td><a href="javascript:void(0);" ng-click="OpenChangeStatus(Class,2,3);"><i class="fa fa-trash"></i></a></td>*@
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-md-10">
+                        <div class="text-center">
+                            <dir-pagination-controls boundary-links="true" pagination-id="SubclassPagination" on-page-change="pageChangeHandler(newPageNumber)" template-url="/dirPagination.tpl.html"></dir-pagination-controls>
+                        </div>
+                    </div>
+                    @*
+            </div>*@
+                    <div ng-show="ShowEmpanelledCADataOld">
+
+                        @*<div class="col-lg-12 ">
+                    <div class="col-lg-4">
+                        <label>{{translation.AuditType}}</label>
+                    </div>
+                    <div class="col-lg-8">
+                        <input class="form-check-input setEnable" type="radio" name="inlineRadioOptions2Old" value="0" ng-model="IsFirm" ng-change="GetAuditorData()">
+                        <label class="form-check-label option_value" for="inlineRadio1Old" style="margin-right: 15px;">{{translation.Firm}}</label>
+
+                        <input class="form-check-input setEnable" type="radio" name="inlineRadioOptions2Old" id="inlineRadio3Old" value="1" ng-model="IsFirm" ng-change="GetAuditorData()">
+                        <label class="form-check-label option_value">{{translation.Individual}}</label>
+                    </div>
+                </div>*@
+                        <div class="form-group col-md-12"></div>
+                        <div class="col-lg-12" ng-show="showdivRedio">
+                            <div class="col-lg-4">
+                                <label>{{translation.SetRequestStatus}}</label>
+                            </div>
+                            <div class="col-lg-8">
+                                <input class="form-check-input" type="radio" name="rbRequestStatus" value="1" ng-model="RequestStatus" ng-checked="1">
+                                <label class="form-check-label option_value" style="margin-right: 15px;">{{translation.Approve}}</label>
+
+                                <input class="form-check-input" type="radio" name="rbRequestStatus" value="2" ng-model="RequestStatus">
+                                <label class="form-check-label option_value">{{translation.Rejection}}</label>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-12"></div>
+                        @*<div class="col-lg-12 ">
+                    <div class="col-lg-4">
+                        <label>{{translation.AuditorData}}</label>
+                    </div>
+                    <div class="col-lg-6">
+                        <select class="form-control setEnable" ng-model="AuditorId" ng-init="AuditorId='0'">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in AuditorList" value="{{item.AuditorId}}">
+                                {{_language =='en-us' ?  item.FirmName : item.FirmName}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-lg-2">
+                    </div>
+                </div>*@
+                    </div>
+                    <div ng-show="ShowDepartmentDataOld">
+                        <div class="form-group col-md-12" ng-show="AuditBy=='All'">
+                            <div class="col-lg-2">
+                                <label style="margin-right: 15px;">{{translation.AuditBy}}</label>
+                            </div>
+                            <div class="col-md-4">
+                                <input class="form-check-input" type="radio" name="AuditBy" value="true" ng-model="AuditByInspector" ng-change="ShowIns(0)">
+                                <label class="form-check-label option_value" style="margin-right: 15px;">{{translation.ByEmpanelledAgency}}</label>
+
+                                <input class="form-check-input" type="radio" name="AuditBy" value="false" ng-model="AuditByInspector" ng-change="ShowIns(1)">
+                                <label class="form-check-label option_value" style="margin-right: 15px;">{{translation.ByDepartment}}</label>
+                            </div>
+
+                            <div class="col-lg-3">
+                                <label>{{translation.AuditDateForFInish}}</label>
+                            </div>
+                            <div class="col-lg-2">
+                                <input name="AuditTillDate" id="txtAuditTillDate" class="AddDate form-control devcalender" placeholder="{{translation.Date}}" ng-model="AuditorAssign.AuditTillDate" autocomplete="off" />
+                            </div>
+                        </div>
+                        <div class="col-lg-2">
+                            <span ng-show="InspectorName.lenth>0||InspectorName!=''" name="InsName" ng-model="InspectorName">{{InspectorName}}</span>
+                        </div>
+                        <div class="form-group col-lg-12" ng-show="FirmOrIndividual">
+                            <div ng-show="AuditByInspector=='true'">
+                                <div class="col-lg-2">
+                                    <label>{{translation.AuditType}}</label>
+                                </div>
+                                <div class="col-lg-3">
+                                    <input class="form-check-input setEnable" type="radio" name="inlineRadioOptions2Old" value="0" ng-model="IsFirm" ng-change="GetAuditorData()">
+                                    <label class="form-check-label option_value" for="inlineRadio1Old" style="margin-right: 15px;">{{translation.Firm}}</label>
+
+                                    <input class="form-check-input setEnable" type="radio" name="inlineRadioOptions2Old" id="inlineRadio3Old" value="1" ng-model="IsFirm" ng-change="GetAuditorData()">
+                                    <label class="form-check-label option_value">{{translation.Individual}}</label>
+                                </div>
+                                <div class="col-lg-1">
+
+                                </div>
+                            </div>
+                            @*S_Category &&*@
+                            <div ng-show="AuditByInspector=='false'">
+                                <div class="col-lg-2">
+                                    <label>{{translation.InspectorFrom}}</label>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div ng-show="@ViewBag.LevelId=='1'">
+                                        <input class="form-check-input setEnable" type="radio" name="InspectorFrom" value="2" ng-model="IsRao" ng-change="GetInspactorName()">
+                                        <label class="form-check-label option_value" style="margin-right: 15px;">{{translation.HQOffice}}</label>
+                                    </div>
+                                    <div ng-show="@ViewBag.LevelId!='3'">
+                                        <input class="form-check-input setEnable" type="radio" name="InspectorFrom" value="3" ng-model="IsRao" ng-change="DivisionsList()">
+                                        <label class="form-check-label option_value" style="margin-right: 15px;">{{translation.AddinationalRegOffice}}</label>
+                                    </div>
+                                    <div ng-show="@ViewBag.LevelId!='1'">
+                                        <input class="form-check-input setEnable" type="radio" name="InspectorFrom" value="4" ng-model="IsRao" ng-change="GetRAODistrictList()">
+                                        <label class="form-check-label option_value" style="margin-right: 15px;">{{translation.DROffice}}</label>
+                                    </div>
+                                    <input class="form-check-input setEnable" type="radio" name="InspectorFrom" value="0" ng-model="IsRao" ng-change="GetAuditorDataForRAO()">
+                                    <label class="form-check-label option_value" style="margin-right: 15px;">{{translation.RaoOffice}}</label>
+
+                                    <input class="form-check-input setEnable" type="radio" name="InspectorFrom" value="1" ng-model="IsRao" ng-change="GetRAODistrictList()">
+                                    <label class="form-check-label option_value">{{translation.SAOffice}}</label>
+                                </div>
+
+                            </div>
+                            <div ng-show="AuditByInspector=='false'" ng-if="@ViewBag.LevelId!='3'">
+                                <div class="col-lg-3">
+                                    <label>{{translation.Division}}</label>
+                                </div>
+                                <div class="col-lg-2">
+                                    <select class="form-control" ng-disabled="IsDivisionLevelUser" ng-model="AuditorAssign.DivisionId" ng-init="AuditorAssign.DivisionId='0'" ng-change="GetInspactorName()">
+                                        <option value="0">{{translation.SelectOption}}</option>
+                                        <option ng-repeat="item in Divisions" value="{{item.DIVISION_ID}}">
+                                            {{_language =='en-us' ?  item.DIVISION_ENG : item.DIVISION_MANGAL}}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div ng-hide="AuditByInspector=='false' && !S_Category">
+                                <div class="col-lg-3">
+                                    <label>{{translation.District}}</label>
+                                </div>
+                                <div class="col-lg-2">
+                                    <select class="form-control" ng-disabled="IsDistrictDisable" ng-model="AuditorAssign.DistrictId" ng-init="AuditorAssign.DistrictId='0'" ng-change="GetAuditorData()">
+                                        <option value="0">{{translation.SelectOption}}</option>
+                                        <option ng-repeat="item in DistrictList" value="{{item.DISTRICT_ID}}">
+                                            {{_language =='en-us' ?  item.DISTRICT_ENG : item.DISTRICT_MANGAL}}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-2">
+
+                        </div>
+                        <div class="col-lg-12" ng-show="AuditorData">
+                            <div class="col-lg-2">
+                                <label>{{translation.AuditorData}}</label>
+                            </div>
+                            <div class="col-lg-3">
+                                <select class="form-control setEnable" ng-model="AuditorId" ng-init="AuditorId='0'">
+                                    <option value="0" disabled>{{translation.SelectOption}}</option>
+                                    <option ng-repeat="item in AuditorList" value="{{item.AuditorId}}">
+                                        {{_language =='en-us' ?  item.FirmName : item.FirmName}}
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="col-lg-6">
+                            </div>
+                        </div>
+                        <div class="form-group col-md-12">
+                            <div ng-show="showdiv">
+                                <div class="col-lg-2">
+                                    <label>{{translation.Inspector}}</label>
+                                </div>
+                                <div class="col-lg-3">
+                                    <select multiple="multiple" class="form-control" id="Inspector"></select>
+                                </div>
+                                <div class="col-lg-1">
+                                </div>
+
+                                @*<div class="col-lg-3" ng-show="FinancialYea > 49">
+
+                        </div>*@
+                                <div class="col-lg-5" ng-show="FinancialYear > 49">
+                                    <label>{{translation.Act73}}</label>
+                                    <input type="checkbox" name="Forced" ng-model="IsForced" class="ng-pristine ng-valid ng-empty ng-touched">
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group col-md-12">
+                        <div class="dev-align-btn">
+                            <button type="submit" class="btn btn-primary dev-btn" ng-show="AuditBy!='All'" ng-disabled="MyUserForm.$invalid" ng-click="SaveAuditAssignbydeprt(1)">{{translation.Submit}}</button>
+                            <button type="submit" class="btn btn-primary dev-btn" ng-show="AuditBy=='All'" ng-disabled="MyUserForm.$invalid" ng-click="GoForReview()">{{translation.Submit}}</button>
+                            <a class="btn btn-primary dev-btn" style="text-transform:capitalize;" href="../User/DashBoard"> Back</a>
+                        </div>
+                    </div>
+
+                </div>
+
+        </div>
+        <div ng-hide="GridNewRequest">
+
+            <div class="table-responsive citizen-dash-head" style="overflow: hidden;">
+                <div>
+                    <input type="radio" name="OldRequest" ng-model="NewRequestY" ng-click="ChangeGridType(2,1)" value="1"><label style="">{{translation.NewRequest}}</label>
+                    <input type="radio" name="OldRequest" ng-model="NewRequestN" ng-click="ChangeGridType(2,2)" value="2"><label style="">{{translation.ApprovedRequest}}</label>
+                </div>
+                <h5 class="heading-hr ng-binding"> {{translation.SocietyListOfAuditorAppointed}} </h5>
+
+                <div class="table-dropdown">
+                    <div class="col-md-2">
+                        <label for="search">{{translation.Search}}:</label>
+                        <input ng-model="A" id="search" class="form-control" placeholder={{translation.filttertext}} autocomplete="off">
+                    </div>
+                    <div class="col-md-2">
+                        <label for="search">{{translation.ItemPerPage}}:</label>
+                        <input type="number" min="1" max="100" class="form-control" ng-model="pageSizeT">
+                    </div>
+                    <div class="col-md-4" style="padding-top: 27px;">
+                        <label>{{translation.AuditBy}}</label>
+
+                        <input class="form-check-input" type="radio" name="inlineRadioOptions" value="true" ng-model="AuditByT" ng-change="SetAuditTypeT(true)" ng-checked="1">
+                        <label class="form-check-label option_value" style="margin-right: 15px;">{{translation.ByEmpanelledAgency}}</label>
+
+                        <input class="form-check-input" type="radio" name="inlineRadioOptions" value="false" ng-model="AuditByT" ng-change="SetAuditTypeT(false)">
+                        <label class="form-check-label option_value">{{translation.ByDepartment}}</label>
+                    </div>
+                    <div class="col-md-2">
+                        <label>{{ translation.FincialYearHeading}}<span class="error">*</span></label>
+                        <select class="form-control" ng-model="ApprovedFinancialYear" ng-init="FinancialYear='0'" ng-change="AssignedAuditorList()">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in FinancialYearList" value="{{item.FIN_YEAR_MASTR_ID}}">
+                                {{item.FIN_YEAR_NAME}}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+
+                <table class="table devtable">
+                    <caption>
+                        <h2>{{translate.TehsilHeading}}</h2>
+                    </caption>
+                    <thead>
+                        <tr>
+                            <th>
+                                {{translation.CheckAll}}
+                            </th>
+                            <th>
+                                {{translation.SRNO}}
+                            </th>
+                            <th>
+                                {{translation.SocietyName}}
+                            </th>
+                            <th>
+                                {{translation.RegistrationNo}}
+                            </th>
+                            <th>
+                                {{translation.SocietyCategory}}
+                            </th>
+                            <th>
+                                {{translation.FincialYearHeading}}
+                            </th>
+                            <th>
+                                {{translation.AuditBy}}
+                            </th>
+                            <th>
+                                {{translation.AuditType}}
+                            </th>
+                            <th>
+                                {{translation.District}}
+                            </th>
+                            <th>
+                                {{translation.Order}}
+                            </th>
+                            <th>
+                                {{translation.OrderDate}}
+                            </th>
+                            <th>
+                                {{translation.Order}}   {{translation.File}}
+                            </th>
+                            <th>
+                                {{translation.ResolutionOrder}}
+                            </th>
+                            <th>
+                                {{translation.RequestStatus}}
+                            </th>
+                            @*
+        <th>
+            {{translation.View}}
+        </th>*@
+                            <th> {{translation.Edit}} {{translation.Society}}</th>
+                            @*<th> {{translation.Delete}}</th>*@
+
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr dir-paginate="items in AssignedAuditor | filter:A | orderBy:colsort:reverseSort | itemsPerPage: pageSizeT" current-page="currentPageT" pagination-id="AuditorPagination">
+                            <td><input type="checkbox" ng-if="items.RequestStatus==1" value="items.IsForceRejected" name="Reject" ng-model="items.IsForceRejected" class="ng-pristine ng-valid ng-empty ng-touched" /></td>
+                            <td>{{$index+1}}</td>
+                            <td>{{ items.SocietyName }}</td>
+                            <td>{{ items.RegistrationNo }}</td>
+                            <td>{{ _language == 'en-us' ?  items.CategoryNameEn : items.CategoryNameHi }}</td>
+                            <td>{{ items.FIN_YEAR_NAME }}</td>
+                            <td>{{ items.IsEmpanelledCA == 'True' ? translation.ByEmpanelledAgency : translation.ByDepartment}}</td>
+                            <td ng-show="items.IsFirm == 0">{{  translation.Firm }}</td>
+                            <td ng-show="items.IsFirm == 1">{{ translation.Individual}}</td>
+                            <td ng-show="items.IsFirm == 2">{{ translation.ByDepartment }}</td>
+                            <td>{{ _language == 'en-us' ?  items.DISTRICT_ENG : items.DISTRICT_MANGAL }}</td>
+                            @*
+                            <td>{{ items.FirmName }}{{ items.IsEmpanelledCA }}{{ items.AuditerAssignByDapt }}</td>*@
+                            <td ng-show="items.IsEmpanelledCA == 'True'">{{ items.FirmName  }}</td>
+                            <td ng-show="items.IsEmpanelledCA == 'False'">{{ items.ClubName=='' ? items.AuditerAssignByDapt: items.ClubName }}</td>
+                            <td>{{ items.CreationDate }}</td>
+                            <td> <a ng-show="items.AuditorAssignFilePath!=''" href="{{items.AuditorAssignFilePath}}" target="_blank" style="color:#505050;" class="fa fa-download"></a></td>
+                            <td> <a ng-show="items.ResolutionPDF!=''" href="{{items.ResolutionPDF}}" target="_blank" style="color:#505050;" class="fa fa-download"></a></td>
+                            <td>{{ items.RequestStatusText }}</td>
+                            @*
+                            <td placeholder={{translation.Download}}><i class="fa fa-download" placeholder={{translation.Download}} ng-click="GenPDF(items.Id)"></i></td>*@
+                            <td><a href="javascript:void(0);" ng-click="OpenChangeStatus(items,1);"><i class="fa fa-edit"></i></a></td>
+                            @*<td><a href="javascript:void(0);" ng-click="OpenChangeStatus(items,2);"><i class="fa fa-trash"></i></a></td>*@
+
+                        </tr>
+                    </tbody>
+                </table>
+                <div id="DivPrintData" style="display:block">
+
+                </div>
+                <div class="col-md-12">
+                    <div class="text-right">
+                        <dir-pagination-controls boundary-links="true" pagination-id="AuditorPagination" on-page-change="pageChangeHandler(newPageNumber)" template-url="/dirPagination.tpl.html"></dir-pagination-controls>
+                    </div>
+                </div>
+                <div class="form-group col-md-12">
+                    <div class="dev-align-btn">
+                        <button type="submit" class="btn btn-primary dev-btn" ng-show="AuditBy!='All'" ng-click="RejectAppointment()">{{translation.Reject}}</button>
+
+                        <a class="btn btn-primary dev-btn" style="text-transform:capitalize;" href="../User/DashBoard"> Back</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="dev-popup-body modal fade" id="mdlChangeStatus" data-backdrop="static" data-keyboard="false" role="dialog">
+            <div class="modal-dialog" style="width: 90%;">
+                <!-- Modal content-->
+                <div class="modal-content" style="color:black;">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        @*<h4 class="modal-title"> {{translation.AddNewRequest}}</h4>*@
+                    </div>
+                    <div class="modal-body">
+                        <form class="dev-search-form" ng-hide="showPriView" style="overflow: hidden; margin-bottom: 35px;" name="OfficeForm">
+                            <div class="col-md-6 margin-Top20" style="margin-top:15px;">
+                                <div class="col-md-3">
+                                    <label>   {{translation.SocietyName}} </label>
+                                </div>
+                                <div class="col-md-6">
+                                    <input style="text-transform:uppercase;" type="text" id="SocietyName" name="SocietyName" class="form-control number-only validateNewAdd" placeholder="{{translation.SocietyName}}" ng-model="SocietyChangeModel.SocietyName" />
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 margin-Top20" style="margin-top:15px;">
+                                <div class="col-md-3">
+                                    <label>   {{translation.RegistrationNo}} </label>
+                                </div>
+                                <div class="col-md-6">
+                                    <input style="text-transform:uppercase;" type="text" id="RegistrationNo" name="RegistrationNo" class="form-control number-only validateNewAdd" placeholder="{{translation.RegistrationNo}}" ng-model="SocietyChangeModel.RegistrationNo" />
+                                </div>
+                            </div>
+                            <div class="clearfix"></div>
+                            <div class="col-md-6 margin-Top20" style="margin-top:15px;">
+                                <div class="col-md-3">
+                                    <label>   {{translation.RequestDate}} </label>
+                                </div>
+                                <div class="col-md-6">
+                                    <input name="ComplaintDate" type="text" id="RegistrationDate" dat-val="1" class="form-control devcalender" placeholder="dd/MM/yyyy" ng-model="SocietyChangeModel.RegistrationDate" autocomplete="off" onKeyPress="return isNumber(event);" size=10 maxlength=10 />
+
+
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 margin-Top20" style="margin-top:15px;">
+                                <div class="col-md-3">
+                                    <label>   {{translation.SocietyType}} </label>
+                                </div>
+                                <div class="col-md-6">
+
+                                    <select ng-model="SocietyChangeModel.SocietyTypeId" id="ddlsocietytype" class="form-control" ng-init="SocietyChangeModel.SocietyTypeId='0'" ng-change="GetSocietyClass(SocietyChangeModel.SocietyTypeId)">
+                                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                                        <option ng-repeat="itemAct in SocietyTypeList" value="{{itemAct.SocietyTypeId}}">
+                                            {{_language =='en-us' ?  itemAct.TypeameEng : itemAct.TypeNameHin}}
+                                        </option>
+                                    </select>
+
+
+                                </div>
+                            </div>
+
+                            <div class="clearfix"></div>
+                            <div class="col-md-6 margin-Top20" style="margin-top:15px;">
+                                <div class="col-md-3">
+                                    <label>   {{translation.SocietyClass}} </label>
+                                </div>
+                                <div class="col-md-6">
+                                    @*Society Class*@
+
+                                    <select ng-model="SocietyChangeModel.ClassId" class="form-control" id="ddlclasstype" ng-init="SocietyChangeModel.ClassId='0'" ng-change="GetSubClass(SocietyChangeModel.ClassId);">
+                                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                                        <option ng-repeat="itemClass in SocietyClassList" value="{{itemClass.ClassId}}">
+                                            {{_language =='en-us' ?  itemClass.ClassNameEn : itemClass.ClassNameHi}}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 margin-Top20" style="margin-top:15px;">
+                                <div class="col-md-3">
+                                    <label>   {{translation.SocietySubClass}} </label>
+                                </div>
+                                <div class="col-md-6">
+                                    @*Society SocietyCategory*@
+
+                                    <select id="ddlSocietySubCategory" class="form-control" ng-model="SocietyChangeModel.SubClassId" ng-change="GetSocietyCategory()" ng-init="SubClassId='0'">
+                                        <option value="0">{{translation.SelectOption}}</option>
+                                        <option ng-repeat="item in SocietySubClassList" value="{{item.SubClassId}}">
+                                            {{ _language == 'en-us' ?  item.SubClassNameEn : item.SubClassNameHi }}
+                                        </option>
+                                    </select>
+
+
+                                </div>
+                            </div>
+                            <div class="clearfix"></div>
+                            <div class="col-md-6 margin-Top20" style="margin-top:15px;">
+                                <div class="col-md-3">
+                                    <label>   {{translation.SocietyCategory}} </label>
+                                </div>
+                                <div class="col-md-6">
+                                    <select ng-model="SocietyChangeModel.CategoryId" class="form-control" ng-init="SocietyChangeModel.CategoryId='0'">
+                                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                                        <option ng-repeat="itemCat in SocietyCategoryList" value="{{itemCat.CategoryId}}">
+                                            {{_language =='en-us' ?  itemCat.CategoryNameEn : itemCat.CategoryNameHi}}
+                                        </option>
+                                    </select>
+                                    @*<input style="text-transform:uppercase;" type="text" id="SerialNoOfReceipt" name="SerialNoOfReceipt" class="form-control number-only validateNewAdd" placeholder="{{translation.SrNoOfPhysicalReceipt}}" ng-model="AddNewModel.OldReceipt_No" maxlength="15" onkeypress='return ValidateFloat(this,event);' autocomplete="off">*@
+                                </div>
+                            </div>
+                            <div class="clearfix"></div>
+                            <div class="col-md-6 margin-Top20" style="margin-top:15px;">
+                                <div class="col-md-3">
+                                    <label>  Change In {{translation.Address}} </label>
+                                </div>
+                                <div class="col-md-6">
+                                    <input type="checkbox" id="chkchange" ng-model="SocietyChangeModel.ChangeInAddress" ng-change="changeaddress()" />
+                                </div>
+                            </div>
+                            <div class="clearfix"></div>
+
+                            <div class="col-md-6 margin-Top20" style="margin-top:15px;">
+                                <div class="col-md-3">
+                                    <label>   {{translation.DivisionHeading}} </label>
+                                </div>
+                                <div class="col-md-6">
+                                    <select ng-model="SocietyChangeModel.DIVISION_ID" id="ddlDivision" name="division" ng-change="GetDistrictList_change()" class="form-control" ng-init="SocietyChangeModel.DIVISION_ID ='0'" ng-disabled="allDisable">
+                                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                                        <option ng-repeat="item in SocietyDivisions" value="{{item.DIVISION_ID}}">
+                                            {{_language =='en-us' ?  item.DIVISION_ENG : item.DIVISION_MANGAL}}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 margin-Top20" style="margin-top:15px;">
+                                <div class="col-md-3">
+                                    <label>   {{translation.District}} </label>
+                                </div>
+                                <div class="col-md-6">
+                                    <select ng-model="SocietyChangeModel.DISTRICT_ID" class="form-control" ng-init="SocietyChangeModel.DISTRICT_ID='0'" ng-change="$scope.BlockListByOffAdd(1)" ng-disabled="allDisable">
+                                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                                        <option ng-repeat="item in SocietyDistrictList" value="{{item.DISTRICT_ID}}">
+                                            {{_language =='en-us' ?  item.DISTRICT_ENG : item.DISTRICT_MANGAL}}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 margin-Top20" style="margin-top:15px;">
+                                <div class="col-md-3">
+                                    <label>   {{translation.UrbanRural}} </label>
+                                </div>
+                                <div class="col-md-6">
+                                  
+                                        <label class="help-block-gender" style="width:40% !important;">
+                                            <input type="radio" id="sdfs" name="Rurals" value="True" ng-model="SocietyChangeModel.IsRural" ng-change="RuralUrbanBlock_change(true)">{{translation.Urban}}
+                                        </label>
+                                        <label class="help-block-gender" style="width:40% !important;">
+                                            <input type="radio" id="sdf" value="False" name="Rural" ng-model="SocietyChangeModel.IsRural" ng-change="RuralUrbanBlock_change(false)">{{translation.Rural}}
+                                        </label>
+                                  
+                                </div>
+                            </div>
+
+                            <div ng-show="RuralDiv">
+                                <div class="col-md-6 margin-Top20" style="margin-top:15px;">
+                                    <div class="col-md-3">
+                                        <label>   {{translation.BlockHeading}} </label>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <select ng-model="SocietyChangeModel.BLOCK_ID" id="ddlblocki" class="form-control" ng-init="SocietyChangeModel.BLOCK_ID='0'" ng-change="GramPanchayatList(1)" ng-disabled="allDisable">
+                                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                                            <option ng-repeat="item in Blocksdata | orderBy:'BLOCK_ENG'" value="{{item.BLOCK_ID}}">
+                                                {{_language =='en-us' ?  item.BLOCK_ENG : item.BLOCK_MANGAL}}
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6 margin-Top20" style="margin-top:15px;">
+                                    <div class="col-md-3">
+                                        <label>   {{translation.GramPanchayatHeading}} </label>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <select ng-model="SocietyChangeModel.GP_ID" id="ddlGP" class="form-control" ng-init="SocietyChangeModel.GP_ID='0'" ng-change="VillageList(1)" ng-disabled="allDisable">
+                                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                                            <option ng-repeat="item in GramPanchayats | orderBy:'GramPanchayats'" value="{{item.GP_ID}}">
+                                                {{_language =='en-us' ?  item.GP_ENG : item.GP_MANGAL}}
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6 margin-Top20" style="margin-top:15px;">
+                                    <div class="col-md-3">
+                                        <label>   {{translation.Village}} </label>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <select ng-model="SocietyChangeModel.VILLAGE_ID" id="ddlVillage" class="form-control" ng-init="SocietyChangeModel.VILLAGE_ID='0'" ng-disabled="allDisable">
+                                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                                            <option ng-repeat="item in Villages | orderBy:'VILLAGE_ENG'" value="{{item.VILLAGE_ID}}">
+                                                {{_language =='en-us' ?  item.VILLAGE_ENG : item.VILLAGE_MANGAL}}
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div ng-show="UrbanDiv">
+
+                                <div class="col-md-6 margin-Top20" style="margin-top:15px;">
+                                    <div class="col-md-3">
+                                        <label>   {{translation.City}} </label>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <select ng-model="SocietyChangeModel.CITY_ID" class="form-control" ng-change="GetWardList(1)" ng-init="SocietyChangeModel.CITY_ID='0'" ng-disabled="allDisable">
+                                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                                            <option ng-repeat="item in CityListdata" value="{{item.CITY_ID}}">
+                                                {{_language =='en-us' ?  item.CITY_ENG : item.CITY_MANGAL}}
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6 margin-Top20" style="margin-top:15px;">
+                                    <div class="col-md-3">
+                                        <label>   {{translation.Ward}} </label>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <select ng-model="SocietyChangeModel.WARD_ID" class="form-control" ng-init="SocietyChangeModel.WARD_ID='0'" ng-disabled="allDisable">
+                                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                                            <option ng-repeat="item in Ward" value="{{item.WARD_ID}}">
+                                                {{_language =='en-us' ?  item.WARD_ENG : item.WARD_MANGAL}}
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            @*Address DETAILS*@
+                         
+                            @*END Address DETAILS*@
+                            <div class="col-md-12" style="margin-top: 20px;">
+                                <div class="dev-menu-btn">
+                                    <button type="submit" class="btn btn-primary" ng-click="SaveDataEdit(true,1)">{{translation.Submit}}</button>
+                                    @*<button type="submit" class="btn btn-primary" ng-click="ResetAddNew()">{{translation.Clear}}</button>*@
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="se-pre-con"></div>
+    <div id="stop" class="scrollTop">
+        <span><a href=""><i class="fa fa-arrow-up">Top</i></a></span>
+    </div>
+</div>
+
+

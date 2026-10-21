@@ -1,0 +1,222 @@
+﻿
+
+
+<script src="~/Scripts/AngularFramework/ElectionDashboard.js"></script>
+<script src="~/Scripts/zingchart.min.js"></script>
+<script src="~/Scripts/zingchart-angularjs.js"></script>
+<script src="~/Scripts/canvasjs.min.js"></script>
+<script src="~/Scripts/jquery-1.11.1.min.js"></script>
+<script src="~/Scripts/AngularFramework/ng-google-chart.min.js"></script>
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.5/jspdf.min.js"></script>
+
+<script>
+    window.onload = function () {
+
+        var chart = new CanvasJS.Chart("chartContainer", {
+        	animationEnabled: true,
+        	theme: "light2", // "light1", "dark1", "dark2"
+        	exportEnabled: true,
+        	title: {
+        		text: ""
+        	},
+        	data: [{
+        		type: "column",
+        		dataPoints:  @Html.Raw(ViewBag.DataPoints),
+        	}]
+        });
+            chart.render();
+
+            google.charts.load('current', { 'packages': ['corechart'] });
+            google.charts.setOnLoadCallback(drawVisualization);
+    }
+</script>
+<style>
+    a.canvasjs-chart-credit {
+        display: none;
+    }
+</style>
+<div ng-app="SocietyIndexmod">
+    <div ng-controller="SocietyIndexCont">
+
+        <div class="row">
+            {{ElectionProgress.TotalSociety}}
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header card-header-warning">{{translation.Society}} </div>
+                    <div class="card-image">
+                        <div class="collection">
+                            <a href="#!" class="collection-item">{{translation.TotalSociety}}  {{ElectionProgress.TotalSociety}} <span class="new badge2">{{ElectionProgress.TotalSocieties}}</span></a>
+                            <a href="#!" class="collection-item">{{translation.EligibleForElection}}<span class="new badge2 red" data-badge-caption="">{{ElectionProgress.TotalElectionSocieties}} </span></a>
+                            <a href="#!" class="collection-item">{{translation.OrderGenerated}}<span class="new badge2 red" data-badge-caption="">{{ElectionProgress.TotalOrderGenerated}} </span></a>
+                            @*<a href="#!" class="collection-item">{{translation.OrderNotGenerated}}<span class="new badge2 red" data-badge-caption="">{{ElectionProgress.OrderNotGenerated}} </span></a>*@
+                            <a href="#!" class="collection-item">{{translation.ElectionCompleted}}<span class="new badge2" data-badge-caption="">{{ElectionProgress.TotalElectionCompleted}}</span></a>
+                            <a href="#!" class="collection-item">{{translation.ElectionInProgress}}<span class="new badge2 brown" data-badge-caption="">{{ElectionProgress.ElectionInProgress}}</span></a>
+                            <a href="#!" class="collection-item">{{translation.UpcomingElection}}<span class="new badge2 brown" data-badge-caption="">{{ElectionProgress.UpcomingElection}}</span></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header card-header-warning"> {{translation.ElectionStatusGraph}}</div>
+                    <div class="card-image2">
+                        <div style="height: 266px; width: 100%;" id="divChart1">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+        <div class="row" >
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <div class="citizen-dash-head" ng-hide="ShowSavedData">
+                    <table class="table table-responsive devtable">
+                        <thead>
+                            <tr>
+                                <th>
+                                    {{translation.SRNO}}
+                                </th>
+                                <th>
+                                    {{translation.OrderDate}}
+                                </th>
+                                <th>
+                                    {{translation.OrderGenerated}}
+                                </th>
+                                <th>
+                                    {{translation.OrderOfficer}}
+                                </th>
+                                <th>{{translation.Division}}</th>
+
+                                @*
+                                <th>
+                                    {{translation.SocietyType}}
+                                </th>*@
+
+                                <th>
+                                    {{translation.TotalSociety}}
+                                </th>
+                                <th>
+                                    {{translation.Election}} {{translation.ViewOrder}}
+                                </th>
+                                <th>
+                                    {{translation.ElectionOfficer}}  {{translation.ViewOrder}}
+                                </th>
+
+
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr dir-paginate="item in ElectionOrders | filter:q | orderBy:colsort:reverseSort | itemsPerPage: pageSize" current-page="currentPage" pagination-id="SubPagination">
+                                <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                                <td>{{item.OrderDate }}</td>
+                                <td>{{item.OrderGeneratedBy}}</td>
+                                <td>{{item.ReturningOfficer}}</td>
+                                <td>{{item.DIVISION_ENG}}</td>
+                                @*
+                                <td>{{item.SocietyType}}</td>*@
+                                <td  style="cursor:pointer;" ng-click="ShowOrderDetails(item.ElectionMasterId)"><a href=""></a> {{item.NoOfSociety}}</td>
+                                <td><a style="color:#505050;" ng-hide="{{item.ElectionOrderPDF==''}}" target="_blank" href="../Content/ElectionOrder/{{ item.ElectionOrderPDF }}"><i class="fa fa-download"></i></a></td>
+                              <td><a style="color:#505050;" ng-hide="{{item.ElectionOrderEOPDF==''}}" target="_blank" href="../Content/ElectionOrder/{{ item.ElectionOrderEOPDF }}"><i class="fa fa-download"></i></a></td>
+
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="col-md-10">
+                        <div class="text-center">
+                            <dir-pagination-controls boundary-links="true" pagination-id="SubPagination" on-page-change="pageChangeHandler(newPageNumber)" template-url="/dirPagination.tpl.html"></dir-pagination-controls>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+           
+
+        </div>
+
+        <div class="row" id="divDetails" ng-if="showOrderDetails">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <div class="citizen-dash-head" ng-hide="ShowSavedData">
+                    <table class="table table-responsive devtable">
+                        <thead>
+                            <tr>
+                                <th>
+                                    {{translation.SRNO}}
+                                </th>
+                                <th>
+                                    {{translation.SocietyName}}
+                                </th>
+                                <th>
+                                    {{translation.ElectionOfficer}}
+                                </th>
+
+                                <th>
+                                    {{translation.StartDate}}
+                                </th>
+
+                                <th>
+                                    {{translation.EndDate}}
+                                </th>
+                                <th>
+                                    {{translation.Election}} {{translation.ViewOrder}}
+                                </th>
+                                <th>
+                                    {{translation.Member}}
+                                </th>
+                                <th>{{translation.Candidate}}</th>                               
+                                <th>
+                                    {{translation.Result}}
+                                </th>
+                                <th>
+                                    {{translation.ElectedMember}}
+                                </th>
+
+                                <th>
+                                    {{translation.Status}}
+                                </th>
+
+
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr dir-paginate="item in ElectionSocietyDetails | filter:q | orderBy:colsort:reverseSort | itemsPerPage: pageSize" current-page="currentPage" pagination-id="SubPagination1">
+                                <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                                <td>{{item.SocietyName }}</td>
+                                <td>{{item.ElectionOfficer}}</td>
+                                <td>{{item.StartDate}}</td>
+                                <td>{{item.EndDate}}</td>
+                                <td><a style="color:#505050;" ng-if="item.ElectionOrderFile!=''" target="_blank" href="../Content/ElectionOrder/{{ item.ElectionOrderFile }}"><i class="fa fa-download"></i></a></td>
+                                <td>@*{{item.TotalMembers}}*@
+                                    <a style="color:#505050;" ng-if="item.MemberListFile!=''" target="_blank" href="../Content/ElectionOrder/{{ item.MemberListFile }}"><i class="fa fa-download"></i></a>                                
+                                </td>
+                                <td>@*{{item.TotalCandidate}}*@
+                                    <a style="color:#505050;" ng-if="item.CandidateListFile!=''" target="_blank" href="../Content/ElectionOrder/{{ item.CandidateListFile }}"><i class="fa fa-download"></i></a>
+                                </td>
+                                <td>@*{{item.TotalCandidate}}*@
+                                    <a style="color:#505050;" ng-if="item.ElectionResultFile!=''" target="_blank" href="../Content/ElectionOrder/{{ item.ElectionResultFile }}"><i class="fa fa-download"></i></a>
+                                </td>
+                                <td>@*{{item.ElectedMemberList}}*@
+                                    <a style="color:#505050;" ng-if="item.ElectedCandidate!=''" target="_blank" href="../Content/ElectionOrder/{{ item.ElectedCandidate }}"><i class="fa fa-download"></i></a>                                
+                                </td>
+                                <td>{{item.Status}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="col-md-10">
+                        <div class="text-center">
+                            <dir-pagination-controls boundary-links="true" pagination-id="SubPagination1" on-page-change="pageChangeHandler(newPageNumber)" template-url="/dirPagination.tpl.html"></dir-pagination-controls>
+                        </div>
+                    </div>
+                </div>
+            </div>            
+        </div>
+
+        <div class="se-pre-con"></div>
+        <div id="stop" class="scrollTop">
+            <span><a href=""><i class="fa fa-arrow-up">Top</i></a></span>
+        </div>
+        <!-- end main-content -->
+    </div>
+
+</div>

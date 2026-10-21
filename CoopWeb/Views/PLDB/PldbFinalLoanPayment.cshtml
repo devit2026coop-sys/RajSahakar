@@ -1,0 +1,652 @@
+﻿<script src="~/Scripts/AngularFramework/PldbFinalLoanPayment.js?v=1.10"></script>
+<script src="~/Scripts/AngularFramework/commonEsign.js?v=@DateTime.Now.Ticks"></script>
+@{
+    ViewBag.Title = "Loanee Final Payment Receipt";
+}
+<style>
+    label {
+        display: inline-block;
+        width: 100% !important;
+        margin-bottom: 5px;
+        font-weight: 700;
+        font-weight: normal
+    }
+
+    .zoom {
+        transition: transform .2s; /* Animation */
+        margin: 0 auto;
+    }
+
+        .zoom:hover {
+            padding-left: 30px;
+            transform: scale(2.5); /* (150% zoom - Note: if the zoom is too large, it will go outside of the viewport) */
+        }
+
+    a > i.fa.fa-plus-circle {
+        font-size: 25px;
+        cursor: pointer;
+    }
+
+    a:hover > i.fa.fa-plus-circle {
+        font-size: 26px;
+        cursor: pointer;
+    }
+
+    a > i.fa.fa-eye {
+        font-size: 25px;
+        cursor: pointer;
+    }
+
+    a:hover > i.fa.fa-eye {
+        font-size: 26px;
+        cursor: pointer;
+    }
+
+
+    .dvfieldset {
+        border: 1px solid #b0adad;
+        border-radius: 5px;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+        background: #fff;
+        color: #444;
+    }
+
+    .dvlegend {
+        width: auto;
+        padding: 24px;
+        margin-left: 11px;
+        border: 1px solid gray;
+        padding: 5px;
+        border-radius: 14px;
+        font-size: 16px;
+        padding-left: 14px;
+        padding-right: 15px;
+        background: #025e63;
+        color: #fff;
+    }
+
+    .modal-dialog {
+        color: #444;
+    }
+
+    .payment-table {
+        width: 100%;
+    }
+
+        .payment-table td {
+            padding: 5px;
+        }
+</style>
+<div ng-app="pldbApp" ng-controller="pldbCtrl" ng-cloak="">
+    <div class="col-lg-12">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 pt-2">
+            <div class="text-right"><button ng-click="BackToPage()" class="btn btn-primary dev-btn">Back To List</button></div>
+            <h5 style="text-align:center;font-size: 17px;background:#025e63;color:#fff;" class="citizen-dash-head">Loanee Final Payment Receipt</h5>
+        </div>
+        <fieldset class="dvfieldset">
+            <legend class="dvlegend">Application Details/आवेदक का विवरण</legend>
+            <div class="col-lg-12">
+                <div class="col-lg-12 table-responsive">
+                    <table class="col-lg-12 table ">
+                        <tr>
+                            <td colspan="8">
+                                <div ng-init="IsAccountClose=0">
+                                    <b>Does A/c close in same day</b>
+                                    <label style="display:inline;"><input type="radio" value="1" name="IsAccountClose" ng-model="IsAccountClose" ng-disabled="ApplicantDetails.IsDisabledSingleAccountClose==1" /> Yes</label>
+                                    <label style="display:inline;"><input type="radio" value="0" name="IsAccountClose" ng-model="IsAccountClose" ng-disabled="ApplicantDetails.IsDisabledSingleAccountClose==1" checked /> No</label>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label>{{translation.LoanApplicationNo}} :</label>
+                            </td>
+                            <td>
+                                {{ _language=='en-us' ? ApplicantDetails.LoanAccNo : ApplicantDetails.LoanAccNo }}
+                            </td>
+                            <td>
+                                <label>{{translation.RegistrationNo}} :</label>
+                            </td>
+                            <td>
+                                {{ _language=='en-us' ? ApplicantDetails.NoticeNo : ApplicantDetails.NoticeNo }}
+                            </td>
+                            <td>
+                                <label>{{translation.PLDB}} :</label>
+                            </td>
+                            <td>
+                                {{_language=='en-us' ? ApplicantDetails.PLDBName: ApplicantDetails.PLDBName}}
+                            </td>
+                            <td>
+                                <label>{{translation.PLDBBranch}} :</label>
+                            </td>
+                            <td>
+                                {{_language=='en-us' ? ApplicantDetails.PLDBBranch: ApplicantDetails.PLDBBranch}}
+                            </td>
+
+                        </tr>
+                        <tr>
+                            <td>
+                                <label>{{translation.ApplicantName}} :</label>
+                            </td>
+                            <td>
+                                {{_language=='en-us' ? ApplicantDetails.ApplicantName: ApplicantDetails.ApplicantName}}
+                            </td>
+                            <td>
+                                <label>{{translation.FatherHasbandName}} :</label>
+                            </td>
+                            <td>
+                                {{ _language=='en-us' ? ApplicantDetails.FatherHusbandName : ApplicantDetails.FatherHusbandName }}
+                            </td>
+                            <td>
+                                <label>{{translation.Gender}} :</label>
+                            </td>
+                            <td>
+                                {{_language=='en-us' ? ApplicantDetails.Gender: ApplicantDetails.Gender}}
+                            </td>
+                            <td>
+                                <label>{{translation.MobileNo}} :</label>
+                            </td>
+                            <td>
+                                {{_language=='en-us' ? ApplicantDetails.MobileNo: ApplicantDetails.MobileNo}}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label>Outstanding as on 31-03-2025 (A) :  @*(37+38)*@</label>
+                            </td>
+                            <td>
+                                {{ApplicantDetails.PrincipalOutstandingAs31032025|inrCurrency}}
+                            </td>
+
+                            <td>
+                                <label>{{translation.RateOfInterest}} : </label>
+                            </td>
+                            <td>
+                                {{ApplicantDetails.RateOfInterest}}%
+                            </td>
+
+                            <td>
+                                <label>{{translation.OtherInterestFrom}}(B) : @*(47*RateOFInterest + RateOfInterest*daysFrom1_4_2025)*@</label>
+                            </td>
+                            <td>
+                                {{ApplicantDetails.OtherInterestAmt|inrCurrency}}
+                            </td>
+
+
+                            <td>
+                                <label>Current Penal Interest (C)</label>
+                            </td>
+                            <td>
+                                {{ApplicantDetails.CurrentPenalInterestAmount|inrCurrency}}
+                            </td>
+                        </tr>
+                        <tr>
+                            @*<td>
+                                    <label>Recovery Charges</label>
+                                </td>
+                                <td>
+                                    {{ApplicantDetails.RecoveryCharge|inrCurrency}}
+                                </td>*@
+                            <td>
+                                <label>Recoverable Total Amount : </label>
+                            </td>
+                            <td>
+                                {{ApplicantDetails.EstimatedTotalAmount|inrCurrency}}
+                            </td>
+                            <td>
+                                <label>{{translation.AmountOfRecovery|inrCurrency}} :</label>
+                            </td>
+                            <td>
+                                {{ApplicantDetails.AlreadyPaidAmount|inrCurrency}}
+                            </td>
+                            <td>
+                                <label>Remaining Amount:</label>
+                            </td>
+                            <td>
+                                {{(ApplicantDetails.EstimatedTotalAmount-ApplicantDetails.AlreadyPaidAmount)|inrCurrency}}
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </fieldset>
+        <fieldset class="dvfieldset">
+            <legend class="dvlegend">Payment Details/भुगतान का विवरण</legend>
+            <div class="col-lg-12 profile-d">
+                <div class="col-md-12 table-responsive ">
+                    <div class="text-right">
+                        <a ng-show="FinalPaymentSummaryList.length==null" href="javascript:void(0)" class="btn btn-primary dev-btn mb-4" data-toggle="modal" data-target="#repaymentmodal">Final Payment</a>
+                    </div>
+                    <table class="table table-responsive devtable" style="color:black" ng-show="FinalPaymentSummaryList!=null">
+                        <thead>
+                            <tr>
+                                <th colspan="1"> {{translation.SRNO}}</th>
+                                <th colspan="3" style="text-align:center">अवधिपार वसूली</th>
+                                <th colspan="6" style="text-align:center">चालू वसूली</th>
+                                <th rowspan="2" style="text-align:center">कुल योग (अ+ब)</th>
+                                <th rowspan="2" style="text-align:center">दिनांक</th>
+                                <th rowspan="2" style="text-align:center">टिप्पणी</th>
+                                <th rowspan="2"></th>
+                            </tr>
+                            <tr>
+                                <th></th>
+                                <th>असल</th>
+                                <th>बीमा प्रीमियम</th>
+                                @*<th>अन्य</th>*@
+                                <th>योग (अ)</th>
+
+                                <th>असल</th>
+                                @*<th>बीमा प्रीमियम</th>*@
+                                <th>ब्याज</th>
+                                <th>द. ब्याज</th>
+                                <th>वसूली शुल्क</th>
+                                <th>अन्य</th>
+                                <th>योग (ब)</th>
+
+
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="li in FinalPaymentSummaryList">
+                                <td>{{$index+1}}</td>
+
+
+                                <td><span class="dev-spancon">{{li.Actual}}</span></td>
+                                <td><span class="dev-spancon">{{li.InsurancePremium}}</span></td>
+                                @*<td><span class="dev-spancon">{{li.OtherAmount}}</span></td>*@
+                                <td><span class="dev-spancon">{{li.OverdueRecoveryTotal}}</span></td>
+                                <td><span class="dev-spancon">{{li.CurrentActual}}</span></td>
+                                @*<td><span class="dev-spancon">{{li.CurrentInsurancePremium}}</span></td>*@
+                                <td><span class="dev-spancon">{{li.CurrentInterest}}</span></td>
+                                <td><span class="dev-spancon">{{li.CurrentPenalInterest}}</span></td>
+                                <td><span class="dev-spancon">{{li.RecoveryCharge}}</span></td>
+                                <td><span class="dev-spancon">{{li.CurrentOtherAmount}}</span></td>
+                                <td><span class="dev-spancon">{{li.CurrentRecoveryTotal}}</span></td>
+                                <td><span class="dev-spancon">{{li.SubTotal}}</span></td>
+                                <td><span class="dev-spancon">{{li.CreatedOn |date:'dd-MM-yyyy'}}</span></td>
+                                <td><span class="dev-spancon">{{li.Remark}}</span></td>
+
+                                <td>
+                                    <span class="dev-spancon"><button ng-click="DownloadFinalPaymentReceipt(li.OTSRePaymentSummaryId)" class="btn btn-xs btn-primary"> <i class="fa fa-print text-white"></i> </button></span>
+
+                                    <a ng-show="ApplicantDetails.IsAadhar_Janaadhar==0" href="javascript:void(0);" class="btn btn-warning" data-toggle="modal" data-target="#Aadharmodal">Upload Aadhar/Jan-aadhar</a>
+
+                                    @if (((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).RoleId == 10188 ||
+                                        ((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).RoleId == 10064)
+                                    {
+                                        <a ng-show="ApplicantDetails.Status==3 && ApplicantDetails.IsAadhar_Janaadhar==1 " href="javascript:void(0)" class="btn btn-sm btn-primary text-white" data-toggle="modal" data-target="#FinalCertificatemodal"><span class="fa fa-id-badge text-white"></span> Generate Certificate</a>
+
+                                    }
+                                    <a ng-show="ApplicantDetails.Status==4" target="_blank" href="~/Content/OTS/{{ApplicantDetails.CertificateFile}}" class="btn btn-sm btn-success"><span class="fa fa-eye text-white"></span>  View Certificate</a>
+                                </td>
+
+                            </tr>
+                        </tbody>
+                        <tfoot ng-show="FinalPaymentSummaryList==null">
+                            <tr>
+                                <td class="text-danger text-center" colspan="12">No payment has been deposited yet./अभी तक कोई भुगतान जमा नहीं किया गया है।</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </fieldset>
+
+    </div>
+
+    <div id="repaymentmodal" class="modal fade" role="dialog" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <b class="text-info">Final Payment Form</b>
+                    <a data-dismiss="modal" class="pull-right"><i class="fa fa-times"></i></a>
+                </div>
+                <div class="modal-body">
+                    <form id="paymentForm" ng-submit="SavePayment()">
+                        <table class="payment-table">
+                            <tr>
+                                <td><label> अवधिपार वसूली</label></td>
+
+                            </tr>
+
+                            <tr>
+                                <td>असल:</td>
+                                <td>
+                                    <input type="number" class="form-control" disabled ng-model="payFObj.Actual" placeholder="0.00" ng-change="AvdhiparVasooliTotal()" required />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>बीमा प्रीमियम</td>
+                                <td>
+                                    <input type="number" class="form-control" disabled ng-model="payFObj.InsurancePremium" ng-change="AvdhiparVasooliTotal()" placeholder="0.00" required />
+                                </td>
+                            </tr>
+
+                            @*<tr>
+                                    <td>अन्य</td>
+                                    <td>
+                                        <input type="number" class="form-control" ng-model="payFObj.OtherAmount" ng-change="AvdhiparVasooliTotal()" placeholder="0.00" required />
+                                    </td>
+                                </tr>*@
+                            <tr>
+                                <td>योग (अ)</td>
+                                <td>
+                                    <input type="number" class="form-control" disabled ng-model="payFObj.OverdueRecoveryTotal" placeholder="0.00" required />
+                                </td>
+                            </tr>
+
+
+                            <tr>
+                                <td><label> चालू वसूली</label></td>
+                            </tr>
+
+                            <tr>
+                                <td>असल :</td>
+                                <td>
+                                    <input type="number" class="form-control" disabled ng-model="payFObj.CurrentActual" ng-change="ChaluVasooliTotal()" placeholder="0.00" required />
+                                </td>
+                            </tr>
+                            @*<tr>
+                                    <td>बीमा प्रीमियम</td>
+                                    <td>
+                                        <input type="number" class="form-control" ng-model="payFObj.CurrentInsurancePremium" ng-change="ChaluVasooliTotal()" placeholder="0.00" required />
+                                    </td>
+                                </tr>*@
+                            <tr>
+                                <td>ब्याज</td>
+                                <td>
+                                    <input type="number" class="form-control" disabled ng-model="payFObj.CurrentInterest" ng-change="ChaluVasooliTotal()" placeholder="0.00" required />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>द. ब्याज</td>
+                                <td>
+                                    <input type="number" class="form-control" disabled ng-model="payFObj.CurrentPenalInterest" ng-change="ChaluVasooliTotal()" placeholder="0.00" required />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>वसूली शुल्क</td>
+                                <td>
+                                    <input type="number" class="form-control" disabled ng-model="payFObj.RecoveryCharge" ng-change="ChaluVasooliTotal()" placeholder="0.00" required />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>अन्य</td>
+                                <td>
+                                    <input type="number" class="form-control" disabled ng-model="payFObj.CurrentOtherAmount" ng-change="ChaluVasooliTotal()" placeholder="0.00" required />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>योग (ब)</td>
+                                <td>
+                                    <input type="number" class="form-control" ng-model="payFObj.CurrentRecoveryTotal" disabled placeholder="0.00" required />
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>कुल योग (अ+ब)</td>
+                                <td>
+                                    <input type="number" class="form-control" ng-model="payFObj.SubTotal" placeholder="0.00" disabled required />
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>कुल भुगतान राशि</td>
+                                <td>
+                                    <input type="number" class="form-control" ng-model="payFObj.AlreadyPaidAmount" placeholder="0.00" disabled required />
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>टिप्पणी</td>
+                                <td>
+                                    <input type="text" class="form-control" ng-model="payFObj.Remark" placeholder="Remark" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" align="center">
+                                    <input type="submit" class="btn btn-primary dev-btn" value="Submit" />
+                                    <input type="button" class="btn btn-danger" value="Cancel" data-dismiss="modal" ng-click="payFObj={}" />
+                                </td>
+                            </tr>
+                        </table>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="FinalCertificatemodal" class="modal fade" role="dialog" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <b class="text-info">Final Payment Form</b>
+                    <a data-dismiss="modal" class="pull-right"><i class="fa fa-times"></i></a>
+                </div>
+                <div class="modal-body">
+
+                    <fieldset class="dvfieldset">
+                        <legend class="dvlegend">Application Details/आवेदक का विवरण</legend>
+                        <div class="col-lg-12">
+                            <div class="col-lg-12 table-responsive">
+                                <table class="col-lg-12 table ">
+                                    <tr>
+                                        <td>
+                                            <label>{{translation.LoanApplicationNo}} :</label>
+                                        </td>
+                                        <td>
+                                            {{ _language=='en-us' ? ApplicantDetails.LoanAccNo : ApplicantDetails.LoanAccNo }}
+                                        </td>
+                                        <td>
+                                            <label>{{translation.RegistrationNo}} :</label>
+                                        </td>
+                                        <td>
+                                            {{ _language=='en-us' ? ApplicantDetails.NoticeNo : ApplicantDetails.NoticeNo }}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <label>{{translation.PLDB}} :</label>
+                                        </td>
+                                        <td>
+                                            {{_language=='en-us' ? ApplicantDetails.PLDBName: ApplicantDetails.PLDBName}}
+                                        </td>
+                                        <td>
+                                            <label>{{translation.PLDBBranch}} :</label>
+                                        </td>
+                                        <td>
+                                            {{_language=='en-us' ? ApplicantDetails.PLDBBranch: ApplicantDetails.PLDBBranch}}
+                                        </td>
+
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <label>{{translation.ApplicantName}} :</label>
+                                        </td>
+                                        <td>
+                                            {{_language=='en-us' ? ApplicantDetails.ApplicantName: ApplicantDetails.ApplicantName}}
+                                        </td>
+                                        <td>
+                                            <label>{{translation.FatherHasbandName}} :</label>
+                                        </td>
+                                        <td>
+                                            {{ _language=='en-us' ? ApplicantDetails.FatherHusbandName : ApplicantDetails.FatherHusbandName }}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <label>{{translation.Gender}} :</label>
+                                        </td>
+                                        <td>
+                                            {{_language=='en-us' ? ApplicantDetails.Gender: ApplicantDetails.Gender}}
+                                        </td>
+                                        <td>
+                                            <label>{{translation.MobileNo}} :</label>
+                                        </td>
+                                        <td>
+                                            {{_language=='en-us' ? ApplicantDetails.MobileNo: ApplicantDetails.MobileNo}}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <label>Outstanding as on 31-03-2025 (A) :  @*(37+38)*@</label>
+                                        </td>
+                                        <td>
+                                            {{ApplicantDetails.PrincipalOutstandingAs31032025}}
+                                        </td>
+
+                                        <td>
+                                            <label>{{translation.RateOfInterest}} : </label>
+                                        </td>
+                                        <td>
+                                            {{ApplicantDetails.RateOfInterest}}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <label>{{translation.OtherInterestFrom}}(B) : @*(47*RateOFInterest + RateOfInterest*daysFrom1_4_2025)*@</label>
+                                        </td>
+                                        <td>
+                                            {{ApplicantDetails.OtherInterestAmt}}
+                                        </td>
+                                        <td>
+                                            <label>Current Penal Interest (C)</label>
+                                        </td>
+                                        <td>
+                                            {{ApplicantDetails.CurrentPenalInterestAmount}}
+                                        </td>
+
+                                    </tr>
+
+                                    <tr>
+                                        @*<td>
+                                                <label>Recovery Charges</label>
+                                            </td>
+                                            <td>
+                                                {{ApplicantDetails.RecoveryCharge|inrCurrency}}
+                                            </td>*@
+                                        <td>
+                                            <label>Recoverable Total Amount : </label>
+                                        </td>
+                                        <td>
+                                            {{ApplicantDetails.EstimatedTotalAmount|inrCurrency}}
+                                        </td>
+                                        <td>
+                                            <label>{{translation.AmountOfRecovery}} :</label>
+                                        </td>
+                                        <td>
+                                            {{ApplicantDetails.AlreadyPaidAmount}}
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </fieldset>
+                    
+                    <form id="paymentForm" ng-submit="RedirectToESPportal()">
+                        <input type="hidden" id="hdnResponse" value="@ViewBag.response" />
+                        <div style="margin-bottom: 10px; max-width: 300px;">
+                            <label for="decisionSelect" style="margin-right: 10px;">{{translation.Actions}}:</label>
+                            <select id="decisionSelect" class="form-control" ng-model="ApplicantDetails.Status">
+                                <option value="0">-- Select --</option>
+                                <option value="4">Accept</option>
+                                <option value="5">Reject</option>
+                            </select>
+                        </div>
+                        <!-- Line 2: Remark Input -->
+                        <div style="margin-top: 10px;">
+                            <label for="remark">Remark:</label>
+                            <input type="text" id="remark" ng-model="ApplicantDetails.Remark" class="form-control" placeholder="Enter your remark here">
+                        </div>
+                        <div style="text-align: center; margin-top: 10px;">
+                            <input type="submit" class="btn btn-primary dev-btn" value="Submit" />
+                            <input type="button" class="btn btn-danger" value="Clear" data-dismiss="modal" ng-click="payFObj={}" />
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="Aadharmodal" class="modal fade" role="dialog" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <b class="text-info">To Upload Aadhar/Jan aadhar / आधार/जनाधार अपलोड</b>
+                    <a data-dismiss="modal" class="pull-right"><i class="fa fa-times"></i></a>
+                </div>
+                <div class="modal-body">
+                    <form id="paymentForm" ng-submit="UploadeAadharJanaadharFileInDB(ApplicantDetails)">
+                        <table class="payment-table">
+                            <tr>
+                                <td>Aadhar/Jan-aadhar Number</td>
+                                <td ng-init="Aadhar_Janaadhar_no=''">
+                                    <input type="text" class="form-control" id="Aadhar" ng-model="Aadhar_Janaadhar_no" placeholder="Aadhar/Jan-aadhar No" required />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Upload Aadhar/Jan-aadhar: <br><span class="text-muted text-danger">  Upload Image only, max size 5 MB</span></td>
+                                <td>
+                                    <input type="file" name="File_{{$index}}" accept="image/*,.pdf" id="flReportFile" class="form-control fileuploader" checkmaxsize="5120" ng-model="ApplicantDetails.DocAadhar" onchange="angular.element(this).scope().UploadReportFile(this.files,'AadharJan')" required>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" align="center">
+                                    <input type="submit" class="btn btn-primary dev-btn" value="Submit" />
+                                    <input type="button" class="btn btn-danger" value="Cancel" data-dismiss="modal" ng-click="BackToPage()" />
+                                </td>
+                            </tr>
+                        </table>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @Html.Partial("_AadhaarValidation")
+</div>
+
+<input type="hidden" name="hdlang" id="hdlang" value="hi-IN" />
+<link href="~/Scripts/google_hindi/google_transliteration.css" rel="stylesheet" />
+<style>
+    .inputapi-transliterate-indic-suggestion-menu {
+        z-index: 99999 !important;
+        display: block;
+    }
+</style>
+<script src="~/Scripts/google_hindi/google_transapi.js"></script>
+<script type="text/javascript">
+    google.load("elements", "1", {
+        packages: "transliteration"
+    });
+
+    function onLoad() {
+        if (document.getElementById('hdlang').value == "hi-IN") {
+            var options = {
+                sourceLanguage: google.elements.transliteration.LanguageCode.ENGLISH,
+                destinationLanguage: google.elements.transliteration.LanguageCode.HINDI, // available option English, Bengali, Marathi, Malayalam etc.
+                shortcutKey: 'ctrl+g',
+                transliterationEnabled: true
+            };
+        }
+        else {
+            var options = {
+                sourceLanguage: google.elements.transliteration.LanguageCode.ENGLISH,
+                destinationLanguage: google.elements.transliteration.LanguageCode.HINDI, // available option English, Bengali, Marathi, Malayalam etc.
+                shortcutKey: 'ctrl+g',
+                transliterationEnabled: false
+            }
+        }
+        var ids = ["remark"];
+        var control = new google.elements.transliteration.TransliterationControl(options);
+        control.makeTransliteratable(ids);
+    }
+    google.setOnLoadCallback(onLoad);
+
+</script>
+
+
+<script src="~/Scripts/google_hindi/google_transliteration.js"></script>
+

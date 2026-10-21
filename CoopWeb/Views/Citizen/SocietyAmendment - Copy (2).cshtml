@@ -1,0 +1,1532 @@
+﻿@{
+
+    Layout = "~/Views/Shared/_CitizenLayout.cshtml"; ;
+}
+<script src="~/Scripts/AngularFramework/SocietyAmendment.js"></script>
+<script type="text/javascript">
+    function RemoveRowAdminiAct2001(Control, row) {
+        if (confirm("Are you sure to remove this row?")) {
+            //  $("button").show();
+            $(Control).closest('tr').remove();
+        }
+    };
+</script>
+<style>
+    /* Style the tab */
+    .tab {
+        overflow: hidden;
+        border: unset;
+        background-color: #f1f1f1;
+        border-radius: 11px;
+    }
+
+        /* Style the buttons inside the tab */
+        .tab button {
+            background-color: inherit;
+            float: left;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 14px 16px;
+            transition: 0.3s;
+            font-size: 17px;
+        }
+
+            /* Change background color of buttons on hover */
+            .tab button:hover {
+                background-color: #ddd;
+                border-radius: 11px;
+            }
+
+            /* Create an active/current tablink class */
+            .tab button.active {
+                background-color: #1899a0;
+                border-radius: 11px;
+            }
+
+    .dishide {
+        display: none !important;
+    }
+
+    .disshow {
+        display: block !important;
+    }
+
+    .stpclick {
+        pointer-events: none;
+    }
+
+    /* Style the tab content */
+    .tabcontent {
+        display: none;
+        padding: 50px 12px;
+        /*border: 1px solid #ccc;*/
+        border: none !important;
+    }
+
+    .arrow-down:after, .arrow-up:after {
+        content: ' ';
+        position: relative;
+        left: 2px;
+        border: 8px solid transparent;
+    }
+
+    .arrow-down:after {
+        top: 0px;
+        border-top-color: #337ab7;
+    }
+
+    .arrow-up:after {
+        bottom: 26px;
+        border-bottom-color: #337ab7;
+    }
+
+    .arrow-down, .arrow-up {
+        padding-top: 10px;
+        float: right;
+        color: #fff;
+    }
+</style>
+<div ng-app="SocietyAmendmentModule">
+    <div ng-controller="SocietyAmendmentCont">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <h3 class="citizen-dash-head">{{translation.SocietyAmendment}}</h3>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#"> {{translation.Home}} </a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;">{{translation.SocietyAmendment}} </span>
+                    </li>
+
+                </ul>
+            </div>
+        </div>
+
+
+        <form class="dev-search-form citizen-dash-head " style="overflow: hidden;" name="SocietyAmendmentForm">
+            <div class="col-lg-12 form-group">
+                <div class="col-lg-4">
+                    <label>{{translation.SocietyName}}</label>
+                </div>
+                <div class="col-lg-8">
+                    <select class="form-control" ng-model="SocietyAmendment.SocietyIdEnc" ng-init="SocietyAmendment.SocietyIdEnc='0'" ng-change="OnChangeSociety()">
+                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                        <option ng-repeat="item in SocietyList" value="{{item.SocietyIdENC}}~{{item.SocietyDirectory}}~{{item.ActId}}">
+                            {{item.SocietyName}}
+                        </option>
+                    </select>
+                </div>
+            </div>
+            <div class="citizen-dash-head" ng-show="ShowTab">
+                <div class="tab">
+                    <button class="tablinks active" onclick="OnTabClick(event, 'ByLaws')" ng-click="CloseOtpBox();GetSocietyNameChangeList();">By Laws</button>
+                    <button class="tablinks" onclick="OnTabClick(event, 'NameChange')" ng-click="CloseOtpBox();GetSocietyNameChangeList();">Name Change</button>
+                    @*<button class="tablinks" onclick="OnTabClick(event, 'AGM')" ng-click="CloseOtpBox()">AGM</button>*@
+                    @*<button class="tablinks" onclick="OnTabClick(event, 'BODAM')" ng-click="CloseOtpBox()"> BOD/Adminisrator Meetings</button>*@
+                    <button class="tablinks" onclick="OnTabClick(event, 'ExecutiveMember')" ng-click="CloseOtpBox();GetMemberList();">Executive Member List</button>
+                    @*<button class="tablinks" onclick="OnTabClick(event, 'MemberList')" ng-click="CloseOtpBox();GetSocietyNameChangeList();">Member List</button>*@
+                    @*<button class="tablinks" onclick="OnTabClick(event, 'BalanceSheet')" ng-click="CloseOtpBox()">Balance Sheet</button>*@
+                </div>
+                <!–– Start ByeLaws ––>
+                <div id="ByLaws" class="tabcontent" style="display:block;">
+
+                    <div ng-show="IsSocietyEdit">
+                        <div class="col-lg-12 form-group">
+                            <div class="col-lg-2">{{ translation.RegisteredYear}} <span class="error">*</span></div>
+                            <div class="col-lg-4">
+                                <select class="form-control" ng-model="SocietyAmendment.RegiYearId" ng-init="SocietyAmendment.RegiYearId='0'">
+                                    <option value="0" disabled>{{translation.SelectOption}}</option>
+                                    <option ng-repeat="item in FinancialYearList" value="{{item.FIN_YEAR_MASTR_ID}}">
+                                        {{item.FIN_YEAR_NAME}}
+                                    </option>
+                                </select>
+                            </div>
+
+                        </div>
+                        <div class="col-lg-12 form-group">
+                            <div class="col-lg-2">{{ translation.ResolutionNo}} <span class="error">*</span></div>
+                            <div class="col-lg-4">
+                                <input name="AGMResolutionNo" id="txtResolutionNo" class="form-control devcalender" placeholder="{{translation.ResolutionNo}}" ng-model="SocietyAmendment.ResolutionNo" autocomplete="off" />
+                            </div>
+                        </div>
+
+                        <div class="col-lg-12 form-group">
+                            <div class="col-lg-2">{{translation.PassedWhichAGM}} <span class="error">*</span></div>
+                            <div class="col-lg-4">
+                                <input name="AGMHeldDate" id="txtByLawsAGMDate" class="form-control devcalender" placeholder="{{translation.PassedWhichAGM}}" ng-model="SocietyAmendment.PaasedAGMDate" autocomplete="off" />
+                            </div>
+                            <div class="col-lg-2"> </div>
+                            <div class="col-lg-4">
+
+                            </div>
+                        </div>
+
+                        <div class="col-lg-12 form-group">
+                            <div class="col-lg-2">{{ translation.BylawsFile}} <span class="error">*</span></div>
+                            @*<div class="col-lg-4">
+                                <input type="file" filetype='pdf' name="File" id="flBylawsFile" class="form-control" ng-model="SocietyAmendment.ByeLawsFile" onchange="angular.element(this).scope().UploadBylawsFile(this.files)" />
+                            </div>*@
+                            <div class="col-lg-4">
+                                <div class="col-lg-12" ng-show="!IsFileUpload('flBylawsFile')">
+                                    <input type="file" accept="application/pdf" dat-val="nocheck" ng-model="SocietyAmendment.ByeLawsFile" id="flBylawsFile" ng-click="AddFile(1,1)" validfile />
+                                </div>
+                                <div class="col-lg-12" ng-if="IsFileUpload('flBylawsFile')">
+                                    <a href="javascript:void(1);" ng-if="GetFileUploaded('flBylawsFile')!=''"><i class="fa fa-check-circle-o" style="font-size: 18px;margin-right: 5px;    color: #20cc20;"></i></a>
+                                    <a href="~/Content/AuditReport/{{GetFileUploaded('flBylawsFile')}}" ng-if="GetFileUploaded('flBylawsFile')!=''" target="_blank"><i class="fa fa-eye-slash" style="font-size: 18px;margin-right: 5px;font-weight: bold"></i>View File</a>
+                                    <a href="javascript:void(1);" ng-if="GetFileUploaded('flBylawsFile')==''" ng-click="UploadFile('flBylawsFile',1,1,'flBylawsFile')"><i class="fa fa-upload" style="font-size: 18px;margin-right: 5px;font-weight: bold"></i>Upload File</a>
+                                    <a href="javascript:void(1);" ng-if="IsFileUpload('flBylawsFile')" ng-click="ChangeFile('flBylawsFile')"><i class="fa fa-undo" style="font-size: 18px;margin-right: 5px;font-weight: bold"></i>Change File</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-12 form-group">
+                            <div class="col-lg-2">Comparison File <span class="error">*</span></div>
+                            @*<div class="col-lg-4">
+                                <input type="file" filetype='pdf' name="File" id="flAGM1PDF" class="form-control" ng-model="SocietyAmendment.ComparisonFile" onchange="angular.element(this).scope().UploadAGM1File(this.files)" />
+                            </div>*@
+                            <div class="col-lg-4">
+                                <div class="col-lg-12" ng-show="!IsFileUpload('ComparisonFile')">
+                                    <input type="file" accept="application/pdf" dat-val="nocheck" ng-model="SocietyAmendment.ComparisonFile" id="ComparisonFile" ng-click="AddFile(1,1)" validfile />
+                                </div>
+                                <div class="col-lg-12" ng-if="IsFileUpload('ComparisonFile')">
+                                    <a href="javascript:void(1);" ng-if="GetFileUploaded('ComparisonFile')!=''"><i class="fa fa-check-circle-o" style="font-size: 18px;margin-right: 5px;    color: #20cc20;"></i></a>
+                                    <a href="~/Content/AuditReport/{{GetFileUploaded('ComparisonFile')}}" ng-if="GetFileUploaded('ComparisonFile')!=''" target="_blank"><i class="fa fa-eye-slash" style="font-size: 18px;margin-right: 5px;font-weight: bold"></i>View File</a>
+                                    <a href="javascript:void(1);" ng-if="GetFileUploaded('ComparisonFile')==''" ng-click="UploadFile('ComparisonFile',1,1,'ComparisonFile')"><i class="fa fa-upload" style="font-size: 18px;margin-right: 5px;font-weight: bold"></i>Upload File</a>
+                                    <a href="javascript:void(1);" ng-if="IsFileUpload('ComparisonFile')" ng-click="ChangeFile('ComparisonFile')"><i class="fa fa-undo" style="font-size: 18px;margin-right: 5px;font-weight: bold"></i>Change File</a>
+                                </div>
+                            </div>
+                        </div>
+
+
+
+                        <div class="col-lg-12 form-group">
+                            <div class="col-lg-2">{{translation.AGM1}} <span class="error">*</span></div>
+                            @*<div class="col-lg-4">
+                                <input type="file" filetype='pdf' name="File" id="flAGM1PDF" class="form-control" ng-model="SocietyAmendment.AGM1" onchange="angular.element(this).scope().UploadAGM1File(this.files)" />
+                            </div>*@
+                            <div class="col-lg-4">
+                                <div class="col-lg-12" ng-show="!IsFileUpload('flAGM1PDF')">
+                                    <input type="file" accept="application/pdf" dat-val="nocheck" ng-model="SocietyAmendment.AGM1" id="flAGM1PDF" ng-click="AddFile(1,1)" validfile />
+                                </div>
+                                <div class="col-lg-12" ng-if="IsFileUpload('flAGM1PDF')">
+                                    <a href="javascript:void(1);" ng-if="GetFileUploaded('flAGM1PDF')!=''"><i class="fa fa-check-circle-o" style="font-size: 18px;margin-right: 5px;    color: #20cc20;"></i></a>
+                                    <a href="~/Content/AuditReport/{{GetFileUploaded('flAGM1PDF')}}" ng-if="GetFileUploaded('flAGM1PDF')!=''" target="_blank"><i class="fa fa-eye-slash" style="font-size: 18px;margin-right: 5px;font-weight: bold"></i>View File</a>
+                                    <a href="javascript:void(1);" ng-if="GetFileUploaded('flAGM1PDF')==''" ng-click="UploadFile('flAGM1PDF',1,1,'flAGM1PDF')"><i class="fa fa-upload" style="font-size: 18px;margin-right: 5px;font-weight: bold"></i>Upload File</a>
+                                    <a href="javascript:void(1);" ng-if="IsFileUpload('flAGM1PDF')" ng-click="ChangeFile('flAGM1PDF')"><i class="fa fa-undo" style="font-size: 18px;margin-right: 5px;font-weight: bold"></i>Change File</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-12 form-group">
+                            <div class="col-lg-2">{{translation.AGM2}} <span class="error">*</span></div>
+                            @*<div class="col-lg-4">
+                                <input type="file" filetype='pdf' name="File" id="flAGM2PDF" class="form-control" ng-model="SocietyAmendment.AGM2" onchange="angular.element(this).scope().UploadAGM2File(this.files)" />
+                            </div>*@
+                            <div class="col-lg-4">
+                                <div class="col-lg-12" ng-show="!IsFileUpload('flAGM2PDF')">
+                                    <input type="file" accept="application/pdf" dat-val="nocheck" ng-model="SocietyAmendment.AGM2" id="flAGM2PDF" ng-click="AddFile(1,1)" validfile />
+                                </div>
+                                <div class="col-lg-12" ng-if="IsFileUpload('flAGM2PDF')">
+                                    <a href="javascript:void(1);" ng-if="GetFileUploaded('flAGM2PDF')!=''"><i class="fa fa-check-circle-o" style="font-size: 18px;margin-right: 5px;    color: #20cc20;"></i></a>
+                                    <a href="~/Content/AuditReport/{{GetFileUploaded('flAGM2PDF')}}" ng-if="GetFileUploaded('flAGM2PDF')!=''" target="_blank"><i class="fa fa-eye-slash" style="font-size: 18px;margin-right: 5px;font-weight: bold"></i>View File</a>
+                                    <a href="javascript:void(1);" ng-if="GetFileUploaded('flAGM2PDF')==''" ng-click="UploadFile('flAGM2PDF',1,1,'flAGM2PDF')"><i class="fa fa-upload" style="font-size: 18px;margin-right: 5px;font-weight: bold"></i>Upload File</a>
+                                    <a href="javascript:void(1);" ng-if="IsFileUpload('flAGM2PDF')" ng-click="ChangeFile('flAGM2PDF')"><i class="fa fa-undo" style="font-size: 18px;margin-right: 5px;font-weight: bold"></i>Change File</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-12 form-group">
+                            <div class="col-lg-2">{{translation.AGM3}} <span class="error">*</span></div>
+                            @*<div class="col-lg-4">
+                                <input type="file" filetype='pdf' name="File" id="flAGM3PDF" class="form-control" ng-model="SocietyAmendment.AGM3" onchange="angular.element(this).scope().UploadAGM3File(this.files)" />
+                            </div>*@
+                            <div class="col-lg-4">
+                                <div class="col-lg-12" ng-show="!IsFileUpload('flAGM3PDF')">
+                                    <input type="file" accept="application/pdf" dat-val="nocheck" ng-model="SocietyAmendment.AGM3" id="flAGM3PDF" ng-click="AddFile(1,1)" validfile />
+                                </div>
+                                <div class="col-lg-12" ng-if="IsFileUpload('flAGM3PDF')">
+                                    <a href="javascript:void(1);" ng-if="GetFileUploaded('flAGM3PDF')!=''"><i class="fa fa-check-circle-o" style="font-size: 18px;margin-right: 5px;    color: #20cc20;"></i></a>
+                                    <a href="~/Content/AuditReport/{{GetFileUploaded('flAGM3PDF')}}" ng-if="GetFileUploaded('flAGM3PDF')!=''" target="_blank"><i class="fa fa-eye-slash" style="font-size: 18px;margin-right: 5px;font-weight: bold"></i>View File</a>
+                                    <a href="javascript:void(1);" ng-if="GetFileUploaded('flAGM3PDF')==''" ng-click="UploadFile('flAGM3PDF',1,1,'flAGM3PDF')"><i class="fa fa-upload" style="font-size: 18px;margin-right: 5px;font-weight: bold"></i>Upload File</a>
+                                    <a href="javascript:void(1);" ng-if="IsFileUpload('flAGM3PDF')" ng-click="ChangeFile('flAGM3PDF')"><i class="fa fa-undo" style="font-size: 18px;margin-right: 5px;font-weight: bold"></i>Change File</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-12 form-group">
+                            <div class="col-lg-2">{{translation.Remarks}} </div>
+                            <div class="col-lg-10">
+                                <textarea type="text" name="Remarks" class="form-control" placeholder="{{translation.Remark}}" ng-model="SocietyAmendment.Remark" autocomplete="off"></textarea>
+                            </div>
+                        </div>
+                        <div class="col-lg-12 dev-menu-btn">
+                            <button type="submit" class="btn btn-primary" ng-click="SaveByLaws()">{{translation.Submit}}</button>
+                        </div>
+                    </div>
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <div class="table-responsive citizen-dash-head">
+                            <table id="example" class="table devtable" style="margin-top: 30px;border:1px solid rgb(222, 221, 221); float: left;">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            {{translation.SRNO}}
+                                        </th>
+                                        <th ng-click="sortData('SocietyName')">
+                                            {{translation.SocietyName}}
+                                            <div ng-class="getSortClass('SocietyName')"></div>
+                                        </th>
+                                        <th ng-click="sortData('RegisteredYear')">
+                                            {{translation.RegisteredYear}}
+                                            <div ng-class="getSortClass('RegisteredYear')"></div>
+                                        </th>
+                                        <th>
+                                            {{translation.ResolutionNo}}
+                                        </th>
+                                        <th>
+                                            {{translation.BylawsFile}}
+                                        </th>
+                                        <th>
+                                            {{translation.AGM1}}
+                                        </th>
+                                        <th>
+                                            {{translation.AGM2}}
+                                        </th>
+                                        <th>
+                                            {{translation.AGM3}}
+                                        </th>
+                                        <th>
+                                            Comparison File
+                                        </th>
+                                        <th>
+                                            {{translation.PassedWhichAGM}}
+                                        </th>
+                                        <th>
+                                            {{translation.SubmissionDate}}
+                                        </th>
+                                        <th>
+                                            {{translation.Remarks}}
+                                        </th>
+                                        <th>
+                                            {{translation.Status}}
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr dir-paginate="item in SocietyNameChangeList | filter: q | orderBy:colsort:reverseSort | itemsPerPage: 1000">
+                                        <td>{{$index+1}}</td>
+                                        <td>{{item.SocietyName}}</td>
+                                        <td>{{item.FIN_YEAR_NAME}}</td>
+                                        <td>{{item.ResolutionNo}}</td>
+                                        <td><a id="LinkBL" href="{{item.ByeLawsFileURL}}" target="_blank">PDF</a></td>
+                                        <td><a id="LinkRF" href="{{item.AGM1FileURL}}" target="_blank">PDF</a></td>
+                                        <td><a id="LinkRF" href="{{item.AGM2FileURL}}" target="_blank">PDF</a></td>
+                                        <td><a id="LinkRF" href="{{item.AGM3FileURL}}" target="_blank">PDF</a></td>
+                                        <td><a id="LinkRF" href="{{item.ComparisonFileURL}}" target="_blank">PDF</a></td>
+                                        <td>{{item.PaasedAGMDateSmall}}</td>
+                                        <td>{{item.InsertDateSmall}}</td>
+                                        <td>{{item.Remark}}   </td>
+                                        <td>{{item.Status}}   </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <!–– End ByeLaws ––>
+                <!–– Start Name Change ––>
+                <div id="NameChange" class="tabcontent">
+                    <div ng-show="IsSocietyEdit">
+                        <div class="col-lg-12 form-group">
+                            <div class="col-lg-2">{{ translation.RegisteredYear}} <span class="error">*</span></div>
+                            <div class="col-lg-4">
+                                <select class="form-control" ng-model="SocietyAmendment.RegiYearId" ng-init="SocietyAmendment.RegiYearId='0'">
+                                    <option value="0" disabled>{{translation.SelectOption}}</option>
+                                    <option ng-repeat="item in FinancialYearList" value="{{item.FIN_YEAR_MASTR_ID}}">
+                                        {{item.FIN_YEAR_NAME}}
+                                    </option>
+                                </select>
+                            </div>
+
+                        </div>
+                        <div class="col-lg-12 form-group">
+                            <div class="col-lg-2">{{ translation.ResolutionNo}} <span class="error">*</span></div>
+                            <div class="col-lg-4">
+                                <input name="AGMResolutionNo" id="txtResolutionNo" class="form-control devcalender" placeholder="{{translation.ResolutionNo}}" ng-model="SocietyAmendment.ResolutionNo" autocomplete="off" />
+                            </div>
+                        </div>
+
+
+                        @*<div class="col-lg-12 form-group">
+                            <div class="col-lg-2">{{_language =='en-us' ?'Whant to change society name?':'समाज का नाम बदलना चाहते हैं?'}}</div>
+                            <div class="col-lg-4">
+                                <input type="checkbox" ng-model="IsChangeName" />
+                            </div>
+                        </div>*@
+
+                        <div class="col-lg-12 form-group">
+                            <div class="col-lg-2">{{ translation.Name}} <span class="error">*</span></div>
+                            <div class="col-lg-4">
+                                <input name="AGMResolutionNo" id="txtResolutionNo" class="form-control devcalender" placeholder="{{translation.Name}}" ng-model="SocietyAmendment.Name" autocomplete="off" />
+                            </div>
+                        </div>
+
+                        <div class="col-lg-12 form-group">
+                            <div class="col-lg-2">{{translation.PassedWhichAGM}} <span class="error">*</span></div>
+                            <div class="col-lg-4">
+                                <input name="AGMHeldDate" id="txtNameChangeAGMDate" class="form-control devcalender" placeholder="{{translation.PassedWhichAGM}}" ng-model="SocietyAmendment.PaasedAGMDate" autocomplete="off" />
+                            </div>
+                            <div class="col-lg-2"> </div>
+                            <div class="col-lg-4">
+
+                            </div>
+                        </div>
+                        <div class="col-lg-12 form-group">
+                            <div class="col-lg-2">{{ translation.BylawsFile}} <span class="error">*</span></div>
+                            @*<div class="col-lg-4">
+                                <input type="file" filetype='pdf' name="File" id="flBylawsFile" class="form-control" ng-model="SocietyAmendment.ByeLawsFile" onchange="angular.element(this).scope().UploadBylawsFile(this.files)" />
+                            </div>*@
+                            <div class="col-lg-4">
+                                <div class="col-lg-12" ng-show="!IsFileUpload('flBylawsFileName')">
+                                    <input type="file" accept="application/pdf" dat-val="nocheck" ng-model="SocietyAmendment.flBylawsFileName" id="flBylawsFileName" ng-click="AddFile(1,1)" validfile />
+                                </div>
+                                <div class="col-lg-12" ng-if="IsFileUpload('flBylawsFileName')">
+                                    <a href="javascript:void(1);" ng-if="GetFileUploaded('flBylawsFileName')!=''"><i class="fa fa-check-circle-o" style="font-size: 18px;margin-right: 5px;    color: #20cc20;"></i></a>
+                                    <a href="~/Content/AuditReport/{{GetFileUploaded('flBylawsFileName')}}" ng-if="GetFileUploaded('flBylawsFileName')!=''" target="_blank"><i class="fa fa-eye-slash" style="font-size: 18px;margin-right: 5px;font-weight: bold"></i>View File</a>
+                                    <a href="javascript:void(1);" ng-if="GetFileUploaded('flBylawsFileName')==''" ng-click="UploadFile('flBylawsFileName',1,1,'flBylawsFileName')"><i class="fa fa-upload" style="font-size: 18px;margin-right: 5px;font-weight: bold"></i>Upload File</a>
+                                    <a href="javascript:void(1);" ng-if="IsFileUpload('flBylawsFileName')" ng-click="ChangeFile('flBylawsFileName')"><i class="fa fa-undo" style="font-size: 18px;margin-right: 5px;font-weight: bold"></i>Change File</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-12 form-group">
+                            <div class="col-lg-2">{{translation.AGM1}} <span class="error">*</span></div>
+                            @*<div class="col-lg-4">
+                                <input type="file" filetype='pdf' name="File" id="flNameAGM1PDF" class="form-control" ng-model="SocietyAmendment.ResolutionFile" onchange="angular.element(this).scope().UploadAGM1File(this.files)" />
+                            </div>*@
+                            <div class="col-lg-4">
+                                <div class="col-lg-12" ng-show="!IsFileUpload('flNameAGM1PDF')">
+                                    <input type="file" accept="application/pdf" dat-val="nocheck" ng-model="SocietyAmendment.flNameAGM1PDF" id="flNameAGM1PDF" ng-click="AddFile(1,1)" validfile />
+                                </div>
+                                <div class="col-lg-12" ng-if="IsFileUpload('flNameAGM1PDF')">
+                                    <a href="javascript:void(1);" ng-if="GetFileUploaded('flNameAGM1PDF')!=''"><i class="fa fa-check-circle-o" style="font-size: 18px;margin-right: 5px;    color: #20cc20;"></i></a>
+                                    <a href="~/Content/AuditReport/{{GetFileUploaded('flNameAGM1PDF')}}" ng-if="GetFileUploaded('flNameAGM1PDF')!=''" target="_blank"><i class="fa fa-eye-slash" style="font-size: 18px;margin-right: 5px;font-weight: bold"></i>View File</a>
+                                    <a href="javascript:void(1);" ng-if="GetFileUploaded('flNameAGM1PDF')==''" ng-click="UploadFile('flNameAGM1PDF',1,1,'flNameAGM1PDF')"><i class="fa fa-upload" style="font-size: 18px;margin-right: 5px;font-weight: bold"></i>Upload File</a>
+                                    <a href="javascript:void(1);" ng-if="IsFileUpload('flNameAGM1PDF')" ng-click="ChangeFile('flNameAGM1PDF')"><i class="fa fa-undo" style="font-size: 18px;margin-right: 5px;font-weight: bold"></i>Change File</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-12 form-group">
+                            <div class="col-lg-2">{{translation.AGM2}} <span class="error">*</span></div>
+                            @*<div class="col-lg-4">
+                                <input type="file" filetype='pdf' name="File" id="flNameAGM2PDF" class="form-control" ng-model="SocietyAmendment.ResolutionFile" onchange="angular.element(this).scope().UploadAGM2File(this.files)" />
+                            </div>*@
+                            <div class="col-lg-4">
+                                <div class="col-lg-12" ng-show="!IsFileUpload('flNameAGM2PDF')">
+                                    <input type="file" accept="application/pdf" dat-val="nocheck" ng-model="SocietyAmendment.flNameAGM2PDF" id="flNameAGM2PDF" ng-click="AddFile(1,1)" validfile />
+                                </div>
+                                <div class="col-lg-12" ng-if="IsFileUpload('flNameAGM2PDF')">
+                                    <a href="javascript:void(1);" ng-if="GetFileUploaded('flNameAGM2PDF')!=''"><i class="fa fa-check-circle-o" style="font-size: 18px;margin-right: 5px;    color: #20cc20;"></i></a>
+                                    <a href="~/Content/AuditReport/{{GetFileUploaded('flNameAGM2PDF')}}" ng-if="GetFileUploaded('flNameAGM2PDF')!=''" target="_blank"><i class="fa fa-eye-slash" style="font-size: 18px;margin-right: 5px;font-weight: bold"></i>View File</a>
+                                    <a href="javascript:void(1);" ng-if="GetFileUploaded('flNameAGM2PDF')==''" ng-click="UploadFile('flNameAGM2PDF',1,1,'flNameAGM2PDF')"><i class="fa fa-upload" style="font-size: 18px;margin-right: 5px;font-weight: bold"></i>Upload File</a>
+                                    <a href="javascript:void(1);" ng-if="IsFileUpload('flNameAGM2PDF')" ng-click="ChangeFile('flNameAGM2PDF')"><i class="fa fa-undo" style="font-size: 18px;margin-right: 5px;font-weight: bold"></i>Change File</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-12 form-group">
+                            <div class="col-lg-2">{{translation.AGM3}} <span class="error">*</span></div>
+                            @*<div class="col-lg-4">
+                                <input type="file" filetype='pdf' name="File" id="flNameAGM3PDF" class="form-control" ng-model="SocietyAmendment.ResolutionFile" onchange="angular.element(this).scope().UploadAGM3File(this.files)" />
+                            </div>*@
+
+                            <div class="col-lg-4">
+                                <div class="col-lg-12" ng-show="!IsFileUpload('flNameAGM3PDF')">
+                                    <input type="file" accept="application/pdf" dat-val="nocheck" ng-model="SocietyAmendment.flNameAGM2PDF" id="flNameAGM3PDF" ng-click="AddFile(1,1)" validfile />
+                                </div>
+                                <div class="col-lg-12" ng-if="IsFileUpload('flNameAGM3PDF')">
+                                    <a href="javascript:void(1);" ng-if="GetFileUploaded('flNameAGM3PDF')!=''"><i class="fa fa-check-circle-o" style="font-size: 18px;margin-right: 5px;    color: #20cc20;"></i></a>
+                                    <a href="~/Content/AuditReport/{{GetFileUploaded('flNameAGM3PDF')}}" ng-if="GetFileUploaded('flNameAGM3PDF')!=''" target="_blank"><i class="fa fa-eye-slash" style="font-size: 18px;margin-right: 5px;font-weight: bold"></i>View File</a>
+                                    <a href="javascript:void(1);" ng-if="GetFileUploaded('flNameAGM3PDF')==''" ng-click="UploadFile('flNameAGM3PDF',1,1,'flNameAGM3PDF')"><i class="fa fa-upload" style="font-size: 18px;margin-right: 5px;font-weight: bold"></i>Upload File</a>
+                                    <a href="javascript:void(1);" ng-if="IsFileUpload('flNameAGM3PDF')" ng-click="ChangeFile('flNameAGM3PDF')"><i class="fa fa-undo" style="font-size: 18px;margin-right: 5px;font-weight: bold"></i>Change File</a>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="col-lg-12 form-group">
+                            <div class="col-lg-2">{{translation.Remarks}} </div>
+                            <div class="col-lg-10">
+                                <textarea type="text" name="Remarks" class="form-control" placeholder="{{translation.Remark}}" ng-model="SocietyAmendment.Remark" autocomplete="off"></textarea>
+                            </div>
+                        </div>
+                        <div class="col-lg-12 dev-menu-btn">
+                            <button type="submit" class="btn btn-primary" ng-click="SaveSocietyNameChange()">{{translation.Submit}}</button>
+                        </div>
+                    </div>
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <div class="table-responsive citizen-dash-head">
+                            <table id="example" class="table devtable" style="margin-top: 30px;border:1px solid rgb(222, 221, 221); float: left;">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            {{translation.SRNO}}
+                                        </th>
+                                        <th ng-click="sortData('SocietyName')">
+                                            {{translation.SocietyName}}
+                                            <div ng-class="getSortClass('SocietyName')"></div>
+                                        </th>
+                                        <th ng-click="sortData('ChangeName')">
+                                            {{translation.Change}} {{translation.Name}}
+                                            <div ng-class="getSortClass('SocietyName')"></div>
+                                        </th>
+                                        <th ng-click="sortData('RegisteredYear')">
+                                            {{translation.RegisteredYear}}
+                                            <div ng-class="getSortClass('RegisteredYear')"></div>
+                                        </th>
+                                        <th>
+                                            {{translation.ResolutionNo}}
+                                        </th>
+                                        <th>
+                                            {{translation.BylawsFile}}
+                                        </th>
+                                        <th>
+                                            {{translation.AGM1}}
+                                        </th>
+                                        <th>
+                                            {{translation.AGM2}}
+                                        </th>
+                                        <th>
+                                            {{translation.AGM3}}
+                                        </th>
+                                        <th>
+                                            {{translation.PassedWhichAGM}}
+                                        </th>
+                                        <th>
+                                            {{translation.SubmissionDate}}
+                                        </th>
+                                        <th>
+                                            {{translation.Remarks}}
+                                        </th>
+
+
+                                        <th>
+                                            {{translation.Status}}
+                                        </th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    <tr dir-paginate="item in SocietyNameChangeList | filter: q | orderBy:colsort:reverseSort | itemsPerPage: 1000">
+                                        <td>{{$index+1}}</td>
+                                        <td>{{item.SocietyName}}</td>
+                                        <td>{{item.ChangeName}}</td>
+                                        <td>{{item.FIN_YEAR_NAME}}</td>
+                                        <td>{{item.ResolutionNo}}</td>
+                                        <td><a id="LinkBL" href="{{item.ByeLawsFileURL}}" target="_blank">PDF</a></td>
+                                        <td><a id="LinkRF" href="{{item.AGM1FileURL}}" target="_blank">PDF</a></td>
+                                        <td><a id="LinkRF" href="{{item.AGM2FileURL}}" target="_blank">PDF</a></td>
+                                        <td><a id="LinkRF" href="{{item.AGM3FileURL}}" target="_blank">PDF</a></td>
+                                        <td>{{item.PaasedAGMDateSmall}}</td>
+                                        <td>{{item.InsertDateSmall}}</td>
+                                        <td>{{item.Remark}}   </td>
+
+                                        <td>{{item.Status}}   </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <!–– End Name Change ––>
+                <!–– Start AGM ––>
+                <div id="AGM" class="tabcontent">
+                    <div class="col-lg-12 form-group">
+                        <div class="col-lg-2">{{ translation.ByeLawsDate}} <span class="error">*</span></div>
+                        <div class="col-lg-4">
+                            <input name="AGMByeLawsDate" id="txtAGMByeLawsDate" class="form-control devcalender" placeholder="{{translation.ByeLawsDate}}" ng-model="SocietyAmendment.ByeLawsDate" autocomplete="off" />
+                        </div>
+                        <div class="col-lg-2">{{translation.MettingHeldDate}}<span class="error">*</span> </div>
+                        <div class="col-lg-4">
+                            <input name="AGMHeldDate" id="txtAGMHeldDate" class="form-control devcalender" placeholder="{{translation.MettingHeldDate}}" ng-model="SocietyAmendment.AGMHeldDate" autocomplete="off" />
+                        </div>
+                    </div>
+
+                    <div class="col-lg-12 form-group">
+                        <div class="col-lg-2">{{ translation.AGM_PDF}} <span class="error">*</span></div>
+                        <div class="col-lg-4">
+                            <input type="file" filetype='pdf' name="File" id="flAGM_PDF" class="form-control" ng-model="SocietyAmendment.MeetingPDF" onchange="angular.element(this).scope().UploadAGM_PDF(this.files)" />
+                        </div>
+                        <div class="col-lg-2"> </div>
+                        <div class="col-lg-4">
+
+                        </div>
+                    </div>
+
+                    <div class="col-lg-12 form-group">
+                        <div class="col-lg-2">{{translation.Remarks}}</div>
+                        <div class="col-lg-10">
+                            <textarea type="text" name="Address" class="form-control" placeholder="{{translation.Remarks}}" ng-model="SocietyAmendment.Remark" autocomplete="off"></textarea>
+                        </div>
+                    </div>
+                    <div class="col-lg-12 dev-menu-btn">
+                        <button type="submit" class="btn btn-primary" ng-click="SaveAGM()">{{translation.Submit}}</button>
+                    </div>
+
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <div class="table-responsive citizen-dash-head">
+                            <table id="example" class="table devtable" style="margin-top: 30px;border:1px solid rgb(222, 221, 221); float: left;">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            {{translation.SRNO}}
+                                        </th>
+                                        <th ng-click="sortData('SocietyName')">
+                                            {{translation.SocietyName}}
+                                            <div ng-class="getSortClass('SocietyName')"></div>
+                                        </th>
+                                        <th>
+                                            {{translation.ByeLawsDate}}
+                                        </th>
+                                        <th>
+                                            {{translation.MettingHeldDate}}
+                                        </th>
+                                        <th>
+                                            {{translation.AGM_PDF}}
+                                        </th>
+                                        <th>
+                                            {{translation.SubmissionDate}}
+                                        </th>
+                                        <th>
+                                            {{translation.Remarks}}
+                                        </th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    <tr dir-paginate="item in AGMListData | filter: q | orderBy:colsort:reverseSort | itemsPerPage: 1000">
+                                        <td>{{$index+1}}</td>
+                                        <td>{{item.SocietyName}}</td>
+                                        <td>{{item.ByeLawsDateSmall}}</td>
+                                        <td>{{item.MeetingDateSmall}}</td>
+                                        <td><a id="LinkBL" href="{{item.MeetingPDFURL}}" target="_blank">PDF</a></td>
+                                        <td>{{item.InsertDateSmall}}</td>
+                                        <td>{{item.Remark}}   </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <!–– End AGM ––>
+                <!–– Start BODM ––>
+                <div id="BODAM" class="tabcontent">
+                    <div class="col-lg-12 form-group">
+                        <div class="col-lg-2">{{ translation.ByeLawsDate}} <span class="error">*</span></div>
+                        <div class="col-lg-4">
+                            <input name="BODByeLawsDate" id="txtBODByeLawsDate" class="form-control devcalender" placeholder="{{translation.ByeLawsDate}}" ng-model="SocietyAmendment.BODByeLawsDate" autocomplete="off" />
+                        </div>
+                        <div class="col-lg-2">{{ translation.MettingHeldDate}} <span class="error">*</span></div>
+                        <div class="col-lg-4">
+                            <input name="BODMeetingHeldDate" id="txtBODMeetingHeldDate" class="form-control devcalender" placeholder="{{translation.MettingHeldDate}}" ng-model="SocietyAmendment.BODMeetingHeldDate" autocomplete="off" />
+                        </div>
+                    </div>
+                    <div class="col-lg-12 form-group">
+                        <div class="col-lg-2">{{translation.AGM_PDF}}<span class="error">*</span> </div>
+                        <div class="col-lg-4">
+                            <input type="file" filetype='pdf' name="File" id="flBODAGM_PDF" class="form-control" ng-model="SocietyAmendment.MeetingPDF" onchange="angular.element(this).scope().UploadBODAGM_PDF(this.files)" />
+                        </div>
+                        <div class="col-lg-2"> </div>
+                        <div class="col-lg-4">
+                        </div>
+                    </div>
+                    <div class="col-lg-12 form-group">
+                        <div class="col-lg-2"> {{translation.Remarks}} </div>
+                        <div class="col-lg-10">
+                            <textarea type="text" name="Address" class="form-control" placeholder="{{translation.Remarks}}" ng-model="SocietyAmendment.Remark" autocomplete="off"></textarea>
+                        </div>
+                    </div>
+                    <div class="col-lg-12 dev-menu-btn">
+                        <button type="submit" class="btn btn-primary" ng-click="SaveBODAM()">{{translation.Submit}}</button>
+                    </div>
+
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <div class="table-responsive citizen-dash-head">
+                            <table id="example" class="table devtable" style="margin-top: 30px;border:1px solid rgb(222, 221, 221); float: left;">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            {{translation.SRNO}}
+                                        </th>
+                                        <th ng-click="sortData('SocietyName')">
+                                            {{translation.SocietyName}}
+                                            <div ng-class="getSortClass('SocietyName')"></div>
+                                        </th>
+                                        <th>
+                                            {{translation.ByeLawsDate}}
+                                        </th>
+                                        <th>
+                                            {{translation.MettingHeldDate}}
+                                        </th>
+                                        <th>
+                                            {{translation.AGM_PDF}}
+                                        </th>
+                                        <th>
+                                            {{translation.SubmissionDate}}
+                                        </th>
+                                        <th>
+                                            {{translation.Remarks}}
+                                        </th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    <tr dir-paginate="item in BODMListData | filter: q | orderBy:colsort:reverseSort | itemsPerPage: 1000">
+                                        <td>{{$index+1}}</td>
+                                        <td>{{item.SocietyName}}</td>
+                                        <td>{{item.ByeLawsDateSmall}}</td>
+                                        <td>{{item.MeetingDateSmall}}</td>
+                                        <td><a id="LinkBL" href="{{item.MeetingPDFURL}}" target="_blank">PDF</a></td>
+                                        <td>{{item.InsertDateSmall}}</td>
+                                        <td>{{item.Remark}}   </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <!–– End BODM ––>
+                <!–– Start Executive Member List ––>
+                <div id="ExecutiveMember" class="tabcontent">
+                    <div ng-show="IsSocietyEdit">
+                        <div ng-show="ActId!=7">
+                            <div class="col-md-12">
+                                <div class="table-responsive">
+                                    <table class="table devtable" style="margin-top: 30px;">
+                                        <thead>
+                                            <tr>
+                                                <th>
+                                                    {{translation.SRNO}}
+                                                </th>
+                                                <th>
+                                                    {{translation.AADHAARNo}}
+                                                </th>
+                                                <th>
+                                                    {{translation.DirectorsName}}
+                                                </th>
+                                                <th>
+                                                    {{translation.ContactNo}}
+                                                </th>
+                                                <th>
+                                                    {{translation.DOB}}
+                                                </th>
+                                                <th>
+                                                    {{translation.GenderHeading}}
+                                                </th>
+                                                <th>
+                                                    {{translation.CategoryHeading}}
+                                                </th>
+                                                <th>
+                                                    {{translation.PostHeading}}
+                                                </th>
+                                                <th>
+                                                    {{translation.Photo}}
+                                                </th>
+                                                <th>
+                                                    {{translation.Occupation}}
+                                                </th>
+                                                <th>
+                                                    {{translation.ElectedMemberCheck}}
+                                                </th>
+                                                <th>
+                                                    {{translation.Actions}}
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="TblElectedMember">
+                                            <tr id="{{item.Id}}" ng-repeat="item in TableData10All" style="{{item.IsDelete?'border: 3px solid red;':''}}">
+                                                <td>{{item.Id}}</td>
+                                                <td>
+                                                    <input type="text" ng-disabled="!item.IsNew" class="form-control" ng-model="item.Aadh" placeholder="{{translation.AADHAARNo}}" maxlength="12" onkeypress='return event.charCode >= 48 && event.charCode <= 59' autocomplete="off">
+                                                </td>
+                                                <td>
+                                                    <input type="text" disabled class="form-control" value="{{item.Name}}" placeholder="{{translation.DirectorsName}}">
+                                                </td>
+                                                <td>
+                                                    <input type="text" class="form-control" ng-model="item.ContactNo" placeholder="{{translation.ContactNo}}" maxlength="10" onkeypress='return ((event.charCode >= 48 && event.charCode <= 57)|| event.which ==8 || event.keyCode ==8 || event.charCode==8)' autocomplete="off">
+                                                </td>
+                                                <td>
+                                                    <input name="DOB1" disabled="disabled" value="{{item.DOB}}" class="form-control VoterDate devcalender" placeholder="{{translation.DOB}}" onkeypress='return ((event.charCode >= 48 && event.charCode <= 57)|| event.which ==8 || event.keyCode ==8 || event.charCode==8)' autocomplete="off">
+                                                </td>
+                                                <td>
+                                                    <div style="width:100%">
+                                                        <label style="width:40% !important;">{{item.Gender}}</label>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div style="width:100%">
+                                                        <select class="form-control" ng-model="SocietyAmendment.CategoryId1" ng-init="SocietyAmendment.CategoryId1='0'">
+                                                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                                                            <option ng-repeat="item1 in CategoryList" value="{{item1.CODEID}}" ng-selected="{{item.CatId==item1.CODEID}}">
+                                                                {{_language =='en-us' ?  item1.CODENAME : item1.CODENAME_MANGAL}}
+                                                            </option>
+                                                        </select>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div style="width:100%">
+                                                        @*<select class="form-control" ng-init="SocietyRegistration.PostId1='0'">
+                                                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                                                            <option ng-repeat="item in BoardPosts" value="{{item.CAD_ID}}">
+                                                                {{_language =='en-us' ?  item.CAD_NAME : item.CAD_SERV}}
+                                                            </option>
+                                                        </select>*@
+                                                        <input type="text" ng-model="item.POSTNAME" class="form-control" placeholder="{{translation.Post}}">
+                                                    </div>
+                                                </td>
+                                                <td><img class="img-thumbnail" src="{{item.Photo}}" height="50" width="50" /></td>
+                                                <td><input type="text" class="form-control" ng-model="item.Occupation" placeholder="{{translation.Occupation}}"></td>
+                                                <td><input type="checkbox" class="checkbox-input" ng-model="item.Status"></td>
+                                                <td>
+                                                    <label style="display:none" id="lblAdministrativeFile1"></label>
+                                                    <i ng-if="!item.IsValidate" ng-click="OpenOtpPopUpOther(item.Aadh,'DIRECTOR1',$index,'TableData10All')" class="fa fa-info-circle green-m1" title="click to validate"></i>
+                                                    @*<i class="fa fa-check-circle-o" ng-if="item.IsValidate" style="font-size: 18px;margin-right: 5px;    color: #20cc20;"></i>*@
+                                                    <i ng-if="!item.IsDelete" class="fa fa-trash clsShowHide btn btn btn-xs tooltips" title="click to remove" id="Remove_{{item.Id}}" ng-click="RemoveRowAdminiAct2001($index,'TableData10All')"></i>
+                                                    <i ng-if="item.IsDelete" class="fa fa-undo clsShowHide btn btn btn-xs tooltips" title="click to remove undo" id="Remove_{{item.Id}}" ng-click="UndoRemoveRowAdminiAct2001($index,'TableData10All')"></i>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="form-group col-md-12">
+                                    <div class="dev-align-btn">
+                                        <button type="submit" class="btn btn-primary dev-btn" ng-click="AddMoreMemberDetailsNew(3,true)">{{_language =='en-us' ?  translation.AddMoreMember : translation.AddMoreMember}}</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div ng-show="ActId==7">
+                            <div class="col-lg-12">
+                                <div class="table-responsive">
+                                    <table class="table devtable" style="margin-top: 30px;">
+                                        <thead>
+                                            <tr>
+                                                <th>
+                                                    {{translation.SRNO}}
+                                                </th>
+                                                <th>
+                                                    {{translation.AADHAARNo}}
+                                                </th>
+                                                <th>
+                                                    {{translation.DirectorsName}}
+                                                </th>
+                                                <th>
+                                                    {{translation.ContactNo}}
+                                                </th>
+                                                <th>
+                                                    {{translation.DOB}}
+                                                </th>
+                                                <th>
+                                                    {{translation.GenderHeading}}
+                                                </th>
+                                                <th>
+                                                    {{translation.CategoryHeading}}
+                                                </th>
+                                                <th>
+                                                    {{translation.PostHeading}}
+                                                </th>
+                                                <th>
+                                                    {{translation.Address}}
+                                                </th>
+                                                <th>
+                                                    {{translation.Photo}}
+                                                </th>
+                                                <th>
+                                                    {{translation.ElectedMemberCheck}}
+                                                </th>
+                                                <th>
+                                                    {{translation.Actions}}
+                                                </th>
+
+                                            </tr>
+                                        </thead>
+                                        <tbody id="TblSportElectedMember">
+                                            <tr id="{{item.Id}}" ng-repeat="item in TableData10AllSports" style="{{item.IsDelete?'border: 3px solid red;':''}}">
+                                                <td>{{item.Id-1000}}</td>
+                                                <td>
+                                                    <input type="text" ng-disabled="!item.IsNew" ng-model="item.Aadh" class="form-control" placeholder="{{translation.AADHAARNo}}" maxlength="12" onkeypress='return event.charCode >= 48 && event.charCode <= 59' autocomplete="off">
+                                                </td>
+                                                <td>
+                                                    <input type="text" value="{{item.Name}}" disabled class="form-control" placeholder="{{translation.DirectorsName}}">
+                                                </td>
+                                                <td>
+                                                    <input type="text" value="{{item.ContactNo}}" ng-model="item.ContactNo" class="form-control" placeholder="{{translation.ContactNo}}" maxlength="10" onkeypress='return ((event.charCode >= 48 && event.charCode <= 57)|| event.which ==8 || event.keyCode ==8 || event.charCode==8)' autocomplete="off">
+                                                </td>
+                                                <td>
+                                                    <input name="DOB1" value="{{item.DOB}}" disabled="disabled" class="form-control VoterDate devcalender" placeholder="{{translation.DOB}}" onkeypress='return ((event.charCode >= 48 && event.charCode <= 57)|| event.which ==8 || event.keyCode ==8 || event.charCode==8)' autocomplete="off">
+                                                </td>
+                                                <td>
+                                                    <div style="width:100%">
+                                                        <label style="width:40% !important;">{{item.Gender}}</label>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div style="width:100%">
+                                                        <select class="form-control" ng-model="SocietyAmendment.CategoryId1" ng-init="SocietyAmendment.CategoryId1='0'">
+                                                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                                                            <option ng-repeat="item1 in CategoryList" value="{{item1.CODEID}}" ng-selected="{{item.CatId==item1.CODEID}}">
+                                                                {{_language =='en-us' ?  item1.CODENAME : item1.CODENAME_MANGAL}}
+                                                            </option>
+                                                        </select>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div style="width:100%">
+                                                        <input type="text" ng-model="item.POSTNAME" class="form-control" placeholder="{{translation.Post}}">
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <textarea type="text" name="Address" class="form-control" placeholder="{{translation.Address}}" ng-model="item.Address" autocomplete="off">{{item.Address}}</textarea>
+                                                </td>
+                                                <td><img class="img-thumbnail" src="{{item.Photo}}" height="50" width="50" /></td>
+                                                <td><input type="checkbox" ng-checked="{{item.Status}}" ng-model="item.Status" class="checkbox-input"></td>
+                                                @*
+                                                <td>
+                                                    <label style="display:none" id="lblAdministrativeFile1"></label>
+                                                    <i ng-click="OpenOtpPopUpOther('ASASASAS','DIRECTOR1',item.Id)" class="fa fa-info-circle green-m1"></i>
+                                                    <i ng-click="ClearAadharDataFromTable(item.Id)" class="fa fa-minus-circle red-m1"></i>
+                                                    <i class="fa fa-trash clsShowHide btn btn btn-xs btn-danger tooltips" id="Remove_{{item.Id}}" onclick="RemoveRowAdminiAct2001(this,'0')" ng-show="1005<{{item.Id}}"></i>
+                                                </td>*@
+                                                <td>
+                                                    <label style="display:none" id="lblAdministrativeFile1"></label>
+                                                    <i ng-if="!item.IsValidate" ng-click="OpenOtpPopUpOther(item.Aadh,'DIRECTOR1',$index,'TableData10AllSports')" class="fa fa-info-circle green-m1" title="click to validate"></i>
+                                                    @*<i class="fa fa-check-circle-o" ng-if="item.IsValidate" style="font-size: 18px;margin-right: 5px;    color: #20cc20;"></i>*@
+                                                    <i ng-if="!item.IsDelete" class="fa fa-trash clsShowHide btn btn btn-xs tooltips" title="click to remove" id="Remove_{{item.Id}}" ng-click="RemoveRowAdminiAct2001($index,'TableData10AllSports')"></i>
+                                                    <i ng-if="item.IsDelete" class="fa fa-undo clsShowHide btn btn btn-xs tooltips" title="click to remove undo" id="Remove_{{item.Id}}" ng-click="UndoRemoveRowAdminiAct2001($index,'TableData10AllSports')"></i>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="form-group col-md-12">
+                                    <div class="dev-align-btn">
+                                        <button type="submit" id="btnAddMoreExecutiveSports" class="btn btn-primary dev-btn" ng-click="AddMoreMemberDetailsNew(1,true)">{{translation.Add}}</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <br />
+                            @*<div class="col-md-12" style="display:none">
+                                <h5 class="heading-hr"> {{ translation.SportMember}} </h5>
+                            </div>
+                            <div class="col-lg-12" style="display:none">
+                                <div class="table-responsive">
+                                    <table class="table devtable" style="margin-top: 30px;">
+                                        <thead>
+                                            <tr>
+                                                <th>
+                                                    {{translation.SRNO}}
+                                                </th>
+                                                <th>
+                                                    {{translation.AADHAARNo}}
+                                                </th>
+                                                <th>
+                                                    {{translation.DirectorsName}}
+                                                </th>
+                                                <th>
+                                                    {{translation.ContactNo}}
+                                                </th>
+                                                <th>
+                                                    {{translation.DOB}}
+                                                </th>
+                                                <th>
+                                                    {{translation.GenderHeading}}
+                                                </th>
+                                                <th>
+                                                    {{translation.CategoryHeading}}
+                                                </th>
+                                                <th>
+                                                    {{translation.PostHeading}}
+                                                </th>
+                                                <th>
+                                                    {{translation.Photo}}
+                                                </th>
+                                                <th>
+                                                    {{translation.Actions}}
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="TblSportNominatedMember">
+                                            <tr id="2001">
+                                                <td>1</td>
+                                                <td>
+                                                    <input type="text" name="AdhareNo" class="form-control" placeholder="{{translation.AADHAARNo}}" maxlength="12" minlength="12" onkeypress='return event.charCode >= 48 && event.charCode <= 59' autocomplete="off">
+                                                </td>
+                                                <td>
+                                                    <input type="text" disabled name="DirectorsName" class="form-control" placeholder="{{translation.DirectorsName}}" autocomplete="off" onKeyPress="return ValidateAlpha(event);">
+                                                </td>
+                                                <td>
+                                                    <input type="text" name="ContactNo" class="form-control" placeholder="{{translation.ContactNo}}" maxlength="10" minlength="10" onkeypress='return ((event.charCode >= 48 && event.charCode <= 57)|| event.which ==8 || event.keyCode ==8 || event.charCode==8)' autocomplete="off">
+                                                </td>
+
+                                                <td>
+                                                    <input name="DOB" id="txt_DOB" disabled="disabled" class="form-control devcalender" placeholder="{{translation.DOB}}" onkeypress='return ((event.charCode >= 48 && event.charCode <= 57)|| event.which ==8 || event.keyCode ==8 || event.charCode==8)' autocomplete="off">
+                                                </td>
+                                                <td>
+                                                    <div style="width:100%">
+                                                        <label style="width:40% !important;"></label>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div style="width:100%">
+                                                        <select class="form-control" ng-model="SocietyAmendment.CategoryId1" ng-init="SocietyRegistration.ElCategoryId1='0'">
+                                                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                                                            <option ng-repeat="item in CategoryList" value="{{item.CODEID}}">
+                                                                {{_language =='en-us' ?  item.CODENAME : item.CODENAME_MANGAL}}
+                                                            </option>
+                                                        </select>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div style="width:100%">
+
+                                                        <input type="text" value="{{item.POSTNAME}}" class="form-control" placeholder="{{translation.Post}}">
+                                                    </div>
+                                                </td>
+                                                <td><img class="img-thumbnail" src="~/Content/Images/Balnk.png" height="50" width="50" /></td>
+                                                <td><input type="checkbox" class="checkbox-input"></td>
+                                                <td>
+                                                    <i ng-click="OpenOtpPopUpOther('ASASASAS','DIRECTOR1',2001)" class="fa fa-info-circle info-m2"></i>
+                                                    <i ng-click="ClearAadharDataFromTable(2001)" class="fa fa-minus-circle red-m1"></i>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="form-group col-md-12">
+                                    <div class="dev-align-btn">
+                                        <button type="submit" class="btn btn-primary dev-btn" ng-click="AddMoreMemberDetailsNew(2)">{{translation.Add}}</button>
+                                    </div>
+                                </div>
+                            </div>*@
+                        </div>
+
+
+
+                        @*{{TableData10NomiAll}}*@
+                        <div class="col-lg-12" ng-show="ActId==3">
+                            <div class="table-responsive">
+
+                                <table class="table devtable" style="margin-top: 30px;">
+                                    <thead>
+                                        <tr>
+                                            <th>
+                                                {{translation.SRNO}}
+                                            </th>
+
+                                            <th>
+                                                {{translation.AADHAARNo}}
+                                            </th>
+                                            <th>
+                                                {{translation.DirectorsName}}
+                                            </th>
+                                            <th>
+                                                {{translation.ContactNo}}
+                                            </th>
+
+                                            <th>
+                                                {{translation.DOB}}
+                                            </th>
+                                            <th>
+                                                {{translation.GenderHeading}}
+                                            </th>
+                                            <th>
+                                                {{translation.CategoryHeading}}
+                                            </th>
+                                            <th>
+                                                {{translation.PostHeading}}
+                                            </th>
+                                            <th>
+                                                {{translation.NominatedByWhom}}
+                                            </th>
+                                            <th>
+                                                {{translation.Photo}}
+                                            </th>
+                                            <th>
+                                                {{translation.Actions}}
+                                            </th>
+
+                                        </tr>
+                                    </thead>
+                                    <tbody id="TblNominatedMember">
+                                        <tr id="{{item.Id}}" ng-repeat="item in TableData10NomiAll" style="{{item.IsDelete?'border: 3px solid red;':''}}">
+                                            <td>1</td>
+                                            <td>
+                                                <input type="text" ng-disabled="!item.IsNew" ng-model="item.Aadh" name="AdhareNo" class="form-control" placeholder="{{translation.AADHAARNo}}" maxlength="12" minlength="12" onkeypress='return event.charCode >= 48 && event.charCode <= 59' autocomplete="off">
+                                            </td>
+                                            <td>
+                                                <input type="text" value="{{item.Name}}" disabled name="DirectorsName" class="form-control" placeholder="{{translation.DirectorsName}}" autocomplete="off" onKeyPress="return ValidateAlpha(event);">
+                                            </td>
+                                            <td>
+                                                <input type="text" ng-model="item.ContactNo" name="ContactNo" class="form-control" placeholder="{{translation.ContactNo}}" maxlength="10" minlength="10" onkeypress='return ((event.charCode >= 48 && event.charCode <= 57)|| event.which ==8 || event.keyCode ==8 || event.charCode==8)' autocomplete="off">
+                                            </td>
+
+                                            <td>
+                                                <input name="DOB" value="{{item.DOB}}" id="txt_DOB" disabled="disabled" class="form-control devcalender" placeholder="{{translation.DOB}}" onkeypress='return ((event.charCode >= 48 && event.charCode <= 57)|| event.which ==8 || event.keyCode ==8 || event.charCode==8)' autocomplete="off">
+                                            </td>
+                                            <td>
+                                                <div style="width:100%">
+                                                    <label style="width:40% !important;">{{item.Gender}}</label>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div style="width:100%">
+                                                    <select class="form-control" ng-model="SocietyAmendment.CategoryId1" ng-init="SocietyAmendment.ElCategoryId1='0'">
+                                                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                                                        <option ng-repeat="item1 in CategoryList" value="{{item1.CODEID}}" ng-selected="{{item.CatId==item1.CODEID}}">
+                                                            {{_language =='en-us' ?  item1.CODENAME : item1.CODENAME_MANGAL}}
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div style="width:100%">
+                                                    <input type="text" ng-model="item.POSTNAME" class="form-control" placeholder="{{translation.Post}}">
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div style="width:100%">
+                                                    <select class="form-control" ng-init="SocietyAmendment.NominatedBy='0'">
+                                                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                                                        <option ng-selected="{{item.NominatedBy==1}}" value="1">{{translation.ByGovernment}}</option>
+                                                        <option ng-selected="{{item.NominatedBy==2}}" value="2">{{translation.ByNabard}}</option>
+                                                        <option ng-selected="{{item.NominatedBy==3}}" value="3">{{translation.ByRBI}}</option>
+                                                        <option ng-selected="{{item.NominatedBy==4}}" value="4">{{translation.ByTechnicalDirector}}</option>
+
+                                                    </select>
+                                                </div>
+                                            </td>
+                                            <td><img class="img-thumbnail" src="{{item.Photo}}" height="50" width="50" /></td>
+                                            @*
+                                            <td>
+                                                <i ng-click="OpenOtpPopUpOther('ASASASAS','DIRECTOR1',item.Id)" class="fa fa-info-circle info-m2"></i>
+                                                <i ng-click="ClearAadharDataFromTable(item.Id)" class="fa fa-minus-circle red-m1"></i>
+                                            </td>*@
+
+                                            <td>
+                                                <label style="display:none" id="lblAdministrativeFile1"></label>
+                                                <i ng-if="!item.IsValidate" ng-click="OpenOtpPopUpOther(item.Aadh,'DIRECTOR1',$index,'TableData10NomiAll')" class="fa fa-info-circle green-m1" title="click to validate"></i>
+                                                @*<i class="fa fa-check-circle-o" ng-if="item.IsValidate" style="font-size: 18px;margin-right: 5px;    color: #20cc20;"></i>*@
+                                                <i ng-if="!item.IsDelete" class="fa fa-trash clsShowHide btn btn btn-xs tooltips" title="click to remove" id="Remove_{{item.Id}}" ng-click="RemoveRowAdminiAct2001($index,'TableData10NomiAll')"></i>
+                                                <i ng-if="item.IsDelete" class="fa fa-undo clsShowHide btn btn btn-xs tooltips" title="click to remove undo" id="Remove_{{item.Id}}" ng-click="UndoRemoveRowAdminiAct2001($index,'TableData10NomiAll')"></i>
+                                            </td>
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="form-group col-md-12">
+                                <div class="dev-align-btn">
+                                    <button type="submit" class="btn btn-primary dev-btn" ng-click="AddMoreMemberDetailsNew(0,true)">{{translation.Add}}</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-12" ng-show="ActId!=7">
+                            <div class="form-group col-md-3" style="padding: 20px;">
+                                <label class="control-label">{{ translation.TotalNoofMembers}}</label>
+                            </div>
+                            <div class="form-group col-md-3" ng-class="{ 'has-error' : MyUserForm.TotalMembersClassA.$invalid && !MyUserForm.TotalMembersClassA.$pristine }">
+                                <label>{{ translation.TotalMembersClassA}}<span class="error">*</span></label>
+                                <input type="text" name="Total No of Members Class A" class="form-control" ng-model="SocietyAmendment.TotalMembersClassA" placeholder="{{translation.TotalMembersClassA}}" onkeypress='return ((event.charCode >= 48 && event.charCode <= 57)|| event.which ==8 || event.keyCode ==8 || event.charCode==8)' autocomplete="off">
+                            </div>
+
+                            <div class="form-group col-md-3" ng-class="{ 'has-error' : MyUserForm.TotalMembersClassB.$invalid && !MyUserForm.TotalMembersClassB.$pristine }">
+                                <label class="control-label">{{ translation.TotalMembersClassB}} <span class="error">*</span> </label>
+                                <input type="text" name="Total No of Members Class B" class="form-control" ng-model="SocietyAmendment.TotalMembersClassB" placeholder="{{translation.TotalMembersClassB}}" onkeypress='return ((event.charCode >= 48 && event.charCode <= 57)|| event.which ==8 || event.keyCode ==8 || event.charCode==8)' autocomplete="off">
+                            </div>
+                            <div class="form-group col-md-3" ng-class="{ 'has-error' : MyUserForm.TotalMembersClassC.$invalid && !myUserForm.TotalMembersClassC.$pristine }">
+                                <label class="control-label">{{ translation.TotalMembersClassC}} <span class="error">*</span></label>
+                                <input type="text" name="Total No of Members Class C" class="form-control" ng-model="SocietyAmendment.TotalMembersClassC" placeholder="{{translation.TotalMembersClassC}}" onkeypress='return ((event.charCode >= 48 && event.charCode <= 57)|| event.which ==8 || event.keyCode ==8 || event.charCode==8)' autocomplete="off">
+                            </div>
+                        </div>
+                        <div class="col-lg-12 dev-menu-btn">
+                            <button type="submit" class="btn btn-primary" ng-click="SaveMemberList()">{{translation.Submit}}</button>
+                        </div>
+                        <input type="hidden" id="hdRowId" />
+                        <button ng-click="OpenOtpPopUpOtherFun()" id="CallAngularFun" ng-show="false"></button>
+                        <button ng-click="ClearAadharDataFromTable()" id="CallAngularFunRemove" ng-show="false"></button>
+
+
+                    </div>
+
+                    <div class="col-md-12">
+                        <div class="table-responsive">
+                            <table class="table devtable" style="margin-top: 30px;">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            {{translation.SRNO}}
+                                        </th>
+                                        <th>
+                                            {{translation.AADHAARNo}}
+                                        </th>
+                                        <th>
+                                            {{translation.DirectorsName}}
+                                        </th>
+                                        <th>
+                                            {{translation.ContactNo}}
+                                        </th>
+                                        <th>
+                                            {{translation.DOB}}
+                                        </th>
+                                        <th>
+                                            {{translation.GenderHeading}}
+                                        </th>
+                                        <th>
+                                            {{translation.CategoryHeading}}
+                                        </th>
+                                        <th>
+                                            {{translation.PostHeading}}
+                                        </th>
+                                        <th>
+                                            {{translation.Photo}}
+                                        </th>
+                                        <th>
+                                            {{translation.Occupation}}
+                                        </th>
+                                        <th>
+                                            {{translation.ElectedMemberCheck}}
+                                        </th>
+                                        <th>Request Type</th>
+                                        <th>
+                                            {{translation.Status}}
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr id="{{item.Id}}" ng-repeat="item in MemberAmendmentList" style="{{item.IsDelete?'border: 3px solid red;':''}}">
+                                        <td>{{$index+1}}</td>
+                                        <td>
+                                            {{item.AadharNo}}
+                                        </td>
+                                        <td>
+                                            {{item.Name}}
+                                        </td>
+                                        <td>
+                                            {{item.ContactNo}}
+                                        </td>
+                                        <td>
+                                            {{item.DOB1}}
+                                        </td>
+                                        <td>
+                                            <div style="width:100%">
+                                                <label style="width:40% !important;">{{item.Gender}}</label>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div style="width:100%">
+                                                <select disabled="disabled" class="form-control" ng-model="SocietyAmendment.CategoryId1" ng-init="SocietyAmendment.CategoryId1='0'">
+                                                    <option value="0" disabled>{{translation.SelectOption}}</option>
+                                                    <option ng-repeat="item1 in CategoryList" value="{{item1.CODEID}}" ng-selected="{{item.CatId==item1.CODEID}}">
+                                                        {{_language =='en-us' ?  item1.CODENAME : item1.CODENAME_MANGAL}}
+                                                    </option>
+                                                </select>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div style="width:100%">
+                                                @*<select class="form-control" ng-init="SocietyRegistration.PostId1='0'">
+                                                    <option value="0" disabled>{{translation.SelectOption}}</option>
+                                                    <option ng-repeat="item in BoardPosts" value="{{item.CAD_ID}}">
+                                                        {{_language =='en-us' ?  item.CAD_NAME : item.CAD_SERV}}
+                                                    </option>
+                                                </select>*@
+                                                {{item.POSTNAME}}
+                                            </div>
+                                        </td>
+                                        <td><img class="img-thumbnail" src="{{item.Photo}}" height="50" width="50" /></td>
+                                        <td>{{item.Occupation}}</td>
+                                        <td>{{item.Status=='True'?'YES':'NO'}}</td>
+                                        <td>
+                                            {{item.RequestType==1?'Remove Member':item.RequestType==2?'Change Details':'Add New Member'}}
+                                        </td>
+                                        <td>
+                                            Panding
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+
+                </div>
+                @*<div ng-show="OtpDilogBox">
+                    <div class="messagebox_overlay" ng-show="messagebox" style="position: fixed; left: 0px; top: 0px; width: 100%; height: 100%; z-index: 99999; background: rgba(0, 0, 0, 0.5);"><div class="messagebox" style="color: rgb(51, 51, 51); font-size: 14px; background: rgb(254, 254, 254); position: absolute; margin: auto; width: auto; max-width: 360px; min-width: 280px; left: 50%; top: 50%; border-radius: 5px; transform: translate(-50%, -50%); box-shadow: rgba(0, 0, 0, 0.4) 0px 0px 16px 2px;"><div class="messagebox_header" style="background: rgb(245, 245, 245); padding: 10px 15px; font-size: 16px; font-weight: bold; border-radius: 4px;">AADHAAR AUTH/ EKYC</div><div class="messagebox_content" style="padding: 12px; overflow-y: auto; border: 1px solid rgb(228, 228, 228); min-height: 60px;">Please allow system for your AADHAAR based Authentication/ eKYC.<div class="messagebox_content_error" style="box-sizing: border-box; display: none;"></div></div><div class="messagebox_buttons" style="background: rgb(245, 245, 245); padding: 8px 15px; text-align: center; border-radius: 4px;"><button ng-click="ClosePopUp()" class="messagebox_button_done" style="box-sizing: border-box; min-width: 65px; background: rgb(48, 115, 173); color: rgb(255, 255, 255); padding: 5px 15px; border: 1px solid rgb(48, 115, 173); cursor: pointer; transition: all 0.3s ease-in-out 0s; box-shadow: rgba(156, 39, 176, 0.42) 0px 14px 26px -12px, rgba(0, 0, 0, 0.12) 0px 4px 23px 0px, rgba(156, 39, 176, 0.2) 0px 8px 10px -5px;">OK</button></div></div></div>
+                    <div id="ssoauth_container" class="ssoauth_container">
+                        <div id="ssoauth" data-lang="en-US" class="loading-container-new">
+                            <div class="ssoauth-header"><div class="ssoauth-uid">{{MaskingAADHAARNo}}</div><span id="SSOAuth_rbtnListLang" class="ssoauth-toggle-lang"><input id="SSOAuth_toggle_hindi" type="radio" name="SSOAuth_ToggleLang" class="toggle toggle-left" value="hi-in"><label for="SSOAuth_toggle_hindi" class="switch hindi label" style="float:left">हिन्दी</label><input id="SSOAuth_toggle_english" type="radio" name="SSOAuth_ToggleLang" class="toggle toggle-right" value="en-us"><label for="SSOAuth_toggle_english" class="switch english" style="float:right">Eng</label></span></div><div ng-click="CloseOtpBox()" class="ssoauth-close border-rounded" title="Close">X</div><span id="SSOAuth_rbtnListType" class="ssoauth-radio-list channel-2"><input id="SSOAuth_rbtnListType_1" type="radio" name="SSOAuth_rbtnListType" value="otp"><label for="SSOAuth_rbtnListType_1"><div class="ssoauth-icon"><img src="~/Content/Images/OTP.png"><span>OTP</span></div></label></span><div id="Div_SSOAuth_chkConsent" class="checkbox-input"><span class="check-box"><input id="SSOAuth_chkConsent" type="checkbox" name="SSOAuth_chkConsent"><label for="SSOAuth_chkConsent">I hereby state that I have no objection in authenticating myself with AADHAAR based authentication system and consent to providing my AADHAAR Number, Biometric and/or OTP for AADHAAR based Authantication/ eKYC. I also give my explicit consent for accessing the mobile number and email address from AADHAAR System.</label></span></div>
+                            <div id="SSOAuth_OTP" ng-show="FillOtp" style="text-align: center;"><input id="SSOAuth_OtpText" type="tel" class="ssoauth-otp-box" maxlength="6" placeholder="OTP (One Time Password)"></div><div id="SSOAuth_Buttons" style="float: left; width: 100%; text-align: center; margin-top: 10px;">
+                                <button id="btnSSOAuth_Capture" type="button" class="ssoauth-btn" causesvalidation="false" style="display: none;">Capture</button>
+                                <button ng-click="Otpsend()" id="btnSSOAuth_SendOTP" type="button" class="ssoauth-btn" causesvalidation="false" style="">Send OTP</button>
+                                <button ng-click="ValidateOTP()" id="btnSSOAuth_ValidateOTP" type="button" class="ssoauth-btn" causesvalidation="false" style="display: none;">Validate OTP</button>
+                                <a id="lnkSSOAuthDownload" class="ssoauth-btn" href="https://ssoauth.rajasthan.gov.in/auth/downloads" target="_blank" title="Downloads" style="text-decoration: none; display: none;">Downloads</a><button id="btnSSOAuth_Cancel" ng-click="CloseOtpBox()" type="button" class="ssoauth-btn btnSSOAuth_Cancel" causesvalidation="false">Cancel</button>
+                            </div>
+                            <div id="ssoauthloading" class="img-loading backdrop" style="display: none;"><div class="loading-container-new"><div class="loader-img"><img id="FPImage" src="~/Content/Images/prog.gif" alt="Loading..." style="width: 75px; height: 75px; vertical-align: middle;"></div></div></div>
+                        </div>
+                    </div>
+                </div>*@
+                <!–– End Executive Member List ––>
+                <!–– Start Member List ––>
+                <div id="MemberList" class="tabcontent">
+                    <div class="col-lg-12 form-group">
+
+                        <div class="col-lg-12 form-group">
+                            <div class="col-lg-2">{{ translation.RegisteredYear}} <span class="error">*</span></div>
+                            <div class="col-lg-4">
+                                <select class="form-control" ng-model="SocietyAmendment.RegiYearId" ng-init="SocietyAmendment.RegiYearId='0'">
+                                    <option value="0" disabled>{{translation.SelectOption}}</option>
+                                    <option ng-repeat="item in FinancialYearList" value="{{item.FIN_YEAR_MASTR_ID}}">
+                                        {{item.FIN_YEAR_NAME}}
+                                    </option>
+                                </select>
+                            </div>
+
+                        </div>
+                        <div class="col-lg-2">Upload List of Members of the Society (File Type - EXCEL upto 1MB)<span class="error">*</span></div>
+                        <div class="col-lg-10">
+                            <input type="file" name="File" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" filetype="excel" id="flMembersListExcelFile" class="form-control ng-pristine ng-untouched ng-valid ng-empty" ng-model="SocietyRegistration.MembersListExcelFile" onchange="angular.element(this).scope().UploadMembersListExcelFile(this.files)"><span class="filesize"></span>
+                        </div>
+
+                    </div>
+                    <div class="col-lg-12 form-group">
+                        <div class="col-lg-2">{{translation.Remarks}}</div>
+                        <div class="col-lg-10">
+                            <textarea type="text" name="Address" class="form-control" placeholder="{{translation.Remarks}}" ng-model="SocietyAmendment.Remark" autocomplete="off"></textarea>
+                        </div>
+                    </div>
+                    <div class="col-lg-12 dev-menu-btn">
+                        <button type="submit" class="btn btn-primary" ng-click="SaveSocietyMemberExcel()">{{translation.Submit}}</button>
+                    </div>
+
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <div class="table-responsive citizen-dash-head">
+                            <table id="example" class="table devtable" style="margin-top: 30px;border:1px solid rgb(222, 221, 221); float: left;">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            {{translation.SRNO}}
+                                        </th>
+                                        <th>
+                                            {{translation.MembersListExcelFile}}
+                                        </th>
+                                        <th>
+                                            {{translation.SubmissionDate}}
+                                        </th>
+                                        <th>
+                                            {{translation.Remarks}}
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr dir-paginate="item in SocietyMemberExcelList | filter: q | orderBy:colsort:reverseSort | itemsPerPage: 1000">
+                                        <td>{{$index+1}}</td>
+                                        <td><a id="LinkBL" href="{{item.MembersListExcelFile}}" target="_blank">Excel</a></td>
+                                        <td>{{item.InsertDateSmall}}</td>
+                                        <td>{{item.Remarks}}   </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+
+
+                <!–– End Member List ––>
+                <!–– Start Balance Sheet ––>
+                <div id="BalanceSheet" class="tabcontent">
+                    <div class="col-lg-12 form-group">
+                        <h4>Current Blance Sheet</h4>
+                        <div class="table-responsive">
+                            <table class="table devtable" style="margin-top: 30px;">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            Liability Head
+                                        </th>
+                                        <th>
+                                            Liability Amount
+                                        </th>
+                                        <th>
+                                            Asset Head
+                                        </th>
+                                        <th>
+                                            Asset Amount
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody id="TblElectedMember">
+                                    <tr id="{{item.Id}}" ng-repeat="item in BalanceSheetOld">
+                                        <td>
+                                            {{item.Liability_Head}}
+                                        </td>
+                                        <td>
+                                            {{item.Liability_Amount}}
+                                        </td>
+                                        <td>
+                                            {{item.Asset_Head}}
+                                        </td>
+                                        <td>
+                                            {{item.Asset_Amount}}
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="col-lg-12 form-group">
+                            <div class="citizen-dash-head">
+
+                                <div class="col-lg-2  btn-lg">{{ translation.RegisteredYear}} <span class="error">*</span></div>
+                                <div class="col-lg-4">
+                                    <select class="form-control" ng-model="SocietyAmendment.RegiYearId" ng-init="SocietyAmendment.RegiYearId='0'">
+                                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                                        <option ng-repeat="item in FinancialYearList" value="{{item.FIN_YEAR_MASTR_ID}}">
+                                            {{item.FIN_YEAR_NAME}}
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="col-lg-2">{{translation.ExcelUpload}}<span class="error">*</span></div>
+                                <div class="col-lg-4"><input type="file" class="form-control" style="width:200px; border:1px solid blue;" filetype='excel' name="File" id="fluBSheetInsert" class="btn btn-outline-primary btn-lg active" ng-model="SocietyAmendment.ExcelBalanceSheetFile" onchange="angular.element(this).scope().UploadBSheetFileExl(this.files)">&nbsp;&nbsp;<a href="~/Content/SocietyExcel/BalanceSheet.xls">Download Sample</a></div>
+                            </div>
+                        </div>
+
+                        <div class="form-group col-md-12">
+                            <div class="dev-align-btn">
+                                <button type="submit" class="btn btn-primary dev-btn" ng-click="SaveBalanceSheetInsert()">{{ translation.Submit}}</button>
+                                @*<button type="button" class="btn btn-primary dev-btn" ng-click="ReloadPage()">{{ translation.Clear}}</button>*@
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-12 form-group" ng-show="NewBSheet">
+                        <h4>New Blance Sheet</h4>
+                        <div class="table-responsive">
+                            <table class="table devtable" style="margin-top: 30px;">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            Liability Head
+                                        </th>
+                                        <th>
+                                            Liability Amount
+                                        </th>
+                                        <th>
+                                            Asset Head
+                                        </th>
+                                        <th>
+                                            Asset Amount
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody id="TblElectedMember">
+                                    <tr id="{{item.Id}}" ng-repeat="item in BalanceSheetNew">
+                                        <td>
+                                            {{item.Liability_Head}}
+                                        </td>
+                                        <td>
+                                            {{item.Liability_Amount}}
+                                        </td>
+                                        <td>
+                                            {{item.Asset_Head}}
+                                        </td>
+                                        <td>
+                                            {{item.Asset_Amount}}
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <div class="table-responsive citizen-dash-head">
+                            <table id="example" class="table devtable" style="margin-top: 30px;border:1px solid rgb(222, 221, 221); float: left;">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            {{translation.SRNO}}
+                                        </th>
+                                        <th ng-click="sortData('SocietyName')">
+                                            {{translation.SocietyName}}
+                                            <div ng-class="getSortClass('SocietyName')"></div>
+                                        </th>
+                                        <th>
+                                            {{translation.RegisteredYear}}
+                                        </th>
+                                        <th>
+                                            {{translation.File}}
+                                        </th>
+                                        <th>
+                                            {{translation.SubmissionDate}}
+                                        </th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    <tr dir-paginate="item in BalanceSheetFileListData | filter: q | orderBy:colsort:reverseSort | itemsPerPage: 1000">
+                                        <td>{{$index+1}}</td>
+                                        <td>{{item.SocietyName}}</td>
+                                        <td>{{item.FIN_YEAR_NAME}}</td>
+                                        <td><a id="LinkBL" href="{{item.FileNameURL}}" target="_blank">Excel</a></td>
+                                        <td>{{item.InsertDateSmall}}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <!–– End Balance Sheet ––>
+
+            </div>
+            <div class="se-pre-con"></div>
+            <div id="stop" class="scrollTop">
+                <span><a href=""><i class="fa fa-arrow-up">Top</i></a></span>
+            </div>
+        </form>
+
+    </div>
+    @Html.Partial("_AadhaarValidation")
+</div>
+<script>
+    function OnTabClick(evt, cityName) {
+        var i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tabcontent");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+        }
+        tablinks = document.getElementsByClassName("tablinks");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+        document.getElementById(cityName).style.display = "block";
+        evt.currentTarget.className += " active";
+    }
+
+
+
+    function SetAngularValue(id) {
+        $("#hdRowId").val(id);
+        $("#CallAngularFun").click();
+    }
+
+    function SetAngularValueForRemove(id) {
+        alert(id);
+        $("#hdRowId").val(id);
+        $("#CallAngularFunRemove").click();
+    }
+
+
+</script>
+

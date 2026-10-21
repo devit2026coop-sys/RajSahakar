@@ -1,0 +1,193 @@
+﻿
+<script src="~/Scripts/AngularFramework/StockTransferSaleOrderByHQ.js"></script>
+<script type="text/javascript">
+
+    function ValidateAlpha(evt) {
+        var keyCode = (evt.which) ? evt.which : evt.keyCode
+        if ((evt.which == 8 || evt.keyCode == 8 || evt.charCode == 8))
+            return true;
+
+        if (((keyCode < 49 || keyCode > 90) && (keyCode < 97 || keyCode > 123) && keyCode != 32))
+            return false;
+        return true;
+    };
+
+</script>
+
+<div ng-app="StockTransferSaleOrderAcceptanceCnt">
+    <div ng-controller="StockTransferSaleOrderAcceptanceMod">
+        <div class="col-md-12">
+            <h3 class="citizen-dash-head">{{translation.StockTransferSalesOrderConfirmation}}</h3>
+            <hr style="margin: 0;">
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#"> {{translation.StockManagement}}</a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;"> {{translation.StockTransferSalesOrderConfirmation}} </span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div>
+                <div class="citizen-dash-head">
+                    <div class="table-dropdown">
+                        <div class="col-lg-12 form-group">
+                            <div class="col-md-4" style="padding-left: 0;">
+                                <label for="search">{{translation.Search}}:</label>
+                                <input ng-model="q" id="search" class="form-control" placeholder={{translation.filttertext}} autocomplete="off">
+                            </div>
+                            <div class="col-md-4" style="padding-left: 0;">
+                                <label for="search">{{translation.ItemPerPage}}:</label>
+                                <input type="number" min="1" max="100" class="form-control" onkeypress='return event.charCode >= 48 && event.charCode <= 57' ng-model="pageSize">
+                            </div>
+                        </div>
+                    </div>
+                    <table class="table table-responsive devtable" style="overflow-x:auto;">
+                        <thead>
+                            <tr>
+                                <th>
+                                    {{translation.SRNO}}
+                                </th>
+                                <th ng-click="sortData('IsStockTransfer')">
+                                    {{translation.OrderType}}
+                                    <div ng-class="getSortClass('IsStockTransfer')"></div>
+                                </th>
+                                <th ng-click="sortData('ProductNameEng')">
+                                    {{translation.OrderForWhichPlant}}
+                                    <div ng-class="getSortClass('ProductNameEng')"></div>
+                                </th>
+                                <th ng-click="sortData('ProductSubCategoryNameEng')">
+                                    {{translation.Product}}
+                                    <div ng-class="getSortClass('ProductSubCategoryNameEng')"></div>
+                                </th>
+                                <th ng-click="sortData('UnitNameEng')">
+                                    {{translation.OrderDate}}
+                                    <div ng-class="getSortClass('UnitNameEng')"></div>
+                                </th>
+                                <th>
+                                    {{translation.SalesOrderTakingFirmName}}
+                                </th>
+                                <th>
+                                    {{translation.DepotName}}
+                                </th>
+                                <th>
+                                    {{translation.IsInTransit}}
+                                </th>
+                                <th>
+                                    {{translation.OrderFulfillDate}}
+                                </th>
+                                <th>
+                                    {{translation.OrderDetails}}
+                                </th>
+                                <th>
+                                   &nbsp;
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr dir-paginate="item in StockTransferSalesOrderList | filter: q | orderBy:colsort:reverseSort | itemsPerPage: pageSize" current-page="currentPage" pagination-id="TrainningFormatPagination">
+                                <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                                <td>
+                                    {{ item.IsStockTransfer ==='True'  ? translation.StockTransfer : translation.SalesOrder }}
+                                </td>
+                                <td>
+                                    {{ _language === 'en-us' ? item.ProcessingUnitNameEng : item.ProcessingUnitNameHi}}
+                                </td>
+                                <td>
+                                    {{ _language === 'en-us' ? item.ProductNameEng : item.ProductNameHi}}
+                                </td>
+                                <td>
+                                    {{ item.OrderDate }}
+                                </td>
+                                <td>
+                                    {{ item.FirmName}}
+                                </td>
+                                <td>
+                                    {{ _language === 'en-us' ? item.DepotNameEng : item.DepotNameHi}}
+                                </td>
+                                <td>
+                                    {{ item.IsInTransit === 'True'  ? translation.Yes : translation.No}}
+                                </td>
+                                <td>
+                                    {{ item.OrderTakenDateTimeByDepot}}
+                                </td>
+                                <td>
+                                    <div ng-click="GetOrderDetails(item.IdStockTransferSaleOrderOnPlantByHQ,item.ProductId)" data-target="#myModalForVehicleDetailsStatus" data-toggle="modal">{{translation.Details}}</div>
+                                </td>
+                                <td>
+                                    <div ng-click="SaveAcceptance(item.IdStockTransferSaleOrderOnPlantByHQ)" title="{{translation.StockTransferSalesOrderConfirmation}}" ng-show="item.IsInTransit === 'False'"><i class="fa fa-edit"></i></div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="col-md-10">
+                <div class="text-center">
+                    <dir-pagination-controls boundary-links="true" pagination-id="TrainningFormatPagination" on-page-change="pageChangeHandler(newPageNumber)" template-url="/dirPagination.tpl.html"></dir-pagination-controls>
+                </div>
+            </div>
+
+            <div class="dev-popup-body modal fade" id="myModalForVehicleDetailsStatus">
+                <div class="modal-dialog" style="width:950px;">
+                    <!-- Modal content-->
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            <h4 class="modal-title"> {{translation.OrderDetails}}  </h4>
+                        </div>
+
+
+                        <div class="citizen-dash-head">
+                            <table class="table table-responsive devtable" style="overflow-x:auto;">
+                                <thead>
+                                    <tr>
+                                        <th rowspan="2" style="vertical-align:central;text-align:center;">
+                                            {{translation.SRNO}}
+                                        </th>
+                                        <th rowspan="2" style="text-align:center">
+                                            {{translation.Product}}
+                                        </th>
+                                        <th colspan="4" style="text-align:center;">
+                                            {{translation.PackagingMaster}}
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <th ng-repeat="itemPacking in OrderDetails.PackingList" style="text-align:center;">
+                                            {{_language === 'en-us' ? itemPacking.PackingNameEng : itemPacking.PackingNameHi }}
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="item in OrderDetails.ProductSubCategoryPackingMappingList">
+                                        <td>{{$index+1}}</td>
+                                        <td>
+                                            {{_language === 'en-us' ? item.ProductSubCategoryNameEng : item.ProductSubCategoryNameHi }}
+                                        </td>
+                                        <td ng-repeat="item2 in item.ProductSubCategoryQuantityEntity">
+                                            <label>{{item2.Quantity}}</label>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+

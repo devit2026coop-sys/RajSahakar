@@ -1,0 +1,189 @@
+﻿
+<script src="~/Scripts/AngularFramework/AddGodownStatus.js?id=0"></script>
+<div ng-app="UserRole">
+    <div ng-controller="Role">
+        <div class="col-md-12">
+            <h3 class="h3heading citizen-dash-head">Update Godown Status</h3>
+        </div>
+        <div class="dev-popup-body modal fade" id="myModal" role="dialog" data-backdrop="static" data-keyboard="false">
+            <div class="modal-dialog">
+                <!-- Modal content-->
+                <input type="hidden" name="name" value="" id="iddgodwnval" />
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Update Godown Status</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form class="dev-search-form" name="MyRoleForm" style="overflow: hidden;">
+                            <div class="form-group">
+                                <label>Status<span class="">*</span></label>
+                                <select class="form-control" ng-model="godown.status" ng-init="godown.status='0'">
+                                    <option value="" ng-selected="selected">--Select--</option>
+                                    <option ng-repeat="item in StatusList" value="{{item.Id}}">{{item.Name}}</option>
+
+                                    @*<option value="1">Sanction Issued</option>
+                                        <option value="2">Fund Received</option>
+                                        <option value="3">Work Started</option>
+                                        <option value="4">Plint Level</option>
+                                        <option value="5">Lanter level</option>
+                                        <option value="6">Plaster level</option>
+                                        <option value="7">Roof Level</option>
+                                        <option value="8">Incomplete</option>
+                                        <option value="9">Complete</option>*@
+
+                                </select>
+                            </div>
+                            <div class="form-group" ng-show="godown.status==9">
+
+                                <label>Actual Cost</label>
+                                <input type="number" class="form-control" ng-model="godown.ActualCost" />
+                            </div>
+
+                            <div class="form-group" ng-show="godown.status==9">
+                                <label>Completion Date<span class="error">*</span></label>
+                                <input type="date" id="idddate" class="form-control" name="RoleNameHi" ng-model="godown.CompletionDate" max="@(DateTime.Now.ToString("yyyy-MM-dd"))" placeholder="Date" ng-minlength="1" maxlength="50" ng-required="true" autocomplete="off">
+
+                            </div>
+
+                            <div class="form-group">
+                                <label>Longitude</label>
+                                <input type="number" class="form-control" ng-model="godown.Longitude" placeholder="integer only" />
+                            </div>
+
+                            <div class="form-group">
+                                <label>Latitude</label>
+                                <input type="number" class="form-control" ng-model="godown.Latitude" placeholder="integer only" />
+                            </div>
+                            <div class="form-group">
+                                <label>Description</label>
+                                <textarea class="form-control" ng-model="godown.Description"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Godown Photo</label>
+                                <input type="file" id="godownPhoto" filetype="Upload" accept="image/*" name="godownphoto" class="form-control" ng-model="godown.Photo">
+                            </div>
+                            <div class="form-group">
+                                <div class="dev-align-btn">
+                                    <button type="submit" class="btn btn-primary dev-btn" ng-click="InsertSave()" style="margin-right:15px;">{{translation.Submit}}</button>
+                                    <button type="button" class="btn btn-primary dev-btn" ng-click="ClearRoleForm()">{{translation.Clear}}</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="">
+            <div class="col-md-12">
+                <div class="citizen-dash-head">
+                    <div class="table-dropdown" id="search-filter">
+                        <div class="col-md-2 NewMemberdob">
+                            <label>
+                                SearchText
+                            </label>
+                            <input id="txtFromDate" name="searchText" class="form-control" placeholder="Search" autocomplete="off">
+                        </div>
+                        <div class="col-md-4">
+                            <label>Status</label>
+                            <select class="form-control" ng-model="godown.status" >
+                                <option value="" ng-selected="selected">--Select--</option>
+                                <option ng-repeat="item in StatusList" value="{{item.Id}}">{{item.Name}}</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label>&nbsp;</label><br>
+                            <button type="button" ng-click="searchRequest(GetGodownlist)" class="btn btn-primary dev-btn ng-binding">{{translation.Search}}</button>
+                            <button type="button" ng-click="ClearSearch()" class="btn btn-primary dev-btn ng-binding">{{translation.Clear}}</button>
+                        </div>
+
+                    </div>
+
+
+                    <table class="table table-responsive devtable">
+                        <thead>
+                            <tr>
+                                <th>
+                                    {{translation.SRNO}}
+                                </th>
+                                <th>Address</th>
+                                <th>Type Of Societies</th>
+                                <th>Schemes Name</th>
+                                <th>Sanction Amt</th>
+                                <th>Sanction Date</th>
+
+                                <th>Godown Capacity (Metric Tun)</th>
+                                <th>Land Type</th>
+                                <th>Land Size (Hectare)</th>
+                                <th>Status</th>
+                                <th>Actual Cost</th>
+                                <th>Update Status</th>
+
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="item in godown | filter: q | orderBy:colsort:reverseSort">
+                                <td>{{(((DataPagingDetails.PageNumber - 1) * DataPagingDetails.PageSize) + 1)+$index}}</td>
+                                <td>{{ item.Address}}  </td>
+                                <td>{{item.SchemesType}}</td>
+                                <td>{{item.SchemesName}}</td>
+                                <td>{{ item.SanctionAmt | uppercase }}</td>
+                                <td>{{ item.SanctionDate | uppercase }}</td>
+                                <td>{{ item.GodownCapacity | uppercase }}</td>
+                                <td>{{ item.LandType | uppercase }}</td>
+                                <td>{{ item.LandSize | uppercase }}</td>
+                                <td>{{ item.StatusName | uppercase }}</td>
+                                <td>{{ item.ActualCost | uppercase }}</td>
+
+                                <td>
+                                    <input type="button" name="name" value="Update Status" ng-click="AddClick(item.GodownId);ClearRoleForm()" data-toggle="modal" data-target="#myModal" class="btn btn-primary" />
+                                    @*<a ng-click="AddRoleClick();ClearRoleForm()" data-toggle="modal" data-target="#myModal" style="color: #025e63; cursor: pointer; text-decoration:none;  font-weight: bold;" class="ng-binding">Add Godown</a>*@
+
+                                </td>
+
+
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="col-md-12">
+                        <div ng-if="DataPagingDetails.TotalPages>1" class="dataTables_paginate paging_simple_numbers" id="dataTables-example_paginate">
+                            <div class="dataTables_info" id="dataTables-example_info" role="status" aria-live="polite">
+                                Total Records: {{DataPagingDetails.TotalRecords}}
+                            </div>
+                            <ul class="pagination pagination_1" style="margin-left: 10px !important;">
+                                <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« First</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« Previous</span></li>
+
+                                <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest('1',GetGodownlist)" style="cursor: pointer;">
+                                    <span>«First</span>
+                                </li>
+                                <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest(DataPagingDetails.PageNumber-1,GetGodownlist)" style="cursor:pointer;">
+                                    <span>« Previous</span>
+                                </li>
+                                <li class="{{n==DataPagingDetails.PageNumber?'active':''}}" style="{{n==DataPagingDetails.PageNumber?'':'cursor: pointer'}}" ng-repeat="n in PagingRange(DataPagingDetails.StartPageNumber,DataPagingDetails.EndPageNumber,DataPagingDetails.TotalPages)" ng-click="pageRequest(n,GetGodownlist)"><span>{{n}}</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Next</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Last</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber!= DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.PageNumber+1,GetGodownlist)" style="cursor:pointer;">
+                                    <span>Next »</span>
+                                </li>
+                                <li ng-if="DataPagingDetails.PageNumber != DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.TotalPages,GetGodownlist)" style="cursor:pointer;">
+                                    <span>Last »</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+
+
+    </div>
+    <div class="se-pre-con"></div>
+    <div id="stop" class="scrollTop">
+        <span><a href=""><i class="fa fa-arrow-up">Top</i></a></span>
+    </div>
+</div>

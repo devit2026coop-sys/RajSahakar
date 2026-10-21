@@ -1,0 +1,381 @@
+﻿
+<script src="~/Scripts/AngularFramework/Inspection.js"></script>
+
+<script>
+    function exportTableToExcel(tableID, filename = '') {
+        var downloadLink;
+        var dataType = 'application/vnd.ms-excel';
+        var tableSelect = document.getElementById(tableID);
+        var tableHTML = tableSelect.outerHTML.replace(/ /g, '%20');
+
+        // Specify file name
+        filename = filename ? filename + '.xls' : 'excel_data.xls';
+        // Create download link element
+        downloadLink = document.createElement("a");
+
+        document.body.appendChild(downloadLink);
+
+        if (navigator.msSaveOrOpenBlob) {
+            var blob = new Blob(['\ufeff', tableHTML], {
+                type: dataType
+            });
+            navigator.msSaveOrOpenBlob(blob, filename);
+        } else {
+            // Create a link to the file
+            downloadLink.href = 'data:' + dataType + ', ' + tableHTML;
+
+            // Setting the file name
+            downloadLink.download = filename;
+
+            //triggering the function
+            downloadLink.click();
+
+        }
+    }
+
+
+</script>
+<script type="text/javascript">
+    function printDataJS(Id, tableid) {
+        // ExportToPDF(Id, [], '', PDFPageType.Portrait);
+        $('body').prepend("<form method='post' action='../ExportHandler.ashx' id='tempForm'><input type='hidden' name='data' value='" + Id + "' ><input type='hidden' name='PdfId' value='" + Id + "' ><input type='hidden' name='MasterId' value='" + $(tableid).closest('tr').children('td:first').text() + "' ><input type='hidden' name='PageType' value='" + PDFPagePrintType.Portrait + "' ></form>");
+        $('#tempForm').submit();
+        $("tempForm").remove();
+    }
+    var PDFPagePrintType = {
+        Default: 'Default',
+        Portrait: 'Portrait',
+        Landscape: 'Landscape'
+    }
+</script>
+<script>
+    function printDiv() {
+        window.frames["print_frame"].document.body.innerHTML = document.getElementById("tblPrintData").innerHTML;
+        window.frames["print_frame"].window.focus();
+        window.frames["print_frame"].window.print();
+    }
+</script>
+<div ng-app="InspectionModule" ng-controller="InspectionCont">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <h3 class="citizen-dash-head"> {{ translation.Inspection}} </h3>
+
+    </div>
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="devpage-breadcrumb">
+            <ul class="page-breadcrumb">
+                <li class="dev-page-br">
+                    <i class="fa fa-home"> </i>
+                    <a href="#"> {{translation.Home}} </a>
+                    <i class="fa fa-angle-right"> </i>
+
+                </li>
+                <li style="float: left">
+                    <span style="margin: 0 5px;"> {{translation.Society}} </span>
+                    <i class="fa fa-angle-right"> </i>
+                </li>
+                <li style="float: left">
+                    <span style="margin: 0 5px;"> {{translation.Inspection}} </span>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div class="col-md-12">
+        <div class="table-responsive citizen-dash-head">
+            @*<div class="table-dropdown">
+                    <div class="col-md-4">
+                        <label>{{ translation.SocietyType}}</label>
+                        <select ng-model="Inspection.SocietyTypeId" class="form-control" ng-init="Inspection.SocietyTypeId='0'" ng-change="getSocietyfilterBySocietyType()">
+                            <option value="0">{{translation.SelectOption}}</option>
+                            <option ng-repeat="itemtype in SocietyTypeList" value="{{itemtype.SocietyTypeId}}">
+                                {{_language =='en-us' ?  itemtype.TypeameEng : itemtype.TypeNameHin}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label>{{ translation.SocietyClass}}</label>
+                        <select ng-model="Inspection.ClassId" class="form-control" ng-init="Inspection.ClassId='0'" ng-change="getSocietyfilter()">
+                            <option value="0">{{translation.SelectOption}}</option>
+                            <option ng-repeat="itemCls in SocietyClassList" value="{{itemCls.ClassId}}">
+                                {{_language =='en-us' ?  itemCls.ClassNameEn : itemCls.ClassNameHi}}
+                            </option>
+                        </select>
+                    </div>
+
+                </div>*@
+            <div class="table-dropdown">
+                <div class="col-md-4">
+                    <label for="search">{{translation.Search}}:</label>
+                    <input ng-model="q" id="search" class="form-control" placeholder={{translation.filttertext}} autocomplete="off">
+                </div>
+                <div class="col-lg-4">
+                    <label for="search">{{translation.FincialYearHeading}}:</label>
+                    <select class="form-control" ng-model="Inspection.Year" ng-init="Inspection.Year='0'" ng-change="GetSocietyList()">
+                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                        <option ng-repeat="item in FinancialYearList" value="{{item.FIN_YEAR_MASTR_ID}}">
+                            {{item.FIN_YEAR_NAME}}
+                        </option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label>&nbsp;</label><br />
+                    <button type="button" ng-click="ShowInspection()" class="btn btn-primary dev-btn">{{translation.Search}}</button>
+                </div>
+            </div>
+            <div class="table-dropdown">
+                <div class="col-md-12">
+                    <table id="example" class="table devtable" style="margin-top: 30px;border:1px solid rgb(222, 221, 221); float: left;">
+                        <thead>
+                            <tr>
+                                <th>
+                                    {{translation.SRNO}}
+                                </th>
+                                <th ng-click="sortData('SocietyName')">
+                                    {{translation.SocietyName}}
+                                    <div ng-class="getSortClass('SocietyName')"></div>
+                                </th>
+                                <th ng-click="sortData('RegistrationNo')">
+                                    {{translation.RegistrationNo}}
+                                    <div ng-class="getSortClass('RegistrationNo')"></div>
+                                </th>
+                                <th>
+                                    {{translation.FincialYearHeading}}
+
+                                </th>
+                                <th>
+                                    {{translation.AssignmentDate}}
+                                </th>
+                                <th>
+                                    {{translation.Actions}}
+                                </th>
+                                <th>
+                                    {{translation.ViewOrder}}
+                                </th>
+                                <th>
+                                    {{translation.Inspection}}
+                                </th>
+                            </tr>
+                        </thead>
+                       
+                        <tbody>
+                            <tr dir-paginate="item in TableData | filter: q | orderBy:colsort:reverseSort | itemsPerPage: pageSize" current-page="currentPage" pagination-id="SocietyIdForTbl">
+                                <td hidden="hidden">
+                                    <label>{{item.InspOfficerSocietyId}}</label>
+                                </td>
+                                <td>
+                                    {{$index+1}}
+                                </td>
+                                <td>{{item.SocietyName}}</td>
+                                <td>{{item.RegistrationNo}}</td>
+                                <td>{{item.FIN_YEAR_NAME}}  </td>
+                                <td>{{item.InsertDate}}</td>
+                                <td class="add-more-td">
+                                    <div>{{item.IsObjection>0 ? "OBJECTION BY INSPECTOR" : ""}}</div>
+                                </td>
+                                <td class="add-more-td">
+                                    <i ng-hide="item.InspectionOrder!=''" onclick="printDataJS(2,this)" class="fa fa-eye"></i>
+                                    <a ng-show="item.InspectionOrder!=''" style="color:#505050;" target="_blank" href="{{ item.InspectionOrder }}"><i class="fa fa-eye"></i></a>
+                                </td>
+                                <td>
+                                    <div ng-show="{{item.InspectionID==0 && '@ViewBag.UserT'=='D'}}">
+                                        <button type="button" ng-click="SETSocietyIdENC(item.SocietyIdENC,item.InspOfficerSocietyId,item.FIN_YEAR_NAME,item.FIN_YEAR_MASTR_ID)" data-toggle="modal" data-target="#myModal" class="btn btn-success">{{translation.StartInspection}}</button>
+                                    </div>                                    
+                                    <div ng-show="{{item.InspectionID!=0}}">
+                                        <button ng-hide="item.InspectionAnsCount==0" type="button" ng-click="GotoInspectionView(item.InspectionIDEnc)" class="btn btn-success">{{item.InspectionAnsCount>0 ? "VIEW" : "Continue"}}</button>
+                                        <button ng-hide="item.FilePath!=''" type="button" ng-click="GotoInspection(item.InspectionIDEnc)" class="btn btn-success">{{item.InspectionAnsCount>0 ? "Continue" : "Continue"}}</button>
+                                        @* <button ng-show="item.FilePath!=''" type="button" onclick="printDataJS(3,this)" class="btn btn-success">View Report</button>*@
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="col-md-10">
+                <div class="text-center">
+                    <dir-pagination-controls boundary-links="true" pagination-id="SocietyIdForTbl" on-page-change="pageChangeHandler(newPageNumber)" template-url="/dirPagination.tpl.html"></dir-pagination-controls>
+                </div>
+            </div>
+
+            <div class="col-md-2" ng-show="DivSms">
+                <h5 class="dev-page"> {{translation.Page}}: {{ currentPage }} </h5>
+            </div>
+            <div class="modal fade" id="myModal" role="dialog">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" ng-click="ClearInspectionForm()">&times;</button>
+                            <h4 class="modal-title">{{translation.Inspection}} </h4>
+                            <label ng-model="Inspection.SocietyIdEnc"></label>
+                            <label ng-model="Inspection.InspectionID"></label>
+                        </div>
+                        <div class="modal-body">
+
+                            <form class="dev-search-form" name="MyInspectionForm" style="overflow: hidden;">
+                                <div class="form-group">
+                                    <label>{{translation.BasicDetails}}</label>
+                                </div>
+                                <div class="col-lg-12 form-group">
+                                    <div class="col-lg-2" style="padding-left:0px;">{{ translation.SocietyName}}</div>
+                                    <div class="col-lg-4"><label id="lblSocityName"></label></div>
+                                    <div class="col-lg-2" style="padding-left:0px;">{{ translation.SocietyRegistrationNo}}</div>
+                                    <div class="col-lg-4"><label id="lblRegistrationNo"></label></div>
+                                </div>
+
+                                <div class="col-lg-12 form-group">
+                                    <div class="col-lg-2" style="padding-left:0px;">{{ translation.AssignmentDate}}</div>
+                                    <div class="col-lg-4"><label id="lblRegistrationDate"></label></div>
+                                    <div class="col-lg-2" style="padding-left:0px;">{{ translation.CEOName}}</div>
+                                    <div class="col-lg-4"><label id="lblCEOName"></label></div>
+                                </div>
+
+                                <div class="col-lg-12 form-group">
+                                    <div class="col-lg-2" style="padding-left:0px;">{{ translation.FincialYearHeading}}</div>
+                                    <div class="col-lg-4">
+                                        <label>{{FYearName}}</label>
+                                    </div>
+
+                                </div>
+                                <div class="col-lg-12 form-group">
+                                    <div class="col-lg-2" style="padding-left:0px;">{{ translation.DateOfStartInspection}} <span class="error">*</span></div>
+                                    <div class="col-lg-4" ng-class="{ 'has-error' : MyInspectionForm.Inspection.DateOfStartInspection.$invalid && !MyInspectionForm.Inspection.DateOfStartInspection.$pristine }">
+                                        <input name="RegistrationDate" id="txtStartInspectionDate" class="form-control devcalender" disabled="disabled" placeholder="{{translation.DateOfStartInspection}}" ng-model="Inspection.DateOfStartInspection" autocomplete="off" />
+                                    </div>
+                                    <div class="col-lg-2">{{ translation.DateOfEndInspection}} <span class="error">*</span></div>
+                                    <div class="col-lg-4" ng-class="{ 'has-error' : MyInspectionForm.Inspection.DateOfEndInspection.$invalid && !MyInspectionForm.Inspection.DateOfEndInspection.$pristine }">
+                                        <input name="RegistrationDate" id="txtEndInspectionDate" class="form-control devcalender" disabled="disabled" placeholder="{{translation.DateOfEndInspection}}" ng-model="Inspection.DateOfEndInspection" autocomplete="off" />
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <div class="form-check form-check-inline" ng-class="{ 'has-error' : MyInspectionForm.Selfdeclaration.$invalid && !MyInspectionForm.Selfdeclaration.$pristine }">
+                                        <input class="form-check-input" type="checkbox" id="inlineCheckbox1" value="1" ng-model="Inspection.Selfdeclaration" ng-checked="InspectionSelfdeclaration == 1" />
+                                        {{translation.Selfdeclaration}}
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="dev-menu-btn">
+                                        <button type="submit" class="btn btn-primary" ng-click="SaveInspection()">{{translation.Submit}}</button>
+                                        <button type="submit" class="btn btn-primary" ng-click="ClearInspectionForm()">{{translation.Clear}}</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="modal fade" id="ReplyModal" role="dialog">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" ng-click="ClearReplyForm()">&times;</button>
+                            <h4 class="modal-title">{{translation.Inspection}} </h4>
+                            <button onclick="exportTableToExcel('tblPrintData')" class="btn btn-primary dev-btn">Export In Excel</button>
+                            <button class="btn btn-primary dev-btn" onclick="printDiv()">Print</button>
+                        </div>
+                        <div class="modal-body">
+                            <form class="dev-search-form" name="InspectionReplyForm" style="overflow: hidden;">
+                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                    <section id="tblPrintData">
+                                        <div class="wizardShow">
+                                            <div class="wizard-inner">
+                                                <div class="col-md-12" style="padding:0px;">
+                                                    <div class="col-md-12" style="padding:0px;">
+                                                        <table style="margin-bottom:10px;">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th colspan="2">
+
+                                                                    </th>
+
+                                                                    <th>
+                                                                        {{translation.DateOfStartInspection}}:<label id="lblStartDate"></label>
+                                                                    </th>
+                                                                    <th>
+                                                                        {{translation.DateOfEndInspection}}:<label id="lblEndDate"></label>
+                                                                    </th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody></tbody>
+                                                        </table>
+                                                    </div>
+
+                                                </div>
+                                                <div class="clearfix"> </div>
+                                                <div class="col-lg-12 labelView">
+                                                    <p>
+                                                        The Following scope of inspection carried out with satisfactory result{{Inspection.SocietyIdEnc}}
+                                                    </p>
+                                                    <h5>
+                                                        <u>{{Admin}}</u>
+                                                    </h5>
+                                                    <ol>
+                                                        <li><label id="lblAdmin"></label></li>
+                                                    </ol>
+                                                    <h5>
+                                                        <u>{{Financial}}</u>
+                                                    </h5>
+                                                    <ol>
+                                                        <li><label id="lblFinancial"></label></li>
+                                                    </ol>
+                                                    <h5>
+                                                        <u>{{TradeBusiness}}</u>
+                                                    </h5>
+                                                    <ol>
+                                                        <li><label id="lblTradeBusiness"></label></li>
+                                                    </ol>
+                                                    <br />
+                                                    <u>
+                                                        {{translation.Observation}}
+                                                    </u>
+                                                    <p>
+                                                        <b> <label id="lblObservation"></label></b>
+                                                    </p>
+                                                </div>
+                                                <div class="clearfix"> </div>
+                                                <div class="form-group" ng-class="{ 'has-error' : MyInspectionForm.Observation.$invalid && !MyInspectionForm.Observation.$pristine }">
+                                                    <label>{{translation.compliance}}</label>
+                                                    <textarea rows="3" cols="50" style="overflow:scroll" class="form-control" name="Remark" ng-bind="Observation" ng-model="Inspection.Compliance" placeholder="{{translation.Compliance}}" ng-required="true" autocomplete="off"></textarea>
+                                                    <label ng-show="MyInspectionForm.MenuIcon.$error.required && !MyInspectionForm.Compliance.$pristine" class="help-block">{{translation.Compliance}} - {{translation.Required}}</label>
+                                                </div>
+                                                <div class="form-group">
+                                                    <div class="form-check form-check-inline" ng-class="{ 'has-error' : MyInspectionForm.ReplyRemark.$invalid && !MyInspectionForm.ReplyRemark.$pristine }">
+                                                        <label>{{translation.Remarks}}</label>
+                                                        <textarea rows="3" cols="50" style="overflow:scroll" class="form-control" name="Remark" ng-bind="Observation" ng-model="Inspection.ReplyRemark" placeholder="{{translation.Remark}}" ng-required="true" autocomplete="off"></textarea>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <div class="col-lg-2">{{translation.File_upload}}</div>
+                                                    <div class="col-lg-4">
+                                                        <input type="file" filetype="image" name="File" class="form-control" ng-model="Inspection.FileName" onchange="angular.element(this).scope().UploadComplinceDoc(this.files)">
+                                                    </div>
+                                                    <div class="clearfix"> </div>
+                                                </div>
+                                            </div>                                            
+                                        </div>
+                                    </section>
+                                    <div class="form-group">
+                                        <div class="dev-menu-btn">
+                                            <button type="submit" class="btn btn-primary" ng-click="SaveInspectionReply()">{{translation.Submit}}</button>
+                                            <button type="submit" class="btn btn-primary" ng-click="ClearInspectionReplyForm()">{{translation.Clear}}</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                            <iframe name="print_frame" width="0" height="0" frameborder="0" src="about:blank"></iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="form-group col-md-12">
+            <div class="dev-align-btn">
+
+                <a class="btn btn-primary dev-btn" style="text-transform:capitalize;" href="../User/DashBoard"> Back</a>
+            </div>
+
+        </div>
+    </div>
+</div>
+

@@ -1,0 +1,508 @@
+﻿
+<script src="~/Scripts/AngularFramework/GetBUDSStatusReport.js?v=@DateTime.Today.Ticks"></script>
+<script src="~/Scripts/xlsx.full.min.js"></script>
+<script type="text/javascript">
+    var tableToExcel = (function () {
+        var uri = 'data:application/vnd.ms-excel;base64,'
+            , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>'
+            , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) }
+            , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
+        return function (table, name) {
+            if (!table.nodeType) table = document.getElementById(table)
+            var ctx = { worksheet: name || 'Worksheet', table: table.innerHTML }
+            window.location.href = uri + base64(format(template, ctx))
+        }
+    })()
+
+    function exportToExcel(tableId, fileName) {
+        // Clone table
+        var originalTable = document.getElementById(tableId);
+        var table = originalTable.cloneNode(true);
+
+        // Remove footer
+        var tfoot = table.querySelector("tfoot");
+        if (tfoot) {
+            tfoot.remove();
+        }
+
+        // Create workbook
+        var wb = XLSX.utils.table_to_book(table, { sheet: "Sheet1" });
+
+        // Export
+        XLSX.writeFile(wb, fileName + ".xlsx");
+    }
+
+</script>
+<style>
+    /*.total-row:hover td:not(:first-child) {
+        font-weight: bold;
+    }*/
+
+    /*.total-row td:hover {
+        font-weight: bold;
+    }*/
+
+    /* Hover any cell → bold */
+    .total-row td:hover {
+        font-weight: bold;
+    }
+
+    /* ONLY first cell (Total text) → red on hover */
+    .total-row td:first-child:hover {
+        color: red;
+    }
+
+    .total-row td:hover {
+        font-weight: bold;
+        background-color: #f5f5f5;
+    }
+
+    .total-row td {
+        transition: all 0.2s ease;
+    }
+</style>
+
+<div ng-app="GetBUDSStatusReportMod" ng-controller="GetBUDSStatusReportCnt">
+
+
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <h3 class="citizen-dash-head"> Credit Cooperative Society Complaints Status Report  </h3>
+    </div>
+
+
+    <div class="col-md-12" ng-show="!IsnotShow">
+        <div class="table-responsive citizen-dash-head">
+
+            <div class="table-responsive citizen-dash-head">
+                <input type="hidden" id="hdnRoleId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).RoleId)" />
+                <input type="hidden" id="hdnDistrictId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DistrictId)" />
+                <input type="hidden" id="hdnPldbId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).PLDBId)" />
+                <input type="hidden" id="hdnPldbBranchId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).PLDBBrancchId)" />
+                <input type="hidden" id="hdnLevelId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).LevelId)" />
+
+                <div class="col-lg-12 form-group">
+                    <!-- District -->
+                    <div class="col-lg-2">
+                        <label class="control-label">
+                            {{ translation.District }}
+                        </label>
+                        <select ng-model="BUDSStatusReport.DistrictId" class="form-control">
+                            <option value="0">
+                                {{translation.SelectOption}}
+                            </option>
+                            <option ng-repeat="item in Districts" value="{{item.DISTRICT_ID}}">
+                                {{_language == 'en-us' ? item.DISTRICT_ENG : item.DISTRICT_MANGAL}}
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- From Date -->
+                    <div class="col-lg-3">
+                        <label class="control-label">
+                            From Date
+                        </label>
+                        <input type="date" ng-model="BUDSStatusReport.FromDate" class="form-control" />
+                    </div>
+
+                    <!-- To Date -->
+                    <div class="col-lg-3">
+                        <label class="control-label">
+                            To Date
+                        </label>
+
+                        <input type="date" ng-model="BUDSStatusReport.ToDate" class="form-control" />
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="col-lg-2">
+                        <label class="control-label">&nbsp;</label>
+
+                        <div>
+                            <button type="button" class="btn btn-primary" ng-click="GetBUDSStatusReport()">
+                                <i class="fa fa-search"></i> Search
+                            </button>
+
+                            <button type="button" class="btn btn-secondary" ng-click="ClearBUDSStatusReport()">
+                                <i class="fa fa-refresh"></i> Clear
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+
+                @*<div class="col-lg-12 form-group">
+                        <div class="col-lg-2">{{ translation.District}}</div>
+                        <div class="col-lg-4">
+                            <select id="ddlDistrict" name="District" ng-model="BUDSStatusReport.DistrictId" ng-change="GetBUDSStatusReport()" class="form-control" ng-disabled="IsControlDisable">
+                                <option value="0">{{translation.SelectOption}}</option>
+                                <option ng-repeat="item in Districts" value="{{item.DISTRICT_ID}}">
+                                    {{_language =='en-us' ?  item.DISTRICT_ENG : item.DISTRICT_MANGAL}}
+                                </option>
+                            </select>
+                        </div>
+                    </div>*@
+            </div>
+            <div class="col-lg-12" style="margin-bottom: 10px;">
+                <div>
+                    <label><input type="radio" id="one" name="ApplicationType" checked="checked" value="A" ng-model="selectedStatus" style="margin-left: 0px;">OverAll</label>
+                    <label><input type="radio" id="two" name="ApplicationType" value="B" ng-model="selectedStatus">Online/Offline&nbsp;</label>
+                </div>
+                <button type="button" ng-show="selectedStatus=='A'" onclick="exportToExcel('tblgetOverAll', 'CCS Complaints Status Report');" class="btn btn-success dev-btn">
+                    <i class="fa fa-file-excel-o"></i> Export Excel
+                </button>
+                <button type="button" ng-show="selectedStatus=='B'" onclick="exportToExcel('tblgetOnlineOffline', 'CCSO Complaints Status Report');" class="btn btn-success dev-btn">
+                    <i class="fa fa-file-excel-o"></i> Export Excel
+                </button>
+            </div>
+
+
+            <div class="col-lg-12 form-group">
+                <h4 style="color:black" class="heading-hr ng-binding">सर्वेक्षण विवरण</h4>
+            </div>
+
+            <table class="table devtable" ng-show="selectedStatus=='A'" id="tblgetOverAll">
+                <thead>
+                    <tr>
+                        <th>{{translation.SRNO}} </th>
+                        <th>{{translation.UnitOfficeName}}</th>
+                        <th>{{translation.ComplaintsReceivedThroughRajSahakarPortal}}</th>
+                        <th>{{translation.ComplaintsReceivedThroughOtherChannels}}</th>
+                        <th>{{translation.TotalComplaints}}</th>
+                        <th>{{translation.DocumentsReceived}}</th>
+                        <th>{{translation.NoticesIssued}}</th>
+                        <th>{{translation.DocumentsReceivedAfterHearing}}</th>
+                        <th>{{translation.DocumentsProvidedToPP}}</th>
+                        <th>{{translation.ProsecutionFiledInCourt}}</th>
+                        <th>{{translation.CasesEligibleForFIRUnderBUDSAct2019}}</th>
+                        <th>{{translation.FIRRegisteredAtPoliceStation}}</th>
+                        <th>{{translation.DisposeRequestComplainer}}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="item in DatabyDistricts">
+                        <td>{{$index+1}}</td>
+                        @*
+                            <td>{{ item.DISTRICT_ENG }}</td>*@
+                        @*
+                            <td> <a href="" ng-click="GetCCSList(0,items)" class="collection-item ng-binding">{{ item.Total }}</a></td>*@
+                        <td>{{ item.OfficeName }}</td>
+                        <td>{{ item.RajSahakarPortal_Complaints_Count }}</td>
+                        <td>{{ item.Other_Complaints_Count }}</td>
+                        <td> {{ (+item.RajSahakarPortal_Complaints_Count || 0) + (+item.Other_Complaints_Count || 0) }} </td>
+                        <td> {{ (+item.Documents_Received_Count || 0) + (+item.TotalUploadedDocument_ON || 0) }} </td>
+                        <td> {{ (+item.Notices_Issued_Count || 0) + (+item.NoticeIsssue_ON || 0) }} </td>
+                        <td>{{ item.Hearing_Documents_Count }}</td>
+                        <td> {{ (+item.Pp_Documents_Shared || 0) + (+item.InstgasaPreparedandmadeavailabletoPP_ON || 0) }} </td>
+                        <td> {{ (+item.Court_Filed_Cases || 0) + (+item.IstgasaSubmittedtoCourt_ON || 0) }} </td>
+                        <td>{{ item.Buds_Act_FIR_Cases }}</td>
+                        <td> {{ (+item.FIR_Registered_Count || 0) + (+item.FIRRegistered_ON || 0) }} </td>
+                        <td>{{ item.DisposeRequestComplainer_ON }}</td>
+                    </tr>
+                    @*
+                        <tr><td colspan="2">Total</td><td>{{Total}}</td><td>{{NoticeIsssue}}</td><td>{{InstgasaPreparedandmadeavailabletoPP}}</td><td>{{IstgasaSubmittedtoCourt}}</td><td>{{NotRelevant}}</td><td>{{DisposeAsPerRequestFromComplainer}}</td><td>{{DisposeByCort}}</td><td>{{Reject}}</td></tr>*@
+                    <tr class="total-row">
+                        <td colspan="2">Total</td>
+
+                        <td>{{RajSahakarPortal_Complaints_Count}}</td>
+                        <td>{{Other_Complaints_Count}}</td>
+                        <td>{{Total_Complaints_Count}}</td>
+                        <td>{{Documents_Received_Count}}</td>
+                        <td>{{Notices_Issued_Count}}</td>
+                        <td>{{Hearing_Documents_Count}}</td>
+                        <td>{{Pp_Documents_Shared}}</td>
+                        <td>{{Court_Filed_Cases}}</td>
+                        <td>{{Buds_Act_FIR_Cases}}</td>
+                        <td>{{FIR_Registered_Count}}</td>
+                        <td>{{DisposeRequestComplainer_Count}}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <table class="table devtable" ng-show="selectedStatus=='B'" id="tblgetOnlineOffline">
+                <thead>
+                    <tr>
+                        <th rowspan="2">{{translation.SRNO}} </th>
+                        <th rowspan="2">{{translation.UnitOfficeName}}</th>
+                        <th colspan="3">{{translation.ComplaintsReceivedThroughRajSahakarPortal}}</th>
+                        <th colspan="3">{{translation.DocumentsReceived}}</th>
+                        <th colspan="3">{{translation.NoticesIssued}}</th>
+                        <th colspan="3">{{translation.DocumentsReceivedAfterHearing}}</th>
+                        <th colspan="3">{{translation.DocumentsProvidedToPP}}</th>
+                        <th colspan="3">{{translation.ProsecutionFiledInCourt}}</th>
+                        <th colspan="3">{{translation.CasesEligibleForFIRUnderBUDSAct2019}}</th>
+                        <th colspan="3">{{translation.FIRRegisteredAtPoliceStation}}</th>
+                        <th rowspan="2">{{translation.DisposeRequestComplainer}}</th>
+                    </tr>
+                    <tr>
+                        <th style="text-align:center;">Online</th>
+                        <th style="text-align:center;">Offline</th>
+                        <th style="text-align:center;">Total</th>
+                        <th style="text-align:center;">Online</th>
+                        <th style="text-align:center;">Offline</th>
+                        <th style="text-align:center;">Total</th>
+                        <th style="text-align:center;">Online</th>
+                        <th style="text-align:center;">Offline</th>
+                        <th style="text-align:center;">Total</th>
+                        <th style="text-align:center;">Online</th>
+                        <th style="text-align:center;">Offline</th>
+                        <th style="text-align:center;">Total</th>
+                        <th style="text-align:center;">Online</th>
+                        <th style="text-align:center;">Offline</th>
+                        <th style="text-align:center;">Total</th>
+                        <th style="text-align:center;">Online</th>
+                        <th style="text-align:center;">Offline</th>
+                        <th style="text-align:center;">Total</th>
+                        <th style="text-align:center;">Online</th>
+                        <th style="text-align:center;">Offline</th>
+                        <th style="text-align:center;">Total</th>
+                        <th style="text-align:center;">Online</th>
+                        <th style="text-align:center;">Offline</th>
+                        <th style="text-align:center;">Total</th>
+                    </tr>
+                    <tr>
+                        <th style="text-align:center">1</th>
+                        <th style="text-align:center">2</th>
+                        <th style="text-align:center">3</th>
+                        <th style="text-align:center">4</th>
+                        <th style="text-align:center">5</th>
+                        <th style="text-align:center">6</th>
+                        <th style="text-align:center">7</th>
+                        <th style="text-align:center">8</th>
+                        <th style="text-align:center">9</th>
+                        <th style="text-align:center">10</th>
+                        <th style="text-align:center">11</th>
+                        <th style="text-align:center">12</th>
+                        <th style="text-align:center">13</th>
+                        <th style="text-align:center">14</th>
+                        <th style="text-align:center">15</th>
+                        <th style="text-align:center">16</th>
+                        <th style="text-align:center">17</th>
+                        <th style="text-align:center">18</th>
+                        <th style="text-align:center">19</th>
+                        <th style="text-align:center">20</th>
+                        <th style="text-align:center">21</th>
+                        <th style="text-align:center">22</th>
+                        <th style="text-align:center">23</th>
+                        <th style="text-align:center">24</th>
+                        <th style="text-align:center">25</th>
+                        <th style="text-align:center">26</th>
+                        <th style="text-align:center">27</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="item in DatabyDistricts">
+                        <td>{{$index+1}}</td>
+                        <td>{{ item.OfficeName }}</td>
+                        <td>{{ item.RajSahakarPortal_Complaints_Count }}</td>
+                        <td>{{ item.Other_Complaints_Count }}</td>
+                        <td> {{ (+item.RajSahakarPortal_Complaints_Count || 0) + (+item.Other_Complaints_Count || 0) }} </td>
+                        <td> {{ item.TotalUploadedDocument_ON  }} </td>
+                        <td>{{ item.Documents_Received_Count }}</td>
+                        <td> {{ (+item.TotalUploadedDocument_ON || 0) + (+item.Documents_Received_Count || 0) }} </td>
+                        <td>{{ item.NoticeIsssue_ON}}</td>
+                        <td>{{ item.Notices_Issued_Count }}</td>
+                        <td> {{ (+item.NoticeIsssue_ON || 0) + (+item.Notices_Issued_Count || 0) }} </td>
+                        <td>0</td>
+                        <td>{{ item.Hearing_Documents_Count }}</td>
+                        <td>{{ item.Hearing_Documents_Count }}</td>
+                        <td>{{ item.InstgasaPreparedandmadeavailabletoPP_ON }}</td>
+                        <td>{{ item.Pp_Documents_Shared }}</td>
+                        <td> {{ (+item.Pp_Documents_Shared || 0) + (+item.InstgasaPreparedandmadeavailabletoPP_ON || 0) }} </td>
+                        <td>{{ item.IstgasaSubmittedtoCourt_ON }}</td>
+                        <td>{{ item.Court_Filed_Cases }}</td>
+                        <td> {{ (+item.IstgasaSubmittedtoCourt_ON || 0) + (+item.Court_Filed_Cases || 0) }} </td>
+                        <td>0</td>
+                        <td>{{ item.Buds_Act_FIR_Cases }}</td>
+                        <td>{{ item.Buds_Act_FIR_Cases }}</td>
+                        <td>{{ item.FIRRegistered_ON }}</td>
+                        <td>{{ item.FIR_Registered_Count }}</td>
+                        <td> {{ (+item.FIRRegistered_ON || 0) + (+item.FIR_Registered_Count || 0) }} </td>
+                        <td>{{ item.DisposeRequestComplainer_ON }}</td>
+                    </tr>
+                    @*
+                        <tr class="total-row">
+                            <td colspan="2">Total</td>
+                            <td>{{RajSahakarPortal_Complaints_Count}}</td>
+                            <td>{{Other_Complaints_Count}}</td>
+                            <td>{{Total_Complaints_Count}}</td>
+                            <td>{{Documents_Received_Count}}</td>
+                            <td>{{Notices_Issued_Count}}</td>
+                            <td>{{Hearing_Documents_Count}}</td>
+                            <td>{{Pp_Documents_Shared}}</td>
+                            <td>{{Court_Filed_Cases}}</td>
+                            <td>{{Buds_Act_FIR_Cases}}</td>
+                            <td>{{FIR_Registered_Count}}</td>
+                            <td>&nbsp;</td>
+                        </tr>*@
+                </tbody>
+            </table>
+
+
+            @*<table class="table devtable" id="tblgetOverAll">
+                    <thead>
+                        <tr>
+                            <th>{{translation.SRNO}} </th>
+                            <th>{{translation.UnitOfficeName}}</th>
+                            <th>{{translation.ComplaintsReceivedThroughRajSahakarPortal}}</th>
+                            <th>{{translation.ComplaintsReceivedThroughOtherChannels}}</th>
+                            <th>{{translation.TotalComplaints}}</th>
+                            <th>{{translation.DocumentsReceived}}</th>
+                            <th>{{translation.NoticesIssued}}</th>
+                            <th>{{translation.DocumentsReceivedAfterHearing}}</th>
+                            <th>{{translation.DocumentsProvidedToPP}}</th>
+                            <th>{{translation.ProsecutionFiledInCourt}}</th>
+                            <th>{{translation.CasesEligibleForFIRUnderBUDSAct2019}}</th>
+                            <th>{{translation.FIRRegisteredAtPoliceStation}}</th>
+                            <th>{{translation.InformationOnTheLevelAtWhichComplaintsArePending}}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="item in DatabyDistricts">
+                            <td>{{$index+1}}</td>
+                            <td>{{ item.OfficeName }}</td>
+                            <td>
+                                <a href="" ng-click="GetCCSList(0,items)" class="collection-item ng-binding">
+                                    {{ item.RajSahakarPortal_Complaints_Count }}
+                                </a>
+                            </td>
+                            <td>
+                                <a href="" ng-click="GetCCSList(1,items)" class="collection-item ng-binding">
+                                    {{ item.Other_Complaints_Count }}
+                                </a>
+                            </td>
+                            <td>
+                                <a href="" ng-click="GetCCSList(2,items)" class="collection-item ng-binding">
+                                    {{ ((item.RajSahakarPortal_Complaints_Count || 0) + (item.Other_Complaints_Count || 0)) | number }}
+                                </a>
+                            </td>
+                            <td>
+                                <a href="" ng-click="GetCCSList(3,items)" class="collection-item ng-binding">
+                                    {{ item.Documents_Received_Count }}
+                                </a>
+                            </td>
+                            <td>
+                                <a href="" ng-click="GetCCSList(4,items)" class="collection-item ng-binding">
+                                    {{ item.Notices_Issued_Count }}
+                                </a>
+                            </td>
+                            <td>
+                                <a href="" ng-click="GetCCSList(5,items)" class="collection-item ng-binding">
+                                    {{ item.Hearing_Documents_Count }}
+                                </a>
+                            </td>
+                            <td>
+                                <a href="" ng-click="GetCCSList(6,items)" class="collection-item ng-binding">
+                                    {{ item.Pp_Documents_Shared }}
+                                </a>
+                            </td>
+                            <td>
+                                <a href="" ng-click="GetCCSList(7,items)" class="collection-item ng-binding">
+                                    {{ item.Court_Filed_Cases }}
+                                </a>
+                            </td>
+
+                            <td>
+                                <a href="" ng-click="GetCCSList(8,items)" class="collection-item ng-binding">
+                                    {{ item.Buds_Act_FIR_Cases }}
+                                </a>
+                            </td>
+
+                            <td>
+                                <a href="" ng-click="GetCCSList(9,items)" class="collection-item ng-binding">
+                                    {{ item.FIR_Registered_Count }}
+                                </a>
+                            </td>
+                            <td>
+                                {{ item.InfoLevelComplaintsArePending }}
+                                <input type="hidden" id="hdnRecordUserId" value="{{item.UserId }}" />
+                            </td>
+                        </tr>
+                        <tr class="total-row">
+                            <td colspan="2">Total</td>
+
+                            <td>{{RajSahakarPortal_Complaints_Count}}</td>
+                            <td>{{Other_Complaints_Count}}</td>
+                            <td>{{Total_Complaints_Count}}</td>
+                            <td>{{Documents_Received_Count}}</td>
+                            <td>{{Notices_Issued_Count}}</td>
+                            <td>{{Hearing_Documents_Count}}</td>
+                            <td>{{Pp_Documents_Shared}}</td>
+                            <td>{{Court_Filed_Cases}}</td>
+                            <td>{{Buds_Act_FIR_Cases}}</td>
+                            <td>{{FIR_Registered_Count}}</td>
+                            <td>&nbsp;</td>
+                        </tr>
+                    </tbody>
+                </table>*@
+
+        </div>
+    </div>
+
+    <input type="hidden" id="hdnLoggedInUserDistrictId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DistrictId)" />
+    <input type="hidden" id="hdnLoggedInUserId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).UserId)" />
+    <input type="hidden" id="hdnLoggedInUserRole" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).RoleName_EN)" />
+
+    <div ng-show="IsnotShow">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="table-responsive citizen-dash-head">
+                <div class="col-md-12 dev-search-form" id="search-filter">
+                    <div class="col-md-4" style="padding-left: 0;">
+                        <label for="search">{{translation.Search}}:</label>
+                        <input ng-model="qery" name="SearchText" id="search" class="form-control" placeholder="{{translation.filttertext}}" autocomplete="off">
+                    </div>
+                    <div class="col-md-4">
+                        <label for="ddlCCSId">
+                            {{translation.CCSName}}
+                        </label>
+                        <select id="ddlCCSId" name="CCSId" ng-model="Filter.CCSId" class="form-control" ng-init="Filter.CCSId=''" ng-change="searchRequest(GetCCSCompalainteReportList)">
+                            <option value="">{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in CCSList" value="{{item.SocietyID}}">
+                                {{item.SocietyName}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-md-4  margin-Top20">
+                        <label for="btnSearch">&nbsp;</label><br>
+                        <button id="btnSearch" type="button" ng-click="searchRequest(GetCCSCompalainteReportList)" class="btn btn-primary dev-btn ng-binding">{{translation.Search}}</button>
+                        <button type="button" ng-click="ClearSearch()" class="btn btn-primary dev-btn ng-binding">{{translation.Clear}}</button>
+                    </div>
+
+                </div>
+
+                <br>
+
+                <div class="col-md-12">
+                    <div ng-if="DataPagingDetails.TotalPages>1" class="dataTables_paginate paging_simple_numbers" id="dataTables-example_paginate">
+                        <div class="dataTables_info" id="dataTables-example_info" role="status" aria-live="polite">
+                            Total Records: {{DataPagingDetails.TotalRecords}}
+                        </div>
+                        <ul class="pagination pagination_1" style="margin-left: 10px !important;">
+                            <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« First</span></li>
+                            <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« Previous</span></li>
+
+                            <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest('1',GetCCSCompalainteReportList)" style="cursor: pointer;">
+                                <span>«First</span>
+                            </li>
+                            <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest(DataPagingDetails.PageNumber-1,GetCCSCompalainteReportList)" style="cursor:pointer;">
+                                <span>« Previous</span>
+                            </li>
+                            <li class="{{n==DataPagingDetails.PageNumber?'active':''}}" style="{{n==DataPagingDetails.PageNumber?'':'cursor: pointer'}}" ng-repeat="n in PagingRange(DataPagingDetails.StartPageNumber,DataPagingDetails.EndPageNumber,DataPagingDetails.TotalPages)" ng-click="pageRequest(n,GetCCSCompalainteReportList)"><span>{{n}}</span></li>
+                            <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Next</span></li>
+                            <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Last</span></li>
+                            <li ng-if="DataPagingDetails.PageNumber!= DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.PageNumber+1,GetCCSCompalainteReportList)" style="cursor:pointer;">
+                                <span>Next »</span>
+                            </li>
+                            <li ng-if="DataPagingDetails.PageNumber != DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.TotalPages,GetCCSCompalainteReportList)" style="cursor:pointer;">
+                                <span>Last »</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+

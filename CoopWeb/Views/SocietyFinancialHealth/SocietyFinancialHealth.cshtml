@@ -1,0 +1,1041 @@
+﻿@*@{Layout = "~/Views/Shared/_CitizenLayout.cshtml";}*@
+<script>
+    function printpage() {
+        var divToPrint = document.getElementById("printTable");
+        newWin = window.print();
+        newWin.document.write(divToPrint.outerHTML);
+        newWin.print();
+        newWin.close();
+    }
+</script>
+<script src="~/Scripts/AngularFramework/FinancialHealth.js?id=2"></script>
+<script src="~/Scripts/jquery.unobtrusive-ajax.min.js"></script>
+<script type="text/javascript">
+    function OnSuccess(data) {
+        $('#preloader').hide();
+        if (data.UserType == 'C') {
+            $('#FormPost').html(data.result);
+            $('#FormPost').find('form').submit();
+        }
+        else {
+            if (data.result == 'Sucess') {
+                alert('Details Save Successful');
+                window.location = "../Citizen/MemberApplicationView?ApplicationIdEnc=" + data.IdEnc;
+            }
+            else {
+                ShowModelAlert("Society Member Registration", 'Issue in Payment Receiveing Please Try after Some time');
+            }
+        }
+    }
+    function OnFailure(data) {
+        $('#preloader').hide();
+        alert(JSON.stringify(data));
+    }
+    function OnBegin() {
+        $('#preloader').show();
+    }
+
+    function isNumber(evt) {
+        var iKeyCode = (evt.which) ? evt.which : evt.keyCode
+        if (iKeyCode != 46 && iKeyCode > 31 && (iKeyCode < 48 || iKeyCode > 57))
+            return false;
+
+        return true;
+    }
+    function ValidateAlpha(evt) {
+        var keyCode = (evt.which) ? evt.which : evt.keyCode
+        if ((keyCode < 65 || keyCode > 90) && (keyCode < 97 || keyCode > 123) && keyCode != 32)
+
+            return false;
+        return true;
+    };
+    $(document).ready(function () {
+        $("select").on("change", function () {
+            $(this).removeClass("notValid");
+        });
+    });
+
+    function previewFile(ths) {
+        var indx = ths.id.split('_')[1];
+        var preview = document.querySelector('img_' + indx);
+        var file = ths.files[0];
+        var reader = new FileReader();
+        reader.onloadend = function () {
+            $('#img_' + indx).attr("src", reader.result);
+        }
+
+        if (file) {
+            reader.readAsDataURL(file);
+        }
+    }
+    $(document).ready(function () {
+        $('.SetCalender').datepicker({
+            showOn: "both",
+            changeMonth: true,
+            buttonImage: "../images/calender.png",
+            changeYear: true,
+            dateFormat: "dd/mm/yy",
+            minDate: '02/02/1970'
+        });
+    });
+</script>
+<style>
+    label {
+        display: inline-block;
+        width: 100% !important;
+        margin-bottom: 5px;
+        font-weight: 700;
+    }
+
+    .zoom {
+        transition: transform .2s; /* Animation */
+        margin: 0 auto;
+    }
+
+        .zoom:hover {
+            padding-left: 30px;
+            transform: scale(2.5); /* (150% zoom - Note: if the zoom is too large, it will go outside of the viewport) */
+        }
+
+
+    ul.pagination {
+        margin: 3px 0 0 0 !important;
+    }
+
+    .dataTables_info {
+        float: left;
+        margin-top: 10px;
+    }
+</style>
+
+<style>
+    @@media print {
+
+        .profile-d1 {
+            color: #000 !important;
+            background: #fff !important;
+            border-radius: 5px !important;
+            margin-bottom: 20px !important;
+        }
+
+        .profile-d1-hr {
+            font-size: 17px !important;
+            background: #025e63 !important;
+            padding: 10px 15px !important;
+            color: #fff !important;
+            border-radius: 4px !important;
+        }
+
+        .dev-spancon {
+            font-size: 13px !important;
+            color: #424242 !important;
+            font-weight: 500 !important;
+        }
+
+        label {
+            color: #025e63 !important;
+            font-size: 14px !important;
+        }
+
+        .devtable thead tr th {
+            background: #64c0c5 !important;
+            color: #fff !important;
+        }
+
+        .col-lg-12, .col-md-12, .col-sm-12, .col-xs-12 {
+            display: block !important;
+            width: auto !important;
+            height: auto !important;
+            overflow: visible !important;
+        }
+
+        .table-responsive {
+            display: block !important;
+            width: auto !important;
+            height: auto !important;
+            overflow: visible !important;
+        }
+
+        .table > tbody > tr > td, .table > tbody > tr > th, .table > tfoot > tr > td, .table > tfoot > tr > th, .table > thead > tr > td, .table > thead > tr > th {
+            border-top: unset !important;
+        }
+
+        .main-header {
+            display: none !important;
+        }
+
+        .sidebar {
+            display: none !important;
+        }
+
+        .dev-toggle-bg {
+            display: none !important;
+        }
+
+        .printhideth {
+            display: none !important;
+        }
+
+        .copydev {
+            display: none !important;
+        }
+
+        .print {
+            display: none !important;
+        }
+
+        .devpage-breadcrumb {
+            display: none !important;
+        }
+
+        .visible-print {
+            display: block !important;
+        }
+
+        table.visible-print {
+            display: table !important;
+        }
+
+        tr.visible-print {
+            display: table-row !important;
+        }
+
+        th.visible-print,
+        td.visible-print {
+            display: table-cell !important;
+        }
+    }
+</style>
+
+<style>
+    @@media print {
+        .visible-print {
+            display: block !important
+        }
+
+        table.visible-print {
+            display: table !important
+        }
+
+        tr.visible-print {
+            display: table-row !important
+        }
+
+        td.visible-print, th.visible-print {
+            display: table-cell !important
+        }
+    }
+
+    .visible-print-block {
+        display: none !important
+    }
+
+    @@media print {
+        .visible-print-block {
+            display: block !important
+        }
+    }
+
+    .visible-print-inline {
+        display: none !important
+    }
+
+    @@media print {
+        .visible-print-inline {
+            display: inline !important
+        }
+    }
+
+    .visible-print-inline-block {
+        display: none !important
+    }
+
+    @@media print {
+        .visible-print-inline-block {
+            display: inline-block !important
+        }
+    }
+
+    @@media print {
+        .hidden-print {
+            display: none !important
+        }
+    }
+
+    .profile-d1 {
+        color: #000;
+        background: #fff;
+        border-radius: 5px;
+        margin-bottom: 20px;
+    }
+
+    .profile-d1-hr {
+        font-size: 17px;
+        background: #025e63;
+        padding: 10px 15px;
+        color: #fff;
+        border-radius: 4px;
+    }
+
+    .dev-spancon {
+        font-size: 13px;
+        color: #424242;
+        font-weight: 500;
+    }
+
+    label {
+        color: #025e63;
+        font-size: 14px;
+    }
+
+    .devtable thead tr th {
+        background: #64c0c5;
+        color: #fff;
+    }
+
+    .table > tbody > tr > td, .table > tbody > tr > th, .table > tfoot > tr > td, .table > tfoot > tr > th, .table > thead > tr > td, .table > thead > tr > th {
+        border-top: unset;
+    }
+
+    .NewMemberdob input {
+        float: left;
+        width: 90%;
+    }
+
+    .NewMemberdob button {
+        float: left;
+    }
+</style>
+
+
+<style>
+    a > i.fa.fa-plus-circle {
+        font-size: 25px;
+        cursor: pointer;
+    }
+
+    a:hover > i.fa.fa-plus-circle {
+        font-size: 26px;
+        cursor: pointer;
+    }
+
+    a > i.fa.fa-eye {
+        font-size: 25px;
+        cursor: pointer;
+    }
+
+    a:hover > i.fa.fa-eye {
+        font-size: 26px;
+        cursor: pointer;
+    }
+
+    .add-more {
+    }
+
+    .thCenter {
+        text-align: center !important;
+    }
+
+    .thverticalMiddle {
+        vertical-align: middle !important;
+    }
+
+    .notValid {
+        border: solid 1px red !important
+    }
+
+    .rowdeleteBtn {
+        color: #fff !important;
+        font-weight: bold !important;
+        font-size: 18px !important;
+    }
+
+    .NewMemberdob input {
+        float: left;
+        width: 90%;
+    }
+
+    .NewMemberdob button {
+        float: left;
+    }
+</style>
+<div ng-app="FinancialHealthMod">
+    <div ng-controller="FinancialHealthCnt">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <h4 class="citizen-dash-head"> {{translation.SocietyFinancialStatus}}</h4>
+        </div>
+
+        <div ng-show="divLoanApplicationList" class="col-lg-12 col-md-12 col-sm-12 col-xs-12 table-responsive citizen-dash-head">
+            @*<div class="table-dropdown" id="search-filter">
+
+                <div class="col-md-4" ng-show="showSearchText">
+                    <label for="search" class="ng-binding">Search:</label>
+                    <input name="searchText" id="search" class="form-control ng-pristine ng-valid ng-empty ng-touched" ng-model="Filter.SearchText" placeholder="Filter Text" autocomplete="off">
+                </div>
+
+
+            </div>*@
+            <div class="table-dropdown" id="search-filter">
+                <div class="col-lg-4">
+                    <label for="search" class="ng-binding">{{translation.FilterType}}::</label>
+
+                    <input type="radio" name="rdoSelect" value="1" checked="checked" ng-click="ChangeSelction()" /> &nbsp; {{translation.AllSocieties}} &nbsp;&nbsp;
+                    <input type="radio" name="rdoSelect" value="2" ng-click="ChangeSelction()" /> &nbsp; {{translation.HealthReportIssuedSocieties}} &nbsp;&nbsp;
+
+                </div>
+                <div class="col-md-4">
+                    <label for="search" class="ng-binding">Search:</label>
+                    <input name="searchText" id="search" class="form-control ng-pristine ng-valid ng-empty ng-touched" ng-model="Filter.SearchText" placeholder="Filter Text" autocomplete="off">
+                </div>
+
+                <div class="col-md-2 NewMemberdob" ng-show="showSearchDate">
+                    <label>
+                        {{translation.FromDate}}
+                    </label>
+                    <input id="txtFromDate" name="FromDate" disabled="disabled" class="form-control SearchDate" ng-model="Filter.FromDate" placeholder="{{translation.FromDate}}" onkeypress="return event.charCode >= 48 &amp;&amp; event.charCode <= 57" autocomplete="off">
+                </div>
+                <div class="col-md-2 NewMemberdob" ng-show="showSearchDate">
+                    <label>
+                        {{translation.ToDate}}
+                    </label>
+                    <input id="txtToDate" name="ToDate" disabled="disabled" class="form-control SearchDate" ng-model="Filter.ToDate" placeholder="{{translation.ToDate}}" onkeypress="return event.charCode >= 48 &amp;&amp; event.charCode <= 57" autocomplete="off">
+                </div>
+
+                <div class="col-md-4">
+                    <label>&nbsp;</label><br>
+                    <button type="button" ng-click="searchRequest(GetSocietyBasicDetailList)" class="btn btn-primary dev-btn ng-binding">{{translation.Search}}</button>
+                    <button type="button" ng-click="ClearSearch()" class="btn btn-primary dev-btn ng-binding">{{translation.Clear}}</button>
+                </div>
+            </div>
+
+            <div class="col-lg-12">
+                <label> {{translation.TotalSocietiesForHealthReport}} : {{TotalCount}} </label>
+                <label>{{translation.SocietiesHealthReportSubmitted}} : {{HealthReportCompleted}}</label>
+            </div>
+            <table id="example" class="table devtable" style="border:1px solid rgb(222, 221, 221); float: left;">
+                <thead>
+                    <tr>
+                        <th>
+                            #
+                        </th>
+                        <th>
+                            {{translation.RegistrationNo}}
+                        </th>
+                        <th>
+                            {{translation.SocietyName}}
+                        </th>
+                        <th>
+                            {{translation.RegistrationDate}}
+                        </th>
+                        <th>
+                            {{translation.CEOName}}
+                        </th>
+                        <th>
+                            {{translation.ContactNo}}
+                        </th>
+                        <th>
+                            {{translation.District}}
+                        </th>
+                        <th>
+                            {{translation.Status}}
+                        </th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="item in SocietyBasicDetailList">
+                        <td>{{(((DataPagingDetails.PageNumber - 1) * DataPagingDetails.PageSize) + 1)+$index}}</td>
+                        <td>{{item.RegistrationNo}}</td>
+                        <td>{{item.SocietyName}}</td>
+                        <td>{{item.RegistrationDate}}</td>
+                        <td>{{item.Name}}</td>
+                        <td>{{item.ContactNo}}</td>
+                        <td>{{_language =='en-us' ?  item.DISTRICT_ENG : item.DISTRICT_MANGAL}}</td>
+                        <td><a ng-show="{{item.SocietyHealthInserted === '1'}}" title="{{translation.ShowDetails}}" ng-click="ShowSocietyHealthData(item.SocietyIdEnc)"> {{ _language === 'en-us' ? 'Health Report Submitted': 'हेल्थ रिपोर्ट जारी'}} </a></td>
+                        <td class="add-more-td">
+                            <a ng-hide="{{item.SocietyHealthInserted === '1'}}" ng-click="ApplicationEdit(item.SocietyIdEnc,item.DISTRICT_ID)"><i class="fa fa-info-circle infoicon-edit"></i></a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div ng-if="DataPagingDetails.TotalPages>1" class="dataTables_paginate paging_simple_numbers" id="dataTables-example_paginate">
+                <div class="dataTables_info" id="dataTables-example_info" role="status" aria-live="polite">
+                    Total Records: {{DataPagingDetails.TotalRecords}}
+                </div>
+                <ul class="pagination pagination_1" style="margin-left: 10px !important;">
+                    <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« First</span></li>
+                    <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« Previous</span></li>
+
+                    <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest('1',GetSocietyBasicDetailList)" style="cursor: pointer;">
+                        <span>«First</span>
+                    </li>
+                    <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest(DataPagingDetails.PageNumber-1,GetSocietyBasicDetailList)" style="cursor:pointer;">
+                        <span>« Previous</span>
+                    </li>
+                    <li class="{{n==DataPagingDetails.PageNumber?'active':''}}" style="{{n==DataPagingDetails.PageNumber?'':'cursor: pointer'}}" ng-repeat="n in PagingRange(DataPagingDetails.StartPageNumber,DataPagingDetails.EndPageNumber,DataPagingDetails.TotalPages)" ng-click="pageRequest(n,GetSocietyBasicDetailList)"><span>{{n}}</span></li>
+                    <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Next</span></li>
+                    <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Last</span></li>
+                    <li ng-if="DataPagingDetails.PageNumber!= DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.PageNumber+1,GetSocietyBasicDetailList)" style="cursor:pointer;">
+                        <span>Next »</span>
+                    </li>
+                    <li ng-if="DataPagingDetails.PageNumber != DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.TotalPages,GetSocietyBasicDetailList)" style="cursor:pointer;">
+                        <span>Last »</span>
+                    </li>
+                </ul>
+            </div>
+
+        </div>
+        <div class="col-lg-12" ng-show="dvApplicationForm">
+            <div class="table-responsive citizen-dash-head">
+                <div id="divUserRegistration1">
+                    <form class="dev-masters" name="MyUserForm">
+                        <div id="dvLoanApplicationLetter" ng-if="LoanApplicationLetter">
+                            <div class="col-lg-12 form-group">
+                                <h4 class="heading-hr ng-binding">{{translation.SocietyCeoDetails}}</h4>
+                            </div>
+                            <div class="col-lg-12">
+                                <div class="table-responsive">
+                                    <table class="table devtable" id="tblLandMemberDetail">
+                                        <thead>
+                                            <tr>
+                                                <th>{{translation.SRNO}}</th>
+                                                <th>{{translation.AADHARNo}}</th>
+                                                <th>{{translation.Name}}</th>
+                                                <th>{{translation.NameOfFather}}</th>
+                                                @*
+                                                <th>{{translation.DOB}}</th>*@
+                                                <th>{{translation.CategoryHeading}}</th>
+                                                <th>{{translation.Address}}</th>
+                                                <th>{{translation.MobileNo}}</th>
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>1</td>
+                                                <td>
+                                                    <input type="text" class="form-control" placeholder="{{translation.AADHARNo}}" ng-model="SocietyDetails.AADHARNo" autocomplete="off" onkeypress='return event.charCode >= 48 && event.charCode <= 57' maxlength="12">
+                                                </td>
+                                                <td>
+                                                    <input type="text" class="form-control" placeholder="{{translation.Name}}" ng-model="SocietyDetails.Name" autocomplete="off" onKeyPress="return ValidateAlpha(event);" maxlength="50">
+                                                </td>
+                                                <td>
+                                                    <input type="text" class="form-control" placeholder="{{translation.NameOfFather}}" ng-model="SocietyDetails.FatherName" autocomplete="off" onKeyPress="return ValidateAlpha(event);" maxlength="50">
+                                                </td>
+                                                <td style="display:none">
+                                                    <div class="NewMemberdob">
+                                                        <input type="text" class="form-control SetCalender" placeholder="{{translation.DOB}}" ng-model="SocietyDetails.DOB" maxlength="10" autocomplete="off" id="txtDOB" value="10/10/2019">
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div style="width:100%">
+                                                        <select ng-model="SocietyDetails.CategoryId" class="form-control" ng-init="SocietyDetails.CategoryId='0'">
+                                                            <option value="0">{{translation.SelectOption}}</option>
+                                                            <option ng-repeat="itm in CategoryList" value="{{itm.CODEID}}">
+                                                                {{_language =='en-us' ?  itm.CODENAME : itm.CODENAME_MANGAL}}
+                                                            </option>
+                                                        </select>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div style="width:100%">
+                                                        <textarea type="text" name="Address" class="form-control" ng-model="SocietyDetails.Address" placeholder="Address" autocomplete="off" maxlength="100"></textarea>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <input type="text" class="form-control" placeholder="{{translation.MobileNo}}" ng-model="SocietyDetails.MobileNo" maxlength="10" autocomplete="off" onKeyPress="return isNumber(event);">
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="col-lg-12 form-group">
+                                <h4 class="heading-hr ng-binding">{{translation.SocietyFinancialDetails}}</h4>
+                            </div>
+
+                            <div class="col-lg-12 form-group">
+                                <div class="col-lg-2">{{ translation.IsCCBAccountOpen}}:</div>
+                                <div class="col-lg-4" ng-init="CCBInvetmentDetails.IsCCBAccountOpen='0'">
+                                    <input type="radio" name="rdoSelect" value="1" ng-model="CCBInvetmentDetails.IsCCBAccountOpen" /> &nbsp; {{translation.Yes}} &nbsp;&nbsp;
+                                    <input type="radio" name="rdoSelect" value="0" ng-model="CCBInvetmentDetails.IsCCBAccountOpen" /> &nbsp; {{translation.No}} &nbsp;&nbsp;
+                                </div>
+                                <div style="display:none">
+                                    <div class="col-lg-2" ng-if="CCBInvetmentDetails.IsCCBAccountOpen==='1'">{{ translation.IsCCBInvestment}}:</div>
+                                    <div class="col-lg-4" ng-if="CCBInvetmentDetails.IsCCBAccountOpen==='1'" ng-init="CCBInvetmentDetails.IsCCInvestment='0'">
+                                        <input type="radio" name="rdoSelect1" value="0" ng-model="CCBInvetmentDetails.IsCCInvestment" /> &nbsp; {{translation.No}} &nbsp;&nbsp;
+                                        <input type="radio" name="rdoSelect1" value="1" ng-model="CCBInvetmentDetails.IsCCInvestment" /> &nbsp; {{translation.Yes}} &nbsp;&nbsp;
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-12 form-group" ng-if="CCBInvetmentDetails.IsCCBAccountOpen==='1'">
+                                <div class="col-lg-2">{{ translation.BalanceInAccount}}:</div>
+                                <div class="col-lg-4">
+                                    <input type="text" class="form-control" ng-model="CCBInvetmentDetails.BalanceInAccount" />
+                                </div>
+
+                                <div class="col-lg-2">{{ translation.FDBalanceInAccount}}:</div>
+                                <div class="col-lg-4">
+                                    <input type="text" class="form-control"  ng-model="CCBInvetmentDetails.FDBalanceInAccount" />
+                                </div>
+
+                             
+                            </div>
+                            <div class="col-lg-12 form-group" ng-if="CCBInvetmentDetails.IsCCBAccountOpen==='1'">
+                                <div class="col-lg-2">{{ translation.BANK_NAME}}:</div>
+                                <div class="col-lg-4">
+                                    <input type="text" class="form-control"  ng-model="CCBInvetmentDetails.BANK_NAME" />
+                                </div>
+                                <div class="col-lg-2">{{ translation.BANK_ACC_NO}}:</div>
+                                <div class="col-lg-4">
+                                    <input type="text" class="form-control"  ng-model="CCBInvetmentDetails.BANK_ACC_NO" />
+                                </div>                                
+                            </div>
+                            <div class="col-lg-12 form-group" ng-if="CCBInvetmentDetails.IsCCBAccountOpen==='1'">
+                                <div class="col-lg-2">{{ translation.BankAcIFSCNoInCCS}}:</div>
+                                <div class="col-lg-4">
+                                    <input type="text" class="form-control"  ng-model="CCBInvetmentDetails.BankAcIFSCNoInCCS" />
+                                </div>
+                            </div>
+                                <div class="col-md-12">
+                                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                                        <div class="citizen-dash-head">
+                                            <table class="table table-responsive devtable" style="overflow-x:auto;">
+                                                <thead>
+                                                    <tr>
+                                                        <th colspan="3" style="text-align:center;">
+                                                            {{translation.OtherAsset}}
+                                                        </th>
+                                                    </tr>
+                                                    <tr>
+                                                        <th style="text-align:center;">
+                                                            {{translation.SRNO}}
+                                                        </th>
+                                                        <th style="text-align:center;">
+                                                            {{translation.Head}}
+                                                        </th>
+                                                        <th style="text-align:center;">
+                                                            {{translation.Amount}}
+                                                        </th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="item in AssetList">
+                                                        <td>
+                                                            {{$index+1}}
+                                                        </td>
+                                                        <td>
+                                                            {{ _language === 'en-us' ? item.NameEng : item.NameHi}}
+                                                        </td>
+                                                        <td>
+                                                            <input class="form-control" onkeypress='return ((event.charCode >= 48 && event.charCode <= 57)|| event.which ==8 || event.keyCode ==8 || event.charCode==8)' placeholder="{{translation.Amount}}" ng-model="item.Amount" autocomplete="off" maxlength="10" />
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+
+                                    </div>
+
+                                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                                        <div class="citizen-dash-head">
+                                            <table class="table table-responsive devtable" style="overflow-x:auto;">
+                                                <thead>
+                                                    <tr>
+                                                        <th colspan="3" style="text-align:center;">
+                                                            {{translation.Liability}}
+                                                        </th>
+                                                    </tr>
+                                                    <tr>
+                                                        <th style="text-align:center;">
+                                                            {{translation.SRNO}}
+                                                        </th>
+                                                        <th style="text-align:center;">
+                                                            {{translation.Head}}
+                                                        </th>
+                                                        <th style="text-align:center;">
+                                                            {{translation.Amount}}
+                                                        </th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="item in LiabilityList">
+                                                        <td>
+                                                            {{$index+1}}
+                                                        </td>
+                                                        <td>
+                                                            {{ _language === 'en-us' ? item.NameEng : item.NameHi}}
+                                                        </td>
+                                                        <td>
+                                                            <input class="form-control" ng-model="item.Amount" onkeypress='return ((event.charCode >= 48 && event.charCode <= 57)|| event.which ==8 || event.keyCode ==8 || event.charCode==8)' placeholder="{{translation.Amount}}" autocomplete="off" maxlength="10" />
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+
+                                    <div class="table-responsive">
+                                        <table class="table devtable">
+                                            <thead>
+                                                <tr>
+                                                    <th colspan="4" style="text-align:center;">
+                                                        {{translation.InvestmentDetails}}
+                                                    </th>
+                                                </tr>
+                                                <tr>
+                                                    <th style="text-align:center;">
+                                                        {{translation.SRNO}}
+                                                    </th>
+                                                    <th style="text-align:center;">
+                                                        {{translation.Head}}
+                                                    </th>
+                                                    <th style="text-align:center;">
+                                                        {{translation.Amount}}
+                                                    </th>
+                                                    <th>{{translation.TakeAction}}</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr ng-repeat="item in InvestmentList track by $index">
+                                                    <td>{{$index+1}}</td>
+                                                    <td>
+                                                        <input type="text" ng-model="item.WhereDid" class="form-control" max="100" onKeyPress="return ValidateAlpha(event);" />
+                                                    </td>
+                                                    <td>
+                                                        <input name="Amount" class="form-control" ng-model="item.Amount" placeholder="{{translation.Amount}}" autocomplete="off" maxlength="10" onkeypress='return ((event.charCode >= 48 && event.charCode <= 57)|| event.which ==8 || event.keyCode ==8 || event.charCode==8)' />
+                                                    </td>
+
+                                                    <td><i ng-hide="($index+1)==1" class="fa fa-trash" title="Remove" ng-click="RemoveInvestmentRow($index)"></i></td>
+                                                </tr>
+                                            </tbody>
+                                            <tfoot>
+                                                <tr>
+                                                    <td colspan="3">&nbsp;</td>
+                                                    <td ng-click="AddNewInvestmentRow()"><i class="fa fa-plus" title="Add New"></i>{{translation.Add}}</td>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                    </div>
+                                </div>
+
+
+
+                            </div>
+                        <div class="col-lg-12 form-group" style="text-align: center;" ng-if="SelfDeclarationLetter">
+                            <h4 class="heading-hr ng-binding">{{translation.SelfDeclarationLetter}}</h4>
+                        </div>
+                        <div class="col-lg-12 form-group" style="margin-left: 19%; margin-right: 19%;width: 62%;border: 1px solid gray; padding-top: 23px;" id="dvSelfDeclarationLetter" ng-if="SelfDeclarationLetter">
+
+                            <div class="col-lg-12" id="dvMemberPhoto">
+                                <div class="table-responsive">
+                                    <table class="" id="tblLandMemberDetail" cellspacing="1">
+                                        <tr>
+                                            <td ng-repeat="item in LoanMembers" ng-if="item.IsDelete==false">
+                                                <div style="border: 1px solid gray;padding: 5px;margin-left: 20px;">
+                                                    <img id="img_{{$index}}" src="{{item.Photo!=''?item.Photo:'../Content/Images/Balnk.png'}}" style="width: 130px;height: 145px;" />
+                                                </div>
+                                                <a style="margin-left: 138px;position: absolute;top: -3px;" href="javascript:void(0);" class="facebook" title="Add Photo">
+                                                    <i class="fa fa-boxed fa-fw fa-plus-circle"></i><span class="hidden-xs"></span>
+                                                    <input type="file" id="fl_{{$index}}" accept="image/*" style="position: absolute;margin-top: -25px;width: 133px;margin-left: 20px;opacity: 0;" onchange='previewFile(this)' />
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+
+
+                        </div>
+                        <div class="form-group col-md-12">
+                            <center>
+                                <a class="btn btn-primary dev-btn" style="text-transform:capitalize;" href="javascript:void(0);" ng-click="BackToList()">{{ translation.Back}}</a>
+                                <button type="submit" class="btn btn-success" ng-click="SaveFinancialHealthRecord()">&nbsp;&nbsp;{{translation.Submit}}</button>
+                            </center>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-lg-12" ng-show="divSocietyHealthReport">
+            <div class="table-responsive citizen-dash-head">
+                <div id="divUserRegistration1">
+                    <form class="dev-masters" name="MyUserForm">
+                        <div id="dvLoanApplicationLetter" ng-if="LoanApplicationLetter">
+                            <div class="col-lg-12 form-group">
+                                <h4 class="heading-hr ng-binding">{{translation.SocietyCeoDetails}}</h4>
+                            </div>
+                            <div class="col-lg-12">
+                                <div class="table-responsive">
+                                    <table class="table devtable" id="tblLandMemberDetail">
+                                        <thead>
+                                            <tr>
+                                                <th>{{translation.SRNO}}</th>
+                                                <th>{{translation.AADHARNo}}</th>
+                                                <th>{{translation.Name}}</th>
+                                                <th>{{translation.NameOfFather}}</th>
+                                                <th>{{translation.DOB}}</th>
+                                                <th>{{translation.CategoryHeading}}</th>
+                                                <th>{{translation.Address}}</th>
+                                                <th>{{translation.MobileNo}}</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>1</td>
+                                                <td>
+                                                    <label>{{SocietyHealthRecord.AADHARNo}}</label>
+                                                </td>
+                                                <td>
+                                                    <label>{{SocietyHealthRecord.Name}}</label>
+                                                </td>
+                                                <td>
+                                                    <label>{{SocietyHealthRecord.FatherName}}</label>
+                                                </td>
+                                                <td>
+                                                    <label>{{SocietyHealthRecord.DOB}}</label>
+                                                </td>
+                                                <td>
+                                                    <label>{{_language === 'en-us' ? SocietyHealthRecord.CategoryNameEng : SocietyHealthRecord.CategoryNameHi}}</label>
+                                                </td>
+                                                <td>
+                                                    <label>{{SocietyHealthRecord.Address}}</label>
+                                                </td>
+                                                <td>
+                                                    <label>{{SocietyHealthRecord.MobileNo}}</label>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+
+
+                            <div class="col-lg-12 form-group">
+                                <h4 class="heading-hr ng-binding">{{translation.SocietyFinancialDetails}}</h4>
+                            </div>
+
+                            <div class="col-lg-12 form-group">
+                                <div class="col-lg-3">{{ translation.IsCCBAccountOpen}}: </div>
+                                <div class="col-lg-4">
+                                    {{ SocietyHealthRecord.IsAccountInCCB === true ?  translation.Yes  : translation.No}}
+                                </div>
+                                <br /><br />
+                                <div class="col-lg-12 form-group" ng-if="SocietyHealthRecord.IsAccountInCCB">
+                                    <div class="col-lg-1">{{ translation.BalanceInAccount}}:</div>
+                                    <div class="col-lg-4">
+                                        <label>{{SocietyHealthRecord.BalanceInAccount}}</label>                                      
+                                    </div>
+
+                                    <div class="col-lg-1">{{ translation.FDBalanceInAccount}}:</div>
+                                    <div class="col-lg-4">
+                                        <label>{{SocietyHealthRecord.FDBalanceInAccount}}</label>  
+                                    </div>
+                                </div>
+                                <div class="col-lg-12 form-group" ng-if="SocietyHealthRecord.IsAccountInCCB">
+                                    <div class="col-lg-1">{{ translation.BANK_NAME}}:</div>
+                                    <div class="col-lg-4">
+                                        <label>{{SocietyHealthRecord.BankName}}</label>                                       
+                                    </div>
+                                    <div class="col-lg-1">{{ translation.BANK_ACC_NO}}:</div>
+                                    <div class="col-lg-4">
+                                        <label>{{SocietyHealthRecord.BankName}}</label>  
+                                    </div>
+                                </div>
+                                <div class="col-lg-12 form-group" ng-if="SocietyHealthRecord.IsAccountInCCB">
+                                    <div class="col-lg-1">{{ translation.BankAcIFSCNoInCCS}}:</div>
+                                    <div class="col-lg-4">
+                                        <label>{{SocietyHealthRecord.BankIFSCNo}}</label>  
+                                    </div>
+                                </div>
+
+
+
+
+
+
+
+
+                                <div class="col-lg-2" ng-if="SocietyHealthRecord.IsAccountInCCB === true">{{ translation.IsCCBInvestment}}:</div>
+                                <div class="col-lg-4" ng-if="SocietyHealthRecord.IsAccountInCCB === true">
+                                    {{SocietyHealthRecord.IsInvestedInCCB === true ?  translation.Yes  : translation.No}}
+                                </div>
+                            </div>
+
+                            <div class="col-lg-12 form-group" ng-if="SocietyHealthRecord.IsAccountInCCB === true && SocietyHealthRecord.IsInvestedInCCB === true">
+                                <div class="col-lg-2">{{ translation.CCBInvestmentAmount}}:</div>
+                                <div class="col-lg-4">
+                                    <i class="fa fa-inr"></i>   {{SocietyHealthRecord.InvestmentAmountInCCB}}
+                                </div>
+                            </div>
+
+
+
+
+                            <div class="col-md-12">
+                                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                                    <div class="citizen-dash-head">
+                                        <table class="table table-responsive devtable" style="overflow-x:auto;">
+                                            <thead>
+                                                <tr>
+                                                    <th colspan="3" style="text-align:center;">
+                                                        {{translation.Asset}}
+                                                    </th>
+                                                </tr>
+                                                <tr>
+                                                    <th style="text-align:center;">
+                                                        {{translation.SRNO}}
+                                                    </th>
+                                                    <th style="text-align:center;">
+                                                        {{translation.Head}}
+                                                    </th>
+                                                    <th style="text-align:center;">
+                                                        {{translation.Amount}}
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr ng-repeat="item in SocietyHealthRecord.AssetList">
+                                                    <td>
+                                                        {{$index+1}}
+                                                    </td>
+                                                    <td>
+                                                        {{ _language === 'en-us' ? item.NameEng : item.NameHi}}
+                                                        <br />
+                                                        <table ng-show="item.IsFurtherExtended" width="100" class="col-md-12">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th style="text-align:center;">
+                                                                        {{translation.SRNO}}
+                                                                    </th>
+                                                                    <th style="text-align:center;">
+                                                                        {{_language === 'en-us' ? 'Details' : 'विवरण' }}
+                                                                    </th>
+                                                                    <th style="text-align:center;">
+                                                                        {{translation.Amount}}
+                                                                    </th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr ng-repeat="item2 in item.AmountDistribution">
+                                                                    <td>
+                                                                        {{$index+1}}
+                                                                    </td>
+                                                                    <td>
+                                                                        {{item2.WhereDid}}
+                                                                    </td>
+                                                                    <td>
+                                                                        {{item2.Amount}}
+                                                                    </td>
+                                                                </tr>
+
+                                                            </tbody>
+                                                        </table>
+                                                    </td>
+                                                    <td>
+                                                        {{item.Amount}}
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                </div>
+
+                                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                                    <div class="citizen-dash-head">
+                                        <table class="table table-responsive devtable" style="overflow-x:auto;">
+                                            <thead>
+                                                <tr>
+                                                    <th colspan="3" style="text-align:center;">
+                                                        {{translation.Liability}}
+                                                    </th>
+                                                </tr>
+                                                <tr>
+                                                    <th style="text-align:center;">
+                                                        {{translation.SRNO}}
+                                                    </th>
+                                                    <th style="text-align:center;">
+                                                        {{translation.Head}}
+                                                    </th>
+                                                    <th style="text-align:center;">
+                                                        {{translation.Amount}}
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr ng-repeat="item in SocietyHealthRecord.LiabilityList">
+                                                    <td>
+                                                        {{$index+1}}
+                                                    </td>
+                                                    <td>
+                                                        {{ _language === 'en-us' ? item.NameEng : item.NameHi}}
+                                                        <br />
+                                                        <table ng-show="item.IsFurtherExtended" width="100" class="col-md-12">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th style="text-align:center;">
+                                                                        {{translation.SRNO}}
+                                                                    </th>
+                                                                    <th style="text-align:center;">
+                                                                        {{_language === 'en-us' ? 'Details' : 'विवरण' }}
+                                                                    </th>
+                                                                    <th style="text-align:center;">
+                                                                        {{translation.Amount}}
+                                                                    </th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr ng-repeat="item2 in item.AmountDistribution">
+                                                                    <td>
+                                                                        {{$index+1}}
+                                                                    </td>
+                                                                    <td>
+                                                                        {{item2.WhereDid}}
+                                                                    </td>
+                                                                    <td>
+                                                                        {{item2.Amount}}
+                                                                    </td>
+                                                                </tr>
+
+                                                            </tbody>
+                                                        </table>
+                                                    </td>
+                                                    <td>
+                                                        {{item.Amount}}
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="blockUI"></div>
+                        <div class="form-group col-md-12">
+                            <center>
+                                <a class="btn btn-primary dev-btn" style="text-transform:capitalize;" href="javascript:void(0);" ng-click="BackToList()">{{ translation.Back}}</a>
+                            </center>
+                        </div>
+
+                        <div class="blockUI"></div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+

@@ -1,0 +1,184 @@
+﻿@{
+    ViewBag.Title = "NCD District Dashboard";
+}
+
+<style>
+    .form-control {
+        border-radius: 0;
+        box-shadow: none;
+        border-color: #d2d6de;
+    }
+
+        .form-control:not(select) {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+
+    .ncd-box {
+        background: #ecf8ee !important;
+        border: 1px dashed #ccc !important;
+        padding: 20px;
+        margin-bottom: 30px;
+        width: 100%;
+    }
+
+    fieldset legend {
+        border: none;
+        background: #bf8313;
+        width: auto;
+        color: #ffffff;
+        padding: 2px 10px;
+    }
+
+    .flexEqualCenter {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    a.backBtn {
+        padding: 3px 5px;
+        background: rgb(99,205,219);
+        color: #fff;
+        border: 0px;
+        outline: none;
+        display: inline-block;
+        text-decoration: none;
+    }
+
+        a.backBtn i {
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+    .tblthfont {
+        font-weight: bold;
+    }
+
+    .d-flex {
+        display: flex;
+    }
+
+    table thead th {
+        background-color: #64c0c5 !important;
+        color: #fff !important;
+        text-align: center;
+    }
+</style>
+
+<script type="text/javascript">
+    var tableToExcel = (function () {
+        var uri = 'data:application/vnd.ms-excel;base64,'
+            , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>'
+            , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) }
+            , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
+        return function (table, name) {
+            if (!table.nodeType) table = document.getElementById(table)
+            var ctx = { worksheet: name || 'Worksheet', table: table.innerHTML }
+            window.location.href = uri + base64(format(template, ctx))
+        }
+    })()
+</script>
+
+
+<script src="~/Scripts/AngularFramework/NcdDistrictDasboard.js?v=1"></script>
+<div ng-app="ncdMod" ng-controller="ncdCtrl" ng-cloak="">
+    <div class="container-fluid citizen-dash-head">
+        <div class="panel panel-default">
+            <div class="panel-heading flexEqualCenter">
+                <b><i class="fa fa-th-list"></i>&nbsp; State/UT wise No. of Cooperative Societies and their Membership</b>
+
+                <!-- ✅ Export to Excel Button -->
+                <button class="btn btn-success btn-sm"
+                        onclick="tableToExcel('districtTable', 'District Dashboard')">
+                    <i class="fa fa-file-excel-o"></i> Export to Excel
+                </button>
+            </div>
+
+            <div class="panel-body">
+
+                <!-- Filters Row -->
+                <div class="row mb-3">
+                    <div class="col-sm-4" ng-init="GetNCDStateDetail()">
+                        <label for="state_ut">State / UT <span class="text-danger">*</span></label>
+                        <select ng-model="ncd.state_code"
+                                class="form-control"
+                                required
+                                ng-options="s.state_code as s.name for s in NCDStateDetails"
+                                ng-change="GetDistrictByStatecode(ncd.state_code)">
+                            <option value="">{{translation.SelectOption}}</option>
+                        </select>
+                    </div>
+
+                    <div class="col-sm-3">
+                        <label for="district">District <span class="text-danger">*</span></label>
+                        <select name="district"
+                                id="district"
+                                ng-model="ncd.district_code"
+                                class="form-control"
+                                required="required"
+                                ng-options="d.district_code as d.district_name for d in NCDDistrictDetails"
+                                ng-change="GetBlockByStateDistrict(ncd.state_code, ncd.district_code)">
+                            <option value="" disabled selected>{{translation.SelectOption}}</option>
+                        </select>
+                    </div>
+
+                    <div class="col-sm-3">
+                        <label for="prsent_functional_status">Present Functional Status<span class="text-danger">*</span></label>
+                        <select name="Primary_Activity" id="registration_authority"
+                                ng-model="ncd.functional_status"
+                                class="form-control" required="required"
+                                ng-options="s.Id as s.FunctionalName for s in SocietyFunctionalStatusList">
+                            <option value="" disabled>{{translation.SelectOption}}</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Buttons -->
+                <div class="row mb-3">
+                    <div class="col-sm-12 text-center">
+                        <button class="btn btn-primary dev-btn" ng-click="loadDistrictList()">Search</button>
+                        <button class="btn btn-primary dev-btn" ng-click="ClearSearch()">Clear</button>
+                    </div>
+                </div>
+
+                <!-- District Table -->
+                <div class="row">
+                    <div class="col-sm-6">
+                        <label>District List</label>
+
+                        <!-- ✅ Added ID for export -->
+                        <table id="districtTable" class="table table-bordered text-center">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Sr.No</th>
+                                    <th class="text-center">District</th>
+                                    <th class="text-center">No. of Cooperatives</th>
+                                    <th class="text-center">No. of Members</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="item in DistrictList">
+                                    <td>{{$index + 1}}</td>
+                                    <td class="text-left">{{item.DistrictName}}</td>
+                                    <td>{{item.NumberOfCooperatives}}</td>
+                                    <td>{{item.NumberOfMembers}}</td>
+                                </tr>
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td></td>
+                                    <td><strong>Total</strong></td>
+                                    <td><strong>{{ totalCooperatives }}</strong></td>
+                                    <td><strong>{{ totalMembers }}</strong></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

@@ -1,0 +1,142 @@
+﻿@*CCSComplaintReport*@
+@{
+    ViewBag.Title = "Complaint Report";
+}
+
+
+<script type="text/javascript">
+    var tableToExcel = (function () {
+        var uri = 'data:application/vnd.ms-excel;base64,'
+            , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>'
+            , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) }
+            , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
+        return function (table, name) {
+            if (!table.nodeType) table = document.getElementById(table)
+            var ctx = { worksheet: name || 'Worksheet', table: table.innerHTML }
+            window.location.href = uri + base64(format(template, ctx))
+        }
+    })()
+</script>
+<script src="~/Scripts/AngularFramework/CCSPropertyReport.js"></script>
+
+
+<div ng-app="CCSPropertyReportCnt" ng-controller="CCSPropertyReportMod">
+
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <h3 class="citizen-dash-head"> {{ translation.CCSPropRpt}}   </h3>
+    </div>
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="devpage-breadcrumb">
+            <ul class="page-breadcrumb">
+                <li class="dev-page-br">
+                    <i class="fa fa-home"> </i>
+                    <a href="#"> {{translation.MIS}} </a>
+                    <i class="fa fa-angle-right"> </i>
+                </li>
+                <li style="float: left">
+                    <span style="margin: 0 5px;">  {{ translation.CCSPropRpt}}  </span>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+
+    <div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="table-responsive citizen-dash-head">
+                <div class="col-md-12 dev-search-form">
+                    <div class="col-xs-2">
+                        <label for="search">{{translation.Search}}:</label>
+                        <input ng-model="q" id="search" class="form-control" placeholder={{translation.filttertext}} autocomplete="off">
+                    </div>
+                    <div class="col-xs-2">
+                        <label for="search">{{translation.ItemPerPage}}:</label>
+                        <input type="number" min="1" max="9999" class="form-control" ng-model="pageSize">
+                    </div>
+                    <div class="col-xs-2">
+                        <label for="search"> {{ translation.State}}:</label>
+                        <select ng-model="CCSproperty.StateId" class="form-control mac" ng-init="CCSproperty.StateId='0'" id="stat" ng-change="GetReportData(CCSproperty.StateId)">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in StateListdata" value="{{item.StateId}}">
+                                {{_language =='en-us' ?  item.StateNAmeEn : item.StateNameHi}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-xs-4" style="padding-top: 25px; ">
+                        <input type="button" class="btn btn-primary dev-btn" onclick="tableToExcel('tblData', 'Get Support Data')" value="Export to Excel">
+                    </div>
+                </div>
+                <br>
+
+                <table id="tblData" class="table devtable" style="margin-top: 30px;border:1px solid rgb(222, 221, 221); float: left;">
+                    <thead>
+                        <tr>
+                            <th>
+                                {{translation.SRNO}}
+                            </th>
+                            <th>
+                                {{translation.EntrantName}}
+                            </th>
+                            <th>
+                                {{translation.Mobile}}
+                            </th>
+                            <th>
+                                {{translation.EntrantType}}
+                            </th>
+
+                            <th>
+                                {{translation.PAddress}}
+                            </th>
+                            <th>
+                                {{translation.landmark}}
+                            </th>
+                            <th>
+                                {{translation.CCSName}}
+                            </th>
+
+                            <th>
+                                {{translation.ProprtyImg}}
+                            </th>
+
+                            <th>
+                                {{translation.ProprtyImg2}}
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr dir-paginate="item in PropertyReportdata | filter:q | orderBy:colsort:reverseSort | itemsPerPage: pageSize" current-page="currentPage" pagination-id="SubclassPagination">
+                            <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                            <td>{{item.ReportByName}}</td>
+                            <td>{{item.MobileNo}}</td>
+                            <td>{{item.EntrantType}}</td>
+                            <td>{{item.LocationAddress}}</td>
+                            <td>{{item.LocationLandMark}}</td>
+                            <td>{{item.SocietyName}}</td>
+                            <td><a target="_blank" href="{{item.Image1}}"><i class="fa fa-download"></i></a></td>
+                            <td><a target="_blank" href="{{item.Image2}}"><i class="fa fa-download"></i></a></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <br />
+                <div class="col-md-12">
+                    <div class="text-center">
+                        <dir-pagination-controls boundary-links="true" pagination-id="SubclassPagination" on-page-change="pageChangeHandler(newPageNumber)" template-url="/dirPagination.tpl.html"></dir-pagination-controls>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <h5 class="dev-page"> {{translation.Page}}: {{ currentPage }} </h5>
+                </div>
+            </div>
+
+
+
+        </div>
+    </div>
+
+
+</div>
+
+
+
+

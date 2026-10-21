@@ -1,0 +1,147 @@
+﻿@{
+    ViewBag.Title = "MIS Section For 38 NI Act";
+}
+<style>
+    .flexEqualCenter {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    a.backBtn {
+        padding: 3px 5px;
+        background: rgb(99,205,219);
+        color: #fff;
+        border: 0px;
+        outline: none;
+        display: inline-block;
+        text-decoration: none;
+    }
+
+        a.backBtn i {
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+    .tblthfont {
+        font-weight: bold;
+    }
+</style>
+<script src="~/Scripts/xlsx.full.min.js"></script>
+<script src="~/Scripts/AngularFramework/Mis_Section_For_138_NiAct.js?v=1.2"></script>
+<div ng-app="sectionFor138Mod" ng-controller="sectionFor138Ctrl" ng-cloak="">
+    <div class="container-fluid citizen-dash-head">
+        <input type="hidden" id="hdnDistrictId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DistrictId)" />
+        <input type="hidden" id="hdnPldbId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).PLDBId)" />
+        <input type="hidden" id="hdnPldbBranchId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).PLDBBrancchId)" />
+
+        <div class="panel panel-default">
+            <div class="panel-heading flexEqualCenter">
+                <b><i class="fa fa-th-list"></i>&nbsp; MIS Section For 138 NI Act Report</b>
+                <div class="text-right">
+                    <button class="btn btn-primary dev-btn" ng-show="MisSectionForNiActDetail!=null && MisSectionForNiActDetail.length>0" ng-click="ReportDownload()">Export Excel</button>
+                </div>
+            </div>
+            <div class="panel-body">
+                <input type="hidden" id="hdnDistrictId" ng-model="search.LoanDistrictId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DistrictId)" />
+                <div class="row">
+                    <div class="col-md-2 form-group" ng-show="false">
+                        <label>{{ translation.District}}<span class="error">*</span></label>
+                        <select id="DISTRICT_ID" ng-model="search.DISTRICT_ID" class="form-control" ng-init="search.DISTRICT_ID='0'" ng-change="PLDBListData(0)">
+                            <option value="0">{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in DistrictList" value="{{item.DISTRICT_ID}}">
+                                {{_language =='en-us' ?  item.DISTRICT_ENG : item.DISTRICT_MANGAL}}
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="col-lg-2 form-group " id="ddlPLDBID">
+                        <label for="PLDB_ID">{{ translation.PLDB}} </label>
+                        <select id="PLDB_ID" name="PLDB_ID" ng-model="search.PLDB_ID" class="form-control" ng-init="PLDB_ID='0'" ng-change="PLDBBranchList('0')">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="itemPLDB in PLDBList  track by itemPLDB.PldbId " value="{{itemPLDB.PldbId}}">
+                                {{itemPLDB.PLDBName}}
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="col-lg-2 form-group" id="ddlPldbBranchID">
+                        <label for="PLDB_Branch_ID">{{ translation.Branch}}</label>
+                        <select ng-model="search.PLDB_Branch_ID" name="PLDB_Branch_ID" id="PLDB_Branch_ID" class="form-control" ng-init="PLDB_Branch_ID='0'" ng-change="GetMisSectionForNIActDetails()">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="itemBlock in PLDBBranches " value="{{itemBlock.BLOCK_ID}}">
+                                {{_language =='en-us' ?  itemBlock.BLOCK_ENG : itemBlock.BLOCK_MANGAL}}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+                <div class="table-responsive devtable">
+                    <table class="table table-hover table-striped table-bordered mb-0" id="{{MisSectionReport}}">
+                        <thead>
+                            <tr>
+                                <th rowspan="2" style="vertical-align:middle;">क्र.सं.</th>
+                                <th rowspan="2" style="vertical-align:middle;">प्राथमिक बैंक</th>
+                                <th colspan="2" style="text-align:center;">अवधिपार ऋणी <br />जिनके द्वारा अपनी किस्तों पेटे<br />चेक दिए गए</th>
+                                <th colspan="2" style="text-align:center;">अवधिपार ऋणी<br />की स्थिति में समाशोधन हेतु<br />लगाए गए चेक</th>
+                                <th colspan="2" style="text-align:center;">समाशोधन हेतु <br />प्रस्तुत चेक में अनादरित <br />चेकों का विवरण</th>
+                                <th colspan="2" style="text-align:center;">
+                                    अनादरित चेकों के विरुद्ध <br />NI Act की धारा 138 के अन्तर्गत कार्यवाही <br />किए गए केसेस का विवरण
+                                </th>
+                                @*<th colspan="2" style="text-align:center;">
+                                    धारा 138 <br />की कार्यवाही पश्चात<br /> प्राप्त वसूली
+                                </th>*@
+                                <th colspan="2" style="text-align:center;">
+                                    प्राप्त कुल वसूली<br />
+                                    (OTS राहत सहित)
+                                </th>
+                                @*<th colspan="2" style="text-align:center;">
+                                    अवधिपार ऋणी<br />से प्राप्त कुल वसूली <br />(OTS सहित)
+                                </th>*@
+                            </tr>
+                            <tr>
+                                <th>सं.</th>
+                                <th>राशि</th>
+                                <th>सं.</th>
+                                <th>राशि</th>
+                                <th>सं.</th>
+                                <th>राशि</th>
+                                <th>सं.</th>
+                                <th>राशि</th>
+                                @*<th>सं.</th>
+                                <th>राशि</th>*@
+                                <th>सं.</th>
+                                <th>राशि</th>
+                                @*<th>सं.</th>*@
+                                @*<th>राशि</th>*@
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-if="MisSectionForNiActDetail && MisSectionForNiActDetail.length > 0" ng-repeat="item in MisSectionForNiActDetail track by $index" ng-style="(item.PLDBName == 'Total') && {'font-weight': 'bold', 'color': '#fdfdfd', 'background': '#466b6d'}">
+                                <th><span ng-hide="item.PLDBName=='Total'">{{$index+1}}.</span></th>
+                                <th>{{item.PLDBName}}</th>
+                                <td>{{item.ChequesCollectedNo}}</td>
+                                <td>{{item.ChequesCollectedAmount}}</td>
+                                <td>{{item.ChequesClearingNo}}</td>
+                                <td>{{item.ChequesClearingAmount}}</td>
+                                <td>{{item.ChequeDishonouredNo}}</td>
+                                <td>{{item.ChequeDishonouredAmount}}</td>
+                                <td>{{item.DishonourActionTakenNo}}</td>
+                                <td>{{item.DishonourActionTakenAmount}}</td>
+                                @*<td>{{item.RecoveryReceivedActionNo}}</td>
+                                <td>{{item.RecoveryReceivedActionAmount}}</td>*@
+                                <td>{{item.RecoveryReceivedNo}}</td>
+                                <td>{{item.RecoveryReceivedAmount}}</td>
+                                @*<td>{{item.ODRecoveryReceivedNo}}</td>*@
+                                @*<td>{{item.ODRecoveryReceivedAmount}}</td>*@
+                            </tr>
+                            <tr ng-if="(!MisSectionForNiActDetail || MisSectionForNiActDetail.length === 0)">
+                                <td colspan="14" class="text-center">No records found</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,184 @@
+﻿
+<script src="~/Scripts/AngularFramework/TilamSanghStockPurchaseDelivery.js"></script>
+<script type="text/javascript">
+
+    function ValidateAlpha(evt) {
+        var keyCode = (evt.which) ? evt.which : evt.keyCode
+        if ((evt.which == 8 || evt.keyCode == 8 || evt.charCode == 8))
+            return true;
+
+        if (((keyCode < 49 || keyCode > 90) && (keyCode < 97 || keyCode > 123) && keyCode != 32))
+            return false;
+        return true;
+    };
+
+</script>
+
+<div ng-app="TilamSanghStockPurchaseDeliveryCnt2">
+    <div ng-controller="TilamSanghStockPurchaseDeliveryMod2">
+        <div class="col-md-12">
+            <h3 class="citizen-dash-head">{{translation.StockDeliveryApprovalDepot}}</h3>
+            <hr style="margin: 0;">
+        </div>
+
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#"> {{translation.StockManagement}}</a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;"> {{translation.StockDeliveryApprovalDepot}} </span>
+                    </li>
+                    <li style="float: right;" id="divAddBtn">
+                        <button type="button" ng-click="ShowDivProductInsert()" class="btn btn-info btn-lg dev-popup-btn" data-toggle="modal" style="color: #025e63; cursor: pointer; text-decoration:none;  font-weight: bold;">
+                            <h5>&#187; {{translation.InsertProduct}}</h5>
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="citizen-dash-head">
+                <table class="table table-responsive devtable" style="overflow-x:auto;">
+                    <thead>
+                        <tr>
+                            <th>
+                                {{translation.SRNO}}
+                            </th>
+                            <th ng-click="sortData('PartyName')">
+                                {{translation.Party}}
+                                <div ng-class="getSortClass('PartyName')"></div>
+                            </th>
+                            <th ng-click="sortData('BrokerName')">
+                                {{translation.Broker}}
+                                <div ng-class="getSortClass('BrokerName')"></div>
+                            </th>
+                            <th ng-click="sortData('ProductSubCategoryNameEng')">
+                                {{translation.Product}}
+                                <div ng-class="getSortClass('ProductSubCategoryNameEng')"></div>
+                            </th>
+                            <th ng-click="sortData('Quantity')">
+                                {{translation.QuantityUnit}}
+                                <div ng-class="getSortClass('Quantity')"></div>
+                            </th>
+                            <th ng-click="sortData('PurchasePaymentDate')">
+                                {{translation.PaymentDate}}
+                                <div ng-class="getSortClass('PurchasePaymentDate')"></div>
+                            </th>
+                            <th ng-click="sortData('ExpectedDeliveryDate')">
+                                {{translation.ExpectedDeliveryDate}}
+                                <div ng-class="getSortClass('ExpectedDeliveryDate')"></div>
+                            </th>
+                            <th ng-click="sortData('SaleContractNo')">
+                                {{translation.SaleContractNo}}
+                                <div ng-class="getSortClass('SaleContractNo')"></div>
+                            </th>
+                            <th>
+                                {{translation.Conditions}}
+                            </th>
+                            <th>
+                                {{translation.RequestStatus}}
+                            </th>
+                            <th>
+                                {{translation.TakeAction}}
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr dir-paginate="item in StockRequestDispatch | filter: q | orderBy:colsort:reverseSort | itemsPerPage: pageSize" current-page="currentPage" pagination-id="TrainningFormatPagination">
+                            <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                            <td>
+                                {{ item.PartyName}}
+                            </td>
+                            <td>
+                                {{ item.BrokerName}}
+                            </td>
+                            <td>
+                                {{ _language === 'en-us' ? item.ProductSubCategoryNameEng :  item.ProductSubCategoryNameHi}} ({{ _language === 'en-us' ? item.ProductNameEng :  item.ProductNameHi}})
+                            </td>
+                            <td>
+                                {{ item.Quantity}}  {{ _language === 'en-us' ? item.UnitNameEng :  item.UnitNameHi}})
+                            </td>
+                            <td>
+                                {{item.PurchasePaymentDate}}
+                            </td>
+                            <td>
+                                {{item.ExpectedDeliveryDate}}
+                            </td>
+                            <td>
+                                {{item.SaleContractNo}}
+                            </td>
+                            <td>
+                                {{ item.Conditions}}
+                            </td>
+                            <td>
+                                {{ _language === 'en-us' ? item.StatusEng :  item.StatusHi}}
+                            </td>
+                            <td data-target="#myModal" data-toggle="modal" ng-click="ShowDeleveryStatusDiv(item)"><a href="javascript:void(0)" target="_blank"><i class="fa fa-file-pdf-o" aria-hidden="true"></i></a></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="dev-popup-body modal fade" id="myModal">
+            <div class="modal-dialog" style="width:950px;">
+                <!-- Modal content-->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" ng-click="ClearClassForm()">&times;</button>
+                        <h4 class="modal-title"> {{translation.StockDeliveryApprovalDepot}}  </h4>
+                    </div>
+                    <div class="citizen-dash-head">
+                        <div class="col-lg-12 form-group">
+                            <div class="col-lg-2">{{ translation.IsDeliveryAccepted}}<span class="error">*</span></div>
+                            <div class="col-lg-4">
+                                <input type="radio" name="IsDeliveryAccepted" value="1" ng-model="StockDelivery.IsPurchaseAccepted" ng-change="RadioChangeDeliveryStatus()" ng-init="StockDelivery.IsPurchaseAccepted=1"> &nbsp;{{translation.Yes}} &nbsp;&nbsp;&nbsp;&nbsp;
+                                <input type="radio" name="IsDeliveryAccepted" value="2" ng-model="StockDelivery.IsPurchaseAccepted" ng-change="RadioChangeDeliveryStatus()"> &nbsp;{{translation.No}}
+                            </div>
+                            <div class="col-lg-2" ng-show="IsDeliveryAccepted===false">{{ translation.RejectionReasonMaster}}<span class="error">*</span></div>
+                            <div class="col-lg-4" ng-show="IsDeliveryAccepted===false">
+                                <select class="form-control" ng-model="StockDelivery.RejectionReasonId" ng-init="StockDelivery.RejectionReasonId='0'">
+                                    <option value="0" disabled>{{translation.SelectOption}}</option>
+                                    <option ng-repeat="item in RejectionReasons" value="{{item.RejectionId}}">
+                                        {{_language =='en-us' ?  item.RejectionReasonEng : item.RejectionReasonHi}}
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="col-lg-2" ng-show="IsDeliveryAccepted">{{ translation.ExecutionAction}}<span class="error">*</span></div>
+                            <div class="col-lg-4" ng-show="IsDeliveryAccepted">
+                                <input type="file" name="fileDeliveryAcceptanceLetter"  onchange="angular.element(this).scope().UploadDeliveryApprovedFile(this.files)"/>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-12 form-group">
+                            <div class="col-lg-2">{{ translation.Remarks}}<span class="error">*</span></div>
+                            <div class="col-lg-4">
+                                <textarea name="HtmlContentRequest" id="HtmlContentRequest" rows="8" cols="120" style="resize:none;" ng-model="StockDelivery.Remarks"></textarea>
+                            </div>
+                            
+                        </div>
+
+                        <div class="form-group col-md-12">
+                            <div class="dev-menu-btn">
+                                <button type="submit" class="btn btn-primary" ng-click="SaveStockDeliveryStatus()">{{translation.Submit}}</button>
+                                <button type="submit" class="btn btn-primary" ng-click="ClearProcessingUnitForm()">{{translation.Clear}}</button>
+                                <a class="btn btn-primary dev-btn" style="text-transform:capitalize;" ng-click="BackToProcessingUnitList()"> {{translation.Back}}</a>
+                                <input type="hidden" ng-model="ProcessingUnit.ProcessingUnitId" />
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+</div>

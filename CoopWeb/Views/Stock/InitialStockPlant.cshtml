@@ -1,0 +1,155 @@
+﻿
+<script src="~/Scripts/AngularFramework/TilamSanghInitialStock.js"></script>
+<script type="text/javascript">
+
+    function ValidateAlpha(evt) {
+        var keyCode = (evt.which) ? evt.which : evt.keyCode
+        if ((evt.which == 8 || evt.keyCode == 8 || evt.charCode == 8))
+            return true;
+
+        if (((keyCode < 49 || keyCode > 90) && (keyCode < 97 || keyCode > 123) && keyCode != 32))
+            return false;
+        return true;
+    };
+
+</script>
+
+<div ng-app="TilamSanghInitialStockCnt">
+    <div ng-controller="TilamSanghInitialStockMod">
+        <div class="col-md-12">
+            <h3 class="citizen-dash-head">{{translation.InitialStock}}</h3>
+            <hr style="margin: 0;">
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#"> {{translation.StockManagement}}</a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;"> {{translation.InitialStock}} </span>
+                    </li>
+
+                    <li style="float: right;" id="divAddBtn">
+                        <button type="button" ng-click="ShowInsertBlock()" class="btn btn-info btn-lg dev-popup-btn" data-toggle="modal" style="color: #025e63; cursor: pointer; text-decoration:none;  font-weight: bold;">
+                            <h5>&#187; {{translation.AddInitialStock}}</h5>
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" ng-show="divSearch">
+            <div class="citizen-dash-head">
+                <div class="col-lg-12 form-group">
+                    <div class="col-lg-2">{{ translation.Product}}<span class="error">*</span></div>
+                    <div class="col-lg-4">
+                        <select class="form-control" ng-model="ProductIdForSearch" ng-init="ProductIdForSearch='0'">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in Products" value="{{item.ProductId}}">
+                                {{_language =='en-us' ?  item.ProductNameEng : item.ProductNameHi}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-lg-2"> <a class="btn btn-primary dev-btn" style="text-transform:capitalize;" ng-click="GetInitialStockData()"> {{translation.SearchStockDepotPlant}}</a></div>
+                </div>
+
+                <div class="citizen-dash-head" ng-show="divSearchData">
+                    <table class="table table-responsive devtable" style="overflow-x:auto;">
+                        <thead>
+                            <tr>
+                                <th rowspan="2" style="vertical-align:central;text-align:center;">
+                                    {{translation.SRNO}}
+                                </th>
+                                <th rowspan="2" style="text-align:center">
+                                    {{translation.Product}}
+                                </th>
+                                <th colspan="4" style="text-align:center;">
+                                    {{translation.PackagingMaster}}
+                                </th>
+                            </tr>
+                            <tr>
+                                <th ng-repeat="itemPacking in InitialStockDataShow.PackingList" style="text-align:center;">
+                                    {{_language === 'en-us' ? itemPacking.PackingNameEng : itemPacking.PackingNameHi }}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="item in InitialStockDataShow.ProductSubCategoryPackingMappingList">
+                                <td>{{$index+1}}</td>
+                                <td>
+                                    {{_language === 'en-us' ? item.ProductSubCategoryNameEng : item.ProductSubCategoryNameHi }}
+                                </td>
+                                <td ng-repeat="item2 in item.ProductSubCategoryQuantityEntity">
+                                    <label>{{item2.Quantity}}</label>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+
+            </div>
+        </div>
+
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" ng-show="divInsert">
+            <div class="citizen-dash-head">
+                <div class="col-lg-12 form-group">
+                    <div class="col-lg-2">{{ translation.Product}}<span class="error">*</span></div>
+                    <div class="col-lg-4">
+                        <select class="form-control" ng-model="InitialStock.ProductId" ng-init="InitialStock.ProductId='0'" ng-change="GetInitialStockEntryForm()">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in Products" value="{{item.ProductId}}">
+                                {{_language =='en-us' ?  item.ProductNameEng : item.ProductNameHi}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-lg-2"> <a class="btn btn-primary dev-btn" style="text-transform:capitalize;" ng-click="Back()"> {{translation.Back}}</a></div>
+                </div>
+
+                <div class="citizen-dash-head" ng-show="divStockEntry">
+                    <table class="table table-responsive devtable" style="overflow-x:auto;">
+                        <thead>
+                            <tr>
+                                <th rowspan="2" style="vertical-align:central;text-align:center;">
+                                    {{translation.SRNO}}
+                                </th>
+                                <th rowspan="2" style="text-align:center">
+                                    {{translation.Product}}
+                                </th>
+                                <th colspan="4" style="text-align:center">
+                                    {{translation.PackagingMaster}}
+                                </th>
+                            </tr>
+                            <tr>
+                                <th ng-repeat="itemPacking in InitialStockData.PackingList">
+                                    {{_language === 'en-us' ? itemPacking.PackingNameEng : itemPacking.PackingNameHi }}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="item in InitialStockData.ProductSubCategoryPackingMappingList">
+                                <td>{{$index+1}}</td>
+                                <td>
+                                    {{_language === 'en-us' ? item.ProductSubCategoryNameEng : item.ProductSubCategoryNameHi }}
+                                </td>
+                                <td ng-repeat="item2 in item.ProductSubCategoryQuantityEntity">
+                                    <input type="text" class="form-control" ng-model="item2.Quantity" maxlength="5" onkeypress='return event.charCode>= 48 && event.charCode <= 57 || (event.charCode===190)' />
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="form-group col-md-12">
+                        <div class="dev-menu-btn">
+                            <button type="button" class="btn btn-primary" ng-click="SaveInitialStock()">{{translation.Submit}}</button>
+                            <a class="btn btn-primary dev-btn" style="text-transform:capitalize;" ng-click="Back()"> {{translation.Back}}</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

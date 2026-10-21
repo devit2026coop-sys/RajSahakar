@@ -1,0 +1,947 @@
+﻿<script src="~/Scripts/AngularFramework/InspactorGSSTarget.js?v=@DateTime.Now.Ticks"></script>
+<script>
+
+    function printpage() {
+        var printContents = document.getElementById('printdiv').innerHTML;
+        var originalContents = document.body.innerHTML;
+        document.body.innerHTML = printContents;
+        window.print();
+        document.body.innerHTML = originalContents;
+    }
+
+</script>
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $('.SetCalender').datepicker({
+            changeMonth: true,
+            changeYear: true,
+            dateFormat: "dd/mm/yy",
+            showOn: "focus",
+            maxDate: 0,
+            // defaultDate: new Date()
+        });//.datepicker("setDate", new Date());
+
+    });
+</script>
+<style>
+    .hideclass {
+        display: none;
+    }
+
+    .hideclass1 {
+        display: block;
+    }
+
+    .ui-datepicker {
+        z-index: 9999 !important;
+    }
+
+
+    .SetCalender {
+        background: url("../images/calender.png") no-repeat right 8px center;
+        background-size: 20px 20px;
+        padding-right: 30px; /* space for icon */
+        cursor: pointer;
+    }
+</style>
+<div ng-app="UnitMastersModule">
+    <div ng-controller="UnitMasterCont">
+        <div class="col-md-12">
+            <h3 class="citizen-dash-head">Formation Of M.PACS </h3>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#"> {{translation.Home}} </a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;">Formation Of M.PACS </span>
+                    </li>
+                    <li style="float: right;" id="divAddBtn">
+                        <i class="fa fa-angle-double-right" style="color: #025e63;"></i>
+                        <a ng-click="AssignNew()" style="color: #025e63; cursor: pointer; text-decoration:none; font-weight: bold;" class="ng-binding">Allot M.PACS</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="col-md-12" ng-show="IsShowAssignForm">
+            <div class="citizen-dash-head" style="overflow: hidden;">
+                <div class="col-md-12">
+                    <input type="hidden" id="DivisionId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DivisionId)" />
+                    <input type="hidden" id="hdnActId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).ActId)" />
+                    <input type="hidden" id="hdnDistrictId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DistrictId)" />
+
+
+                    <div class="col-xs-4">
+                        <label for="InspactorId">Inspector:</label>
+                        <select id="InspactorId" class="form-control" ng-init="InspactorId='0'" ng-model="InspactorId">
+                            <option value="0">{{translation.SelectOption}}</option>
+                            <option ng-repeat="itm in InspacorData" value="{{itm.MappingID}}">
+                                {{_language =='en-us' ?  itm.OfficerNameEn : itm.OfficerNameHi}}
+                            </option>
+                        </select>
+                    </div>
+
+
+                    <div class="col-md-4  margin-Top20">
+                        <label>&nbsp;</label><br>
+                        <button type="button" ng-click="GetInspactorTargetsCount()" class="btn btn-primary dev-btn ng-binding">{{translation.Search}}</button>
+                        <button type="button" ng-click="ClearSearch()" class="btn btn-primary dev-btn ng-binding">{{translation.Clear}}</button>
+                    </div>
+                </div>
+                <br>
+
+                <div class="col-md-12">
+                    <div class="table-responsive">
+                        <table class="table table-responsive devtable" style="margin-top: 30px;">
+                            <thead>
+                                <tr>
+                                    <th>{{translation.SRNO}}</th>
+                                    <th> Inspector Name</th>
+                                    <th>{{translation.Month}}</th>
+                                    <th>MPacs/Gram Panchayat</th>
+                                    <th>MPacs Allotted</th>
+                                    <th>Survey Submitted</th>
+                                    <th>Pending Approval ( JR Plan )</th>
+                                    <th>Generate Sanction Letter</th>
+                                    <th>Upload Sanction Letter</th>
+                                    <th>{{translation.TotalObjection}} </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="item in InspactorTargetsList">
+                                    <td>{{$index+1}}</td>
+                                    <td>{{item.InspacorName}}</td>
+                                    <td>
+                                        {{ ["","January","February","March","April","May","June","July", "August","September","October","November","December"][+item.MonthId] }}
+                                    </td>
+                                    <td style="text-align:center"><a href="javascript:void(0);" ng-click="getinsepectorwise(item.MonthId,item.Inspector_ID,'')">  {{item.GSSCount}}</a></td>
+                                    <td style="text-align:center"><a href="javascript:void(0);" ng-click="getinsepectorwise(item.MonthId,item.Inspector_ID,'0')">  {{item.AssignedCount}}</a></td>
+                                    <td style="text-align:center"><a href="javascript:void(0);" ng-click="getinsepectorwise(item.MonthId,item.Inspector_ID,'1')">  {{item.SurveyCount}}</a></td>
+                                    <td style="text-align:center"><a href="javascript:void(0);" ng-click="getinsepectorwise(item.MonthId,item.Inspector_ID,'8')">  {{item.TotalJRPlanApprovalCount }}</a></td>
+                                    <td style="text-align:center"><a href="javascript:void(0);" ng-click="getinsepectorwise(item.MonthId,item.Inspector_ID,'4')">  {{item.CompletedCount}}</a></td>
+                                    <td style="text-align:center"><a href="javascript:void(0);" ng-click="getinsepectorwise(item.MonthId,item.Inspector_ID,'15')">  {{item.UploadSanctionCount}}</a></td>
+                                    <td style="text-align:center"> {{item.TotalUnderProcess}}</td>
+                                </tr>
+
+                                <!-- ADD TOTAL ROW HERE -->
+
+                                <tr style="font-weight:bold;background:#f2f2f2;">
+                                    <td colspan="3" style="text-align:right"> Total </td>
+
+                                    <td style="text-align:center">
+                                        <a href="javascript:void(0)" ng-click="getinsepectorwise('',0,'')">  {{TotalData.GSSCount}} </a>
+                                    </td>
+
+                                    <td style="text-align:center">
+                                        <a href="javascript:void(0)" ng-click="getinsepectorwise('',0,'0')"> {{TotalData.AssignedCount}}  </a>
+                                    </td>
+
+                                    <td style="text-align:center">
+                                        <a href="javascript:void(0)" ng-click="getinsepectorwise('',0,'1')"> {{TotalData.SurveyCount}} </a>
+                                    </td>
+
+                                    <td style="text-align:center">
+                                        <a href="javascript:void(0)" ng-click="getinsepectorwise('',0,'8')"> {{TotalData.TotalJRPlanApprovalCount}} </a>
+                                    </td>
+
+                                    <td style="text-align:center">
+                                        <a href="javascript:void(0)" ng-click="getinsepectorwise('',0,'4')"> {{TotalData.CompletedCount}}  </a>
+                                    </td>
+
+                                    <td style="text-align:center">
+                                        <a href="javascript:void(0)" ng-click="getinsepectorwise('',0,'15')"> {{TotalData.UploadSanctionCount}}  </a>
+                                    </td>
+
+                                    <td style="text-align:center">  {{TotalData.TotalUnderProcess}} </td>
+
+                                </tr>
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div ng-show="AllDetails">
+
+            <div class="citizen-dash-head" style="overflow: hidden;">
+                <div class="table-dropdown" id="search-filter">
+                    <div class="col-xs-4" style="display:none;">
+                        <label for="search">{{translation.Status}}:</label>
+                        <select name="StatusId" id="CaseStatusId" class="form-control" ng-init="StatusId='0'" ng-model="StatusId">
+                            <option value="0">{{translation.SelectOption}}</option>
+                            <option ng-repeat="itm in GSSStatusList" value="{{itm.StatusId}}">
+                                {{_language =='en-us' ?  itm.StatusNameEn : itm.StatusNameHi}}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-12" ng-show="GSSSStatusId=='1' || GSSSStatusId=='6'" style="margin-bottom:15px;">
+                    <div class="table-responsive">
+                        <table class="table table-responsive devtable" style="margin-top: 10px;">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        <input type="checkbox" name="select-alldfg" ng-model="Ischeckedall" ng-click="ChkdiAllnspector();" id="select-all" />
+                                    </th>
+                                    <th>{{translation.SRNO}}</th>
+                                    <th> {{translation.InspectorName}}</th>
+                                    <th>{{translation.Urban}}/{{translation.Rural}}</th>
+                                    <th>{{translation.BlockHeading}}/{{translation.City}}</th>
+                                    <th> {{translation.GramPanchayat}}</th>
+                                    <th>{{translation.PrecentNameGSS_M}}</th>
+                                    <th>{{translation.NewGSSName_M}}</th>
+                                    <th>{{translation.NewGSSMemNo_M}}</th>
+                                    <th>{{translation.NewGSSAmanat_M}}</th>
+                                    <th>{{translation.NewGssAmount_M}}</th>
+                                    <th> {{translation.Remarkhi}}</th>
+                                    <th> {{translation.Document}}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                                <tr ng-repeat="item in InspactorTargetsListDetils">
+                                    @*<td><input type="checkbox" name="checkbox-1" class="chk" ng-model="item.chkdboxValue" ng-click="Chkdinspector(item);" /></td>*@
+                                    <td>{{$index+1}}</td>
+                                    <td>
+                                        {{item.InspacorName}}
+                                    </td>
+                                    <td>
+                                        {{item.Urban_Rural}}
+                                    </td>
+                                    <td>
+                                        {{item.BLOCK_ENG}} {{item.CITY_ENG}}
+                                    </td>
+                                    <td>
+                                        {{item.GP_ENG}}
+                                    </td>
+                                    <td>
+                                        {{item.PrecentNameGSS}}
+                                    </td>
+                                    <td>
+                                        {{item.NewGSSName}}
+                                    </td>
+                                    <td>
+                                        {{item.NoofMember}}
+                                    </td>
+                                    <td>
+                                        {{item.NewGSSprecious}}
+                                    </td>
+                                    <td>
+                                        {{item.NewGSSFinanceAmount}}
+                                    </td>
+                                    <td>
+                                        {{item.Remark}}
+                                    </td>
+
+                                    <td>
+
+                                        <a style="color:#505050;" ng-if="item.Documentname!=null" target="_blank" href="../Content/InspactorDocument/{{ item.Documentname}}"><i class="fa fa-eye"></i></a>
+                                    </td>
+                                    <td>
+
+                                        <a style="color:#505050;" ng-if="item.Documentname!=null" target="_blank"><i class="fa fa-eye"></i></a>
+                                    </td>
+
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div ng-show="ischeckdtrue">
+
+                        <div class="col-md-6" style="margin-top:15px;">
+                            <label>
+
+                            </label>
+                            <input type="radio" name="SubmitType" value="3" ng-model="ReqoestStatus" />APPROVED(Sent proposal to RCS office for sanction)
+                            <input type="radio" name="SubmitType" value="7" ng-model="ReqoestStatus" />REJECT
+                        </div>
+
+
+
+                        <div class="col-lg-12" style="margin-top:15px;" ng-if="ReqoestStatus==3">
+                            <label>DLC Meeting Proposal Report:<span class="error">*</span></label><br />
+
+                            <div class="col-lg-10" style="margin-top:5px;padding-left: 0px;">
+
+                                <div class="col-lg-5" ng-show="!IsUploadFileName" style="padding-left: 0px;">
+                                    <input type="file" accept="image/*,application/pdf" dat-val="nocheck" ng-model="FileName" id="FileName" ng-click="AddFile1(1,0)" validfile />
+                                </div>
+                                <div class="col-lg-7" style="padding-left: 0px;" ng-if="IsUploadFileName">
+                                    <a href="javascript:void(1);" ng-if="FileName!=''"><i class="fa fa-check-circle-o" style="font-size: 18px;margin-right: 5px;    color: #20cc20;"></i></a>
+                                    <a href="~/Content/InspactorDocument/{{FileName}}" ng-if="FileName!=''" target="_blank"><i class="fa fa-eye-slash" style="font-size: 18px;margin-right: 5px;font-weight: bold"></i>View File</a>
+                                    <a href="javascript:void(1);" ng-if="FileName=='' && !IsSubmiApplication" ng-click="UploadFile_new('FileName',1,0)"><i class="fa fa-upload" style="font-size: 18px;margin-right: 5px;font-weight: bold"></i>Upload File</a>
+                                    <a href="javascript:void(1);" ng-if="IsUploadFileName && !IsSubmiApplication" ng-click="ChangeFile1(1,0)"><i class="fa fa-undo" style="font-size: 18px;margin-right: 5px;font-weight: bold"></i>Change File</a>
+                                </div>
+
+
+                            </div>
+                        </div>
+                        <div class="clearfix"></div>
+                        <div class="col-md-6" style="margin-top:15px;">
+                            <label>
+                                {{translation.Remark}}
+                            </label>
+                            <textarea class="form-control" ng-model="Remarks"></textarea>
+                        </div>
+                    </div>
+
+
+                    <div class="text-center" ng-if="InspactorTargetsListDetils.length === 0" style="margin-top: 30px;">
+                        <strong>No record found</strong>
+                    </div>
+
+
+                    <div class="text-center" style="margin-top: 15px;">
+                        <button type="button" class="btn btn-primary dev-btn" ng-click="goBackToInspactorTargets()"> <i class="fa fa-arrow-left"></i> Back </button>
+                    </div>
+
+                </div>
+
+                <div class="col-md-12" ng-show="GSSSStatusId=='2' || GSSSStatusId=='3' || GSSSStatusId=='0' || GSSSStatusId=='5'|| GSSSStatusId=='7' ||  GSSSStatusId =='' || GSSSStatusId =='8' ">
+                    <div class="table-responsive">
+                        <table class="table table-responsive devtable" style="margin-top: 30px;">
+                            <thead>
+                                <tr>
+                                    <th>{{translation.SRNO}}</th>
+                                    <th> {{translation.InspectorName}}</th>
+                                    <th>{{translation.Urban}}/{{translation.Rural}}</th>
+                                    <th>{{translation.District}}</th>
+                                    <th>{{translation.BlockHeading}}</th>
+                                    <th>{{translation.City}}</th>
+                                    <th> {{translation.GramPanchayat}}</th>
+                                    <th> {{translation.Remark}}</th>
+                                    <th> {{translation.Document}}</th>
+                                    <th> {{translation.Status}}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="item in InspactorTargetsListDetils">
+
+                                    <td>{{$index+1}}</td>
+                                    <td>
+                                        {{item.InspacorName}}
+                                    </td>
+                                    <td>
+                                        {{item.Urban_Rural}}
+                                    </td>
+                                    <td>
+                                        {{item.DISTRICT_ENG}}
+                                    </td>
+                                    <td>
+                                        {{item.BLOCK_ENG}}
+                                    </td>
+                                    <td>
+                                        {{item.CITY_ENG}}
+                                    </td>
+                                    <td>
+                                        {{item.GP_ENG}}
+                                    </td>
+                                    <td>
+                                        {{item.Remark}}
+                                    </td>
+
+                                    <td>
+                                        <a style="color:#505050;" ng-if="item.Documentname!=null" target="_blank" href="../Content/InspactorDocument/{{ item.Documentname}}"><i class="fa fa-eye"></i></a>
+                                    </td>
+                                    <td>
+                                        @*<span ng-if="item.InspectorStatusId=='0'">Assigned</span>*@
+                                        <span ng-if="item.InspectorStatusId=='1'">Survey Submitted </span>
+                                        <span ng-if="item.InspectorStatusId=='2'">Not Feasible</span>
+                                        <span ng-if="item.InspectorStatusId=='3'">Proposal Submitted</span>
+                                        <span ng-if="item.InspectorStatusId=='4'">Sention Submited</span>
+                                        <span ng-if="item.InspectorStatusId=='5'">Completed</span>
+                                        <span ng-if="item.InspectorStatusId=='6'">Objection Submitted </span>
+                                        <span ng-if="item.InspectorStatusId=='7'">Rejected Submited</span>
+                                        <span ng-if="item.InspectorStatusId=='8'">Approved For Ragistration </span>
+                                    </td>
+
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="text-center" ng-if="InspactorTargetsListDetils.length === 0" style="margin-top: 30px;">
+                        <strong>No record found</strong>
+                    </div>
+
+                    <div class="text-center" style="margin-top: 15px;">
+                        <button type="button" class="btn btn-primary dev-btn"
+                                ng-click="goBackToInspactorTargets()">
+                            <i class="fa fa-arrow-left"></i> Back
+                        </button>
+                    </div>
+
+                </div>
+
+                @*when status id 4 and 15*@
+                <div class="col-md-12" ng-show="GSSSStatusId=='4' || GSSSStatusId=='15' ">
+                    @*RCH -Sention- After case handle*@
+                    <div class="table-responsive">
+                        <table class="table table-responsive devtable" style="margin-top: 10px;">
+                            <thead>
+                                <tr>
+                                    @*<th>
+                                            <input type="checkbox" name="select-alldfg" ng-model="IscheckedallSenction" ng-click="ChkdiAllSenction();" id="select-all" />
+                                        </th>*@
+                                    <th>{{translation.SRNO}}</th>
+                                    <th> {{translation.InspectorName}}</th>
+                                    <th>{{translation.Urban}}/{{translation.Rural}}</th>
+                                    <th>{{translation.BlockHeading}}/{{translation.City}}</th>
+                                    <th> {{translation.GramPanchayat}}</th>
+                                    <th>{{translation.PrecentNameGSS}}</th>
+                                    <th>{{translation.NewGSSName}}</th>
+                                    <th>{{translation.NewGSSMemNo}}</th>
+                                    <th>{{translation.NewGSSAmanat}}</th>
+                                    <th>{{translation.NewGssAmount}}</th>
+                                    <th> {{translation.Remarkhi}}</th>
+                                    <th> {{translation.Document}}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                                <tr ng-repeat="item in InspactorTargetsListDetils">
+                                    @*<td><input type="checkbox" name="checkbox-1" class="chk" ng-model="item.chkdboxValue" ng-click="ChkdSenction(item);" /></td>*@
+                                    <td>{{$index+1}}</td>
+                                    <td>
+                                        {{item.InspacorName}}
+                                    </td>
+                                    <td>
+                                        {{item.Urban_Rural}}
+                                    </td>
+                                    <td>
+                                        {{item.BLOCK_ENG}} {{item.CITY_ENG}}
+                                    </td>
+                                    <td>
+                                        {{item.GP_ENG}}
+                                    </td>
+                                    <td>
+                                        {{item.PrecentNameGSS}}
+                                    </td>
+                                    <td>
+                                        {{item.NewGSSName}}
+                                    </td>
+                                    <td>
+                                        {{item.NoofMember}}
+                                    </td>
+                                    <td>
+                                        {{item.NewGSSprecious}}
+                                    </td>
+                                    <td>
+                                        {{item.NewGSSFinanceAmount}}
+                                    </td>
+                                    <td>
+                                        {{item.Remark}}
+                                    </td>
+
+                                    <td>
+                                        @*<a style="color:#505050;" ng-if="item.SenctionLatter!=null" target="_blank" href="../Content/SenctionFiles/{{item.SenctionLatter}}"><i class="fa fa-eye"></i></a>*@
+                                        <a ng-if="item.Documentname!=null" target="_blank" ng-href="../Content/InspactorDocument/{{item.Documentname}}">SANCTION LETTER UPLOAD APPROVED BY RCS</a>
+                                    </td>
+
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div ng-show="isSenction">
+                        <div class="col-lg-12" style="text-align:left;">
+                            <label>{{translation.ApprovedForRagistration}}:</label>
+                        </div>
+                        <div class="col-md-6" style="margin-top:15px;">
+                            <label>
+                                {{translation.Remark}}
+                            </label>
+                            <textarea class="form-control" ng-model="RemarksSenction"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="text-center" ng-if="InspactorTargetsListDetils.length === 0" style="margin-top: 30px;">
+                        <strong>No record found</strong>
+                    </div>
+
+                    <div class="text-center" style="margin-top: 15px;">
+                        <button type="button" class="btn btn-primary dev-btn" ng-click="goBackToInspactorTargets()"> <i class="fa fa-arrow-left"></i> Back </button>
+                    </div>
+
+                    @*status--8--set*@
+                </div>
+
+                <div ng-if="DataPagingDetails.TotalPages>1" class="dataTables_paginate paging_simple_numbers" id="dataTables-example_paginate">
+                    <div class="dataTables_info" id="dataTables-example_info" role="status" aria-live="polite">
+                        Total Records: {{DataPagingDetails.TotalRecords}}
+                    </div>
+                    <ul class="pagination pagination_1" style="margin-left: 10px !important;">
+                        <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« First</span></li>
+                        <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« Previous</span></li>
+
+                        <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest('1',GetInspactorTargetsDetails)" style="cursor: pointer;">
+                            <span>«First</span>
+                        </li>
+                        <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest(DataPagingDetails.PageNumber-1,GetInspactorTargetsDetails)" style="cursor:pointer;">
+                            <span>« Previous</span>
+                        </li>
+                        <li class="{{n==DataPagingDetails.PageNumber?'active':''}}" style="{{n==DataPagingDetails.PageNumber?'':'cursor: pointer'}}" ng-repeat="n in PagingRange(DataPagingDetails.StartPageNumber,DataPagingDetails.EndPageNumber,DataPagingDetails.TotalPages)" ng-click="pageRequest(n,GetInspactorTargetsDetails)"><span>{{n}}</span></li>
+                        <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Next</span></li>
+                        <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Last</span></li>
+                        <li ng-if="DataPagingDetails.PageNumber!= DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.PageNumber+1,GetInspactorTargetsDetails)" style="cursor:pointer;">
+                            <span>Next »</span>
+                        </li>
+                        <li ng-if="DataPagingDetails.PageNumber != DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.TotalPages,GetInspactorTargetsDetails)" style="cursor:pointer;">
+                            <span>Last »</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!--<div class="col-md-12 dev-menu-btn" style="margin-top: 20px; text-align:center;">
+                    <button type="submit" ng-show="!(GSSSStatusId=='1' && ischeckdtrue)" class="btn btn-primary" ng-click="SubmitDRToDistrict()">{{translation.Submit}}</button>
+                    <button type="submit" ng-show="(GSSSStatusId=='4' && isSenction)" class="btn btn-primary" ng-click="ApprovedForRagistration()">{{translation.Submit}}</button>-->
+                @*<button type="submit" class="btn btn-primary" ng-click="SubmitDRToDistrict()">Print</button>*@
+                <!--<button class="btn btn-primary dev-btn" ng-disabled="!(GSSSStatusId=='1' && ischeckdtrue)" onclick="printpage()"><i class="fa fa-print"></i> Print</button>
+                    <button type="submit" class="btn btn-primary" ng-click="BacktoMainDiv()">{{translation.Back}}</button>
+                </div>-->
+
+            </div>
+        </div>
+
+
+
+        <div class="col-md-12" ng-show="IsShowAssignForm1">
+            <div class="citizen-dash-head" style="overflow: hidden;">
+                <div class="col-lg-2 margin-Top20" style="padding-left:30px;">
+                    <label>{{ translation.Year}}</label>
+                    @*<select name="YearID" ng-disabled="true" class="form-control">
+                            <option value="2021" selected="selected">2021</option>
+                            <option value="2022">2022</option>
+                            <option value="2023">2023</option>
+                            <option value="2024">2024</option>
+                            <option value="2025">2025</option>
+                        </select>*@
+                    <select name="YearID" ng-model="selectedYear" class="form-control" ng-disabled="true"
+                            ng-options="y for y in years">
+                    </select>
+
+                </div>
+
+                <div class="col-lg-2 margin-Top20" style="padding-left:30px;">
+                    <label>{{ translation.Month}}</label>
+                    <select name="Mon" ng-model="MonthID" class="form-control" ng-init="MonthID='0'" ng-disabled="isEditMode">
+                        <option value="0">{{translation.SelectOption}}</option>
+                        <option ng-repeat="item in MonthList" value="{{item.Month_Id}}">
+                            {{_language =='en-us' ?  item.Month_En : item.Month_Hi}}
+                        </option>
+                    </select>
+                </div>
+                <div class="clearfix"></div>
+                <div class="col-lg-2 margin-Top20" style="padding-left:30px;">
+                    <label>{{translation.Level}}</label>
+                    <select class="form-control" id="ddllevel" ng-model="UserRegistration.LevelId" ng-init="UserRegistration.LevelId='0'" ng-change="OfficeList();DistrictList();GetRAJFEDRO();getLevelName()">
+                        <option value="0">{{translation.SelectOption}}</option>
+                        <option ng-repeat="item in Level" value="{{item.LevelId}}">
+                            {{_language =='en-us' ?  item.LevelNameEn : item.LevelNameHi}}
+                        </option>
+                    </select>
+                </div>
+
+
+                <div class="col-lg-2 margin-Top20" style="padding-left:30px;" ng-if="UserRegistration.LevelId=='2'">
+                    <label>{{translation.DivisionHeading}}</label> @*ng-change="DistrictList()"*@
+                    <select ng-model="UserRegistration.DivisionId" id="ddlDivision" name="division" class="form-control" ng-init="UserRegistration.DivisionId ='0'" ng-change="OfficeList();">
+                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                        <option ng-repeat="item in ROList" value="{{item.DIVISION_ID}}">
+                            {{_language =='en-us' ?  item.DIVISION_ENG : item.DIVISION_MANGAL}}
+                        </option>
+                    </select>
+                </div>
+                <div class="col-lg-2 margin-Top20" style="padding-left:30px;" ng-if="UserRegistration.LevelId=='3'">
+                    <label>{{translation.District}}</label>
+                    <select ng-model="UserRegistration.DistrictId" id="ddlDistrict" class="form-control" ng-init="UserRegistration.DistrictId='0'" ng-change="OfficeList()">
+                        <option value="0">{{translation.SelectOption}}</option>
+                        <option ng-repeat="item in Districts" value="{{item.DISTRICT_ID}}">
+                            {{_language =='en-us' ?  item.DISTRICT_ENG : item.DISTRICT_MANGAL}}
+                        </option>
+                    </select>
+                </div>
+
+                <div class="col-lg-2 margin-Top20" style="padding-left:30px;">
+                    <label>{{translation.Office}}</label>
+                    <select ng-model="UserRegistration.OfficeId" id="ddloffice" class="form-control" ng-init="UserRegistration.OfficeId='0'" ng-change="GetInspactor();">
+                        <option value="0">{{translation.SelectOption}}</option>
+                        <option ng-repeat="item in OfficeListData" value="{{item.OfficeId}}">
+                            {{_language =='en-us' ?  item.OfficeNameEn : item.OfficeNameHi}}
+                        </option>
+                    </select>
+                </div>
+                <div class="col-lg-2 margin-Top20" style="padding-left:30px;">
+                    <label>
+                        Inspector:
+                    </label>
+                    <select class="form-control" ng-model="InspactorId">
+                        <option value="0">{{translation.SelectOption}}</option>
+                        <option ng-repeat="itm in InspacorData" value="{{itm.MappingID}}">
+                            {{_language =='en-us' ?  itm.OfficerNameEn : itm.OfficerNameHi}}
+                        </option>
+                    </select>
+                </div>
+
+                <div class="col-lg-4 mt-8" style="padding-left:30px;" ng-show="false">
+                    <label>
+                        <input type="checkbox" ng-model="IsMahilaMpacs" ng-checked="IsMahilaMpacs" ng-disabled="isEditMode"> {{translation.IsMahilaMpacs}}
+                    </label>
+
+                </div>
+
+
+                <div class="form-group col-md-12">
+                    <h5 class="heading-hr ng-binding">{{translation.DetailofProposedMPACS}}</h5>
+                </div>
+                <div class="form-group col-md-12">
+                    <div class="col-md-3 form-group">
+                        <label>
+                            {{translation.BankName}}
+                        </label>
+                        <select ng-model="LoanBankID" name="CcbId" ng-init="LoanBankID=='0'" class="form-control" ng-change="Get_LoanBankBranch('0')" ng-disabled="isEditMode">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="itemBlock in BankMasterList | orderBy:'CCBNameEn'" value="{{itemBlock.CCBId}}">
+                                {{_language =='en-us' ?  itemBlock.CCBNameEn : itemBlock.CCBNameHi}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 form-group" ng-show="LoanBankID>0">
+                        <label>
+                            {{translation.BankBranch}}
+                        </label>
+                        <select ng-model="LoanBranchId" name="CcbBranchId" id="BranchId" class="form-control" ng-change="Get_LoanBranch_PACS('0')" ng-disabled="isEditMode">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="itemBlock in BankBranches | orderBy:'BranchNameEn'" value="{{itemBlock.Branch_ID}}">
+                                {{_language =='en-us' ?  itemBlock.BranchNameEn : itemBlock.BranchNameHi}}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group col-md-12">
+                    <div class="col-md-2 margin-Top20 form-group">
+                        <label>
+                            <input type="radio" name="AreaType" ng-model="IsTspArea" value="1" ng-change="IsTspArea==1 ? NonTspAreaType='' : ''" ng-disabled="isEditMode"> {{translation.TSPAREA}}
+                        </label>
+                        <label>
+                            <input type="radio" name="AreaType" ng-model="IsTspArea" value="0" ng-change="IsTspArea==1 ? NonTspAreaType='' : ''" ng-disabled="isEditMode">{{translation.NONTSPAREA}}
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group col-md-12" ng-show="IsTspArea==1">
+                    <div class="col-md-2 margin-Top20 form-group">
+                        <label>
+                            <input type="radio" name="TspAreaType" ng-model="TspAreaType" value="1" ng-disabled="isEditMode"> {{translation.GENERAL}}
+                        </label>
+                        <label>
+                            <input type="radio" name="TspAreaType" ng-model="TspAreaType" value="2" ng-disabled="isEditMode">{{translation.MINING}}
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group col-md-12" ng-show="IsTspArea==0">
+                    <div class="col-md-2 margin-Top20 form-group">
+                        <label>
+                            <input type="radio" name="NonTspAreaType" ng-model="NonTspAreaType" value="1" ng-disabled="isEditMode"> {{translation.GENERAL}}
+                        </label>
+                        <label>
+                            <input type="radio" name="NonTspAreaType" ng-model="NonTspAreaType" value="2" ng-disabled="isEditMode">{{translation.MINING}}
+                        </label>
+                        <label>
+                            <input type="radio" name="NonTspAreaType" ng-model="NonTspAreaType" value="3" ng-disabled="isEditMode">{{translation.CAD}}
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group col-md-12">
+                    <div class="row" ng-show=" (IsTspArea == 1 && TspAreaType) || (IsTspArea == 0 && NonTspAreaType) ">
+                        @*<div class="form-group col-md-6">
+
+                                <label class="help-block-gender ng-binding" style="width:15% !important;">
+                                    <input type="radio" id="sdfs" name="Rurals" value="1" onchange="getUrban()" class="ng-pristine ng-untouched ng-valid ng-empty"><span class="URBAN_TXT">Urban</span>
+                                </label>
+                                <label class="help-block-gender ng-binding" style="width:15% !important;">
+                                    <input type="radio" id="sdf" value="2" selected name="Rurals"><span class="RURAL_TXT">Rural</span>
+                                </label>
+
+                            </div>*@
+                        <div class="clearfix"></div>
+                        <div class="col-lg-2 margin-Top20" style="padding-left:30px;">
+                            <label>{{translation.District}}</label>
+                            <select ng-model="DistrictId" id="ddlDistrict1" class="form-control" ng-init="DistrictId='0'" ng-change="getAssembly();getblock()" ng-disabled="NonTspAreaType === '3' || isEditMode ">
+                                <option value="0">{{translation.SelectOption}}</option>
+                                <option ng-repeat="item in DistrictLst | filter:(NonTspAreaType=='3' ? {DISTRICT_ID:'16'} : {})" value="{{item.DISTRICT_ID}}">
+                                    {{_language =='en-us' ?  item.DISTRICT_ENG : item.DISTRICT_MANGAL}}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-lg-2 margin-Top20" style="padding-left:30px;">
+                            <label>{{translation.Assembly}}</label>
+                            <select ng-model="AssemblyId" id="ddlAssembly" class="form-control" ng-init="AssemblyId='0'" ng-disabled="isEditMode">
+                                <option value="0">{{translation.SelectOption}}</option>
+                                <option ng-repeat="item in AssemblyList " value="{{item.ASSEMBLY_ID}}">
+                                    {{_language =='en-us' ?  item.AC_ENG : item.AC_MANGAL}}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-lg-2 margin-Top20">
+                            <label><span class="BLOCK_TXT"> {{translation.BlockHeading}} </span></label>
+                            @*<select id="ddlblocki_@Model" class="form-control ng-pristine ng-untouched ng-valid ng-not-empty"></select>*@
+                            <select ng-model="BlockId" id="ddlBlock" class="form-control" ng-init="BlockId='0'" ng-change="getGrampanchyat()" ng-disabled="isEditMode">
+                                <option value="0">{{translation.SelectOption}}</option>
+                                <option ng-repeat="item in BlockDataList" value="{{item.BLOCK_ID}}">
+                                    {{_language =='en-us' ?  item.BLOCK_ENG : item.BLOCK_ENG}}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-lg-2 margin-Top20">
+                            <label><span class="GRAMPANCHAYAT_TXT">{{translation.GramPanchayatHeading}}</span></label>
+                            <select ng-model="PanchayatId" id="ddlGramPancyat" class="form-control" ng-init="PanchayatId='0'" ng-change="getvillage()" ng-disabled="isEditMode">
+                                <option value="0">{{translation.SelectOption}}</option>
+                                <option ng-repeat="item in GramPancyatList" value="{{item.GP_ID}}">
+                                    {{_language =='en-us' ?  item.GP_ENG : item.GP_ENG}}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-lg-2 margin-Top20" ng-show="NonTspAreaType=='3'  ">
+                            <label><span class="VILLAGE_TXT">{{translation.Village}}</span></label>
+                            <select ng-model="VillageId" id="ddlVillage" class="form-control" ng-init="VillageId='0'" ng-disabled="isEditMode">
+                                <option value="0">{{translation.SelectOption}}</option>
+                                <option ng-repeat="item in VillageList" value="{{item.VILLAGE_ID}}">
+                                    {{_language =='en-us' ?  item.VILLAGE_ENG : item.VILLAGE_ENG}}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-lg-2 margin-Top20" ng-show="NonTspAreaType=='3'  ">
+                            <label><span class="ProposedNameMPACS">{{translation.ProposedNameMPACS}}</span></label>
+                            <input type="text" ng-model="ProposedNameMPACS" class="form-control" placeholder="Please enter proposed mpacs" ng-disabled="isEditMode" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class=" col-md-12">
+                    <div class="clearfix"></div>
+                    <div class="row " ng-show=" (IsTspArea == 1 && TspAreaType) || (IsTspArea == 0 && NonTspAreaType) ">
+                        @*<div class="clearfix"></div>*@
+                        <div class="col-md-3  form-group margin-Top20 " style="padding-left:30px;" ng-show=" (IsTspArea == 1 && TspAreaType) || (IsTspArea == 0 && NonTspAreaType) ">
+                            <label>
+                                {{translation.SurveyDate}}
+                            </label>
+                            <input type="date" class="form-control" ng-model="SurveyDate" min="{{(!isEditMode) ? (today | date:'yyyy-MM-dd') :  (today | date:'yyyy-MM-dd') }}" required ng-disabled="isEditMode" />
+                        </div>
+
+                        <div class="col-md-3  margin-Top20 form-group">
+                            <label for="uploadDoc">{{translation.AllotmentLetter}}:</label>
+                            <div class="col-lg-10" style="margin-top:5px;padding-left:0;">
+
+                                <div class="col-lg-5" ng-show="!IsUploadFileName['AllotmentLetter'] " style="padding-left:0;">
+                                    <input type="file" accept="application/pdf" dat-val="nocheck" ng-model="AllotmentLetter" id="AllotmentLetter"
+                                           onchange="angular.element(this).scope().fileChanged(this, 'AllotmentLetter', 1)"
+                                           @*ng-click="AddFile1(1,'AllotmentLetter')"*@
+                                           validfile />
+                                </div>
+                                <div class="col-lg-7" ng-if="IsUploadFileName['AllotmentLetter'] " style="padding-left:0;">
+                                    <a ng-if="AllotmentLetter!=''"><i class="fa fa-check-circle-o" style="font-size:18px;color:#20cc20;"></i></a>
+                                    <a ng-if="AllotmentLetter!=''" ng-href="~/Content/InspactorDocument/{{AllotmentLetter}}" target="_blank"><i class="fa fa-eye-slash" style="font-size:18px;font-weight:bold"></i>View File</a>
+                                    <a ng-if="AllotmentLetter=='' " href="javascript:void(0)" ng-click="UploadFile_new('AllotmentLetter',1)">
+                                        <i class="fa fa-upload" style="font-size:18px;font-weight:bold"></i>Upload File
+                                    </a>
+                                    <a ng-if="IsUploadFileName['AllotmentLetter']" href="javascript:void(0)" ng-click="ChangeFile1(1,'AllotmentLetter')">
+                                        <i class="fa fa-undo" style="font-size:18px;font-weight:bold"></i>Change File
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3  margin-Top20 form-group" ng-show="CurrentUserDistrictId != UserRegistration.DistrictId">
+                            <label for="uploadDoc">{{translation.CompetentAcceptanceLetter}}:</label>
+                            <div class="col-lg-10" style="margin-top:5px;padding-left:0;">
+
+                                <div class="col-lg-5" ng-show="!IsUploadFileName['FileName']" style="padding-left:0;">
+                                    <input type="file" accept="application/pdf" dat-val="nocheck" ng-model="FileName" id="FileName"
+                                           onchange="angular.element(this).scope().fileChanged(this, 'FileName', 1)"
+                                           @*ng-click="AddFile1(1,'FileName')" checkmaxsize="1"*@ validfile />
+                                </div>
+                                <div class="col-lg-7" ng-if="IsUploadFileName['FileName']" style="padding-left:0;">
+                                    <a ng-if="FileName!=''"><i class="fa fa-check-circle-o" style="font-size:18px;color:#20cc20;"></i></a>
+                                    <a ng-if="FileName!=''" ng-href="~/Content/InspactorDocument/{{FileName}}" target="_blank"><i class="fa fa-eye-slash" style="font-size:18px;font-weight:bold"></i>View File</a>
+                                    <a ng-if="FileName==''" href="javascript:void(0)" ng-click="UploadFile_new('FileName',1)">
+                                        <i class="fa fa-upload" style="font-size:18px;font-weight:bold"></i>Upload File
+                                    </a>
+                                    <a ng-if="IsUploadFileName['FileName']" href="javascript:void(0)" ng-click="ChangeFile1(1,'FileName')">
+                                        <i class="fa fa-undo" style="font-size:18px;font-weight:bold"></i>Change File
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                @*@Html.Partial("_AddressControl", "MemberAdd")*@
+
+                <div class="col-lg-12 " id="panal_6" style="text-align: center;">
+                    @*<button type="button" ng-click="AddGSS()" class="btn btn-primary dev-btn ng-binding">{{translation.Add}}</button>*@
+                    <button type="button" ng-click="ValidateDuplicateProcess()" class="btn btn-primary dev-btn ng-binding">{{isEditMode ? 'Assign & Save': translation.Add}}</button>
+                </div>
+
+                <div class="col-lg-12  clspanal  margin-Top20" id="panal_6" style="margin-top:50px;" ng-hide="isEditMode">
+                    <div class="table-responsive">
+                        <table class="table devtable" id="tblLoanAmountDetail">
+                            <thead>
+                                <tr>
+                                    <th>{{translation.SRNO}}</th>
+                                    <th> {{translation.Inspector}}</th>
+                                    <th> {{ translation.Month}}</th>
+                                    <th> {{ translation.TSP}}/{{translation.NonTSP}}</th>
+                                    <th>{{translation.Urban}}/{{translation.Rural}}</th>
+                                    <th>{{translation.City}}/{{translation.BlockHeading}}</th>
+                                    <th> {{translation.GramPanchayat}}</th>
+                                    <th> {{translation.Village}}</th>
+                                    <th> {{translation.ProposedNameMPACS}}</th>
+
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="item in OtherPersonListNew" @*ng-if="!item.IsDelete"*@>
+                                    <td>{{$index+1}}</td>
+                                    <td>
+                                        {{item.Inspector}}
+                                    </td>
+                                    <td>
+                                        {{ ["","January","February","March","April","May","June","July", "August","September","October","November","December"][+item.MonthId] }}
+                                    </td>
+                                    <td>
+                                        {{item.IsTspArea==1 ? 'TSP' : 'NonTSP'}}-{{ item.AreaType == 1 ? 'General': item.AreaType == 2 ? 'Mining': item.AreaType == 3 ? 'CAD': '' }}
+                                    </td>
+
+                                    <td>
+                                        {{item.Urban_Rural}}
+                                    </td>
+                                    <td>
+                                        {{item.City_Block}}
+                                    </td>
+                                    <td>
+                                        {{item.GramPanchayat}}
+                                    </td>
+                                    <td>
+                                        {{item.VillageName}}
+                                    </td>
+                                    <td>
+                                        {{item.ProposedNameMPACS}}
+                                    </td>
+                                    <td style="text-align: right !important">
+
+                                        <i class="fa fa-trash clsShowHide btn btn btn-xs  tooltips " id="Remove_8" ng-click="RemoveOtherPersonListRow($index)" style=""></i>
+                                    </td>
+                                </tr>
+                            </tbody>
+
+                        </table>
+                    </div>
+                </div>
+
+                <div class="col-md-12" style="margin-top: 20px;">
+                    <div class="dev-menu-btn">
+                        <button type="submit" ng-hide="isEditMode" class="btn btn-primary" ng-click="SaveIODetailsUser()">{{ translation.Submit}}</button>
+                        <button type="submit" class="btn btn-primary" ng-click="Backtomove()">{{translation.Back}}</button>
+                    </div>
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+        @*<div id="printdiv" style="display:none">
+                <div class="col-lg-12" style="text-align:center; margin-top:15px; margin-bottom:15px; font-weight:bold; font-size:15px;">
+                    <span>:: नई प्रस्तावित ग्राम सेवा सहकारी समिति हेतु अनुसंशा ::</span>
+                </div>
+                <table id="tblid" border='1' cellpadding='5'>
+
+                    <tr>
+                        <td rowspan="2" style="font-size:12px;padding:5px;font-weight:normal;text-align:center;vertical-align:top;">क्र. सं.</td>
+                        <td rowspan="2" style="font-size:12px;padding:5px;font-weight:normal;text-align:center;vertical-align:top;">वर्तमान ग्राम सेवा सहकारी समिति (पैक्स/लेम्पस) का नाम</td>
+                        <td rowspan="2" style="font-size:12px;padding:5px;font-weight:normal;text-align:center;vertical-align:top;">नई प्रस्तावित ग्राम सेवा सहकारी समिति (पैक्स/लेम्पस) का नाम</td>
+                        <td rowspan="2" style="font-size:12px;padding:5px;font-weight:normal;text-align:center;vertical-align:top;">ग्राम पंचायत</td>
+                        <td rowspan="2" style="font-size:12px;padding:5px;font-weight:normal;text-align:center;vertical-align:top;">पंचायत सिमिति</td>
+                        <td colspan="3" style="font-size:12px;padding:5px;font-weight:normal;text-align:center;vertical-align:top;"> नई प्रस्तावित ग्राम सेवा<br /> सहकारी समिति की</td>
+                        <td rowspan="2" style="font-size:12px;padding:5px;font-weight:normal;text-align:center;vertical-align:top;">विशेष विवरण (कार्यालय/गोदाम निर्माण हेतु भूमि उब्लब्ध है अथवा नहीं तथा अन्य आवश्य्क सूचना)</td>
+                    </tr>
+                    <tr>
+                        <td style="font-size:12px;padding:5px;font-weight:normal;text-align:center;vertical-align:top;">सदस्य संख्या</td>
+                        <td style="font-size:12px;padding:5px;font-weight:normal;text-align:center;vertical-align:top;">अमानत</td>
+                        <td style="font-size:12px;padding:5px;font-weight:normal;text-align:center;vertical-align:top;">हिस्सा पूंजी</td>
+                    </tr>
+
+
+                    <tr ng-repeat="item in PrintDatalist">
+                        <td style="font-size:12px;padding:5px">{{$index+1}}</td>
+                        <td style="font-size:12px;padding:5px">{{item.PrecentNameGSS}}</td>
+                        <td style="font-size:12px;padding:5px">{{item.NewGSSName}}</td>
+                        <td style="font-size:12px;padding:5px">{{item.GP_ENG}}</td>
+                        <td style="font-size:12px;padding:5px"></td>
+                        <td style="font-size:12px;padding:5px">{{item.NoofMember}}</td>
+                        <td style="font-size:12px;padding:5px">{{item.NewGSSprecious}}</td>
+                        <td style="font-size:12px;padding:5px">{{item.NewGSSFinanceAmount}}</td>
+                        <td style="font-size:12px;padding:5px">{{item.Remark}}</td>
+                    </tr>
+
+                </table>
+            </div>*@<div id="printdiv" style="display:none">
+            <div class="col-lg-12" style="text-align:center; margin-top:15px; margin-bottom:15px; font-weight:bold; font-size:15px;">
+                <span></span>
+            </div>
+            <table id="tblid" border='1' cellpadding='5'>
+
+                <tr>
+                    <td rowspan="2" style="font-size:12px;padding:5px;font-weight:normal;text-align:center;vertical-align:top;"></td>
+                    <td rowspan="2" style="font-size:12px;padding:5px;font-weight:normal;text-align:center;vertical-align:top;"></td>
+                    <td rowspan="2" style="font-size:12px;padding:5px;font-weight:normal;text-align:center;vertical-align:top;"></td>
+                    <td rowspan="2" style="font-size:12px;padding:5px;font-weight:normal;text-align:center;vertical-align:top;"></td>
+                    <td rowspan="2" style="font-size:12px;padding:5px;font-weight:normal;text-align:center;vertical-align:top;"></td>
+                    <td colspan="3" style="font-size:12px;padding:5px;font-weight:normal;text-align:center;vertical-align:top;"><br /></td>
+                    <td rowspan="2" style="font-size:12px;padding:5px;font-weight:normal;text-align:center;vertical-align:top;"></td>
+                </tr>
+                <tr>
+                    <td style="font-size:12px;padding:5px;font-weight:normal;text-align:center;vertical-align:top;"></td>
+                    <td style="font-size:12px;padding:5px;font-weight:normal;text-align:center;vertical-align:top;"></td>
+                    <td style="font-size:12px;padding:5px;font-weight:normal;text-align:center;vertical-align:top;"></td>
+                </tr>
+
+
+                <tr ng-repeat="item in PrintDatalist">
+                    <td style="font-size:12px;padding:5px"></td>
+                    <td style="font-size:12px;padding:5px"></td>
+                    <td style="font-size:12px;padding:5px"></td>
+                    <td style="font-size:12px;padding:5px"></td>
+                    <td style="font-size:12px;padding:5px"></td>
+                    <td style="font-size:12px;padding:5px"></td>
+                    <td style="font-size:12px;padding:5px"></td>
+                    <td style="font-size:12px;padding:5px"></td>
+                    <td style="font-size:12px;padding:5px"></td>
+                </tr>
+
+            </table>
+        </div>
+
+        <div class="se-pre-con"></div>
+
+        <div id="stop" class="scrollTop">
+            <span><a href=""><i class="fa fa-arrow-up">Top</i></a></span>
+        </div>
+
+    </div>
+</div>

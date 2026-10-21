@@ -1,0 +1,158 @@
+﻿@{
+    ViewBag.Title = "GSS Mpacs Target Detail Report";
+}
+<script src="~/Scripts/AngularFramework/GetGSSMpacsTargetDetailReport.js?v=1.1"></script>
+<link href="~/Scripts/google_hindi/google_transliteration.css" rel="stylesheet" />
+<script src="~/Scripts/xlsx.full.min.js"></script>
+
+<style>
+
+    .inputapi-transliterate-indic-suggestion-menu {
+        z-index: 99999 !important;
+        display: block;
+    }
+
+    .table > tbody > tr > td, .table > tbody > tr > th, .table > tfoot > tr > td, .table > tfoot > tr > th, .table > thead > tr > td {
+        padding-right: 5px;
+        padding-left: 5px;
+    }
+
+    .freeze-select {
+        pointer-events: none;
+        background-color: #ffffff !important;
+        color: #000 !important;
+        border: 1px solid #ced4da !important;
+        cursor: default !important;
+    }
+</style>
+
+<script type="text/javascript">
+
+    var tableToExcel = (function () {
+
+        var uri = 'data:application/vnd.ms-excel;base64,'
+
+            , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>'
+
+            , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) }
+
+            , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
+
+        return function (table, name) {
+
+            if (!table.nodeType) table = document.getElementById(table)
+
+            var ctx = { worksheet: name || 'Worksheet', table: table.innerHTML }
+
+            window.location.href = uri + base64(format(template, ctx))
+
+        }
+
+    })()
+</script>
+
+
+<div ng-app="ApplicationFlowGssMpacsTargetDetailsModule" ng-controller="ApplicationGssMpacsTargetDetailsFlowCont" ng-cloak="">
+    <div>
+        <div class="col-md-12">
+            <h3 class="citizen-dash-head ng-binding" style="margin-top:0px;">GSS Mpacs Target Detail List</h3>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#"> {{translation.Home}}</a> <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;"> {{translation.New}} </span>
+                        <i class="fa fa-angle-right"> </i>
+                        <span style="margin: 0 5px;"> GSS Mpacs Target Detail List </span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div style="margin-top:30px;padding-top:30px">
+            <div class="col-md-12">
+                <div class="citizen-dash-head" style="overflow: hidden;">
+                    <div class="table-dropdown" id="search-filter" style="margin-bottom: 5px;">
+                        <div class="col-lg-12" style="margin-bottom: 5px; padding-left: 0;">
+
+                            <div class="col-md-12" style="margin-bottom:10px;">
+                                <button class="btn btn-default" ng-click="goBack()"> ← Back </button>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div style="overflow-x: auto;">
+                        <table id="PLDBLoanApplicationSectorWise" class="table table-bordered devtable text-center">
+
+                            <thead>
+                                <tr>
+                                    <th rowspan="2" width="80">{{translation.SRNO}}</th>
+                                    <th rowspan="2" style="text-align:center;"> Inspactor Name </th>
+                                    <th rowspan="2" style="text-align:center;"> District Name </th>
+                                    <th rowspan="2" style="text-align:center;"> New GSS Name </th>
+                                    <th rowspan="2" style="text-align:center;"> Precent Name GSS </th>                                                                   
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <tr ng-repeat="row in GridData">
+                                    <td>{{(((DataPagingDetails.PageNumber - 1) * DataPagingDetails.PageSize) + 1)+$index}}</td>
+                                    <td>{{row.InspacorName}}</td>
+                                    <td>{{row.DISTRICT_ENG}}</td>
+                                    <td>{{row.NewGSSName}}</td>
+                                    <td>{{row.PrecentNameGSS}}</td>                                                    
+                                </tr>
+
+                                <tr ng-if="!GridData || GridData.length === 0">
+                                    <td colspan="24" class="text-center">
+                                        Record Not Found
+                                    </td>
+                                </tr>
+                            </tbody>
+
+                            <tfoot>
+                                <tr>
+                                    <td colspan="8" class="listCount">
+                                        <div class="col-md-2">
+                                            <input ng-if="GridData.length>0" type="button" class="btn btn-primary dev-btn" ng-click="exportAllToExcel()" value="Export to Excel">
+                                        </div>
+                                        <div class="col-md-10">
+                                            <div ng-if="DataPagingDetails.TotalPages>1" class="dataTables_paginate paging_simple_numbers" id="dataTables-example_paginate">
+                                                <ul class="pagination pagination_1" style="margin: auto !important;display: block;">
+                                                    <li><label style="display: inline;position: relative;float: left;padding-top: 8px;padding-right:7px;">Total Records: {{DataPagingDetails.TotalRecords}}</label> </li>
+                                                    <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« First</span></li>
+                                                    <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« Previous</span></li>
+                                                    <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest('1',PldbOtsApplicationDetailList)" style="cursor: pointer;">
+                                                        <span>«First</span>
+                                                    </li>
+                                                    <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest(DataPagingDetails.PageNumber-1,PldbOtsApplicationDetailList)" style="cursor:pointer;">
+                                                        <span>« Previous</span>
+                                                    </li>
+                                                    <li class="{{n==DataPagingDetails.PageNumber?'active':''}}" style="{{n==DataPagingDetails.PageNumber?'':'cursor: pointer'}}" ng-repeat="n in PagingRange(DataPagingDetails.StartPageNumber,DataPagingDetails.EndPageNumber,DataPagingDetails.TotalPages)" ng-click="pageRequest(n,PldbOtsApplicationDetailList)"><span>{{n}}</span></li>
+                                                    <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Next</span></li>
+                                                    <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Last</span></li>
+                                                    <li ng-if="DataPagingDetails.PageNumber!= DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.PageNumber+1,PldbOtsApplicationDetailList)" style="cursor:pointer;">
+                                                        <span>Next »</span>
+                                                    </li>
+                                                    <li ng-if="DataPagingDetails.PageNumber != DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.TotalPages,PldbOtsApplicationDetailList)" style="cursor:pointer;">
+                                                        <span>Last »</span>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tfoot>
+
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="se-pre-con"></div>
+    </div>
+</div>
+

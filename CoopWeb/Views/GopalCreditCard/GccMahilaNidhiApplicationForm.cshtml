@@ -1,0 +1,951 @@
+﻿@model Cooperative.Models.GopalCreditCardModel.GopalCreditCardFormModel
+<script src="~/Scripts/AngularFramework/GccMahilaNidhiApplicationForm.js?id=27"></script>
+<script type="text/javascript" src="~/Scripts/jqueryuitimepicker.js"></script>
+<link href="~/Content/Stylesheets/jqueryuitimepicker.css" rel="stylesheet" />
+<style>
+    input[type=file].form-control {
+        border: 1px solid #cccccc !important;
+    }
+
+    .disabled input {
+        background-color: #e0e0ef; /* Change background to indicate disabled state */
+        /*pointer-events: none;*/
+    }
+
+    .instruction p {
+        color: #222222
+    }
+
+        .instruction p b {
+            color: #025e63
+        }
+
+    .instruction ul, .instruction ol {
+        color: #222222;
+        list-style-position: inside;
+    }
+</style>
+@Html.Hidden("TemplateId")
+<div ng-app="GopalCreditCardAppEntryForm" data-ng-init="init(@Newtonsoft.Json.JsonConvert.SerializeObject(Model))" ng-cloak="">
+    <input type="hidden" id="hdnUserType" ng-model="UserType" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).UserType)" />
+
+    <div ng-controller="GopalCreditCard">
+
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" ng-show="ShowGopalCreditCardForm=true">
+            <div class="citizen-dash-head">
+                <div class="caseformShow">
+                    <form id="frmGopalForm">
+                        <div class="col-lg-12 padding_zero">
+                            <h5 class="heading-hr ng-binding"> {{translation.PersonalDetail}} </h5>
+                        </div>
+                        <div class="col-lg-12" id="PersonalDetail">
+                            <div class="row">
+                                <div class="col-md-10">
+                                    <div class="row">
+                                        <div class="col-md-4  form-group">
+                                            <label for="search">{{translation.Name}}<span class="error">*</span>:</label>
+                                            <input type="text" name="PashupalakName" class="form-control disabled" disabled value="{{_language =='en-us' ?  GopalCreditCardModel.Name_ENG : GopalCreditCardModel.Name_HI}}" autocomplete="off" />
+                                            <input type="hidden" ng-model="GopalCreditCardModel.Name_ENG" />
+                                            <input type="hidden" ng-model="GopalCreditCardModel.Name_HI" />
+                                        </div>
+                                        <div class="col-md-4 form-group">
+                                            <label for="search">{{translation.FatherSpouseName}}<span class="error">*</span>:</label>
+                                            <input type="text" name="PashupalakFName" class="form-control disabled" disabled value="{{_language =='en-us' ?  GopalCreditCardModel.FatherName_ENG : GopalCreditCardModel.FatherName_HI}}" autocomplete="off" />
+                                        </div>
+                                        <div class="col-md-4 form-group">
+                                            <label for="search">{{translation.DOB}}/{{translation.Age}}<span class="error">*</span>:</label>
+                                            <input type="text" name="PashupalakDOB" class="form-control disabled" disabled value="{{GopalCreditCardModel.DOB}}/{{GopalCreditCardModel.Age}}" autocomplete="off" />
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-4 form-group">
+                                            <label style="color:black;">{{translation.Category}} <span class="error">*</span></label>
+                                            <select class="form-control" ng-model="GopalCreditCardModel.Category">
+                                                <option value="0">{{translation.SelectOption}}</option>
+                                                <option ng-repeat="item1 in CategoryList" value="{{item1.CODEID}}">
+                                                    {{_language =='en-us' ?  item1.CODENAME : item1.CODENAME_MANGAL}}
+                                                </option>
+                                            </select>
+                                        </div>
+                                        @*Madhuri*@
+                                        <div class="col-md-4  form-group">
+                                            <label for="search">{{translation.AADHARNo}}<span class="error">*</span>:</label>
+                                            <input type="text" class="form-control disabled" ng-minlength="12" maxlength="12" ng-model="GopalCreditCardModel.AadharNo" ng-value="GopalCreditCardModel.AadharNo | DEC" onpaste="return false;" ondrop="return false;" placeholder="{{translation.AADHARNo}}" onkeypress="return event.charCode >= 48 && event.charCode <= 57" autocomplete="off" />
+                                        </div>
+                                        <div class="col-md-4 form-group">
+                                            <label for="search">{{translation.PANNo}}:</label>
+                                            <input type="text" class="form-control disabled" ng-minlength="10" maxlength="10" onpaste="return false;" ondrop="return false;" placeholder="{{translation.PANNo}}" ng-model="GopalCreditCardModel.PANCardNo" ng-value="GopalCreditCardModel.PANCardNo | DEC" autocomplete="off" />
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-4 form-group">
+                                            <label for="search">{{translation.MobileNo}}<span class="error">*</span>:</label>
+                                            <input type="text" ng-minlength="10" maxlength="10" onkeypress="return event.charCode >= 48 && event.charCode <= 57" onpaste="return false;" ondrop="return false;" class="form-control disabled" placeholder="{{translation.MobileNo}}" ng-model="GopalCreditCardModel.MobileNo" autocomplete="off" />
+                                        </div>
+                                        <div class="col-md-4 form-group">
+                                            <label for="uploadAadharDoc"> {{translation.AadharDoc}}:<span class="error">(Max size upto 2MB)</span></label>
+                                            <input type="file" class="form-control" accept="application/pdf" ng-model="GopalCreditCardModel.AadharDoc" id="uploadAadharDoc" name="uploadAadharDoc" checkmaxsize="2048" onchange="angular.element(this).scope().ValidateAndUploadFile(this.files, 'AadharDoc')">
+                                            <a ng-show="AadharDoc!=''" target="_blank" href="~/Content/GopalCreditCard/{{AadharDoc}}" style="color: #337ab7;">View Aadhar Document<i class="fa fa-download"></i></a>
+                                            <div ng-if="GopalCreditCardModel.isValidAadharDoc" class="text-danger">
+                                                <p ng-if="GopalCreditCardModel.isValidAadharDoc"> {{ImageValidationMessage}}</p>
+                                            </div>
+                                            <div ng-if="GopalCreditCardModel.AadharDoc==''" class="text-danger">
+                                                <p>This field is required .!</p>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 form-group">
+                                            <label for="uploadPanCardDoc"> {{translation.PanCardDoc}}:<span class="error">(Max size upto 2MB)</span></label>
+                                            <input type="file" class="form-control" accept="application/pdf" ng-model="GopalCreditCardModel.PanCardDoc" id="uploadPanCardDoc" name="uploadPanCardDoc" checkmaxsize="2048" onchange="angular.element(this).scope().ValidateAndUploadFile(this.files, 'PanCardDoc')">
+                                            <a ng-show="PanCardDoc!=''" target="_blank" href="~/Content/GopalCreditCard/{{PanCardDoc}}" style="color: #337ab7;">View Pan Card Document<i class="fa fa-download"></i></a>
+                                            @*<div ng-if="GopalCreditCardModel.isValidPanCardDoc" class="text-danger">
+                                                    <p ng-if="GopalCreditCardModel.isValidPanCardDoc"> {{ImageValidationMessage}}</p>
+                                                </div>
+                                                <div ng-if="GopalCreditCardModel.PanCardDoc==''" class="text-danger">
+                                                    <p>This field is required .!</p>
+                                                </div>*@
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-2 form-group" ng-show="GopalCreditCardModel.MemberPhoto!=null && GopalCreditCardModel.MemberPhoto!=''">
+                                    <img src="~/Content/GopalCreditCard/{{GopalCreditCardModel.MemberPhoto}}" width="100" />
+                                </div>
+                                <div class="col-md-2 form-group" ng-show="GopalCreditCardModel.MemberPhoto_Base64!=null && GopalCreditCardModel.MemberPhoto_Base64!=''">
+                                    <img src="{{(GopalCreditCardModel.MemberPhoto_Base64!=null && GopalCreditCardModel.MemberPhoto_Base64!='')?'data:image/jpg;base64,' + GopalCreditCardModel.MemberPhoto_Base64:'../content/images/dummyImg.jpg'}}" width="100" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-12 form-group">
+                            <h5 class="heading-hr ng-binding"> {{translation.PahupalkAddress}}</h5>
+                            <label><input type="checkbox" ng-model="GopalCreditCardModel.IsAddressSameAsJanAadhar" id="IsAddressSameAsJanAadhar" name="chkAddressSameAsJanAadhar" ng-click="IsAddressSameAsJanAadhar_Changed(1)"> {{translation.AddressSameAsJanAadhar}}:</label>
+                        </div>
+                        <div class="col-lg-12" id="Address">
+                            <div class="row">
+                                <div class="col-md-6 form-group">
+                                    <label>{{ translation.HouseBuildingNo}}<span class="error">*</span></label>
+                                    <input type="text" class="form-control" name="HouseBuildingNo" ng-model="GopalCreditCardModel.HouseBuildingNo" placeholder="{{translation.HouseBuildingNo}}" autocomplete="off">
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label>{{ translation.LaneStreetName}}<span class="error">*</span></label>
+                                    <input type="text" class="form-control" name="LaneStreetName" ng-model="GopalCreditCardModel.LaneStreetName" placeholder="{{translation.LaneStreetName}}" autocomplete="off">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 form-group">
+                                    <label>{{translation.Address}}<span class="error">*</span>:</label>
+                                    <input type="text" class="form-control " ng-model="GopalCreditCardModel.Address_ENG" value="{{_language =='en-us' ?  GopalCreditCardModel.Address_ENG : GopalCreditCardModel.Address_HI}}" autocomplete="off" />
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label class="control-label">{{ translation.PIN}}<span class="error">*</span></label>
+                                    <input type="text" name="PinCode" class="form-control" ng-model="GopalCreditCardModel.PinCode" ng-disabled="GopalCreditCardModel.IsAddressSameAsJanAadhar && GopalCreditCardModel.PinCode!=''" placeholder="{{translation.PIN}}" maxlength="6" ng-minlength="6" onkeypress='return event.charCode >= 48 && event.charCode <= 57' autocomplete="off">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 form-group">
+                                    <label>{{ translation.Locality}}<span class="error">*</span></label>
+                                    <input type="text" class="form-control" name="Locality" ng-model="GopalCreditCardModel.Locality" placeholder="{{translation.Locality}}" autocomplete="off">
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label>{{ translation.District}}<span class="error">*</span></label>
+                                    <select ng-model="GopalCreditCardModel.District_Code" class="form-control" ng-init="GopalCreditCardModel.District_Code='0'" ng-disabled="GopalCreditCardModel.IsAddressSameAsJanAadhar" ng-change="ResetDataForAddress(1,2)">
+                                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                                        <option ng-repeat="item in DistrictList" value="{{item.DISTRICT_CODE}}">
+                                            {{_language =='en-us' ?  item.DISTRICT_ENG : item.DISTRICT_MANGAL}}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 form-group">
+                                    <label class="form-check-label" for="inlineRadio1">{{translation.UrbanRural}}</label>
+                                    <label class="help-block-gender">
+                                        <input type="radio" id="sdfs" name="Urban" ng-value="0" ng-model="GopalCreditCardModel.IsRural" ng-change="RuralUrbanBlock(false)" ng-disabled="GopalCreditCardModel.IsAddressSameAsJanAadhar">{{translation.Urban}}
+                                    </label>
+                                    <label class="help-block-gender">
+                                        <input type="radio" id="sdf" ng-value="1" name="Rural" ng-model="GopalCreditCardModel.IsRural" ng-change="RuralUrbanBlock(true)" ng-disabled="GopalCreditCardModel.IsAddressSameAsJanAadhar">{{translation.Rural}}
+                                    </label>
+                                </div>
+                                <div class="col-md-6 form-group">
+                                </div>
+                            </div>
+                            <div class="row" ng-show="RuralDiv">
+                                <div class="col-md-6 form-group">
+                                    <label>{{ translation.BlockHeading}}<span class="error">*</span> </label>
+                                    <select ng-model="GopalCreditCardModel.Block_Code" id="ddlblocki" class="form-control" ng-change="GramPanchayatList(1)" ng-disabled="GopalCreditCardModel.IsAddressSameAsJanAadhar">
+                                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                                        <option ng-repeat="item in Blocksdata | orderBy:'BLOCK_ENG'" value="{{item.BLOCK_CODE}}">
+                                            {{_language =='en-us' ?  item.BLOCK_ENG : item.BLOCK_MANGAL}}
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label>{{ translation.GramPanchayatHeading}}<span class="error">*</span></label>
+                                    <select ng-model="GopalCreditCardModel.GP_Code" id="ddlGP" class="form-control" ng-init="GopalCreditCardModel.GP_Code='0'" ng-change="VillageList(1)" ng-disabled="GopalCreditCardModel.IsAddressSameAsJanAadhar">
+                                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                                        <option ng-repeat="item in GramPanchayats | orderBy:'GP_ENG'" value="{{item.GP_CODE}}">
+                                            {{_language =='en-us' ?  item.GP_ENG : item.GP_MANGAL}}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row" ng-show="RuralDiv">
+                                <div class="col-md-6 form-group">
+                                    <label>{{translation.Village}}<span class="error">*</span></label>
+                                    <select ng-model="GopalCreditCardModel.Village_Code" id="ddlVillage" class="form-control" ng-init="GopalCreditCardModel.Village_Code='0'" ng-disabled="GopalCreditCardModel.IsAddressSameAsJanAadhar">
+                                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                                        <option ng-repeat="item in Villages | orderBy:'VILLAGE_ENG'" value="{{item.VILLAGE_CODE}}">
+                                            {{_language =='en-us' ?  item.VILLAGE_ENG : item.VILLAGE_MANGAL}}
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 form-group">
+                                </div>
+                            </div>
+                            <div class="row" ng-show="UrbanDiv">
+                                <div class="col-md-6 form-group">
+                                    <label>{{translation.City}}<span class="error">*</span></label>
+                                    <select ng-model="GopalCreditCardModel.City_Code" class="form-control" ng-change="GetWardList(1)" ng-init="GopalCreditCardModel.City_Code='0'" ng-disabled="GopalCreditCardModel.IsAddressSameAsJanAadhar">
+                                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                                        <option ng-repeat="item in CityList" value="{{item.CITY_CODE}}">
+                                            {{_language =='en-us' ?  item.CITY_ENG : item.CITY_MANGAL}}
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label>{{translation.Ward}}<span class="error">*</span></label>
+                                    <select ng-model="GopalCreditCardModel.Ward_Code" class="form-control" ng-init="GopalCreditCardModel.Ward_Code='0'" ng-disabled="GopalCreditCardModel.IsAddressSameAsJanAadhar && GopalCreditCardModel.Ward_Code!='0'">
+                                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                                        <option ng-repeat="item in Ward" value="{{item.WARD_CODE}}">
+                                            {{_language =='en-us' ?  item.WARD_ENG : item.WARD_MANGAL}}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="row" ng-show="false">
+                            <div class="col-md-6 form-group">
+                                <label> 1) {{translation.PACSLAMPSArea}}:<span class="error">*</span></label>
+                                <label for="chkIsResideInPACSLAMPSAreaYes"><input type="radio" ng-value="true" ng-model="GopalCreditCardModel.IsResideInPACSLAMPSArea" name="chkIsResideInPACSLAMPSArea" id="chkIsResideInPACSLAMPSAreaYes"> {{translation.Yes}}</label>
+                                <label for="chkIsResideInPACSLAMPSAreaNo"><input type="radio" ng-value="false" ng-model="GopalCreditCardModel.IsResideInPACSLAMPSArea" name="chkIsResideInPACSLAMPSArea" id="chkIsResideInPACSLAMPSAreaNo"> {{translation.No}}</label>
+                            </div>
+                            <div class="col-md-6 form-group">
+                            </div>
+                        </div>
+
+                        <div class="col-lg-12 padding_zero">
+                            <h5 class="heading-hr ng-binding"> {{translation.SHGBankDetails}} </h5>
+                        </div>
+                        <div class="col-lg-12" id="GCCBankDetails">
+                            <div class="row">
+                                <div class="col-md-6 form-group">
+                                    <label for="txtBankName">{{translation.BankName}}<span class="error">*</span>:</label>
+                                    <input type="text" class="form-control" ng-model="GopalCreditCardModel.SHG_BankName" id="txtSHGBankName" placeholder="{{translation.BankName}}" name="txtSHGBankName" autocomplete="off">
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label for="txtBankName">{{translation.Branch}}<span class="error">*</span>:</label>
+                                    <input type="text" class="form-control" ng-model="GopalCreditCardModel.SHG_BranchName" id="txtSHGBankName" placeholder="{{translation.Branch}}" name="txtSHGBankName" maxlength="100" autocomplete="off">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 form-group">
+                                    <label for="txtBankIFSCCode">{{translation.BankAcIFSCNoInCCS}}<span class="error">*</span>:</label>
+                                    <input type="text" class="form-control" ng-model="GopalCreditCardModel.SHG_IFSC_Code" id="txtSHGBankIFSCCode" placeholder="{{translation.IFSCCode}}" name="txtSHGBankIFSCCode" maxlength="30" autocomplete="off">
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label for="txtBankAccountNo">{{translation.BankAccountNo}}<span class="error">*</span>:</label>
+                                    <input type="text" class="form-control" ng-model="GopalCreditCardModel.SHG_AccountNo" onpaste="return false;" ondrop="return false;" id="txtSHGBankAccountNo" placeholder="{{translation.BankAccountNo}}" name="txtSHGBankAccountNo" maxlength="17" onkeypress='return event.charCode >= 48 && event.charCode <= 57' autocomplete="off">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-12 padding_zero">
+                            <h5 class="heading-hr ng-binding"> {{translation.SHGMemberBankDetails}} </h5>
+                        </div>
+                        <div class="col-lg-12" id="GCCBankDetails">
+                            <div class="row">
+                                <div class="col-md-6 form-group">
+                                    <label for="txtBankName">{{translation.BankName}}<span class="error">*</span>:</label>
+                                    <input type="text" class="form-control" ng-model="GopalCreditCardModel.SHG_Mem_BankName" id="txtSHGMemBankName" placeholder="{{translation.BankName}}" name="txtSHGMemBankName" autocomplete="off">
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label for="txtBankName">{{translation.Branch}}<span class="error">*</span>:</label>
+                                    <input type="text" class="form-control" ng-model="GopalCreditCardModel.SHG_Mem_BranchName" id="txtSHGMemBankName" placeholder="{{translation.Branch}}" name="txtSHGMemBankName" maxlength="100" autocomplete="off">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 form-group">
+                                    <label for="txtBankIFSCCode">{{translation.BankAcIFSCNoInCCS}}<span class="error">*</span>:</label>
+                                    <input type="text" class="form-control" ng-model="GopalCreditCardModel.SHG_Mem_IFSC_Code" id="txtSHGMemBankIFSCCode" placeholder="{{translation.IFSCCode}}" name="txtSHGMemBankIFSCCode" maxlength="30" autocomplete="off">
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label for="txtBankAccountNo">{{translation.BankAccountNo}}<span class="error">*</span>:</label>
+                                    <input type="text" class="form-control" ng-model="GopalCreditCardModel.SHG_Mem_AccountNo" onpaste="return false;" ondrop="return false;" id="txtSHGMemBankAccountNo" placeholder="{{translation.BankAccountNo}}" name="txtSHGMemBankAccountNo" maxlength="17" onkeypress='return event.charCode >= 48 && event.charCode <= 57' autocomplete="off">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-12 ">
+                            <div class="row">
+                                <div class="col-md-6 form-group">
+                                    <label>1) {{translation.DoesTheMilkSaleToDCS}}:<span class="error">*</span></label>
+                                    <label for="chkDoesTheMilkSaleToDCSYes"><input type="radio" ng-value="true" ng-model="GopalCreditCardModel.DoesTheMilkSaleToDCS" name="chkDoesTheMilkSaleToDCS" id="chkDoesTheMilkSaleToDCSYes" ng-click="DoesTheMilkSaleToDCS_Changed(1)"> {{translation.Yes}}</label>
+                                    <label for="chkDoesTheMilkSaleToDCSNo"><input type="radio" ng-value="false" ng-model="GopalCreditCardModel.DoesTheMilkSaleToDCS" name="chkDoesTheMilkSaleToDCS" id="chkDoesTheMilkSaleToDCSNo" ng-click="DoesTheMilkSaleToDCS_Changed(0)">{{translation.No}}</label>
+                                </div>
+                            </div>
+                            <div class="row" ng-show="GopalCreditCardModel.DoesTheMilkSaleToDCS" id="AnimalDetails">
+                                <div class="col-md-12 form-group">
+                                    <div class="row">
+                                        <div class="col-md-4 form-group">
+                                            <label for="txtDCSName">{{translation.DCSName}}:<span class="error">*</span></label>
+                                            <input type="text" id="txtDCSName" ng-model="GopalCreditCardModel.DCSName" placeholder="{{translation.SocietyName}}" class="form-control" maxlength="100" autocomplete="off" />
+                                        </div>
+                                        <div class="col-md-4 form-group">
+                                            <label for="txtDCSMembershipNo">{{translation.DCSMembershipNo}}:<span class="error">*</span></label>
+                                            <input type="text" id="txtDCSMembershipNo" ng-model="GopalCreditCardModel.DCSMembershipNo" placeholder="{{translation.MembershipNo}}" class="form-control" maxlength="30" autocomplete="off" />
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-lg-12 padding_zero">
+                                            <h5 class="heading-hr ng-binding"> {{translation.AnimalDetails}} </h5>
+                                        </div>
+
+                                        <div class="col-md-2 form-group">
+                                            <label for="txtNoOfCows">{{translation.NoOfCows}}:<span class="error">*</span></label>
+                                            <input type="number" id="txtNoOfCows" ng-model="GopalCreditCardModel.NoOfCows" onkeypress='return (event.charCode >= 48 && event.charCode <= 57)' class="form-control" maxlength="100" />
+                                        </div>
+                                        <div class="col-md-2 form-group">
+                                            <label for="txtNoOfbuffaloes">{{translation.NoOfbuffaloes}}:<span class="error">*</span></label>
+                                            <input type="number" id="txtNoOfbuffaloes" ng-model="GopalCreditCardModel.NoOfbuffaloes" class="form-control" onkeypress='return (event.charCode >= 48 && event.charCode <= 57)' maxlength="100" autocomplete="off" />
+                                        </div>
+                                        <div class="col-md-2 form-group">
+                                            <label for="txtOtherAnimal">{{translation.Other}}:<span class="error">*</span></label>
+                                            <input type="number" id="txtOtherAnimal" ng-model="GopalCreditCardModel.OtherAnimal" onkeypress='return (event.charCode >= 48 && event.charCode <= 57)' class="form-control" maxlength="10" autocomplete="off" />
+                                        </div>
+                                        <div class="col-md-2 form-group">
+                                            <label for="txtTotalAnimal">{{translation.TotalAnimal}}:<span class="error">*</span></label>
+                                            <input type="number" id="txtTotalAnimal" ng-model="GopalCreditCardModel.TotalAnimal" value="{{GopalCreditCardModel.NoOfCows+GopalCreditCardModel.NoOfbuffaloes+GopalCreditCardModel.OtherAnimal}}" class="form-control" onkeypress='return (event.charCode >= 48 && event.charCode <= 57)' maxlength="100" autocomplete="off" readonly />
+                                        </div>
+                                        <div class="col-md-4 form-group">
+                                            <label for="txtEstimatedAmountOfMilkSoldToDCS">{{translation.EstimatedAmountOfMilkSoldToDCS}}:<span class="error">*</span></label>
+                                            <input type="text" id="txtEstimatedAmountOfMilkSoldToDCS" ng-model="GopalCreditCardModel.EstimatedAmountOfMilkSoldToDCS" placeholder="0.00" class="form-control" maxlength="10" onkeypress='return (event.charCode >= 48 && event.charCode <= 57) || event.charCode==46' autocomplete="off" />
+                                        </div>
+
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-12 padding_zero" ng-show="GopalCreditCardModel.janAaadharFamilyMemberList.length>0">
+                            <h5 class="heading-hr ng-binding"> {{translation.SelectCowherdFamily1}} </h5>
+                        </div>
+                        <div class="col-lg-12 form-group" id="SelectCowherdFamily" ng-show="GopalCreditCardModel.janAaadharFamilyMemberList.length>0">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="citizen-dash-head">
+                                        <table class="table table-responsive devtable" style="overflow-x:auto;">
+                                            <thead>
+                                                <tr>
+                                                    <th width="10%">
+                                                        {{translation.SRNO}}
+                                                    </th>
+                                                    <th width="30%">
+                                                        {{translation.Name}}
+                                                    </th>
+                                                    <th width="20%">
+                                                        {{translation.MobileNo}}
+                                                    </th>
+                                                    <th width="40%">
+                                                        {{translation.SelectMember}}
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr dir-paginate="li in GopalCreditCardModel.janAaadharFamilyMemberList | filter: q | orderBy:colsort:reverseSort | itemsPerPage: pageSize" current-page="currentPage" pagination-id="TrainningFormatPagination">
+                                                    <td>
+                                                        {{pageSize *(currentPage-1)+$index+1}}
+                                                    </td>
+                                                    <td>
+                                                        {{_language =='en-us' ?  li.NAME : li.NAME_HI}}
+                                                    </td>
+                                                    <td>
+                                                        {{li.Masked_MOBILE_NO}}
+                                                    </td>
+                                                    <td>
+                                                        @*<input type="checkbox" ng-model="li.IsMemberSelected" ng-disabled="li.Age>25" id="chkIsFamilyMember{{li.Encrypted_JAN_MEMBER_ID}}" name="select" title="{{li.Age>25?translation.GCCRegistrationMsg_Age_25:''}}" class="family-member-checkbox">*@
+                                                        <input type="checkbox" ng-model="li.IsMemberSelected" id="chkIsFamilyMember{{li.Encrypted_JAN_MEMBER_ID}}" name="select" title="{{li.Age>25?translation.GCCRegistrationMsg_Age_25:''}}" class="family-member-checkbox">
+
+                                                        @*<label ng-show="li.Age>25"> {{translation.GCCRegistrationMsg_Age_25}}</label>*@
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-12 padding_zero">
+                            <h5 class="heading-hr ng-binding"> {{translation.DetailsCroploantaken}} </h5>
+                        </div>
+                        <div class="col-md-12" style="margin-top: 0px;" id="DetailsCroploantaken">
+                            <div class="table-responsive">
+                                <table class="table devtable" style="margin-top: 0px;">
+                                    <thead>
+                                        <tr>
+                                            <th rowspan="2">
+                                                {{translation.SRNO}}
+                                            </th>
+                                            <th rowspan="2" style="text-align:center;">
+                                                {{translation.NameOfSocietyFinancialInstitution}}
+                                            </th>
+                                            <th colspan="2" style="text-align:center;">
+                                                {{translation.Outstandingloanamount}}
+                                            </th>
+                                            <th rowspan="2" style="text-align:center;">
+                                                {{translation.Action}}
+                                            </th>
+                                        </tr>
+                                        <tr>
+                                            <th style="text-align:center;">
+                                                NOD
+                                            </th>
+                                            <th style="text-align:center;">
+                                                OD
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="item in CropLoanDetailsList|filter:{IsDelete:false}">
+                                            <td>{{$index+1}}</td>
+                                            <td>
+                                                <input type="text" class="form-control" ng-model="item.financeInstituteName" placeholder="{{translation.NameOfSocietyFinancialInstitution}}" autocomplete="off">
+                                            </td>
+
+                                            <td>
+                                                <input type="number" step="0.01" class="form-control" oninput="validateInput(this,12, 2)" ng-model="item.NOD" placeholder="NOD" autocomplete="off">
+                                            </td>
+                                            <td>
+                                                <input name="number" step="0.01" ng-model="item.OD" oninput="validateInput(this,12, 2)" class="form-control" placeholder="OD" autocomplete="off">
+                                            </td>
+
+                                            <td style="text-align:center;">
+                                                <i class="fa fa-plus clsShowHide btn btn btn-xs tooltips" title="Add More" ng-show="(CropLoanDetailsList|filter:{IsDelete:false}).length==$index+1" ng-click="AddMoreAg()"></i>
+                                                <i class="fa fa-trash clsShowHide btn btn btn-xs tooltips" title="Remove" ng-show="(CropLoanDetailsList|filter:{IsDelete:false}).length>1" ng-click="removeAgItem(item.cIndex)"></i>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="col-lg-12 padding_zero">
+                            <h5 class="heading-hr ng-binding"> {{translation.Detailsofguarantor}} </h5>
+                        </div>
+                        <div class="col-lg-12" id="IsDetailsofguarantor">
+                            <div class="col-lg-12 padding_zero">
+                                <h5 class="heading-hr"> {{translation.Guarranter1details}} </h5>
+                            </div>
+                            <div class="row" id="G1Details">
+                                <div class="col-md-12">
+                                    <div class="row">
+                                        <div class="col-md-4  form-group">
+                                            <label for="txtG1Name">{{translation.SHGMemberName}}:<span class="error">*</span></label>
+                                            <input type="text" id="txtG1Name" ng-model="GopalCreditCardModel.G1Name" placeholder="{{translation.Name}}" class="form-control" maxlength="100" />
+                                        </div>
+                                        <div class="col-md-4  form-group">
+                                            <label for="txtG1FatherSpouseName">{{translation.FatherSpouseName}}:<span class="error">*</span></label>
+                                            <input type="text" id="txtG1FatherSpouseName" ng-model="GopalCreditCardModel.G1FatherSpouseName" placeholder="{{translation.FatherSpouseName}}" class="form-control" maxlength="100" autocomplete="off" />
+                                        </div>
+                                        <div class="col-md-4 form-group">
+                                            <label for="search">{{translation.DOB}}<span class="error">*</span>:</label>
+                                            <input type="date" ng-model="GopalCreditCardModel.G1DOB" class="form-control disabled" value="{{GopalCreditCardModel.G1DOB}}" max="@(DateTime.Now.ToString("yyyy-MM-dd"))" placeholder="Date" autocomplete="off" />
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-4  form-group">
+                                            <label for="txtG1JanAadharNumber">{{translation.JanAadharNumberDetail}}:@*<span class="error">*</span>*@</label>
+                                            <input type="text" id="txtG1JanAadharNumber" ng-model="GopalCreditCardModel.G1JanAadharNumber" ng-value="GopalCreditCardModel.G1JanAadharNumber|DEC" placeholder="{{translation.JanAadharNumber}}" onpaste="return false;" ondrop="return false;" ng-minlength="10" maxlength="10" onkeypress="return event.charCode >= 48 && event.charCode <= 57" class="form-control" />
+                                        </div>
+
+                                        <div class="col-md-4  form-group">
+                                            <label for="txtG1AadharNo">{{translation.AADHARNo}}:<span class="error">*</span></label>
+                                            <input type="text" id="txtG1AadharNo" ng-model="GopalCreditCardModel.G1AadharNo" ng-value="GopalCreditCardModel.G1AadharNo | DEC" placeholder="{{translation.AADHARNo}}" onpaste="return false;" ondrop="return false;" ng-minlength="12" maxlength="12" onkeypress="return event.charCode >= 48 && event.charCode <= 57" class="form-control" />
+                                        </div>
+                                        <div class="col-md-4  form-group">
+                                            <label for="txtG1PANCardNo">{{translation.PANNo}}:@*<span class="error">*</span>*@</label>
+                                            <input type="text" id="txtG1PANCardNo" ng-model="GopalCreditCardModel.G1PANCardNo" ng-value="GopalCreditCardModel.G1PANCardNo | DEC" placeholder="{{translation.PANNo}}" onpaste="return false;" ondrop="return false;" class="form-control" ng-minlength="10" maxlength="10" autocomplete="off" />
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-4 form-group">
+                                            <label for="txtG1MobileNo">{{translation.MobileNo}}@*<span class="error">*</span>*@:</label>
+                                            <input type="text" id="txtG1MobileNo" class="form-control disabled" ng-model="GopalCreditCardModel.G1MobileNo" onpaste="return false;" ondrop="return false;" placeholder="{{translation.MobileNo}}" maxlength="10" onkeypress="return event.charCode >= 48 && event.charCode <= 57" autocomplete="off" />
+                                        </div>
+
+                                        <div class="col-md-8 form-group">
+                                            <label for="txtG1Address">{{translation.Address}}@*<span class="error">*</span>*@:</label>
+                                            <input type="text" id="txtG1Address" class="form-control disabled" ng-model="GopalCreditCardModel.G1Address" placeholder="{{translation.Address}}" autocomplete="off" />
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-4 form-group">
+                                            <label for="txtG1GuarranterLandProperty">{{translation.GuarranterLandProperty}}<span class="error">*</span>:</label>
+                                            <input type="text" id="txtG1GuarranterLandProperty" class="form-control disabled" ng-model="GopalCreditCardModel.G1GuarranterLandProperty" placeholder="{{translation.GuarranterLandProperty}}" autocomplete="off" />
+                                        </div>
+                                        <div class="col-md-4 form-group">
+                                            <label for="uploadG1Photo"> {{translation.Guarranter1details}} {{translation.Photo}}:<span class="error">(Max size upto 400KB)</span></label>
+                                            <input type="file" class="form-control" accept="image/png, image/gif, image/jpeg, image/pdf" ng-model="GopalCreditCardModel.G1Photo" id="uploadG1Photo" name="uploadG1Photo" checkmaxsize="400" onchange="angular.element(this).scope().ValidateAndUploadFile(this.files, 'G1Photo')">
+                                            <a ng-show="G1Photo!=''" target="_blank" href="~/Content/GopalCreditCard/{{G1Photo}}" style="color: #337ab7;">View Photo<i class="fa fa-download"></i></a>
+                                            <div ng-if="GopalCreditCardModel.isValidG1Photo" class="text-danger">
+                                                <p ng-if="GopalCreditCardModel.isValidG1Photo"> {{ImageValidationMessage}}</p>
+                                            </div>
+                                            <div ng-if="GopalCreditCardModel.G1Photo=='' " class="text-danger">
+                                                <p>This field is required .!</p>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 form-group">
+                                            <label for="uploadG1Signature"> {{translation.Guarranter1details}} {{translation.Signature}}:<span class="error">(Max size upto 100KB)</span></label>
+                                            <input type="file" class="form-control" accept="image/png, image/gif, image/jpeg, image/pdf" ng-model="GopalCreditCardModel.G1Signature" id="uploadG1Signature" checkmaxsize="100" name="uploadG1Signature" onchange="angular.element(this).scope().ValidateAndUploadFile(this.files, 'G1Signature')">
+                                            <a ng-show="G1Signature!=''" target="_blank" href="~/Content/GopalCreditCard/{{G1Signature}}" style="color: #337ab7;">View Signature<i class="fa fa-download"></i></a>
+                                            <div ng-if="GopalCreditCardModel.isValidG1Signature" class="text-danger">
+                                                <p ng-if="GopalCreditCardModel.isValidG1Signature"> {{ImageValidationMessage}}</p>
+                                            </div>
+                                            <div ng-if="GopalCreditCardModel.G1Signature==''" class="text-danger">
+                                                <p>This field is required .!</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-12 padding_zero">
+                                <h5 class="heading-hr"> {{translation.Guarranter2details}} </h5>
+                            </div>
+                            <div class="row" id="G2Details" ng-show="txtG1Name!=''">
+                                <div class="col-md-12">
+                                    <div class="row">
+                                        <div class="col-md-4  form-group">
+                                            <label for="txtG2Name">{{translation.SHGMemberName}}:<span class="error">*</span></label>
+                                            <input type="text" id="txtG2Name" ng-model="GopalCreditCardModel.G2Name" placeholder="{{translation.Name}}" class="form-control" maxlength="100" />
+                                        </div>
+                                        <div class="col-md-4  form-group">
+                                            <label for="txtG2FatherSpouseName">{{translation.FatherSpouseName}}:<span class="error">*</span></label>
+                                            <input type="text" id="txtG2FatherSpouseName" ng-model="GopalCreditCardModel.G2FatherSpouseName" class="form-control" placeholder="{{translation.FatherSpouseName}}" maxlength="100" autocomplete="off" />
+                                        </div>
+                                        <div class="col-md-4 form-group">
+                                            <label for="search">{{translation.DOB}}<span class="error">*</span>:</label>
+                                            <input type="date" class="form-control disabled" ng-model="GopalCreditCardModel.G2DOB" value="{{GopalCreditCardModel.G2DOB}}" max="@(DateTime.Now.ToString("yyyy-MM-dd"))" placeholder="Date" autocomplete="off" />
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-4  form-group">
+                                            <label for="txtG2JanAadharNumber">{{translation.JanAadharNumberDetail}}:@*<span class="error">*</span>*@</label>
+                                            <input type="text" id="txtG2JanAadharNumber" ng-model="GopalCreditCardModel.G2JanAadharNumber" ng-value="GopalCreditCardModel.G2JanAadharNumber|DEC" placeholder="{{translation.JanAadharNumber}}" onpaste="return false;" ondrop="return false;" ng-minlength="10" maxlength="10" onkeypress="return event.charCode >= 48 && event.charCode <= 57" class="form-control" />
+                                        </div>
+
+                                        <div class="col-md-4  form-group">
+                                            <label for="txtG2AadharNo">{{translation.AADHARNo}}:<span class="error">*</span></label>
+                                            <input type="text" id="txtG2AadharNo" ng-model="GopalCreditCardModel.G2AadharNo" ng-value="GopalCreditCardModel.G2AadharNo| DEC" placeholder="{{translation.AADHARNo}}" onpaste="return false;" ondrop="return false;" ng-minlength="12" maxlength="12" onkeypress="return event.charCode >= 48 && event.charCode <= 57" class="form-control" />
+                                        </div>
+                                        <div class="col-md-4  form-group">
+                                            <label for="txtG2PANCardNo">{{translation.PANNo}}@*:<span class="error">*</span>*@</label>
+                                            <input type="text" id="txtG2PANCardNo" ng-model="GopalCreditCardModel.G2PANCardNo" ng-value="GopalCreditCardModel.G2PANCardNo | DEC" placeholder="{{translation.PANNo}}" onpaste="return false;" ondrop="return false;" class="form-control" ng-minlength="10" maxlength="10" autocomplete="off" />
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-4 form-group">
+                                            <label for="txtG2MobileNo">{{translation.MobileNo}}@*<span class="error">*</span>*@:</label>
+                                            <input type="text" id="txtG2MobileNo" class="form-control disabled" ng-model="GopalCreditCardModel.G2MobileNo" onpaste="return false;" ondrop="return false;" placeholder="{{translation.MobileNo}}" maxlength="10" onkeypress="return event.charCode >= 48 && event.charCode <= 57" autocomplete="off" />
+                                        </div>
+
+                                        <div class="col-md-8 form-group">
+                                            <label for="txtG2Address">{{translation.Address}}@*<span class="error">*</span>*@:</label>
+                                            <input type="text" id="txtG2Address" class="form-control disabled" ng-model="GopalCreditCardModel.G2Address" placeholder="{{translation.Address}}" autocomplete="off" />
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-4 form-group">
+                                            <label for="txtG2GuarranterLandProperty">{{translation.GuarranterLandProperty}}<span class="error">*</span>:</label>
+                                            <input type="text" id="txtG2GuarranterLandProperty" class="form-control disabled" ng-model="GopalCreditCardModel.G2GuarranterLandProperty" placeholder="{{translation.GuarranterLandProperty}}" autocomplete="off" />
+                                        </div>
+                                        <div class="col-md-4 form-group">
+                                            <label for="uploadG2Photo">{{translation.Guarranter2details}} {{translation.Photo}}:<span class="error">(Max size upto 400KB)</span></label>
+                                            <input type="file" class="form-control" accept="image/png, image/gif, image/jpeg, image/pdf" ng-model="GopalCreditCardModel.G2Photo" id="uploadG2Photo" checkmaxsize="400" name="uploadG2Photo" onchange="angular.element(this).scope().ValidateAndUploadFile(this.files, 'G2Photo')">
+                                            <a ng-show="G2Photo!=''" target="_blank" href="~/Content/GopalCreditCard/{{G2Photo}}" style="color: #337ab7;">View Photo<i class="fa fa-download"></i></a>
+                                            <div ng-if="GopalCreditCardModel.isValidG2Photo" class="text-danger">
+                                                <p ng-if="GopalCreditCardModel.isValidG2Photo"> {{ImageValidationMessage}}</p>
+                                            </div>
+                                            <div ng-if="GopalCreditCardModel.G2Photo==''" class="text-danger">
+                                                <p>This field is required .!</p>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 form-group">
+                                            <label for="uploadG2Signature"> {{translation.Guarranter2details}} {{translation.Signature}}:<span class="error">(Max size upto 100KB)</span></label>
+                                            <input type="file" class="form-control" accept="image/png, image/gif, image/jpeg, image/pdf" ng-model="GopalCreditCardModel.G2Signature" id="uploadG2Signature" checkmaxsize="100" name="uploadG2Signature" onchange="angular.element(this).scope().ValidateAndUploadFile(this.files, 'G2Signature')">
+                                            <a ng-show="G2Signature!=''" target="_blank" href="~/Content/GopalCreditCard/{{G2Signature}}" style="color: #337ab7;">View Signature<i class="fa fa-download"></i></a>
+                                            <div ng-if="GopalCreditCardModel.isValidG2Signature" class="text-danger">
+                                                <p ng-if="GopalCreditCardModel.isValidG2Signature"> {{ImageValidationMessage}}</p>
+                                            </div>
+                                            <div ng-if="GopalCreditCardModel.G2Signature==''" class="text-danger">
+                                                <p>This field is required .!</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                        <!--Madhuri -->
+                        <div class="col-lg-12 padding_zero">
+                            <h5 class="heading-hr ng-binding"> {{translation.OtherDetails}} </h5>
+                        </div>
+                        <div class="col-lg-12" id="OtherDetails">
+
+                            <div class="row">
+                                <div class="col-md-3 form-group">
+                                    <label for="txtDesiredCreditLimitLoanAmount">1) {{translation.DesiredCreditLimitLoanAmount}}:<span class="error">*</span></label>
+                                    <input type="text" class="form-control" ng-model="GopalCreditCardModel.DesiredCreditLimitLoanAmount" id="txtDesiredCreditLimitLoanAmount" name="txtDesiredCreditLimitLoanAmount" maxlength="6" onkeypress='return (event.charCode >= 48 && event.charCode <= 57) || event.charCode==46' autocomplete="off">
+                                </div>
+                                <div class="col-md-2 form-group">
+                                    <label for="txtLoanAmountRecommendedByDCS">{{translation.LoanAmountRecommendedByDCS}}:<span class="error">*</span></label>
+                                    <input type="text" class="form-control" ng-model="GopalCreditCardModel.LoanAmountRecommendedByDCS" id="txtLoanAmountRecommendedByDCS" name="txtLoanAmountRecommendedByDCS" maxlength="7" onkeypress='return (event.charCode >= 48 && event.charCode <= 57) || event.charCode==46' autocomplete="off">
+                                </div>
+                                <div class="col-md-2 form-group">
+                                    <label for="search">{{translation.LoanDuration}} {{translation.Month}}<span class="error">*</span>:</label>
+                                    <input type="number" class="form-control" id="txtLoanDuration" value="12" disabled>
+                                </div>
+                                <div class="col-md-2 form-group">
+                                    <label for="search">{{translation.PurposeOfLoan}}<span class="error">*</span>:</label>
+                                    <select class="form-control" ng-model="GopalCreditCardModel.PurposeOfLoan" ng-init="GopalCreditCardModel.PurposeOfLoan='0'">
+                                        <option value="0">{{translation.SelectOption}}</option>
+                                        <option value="6" selected>{{_language =='en-us' ?  'To build/improve animal shelter(shed)' : 'पशु आश्रय (शेड) का निर्माण/सुधार करना'}}</option>
+                                        <option value="7">{{_language =='en-us' ?  'To build space for grazing (kheli)' : 'चराई के लिए जगह (खेली) बनाना'}}</option>
+                                        <option value="8">{{_language =='en-us' ?  'To purchase equipment for milk/chara/banta' : 'दूध/चारा/बांटा के लिए उपकरण खरीदने हेतु'}}</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3 form-group" ng-show="GopalCreditCardModel.PurposeOfLoan==5">
+                                    <label for="search">{{translation.Other}}<span class="error">*</span>:</label>
+                                    <input type="text" class="form-control" disable ng-model="GopalCreditCardModel.PurposeOfLoanOther" id="txtPurposeOfLoanOther" maxlength="50">
+                                </div>
+                            </div>
+
+                            <div class="col-lg-12" id="ShgDetails">
+                                <div class="row">
+                                    <div class="col-md-1 form-group">
+                                        <label>
+                                            {{translation.District}}
+                                        </label>
+                                        <select ng-model="GopalCreditCardModel.Mn_DistrictId" class="form-control" ng-init="GopalCreditCardModel.Mn_DistrictId='0'" ng-change="GetShgBlockList('0');" id="DistId">
+                                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                                            <option ng-repeat="item in ShgDistrictList track by item.DISTRICT_ID" value="{{item.DISTRICT_ID}}">
+                                                {{_language =='en-us' ?  item.DISTRICT_ENG : item.DISTRICT_MANGAL}}
+                                            </option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2 form-group">
+                                        <label>
+                                            {{translation.Block}}
+                                        </label>
+                                        <select ng-model="GopalCreditCardModel.Mn_BlockID" ng-disabled="IsSubmiApplication" id="Mn_BlockID" class="form-control" ng-init="GopalCreditCardModel.Mn_BlockID='0'" ng-change="GetShgCLFList('0')">
+                                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                                            <option ng-repeat="itemBlock in ShgBlockList | orderBy:'BLOCK_ENG'" value="{{itemBlock.BLOCK_ID}}">
+                                                {{_language =='en-us' ?  itemBlock.BLOCK_ENG : itemBlock.BLOCK_ENG}}
+                                            </option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3 form-group">
+                                        <label>
+                                            {{translation.CLF}}
+                                        </label>
+                                        <select ng-model="GopalCreditCardModel.Mn_ClusterId" id="ShgClfID" class="form-control" ng-init="GopalCreditCardModel.Mn_ClusterId='0'" ng-change="GetShgVoList('0')">
+                                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                                            <option ng-repeat="itemBlock in CLFList | orderBy:'ClfName'" value="{{itemBlock.ClfId}}">
+                                                {{_language =='en-us' ?  itemBlock.ClfName : itemBlock.ClfNameHi}}
+                                            </option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3 form-group">
+                                        <label>
+                                            {{translation.VO}}
+                                        </label>
+                                        <select ng-model="GopalCreditCardModel.Mn_VoID" id="ShgVoID" class="form-control" ng-init="GopalCreditCardModel.Mn_VoID='0'" ng-change="GetShgList('0')">
+                                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                                            <option ng-repeat="itemBlock in VoList | orderBy:'BLOCK_ENG'" value="{{itemBlock.VoId}}">
+                                                {{_language =='en-us' ?  itemBlock.VoName : itemBlock.VoNameHi}}
+                                            </option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3 form-group">
+                                        <label>
+                                            {{translation.SHG}}
+                                        </label>
+                                        <select ng-model="GopalCreditCardModel.Mn_ShgId" id="ShgId" class="form-control" ng-init="GopalCreditCardModel.Mn_ShgId='0'">
+                                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                                            <option ng-repeat="itemBlock in SHGList | orderBy:'ShgName'" value="{{itemBlock.ShgId}}">
+                                                {{_language =='en-us' ?  itemBlock.ShgName : itemBlock.ShgNameHi}}
+                                            </option>
+                                        </select>
+                                    </div>
+                                    @*<div class="col-md-3 form-group">
+                                            <label>
+                                                {{translation.SHGMemID}}
+                                            </label>
+                                            <select ng-model="GopalCreditCardModel.ShgMemId" id="ShgMemId" class="form-control" ng-init="GopalCreditCardModel.ShgMemId='0'">
+                                                <option value="0" disabled>{{translation.SelectOption}}</option>
+                                                <option ng-repeat="itemBlock in SHGList | orderBy:'ShgName'" value="{{itemBlock.ShgId}}">
+                                                    {{_language =='en-us' ?  itemBlock.ShgName : itemBlock.ShgNameHi}}
+                                                </option>
+                                            </select>
+                                        </div>*@
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12 form-group">
+                                    <label for="chkECSMandateConfirmation"><input type="checkbox" ng-model="GopalCreditCardModel.ECSMandateConfirmation" id="chkECSMandateConfirmation" name="chkECSMandateConfirmation"> {{translation.ECSMandateConfirmation}}:</label>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12 form-group">
+                                    <label for="chkGopalCreditCardLoanDeclaration1"><input type="checkbox" ng-model="GopalCreditCardModel.GopalCreditCardLoanDeclaration" id="chkGopalCreditCardLoanDeclaration1" name="chkGopalCreditCardLoanDeclaration"> {{translation.GopalCreditCardLoanDeclaration}}:</label>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12 form-group">
+                                    <label for="chkGopalCreditCardDeclaration2"><input type="checkbox" ng-model="GopalCreditCardModel.GopalCreditCardDeclaration2" id="chkGopalCreditCardDeclaration2" name="chkGopalCreditCardDeclaration2"> {{translation.GopalCreditCardDeclaration2}}:</label>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12 form-group">
+                                    <label for="chkGopalCreditCardDeclaration3"><input type="checkbox" ng-model="GopalCreditCardModel.GopalCreditCardDeclaration" id="chkGopalCreditCardDeclaration3" name="chkGopalCreditCardDeclaration"> {{translation.GopalCreditCardDeclaration}}:</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-12 text-center">
+                            @*<button type="submit" ng-show="GopalCreditCardModel.StatusId==1||GopalCreditCardModel.StatusId==0" class="btn btn-primary dev-btn" ng-click="Save_GopalCreditCardForm(1)">{{translation.PartialSave}}</button>*@
+                            <button type="submit" ng-show="GopalCreditCardModel.StatusId==1||GopalCreditCardModel.StatusId==0||GopalCreditCardModel.StatusId==13||GopalCreditCardModel.StatusId==14" class="btn btn-primary dev-btn" ng-click="Save_GopalCreditCardForm(2)">{{translation.SaveData}}</button>
+
+                            <button ng-show="GopalCreditCardModel.StatusId==1 && KioskUserType=='K'" class="btn btn-primary dev-btn" ng-click="GetFeeVerification13851()">{{translation.VerifyTransaction}}</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" ng-show="ShowJanAadharOTPValidation==true">
+            <div class="citizen-dash-head">
+                <div class="caseformShow">
+                    <div class="col-md-12">
+                        <div class="citizen-dash-head">
+                            <form name="GetJanMemberList">
+                                <div class="table-dropdown">
+                                    <div class="col-md-4">
+                                        <label>
+                                            {{translation.JanAadharNumberDetail}} :
+                                        </label>
+                                        <input type="text" id="txtJanAadharNo" ng-model="JanAadharNo" ng-value="JanAadharNo | DEC" class="form-control" placeholder="{{translation.JanAadharNumber}}" maxlength="10" />
+                                    </div>
+                                    <div class="col-md-4">
+                                        <button type="submit" class="btn btn-primary dev-btn" style="margin-top: 25px;" ng-disabled="JanAadharNo==''" ng-click="GetJanAadharDetail()">{{translation.GetDetails}}</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="col-md-12" ng-show="ShowFamilyMemberGrid==true">
+                        <div class="citizen-dash-head">
+                            <table class="table table-responsive devtable" style="overflow-x:auto;">
+                                <thead>
+                                    <tr>
+                                        <th width="10%">
+                                            {{translation.SRNO}}
+                                        </th>
+                                        <th width="30%">
+                                            {{translation.Name}}
+                                        </th>
+                                        <th width="20%">
+                                            {{translation.MobileNo}}
+                                        </th>
+                                        <th width="40%">
+                                            {{translation.SelectMember}}
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr dir-paginate="li in JanMemberList | filter: q | orderBy:colsort:reverseSort | itemsPerPage: pageSize" current-page="currentPage" pagination-id="TrainningFormatPagination">
+                                        <td>
+                                            {{pageSize *(currentPage-1)+$index+1}}
+                                        </td>
+                                        <td>
+                                            {{_language =='en-us' ?  li.NAME : li.NAME_HINDI}}
+                                        </td>
+                                        <td>
+                                            {{li.Masked_MOBILE_NO}}
+                                        </td>
+                                        <td>
+                                            <input type="radio" name="select" data-target="#modelPopupVerifyOTP" data-toggle="modal" ng-disabled="li.Age<18 || li.Encrypted_MOBILE_NO==''" ng-click="VerifyOTPViewPopup(li.Masked_MOBILE_NO,li.Encrypted_JAN_MEMBER_ID, li.Encrypted_JAN_AADHAR )" title="{{li.Age==0?translation.GCCAge0Message:(li.Age<18?translation.GCCRegistrationMsg_Age_18:'')}}">
+                                            @*<label ng-show="li.Age<18">
+                                                    {{translation.GCCRegistrationMsg_Age_18}}
+                                                </label>
+                                                <label ng-show="li.Encrypted_MOBILE_NO==''">
+                                                    {{translation.GCCRegistrationMsg_Mobile}}
+                                                </label>*@
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="col-md-10">
+                        <div class="text-center">
+                            <dir-pagination-controls boundary-links="true" pagination-id="TrainningFormatPagination" on-page-change="pageChangeHandler(newPageNumber)" template-url="/dirPagination.tpl.html"></dir-pagination-controls>
+                        </div>
+                    </div>
+                    @*<div class="form-group col-md-12">
+                            <div class="dev-align-btn">
+                                <a class="btn btn-primary dev-btn" style="text-transform:capitalize;" href="../User/DashBoard"> Back</a>
+                            </div>
+                        </div>*@
+                </div>
+            </div>
+        </div>
+        <div class="dev-popup-body modal fade" id="modelPopupVerifyOTP" role="dialog" data-backdrop="static" data-keyboard="false">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" ng-click="ClearOrganisationForm()">&times;</button>
+                        <h4 class="modal-title"> {{translation.VerifyJanAadharOTP}} </h4>
+                    </div>
+                    <div class="modal-body">
+                        <form id="OrganisationForm" class="dev-search-form" style="overflow: hidden; margin-bottom: 35px;" name="OrganisationForm">
+                            <div class="col-md-12">
+                                <label>
+                                    {{translation.MobileNo}} :
+                                </label>
+                                <input type="text" id="txtMasked_MOBILE_NO" ng-model="SendAndVerifyOTP.Masked_MOBILE_NO" class="form-control" disabled />
+                            </div>
+                            <div class="col-md-12" ng-if="SendAndVerifyOTP.tid!=''">
+                                <label>
+                                    {{translation.EnterOTP}} :
+                                </label>
+                                <input type="text" id="txtJanAadharOTP" ng-if="SendAndVerifyOTP.tid!=''" ng-model="SendAndVerifyOTP.JanAadharOTP" class="form-control" onkeypress='return (event.charCode >= 48 && event.charCode <= 57)' maxlength="6" ng-minlength="6" />
+                            </div>
+                            <div class="form-group mb-0">
+                                <div class="dev-align-btn">
+                                    <span id="countdown" style="color:red" class="d-inline-block"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-12 text-center">
+                                <button type="submit" id="btnSendOTP" class="btn btn-primary dev-btn" style="margin-top: 25px;" ng-disabled="SendAndVerifyOTP.Masked_MOBILE_NO==''" ng-if="SendAndVerifyOTP.tid==''" ng-click="GenrateJanAadharOTP()">{{translation.SendOTP}}</button>
+                                <button type="submit" id="btnReSendOTP" class="btn btn-primary dev-btn" style="margin-top: 25px; display:none;" ng-click="GenrateJanAadharOTP()">{{translation.ReSendOTP}}</button>
+                                <button type="submit" class="btn btn-primary dev-btn" style="margin-top: 25px;" ng-if="SendAndVerifyOTP.tid!=''" ng-click="ValidateJanAadharOTP()">{{translation.VerifyOTP}}</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="dev-popup-body modal fade" id="modalInstruction" role="dialog" data-backdrop="static" data-keyboard="false">
+            <div class="modal-dialog" style="width:100%;max-width:800px;">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        @*<button type="button" class="close" data-dismiss="modal">&times;</button>*@
+                        <h4 class="modal-title fw-bold"> {{translation.Instruction}} </h4>
+                    </div>
+                    <div class="modal-body instruction">
+                        <div class="row">
+                            <div class="col-md-12" ng-show="_language == 'en-us'">
+                                <h4 class="text-success">The following qualifications are necessary for the animal breeder to be eligible for the scheme:</h4>
+                                <ol>
+                                    <li>The cattle keeper should be a member of the primary milk producing cooperative society.</li>
+                                    <li>The cattle owner should sell his milk to the primary milk producing cooperative society.</li>
+                                    <li>The livestock owner should be a resident of the Gram Seva Sahakari Samiti/Primary Agriculture Credit Cooperative Society.</li>
+                                </ol>
+                                <hr />
+                                <p>
+                                    <b>If you are eligible then submit the application after completing the below documents and details.</b>
+                                </p>
+                                <ol>
+                                    <li>Your PAN Card and Aadhaar Card.</li>
+                                    <li>Details of account in which milk is paid by the committee.</li>
+                                    <li>Name and membership number of your society.</li>
+                                    <li>Details of the property proposed for hypothecation to the bank.</li>
+                                    <li>Details of agricultural land.</li>
+                                    <li>Details of crop loan taken from cooperative society/other financial institution.</li>
+                                    <li>Details of two guarantors and their Aadhaar and PAN details along with one photograph and signature each.</li>
+                                    <li>Recommendation of primary milk producer cooperative society.</li>
+                                </ol>
+                                <label class="text-warning">
+                                    <input type="checkbox" ng-model="isFulfillCondition" />
+                                    Does the animal keeper fulfill all the above conditions and does he have all the required documents.
+                                </label>
+                            </div>
+                            <div class="col-md-12" ng-show="_language != 'en-us'">
+                                <h4 class="text-success">पशुपालक को योजना में पात्र होने के लिए निम्न योग्यता जरुरी है:-</h4>
+                                <ol>
+                                    <li>पशुपालक को प्राथमिक दुग्ध उत्पादक सहकारी समिति का सदस्य होना चाहिए। </li>
+                                    <li>पशुपालक द्वारा प्राथमिक दुग्ध उत्पादक सहकारी समिति में अपने दूध का बेचान किया जाना चाहिए। </li>
+                                    <li>पशुपालक ग्राम सेवा सहकारी समिति का निवासी होना चाहिए। </li>
+                                </ol>
+                                <hr />
+                                <p>
+                                    <b>यदि आप पात्र है तो नीचे दिए गए दस्तावेज और विवरण पूर्ण करते ही आवेदन प्रस्तुत करें।</b>
+                                </p>
+                                <ol>
+                                    <li>अपना पैन कार्ड और आधार कार्ड।</li>
+                                    <li>समिति द्वारा दूध का भुगतान जिस खाते में किया जाता है उसका विवरण।</li>
+                                    <li>आपकी सोसायटी का नाम और सदस्यता संख्या।</li>
+                                    <li>रहन हेतु प्रस्तावित संपत्ति का विवरण।</li>
+                                    <li>कृषि भूमि का विवरण।</li>
+                                    <li>सहकारी समिति/अन्य वित्तीय संस्थान से लिए गए फसली ऋण का विवरण।</li>
+                                    <li>दो जमानतदारो का विवरण एवं उनके आधार और पैन विवरण के साथ एक एक फोटो और हस्ताक्षर।</li>
+                                    <li>प्राथमिक दुग्ध उत्पादक सहकारी समिति की अनुशंषा।</li>
+                                </ol>
+                                <label class="text-warning">
+                                    <input type="checkbox" ng-model="isFulfillCondition" />
+                                    क्या पशुपालक उपरोक्त सभी शर्तों की पूर्ति करता है एवं उसके पास वांछित समस्त दस्तावेज मौजूद है।
+                                </label>
+                            </div>
+                            <div class="col-md-12 text-center">
+                                <button type="button" class="btn btn-danger" data-dismiss="modal" style="margin-top: 25px; ">{{translation.GoBack}}</button>&emsp;
+                                <button type="button" ng-disabled="!isFulfillCondition" ng-click="AddNewGopalCreditCardApp(2)" data-dismiss="modal" class="btn btn-primary dev-btn" style="margin-top: 25px; ">{{translation.ProceedFurther}}</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    //function setTwoNumberDecimal(event) {
+
+    //    this.value = parseFloat(this.value).toFixed(2);
+    //    alert(this.value);
+    //}
+
+    function validateDecimalPlaces1(input, maxDecimalPlaces) {
+        let value = input.value;
+        if (value.includes('.')) {
+            const decimalPart = value.split('.')[1];
+            if (decimalPart.length > maxDecimalPlaces) {
+                input.value = parseFloat(value).toFixed(maxDecimalPlaces);
+            }
+        }
+    }
+    function validateInput(input, maxLength, maxDecimalPlaces) {
+        let value = input.value;
+        if (value) {
+            // Check for decimal places
+            let parts = value.split('.');
+            if (parts.length > 1 && parts[1].length > maxDecimalPlaces) {
+                value = parseFloat(value).toFixed(maxDecimalPlaces);
+                input.value = value;
+            }
+
+            // Check for overall length (excluding decimal point and decimal places)
+            let integerPartLength = parts[0].length;
+            let totalLength = integerPartLength + (parts[1] ? parts[1].length : 0);
+            if (totalLength > maxLength) {
+                input.value = input.value.slice(0, maxLength);
+            }
+        }
+    }
+</script>

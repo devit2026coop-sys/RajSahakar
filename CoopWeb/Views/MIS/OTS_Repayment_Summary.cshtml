@@ -1,0 +1,171 @@
+﻿@{
+    ViewBag.Title = "OTS Repayment Summary";
+}
+<style>
+    .flexEqualCenter {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    a.backBtn {
+        padding: 3px 5px;
+        background: rgb(99,205,219);
+        color: #fff;
+        border: 0px;
+        outline: none;
+        display: inline-block;
+        text-decoration: none;
+    }
+
+        a.backBtn i {
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+    .tblthfont {
+        font-weight: bold;
+    }
+</style>
+<script src="~/Scripts/AngularFramework/OTS_Repayment_Summary.js?v=2"></script>
+<div ng-app="otsMod" ng-controller="otsCtrl" ng-cloak="">
+    <div class="container-fluid citizen-dash-head">
+        <input type="hidden" id="hdnDistrictId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DistrictId)" />
+        <input type="hidden" id="hdnPldbId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).PLDBId)" />
+        <input type="hidden" id="hdnPldbBranchId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).PLDBBrancchId)" />
+
+        <div class="panel panel-default">
+            <div class="panel-heading flexEqualCenter">
+                <b><i class="fa fa-th-list"></i>&nbsp; PLDB OTS Repayment Summary</b>
+                <div class="text-right">
+                    @*<button ng-click="BackToPage()" class="btn btn-primary dev-btn">Back To List</button>*@
+                    <button ng-if="GetPldbOtsSummaryDetail.length==0" ng-show="GetPldbOtsSummary!=null && GetPldbOtsSummary.length>0" ng-click="ReportDownload()" class="btn btn-primary dev-btn">Export Excel</button>
+                    <button ng-show="GetPldbOtsSummary!=null && GetPldbOtsSummaryDetail.length>0" ng-click="ReportSummaryDownload()" class="btn btn-primary dev-btn">Export Excel</button>
+                </div>
+            </div>
+            <div class="panel-body">
+                <input type="hidden" id="hdnDistrictId" ng-model="search.LoanDistrictId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DistrictId)" />
+                <div class="row">
+                    <div class="col-md-2 form-group" ng-show="true">
+                        <label>{{ translation.District}}<span class="error">*</span></label>
+                        <select id="DISTRICT_ID" ng-model="search.DISTRICT_ID" class="form-control" ng-init="search.DISTRICT_ID='0'" ng-change="PLDBListData(0)">
+                            <option value="0">{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in DistrictList" value="{{item.DISTRICT_ID}}">
+                                {{_language =='en-us' ?  item.DISTRICT_ENG : item.DISTRICT_MANGAL}}
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="col-lg-2 margin-Top20" style="padding-left: 0;" id="ddlPLDBID" ng-show="true">
+                        <label for="PLDB_ID">{{ translation.PLDB}} </label>
+                        <select id="PLDB_ID" name="PLDB_ID" ng-model="search.PLDB_ID" class="form-control" ng-init="PLDB_ID='0'" ng-change="PLDBBranchList('0')">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="itemPLDB in PLDBList  track by itemPLDB.PldbId " value="{{itemPLDB.PldbId}}">
+                                {{itemPLDB.PLDBName}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-lg-2 margin-Top20" style="padding-left: 0;" id="ddlPldbBranchID" ng-show="true">
+                        <label for="PLDB_Branch_ID">{{ translation.Branch}}</label>
+                        <select ng-model="search.PLDB_Branch_ID" name="PLDB_Branch_ID" id="PLDB_Branch_ID" class="form-control" ng-init="PLDB_Branch_ID='0'" ng-change="GetPldbOtsSummaryList('0')">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="itemBlock in PLDBBranches " value="{{itemBlock.BLOCK_ID}}">
+                                {{_language =='en-us' ?  itemBlock.BLOCK_ENG : itemBlock.BLOCK_MANGAL}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-lg-2" style="padding-top: 26px;">
+                        <button ng-click="ClearFilter()" class="btn btn-primary dev-btn">Clear Filter</button>
+                    </div>
+                </div>
+
+                <div class="table-responsive devtable" ng-show="IsPldbcalled">
+                    <table class="table table-hover table-striped table-bordered mb-0" id="{{PLDBOtsRepaymentReport}}">
+                        <thead>
+                            <tr>
+                                <th rowspan="2" width="60">{{translation.SRNO}}</th>
+                                <th ng-show="search.DISTRICT_ID!=0 && search.PLDB_ID!=0 && search.PLDB_Branch_ID!=0">{{translation.ApplicantName}}</th>
+                                <th ng-show="search.DISTRICT_ID!=0 && search.PLDB_ID!=0 && search.PLDB_Branch_ID!=0">{{translation.LoanAccNo }}</th>
+                                <th ng-show="search.DISTRICT_ID!=0 && search.PLDB_ID!=0 && search.PLDB_Branch_ID!=0 && ReportType!=4">{{translation.District}}</th>
+                                <th ng-show="search.DISTRICT_ID!=0 || search.DISTRICT_ID==0">{{translation.PLDB }}</th>
+                                <th ng-show="search.DISTRICT_ID!=0 && search.PLDB_ID!=0">{{translation.PLDBBranch }}</th>
+                                <th>{{_language =='en-us'?'Recovered Amount':'वसूली राशि'}}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="item in GetPldbOtsSummary">
+                                <td><span ng-hide="item.DistrictName=='Total' || item.PLDBName=='Total' || item.ApplicantName =='Total'">{{$index+1}}.</span></td>
+                                <td ng-show="search.DISTRICT_ID!=0 && search.PLDB_ID!=0 && search.PLDB_Branch_ID!=0">
+                                    <a ng-show="item.ApplicantName!='Total'" href="" ng-click="GetPldbOtsSummaryDetails(item.PLDB_OTS_SchemeID)">{{item.ApplicantName}}</a>
+                                    <span ng-show="item.ApplicantName=='Total'" ng-style="(item.ApplicantName =='Total') && {'font-weight': 'bold', 'color': 'black'}">{{item.ApplicantName}}</span>
+                                </td>
+                                <td ng-show="search.DISTRICT_ID!=0 && search.PLDB_ID!=0 && search.PLDB_Branch_ID!=0">{{item.LoanAccNo}}</td>
+                                <td ng-show="search.DISTRICT_ID!=0 && search.PLDB_ID!=0 && search.PLDB_Branch_ID!=0 && ReportType!=4" ng-style="(item.DistrictName == 'Total' || item.PLDBName == 'Total') && {'font-weight': 'bold', 'color': 'black'}">{{item.DistrictName}}</td>
+                                <td ng-show="search.DISTRICT_ID!=0 || search.DISTRICT_ID==0" ng-style="(item.DistrictName == 'Total' || item.PLDBName == 'Total') && {'font-weight': 'bold', 'color': 'black'}">{{item.PLDBName}}</td>
+                                <td ng-show="search.DISTRICT_ID!=0 && search.PLDB_ID!=0">{{item.PLDBBranch}}</td>
+                                <td ng-style="(item.DistrictName == 'Total' || item.PLDBName == 'Total' || item.ApplicantName =='Total') && {'font-weight': 'bold', 'color': 'black'}">{{item.TotalPaidAmount|inrCurrency}}</td>
+                            </tr>
+                            <tr ng-show="isNoRecord">
+                                <td colspan="{{colspan}}" style="text-align: center;">No Records</td>
+                            </tr>
+                        </tbody>
+                        <tbody></tbody>
+                        @*<tfoot ng-show="GetPldbOtsSummary!=null && search.DISTRICT_ID > 0 && search.PLDB_ID>0">
+                                <tr ng-show="GetPldbOtsSummary!=null && GetPldbOtsSummary.length>0">
+                                    <td colspan="{{Iscolspan}}">
+                                        <b>
+                                            {{translation.TotalAmount}}
+                                        </b>
+                                    </td>
+                                    <td><b>{{PldbTotalAmount|inrCurrency}}</b></td>
+                                </tr>
+                            </tfoot>*@
+                    </table>
+                </div>
+
+                <div class="table-responsive devtable" ng-show="divClass">
+                    <table class="table table-hover table-striped table-bordered mb-0" id="{{PLDBOtsRepaymentSummaryReport}}">
+                        <thead>
+                            <tr>
+                                <th width="60">{{translation.SRNO}}</th>
+                                <th>{{translation.ReceiptNo }}</th>
+                                <th>{{translation.PaidAmount}}</th>
+                                <th>{{translation.PaymentMode}}</th>
+                                <th>{{translation.PaymentDate}}</th>
+                                <th>{{translation.DepositorPerson}}</th>
+                                <th>{{translation.Remark}}</th>
+                            </tr>
+
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="item in GetPldbOtsSummaryDetail">
+                                <td><span ng-hide="item.ReceiptNo=='Total'">{{$index+1}}.</span></td>
+                                <td ng-style="(item.ReceiptNo == 'Total') && {'font-weight': 'bold', 'color': 'black'}">{{item.ReceiptNo}}</td>
+                                <td ng-style="(item.ReceiptNo == 'Total') && {'font-weight': 'bold', 'color': 'black'}">{{item.PaidAmount|inrCurrency}}</td>
+                                <td>{{item.ModeNameEn}}</td>
+                                <td>{{item.PaymentDate }}</td>
+                                <td>{{item.DepositByPerson}}</td>
+                                <td>{{item.Remark}}</td>
+                            </tr>
+                        </tbody>
+                        @*<tfoot ng-show="GetOtsAmountSummary!=null">
+                                <tr>
+                                    <td colspan="2">
+                                        <b>
+                                            {{translation.TotalAmount}}
+                                        </b>
+                                    </td>
+                                    <td>
+                                        <b>
+                                            {{TotalAmountSummary |inrCurrency}}
+                                        </b>
+                                    </td>
+                                </tr>
+                            </tfoot>*@
+                    </table>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+        </div>
+    </div>
+</div>

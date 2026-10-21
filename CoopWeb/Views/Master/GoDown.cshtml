@@ -1,0 +1,350 @@
+﻿
+<script src="~/Scripts/AngularFramework/Rajfed_GoDown.js"></script>
+<script type="text/javascript">
+
+    function ValidateAlpha(evt) {
+        var keyCode = (evt.which) ? evt.which : evt.keyCode
+        if ((evt.which == 8 || evt.keyCode == 8 || evt.charCode == 8 || evt.charCode == 48))
+            return true;
+
+        if (((keyCode < 49 || keyCode > 90) && (keyCode < 97 || keyCode > 123) && keyCode != 32))
+            return false;
+        return true;
+    };
+    var tableToExcel = (function () {
+        var uri = 'data:application/vnd.ms-excel;base64,'
+            , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>'
+            , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) }
+            , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
+        return function (table, name) {
+            if (!table.nodeType) table = document.getElementById(table)
+            var ctx = { worksheet: name || 'Worksheet', table: table.innerHTML }
+            window.location.href = uri + base64(format(template, ctx))
+        }
+    })()
+
+</script>
+
+<div ng-app="GoDownCnt">
+    <div ng-controller="GoDownMod">
+        <div class="col-md-12">
+            <h3 class="citizen-dash-head">{{translation.GoDown}}</h3>
+            <hr style="margin: 0;">
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#"> {{translation.Master}}</a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;"> {{translation.GoDown}} </span>
+                    </li>
+                    <li style="float: right;" id="divAddBtn">
+                        <button type="button" ng-click="ShowDivForInsert()" class="btn btn-info btn-lg dev-popup-btn" data-toggle="modal" style="color: #025e63; cursor: pointer; text-decoration:none;  font-weight: bold;">
+                            <h5>&#187; {{translation.AddNewGoDown}}</h5>
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" ng-show="divInsert">
+           
+            <form class="citizen-dash-head">
+                <div class="col-lg-12 form-group">
+                    <div class="col-lg-2">{{ translation.Warehouse}}<span class="error">*</span></div>
+                    <div class="col-lg-4">
+                        <select class="form-control" ng-model="Godown.WarehouseId" ng-init="Godown.WarehouseId='0'">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in Warehouses" value="{{item.WarehousId}}">
+                                {{_language =='en-us' ?  item.WarehousNameEn : item.WarehousNameHi}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-lg-2">{{ translation.GoDownType}}<span class="error">*</span></div>
+                    <div class="col-lg-4">
+                        <input type="radio" name="rdoGodownType" value="1" ng-model="Godown.GoDownTypeId" ng-init="Godown.GoDownTypeId=1" /> &nbsp; {{translation.GoDownRented}} &nbsp; &nbsp;
+                        <input type="radio" name="rdoGodownType" value="2" ng-model="Godown.GoDownTypeId" /> &nbsp; {{translation.GoDownOwned}}
+                    </div>
+                </div>
+                <div class="col-lg-12 form-group">
+                    <div class="col-lg-2">{{ translation.GodownNameEng}}<span class="error">*</span></div>
+                    <div class="col-lg-4">
+                        <input type="text" class="form-control" ng-model="Godown.GoDownNameEng" placeholder={{translation.GodownNameEng}} autocomplete="off" onKeyPress="return ValidateAlpha(event);" maxlength="50" />
+                    </div>
+                    <div class="col-lg-2">{{ translation.GodownNameHi}}<span class="error">*</span></div>
+                    <div class="col-lg-4">
+                        <input type="text" class="form-control" ng-model="Godown.GoDownNameHi" placeholder={{translation.GodownNameHi}} autocomplete="off" maxlength="50" />
+                    </div>
+                </div>
+
+
+                <div class="col-lg-12 form-group">
+                    <div class="col-lg-2">{{ translation.District}}<span class="error">*</span></div>
+                    <div class="col-lg-4">
+                        <select id="ddlDistrict" ng-model="Godown.DistrictId" class="form-control" ng-change="BlockList()" ng-disabled="IsDisabled">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in Districts" value="{{item.DISTRICT_ID}}">
+                                {{_language =='en-us' ?  item.DISTRICT_ENG : item.DISTRICT_MANGAL}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-lg-2">{{ translation.UrbanRural}}<span class="error">*</span></div>
+                    <div class="col-lg-4">
+                        <input type="radio" name="rdoUrbanRural" value="1" ng-model="Godown.UrbanRural" ng-init="Godown.UrbanRural=1" ng-change="UrbanRuralChange()" /> &nbsp; {{translation.Urban}} &nbsp; &nbsp;
+                        <input type="radio" name="rdoUrbanRural" value="2" ng-model="Godown.UrbanRural" ng-change="UrbanRuralChange()" /> &nbsp; {{translation.Rural}}
+                    </div>
+                </div>
+
+
+
+                <div ng-show="Godown.UrbanRural=== 1 || Godown.UrbanRural==='1'">
+
+                    <div class="col-lg-12 form-group">
+                        <div class="col-lg-2">{{ translation.City}}<span class="error">*</span></div>
+                        <div class="col-lg-4">
+                            <select ng-model="Godown.CityId" class="form-control" ng-change="GetWardList()" ng-init="Godown.CityId='0'">
+                                <option value="0" disabled>{{translation.SelectOption}}</option>
+                                <option ng-repeat="item in CityList" value="{{item.CITY_ID}}">
+                                    {{_language =='en-us' ?  item.CITY_ENG : item.CITY_MANGAL}}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-lg-2">{{ translation.Ward}}<span class="error">*</span></div>
+                        <div class="col-lg-4">
+                            <select ng-model="Godown.WardId" class="form-control" ng-init="Godown.WardId='0'">
+                                <option value="0" disabled>{{translation.SelectOption}}</option>
+                                <option ng-repeat="item in Ward" value="{{item.WARD_ID}}">
+                                    {{_language =='en-us' ?  item.WARD_ENG : item.WARD_MANGAL}}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-lg-12 form-group">
+                        <div class="col-lg-2">{{ translation.PIN}}<span class="error">*</span></div>
+                        <div class="col-lg-4">
+                            <input type="text" class="form-control" ng-model="Godown.PIN" placeholder={{translation.PIN}} autocomplete="off" maxlength="6" />
+                        </div>
+                    </div>
+
+                </div>
+
+
+                <div ng-hide="Godown.UrbanRural===1 || Godown.UrbanRural==='1'">
+
+                    <div class="col-lg-12 form-group">
+                        @*<div class="col-lg-2">{{ translation.DivisionHeading}}<span class="error">*</span></div>
+                    <div class="col-lg-4">
+                        <select ng-model="Godown.DivisionId" ng-change="DistrictList()" class="form-control" ng-init="Godown.DivisionId ='0'">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in Divisions" value="{{item.DIVISION_ID}}">
+                                {{_language =='en-us' ?  item.DIVISION_ENG : item.DIVISION_MANGAL}}
+                            </option>
+                        </select>
+                    </div>*@
+                    </div>
+
+
+
+                    <div class="col-lg-12 form-group">
+                        <div class="col-lg-2">{{ translation.BlockHeading}}<span class="error">*</span></div>
+                        <div class="col-lg-4">
+                            <select ng-model="Godown.BlockId" class="form-control" ng-init="Godown.BlockId='0'" ng-change="GramPanchayatList()">
+                                <option value="0" disabled>{{translation.SelectOption}}</option>
+                                <option ng-repeat="item in Blocks | orderBy:'BLOCK_ENG'" value="{{item.BLOCK_ID}}">
+                                    {{_language =='en-us' ?  item.BLOCK_ENG : item.BLOCK_MANGAL}}
+                                </option>
+                            </select>
+                        </div>
+
+                        @*<div class="col-lg-2">{{ translation.GramPanchayatHeading}}<span class="error">*</span></div>
+                    <div class="col-lg-4">
+                        <select ng-model="Godown.GPId" class="form-control" ng-init="Godown.GPId='0'" ng-change="VillageList()">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in GramPanchayats | orderBy:'GramPanchayats'" value="{{item.GP_ID}}">
+                                {{_language =='en-us' ?  item.GP_ENG : item.GP_MANGAL}}
+                            </option>
+                        </select>
+                    </div>*@
+                    </div>
+
+                    @*<div class="col-lg-12 form-group">
+                    <div class="col-lg-2">{{ translation.Village}}<span class="error">*</span></div>
+                    <div class="col-lg-4">
+                        <select ng-model="Godown.VillageId" class="form-control" ng-init="Godown.VillageId='0'">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in Villages | orderBy:'VILLAGE_ENG'" value="{{item.VILLAGE_ID}}">
+                                {{_language =='en-us' ?  item.VILLAGE_ENG : item.VILLAGE_MANGAL}}
+                            </option>
+                        </select>
+                    </div>
+                </div>*@
+                </div>
+
+
+                <div class="form-group col-md-12">
+                    <div class="dev-menu-btn">
+                        <button type="submit" class="btn btn-primary" ng-click="Insert()">{{translation.Submit}}</button>
+                        <button type="submit" class="btn btn-primary" ng-click="ClearForm()">{{translation.Clear}}</button>
+                        <a class="btn btn-primary dev-btn" style="text-transform:capitalize;" ng-click="BackToList()"> {{translation.Back}}</a>
+                        <input type="hidden" ng-model="Godown.GoDownId" />
+                        <input type="hidden" value="@ViewBag.DistrictId" id="hdnUserDistrict" />
+                        <input type="hidden" value="@ViewBag.UserLevel" id="hdnUserLevel" />
+                        <input type="hidden" value="@ViewBag.WarehouseId" id="hdnWarehouseId" />
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" ng-show="GridGodowns">
+            <div>
+                <div class="citizen-dash-head">
+                    <div class="table-dropdown">
+                        <div class="col-lg-12 form-group">
+                            <div class="col-md-4" style="padding-left: 0;">
+                                <label for="search">{{translation.Search}}:</label>
+                                <input ng-model="q" id="search" class="form-control" placeholder={{translation.filttertext}} autocomplete="off">
+                            </div>
+                            <div class="col-md-4" style="padding-left: 0;">
+                                <label for="search">{{translation.ItemPerPage}}:</label>
+                                <input type="number" min="1" max="100" class="form-control" onkeypress='return event.charCode >= 48 && event.charCode <= 57' ng-model="pageSize">
+                            </div>
+                            <div class="col-md-4" style="padding-top: 25px; ">
+                                <input type="button" class="btn btn-primary dev-btn" onclick="tableToExcel('tblgetsuport', 'Get Support Data')" value="Export to Excel">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-12 form-group">
+                        <h4 class="heading-hr ng-binding">{{ translation.Search }} : {{TotalGodowns}}</h4>
+                    </div>
+                    <table class="table table-responsive devtable" style="overflow-x:auto;" id="tblgetsuport">
+                        <thead>
+                            <tr>
+                                <th>
+                                    {{translation.SRNO}}
+                                </th>
+                                <th ng-click="sortData('WareHouseNameEng')">
+                                    {{translation.Warehouse}}
+                                    <div ng-class="getSortClass('WareHouseNameEng')"></div>
+                                </th>
+                                <th>
+                                    {{translation.GoDownType}}
+                                </th>
+                                <th>
+                                    {{translation.GoDownName}}
+                                </th>
+                                <th>
+                                    {{translation.UrbanRural}}
+                                </th>
+                                <th>
+                                    {{translation.PIN}}
+                                </th>
+                                @*<th>
+                        {{translation.CityType}}
+                    </th>*@
+                                <th>
+                                    {{translation.City}}
+                                </th>
+                                <th>
+                                    {{translation.Ward}}
+                                </th>
+                                @*<th>
+                        {{translation.DivisionHeading}}
+                    </th>*@
+                                <th>
+                                    {{translation.District}}
+                                </th>
+                                <th>
+                                    {{translation.BlockHeading}}
+                                </th>
+                                @*<th>
+                        {{translation.GramPanchayatHeading}}
+                    </th>
+                    <th>
+                        {{translation.Village}}
+                    </th>*@
+
+                                <th>
+                                    {{translation.IsActive}}
+                                </th>
+                                <th>
+                                    {{translation.Edit}}
+                                </th>
+                                <th>
+                                    {{translation.Delete}}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr dir-paginate="item in Godowns | filter: q | orderBy:colsort:reverseSort | itemsPerPage: pageSize" current-page="currentPage" pagination-id="TrainningFormatPagination">
+                                <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                                <td>
+                                    {{ _language === 'en-us' ? item.WareHouseNameEng : item.WareHouseNameHi}}
+                                </td>
+                                <td>
+                                    {{ _language === 'en-us' ? item.GodownTypeEng : item.GodownTypeHi}}
+                                </td>
+                                <td>
+                                    {{ _language === 'en-us' ? item.GoDownNameEng : item.GoDownNameHi}}
+                                </td>
+                                <td>
+                                    {{ item.IsRural == true || item.IsRural ==='True' ? translation.Rural : translation.Urban }}
+                                </td>
+                                <td>
+                                    {{ item.Address}}
+                                </td>
+
+                                @*<td>
+                        {{ _language === 'en-us' ? item.CityType_Eng : item.CityType_Hin}}
+                    </td>*@
+                                <td>
+                                    {{ _language === 'en-us' ? item.CITY_ENG : item.CITY_MANGAL}}
+                                </td>
+                                <td>
+                                    {{ _language === 'en-us' ? item.WARD_ENG : item.WARD_MANGAL}}
+                                </td>
+                                @*<td>
+                        {{ _language === 'en-us' ? item.DIVISION_ENG : item.DIVISION_MANGAL}}
+                    </td>*@
+                                <td>
+                                    {{ _language === 'en-us' ? item.DISTRICT_ENG : item.DISTRICT_MANGAL}}
+                                </td>
+                                <td>
+                                    {{ _language === 'en-us' ? item.BLOCK_ENG : item.BLOCK_MANGAL}}
+                                </td>
+                                @*<td>
+                        {{ _language === 'en-us' ? item.GP_ENG : item.GP_MANGAL}}
+                    </td>
+                    <td>
+                        {{ _language === 'en-us' ? item.VILLAGE_ENG : item.VILLAGE_MANGAL}}
+                    </td>*@
+
+                                <td>
+                                    <div class="dev-action">
+                                        <label class="switch">
+                                            <input type="checkbox" ng-checked="item.IsActive === 'True' || item.IsActive === 'true' || item.IsActive === true" ng-click="SetStatus(item.GoDownId,1)">
+                                            <span class="slider round"></span>
+                                        </label>
+                                    </div>
+                                </td>
+                                <td><a href="javascript:void(0)"><i class="fa fa-edit" aria-hidden="true" ng-click="Edit(item)"></i></a></td>
+                                <td><a href="javascript:void(0)"><i class="fa fa-trash" aria-hidden="true" ng-click="SetStatus(item.GoDownId,2)"></i></a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="col-md-10">
+                <div class="text-center">
+                    <dir-pagination-controls boundary-links="true" pagination-id="TrainningFormatPagination" on-page-change="pageChangeHandler(newPageNumber)" template-url="/dirPagination.tpl.html"></dir-pagination-controls>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

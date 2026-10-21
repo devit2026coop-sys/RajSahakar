@@ -1,0 +1,260 @@
+﻿<script src="~/Scripts/AngularFramework/UpdateSocietyApplicationFlow.js"></script>
+
+<div ng-app="UpdateSocietyApplicationFlowModule">
+    <div ng-controller="UpdateSocietyApplicationFlowCont">
+        <div class="col-md-12">
+            <h3 class="citizen-dash-head ng-binding" style="margin-top:0px;">{{translation.UpdateSocietyApplicationFlow}}</h3>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#">  {{translation.Home}}</a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;"> {{translation.New}} </span>
+                        <i class="fa fa-angle-right"> </i>
+
+                        <span style="margin: 0 5px;"> {{translation.UpdateSocietyApplicationFlow}} </span>
+                    </li>
+
+                </ul>
+            </div>
+        </div>
+
+        <div style="margin-top:30px;padding-top:30px">
+            <div class="col-md-12">
+                <form class="dev-search-form citizen-dash-head" name="MyClassForm" style="overflow: hidden; margin-bottom:35px;">
+                    <div class="form-group col-md-4">
+                        <label>
+                            {{translation.SocietyRegistrationNo}} :
+                        </label>
+                    </div>
+                    <div class="form-group col-md-5">
+                        <input type="text" class="form-control" id="socregno" name="Remarks" ng-bind="OTP" ng-model="ApplicationFlowMaster.SocietyRegistrationNo" placeholder={{translation.SocietyRegistrationNo}} autocomplete="off" /><br />
+                    </div>
+
+                    <div class="form-group col-md-3">
+                        <button type="submit" class="btn btn-primary" ng-click="GetApplicationFlowSociety();SocietyFeesStatus()">{{translation.Submit}}</button>
+                    </div>
+                </form>
+            </div>
+            <div class="col-md-12" ng-show="ShowDetail">
+                <div class="citizen-dash-head" style="overflow: hidden;">
+                    <div class="table-responsive">
+                        <table class="table table-responsive devtable" style="margin-top: 30px;color:black" id="a">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        {{translation.SRNO}}
+                                    </th>
+                                    <th>
+                                        {{translation.Status}}
+                                    </th>
+                                    <th>
+                                        {{translation.Remarks}}
+                                    </th>
+                                    <th>
+                                        {{translation.CreationDate}}
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr dir-paginate="AppFlowOne in ApplicationFlowSociety | itemsPerPage: 50">
+                                    <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                                    <td>{{ _language =='en-us' ? AppFlowOne.ProceesStatusTextEn : AppFlowOne.ProceesStatusTextHi}}</td>
+                                    <td>{{AppFlowOne.Remark}}</td>
+                                    <td>{{AppFlowOne.ActionDate}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <form class="dev-search-form citizen-dash-head" name="MyClassForm" style="margin-top:15px;padding-top:15px">
+                        <div class="col-md-6" ng-hide="ShowOTPDiv">
+                            <label>
+                                {{translation.Status}} :
+                            </label>
+                            <select ng-model="ApplicationFlowMaster.StatusId" class="form-control" ng-init="ApplicationFlowMaster.StatusId='0'" ng-change="GetRoleList()">
+                                <option value="0" disabled>{{translation.SelectOption}}</option>
+                                <option ng-repeat="item in SocietyProceesStatus" value="{{item.SocietyProceesStatusId}}">
+                                    {{_language =='en-us' ?  item.ProceesStatusTextEn : item.ProceesStatusTextHi}}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-6" ng-hide="ShowOTPDiv">
+                            <div ng-show="ApplicationFlowMaster.StatusId==3 || ApplicationFlowMaster.StatusId==9 || ApplicationFlowMaster.StatusId==12 || ApplicationFlowMaster.StatusId==19 || ApplicationFlowMaster.StatusId==23 || ApplicationFlowMaster.StatusId==35|| ApplicationFlowMaster.StatusId==36|| ApplicationFlowMaster.StatusId == 1058">
+                                <label>
+                                    {{translation.RoleHeading}} :
+                                </label>
+                                <select ng-model="RoleId" class="form-control" ng-init="RoleId=0" ng-change="GetOfficer()">
+                                    <option value="0" disabled>{{translation.SelectOption}}</option>
+                                    <option ng-repeat="item in RoleList " value="{{item.RoleID}}">
+                                        {{ item.RoleName_EN }}
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6" ng-hide="ShowOTPDiv">
+                            <div ng-show="ApplicationFlowMaster.StatusId==3 || ApplicationFlowMaster.StatusId==9 || ApplicationFlowMaster.StatusId==12 || ApplicationFlowMaster.StatusId==19 || ApplicationFlowMaster.StatusId==23 || ApplicationFlowMaster.StatusId==35 || ApplicationFlowMaster.StatusId==36|| ApplicationFlowMaster.StatusId == 1058">
+                                <label>
+                                    {{translation.Officer}} :
+                                </label>
+                                <select ng-model="ApplicationFlowMaster.OfficeId" class="form-control" ng-init="ApplicationFlowMaster.OfficeId='0'">
+                                    <option value="0" disabled>{{translation.SelectOption}}</option>
+                                    <option ng-repeat="item in OfficerData " value="{{item.userid}}">
+                                        {{ item.OfficerNameEn }}
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-12" ng-hide="ShowOTPDiv">
+                            <label>{{translation.Remarks}}</label>
+                            <textarea type="text" rows="4" cols="50" class="form-control" id="Remarks" name="Remarks" ng-bind="Remarks" ng-model="ApplicationFlowMaster.Remark" placeholder={{translation.Remarks}}></textarea>
+                            <code style="float: left;">
+                            </code>
+                            @*<input type="hidden" class="form-control hindiFont" id="txtRemark" ng-bind="Remarks" ng-model="ApplicationFlowMaster.Remark" />
+                                <textarea type="text" rows="4" cols="50" class="form-control hindiFont" name="Remarks" onblur="convert_to_unicode(this,'txtRemark')"  placeholder={{translation.Remarks}}></textarea>*@
+                        </div>
+                        <div class="form-group col-md-12" ng-hide="ShowOTPDiv">
+                            <div ng-show="ApplicationFlowMaster.StatusId==36">
+                                <div class="col-md-3">
+                                    <label>
+                                        {{translation.File}} :
+                                    </label>
+                                </div>
+                                <div class="col-md-8" style="text-align:left">
+                                    <input type="file" name="File" filetype='pdf' id="flReportFile" class="form-control" ng-model="ApplicationFlowMaster.ReportFile" onchange="angular.element(this).scope().UploadReportFile(this.files)">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-12" ng-hide="ShowOTPDiv">
+                            <div class="citizen-dash-head col-md-3" ng-show="ApplicationFlowMaster.StatusId==5 || ApplicationFlowMaster.StatusId==10 || ApplicationFlowMaster.StatusId==20">
+                                <label>{{translation.ObjectionBelongTo}}</label>
+                            </div>
+                            <div class="citizen-dash-head col-md-9" style="text-align:left" ng-show="ApplicationFlowMaster.StatusId==5 || ApplicationFlowMaster.StatusId==10 || ApplicationFlowMaster.StatusId==20">
+                                <input type="checkbox" style="" name="Basic" ng-model="ObjectionFlagBasic">{{translation.SocietyDetails}}
+                                <input type="checkbox" style="padding-left:15px;margin-left:15px" name="Administrative" ng-model="ObjectionFlagAdmin">{{translation.AdministrativeDetails}}
+                                <input type="checkbox" style="padding-left:15px;margin-left:15px" name="Office" ng-model="ObjectionFlagOffice"> {{translation.SocietyOfficeDetails}}
+                            </div>
+                        </div>
+
+                        <div class="form-group col-md-12">
+                            <center> <button type="submit" class="btn btn-primary" ng-click="UpdateSocietyStatus()">{{translation.Submit}}</button></center>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+
+            <div class="col-md-12" ng-show="ShowDetailtbl">
+                <div class="citizen-dash-head" style="overflow: hidden;display:none">
+                    <div class="table-responsive">
+                        <table class="table table-responsive devtable" style="margin-top: 30px;color:black" id="a">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        {{translation.SRNO}}
+                                    </th>
+                                    <th>
+                                        {{translation.RequestID}}
+                                    </th>
+                                    <th>
+                                        {{translation.Amount}}
+                                    </th>
+                                    <th>
+                                        {{translation.StatusMsg}}
+                                    </th>
+                                    <th>
+                                        {{translation.RequestDateTime}}
+                                    </th>
+                                    <th>
+                                        {{translation.Status}}
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr dir-paginate="item in SocietyFeedata | itemsPerPage: 50">
+                                    <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                                    <td>{{item.EMitraAppRequestID}}</td>
+                                    <td>{{item.REVENUEHEADFORPG}}</td>
+                                    <td>{{item.StatusMsg}}</td>
+                                    <td>{{item.CreationDate}}</td>
+                                    <td>{{item.Status}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12" style="margin-top: 15px" ng-show="ShowDetailtbl">
+                <form class="dev-search-form citizen-dash-head" name="MyClassForm" style="overflow: hidden; margin-bottom:35px;display:none">
+                    <div class="form-group col-md-4">
+                        <label>
+                            {{translation.paymentupdate}} :
+                        </label>
+                    </div>
+                    <div class="form-group col-md-5">
+                        <input type="text" class="form-control" name="Remarks" ng-model="ApplicationFlowMaster.PNR" placeholder={{translation.paymentupdate}} autocomplete="off" /><br />
+                    </div>
+
+                    <div class="form-group col-md-3">
+                        <button type="submit" class="btn btn-primary" ng-click="">{{translation.Submit}}</button>
+                    </div>
+                    <div class="form-group col-md-12">
+                        <a href="~/User/DashBoard"><input type="submit" class="btn btn-primary" value="Back"></a>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="se-pre-con"></div>
+        <div id="stop" class="scrollTop">
+            <span><a href=""><i class="fa fa-arrow-up">Top</i></a></span>
+        </div>
+    </div>
+</div>
+<input type="hidden" name="hdlang" id="hdlang" value="hi-IN" />
+
+<link href="~/Scripts/google_hindi/google_transliteration.css" rel="stylesheet" />
+
+<style>
+    .inputapi-transliterate-indic-suggestion-menu {
+        z-index: 99999 !important;
+        display: block;
+    }
+</style>
+<script src="~/Scripts/google_hindi/google_transapi.js"></script>
+<script type="text/javascript">
+    google.load("elements", "1", {
+        packages: "transliteration"
+    });
+
+    function onLoad() {
+        var content = document.getElementById('content');
+        if (document.getElementById('hdlang').value == "hi-IN") {
+            var options = {
+                sourceLanguage: google.elements.transliteration.LanguageCode.ENGLISH,
+                destinationLanguage: google.elements.transliteration.LanguageCode.HINDI, // available option English, Bengali, Marathi, Malayalam etc.
+                shortcutKey: 'ctrl+g',
+                transliterationEnabled: true
+            };
+        }
+        else {
+            var options = {
+                sourceLanguage: google.elements.transliteration.LanguageCode.ENGLISH,
+                destinationLanguage: google.elements.transliteration.LanguageCode.HINDI, // available option English, Bengali, Marathi, Malayalam etc.
+                shortcutKey: 'ctrl+g',
+                transliterationEnabled: false
+            }
+        }
+        var ids = ["Remarks"];
+        var control = new google.elements.transliteration.TransliterationControl(options);
+        control.makeTransliteratable(ids);
+    }
+    google.setOnLoadCallback(onLoad);
+
+</script>
+
+
+<script src="~/Scripts/google_hindi/google_transliteration.js"></script>

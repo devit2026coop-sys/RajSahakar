@@ -1,0 +1,117 @@
+﻿@{
+    ViewBag.Title = "OTS Daily Progress View";
+}
+<style>
+    .flexEqualCenter {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    a.backBtn {
+        padding: 3px 5px;
+        background: rgb(99,205,219);
+        color: #fff;
+        border: 0px;
+        outline: none;
+        display: inline-block;
+        text-decoration: none;
+    }
+
+        a.backBtn i {
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+    .tblthfont {
+        font-weight: bold;
+    }
+
+    .devtable thead tr th {
+        vertical-align: middle;
+    }
+</style>
+<script src="~/Scripts/xlsx.full.min.js"></script>
+<script src="~/Scripts/AngularFramework/OtsDailyProgressViewDetails.js?v=1.3"></script>
+<div ng-app="otsMod" ng-controller="otsCtrl" ng-cloak="">
+    <div class="container-fluid citizen-dash-head">
+        <input type="hidden" id="hdnDistrictId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DistrictId)" />
+        <input type="hidden" id="hdnPldbId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).PLDBId)" />
+        <input type="hidden" id="hdnPldbBranchId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).PLDBBrancchId)" />
+
+        <div class="panel panel-default">
+            <div class="panel-heading flexEqualCenter">
+                <b><i class="fa fa-th-list"></i>&nbsp; OTS Daily Progress View</b>
+                <div class="text-right">
+                    <button class="btn btn-primary dev-btn" ng-show="otsDPR!=null && otsDPR.length>0" ng-click="ReportDownload()">Export Excel</button>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-md-12 form-group">
+                        <label class="help-block-gender">
+                            <input type="radio" ng-value="0" name="AmountType" ng-model="AmountType"> मूल रूप में राशि देखें
+                        </label>
+                        <label class="help-block-gender">
+                            <input type="radio" name="AmountType" ng-value="1" ng-model="AmountType"> लाख में राशि देखें
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="table-responsive devtable">
+                    <table class="table table-hover table-striped table-bordered mb-0" id="dprTable">
+                        <thead>
+                            <tr>
+                                <th rowspan="3">क्र.सं.</th>
+                                <th rowspan="3">ऋणी का नाम </th>
+                                <th rowspan="3">पिता /पति का नाम </th>
+                                <th rowspan="3">खाता संख्या </th>
+                                <th rowspan="3">प्राथमिक बैंक</th>
+                                <th rowspan="2" colspan="3" style="text-align:center;">दिनांक 31.03.2025 तक<br />ऋणी की कुल मांग राशि</th>
+                                <th colspan="5" style="text-align:center;">वसूली (दिनांक <span style="color:#f00;">{{ReportDate|date:'dd-MM-yyyy'}}</span> तक)</th>
+                                <th rowspan="2" style="text-align:center;">दिनांक <span style="color:#f00;">{{ReportDate|date:'dd-MM-yyyy'}}</span> <br />को की गई कुल वसूली<br />(राहत एवं नकद)</th>
+                            </tr>
+                            <tr>
+                                <th style="text-align:center;">आंशिक</th>
+                                <th colspan="3" style="text-align:center;">पूर्ण</th>
+                                <th rowspan="2">योग</th>
+                            </tr>
+                            <tr>
+                                <th>ऋणी से वसूली योग्य</th>
+                                <th>राहत राशि</th>
+                                <th>योग</th>
+                                <th>ऋणी द्वारा जमा</th>
+                                <th>ऋणी द्वारा जमा</th>
+                                <th>प्रदत्त राहत राशि</th>
+                                <th>योग</th>
+                                <th>राशि</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-if="otsDPR && otsDPR.length > 0" ng-repeat="item in otsDPR track by $index" ng-style="(item.PLDBName == 'Total') && {'font-weight': 'bold', 'color': '#fdfdfd', 'background': '#466b6d'}">
+                                <th><span ng-hide="item.PLDBName=='Total'">{{$index+1}}.</span></th>
+                                <th>{{item.ApplicantName}}</th>
+                                <td>{{item.FatherHusbandName}}</td>
+                                <td>{{item.LoanAccNo}}</td>
+                                <td>{{item.PLDBName}}</td>
+                                <td>{{item.ToBeReceived | ShowInLac:AmountType}}</td>
+                                <td>{{item.Relief | ShowInLac:AmountType}}</td>
+                                <td>{{item.TotalDemand | ShowInLac:AmountType}}</td>
+                                <td>{{item.PartialAmount | ShowInLac:AmountType}}</td>
+                                <td>{{item.FullAmount | ShowInLac:AmountType}}</td>
+                                <td>{{item.ReliefGiven | ShowInLac:AmountType}}</td>
+                                <td>{{item.TotalRecovery | ShowInLac:AmountType}}</td>
+                                <td>{{item.Total | ShowInLac:AmountType}}</td>
+                                <td>{{item.TodayRecovery | ShowInLac:AmountType}}</td>
+                            </tr>
+                            <tr ng-if="(!otsDPR || otsDPR.length === 0)">
+                                <td colspan="17" class="text-center">No records found</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+        </div>
+    </div>
+</div>

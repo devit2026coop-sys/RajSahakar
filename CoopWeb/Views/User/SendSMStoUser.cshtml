@@ -1,0 +1,305 @@
+﻿@if (((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]) != null)
+{
+    if (((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).UserType == "C")
+    {
+        Layout = "~/Views/Shared/_CitizenLayout.cshtml";
+    }
+    else
+    {
+        Layout = "~/Views/Shared/_Layout.cshtml";
+    }
+}
+else
+{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<script src="~/Scripts/AngularFramework/SendSMStoUser.js"></script>
+<script type="text/javascript" src="~/Scripts/jquery.min.js"></script>
+<script type="text/javascript" src="~/Scripts/pdfmake.min.js"></script>
+<script type="text/javascript" src="~/Scripts/html2canvas.min.js"></script>
+
+<link href="~/Scripts/google_hindi/google_transliteration.css" rel="stylesheet" />
+<style>
+    .inputapi-transliterate-indic-suggestion-menu {
+        z-index: 99999 !important;
+        display: block;
+    }
+</style>
+
+<style type="text/css">
+    body {
+        font-family: Arial;
+        font-size: 10pt;
+    }
+
+    table {
+        border: 1px solid #ccc;
+        border-collapse: collapse;
+    }
+
+        table th {
+            background-color: #F7F7F7;
+            color: #333;
+            font-weight: bold;
+        }
+
+        table th, table td {
+            padding: 5px;
+            border: 1px solid #ccc;
+        }
+
+    .NewDate input {
+        float: left;
+        width: 90%;
+    }
+
+    .NewDate button {
+        float: left;
+    }
+
+    .notValid {
+        border: solid 1px red !important
+    }
+</style>
+
+<style>
+    @@media (min-width: 768px) {
+
+        .modal-dialog {
+            width: 836px !important;
+            margin: 30px auto !important;
+        }
+    }
+</style>
+<script type="text/javascript">
+
+    function ValidateAlpha(evt) {
+        var keyCode = (evt.which) ? evt.which : evt.keyCode
+        if ((keyCode < 65 || keyCode > 90) && (keyCode < 97 || keyCode > 123) && keyCode != 32)
+
+            return false;
+        return true;
+    };
+
+    function ValidateFloat(th, e) {
+        if (isNaN(th.value + "" + String.fromCharCode(e.charCode)))
+            return false;
+        return true;
+    }
+
+    function isAlphaNumeric(e) { // Alphanumeric only
+        var k;
+        document.all ? k = e.keycode : k = e.which;
+        return ((k > 47 && k < 58) || (k > 64 && k < 91) || (k > 96 && k < 123) || k == 0 || k == 32 || k == 44);
+    }
+
+    function isNumber(evt) {
+        var iKeyCode = (evt.which) ? evt.which : evt.keyCode
+        if (iKeyCode != 46 && iKeyCode > 31 && (iKeyCode < 48 || iKeyCode > 57))
+            return false;
+
+        return true;
+    }
+
+</script>
+
+<div ng-app="PLDBLoanMastersMOD" ng-controller="PLDBLoanMastersCONT">
+
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <h3 class="citizen-dash-head">Send SMS To User</h3>
+    </div>
+
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="devpage-breadcrumb">
+            <ul class="page-breadcrumb">
+                <li class="dev-page-br">
+                    <i class="fa fa-home"> </i>
+                    <a href="../Citizen/Index"> {{translation.Home}} </a>
+                    <i class="fa fa-angle-right"> </i>
+                </li>
+                <li style="float: left">
+                    <span style="margin: 0 5px;">Send SMS To User </span>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="citizen-dash-head" style="overflow: hidden;">
+            <div class="table-dropdown">
+                <div class="col-xs-4">
+                    <label for="search">{{translation.Search}}:</label>
+                    <input ng-model="q" id="search" class="form-control" placeholder={{translation.filttertext}} autocomplete="off">
+                </div>
+                <div class="col-xs-4">
+                    <label for="search">{{translation.ItemPerPage}}:</label>
+                    <input type="number" min="1" max="100" class="form-control" onkeypress='return event.charCode >= 48 && event.charCode <= 57' ng-model="pageSize">
+                </div>
+                <div class="col-xs-4" style="margin-top: 25px;">
+                    <button type="button" class="btn btn-primary" ng-click="SendSMSPopUp()" ng-show="SMSButton==true " style="float:right">Send SMS To User</button>
+                </div>
+            </div>
+
+            <table class="table table-responsive devtable">
+                <thead>
+                    <tr>
+                        <th><input type="checkbox" ng-model="checkall" ng-click="checkUncheckAll()" /></th>
+                        @*<th><input type="checkbox" ng-model="checkForSMS" /></th>*@
+                        <th>
+                            {{translation.SRNO}}
+                        </th>
+                        <th ng-click="sortData('SubClassNameEn')">
+                            {{translation.OfficerNameEn}}
+                            <div ng-class="getSortClass('SubClassNameEn')"></div>
+                        </th>
+                        <th>
+                            {{translation.MobileNo}}
+                        </th>
+                        <th>
+                            {{translation.SSOID}}
+                        </th>
+                        <th ng-click="sortData(_language =='en-us' ? 'DEPTNAMEENGLISH' : 'DEPTNAMEHINDI')">
+                            {{translation.DepartmentHeading}}
+                            <div ng-class="getSortClass(_language =='en-us' ? 'DEPTNAMEENGLISH' : 'DEPTNAMEHINDI')"></div>
+                        </th>
+                        <th ng-click="sortData(_language =='en-us' ? 'OrganisationNameEn' : 'OrganisationNameHi')">
+                            {{translation.Organisation}}
+                            <div ng-class="getSortClass(_language =='en-us' ? 'OrganisationNameEn' : 'OrganisationNameHi')"></div>
+                        </th>
+                        <th ng-click="sortData(_language =='en-us' ? 'LevelNameEn' : 'LevelNameHi')">
+                            {{translation.Level}}
+                            <div ng-class="getSortClass(_language =='en-us' ? 'LevelNameEn' : 'LevelNameHi')"></div>
+                        </th>
+                        <th ng-click="sortData(_language =='en-us' ? 'OfficeNameEn' : 'OfficeNameHi')">
+                            {{translation.Office}}
+                            <div ng-class="getSortClass(_language =='en-us' ? 'OfficeNameEn' : 'OfficeNameHi')"></div>
+                        </th>
+                        <th ng-click="sortData(_language =='en-us' ? 'DESIGNATIONDESCENGLISH' : 'DESIGNATIONDESCHINDI')">
+                            {{translation.Designation}}
+                            <div ng-class="getSortClass(_language =='en-us' ? 'DESIGNATIONDESCENGLISH' : 'DESIGNATIONDESCHINDI')"></div>
+                        </th>
+                        <th>
+                            {{translation.RoleHeading}}
+                        </th>
+                        <th>
+                            {{translation.Place}}
+                        </th>
+                    </tr>
+
+                </thead>
+                <tbody>
+                    <tr dir-paginate="Class in UserReqData | limitTo:-5 | filter:q | orderBy:colsort:reverseSort | itemsPerPage: pageSize" current-page="currentPage" pagination-id="SubclassPagination">
+                        <td><input type="checkbox" ng-model="Class.checked" ng-change='updateCheckall()' /> </td>
+                        @*<td><input type="checkbox" ng-model="checkForSMS"/></td>*@
+                        <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                        <td>{{ Class.OfficerNameEn }}</td>
+
+                        <td>{{Class.MobileNo}} </td>
+                        <td>{{Class.SSO_ID}}</td>
+                        <td>{{_language =='en-us' ?  Class.DEPTNAMEENGLISH : Class.DEPTNAMEHINDI}}</td>
+                        <td>{{_language =='en-us' ?  Class.OrganisationNameEn : Class.OrganisationNameHi}}</td>
+                        <td>{{_language =='en-us' ?  Class.LevelNameEn : Class.LevelNameHi}}</td>
+                        <td>{{_language =='en-us' ?  Class.OfficeNameEn : Class.OfficeNameHi}}</td>
+                        <td>{{_language =='en-us' ?  Class.DESIGNATIONDESCENGLISH : Class.DESIGNATIONDESCHINDI}}</td>
+                        <td>{{_language =='en-us' ?  Class.RoleName_EN : Class.RoleName_HI}}</td>
+                        <td ng-show="Class.LevelId==1">{{translation.Rajasthan}}</td>
+                        <td ng-show="Class.LevelId==2">{{_language =='en-us' ?  Class.DIVISION_ENG : Class.DIVISION_MANGAL}} </td>
+                        <td ng-show="Class.LevelId==3">{{_language =='en-us' ?  Class.DISTRICT_ENG : Class.DISTRICT_MANGAL}} </td>
+                        <td ng-show="Class.LevelId==4 && Class.BLOCK_ENG==''">{{_language =='en-us' ?  Class.DISTRICT_ENG : Class.DISTRICT_MANGAL}}, {{_language =='en-us' ?  Class.CITY_ENG : Class.CITY_MANGAL}} </td>
+                        <td ng-show="Class.LevelId==4 && Class.BLOCK_ENG!=''">{{_language =='en-us' ?  Class.DISTRICT_ENG : Class.DISTRICT_MANGAL}}, {{_language =='en-us' ?  Class.BLOCK_ENG : Class.BLOCK_MANGAL}} </td>
+                        <td ng-show="Class.LevelId==5 && Class.IsRuralArban=='False'">{{_language =='en-us' ?  Class.DISTRICT_ENG : Class.DISTRICT_MANGAL}}, {{_language =='en-us' ?  Class.BLOCK_ENG : Class.BLOCK_MANGAL}} {{_language =='en-us' ?  Class.GP_ENG : Class.GP_MANGAL}} </td>
+
+                    </tr>
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+
+
+    <div class="col-md-10">
+        <div class="text-center">
+            <dir-pagination-controls boundary-links="true" pagination-id="SubclassPagination" on-page-change="pageChangeHandler(newPageNumber)" template-url="/dirPagination.tpl.html"></dir-pagination-controls>
+        </div>
+    </div>
+    <div class="form-group col-md-12">
+        <div class="dev-align-btn">
+
+            <a class="btn btn-primary dev-btn" style="text-transform:capitalize;" href="../User/DashBoard"> Back</a>
+        </div>
+    </div>
+
+    <div class="col-md-2">
+        <h5 class="dev-page"> {{translation.Page}}: {{ currentPage }} </h5>
+    </div>
+
+
+    <div class="dev-popup-body modal fade" id="addModal" data-backdrop="static" data-keyboard="false" role="dialog">
+        <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Send SMS to User</h4>
+                </div>
+                <div class="modal-body">
+                    <form class="dev-search-form" style="overflow: hidden; margin-bottom: 35px;" name="OfficeForm">
+                        <div class="col-md-12 form-group">
+
+                            <div class="col-md-3">
+                                <label>
+                                    Message
+                                </label>
+                            </div>
+                            <div class="col-md-8">                               
+                                <textarea type="text" rows="2" id="Message" maxlength="500" class="form-control" placeholder="Message" ng-model="SMS.Message" autocomplete="off" onKeyPress="return isAlphaNumeric(event);"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12" style="margin-top: 10px;">
+                            <div class="dev-menu-btn">
+                                <button type="submit" class="btn btn-primary" ng-click="SaveAndSendSMS()">{{translation.Submit}}</button>
+                                <button type="submit" class="btn btn-primary" ng-click="ResetAddNew()">{{translation.Clear}}</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<input type="hidden" name="hdlang" id="hdlang" value="hi-IN" />
+<script src="~/Scripts/google_hindi/google_transapi.js"></script>
+@*<script type="text/javascript">
+        google.load("elements", "1", {
+            packages: "transliteration"
+        });
+
+        function onLoad() {
+            var content = document.getElementById('content');
+            if (document.getElementById('hdlang').value == "hi-IN") {
+                var options = {
+                    sourceLanguage: google.elements.transliteration.LanguageCode.ENGLISH,
+                    destinationLanguage: google.elements.transliteration.LanguageCode.HINDI, // available option English, Bengali, Marathi, Malayalam etc.
+                    shortcutKey: 'ctrl+g',
+                    transliterationEnabled: true
+                };
+            }
+            else {
+                var options = {
+                    sourceLanguage: google.elements.transliteration.LanguageCode.ENGLISH,
+                    destinationLanguage: google.elements.transliteration.LanguageCode.HINDI, // available option English, Bengali, Marathi, Malayalam etc.
+                    shortcutKey: 'ctrl+g',
+                    transliterationEnabled: false
+                }
+            }
+            var ids = ["name_hi"];
+            var control = new google.elements.transliteration.TransliterationControl(options);
+            control.makeTransliteratable(ids);
+        }
+        google.setOnLoadCallback(onLoad);
+
+    </script>*@
+<script src="~/Scripts/google_hindi/google_transliteration.js"></script>

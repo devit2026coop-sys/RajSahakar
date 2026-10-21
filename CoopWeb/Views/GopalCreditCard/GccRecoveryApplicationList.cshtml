@@ -1,0 +1,670 @@
+﻿@*@{
+        ViewBag.Title = "Gopal Credit Card Appliation List";
+    }*@
+<style>
+    .flexEqualCenter {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    a.backBtn {
+        padding: 3px 5px;
+        background: rgb(99,205,219);
+        color: #fff;
+        border: 0px;
+        outline: none;
+        display: inline-block;
+        text-decoration: none;
+    }
+
+
+        a.backBtn i {
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+    .ui-datepicker {
+        z-index: 9999 !important;
+    }
+
+
+    .SetCalender {
+        background: url("../images/calender.png") no-repeat right 8px center;
+        background-size: 20px 20px;
+        padding-right: 30px; /* space for icon */
+        cursor: pointer;
+    }
+
+    .payment-table {
+        width: 100%;
+    }
+
+        .payment-table td {
+            padding: 5px;
+        }
+
+    .modal-dialog {
+        color: #444;
+    }
+</style>
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $('.SetCalender').datepicker({
+            changeMonth: true,
+            changeYear: true,
+            dateFormat: "dd/mm/yy",
+            showOn: "focus",
+            maxDate: 0,
+            // defaultDate: new Date()
+        });//.datepicker("setDate", new Date());
+
+    });
+</script>
+<script src="~/Scripts/AngularFramework/GccRecoveryApplicationList.js?v=@DateTime.Now.Ticks"></script>
+<script src="~/Scripts/AngularFramework/commonEsign.js?v=@DateTime.Now.Ticks"></script>
+<div ng-app="GccApplicationListMod" ng-controller="GccApplicationListCnt" ng-cloak="">
+    <input type="hidden" id="hdnGccId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).GccId)" />
+    <input type="hidden" id="hdnLevelId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).LevelId)" />
+    <input type="hidden" id="hdnUserId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).UserId)" />
+
+    <div class="container-fluid  citizen-dash-head">
+        <div class="panel panel-default">
+            <div class="panel-heading flexEqualCenter">
+                <b><i class="fa fa-th-list"></i>&nbsp;GCC Recovery Application List</b>
+                <div>
+
+                    @*<div class="row">
+                            <div class="col-xs-12" align="right">
+                                <a href="~/MIS/DueDateDiary" class="backBtn"><i class="fa fa-angle-left"></i>Back</a>
+
+                            </div>
+                        </div>*@
+                </div>
+            </div>
+            <div id="search-filter">
+                <div class="table-dropdown">
+                    <div class="form-group col-md-12">
+                        <div class="col-xs-4">
+                            <label for="search">{{translation.Search}}:</label>
+                            <input ng-model="q" id="search" name="SearchText" class="form-control" placeholder={{translation.filttertext}} autocomplete="off">
+                        </div>
+                        <div class="col-md-3 margin-Top20" id="ddrStatus">
+                            <label>{{ translation.Status}}:</label>
+                            <select name="StatusId" ng-model="search.StatusId" class="form-control">
+                                <option value="">{{translation.SelectOption}}</option>
+                                <option ng-repeat="sts in StatusList" value="{{sts.GccProceesStatusId}}">
+                                    {{_language =='en-us' ?  sts.ProceesStatusTextEn : sts.ProceesStatusTextHi}}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-xs-2">
+                            <label for="search">{{translation.ItemPerPage}}:</label>
+                            <select ng-model="obj.pageSize" class="form-control" ng-change="pagechange()" ng-init="obj.pageSize='50'">
+                                <option value="10">10</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                                <option value="200">200</option>
+                                <option value="500">500</option>
+                                <option value="1000">1000</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group col-md-12">
+
+                        @*<div class="col-md-2  form-group">
+                                <label>
+                                    {{translation.FromDate}}
+                                </label>
+                                <input id="txtFromDate" type="text" name="FromDate" class="form-control SetCalender " ng-model="Filter.FromDate" placeholder="{{translation.FromDate}}" autocomplete="off" readonly>
+                            </div>
+                            <div class="col-md-2 NewMemberdob form-group">
+                                <label>
+                                    {{translation.ToDate}}
+                                </label>
+                                <input id="txtToDate" type="text" name="ToDate" class="form-control SetCalender Todate" ng-model="Filter.ToDate" placeholder="{{translation.ToDate}}" autocomplete="off" readonly>
+                            </div>*@
+
+                        <div class="col-md-3 form-group" ng-show="levelId==1">
+                            <label>
+                                {{translation.BankName}}
+                            </label>
+                            <select ng-model="search.LoanBankID" name="CcbId" ng-disabled="IsSubmiApplication || isLBDisabled" ng-init="search.LoanBankID=='0'" class="form-control" ng-change="Get_LoanBankBranch('0')">
+                                <option value="0" disabled>{{translation.SelectOption}}</option>
+                                <option ng-repeat="itemBlock in BankMasterList | orderBy:'CCBNameEn'" value="{{itemBlock.CCBId}}">
+                                    {{_language =='en-us' ?  itemBlock.CCBNameEn : itemBlock.CCBNameHi}}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 form-group" ng-show="search.LoanBankID>0">
+                            <label>
+                                {{translation.BankBranch}}
+                            </label>
+                            <select ng-model="search.LoanBranchId" name="CcbBranchId" id="BranchId" class="form-control" ng-change="Get_LoanBranch_PACS('0')">
+                                <option value="0" disabled>{{translation.SelectOption}}</option>
+                                <option ng-repeat="itemBlock in BankBranches | orderBy:'BranchNameEn'" value="{{itemBlock.Branch_ID}}">
+                                    {{_language =='en-us' ?  itemBlock.BranchNameEn : itemBlock.BranchNameHi}}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-2 form-group" ng-show="search.LoanBranchId>0">
+                            <label>
+                                {{translation.PACSName}}
+                            </label>
+                            <select ng-model="search.PACS_ID" name="PacsId" id="PacsId" class="form-control">
+                                <option value="0" disabled>{{translation.SelectOption}}</option>
+                                <option ng-repeat="itemBlock in PACSNameList | orderBy:'BLOCK_ENG'" value="{{itemBlock.PACS_ID}}">
+                                    {{_language =='en-us' ?  itemBlock.PACSNameEn : itemBlock.PACSNameEn}}
+                                </option>
+                            </select>
+                        </div>
+
+
+                        <label><input type="radio" id="four" name="ApplicationStatus" value="PA" ng-model="selectedStatus" ng-click="searchRequest(GetGccApplicationList)">All Applications&nbsp;</label>
+                        <label><input type="radio" id="five" name="ApplicationStatus" checked="checked" value="PS" ng-model="selectedStatus" ng-click="searchRequest(GetGccApplicationList)">Pending Self</label>
+
+                    </div>
+
+
+                    <div class="form-group col-md-12">
+                        <div class="dev-align-btn">
+                            <button type="submit" class="btn btn-primary dev-btn" ng-click="searchRequest(GetGccApplicationList)">{{translation.Search}}</button>
+                            <button type="button" class="btn btn-warning" ng-click="exportExcel()"><i class="fa fa-file-excel-o"></i> Export Excel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="table-responsive devtable">
+                    <table class="table table-hover table-striped table-bordered mb-0">
+                        <thead>
+                            <tr>
+                                <th>Sr. No.</th>
+                                <th>Application No</th>
+                                <th>Applicant Name</th>
+                                <th>CCB</th>
+                                <th>Branch</th>
+                                <th>GSS/PACS</th>
+                                <th>Loan Amount</th>
+                                <th>Disbursed Date</th>
+                                <th>Due Date</th>
+                                <th>Extended Due Date (6 Months Relaxation)</th>
+                                <th>Status</th>
+                                <th>Total Recovery Amount</th>
+                                <th>Noc Dcoument</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr dir-paginate="item in GccApplicationList | filter:q | orderBy:colsort:reverseSort | itemsPerPage: obj.pageSize" current-page="currentPage" pagination-id="SubclassPagination" ng-init="item.selected = false">
+                                <td>
+                                    {{(((DataPagingDetails.PageNumber - 1) * DataPagingDetails.PageSize) + 1)+$index}}
+                                    @*<input ng-show="item.UserId == currentUserId && ((item.statusid == 31 && levelId == 8) || (item.statusid != 31  && levelId == 9) ) && selectedStatus== 'PS'" type="checkbox" ng-model="item.selected" ng-change="toggleSelection(item)">*@
+                                </td>
+                                <td>{{item.ApplicationNo}}</td>
+                                <td>{{item.ApplicantName}}</td>
+                                <td>{{item.CCBName}}</td>
+                                <td>{{item.BranchName}}</td>
+                                <td>{{item.PACSName}}</td>
+                                <td>{{item.sanctionAmt}}</td>
+                                <td>{{item.DisbursedDate|date:'dd/MM/yyyy'}}</td>
+                                <td>{{item.OldDueDate}}</td>
+                                <td>{{item.DueDate}}</td>
+                                <td>{{item.Status}}</td>
+                                <td>{{item.TotalRecoveryAmt}}</td>
+                                <td><a target="_blank" href="../Content/GopalCreditCard/GSSProfiling/{{item.NocDocument}}" ng-show="item.NocDocument != ''"><i class="fa fa-download"></i></a></td>
+                                <td>
+                                    @*<a href="#" ng-click="ApplicationView(item.encGccid)"><i class="fa fa-eye"></i></a>*@
+                                    <a href="#" ng-click="ApplicationActionView(item.encGccid)"><i class="fa fa-eye"></i></a>
+                                    @*<a ng-show="item.PaymentSummaryId==0 && levelId==9 && (item.statusid == 33 || item.statusid == 11 )&& selectedStatus== 'PS'" href="javascript:void(0)" class="btn btn-primary dev-btn mb-4" ng-click="NewPayment(item)">New Sanction</a>*@
+                                    <a ng-show="item.PaymentSummaryId == 0 && levelId==9 && (item.statusid == 33 || item.statusid == 11 )&& selectedStatus== 'PS'" href="javascript:void(0)" class="btn btn-primary dev-btn mb-4" ng-click="NewSanction(item.GopalCreditCardId)">New Sanction</a>
+                                    <a ng-show="item.PaymentSummaryId >0  && item.statusid != 35 && ((item.statusid == 31 && levelId == 8) || (item.statusid != 31  && levelId == 9) ) &&  item.UserId == currentUserId && selectedStatus== 'PS' && item.selected == false" href="javascript:void(0)" class="btn btn-primary dev-btn mb-4" ng-click="Action(item)">Action</a>
+                                    @*<a href="javascript:void(0)" ng-show=" item.statusid == 35 && levelId==9 &&  item.UserId == currentUserId" ng-click="EditPayment(item)"><i class="fa fa-edit"></i></a>*@
+
+                                    <a href="javascript:void(0)" ng-show="item.IsEditable == 1" ng-click="EditPayment(item)"> <i class="fa fa-edit"></i></a>
+                                    <!--<a ng-show="item.PaymentSummaryId >0 && levelId==8 && item.UserId == currentUserId" href="javascript:void(0)" class="btn btn-primary dev-btn mb-4"><i class="fa fa-edit"></i>--> <!-- Edit icon --><!--</a>-->
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div ng-if="DataPagingDetails.TotalPages>1" class="dataTables_paginate paging_simple_numbers" id="dataTables-example_paginate" style="display: flex; align-items: center; justify-content: space-between;">
+                            <div class="dataTables_info" id="dataTables-example_info" role="status" aria-live="polite">
+                                Total Records: {{DataPagingDetails.TotalRecords}}
+                            </div>
+                            <ul class="pagination pagination_1" style="margin-left: 10px !important; margin:0">
+                                <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« First</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« Previous</span></li>
+
+                                <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest('1',SearchData)" style="cursor: pointer;">
+                                    <span>« First</span>
+                                </li>
+                                <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest(DataPagingDetails.PageNumber-1,SearchData)" style="cursor:pointer;">
+                                    <span>« Prev</span>
+                                </li>
+                                <li class="{{n==DataPagingDetails.PageNumber?'active':''}}" style="{{n==DataPagingDetails.PageNumber?'':'cursor: pointer'}}" ng-repeat="n in PagingRange(DataPagingDetails.StartPageNumber,DataPagingDetails.EndPageNumber,DataPagingDetails.TotalPages)" ng-click="pageRequest(n,SearchData)"><span>{{n}}</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Next</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Last</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber!= DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.PageNumber+1,SearchData)" style="cursor:pointer;">
+                                    <span>Next »</span>
+                                </li>
+                                <li ng-if="DataPagingDetails.PageNumber != DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.TotalPages,SearchData)" style="cursor:pointer;">
+                                    <span>Last »</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="repaymentmodal" class="modal fade" role="dialog" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <b class="text-info"> {{ payObj.PaymentSummaryId > 0 ? 'Update Payment Form' : 'New Payment Form' }}</b>
+                    <a data-dismiss="modal" class="pull-right"><i class="fa fa-times"></i></a>
+                </div>
+                <div class="modal-body">
+                    <form id="paymentForm" ng-submit="SavePayment()">
+                        <table class="payment-table">
+                            <thead>
+                                <tr>
+                                    <td><label> Application No : </label></td>
+                                    <td> {{payObj.ApplicationNo}}</td>
+                                </tr>
+                                <tr>
+                                    <td><label>Applicant Name : </label></td>
+                                    <td> {{payObj.ApplicantName}}</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="100">
+                                        <hr />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><label>Recovery as : </label></td>
+                                    <td>
+                                        <label>
+                                            <input name="paymentType" type="radio" ng-model="payObj.PaymentType" value="OD" ng-disabled="payObj.PaymentType" />
+                                            OD
+                                        </label>
+
+                                        <label>
+                                            <input name="paymentType" type="radio" ng-model="payObj.PaymentType" value="NOD" ng-disabled="payObj.PaymentType" />
+                                            NOD
+                                        </label>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td>
+                                        <label>Payment Date :</label>
+                                    </td>
+                                    <td>
+                                        <input type="date" class="form-control" ng-model="payObj.PaymentDate" ng-change="onPaymentDateChange()" placeholder="Select Date" />
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td>Principal Amount</td>
+                                    <td>
+                                        <input type="number" class="form-control" ng-model="payObj.PrincipalAmount" placeholder="0.00" min="0" disabled />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td> Interest Amount (10.25 %)</td>
+                                    <td>
+                                        <input name="Interest" type="number" class="form-control" ng-model="payObj.InterestAmount" placeholder="0.00" min="0" required disabled />
+                                    </td>
+                                </tr>
+
+                                <tr ng-show="payObj.PaymentType === 'OD'">
+                                    <td> Penal Interest Amount (2 %)</td>
+                                    <td>
+                                        <input name="PenalInterest" type="number" class="form-control" ng-model="payObj.PenalInterestAmount" placeholder="0.00" min="0" ng-required="payObj.PaymentType === 'OD'" disabled />
+                                    </td>
+                                </tr>
+
+
+                                <tr>
+                                    <td> Total Amount:</td>
+                                    <td>
+                                        <input name="Interest" type="number" class="form-control" ng-model="payObj.TotalAmount" placeholder="0.00" min="0" disabled />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td> Recoverable Amount:</td>
+                                    <td>
+                                        <input name="Interest" type="number" class="form-control" ng-model="payObj.RecoverableAmount" placeholder="0.00" min="0" disabled />
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td> Upload Final Receipt: <span style="color:red;">*</span></td>
+
+                                    <td>
+                                        <input type="file"
+                                               accept="application/pdf"
+                                               class="form-control"
+                                               id="flReportFile"
+                                               checkmaxsize="5120"
+                                               ng-model="payObj.ReceiptFileName"
+                                               onchange="angular.element(this).scope().SelectReceiptFile(this.files)">
+
+                                        <div ng-show="showReceiptError" style="color:red;">
+                                            Please upload receipt PDF file.
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td>Remark <span style="color:red;">*</span></td>
+                                    <td>
+                                        <input name="Remarks" type="text" id="Remarks" class="form-control" ng-model="payObj.Remark" placeholder="Remark" required />
+                                        <div ng-show="paymentForm.Remarks.$touched && paymentForm.Remarks.$error.required"
+                                             style="color:red;">
+                                            Please enter Interest Amount
+                                        </div>
+
+                                        <div ng-show="paymentForm.Remarks.$touched && paymentForm.Remarks.$error.required"
+                                             style="color:red;">
+                                            Please enter Remark
+                                        </div>
+
+
+                                    </td>
+
+                                </tr>
+
+                                @*
+                                    <tr ng-show="false">
+                                        <td colspan="2">
+                                            <label><input type="checkbox" value="1" ng-model="payObj.IsEligible" /> Check, If Eligible for Renewable</label>
+                                        </td>
+                                    </tr>*@
+
+                            </thead>
+
+                            <tfoot>
+                                <tr>
+                                    <td colspan="2" align="center">
+                                        <input type="submit" class="btn btn-primary dev-btn" value="Submit" />
+                                        <input type="button" class="btn btn-danger" value="Cancel" data-dismiss="modal" ng-click="payObj={}" />
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    @*Action Popup*@
+
+
+    <div id="actionmodal" class="modal fade" role="dialog" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <b class="text-info">GCC Recovery Form</b>
+                    <a data-dismiss="modal" class="pull-right"><i class="fa fa-times"></i></a>
+                </div>
+                <div class="modal-body">
+                    <form id="paymentForm" ng-submit="SaveGSSApplicationFlowStatusNewEsign(false)">
+                        @*ng-submit="SaveGSSApplicationFlowStatusNewEsign(false)"*@
+                        <table class="payment-table">
+                            <thead>
+                                <tr>
+                                    <td><label> Application No : </label></td>
+                                    <td> {{payObj.ApplicationNo}}</td>
+                                </tr>
+                                <tr>
+                                    <td><label>Applicant Name : </label></td>
+                                    <td> {{payObj.ApplicantName}}</td>
+                                </tr>
+                                <tr>
+                                    <td><label>Recovery as : </label></td>
+                                    <td>
+                                        <label>
+                                            <input name="paymentType" type="radio" ng-model="payObj.PaymentType" value="OD" ng-disabled="payObj.PaymentType" />
+                                            OD
+                                        </label>
+
+                                        <label>
+                                            <input name="paymentType" type="radio" ng-model="payObj.PaymentType" value="NOD" ng-disabled="payObj.PaymentType" />
+                                            NOD
+                                        </label>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td><label>Principal Amount:</label></td>
+                                    <td><label>{{payObj.PrincipalAmount}}  </label></td>
+                                </tr>
+
+                                <tr>
+                                    <td><label>Interest Amount:</label></td>
+                                    <td><label>{{payObj.InterestAmount}}  </label></td>
+                                </tr>
+
+                                <tr>
+                                    <td><label> Recoverable Amount:</label></td>
+                                    <td><label>{{payObj.RecoverableAmount}}</label></td>
+                                </tr>
+
+                                <tr>
+                                    <td><label>  Payment Date:</label></td>
+                                    <td><label>{{payObj.PaymentDate | date:'dd/MM/yyyy' }}</label></td>
+                                </tr>
+                                <tr ng-show="payObj.RecieptDocument != ''">
+                                    <td><label> Reciept Document:</label></td>
+                                    <td>
+                                        <a target="_blank"
+                                           href="../Content/GCC/Receipts/{{payObj.RecieptDocument}}">
+                                            <i class="fa fa-eye"></i>
+                                        </a>
+
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <label>{{translation.Status}} :</label>
+                                    </td>
+                                    <td>
+                                        <select ng-model="ddlStatus" class="form-control" id="ddlStatus" ng-init="ddlStatus=''" ng-change="StatusChange()" ng-required="true">
+                                            <option value="" disabled>{{translation.SelectOption}}</option>
+                                            <option ng-repeat="item in ProceesStatus" value="{{item.ProcessStatusType}}">
+                                                {{_language == 'en-us' ? item.Status : item.Status}}
+                                            </option>
+                                        </select>
+                                    </td>
+                                </tr>
+
+                                <tr ng-hide="ShowOTPDiv">
+                                    <td><label>{{translation.Remarks}}<span style="color:red;">*</span></label></td>
+                                    <td>
+                                        <textarea rows="4" cols="50"
+                                                  class="form-control"
+                                                  id="Remarks"
+                                                  name="Remarks"
+                                                  ng-model="ApplicationFlowMaster.Remark"
+                                                  placeholder="{{translation.Remarks}}"
+                                                  ng-keypress="checkInput($event)" required></textarea>
+                                    </td>
+                                </tr>
+
+                                <tr ng-hide="ShowOTPDiv" ng-show="ApplicationFlowMaster.StatusId != 34">
+                                    <td>
+                                        <label ng-show="ApplicationFlowMaster.StatusId != 7 && ApplicationFlowMaster.StatusId != 8">
+                                            {{translation.OtherAttachment}} :
+                                        </label>
+                                        <label ng-show="ApplicationFlowMaster.StatusId == 7">
+                                            {{translation.MokaReport}} :
+                                        </label>
+                                        <label ng-show="ApplicationFlowMaster.StatusId == 8">
+                                            {{translation.BranchLevelReport}} :
+                                        </label>
+                                    </td>
+                                    <td>
+                                        <input type="file"
+                                               name="File"
+                                               accept="application/pdf"
+                                               filetype="pdf"
+                                               id="flReportFile"
+                                               class="form-control"
+                                               checkmaxsize="5120"
+                                               GccReportFile
+                                               ng-model="ApplicationFlowMaster.DocumentURL"
+                                               @*ng-model="ApplicationFlowMaster.DocumentURL"*@
+                                               onchange="angular.element(this).scope().UploadReportFile(this.files)">
+                                    </td>
+                                </tr>
+
+                                <tr ng-hide="ShowOTPDiv" ng-show="ApplicationFlowMaster.StatusId != 34">
+                                    <td>
+                                        <label>Journal Number<span style="color:red;">*</span></label>
+                                    </td>
+                                    <td>
+                                        <input type="number"
+                                               class="form-control"
+                                               id="GeneralNumber"
+                                               name="GeneralNumber"
+                                               ng-model="ApplicationFlowMaster.GeneralNumber"
+                                               placeholder="Please enter Journal Number" />
+
+                                    </td>
+                                </tr>
+
+                                <tr ng-show="ddlStatus == 'A' ">
+                                    <td colspan="2">
+                                        <label>
+                                            <input type="radio" name="renewal" ng-value="'renew'"
+                                                   value="1"
+                                                   ng-model="ApplicationFlowMaster.SelectedOption" ng-true-value="1" ng-false-value="0" ng-disabled="IsRenewDisabled" ng-click="ApplicationFlowMaster.IsSatisfiedWithInttCalcByPacs = 0" />
+                                            Eligible for Renewal
+                                        </label>
+                                    </td>
+                                </tr>
+
+                                <tr ng-show="ddlStatus == 'A' ">
+                                    <td colspan="2">
+                                        <label>
+                                            <input type="radio" name="renewal" ng-value="'closer'"
+                                                   value="1"
+                                                   ng-model="ApplicationFlowMaster.SelectedOption" ng-true-value="1" ng-false-value="0" ng-disabled="IsRenewDisabled" ng-click="ApplicationFlowMaster.IsEligibleForRenewable = 0" />
+                                            Loan Closer
+                                        </label>
+
+                                        <div style="color:red; margin-top:5px;"
+                                             ng-show="paymentForm.$submitted && !ApplicationFlowMaster.IsEligibleForRenewable && !ApplicationFlowMaster.IsSatisfiedWithInttCalcByPacs">
+                                            Please select either "Eligible for Renewal" or "Loan Closer".
+                                        </div>
+
+                                    </td>
+                                </tr>
+
+                            </thead>
+
+                            <tfoot>
+                                <tr>
+                                    <td colspan="2" align="center">
+                                        <input type="submit" class="btn btn-primary dev-btn" value="Submit" />
+                                        <input type="button" class="btn btn-danger" value="Cancel" data-dismiss="modal" ng-click="payObj={}" />
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="otpmodal" class="modal fade" role="dialog" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <b class="text-info">Verify OTP</b>
+                    <a data-dismiss="modal" class="pull-right"><i class="fa fa-times"></i></a>
+                </div>
+                <div class="modal-body">
+                    <form id="paymentForm" style="display:inline-block;width:100%" ng-submit="SaveGSSApplicationFlowStatus(false)">
+                        <div class="row">
+                            <div class="form-group col-md-6" ng-show="ShowOTPDiv">
+                                <div class="form-group">
+                                    <label>{{translation.EnterOTP}}</label>
+                                    <input type="text" class="form-control" name="Remarks" ng-bind="OTP" ng-model="ApplicationFlowMaster.OTP" placeholder={{translation.EnterOTP}} autocomplete="off" /><br />
+                                    <button type="button" class="btn btn-primary" ng-click="VerifyOTP()">{{translation.Submit}}</button>
+                                    <button type="button" class="btn btn-primary" ng-click="SaveGSSApplicationFlowStatus(true)">{{translation.ReSendOTP}}</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" ng-show="chkBulkSelected">
+        <div class=" profile-d1" style="margin-top: 30px;">
+            <fieldset class="dvfieldset">
+                <legend class="dvlegend">{{translation.ApplicationFlow}}</legend>
+                <div class="col-lg-12 profile-d1">
+                    <form class="dev-search-form" name="MyClassForm" ng-show="BaseUserId==ApplicationFlowMaster.UserId" style="overflow: hidden; margin-bottom:35px;">
+                        <div class="row">
+                            <div class="col-md-6" ng-show="!ShowOTPDiv1">
+                                <div>
+                                    <label>
+                                        {{translation.Status}} :
+                                    </label>
+                                    <select ng-model="ddlStatus" class="form-control" id="ddlStatus" ng-init="ddlStatus=''" ng-change="StatusChange()" ng-required="true">
+                                        <option value="" disabled>{{translation.SelectOption}}</option>
+                                        <option ng-repeat="item in ProceesStatus" value="{{item.ProcessStatusType}}">
+                                            {{_language =='en-us' ?  item.Status : item.Status}}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-md-12" ng-hide="ShowOTPDiv1">
+                                <label>{{translation.Remarks}}</label>
+                                <textarea type="text" rows="4" cols="50" class="form-control" id="Remarks" name="Remarks" ng-bind="Remarks" ng-model="ApplicationFlowMaster.Remark" placeholder={{translation.Remarks}} ng-keypress="checkInput($event)"></textarea>
+                                <code style="float: left;">
+                                </code>
+                            </div>
+                        </div>
+                        @*<div class="row">
+                                <div class="form-group col-md-12">
+                                    <label style="color:red;">  {{_language=='en-us'?'Note: The sanctioned amount will be the same as the recommended loan amount':'नोट: स्वीकृत राशि अनुशंसित ऋण राशि के समान होगी'}}</label>
+                                </div>
+                            </div>*@
+                        <div class="row">
+                            <div class="form-group col-md-12" ng-hide="ShowOTPDiv1">
+                                <div class="dev-menu-btn">
+                                    <button type="button" class="btn btn-primary" ng-click="SaveGSSApplicationFlowStatus()">{{translation.Submit}}</button>
+                                    <button type="button" class="btn btn-primary" ng-click="BackToPage()">{{translation.Back}}</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group col-md-6" ng-show="ShowOTPDiv1">
+                                <label>{{translation.EnterOTP}}</label>
+                                <input type="text" class="form-control" name="otp" ng-bind="OTP" ng-model="ApplicationFlowMaster.OTP" placeholder={{translation.EnterOTP}} autocomplete="off" /><br />
+                                <button type="button" class="btn btn-primary" ng-click="VerifyOTP()">{{translation.Submit}}</button>
+                                <button type="button" class="btn btn-primary" ng-click="SaveGSSApplicationFlowStatus()">{{translation.ReSendOTP}}</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </fieldset>
+        </div>
+    </div>
+</div>

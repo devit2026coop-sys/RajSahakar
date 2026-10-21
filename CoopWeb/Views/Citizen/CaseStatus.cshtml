@@ -1,0 +1,243 @@
+﻿@{
+
+    Layout = "~/Views/Shared/_CitizenLayout.cshtml"; ;
+}
+<script src="~/Scripts/AngularFramework/CaseRegistraion.js"></script>
+<script type="text/javascript">
+    var tableToExcel = (function () {
+        var uri = 'data:application/vnd.ms-excel;base64,'
+            , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>'
+            , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) }
+            , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
+        return function (table, name) {
+            if (!table.nodeType) table = document.getElementById(table)
+            var ctx = { worksheet: name || 'Worksheet', table: table.innerHTML }
+            window.location.href = uri + base64(format(template, ctx))
+        }
+    })()
+</script>
+<style>
+    body {
+        font-family: Arial, Helvetica, sans-serif;
+    }
+
+    #card {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        transform-style: preserve-3d;
+        transition: transform 1s;
+    }
+
+        #card figure {
+            margin: 0;
+            display: block;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+        }
+
+        #card .front {
+            background: red;
+        }
+
+        #card .back {
+            background: blue;
+            transform: rotateY( 180deg);
+        }
+
+        #card.flipped {
+            transform: rotateY( 180deg);
+        }
+</style>
+
+
+<div ng-app="CaseRegistraionModule">
+    <div ng-controller="CaseRegistraionCont">
+       
+
+
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <h3 class="citizen-dash-head">{{translation.CaseStatus}}</h3>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#"> {{translation.Home}} </a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;">{{translation.CaseStatus}} </span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="col-lg-12">
+            <div class="citizen-dash-head">
+                <form name="MyClassForm" style="overflow: hidden; margin-bottom:35px;">
+                    <div class="col-lg-12 form-group">
+                        <div class="col-lg-2" style="font-weight: 600 !important;">{{translation.DateOfAffiliation}}</div>
+                        <div class="col-lg-4">
+                            <input type="date" name="Affiliation" id="txtfAffiliationDate" ng-init="CaseRegistration.DateOfAffiliation=''" style="display:inline; margin-top: 0px;" class="form-control" ng-change="CaseRegDetailList()" placeholder="{{translation.Affiliation}}" ng-model="CaseRegistration.DateOfAffiliation" autocomplete="off" /> &nbsp;
+                        </div>
+
+                        <div class="col-lg-2" style="font-weight: 600 !important;">{{translation.CaseStatus}}:</div>
+                        <div class="col-lg-4" style="padding-left: 0;">
+
+                            <label class="help-block-gender"><input type="radio" id="casestatustype" name="CaseStatus" checked="checked" value="1" ng-init="CaseRegistration.CaseStatus=1" ng-model="CaseRegistration.CaseStatus" ng-change="CaseRegDetailList()">{{translation.Approvable}} </label>
+                            <label class="help-block-gender"><input type="radio" id="casestatustype" name="CaseStatus" value="2" ng-model="CaseRegistration.CaseStatus" ng-change="CaseRegDetailList()">{{translation.UnderProc}}</label>
+                        </div>
+                    </div>
+                    <div class="col-lg-12 form-group">
+                        <div class="col-lg-2" style="font-weight: 600 !important;">{{translation.Search}}:</div>
+                        <div class="col-lg-4">
+
+                            <input ng-model="q" id="search" class="form-control" placeholder={{translation.filttertext}} autocomplete="off">
+                        </div>
+                    </div>
+                    <div class="clearfix"></div>
+                    <div class="col-lg-12 form-group">
+                        <h5 class="heading-hr ng-binding">  {{translation.CaseStatus}}</h5>
+                    </div>
+                    <div class="col-lg-12 table-responsive">
+                        <table class="table devtable">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        {{translation.SRNO}}
+                                    </th>
+                                    <th>
+                                        {{translation.Court}}
+                                    </th>
+                                    <th>
+                                        {{translation.CaseRegistraionNo}}
+                                    </th>
+
+                                    <th>
+                                        {{translation.Act}}
+                                    </th>
+                                    <th>
+                                        {{translation.section}}
+                                    </th>
+                                    <th>
+                                        {{translation.DateOfAffiliation}}
+                                    </th>
+                                    <th>
+                                        {{translation.CaseHistory}}
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr dir-paginate="Transaction in CaseRegDetailListData | filter: {q,AffilationDate} | orderBy:colsort:reverseSort  | itemsPerPage: pageSize" current-page="currentPage" pagination-id="statePagination">
+                                    <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                                    <td>{{ Transaction.courtname | uppercase }}</td>
+                                    <td>{{ Transaction.CaseRegNo | uppercase }}</td>
+                                    <td>{{ Transaction.Act}}</td>
+                                    <td>{{ Transaction.Section}}</td>
+                                    <td>{{ Transaction.AffilationDate | uppercase }}</td>
+
+                                    <td><a title="SUBMIT" style="cursor:pointer;" data-toggle="modal" ng-show="(Transaction.CaseRegNo != '')" ng-click="GetCaseHistory(Transaction.CaseRegNo)"><i class="fa fa-eye"></i></a>                                 </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-md-10">
+                        <div class="text-center">
+                            <dir-pagination-controls boundary-links="true" pagination-id="statePagination" on-page-change="pageChangeHandler(newPageNumber)" template-url="/dirPagination.tpl.html"></dir-pagination-controls>
+                        </div>
+                    </div>
+                    <div class="form-group col-md-12">
+                        <div class="dev-align-btn">
+
+                            <a class="btn btn-primary dev-btn" style="text-transform:capitalize;" href="../Citizen/Index"> Back</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <style>
+                .modal-body {
+                    max-height: calc(100vh - 210px);
+                    overflow-y: auto;
+                }
+
+                .modal-dialog {
+                    width: 800px;
+                }
+            </style>
+            <div class="dev-popup-body modal fade" id="myModal" role="dialog">
+                <div class="modal-dialog" style="width:950px;">
+                    <!-- Modal content-->
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" ng-click="ClearClassForm()">&times;</button>
+                            <h4 class="modal-title"> {{translation.CaseHistory}}  </h4>
+                        </div>
+                        <div class="modal-body citizen-dash-head">
+                            <div class="col-lg-12 form-group">
+                                <div class="col-md-4" style="padding-left: 750px; ">
+                                    <input type="button" class="btn btn-primary dev-btn" onclick="tableToExcel('tblgetsuport', 'Get Support Data')" value="Export to Excel">
+                                </div>
+                            </div>
+                            <div class="citizen-dash-head">
+                                <div class="col-lg-12 table-responsive">
+                                    <div style="min-width:100%;overflow-x :scroll;" id="tblgetsuport">
+                                        <table class="table devtable">
+                                            <thead>
+                                                <tr>
+                                                    <th>
+                                                        {{translation.SRNO}}
+                                                    </th>
+                                                    <th>
+                                                        {{translation.CaseRegistraionNo}}
+                                                    </th>
+                                                    <th>
+                                                        {{translation.Court}}
+                                                    </th>
+                                                    <th>
+                                                        {{translation.CreationDate}}
+                                                    </th>
+                                                    <th>
+                                                        {{translation.Status}}
+                                                    </th>
+                                                    <th>
+                                                        {{translation.File}}
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr dir-paginate="Item in CaseRegHistoryData | filter: q | itemsPerPage: pageSize" current-page="currentPage" pagination-id="MenuPagination">
+                                                    <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                                                    <td>{{ Item.case_no}}</td>
+                                                    <td>{{ Item.court_name}}</td>
+                                                    <td>{{ Item.createdon}}</td>
+                                                    <td>{{ Item.status}}</td>
+                                                    <td>
+                                                        <a title="SUBMIT" target="_blank" href="{{ Item.noticefilepath}}" ng-show="(Item.noticefilepath != '')" style="cursor:pointer;"  ><i class="fa fa-file-pdf-o"></i></a> 
+                                                  </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                           
+                            <div class="col-md-10">
+                                <div class="text-center">
+                                    <dir-pagination-controls boundary-links="true" pagination-id="MenuPagination" on-page-change="pageChangeHandler(newPageNumber)" template-url="/dirPagination.tpl.html"></dir-pagination-controls>
+                                </div>
+                            </div>
+                            
+                           
+                        </div>
+                     
+                    </div>
+                   
+                </div>
+              
+            </div>
+        </div>
+    </div>
+</div>

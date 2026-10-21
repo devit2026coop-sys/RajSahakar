@@ -1,0 +1,203 @@
+﻿@{
+    ViewBag.Title = "Board of Director";
+}
+<style>
+    .flexEqualCenter {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .invalid-field {
+        border: 2px solid red;
+        background-color: #ffe6e6;
+    }
+</style>
+<script src="~/Scripts/AngularFramework/NCDBoardofDirector.js?v=@DateTime.Now.Ticks"></script>
+<link href="~/Content/Stylesheets/toastr.min.css" rel="stylesheet" />
+<script src="~/Scripts/toastr.min.js"></script>
+<div ng-app="directMod" ng-controller="directCtrl" ng-cloak="">
+    <div class="container-fluid citizen-dash-head">
+        <div class="panel panel-default">
+            <div class="panel-heading flexEqualCenter">
+                <b><i class="fa fa-user-plus"></i> Cooperative Board of Director</b>
+                <div class="text-right">
+                    <a href="javascript:void(0)" class="btn btn-primary dev-btn" ng-click="goBackToList()">
+                        <i class="fa fa-angle-left"></i> Back
+                    </a>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-lg-12 form-group">
+                        <div class="col-md-4">
+                            <label>
+                                Director Member Name
+                            </label>
+                            <input type="text" class="form-control" ng-model="search.bod_Member_name" ng-class="{'invalid-field': invalidFields.bod_Member_name}" ng-change="invalidFields.bod_Member_name = false" placeholder="Please enter name of director" uppercase-only />
+                        </div>
+                        <div class="col-md-4">
+                            <label>
+                                Gender
+                            </label>
+                            <div>
+                                <label class="radio-inline">
+                                    <input type="radio" ng-model="search.gender" ng-value="1"> Male
+                                </label>
+                                <label class="radio-inline">
+                                    <input type="radio" ng-model="search.gender" ng-value="2"> Female
+                                </label>
+                                <label class="radio-inline">
+                                    <input type="radio" ng-model="search.gender" ng-value="3"> Transgender
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label>
+                                Mobile No.
+                            </label>
+                            <input type="text" class="form-control" ng-model="search.mobile_number" ng-class="{'invalid-field': invalidFields.mobile_number}" ng-change="invalidFields.mobile_number = false" placeholder="Please enter mobile number" mobile-number />
+                        </div>
+                    </div>
+                    <div class="col-lg-12 form-group">
+                        <div class="col-md-4">
+                            <label>
+                                Email
+                            </label>
+                            <input type="text" class="form-control" ng-model="search.email_id" ng-class="{'invalid-field': invalidFields.email_id}" ng-change="invalidFields.email_id = false" placeholder="Please enter email address" />
+                        </div>
+                        <div class="col-md-4">
+                            <label>
+                                Document Type
+                            </label>
+                            <select ng-model="search.id_proof_type" class="form-control" ng-class="{'invalid-field': invalidFields.id_proof_type}" required ng-change="invalidFields.id_proof_type = false">
+                                <option value="" disabled>{{translation.SelectOption}}</option>
+                                <option ng-repeat="item in documentTypeList" value="{{item.id}}" ng-disabled="item.id == 2 || item.id == 3 || item.id == 4">
+                                    {{item.name}}
+                                </option>
+                            </select>
+                            @*<select ng-model="search.id_proof_type" ng-options="item.id as item.name disable when item.id==2 || item.id==3 || item.id==4 for item in documentTypeList" ng-change="changeDocumentType()" class="form-control" required>
+                                    <option value="" disabled>Select Document Type</option>
+                                </select>*@
+                        </div>
+                        <div class="col-md-4">
+                            <label>
+                                Document No.
+                            </label>
+                            @* <input type="text" class="form-control" ng-model="search.id_proof_no" input-transform="search.id_proof_type" ng-attr-placeholder="{{getPlaceholder(search.id_proof_type)}}"
+                                ng-attr-maxlength="{{getMaxLength(search.id_proof_type)}}" ng-disabled="!search.id_proof_type" required />*@
+                            <input type="text" class="form-control" ng-model="search.id_proof_no" ng-class="{'invalid-field': invalidFields.id_proof_no}" ng-change="invalidFields.id_proof_no = false" placeholder="Enter Aadhaar number" maxlength="12" numbers-only>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-12 form-group">
+                        <div class="col-md-4">
+                            <label>
+                                Director Designation
+                            </label>
+                            <select ng-model="search.bod_designation" class="form-control" ng-class="{'invalid-field': invalidFields.bod_designation}" ng-change="invalidFields.bod_designation = false" required ng-options="item.id as item.name for item in NcdDesignationsList">
+                                <option value="" disabled>{{translation.SelectOption}}</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label>
+                                From Date
+                            </label>
+                            <input type="date" class="form-control" ng-model="search.from_date" ng-class="{'invalid-field': invalidFields.from_date}" ng-change="invalidFields.from_date = false" autocomplete="off" disable-before-date />
+                        </div>
+                        <div class="col-md-4">
+                            <label>
+                                To Date
+                            </label>
+                            <input type="date" class="form-control" ng-model="search.to_date" ng-class="{'invalid-field': invalidFields.to_date}" ng-change="invalidFields.to_date = false" autocomplete="off" disable-before-date />
+                        </div>
+                    </div>
+
+                    <div class="col-lg-12 form-group">
+                        <div class="col-md-2">
+                            <label>Any Other Cooperative</label>
+                            <div>
+                                <label class="radio-inline">
+                                    <input type="radio" name="is_any_other_cooperative" ng-model="search.is_any_other_cooperative" value="1"> Yes
+                                </label>
+
+                                <label class="radio-inline">
+                                    <input type="radio" name="is_any_other_cooperative" ng-model="search.is_any_other_cooperative" value="0"> No
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4" ng-show="search.is_any_other_cooperative==1">
+                            <label>
+                                Other Cooperative Society Name
+                            </label>
+                            <input type="text" class="form-control" placeholder="Please enter any other cooperative name" ng-class="{'invalid-field': invalidFields.other_cooperative_society_name}" ng-change="invalidFields.other_cooperative_society_name = false" ng-model="search.other_cooperative_society_name" autocomplete="off" />
+                        </div>
+                        <div class="col-md-3">
+                            <label>Sector</label>
+                            <div class="form-group">
+                                <select ng-model="search.sector_code" class="form-control" required ng-change="searchFilterData()">
+                                    <option value="0" disabled>{{translation.SelectOption}}</option>
+                                    <option ng-repeat="item in SectorDataList " value="{{item.id}}">
+                                        {{item.name}}
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <label>District</label>
+                            <div class="form-group">
+                                <select ng-model="search.dist_code" class="form-control" required ng-options="d.district_code as d.district_name for d in districtDataList" ng-change="searchFilterData()">
+                                    <option value="" disabled>{{translation.SelectOption}}</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-12" style="margin-top:20px;">
+                        <div class="form-group">
+                            <div class="dev-menu-btn">
+                                <button type="submit" class="btn btn-primary" ng-click="SaveDirectorData()">{{translation.Submit}}</button>
+                                <button type="submit" class="btn btn-primary" ng-click="resetForm()">Reset</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row" ng-if="DirectorDataList != null && DirectorDataList.length > 0">
+                    <table class="table table-responsive devtable mb-2">
+                        <thead>
+                            <tr>
+                                <th>
+                                    {{translation.SRNO}}
+                                </th>
+                                <th>Board of Member Name </th>
+                                <th>District Name</th>
+                                <th>Sector Name</th>
+                                <th>Designations Name</th>
+                                <th>Id Proof No.</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="item in DirectorDataList track by $index">
+                                <td>{{$index + 1 }}</td>
+                                <td>{{ item.bod_Member_name }}</td>
+                                <td>{{ item.district_name}}</td>
+                                <td>{{ item.sector_name }}</td>
+                                <td>{{ item.designation_name }}</td>
+                                <td>{{ item.id_proof_no }}</td>
+                                <td>
+                                    <a class="btn btn-sm" ng-class="(search.ncd_bod_id > 0 && search.ncd_bod_id == item.ncd_bod_id) ? 'btn-danger' : 'btn-warning'" ng-click="(search.ncd_bod_id > 0 && search.ncd_bod_id == item.ncd_bod_id) ? resetForm() : getDirectorDetailById(item.ncd_bod_id)">
+                                        <i class="fa" ng-class="(search.ncd_bod_id > 0 && search.ncd_bod_id == item.ncd_bod_id) ? 'fa-times text-white' : 'fa-edit text-white'"></i>
+                                    </a>
+                                    @*<a class="btn btn-sm btn-warning" title="Edit" ng-click="getDirectorDetailById(item.ncd_bod_id)">
+                                        <i class="fa fa-edit text-white"></i></a>*@
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

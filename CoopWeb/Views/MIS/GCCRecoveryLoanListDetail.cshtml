@@ -1,0 +1,217 @@
+﻿@{
+    ViewBag.Title = "GCC Recovery Loan Application List";
+}
+<script src="~/Scripts/AngularFramework/GCCRecoveryLoanListDetail.js?v=1.13"></script>
+<link href="~/Scripts/google_hindi/google_transliteration.css" rel="stylesheet" />
+
+<style>
+    .inputapi-transliterate-indic-suggestion-menu {
+        z-index: 99999 !important;
+        display: block;
+    }
+
+    .table > tbody > tr > td, .table > tbody > tr > th, .table > tfoot > tr > td, .table > tfoot > tr > th, .table > thead > tr > td {
+        padding: 1px;
+        padding-right: 5px;
+        padding-left: 5px;
+    }
+</style>
+
+<script type="text/javascript">
+    var tableToExcel = (function () {
+        var uri = 'data:application/vnd.ms-excel;base64,'
+            , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>'
+            , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) }
+            , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
+        return function (table, name) {
+            if (!table.nodeType) table = document.getElementById(table)
+            var ctx = { worksheet: name || 'Worksheet', table: table.innerHTML }
+            window.location.href = uri + base64(format(template, ctx))
+        }
+    })()
+</script>
+
+
+<div ng-app="ApplicationFlowRecoveryModule" ng-controller="ApplicationRecoveryFlowCont" ng-cloak="">
+    <div>
+        <div class="col-md-12">
+            <h3 class="citizen-dash-head ng-binding" style="margin-top:0px;">GCC Recovery Application List</h3>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#">  {{translation.Home}}</a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;"> {{translation.New}} </span>
+                        <i class="fa fa-angle-right"> </i>
+                        <span style="margin: 0 5px;"> GCC Recovery Application List </span>
+                    </li>
+
+                </ul>
+            </div>
+        </div>
+        <div style="margin-top:30px;padding-top:30px">
+            <div class="col-md-12">
+                <div class="citizen-dash-head" style="overflow: hidden;">
+                    <div class="table-dropdown" id="search-filter" style="margin-bottom: 5px;">
+                        <div class="col-lg-12" style="margin-bottom: 5px; padding-left: 0;">
+                            <input type="hidden" id="hdnRoleId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).RoleId)" />
+                            <input type="hidden" id="hdnDistrictId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DistrictId)" />
+                            <input type="hidden" id="hdnGccId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).GccId)" />
+                            <input type="hidden" id="hdnLevelId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).LevelId)" />
+                            <input type="hidden" id="hdnUserId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).UserId)" />
+
+                            @*Bank*@
+                            <div class="col-md-3" id="BankID">
+                                <label>
+                                    {{translation.BankName}}
+                                </label>
+                                <select id="BankID" name="CCBBANK_ID" ng-model="GopalCreditCardModel.LoanBankID" ng-change="Get_LoanBankBranch(GopalCreditCardModel.LoanBankID)" class="form-control" ng-disabled="IsBankFreezed">
+                                    <option value="0" disabled>{{translation.SelectOption}}</option>
+                                    <option ng-repeat="itemBlock in BankMasterList | orderBy:'BLOCK_ENG'" value="{{itemBlock.CCBId}}">
+                                        {{_language =='en-us' ?  itemBlock.CCBNameEn : itemBlock.CCBNameHi}}
+                                    </option>
+                                </select>
+                            </div>
+                            @*Branch*@
+                            <div class="col-md-3" id="BranchId">
+                                <label>
+                                    {{translation.BankBranch}}
+                                </label>
+                                <select name="PLDB_Branch_ID" ng-model="GopalCreditCardModel.LoanBranchId" class="form-control" ng-init="GopalCreditCardModel.LoanBranchId='0'" ng-change="Get_LoanBranch_PACS(GopalCreditCardModel.LoanBranchId)" ng-disabled="IsBranchFreezed">
+                                    <option value="0" disabled>{{translation.SelectOption}}</option>
+                                    <option ng-repeat="itemBlock in PLDBBranches | orderBy:'BLOCK_ENG'" value="{{itemBlock.Branch_ID}}">
+                                        {{_language =='en-us' ?  itemBlock.BranchNameEn : itemBlock.BranchNameHi}}
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-3">
+                                <label>{{translation.PACSName}}</label>
+                                <select id="PacsId" ng-model="GopalCreditCardModel.PACS_ID"
+                                        name="Pacs_Id"
+                                        class="form-control"
+                                        ng-disabled="IsPacsFreezed"
+                                        ng-init="GopalCreditCardModel.PACS_ID='0'">
+                                    <option value="0" disabled>{{translation.SelectOption}}</option>
+                                    <option ng-repeat="itemBlock in PACSNameList | orderBy:'BLOCK_ENG'" value="{{itemBlock.PACS_ID}}">
+                                        {{_language =='en-us' ? itemBlock.PACSNameEn : itemBlock.PACSNameEn}}
+                                    </option>
+                                </select>
+                            </div>                                   
+
+
+                                <div class="col-md-3">
+                                    <label for="search">{{translation.Search}}:</label>
+                                    <input ng-model="q" name="SearchText" id="search" class="form-control" placeholder={{translation.filttertext}} autocomplete="off">
+                                </div>
+
+                                <div class="col-md-2">
+                                    <label>From Date:</label>
+                                    <input type="date" name="FromDate" ng-model="startdate" class="form-control" autocomplete="off">
+                                </div>
+
+                                <div class="col-md-2">
+                                    <label>To Date:</label>
+                                    <input type="date" name="ToDate" ng-model="enddate" class="form-control" autocomplete="off">
+                                </div>
+
+                                <div class="col-md-1">
+                                    <label for="search">{{translation.ItemPerPage}}:</label>
+                                    <input type="number" min="1" max="1000" class="form-control" ng-model="pageSize">
+                                </div>
+
+                                <div class="col-md-3" style="margin-top: 10px;padding-left: 0px;" ng-init="Cases103='BOTH'">
+                                    <label for="">Case Type : </label>
+                                    <div>
+                                        <label><input type="radio" value="OD" name="ApplicationStatus" ng-model="Cases103" ng-click="searchRequest(GccLoanApplicationList)">OD</label>
+                                        <label><input type="radio" value="NOD" name="ApplicationStatus" ng-model="Cases103" ng-click="searchRequest(GccLoanApplicationList)">NOD</label>
+                                        <label><input type="radio" value="BOTH" name="ApplicationStatus" ng-model="Cases103" ng-click="searchRequest(GccLoanApplicationList)" checked>Both</label>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label>&nbsp;</label><br>
+                                    <button type="button" ng-click="searchRequest(GccLoanApplicationList)" class="btn btn-primary dev-btn ng-binding">{{translation.Search}}</button>
+                                    <button type="button" ng-show="showClearButton" ng-click="ClearSearch()" class="btn btn-primary dev-btn ng-binding">{{translation.Clear}}</button>
+                                    <button type="button" onclick="tableToExcel('GCCRecoveryListDetails', 'GCC Recovery Application List')" class="btn btn-success dev-btn">
+                                        <i class="fa fa-file-excel-o"></i> Export Excel
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    <div style="overflow-x: auto;">
+                        <table id="GCCRecoveryListDetails" class="table table-responsive devtable" style="">
+                            <thead>
+                                <tr>
+                                    <th> {{translation.SRNO}} </th>
+                                    <th style=" min-width: 125px;"> Loanee Name </th>                                   
+                                    <th style=" min-width: 125px;"> CCB Bank </th>
+                                    <th style=" min-width: 125px;"> CCB Branch </th>
+                                    <th> {{translation.MobileNo}} </th>
+                                    <th> Registration Number </th>
+                                    <th> Loan Amount </th>
+                                    <th> Interest Amount </th>
+                                    <th> Penal Interest Amount </th>                                    
+                                    <th> Recovery Amount </th>
+                                    <th> Case Type </th>
+                                    <th> Status </th>
+                                    
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="OTS in OTSList">
+                                    <td> {{(((DataPagingDetails.PageNumber - 1) * DataPagingDetails.PageSize) + 1)+$index}} </td>
+                                    <td style="text-transform:uppercase;"><b> <i>{{OTS.LoaneeName }}</i></b><br /> </td>
+                                    <td>{{OTS.CCBName}}  </td>                                  
+                                    <td>{{OTS.BranchName }}</td>
+                                    <td>{{OTS.MobileNo }}</td>
+                                    <td>{{OTS.ApplicationNo }}</td>
+                                    <td>{{OTS.LoanAmount }}</td>
+                                    <td>{{OTS.InterestAmount }}</td>
+                                    <td>{{OTS.PenalInterestAmount }}</td>
+                                    <td>{{OTS.TotalRecoveryAmt}}</td>
+                                    <td>{{OTS.PaymentType}}</td>                                      
+                                    <td>{{OTS.StatusName}}</td>                                      
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-md-12">                      
+                        <div ng-if="DataPagingDetails.TotalPages > 1" class="dataTables_paginate paging_simple_numbers" id="dataTables-example_paginate">
+                            <div class="dataTables_info" id="dataTables-example_info" role="status" aria-live="polite">
+                                Total Records: {{DataPagingDetails.TotalRecords}}
+                            </div>
+                            <ul class="pagination pagination_1" style="margin-left: 10px !important;">
+                                <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« First</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« Previous</span></li>
+
+                                <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest('1',GccLoanApplicationList)" style="cursor: pointer;">
+                                    <span>«First</span>
+                                </li>
+                                <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest(DataPagingDetails.PageNumber-1,GccLoanApplicationList)" style="cursor:pointer;">
+                                    <span>« Previous</span>
+                                </li>
+                                <li class="{{n==DataPagingDetails.PageNumber?'active':''}}" style="{{n==DataPagingDetails.PageNumber?'':'cursor: pointer'}}" ng-repeat="n in PagingRange(DataPagingDetails.StartPageNumber,DataPagingDetails.EndPageNumber,DataPagingDetails.TotalPages)" ng-click="pageRequest(n,GccLoanApplicationList)"><span>{{n}}</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Next</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Last</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber!= DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.PageNumber+1,GccLoanApplicationList)" style="cursor:pointer;">
+                                    <span>Next »</span>
+                                </li>
+                                <li ng-if="DataPagingDetails.PageNumber != DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.TotalPages,GccLoanApplicationList)" style="cursor:pointer;">
+                                    <span>Last »</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="se-pre-con"></div>
+    </div>
+</div>
+

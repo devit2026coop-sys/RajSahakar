@@ -1,0 +1,859 @@
+﻿<script src="~/Scripts/AngularFramework/AddGodown.js?v=1.2"></script>
+<style>
+
+    input.picker[type="date"] {
+        position: relative;
+    }
+
+        input.picker[type="date"]::-webkit-calendar-picker-indicator {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            color: transparent;
+            background: transparent;
+        }
+</style>
+<div ng-app="UserRole">
+    <div ng-controller="Role">
+        <div class="col-md-12">
+            <h3 class="h3heading citizen-dash-head">Add Godown</h3>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#">  {{translation.Home}} </a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;">Godown</span>
+                    </li>
+                    <li style="float: right;" id="divAddBtn">
+                        <i class="fa fa-angle-double-right" style="color: #025e63;"></i>
+                        <a ng-click="AddRoleClick();GodownCCBlistsdetails();ClearRoleForm()" data-toggle="modal" data-target="#myModal" style="color: #025e63; cursor: pointer; text-decoration:none;  font-weight: bold;" class="ng-binding">Add Godown</a>
+                    </li>
+
+                </ul>
+            </div>
+        </div>
+
+
+        <div class="dev-popup-body modal fade" id="myupdateModal" role="dialog" data-backdrop="static" data-keyboard="false">
+            <div class="modal-dialog">
+                <!-- Modal content-->
+                <input type="hidden" name="name" value="" id="iddgodwnval" />
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Update Godown Status</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form class="dev-search-form" name="MyRoleForm" style="overflow: hidden;">
+                            @*<div class="form-group">
+                                <label>Status<span class="">*</span></label>
+                                <select class="form-control" ng-model="godown.status" ng-init="godown.status='0'">
+                                    <option value="" ng-selected="selected">--Select--</option>
+                                    <option ng-repeat="item in StatusList" value="{{item.Id}}">{{item.Name}}</option>
+
+                                </select>
+                            </div>*@
+                            <div class="form-group">
+                                <label>Longitude</label>
+                                <input type="number" class="form-control" ng-model="godown.Longitude" />
+                            </div>
+
+                            <div class="form-group">
+                                <label>Latitude</label>
+                                <input type="number" class="form-control" ng-model="godown.Latitude" />
+                            </div>
+                            <div class="form-group">
+                                <label>Description</label>
+                                <textarea class="form-control" ng-model="godown.Description"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Godown Photo</label>
+                                <input type="file" id="godownPhoto" filetype="Upload" accept="image/*" name="godownphoto" class="form-control" ng-model="godown.Photo">
+                            </div>
+                            <div class="form-group">
+                                <div class="dev-align-btn">
+                                    <button type="submit" class="btn btn-primary dev-btn" ng-click="UpdateGodown()" style="margin-right:15px;">{{translation.Submit}}</button>
+                                    <button type="button" class="btn btn-primary dev-btn" ng-click="ClearRoleForm()">{{translation.Clear}}</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <style>
+            .flex {
+                display: flex;
+            }
+
+            .flexEqual {
+                justify-content: space-between;
+            }
+
+            .flexMiddel {
+                align-items: center;
+            }
+
+            .panelCollapsebtn, .panelCollapsebtn:hover, .panelCollapsebtn:focus {
+                background: none;
+                border: 0px;
+                box-shadow: none;
+                outline: none;
+            }
+
+            .maxHeight {
+                max-height: calc(100vh - 164px);
+                overflow: auto;
+            }
+
+            .MarginTop20 {
+                margin-top: 20px;
+            }
+        </style>
+
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" ng-show="ShowForm1">
+            <div class="citizen-dash-head">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="citizen-dash-head">
+                            <div class="table-dropdown">
+
+                                <div class="col-md-4">
+                                    <label>Status<span class=""></span></label>
+                                    <select for="search" class="form-control" ng-model="godown.status" ng-init="godown.status='0'" id="status">
+                                        <option value="" ng-selected="selected" >--Select--</option>
+                                        <option ng-repeat="item in StatusList" value="{{item.Id}}">{{item.Name}}</option>
+
+                                    </select>
+                                </div>
+
+
+
+                                <div class="col-md-4">
+                                    <label for="search">{{translation.Search}}:</label>
+                                    <input ng-model="q" id="search" class="form-control" placeholder={{translation.filttertext}} autocomplete="off">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="search">{{translation.ItemPerPage}}:</label>
+                                    <input type="number" min="1" max="100" class="form-control" ng-model="pageSize">
+                                </div>
+                                <div class="col-md-4">
+                                    <label>Status<span class="">*</span></label>
+                                    <select class="form-control" ng-model="godown.status" ng-change="GetGodownlist()">
+                                        <option value="" ng-selected="selected">--Select--</option>
+                                        <option ng-repeat="item in StatusList" value="{{item.Id}}">{{item.Name}}</option>
+                                    </select>
+                                </div>
+
+                            </div>
+                            <table class="table table-responsive devtable">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            {{translation.SRNO}}
+                                        </th>
+                                        <th>Address</th>
+                                        <th>Type Of Society</th>
+                                        <th>Schemes Name</th>
+                                        <th>Sanction Amt</th>
+                                        <th>Sanction Date</th>
+                                        <th>Godown Capacity (Metric Tun)</th>
+                                        <th>Land Type</th>
+                                        <th>Land Size (Hectare)</th>
+                                        <th>Status</th>
+                                        @*
+                                        <th>{{translation.Edit}}</th>*@
+                                        <th>{{translation.View}}</th>
+
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr dir-paginate="item in godown | filter: q | filter:godown.status | orderBy:colsort:reverseSort | itemsPerPage: pageSize" current-page="currentPage" pagination-id="rolePagination">
+                                        <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                                        <td>{{item.Address}}  </td>
+                                        <td>{{item.TypeofSociety}}</td>
+                                        <td>{{item.Scheme}}</td>
+                                        <td>{{ item.SanctionAmt | uppercase }}</td>
+                                        <td>{{ item.SanctionDate | uppercase }}</td>
+                                        <td>{{ item.GodownCapacity | uppercase }}</td>
+                                        <td>{{ item.LandType | uppercase }}</td>
+                                        <td>{{ item.LandSize | uppercase }} </td>
+                                        <td>{{ item.StatusName | uppercase }}</td>
+                                        <td ng-show="true" style="text-align:center !important">
+
+                                            <i class="fa fa-info-circle" data-target="#popupDetailView" data-toggle="modal" ng-click="GetGodownlistdetail(item.GodownId)"></i>
+                                        </td>
+
+
+
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="col-md-10">
+                        <div class="text-center">
+                            <dir-pagination-controls boundary-links="true" pagination-id="rolePagination" on-page-change="pageChangeHandler(newPageNumber)" template-url="/dirPagination.tpl.html"></dir-pagination-controls>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <h5 class="dev-page"> {{translation.Page}}: {{ currentPage }} </h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" ng-show='IsVisible'>
+            <div class="devpage-breadcrumb">
+                <div class="citizen-dash-head">
+                    <label>{{translation.ParentMenu}} </label>
+                    <select style="width:200px" ng-model="menu.ParentId" data-val-required="Parent Menu field is required." ng-init="menu.ParentId='0'" ng-change="MenuListbyparent()">
+                        <option value="0" disabled>{{translation.SelectMasterMenu}}</option>
+                        <option ng-repeat="Menu in Menus" ng-show="Menu.ParentId==0" value="{{Menu.MenuId}}">
+                            {{_language =='en-us' ?  Menu.MenuNameEn : Menu.MenuNameHi}}
+                        </option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div ng-show='IsVisible'>
+            <div class="form-group">
+                <div class="col-md-12">
+                    <div class="table-responsive citizen-dash-head">
+                        <table class="table table-responsive devtable">
+                            <thead>
+                                <tr>
+                                    @*
+                                    <th>
+                                        {{translation.SRNO}}
+                                    </th>*@
+                                    <th style="width:50%"><i ng-click="ShowHideAllRoles()" class="fa {{MenuClass}}"></i>  Menu</th>
+                                    @*
+                                    <th style="width:15%">Level 2</th>
+                                    <th>Level 3</th>*@
+                                    <th style="width:30%" ng-click="sortData('MenuUrl')">
+                                        {{translation.MenuUrl}}
+                                        <div ng-class="getSortClass('MenuUrl')"></div>
+                                    </th>
+                                    <th style="width:20%">{{translation.MenueAction}}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="Menu in AllMenus" current-page="currentPage" pagination-id="MenuPagination" dat-val="{{Menu.ParentId}}" class="_{{Menu.ParentId}}" ng-if="Menu.IsShow">
+                                    @*
+                                    <td>{{pageSize *(currentPage-1)+$index+1}}</td>*@
+
+                                    <td>
+                                        <div><i ng-if="Menu.Level1En!='' && Menu.IsChild" ng-click="ShowHideRoles($index,Menu.MenuId,MenuLevel)" class="fa {{Menu.Class}}" dat-val="Menu.ParentId"></i><input style="margin-left: {{Menu.Level1En!='' && Menu.IsChild?15:30}}px;" ng-if="Menu.Level1En!=''" type="checkbox" name="{{AllMenu.MenuId}}" ng-model="Menu.IsChecked" ng-change="optionToggled()" ng-checked="Menu.IsChecked" ng-click="SetUncheckStatus(Menu.MenuId,Menu.IsChecked)" />   {{ Menu.Level1En | uppercase }}</div>
+                                        <div style="margin-left:50px;"><i ng-if="Menu.Level2En!='' && Menu.Level1En=='' && Menu.IsChild" ng-click="ShowHideRoles($index,Menu.MenuId,MenuLevel)" class="fa {{Menu.Class}}"></i><input style="margin-left: {{Menu.Level2En!='' && Menu.Level1En=='' && Menu.IsChild?15:30}}px;" ng-if="Menu.Level2En!='' && Menu.Level1En==''" type="checkbox" name="{{AllMenu.MenuId}}" ng-model="Menu.IsChecked" ng-change="optionToggled()" ng-checked="Menu.IsChecked" ng-click="SetUncheckStatus(Menu,AllMenu.MenuIdChecked,Menu.IsChecked)" />{{ Menu.Level2En | uppercase }}</div>
+                                        <div style="margin-left:150px;"><input ng-if="Menu.Level2En=='' && Menu.Level3En!=''" type="checkbox" name="{{AllMenu.MenuId}}" ng-model="Menu.IsChecked" ng-change="optionToggled()" ng-checked="Menu.IsChecked" ng-click="SetUncheckStatus(AllMenu,AllMenu.MenuIdChecked,Menu.IsChecked)" />{{ Menu.Level3En | uppercase }}</div>
+                                    </td>
+                                    @*
+                                    <td><i ng-if="Menu.Level1En!='' && Menu.IsChild" ng-click="ShowHideRoles($index,Menu.MenuId,MenuLevel)" class="fa {{Menu.Class}}" dat-val="Menu.ParentId"></i><input style="margin-left: {{Menu.Level1En!='' && Menu.IsChild?15:30}}px;" ng-if="Menu.Level1En!=''" type="checkbox" name="{{AllMenu.MenuId}}" ng-model="AllMenu.Checked" ng-change="optionToggled()" ng-checked="AllMenu.MenuIdChecked == 1" ng-click="SetUncheckStatus(AllMenu,AllMenu.MenuIdChecked,AllMenu.Checked)" />   {{ Menu.Level1En | uppercase }}</td>
+                                    <td><i ng-if="Menu.Level2En!='' && Menu.Level1En=='' && Menu.IsChild" ng-click="ShowHideRoles($index,Menu.MenuId,MenuLevel)" class="fa {{Menu.Class}}"></i><input style="margin-left: {{Menu.Level2En!='' && Menu.Level1En=='' && Menu.IsChild?15:30}}px;" ng-if="Menu.Level2En!='' && Menu.Level1En==''" type="checkbox" name="{{AllMenu.MenuId}}" ng-model="AllMenu.Checked" ng-change="optionToggled()" ng-checked="AllMenu.MenuIdChecked == 1" ng-click="SetUncheckStatus(AllMenu,AllMenu.MenuIdChecked,AllMenu.Checked)" />{{ Menu.Level2En | uppercase }}</td>
+                                    <td><input ng-if="Menu.Level2En=='' && Menu.Level3En!=''" type="checkbox" name="{{AllMenu.MenuId}}" ng-model="AllMenu.Checked" ng-change="optionToggled()" ng-checked="AllMenu.MenuIdChecked == 1" ng-click="SetUncheckStatus(AllMenu,AllMenu.MenuIdChecked,AllMenu.Checked)" />{{ Menu.Level3En | uppercase }}</td>*@
+                                    <td>{{ Menu.MenuUrl }}</td>
+                                    <td>
+                                        <ul style="list-style:none;">
+                                            <li style="display: inline-block;margin-right:5px; " ng-repeat="item in Menu.MenuActionList"><input type="checkbox" name="Actionchecked{{item.Key}}" ng-model="item.RoleMenuActionCheck" ng-checked="item.RoleMenuActionCheck || (Menu.IsChecked && item.Value=='Add')" value="item.Key" /> {{item.Value}}</li>
+                                        </ul>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="dev-align-btn">
+                        <button type="button" class="btn btn-primary dev-btn" ng-click="SaveAssignRights()" style="margin-right:15px;">{{translation.Submit}}</button>
+                        <button type="button" id="btnShow" ng-click="btnShowClick()" style="margin-right:15px;display:none"></button>
+                        <button type="button" class="btn btn-primary dev-btn" ng-click="ClearAssignRightsForm()">{{translation.Clear}}</button>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+        <div class="col-md-12">
+            <div class="citizen-dash-head" ng-show="ShowForm">
+                <div class="row">
+                    <div class="col-md-12">
+
+                        <form>
+                            <div class="row">
+                                <input type="hidden" id="hdnDistrictId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DistrictId)" />
+
+                                <div class="col-lg-12 form-group">
+                                    @*<div class="form-group col-md-12">
+                                        <label>Does Society Have Land Area ?</label>
+                                        <input type="radio" name="IshaveLand" ng-model="godown.haveLandarea" placeholder="DoesSocietyHave" value="1"><label>Yes</label>
+                                        <input type="radio" name="IshaveLand" ng-model="godown.haveLandarea" placeholder="DoesSocietyHave" value="2"><label>No</label>
+                                    </div>*@
+                                    <div class="col-lg-12 form-group">
+                                        <h4 class="heading-hr ng-binding">
+                                            Is Godown Old or New?  <input id="radChcTypeNew"  type="radio" ng-click="ISNewGodown()" name="GodownOld" ng-model="godown.isOldGodown" placeholder="Yes" value="1"><label>New</label>
+                                            <input type="radio" id="radChcTypeOld" name="GodownOld" ng-click="ISOldGodown()" ng-model="godown.isOldGodown" placeholder="No" value="0"><label>Old</label>
+
+                                        </h4>
+                                    </div>
+
+
+                                    <div id="divAddress" style="display:none">
+                                        <div class="col-lg-12 form-group">
+                                            <h4 class="heading-hr ng-binding">Address Of Godown<a ng-show="IsSubmiApplication" href="javascript:void(0);" dat-val="panal_1" class="fa fa-plus-circle expandDetails ng-hide" style="float:right;font-size: 25px;"></a></h4>
+                                        </div>
+
+
+                                        <div class="col-lg-12 form-group">
+                                            <div class="form-group1 col-md-6 MarginTop20">
+                                                <input type="hidden" id="hdnDistrictId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DistrictId)" />
+                                                <label class="ng-binding"><span class="DISTRICT_TXT">District</span><span class="error">*</span></label>
+                                                <select id="district_MemberAdd" ng-model="district_MemberAdd" class="form-control ng-pristine ng-untouched ng-valid ng-not-empty" ng-change="GetConstituencyList()">
+                                                    <option value="">{{translation.SelectOption}}</option>
+                                                    <option ng-repeat="district in DistrictList" value="{{district.DISTRICT_ID}}">
+                                                        {{_language =='en-us' ?  district.DISTRICT_ENG : district.DISTRICT_MANGAL}}
+                                                    </option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group col-md-6 MarginTop20">
+                                                <label for="ddlGdf">Select CCB</label>
+                                                <select class="form-control" id="ddlCCB" ng-model="godown.CCB" ng-init="godown.CCB=''">
+                                                    <option value="0">{{translation.SelectOption}}</option>
+                                                    <option ng-repeat="item in CCBdataset" value="{{item.CCBId}}">
+                                                        {{_language =='en-us' ?  item.CCBNameEn : item.CCBNameHi}}
+                                                    </option>
+                                                </select>
+                                            </div>
+
+
+
+
+                                            <div class="form-group1 col-md-6 MarginTop20">
+                                                <label for="ddlConstituency">Constituency<sup class="text-red">*</sup></label>
+                                                <select ng-model="ConstituencyId" id="ddlConstituency" class="form-control" ng-init="ConstituencyId=''">
+                                                    <option value="" selected="selected" disabled>{{translation.SelectOption}}</option>
+                                                    <option ng-repeat="item in ConstituencyList" value="{{item.Id}}">
+                                                        {{_language =='en-us' ?  item.Constituency : item.Constituency}}
+                                                    </option>
+                                                </select>
+                                            </div>
+
+
+                                            <div class="form-group col-md-6 MarginTop20">
+
+                                                <div class="col-md-4 MarginTop20">
+                                                    <label>Type of Society </label>
+                                                    <input type="radio" name="TypeOfSociety" ng-model="godown.isGSSKVSS" placeholder="GSS" value="1" ng-change="GetKVSSList(1);"><label>GSS</label>
+                                                    <input type="radio" name="TypeOfSociety" ng-model="godown.isGSSKVSS" placeholder="KVSS" value="2" ng-change="GetKVSSList(2);"><label>KVSS</label>
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <div ng-if="godown.isGSSKVSS==1||godown.isGSSKVSS==2">
+
+                                                    </div>
+
+                                                    <label for="ddlGSS">Select {{type}}</label>
+                                                    <select class="form-control" id="ddlGSS" ng-model="godown.KVSSGSS" ng-init="godown.KVSSGSS=''">
+                                                        <option value="" selected="selected" disabled>{{translation.SelectOption}}</option>
+                                                        <option ng-repeat="item in KvssGssList" value="{{item.SocietyID}}">
+                                                            {{_language =='en-us' ?  item.SocietyName : item.SocietyName}}
+                                                        </option>
+                                                    </select>
+
+                                                </div>
+                                            </div>
+
+                                            <div class="clear"></div>
+
+                                            <div class="form-group1 col-md-6" style="margin-top: 25px;">
+                                                <label class="help-block-gender ng-binding" style="width:15% !important;">
+                                                    <input type="radio" id="sdfs" name="Rurals" ng-model="UralUrban" value="1" ng-click="getRural()" class="ng-pristine ng-untouched ng-valid ng-empty"><span class="URBAN_TXT">Urban</span>
+                                                </label>
+                                                <label class="help-block-gender ng-binding" style="width:15% !important;">
+                                                    <input type="radio" id="sdf" value="2" name="Rurals" ng-model="UralUrban" ng-click="getUrban()"><span class="RURAL_TXT">Rural</span>
+                                                </label>
+                                            </div>
+
+                                            <div class="form-group1 col-md-6 Rurals_MemberAdd  MarginTop20" style="display:none">
+                                                <label><span class="BLOCK_TXT"> Block </span><span class="error">*</span></label>
+                                                <select id="ddlblocki_MemberAdd" ng-model="ddlblocki_MemberAdd" class="form-control ng-pristine ng-untouched ng-valid ng-not-empty" ng-change="getGrampanchyat()">
+                                                    <option value="">{{translation.SelectOption}}</option>
+                                                    <option ng-repeat="block in BlockDataList" value="{{block.BLOCK_ID}}">
+                                                        {{_language =='en-us' ?  block.BLOCK_ENG : block.BLOCK_MANGAL}}
+                                                    </option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group1 col-md-6 Rurals_MemberAdd  MarginTop20" style="display:none">
+                                                <label><span class="GRAMPANCHAYAT_TXT">Gram Panchayat</span><span class="error">*</span></label>
+                                                <select id="ddlGP_MemberAdd" ng-model="ddlGP_MemberAdd" class="form-control ng-pristine ng-untouched ng-valid ng-not-empty" ng-change="getvillage()">
+                                                    <option value="">{{translation.SelectOption}}</option>
+                                                    <option ng-repeat="gp in GramPancyatList" value="{{gp.GP_ID}}">
+                                                        {{_language =='en-us' ?  gp.GP_ENG : gp.GP_MANGAL}}
+                                                    </option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group1 col-md-6 Rurals_MemberAdd  MarginTop20" style="display:none">
+                                                <label><span class="VILLAGE_TXT">Village</span><span class="error">*</span></label>
+                                                <select id="ddlVillage_MemberAdd" ng-model="ddlVillage_MemberAdd" class="form-control">
+                                                    <option value="">{{translation.SelectOption}}</option>
+                                                    <option ng-repeat="vill in VillageList" value="{{vill.VILLAGE_ID}}">
+                                                        {{_language =='en-us' ?  vill.VILLAGE_ENG : vill.VILLAGE_MANGAL}}
+                                                    </option>
+                                                </select>
+                                            </div>
+
+                                            <div class="form-group1 col-md-6 cityward_MemberAdd  MarginTop20" style="display:none">
+                                                <label><span class="CITY_TXT">City</span><span class="error">*</span></label>
+                                                <select id="ddlcity_MemberAdd" ng-model="ddlcity_MemberAdd" class="form-control" ng-change="getward()">
+                                                    <option value="">{{translation.SelectOption}}</option>
+                                                    <option ng-repeat="city in Citylist" value="{{city.CITY_ID}}">
+                                                        {{_language =='en-us' ?  city.CITY_ENG : city.CITY_MANGAL}}
+                                                    </option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group1 col-md-6 cityward_MemberAdd  MarginTop20" style="display:none">
+                                                <label><span class="WARD_TXT">Ward</span><span class="error">*</span></label>
+                                                <select id="ddlward_MemberAdd" class="form-control">
+                                                    <option value="">{{translation.SelectOption}}</option>
+                                                    <option ng-repeat="wd in WardList" value="{{wd.WARD_ID}}">
+                                                        {{_language =='en-us' ?  wd.WARD_ENG : wd.WARD_MANGAL}}
+                                                    </option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group1 col-md-6 pincode_MemberAdd  MarginTop20" style="display:none">
+                                                <label class="control-label ng-binding"><span class="PIN_TXT">PIN</span><span class="error">*</span></label>
+                                                <input type="text" name="PinCode" class="form-control ng-pristine ng-untouched ng-valid ng-empty ng-valid-minlength ng-valid-maxlength" id="pincode_MemberAdd" placeholder="PIN" maxlength="6" ng-minlength="6" onkeypress="return event.charCode >= 48 &amp;&amp; event.charCode <= 57" autocomplete="off">
+                                            </div>
+
+                                            <div class="form-group1 col-md-6  MarginTop20">
+                                                <label class="ng-binding"><span class="HOUSE_BUILDING_NUMBER_TXT">Address</span><span class="error">*</span></label>
+                                                <input type="text" class="form-control" id="HouseBuildingNo_MemberAdd" name="HouseBuildingNo" placeholder="Address">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12 form-group" id="divDoesSociety" style="display:none"  >
+                                        <h4 class="heading-hr ng-binding">
+                                            Does Society have Land or Not?  <input type="radio" name="IshaveLandSociety" ng-model="godown.haveLandarea" placeholder="DoesSocietyhaveLand" value="1"><label>Yes</label>
+                                            <input type="radio" name="IshaveLandSociety" ng-model="godown.haveLandarea" placeholder="DoesSocietyhaveLand" value="2"><label>No</label>
+                                        </h4>
+                                    </div>
+                                    <div class="" ng-if="godown.haveLandarea==1">
+                                        <div class="col-lg-12 form-group">
+                                            <h4 class="heading-hr ng-binding">Godown Details<a ng-show="IsSubmiApplication" href="javascript:void(0);" dat-val="panal_1" class="fa fa-plus-circle expandDetails ng-hide" style="float:right;font-size: 25px;"></a></h4>
+                                        </div>
+
+                                        <div class="col-lg-12 form-group">
+
+                                            <div class="form-group col-md-6">
+                                                <label for="ddlGSS">Select Scheme<span class="error">*</span></label>
+                                                <select class="form-control" id="ddldd" ng-model="godown.Scheme" ng-init="godown.Scheme=''">
+                                                    <option value="" selected="selected" disabled>{{translation.SelectOption}}</option>
+                                                    <option value="{{translation.budgetannouncement}}">{{translation.budgetannouncement}}</option>
+                                                    <option value="{{translation.RKVY}}">{{translation.RKVY}}</option>
+                                                    <option value="{{translation.ICDP}}">{{translation.ICDP}}</option>
+                                                    <option value="{{translation.Other}}">{{translation.Other}}</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="form-group1 col-md-6 MarginTop20">
+                                                <label>Sanction Amt<span class="error">*</span></label>
+                                                <input type="number" class="form-control" name="SanctionAmt" ng-model="godown.Amt" placeholder="Ammount" ng-minlength="1" maxlength="50" ng-required="true" autocomplete="off">
+                                            </div>
+                                            <div class="form-group1 col-md-6 MarginTop20">
+                                                <label>Sanction Date<span class="error">*</span></label>
+                                                <input type="date" id="idddate" class="form-control picker" name="RoleNameHi" ng-model="godown.Date" max="@(DateTime.Now.ToString(" yyyy-MM-dd"))" placeholder="Date" ng-minlength="1" maxlength="50" ng-required="true" autocomplete="off">
+                                            </div>
+                                            <div class="form-group1 col-md-6 MarginTop20">
+                                                <label>Godown Capacity (Metric Ton)<span class="error">*</span></label>
+                                                <input type="number" class="form-control" name="Capacity" ng-model="godown.Capacity" placeholder="Capacity" ng-minlength="1" maxlength="50" ng-required="true" autocomplete="off">
+                                            </div>
+
+                                            <div class="form-group1 col-md-6 MarginTop20">
+                                                <label>Land Size (Hectare)<span class="error">*</span></label>
+                                                <input type="number" class="form-control" name="RoleNameHi" ng-model="godown.LandSize" placeholder="Land Size (Hectare)" ng-minlength="1" maxlength="50" ng-required="true" autocomplete="off">
+                                                <label ng-show="MyRoleForm.RoleNameHi.$error.required && !MyRoleForm.RoleNameHi.$pristine" class="help-block">{{translation.RoleNameHi}} - {{translation.Required}}</label>
+                                            </div>
+
+                                            <div class="form-group1 col-md-6 MarginTop20">
+                                                <label>Godown Photo<span class="error">*</span></label>
+                                                <input type="file" id="godownPhoto1" filetype="Upload" accept="image/*" name="godownphoto1" class="form-control" ng-model="godown.Photo1">
+                                            </div>
+
+                                            <div class="form-group1 col-md-6 MarginTop20">
+                                                <label>Description <span class="error">*</span></label>
+                                                <textarea class="form-control" name="Description" ng-model="godown.Description" placeholder="Description" ng-minlength="1" maxlength="250" ng-required="true" autocomplete="off"> </textarea>
+                                            </div>
+
+                                            <div class="form-group1 col-md-6 MarginTop20">
+                                                <label>Land Type<span class="error">*</span></label>
+                                                <div>
+                                                    <input type="radio" name="LandType" ng-model="godown.LandType" placeholder="LandType" value="1"><label>Allotment</label>
+                                                    <input type="radio" name="LandType" ng-model="godown.LandType" placeholder="LandType" value="2"><label>Donate</label>
+                                                    <input type="radio" name="LandType" ng-model="godown.LandType" placeholder="LandType" value="3"><label>Own</label>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group1 col-md-6 MarginTop20">
+                                                <label>Sanction Document</label>
+                                                <input type="file" id="godownPhoto2" filetype="Upload" name="SUBDIR" class="form-control" ng-model="godown.Document" onchange="angular.element(this).scope().UploadFile(this.files)" placeholder="{{translation.SUBDIR}}" autocomplete="off">
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+                                </div>
+                            </div>
+                            <div class="row" ng-if="godown.haveLandarea==2">
+                                <div class="col-lg-12 form-group">
+                                    <div class="col-lg-12 form-group">
+                                        <div class="form-group1 col-md-6">
+                                            <label>Remark</label>
+                                            <textarea ng-model="godown.haveLandareaReamrk" class="form-control" placeholder="Please Enter Remarks" value=""></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-12 form-group" ng-show="godown.isOldGodown==0">
+                                <div class="col-lg-12 form-group">
+                                    <h4 class="heading-hr ng-binding">Status of Godown<a ng-show="IsSubmiApplication" href="javascript:void(0);" dat-val="panal_1" class="fa fa-plus-circle expandDetails ng-hide" style="float:right;font-size: 25px;"></a></h4>
+                                </div>
+                                <div class="form-group1 col-md-6 MarginTop20">
+                                    <label>Current Status Of Godown<span class="error">*</span></label>
+                                    <select class="form-control" id="ddldd" ng-model="godown.CurrentStatus" ng-init="godown.CurrentStatus=''">
+                                        <option value="" selected="selected" disabled>{{translation.SelectOption}}</option>
+                                        <option value="{{translation.Good}}">{{translation.Good}}</option>
+                                        <option value="{{translation.veryGood}}">{{translation.veryGood}}</option>
+                                        <option value="{{translation.shabby}}">{{translation.shabby}}</option>
+                                        <option value="{{translation.Repaired}}">{{translation.Repaired}}</option>
+                                    </select>
+                                </div>
+                                <div class="form-group1 col-md-6 MarginTop20">
+                                    <label>Current Use Status of Godown<span class="error">*</span></label>
+                                    <select class="form-control" id="ddldd" ng-model="godown.Usegodown" ng-init="godown.Usegodown=''">
+                                        <option value="" selected="selected" disabled>{{translation.SelectOption}}</option>
+                                        <option value="{{translation.UseFul}}">{{translation.UseFul}}</option>
+                                        <option value="{{translation.underconstruction}}">{{translation.underconstruction}}</option>
+                                        <option value="Unusable">Unusable</option>
+                                    </select>
+                                </div>
+                                <div class="form-group1 col-md-6 MarginTop20">
+                                    <label>Year Of Completion <span class="error">*</span></label>
+                                    <select class="form-control" ng-model="godown.ComplitionYear">
+                                        <option value="">{{translation.SelectOption}}</option>
+                                        <option ng-repeat="district in FinancialYearList" value="{{district.FIN_YEAR_END}}">
+                                            {{_language =='en-us' ?  district.FIN_YEAR_END : district.FIN_YEAR_END}}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="row" ng-if="godown.haveLandarea==1">
+                                <div class="col-lg-12 form-group">
+                                    <div class="col-lg-12 form-group">
+                                        <div class="col-lg-12 form-group">
+                                            <h4 class="heading-hr ng-binding">
+                                                Is There CHC ?  <input type="radio" name="ChcType" ng-model="godown.isChcType" placeholder="Yes" value="1" ng-click="getshowChc(1)"><label>Yes</label>
+                                                <input type="radio" name="ChcType" ng-model="godown.isChcType" placeholder="No" value="2" ng-click="getshowChc(2)"><label>No</label>
+
+                                            </h4>
+                                        </div>
+                                        <div class="col-lg-12 form-group" ng-show="isChcyes">
+                                            <div class="form-group1 col-md-6 MarginTop20">
+                                                <label>Date Of Establishment <span class="error">*</span></label>
+                                                <input type="date" id="idddatetb" class="form-control" name="RoleNameHi" ng-model="item.EstablishmentDate" max="@(DateTime.Now.ToString(" yyyy-MM-dd"))" placeholder="Date" ng-minlength="1" maxlength="50" ng-required="true" autocomplete="off">
+                                            </div>
+                                            <div class="form-group1 col-md-6 MarginTop20">
+                                                <label>Total Cost ( In Lacs ) <span class="error">*</span></label>
+                                                <input type="text" id="TotalCostidd" placeholder="Total Cost" ng-model="item.Cost" class="form-control border" onkeypress="return numbersOnly(event)">
+                                            </div>
+                                        </div>
+
+                                        <div class="col-lg-12 form-group" ng-show="isChcyes">
+
+                                            <table class="table table-bordered mb-0 table-responsive devtable">
+                                                <thead>
+                                                    <tr>
+                                                        <th><label> SNo.</label></th>
+                                                        @*
+                                                        <th><label> Date Of Establishment</label></th>
+                                                        <th><label> Total Cost ( In Lacs )</label> </th>*@
+                                                        <th><label> Name Of Equipment </label></th>
+                                                        <th><label> Price (In Thousand)</label></th>
+                                                        <th><label> Name Of Manufacturer</label></th>
+                                                        <th><label> Registration No. </label> </th>
+                                                        <th><label> &nbsp;</label></th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="item in TblCHCDetails">
+                                                        <td><label>{{$index+1}} </label></td>
+                                                        <td><input type="text" ng-model="item.Instrument" class="form-control border" value=""></td>
+                                                        <td><input type="number" ng-model="item.Price" class="form-control border" onkeypress="return numbersOnly(event)"></td>
+                                                        <td><input type="text" ng-model="item.Manufacture" class="form-control border" value=""></td>
+                                                        <td><input type="text" ng-model="item.RegistrationNo" class="form-control border" value=""></td>
+                                                        <td style="text-align:right"><button ng-if="TblCHCDetails.length>1" class="btn btn-primary dev-btn" ng-click="RemoveRow($index)">Remove Row</button></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td colspan="8" style="text-align:right;"><button class="btn btn-primary dev-btn" ng-click="AddMoreRow()">Add New Row</button></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+
+                                            <label>Beneficial Member </label>
+                                            <table class="table table-bordered mb-0 table-responsive devtable">
+                                                <thead>
+                                                    <tr>
+                                                        <th><label> SNo.</label></th>
+                                                        <th><label> Financial Year </label></th>
+                                                        <th><label> No. of Farmers Benefited by CHC </label> </th>
+                                                        <th><label> &nbsp;</label></th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="item in TblDetails">
+                                                        <td><label>{{$index+1}} </label></td>
+                                                        <td><input type="text" ng-model="item.Year" class="form-control border" onkeypress="return numbersOnly(event)"></td>
+                                                        <td><input type="number" ng-model="item.Number" class="form-control border" onkeypress="return numbersOnly(event)"></td>
+                                                        <td style="text-align:right"><button ng-show="TblDetails.length>01" class="btn btn-primary dev-btn" ng-click="RemoveARow($index)">Remove Row </button></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td colspan="4" style="text-align:right"><button class="btn btn-primary dev-btn" ng-click="AddRow()">Add New Row</button></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </form>
+
+
+
+                        <div class="panel-footer" id="divFooter" style="display:none">
+                            <div class="dev-align-btn">
+                                <button type="submit" class="btn btn-primary dev-btn" ng-click="InsertSave()" style="margin-right:15px;">{{translation.Submit}}</button>
+                                <button type="button" class="btn btn-primary dev-btn" ng-click="ClearRoleForm()">{{translation.Clear}}</button>
+                                <a href="javascript:void(0);" class="btn btn-primary dev-btn" ng-click="ShowForm1=true;ShowForm=false;"><i class="fa fa-angle-left"></i>&nbsp;Back</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="dev-popup-body modal fade" id="popupDetailView" role="dialog" data-backdrop="static" data-keyboard="false">
+            <div class="modal-dialog" style="width:80%">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title"> Godown View </h4>
+                    </div>
+
+                    <div class="modal-body maxHeight" style="color:#333 !important">
+                        <div class="panel panel-default">
+                            <div class="panel-heading flex flexEqual flexMiddel">
+                                <h4 style="margin:0px">Godown Details</h4>
+                                <button type="button" onclick="js_PanleCollapse(this)" class="panelCollapsebtn"><i class="fa fa-minus"></i></button>
+                            </div>
+                            <div class="panel-body">
+                                <div class="row">
+                                    <div class="col-md-6 form-group">
+                                        <label>Address :</label>
+                                        <span>
+                                            {{godown1[0].Address}}
+                                        </span>
+                                    </div>
+
+                                    <div class="col-md-6 form-group">
+                                        <label>Constituency :</label>
+                                        <span> {{godown1[0].Constituency}}</span>
+                                    </div>
+                                    <div class="col-md-6 form-group">
+                                        <label>Actual Cost :</label>
+                                        <span> {{godown1[0].ActualCost}}</span>
+                                    </div>
+                                    <div class="col-md-6 form-group">
+                                        <label>Sanction Amount :</label>
+                                        <span> {{godown1[0].SanctionAmt}}</span>
+                                    </div>
+                                    <div class="col-md-6 form-group">
+                                        <label>Sanction Date :</label>
+                                        <span> {{godown1[0].SanctionDate}}</span>
+                                    </div>
+                                    @*<div class="col-md-6 form-group">
+                                        <label>Land Type:</label>
+                                        <span> {{godown1[0].Constituency}}</span>
+                                    </div>*@
+                                    <div class="col-md-6 form-group">
+                                        <label>Land Size:</label>
+                                        <span> {{godown1[0].LandSize}}</span>
+                                    </div>
+                                    <div class="col-md-6 form-group">
+                                        <label>Sanction Doc:</label>
+                                        <span> <a href="{{godown1[0].SanctionDoc}}" download>Download</a></span>
+                                    </div>
+                                    <div class="col-md-6 form-group">
+                                        <label>Status Name:</label>
+                                        <span> {{godown1[0].StatusName}}</span>
+                                    </div>
+                                    <div class="col-md-6 form-group">
+                                        <label>Description:</label>
+                                        <span> {{godown1[0].Description}}</span>
+
+                                    </div>
+
+                                    <div class="col-md-6 form-group">
+                                        <label>Kvss/Gss Name:</label>
+                                        <span> {{godown1[0].kvssgss_name}}</span>
+
+                                    </div>
+                                    <div class="col-md-6 form-group">
+                                        <label>Scheme Name:</label>
+                                        <span> {{godown1[0].Scheme}}</span>
+
+                                    </div>
+                                    <div class="col-md-6 form-group">
+                                        <label>CCB Name:</label>
+                                        <span> {{godown1[0].CCB}}</span>
+
+                                    </div>
+
+
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12" ng-show="godown1[0].IsOldGoDown==1">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading flex flexEqual flexMiddel">
+                                        <h4 style="margin:0px">Old Godown Details</h4>
+                                        <button type="button" onclick="js_PanleCollapse(this)" class="panelCollapsebtn"><i class="fa fa-minus"></i></button>
+                                    </div>
+                                    <div class="panel-body">
+                                        <table class="table table-bordered mb-0">
+                                            <thead>
+                                               
+                                                <tr>
+                                                    <th><label> SNo.</label></th>
+                                                    <th><label> Current Status Of Godown </label></th>
+                                                    <th><label> Current Use Status of Godown </label> </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td><label>{{$index+1}} </label></td>
+                                                    <td> {{godown1[0].CurrentStatus}}</td>
+                                                    <td> {{godown1[0].Usegodown}}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-12" ng-show="godown2.length>0">
+
+                                <div class="panel panel-default">
+                                    <div class="panel-heading flex flexEqual flexMiddel">
+                                        <h4 style="margin:0px">CHC Details</h4>
+                                        <button type="button" onclick="js_PanleCollapse(this)" class="panelCollapsebtn"><i class="fa fa-minus"></i></button>
+                                    </div>
+                                    <div class="panel-body">
+                                        <table class="table table-bordered mb-0">
+                                            <thead>
+
+                                                <tr>
+                                                    <th><label> SNo.</label></th>
+                                                    <th><label> Establishment Date </label></th>
+                                                    <th><label> Total Cost ( In Lacs )</label></th>
+                                                    <th><label> Name Of Equipment </label> </th>
+                                                    <th><label> Name Of Manufacturer </label> </th>
+                                                    <th><label> Price (In Thousand)</label></th>
+                                                    <th><label> Registration No</label></th>
+
+
+
+                                                </tr>
+                                            </thead>
+                                            <tbody ng-repeat="item in godown2">
+                                                <tr>
+                                                    <td><label>{{$index+1}} </label></td>
+                                                    <td>{{item.EstablishmentDate}}</td>
+                                                    <td>{{item.TotalCost}}</td>
+                                                    <td>{{item.NameOfInstrument}}</td>
+                                                    <td>{{item.Manufacture}}</td>
+                                                    <td>{{item.Price}}</td>
+                                                    <td>{{item.RegistrationNo}}</td>
+
+
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+
+
+                            </div>
+
+                            <div class="col-md-12" ng-show="godown3.length>0">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading flex flexEqual flexMiddel">
+                                        <h4 style="margin:0px">Benificial Details</h4>
+                                        <button type="button" onclick="js_PanleCollapse(this)" class="panelCollapsebtn"><i class="fa fa-minus"></i></button>
+                                    </div>
+                                    <div class="panel-body">
+                                        <table class="table table-bordered mb-0">
+                                            <thead>
+
+                                                <tr>
+                                                    <th><label> SNo.</label></th>
+                                                    <th><label> Financial Year </label></th>
+                                                    <th><label> Number of Farmers benefitted by CHC</label> </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody ng-repeat="item2 in godown3">
+                                                <tr>
+                                                    <td><label>{{$index+1}} </label></td>
+                                                    <td>{{item2.Year}}</td>
+                                                    <td>{{item2.Number}}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-footer text-center">
+                        <button data-dismiss="modal" type="button" class="btn btn-primary dev-btn">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="se-pre-con"></div>
+    <div id="stop" class="scrollTop">
+        <span><a href=""><i class="fa fa-arrow-up">Top</i></a></span>
+    </div>
+    <script>
+        function js_PanleCollapse(elem) {
+            //alert(1);
+            $(elem).parents('.panel').find('.panel-body').slideToggle();
+            $(elem).find('i.fa').toggleClass('fa-minus fa-plus');
+        }
+    </script>
+</div>
+

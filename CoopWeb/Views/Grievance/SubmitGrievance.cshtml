@@ -1,0 +1,215 @@
+﻿<script src="~/Scripts/AngularFramework/GrievanceNew.js?v=5"></script>
+<script src="~/Scripts/Tabulator/jspdf.min.js"></script>
+<script src="~/Scripts/Tabulator/jspdf.plugin.autotable.js"></script>
+<script src="~/Scripts/Tabulator/tabulator.min.js"></script>
+<script src="~/Scripts/Tabulator/xlsx.full.min.js"></script>
+<link href="~/Scripts/Tabulator/tabulator.min.css" rel="stylesheet" />
+
+<style>
+    .card-radio {
+        display: flex;
+        padding: 20px 20px 0;
+    }
+
+    .margin-Top15 {
+        margin-top: 15px;
+    }
+
+    .text-red {
+        color: #f94b4b;
+    }
+</style>
+<div ng-app="GrievanceModule" ng-controller="GrievanceCont">
+    <div class="col-md-12">
+        <h3 class="citizen-dash-head">Grievance</h3>
+        <hr style="margin: 0;">
+    </div>
+
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="devpage-breadcrumb">
+            <ul class="page-breadcrumb">
+                <li class="dev-page-br">
+                    <i class="fa fa-home"> </i>
+                    <a href="#"> Grievance </a>
+                    <i class="fa fa-angle-right"> </i>
+                </li>
+                <li style="float: left">
+                    <span style="margin: 0 5px;">Grievance</span>
+                </li>
+                <li style="float: right;">
+                    <button type="button" class="btn btn-info btn-lg dev-popup-btn" data-toggle="modal" data-target="#myModal" style="color: #025e63; cursor: pointer; text-decoration:none;  font-weight: bold;" ng-click="OpenGrievanceForm()"> <h5>&#187; {{translation.AddNew}}</h5> </button>
+                </li>
+
+            </ul>
+        </div>
+    </div>
+    <div class="col-md-12">
+        <div class="card" ng-show="IsForm">
+            <input type="hidden" id="hdnSSOIDId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).SSOID)" />
+            <div class="card-header card-radio bg-white">
+                <label style="margin-right: 50px;">Issue Related <sup class="text-red">*</sup></label>
+                <div class="custom-control custom-radio d-inline-flex  ml-5 ">
+                    <input class="custom-control-input" type="radio" id="RB2" name="rbRSSC" ng-change="IssueRelatedChanged()" value="2" ng-model="Grievance.IssueFrom">
+                    <label class="custom-control-label" for="RB2"> Web Portal </label>
+                </div>
+                <div class="custom-control custom-radio d-inline-flex ml-5">
+                    <input class="custom-control-input" type="radio" id="RB1" name="rbRSSC" ng-change="IssueRelatedChanged()" value="1" ng-model="Grievance.IssueFrom">
+                    <label class="custom-control-label" for="RB1"> Mobile Apps </label>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row ">
+                    <div class="col-lg-4">
+                        <label>{{translation.Category}}<sup class="text-red">*</sup></label>
+                        <select class="form-control" id="ddlGrievanceCategory" ng-model="Grievance.CategoryId" ng-init="Grievance.CategoryId = '0'">
+                            <option value="0" disabled selected>{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in GrievanceCategoryLists" value="{{item.LovValuesId}}">
+                                {{_language =='en-us' ?  item.Lovdescription : item.Lovdescription}}
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="col-lg-4">
+                        <label id="lblDepartment">{{translation.DepartmentHeading}}<sup class="text-red">*</sup></label>
+                        <select class="form-control" ng-model="Grievance.DepartmentId" ng-init="Grievance.DepartmentId = '0'">
+                            <option value="0" disabled selected>{{translation.SelectOption}}</option>
+                            <option value="1">Cooperative</option>
+                        </select>
+                    </div>
+
+                    <div class="col-lg-4">
+                        <label id="lblDepartment">Module<sup class="text-red">*</sup> </label>
+                        <select class="form-control" id="ddlmodule" ng-model="Grievance.ModuleId" ng-init="Grievance.ModuleId='0'" ng-change="GetGrievanceSectionByModuleId(Grievance.ModuleId)">
+                            <option value="0" selected="selected" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in GrievanceModuleLists | orderBy:'Lovdescription'" value="{{item.LovValuesId}}">
+                                {{_language =='en-us' ?  item.Lovdescription : item.Lovdescription}}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row margin-Top15">
+                    <div class="col-lg-4">
+                        <label id="lblDepartment">Section<sup class="text-red">*</sup> </label>
+                        <select class="form-control" id="ddlmodule" ng-model="Grievance.GrievanceSectionId" ng-init="Grievance.GrievanceSectionId='0'">
+                            <option value="0">--- Select ---</option>
+                            <option ng-repeat="item in GrievanceSectionList" value="{{item.GrievanceSectionId}}">
+                                {{item.GrievanceSectionName}}
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="col-lg-4">
+                        <label>Subject<sup class="text-red">*</sup></label>
+                        <input type="text" class="form-control" name="Subject" ng-model="Grievance.Subject" placeholder="Enter Subject" autocomplete="off" />
+                    </div>                    
+
+                    <div class="col-lg-4">
+                        <label> Alternate Mobile No</label>
+                        <input type="text" class="form-control" name="Subject" ng-model="Grievance.MobileNo" placeholder="Enter Mobile no" autocomplete="off" maxlength="10" />
+                    </div>
+                </div>
+                <div class="row margin-Top15">
+
+                    <div class="col-lg-4">
+                        <label>Application No</label>
+                        <input type="text" class="form-control" name="Subject" ng-model="Grievance.ApplicationId" placeholder="Enter Application no" autocomplete="off" />
+                    </div>
+
+                    <div class="col-lg-4">
+                        <label> Mobile No</label>
+                        <input type="text" class="form-control" name="Subject" ng-model="Grievance.UserMobileNo" placeholder="Enter Mobile no" autocomplete="off" maxlength="10" ng-disabled="IsMobileNoDisabled" />
+                    </div>
+
+                    <div class="form-group col-md-4">
+                        <label ng-hide="isViewMode">Upload File</label>
+                        <div style="display:flex; align-items:center; gap:5px;">
+                            <input type="file" accept="application/pdf" class="form-control" id="AttachmentDocument" ng-model="Grievance.Attachment" onchange="angular.element(this).scope().SelectGrievanceFile(this.files)">
+                            <div style="display:flex; align-items:center; gap:5px;">
+                                <div ng-if="Grievance.Attachment" style="display:flex; align-items:center; gap:5px" class="mt-2">
+                                    <a target="_blank" class="btn btn-success" href="../Content/Grievance/Document/{{Grievance.Attachment}}" title="View Document">
+                                        <i class="fa fa-file-o"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-12">
+                        <label>Description<sup class="text-red">*</sup></label>
+                        <textarea class="form-control" id="GrievanceDescription" ng-model="Grievance.Description" rows="5"></textarea>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="card-footer" style="justify-content:center;">
+                <button type="submit" class="btn btn-primary dev-btn mt-20" ng-click="SubmitGrievance()">{{translation.Submit}}</button>&nbsp;&nbsp;
+                <button type="submit" class="btn btn-primary dev-btn mt-20" ng-click="ClearForm()">{{translation.Clear}}</button>&nbsp;&nbsp;
+            </div>
+        </div>
+
+        <div class="card" ng-hide="IsForm">
+            <div class="citizen-dash-head">
+                <div class="table-dropdown">
+                    <div class="card-body col-sm row mb-0">
+                        <div class="col-md-4">
+                            <label for="search">{{translation.Search}}:</label>
+                            <input ng-model="q" id="search" class="form-control" placeholder={{translation.filttertext}} autocomplete="off">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="search">{{translation.ItemPerPage}}:</label>
+                            <input type="number" min="1" max="100" class="form-control" ng-model="pageSize">
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="col-md-12">
+                    <div class="table-wrap table-responsive devtable">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Sr.No</th>
+                                    <th>ComplainNo</th>
+                                    <th>Issue Related</th>
+                                    <th>Category</th>
+                                    <th>Module</th>
+                                    <th>Section</th>                              
+                                    <th>Mobile No</th>
+                                    <th>Subject</th>
+                                    <th>Description</th>                               
+                                    <th>Attachment</th>
+
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr dir-paginate="item in GrevianceList | filter: q | orderBy:colsort:reverseSort  | itemsPerPage: pageSize" current-page="currentPage" pagination-id="GrievancePagination">
+                                    <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                                    <td>{{item.ComplainNo}}</td>
+                                    <td>{{ item.IssueRelated }}</td>
+                                    <td>{{item.GrievanceCategory}}</td>
+                                    <td>{{item.Lovdescription }}</td>
+                                    <td>{{item.GrievanceSectionName }}</td>                                
+                                    <td>{{item.Mobile }}</td>
+                                    <td>{{item.Subject}}</td>
+                                    <td>{{item.Description}}</td>                   
+                                    <td>
+                                        <a ng-if="item.Attachment != null && item.Attachment!=''" href="~/Content/Grievance/Document/{{item.Attachment}}" target="_blank">View</a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <nav class="pagination-wrap  justify-content-end mb-25" aria-label="Page navigation example">
+                        <nav class="pagination-wrap d-inline-block mr-40 mt-15 __web-inspector-hide-shortcut__" aria-label="Page navigation example" style="display:flex; justify-content:end;">
+                            <ul class="pagination">
+                                <dir-pagination-controls boundary-links="true" pagination-id="GrievancePagination" on-page-change="pageChangeHandler(newPageNumber)" template-url="/dirPagination.tpl.html"></dir-pagination-controls>
+                            </ul>
+                        </nav>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

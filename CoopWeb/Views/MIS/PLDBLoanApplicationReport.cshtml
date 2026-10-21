@@ -1,0 +1,426 @@
+﻿
+@{
+    ViewBag.Title = "PLDBLoanApplicationReport";
+    Layout = "~/Views/Shared/_CitizenLayout.cshtml";
+}
+<script src="~/Scripts/AngularFramework/PLDBLoanApplicationReport.js"></script>
+<script src="~/Scripts/Excel/jszip_v1.js"></script>
+<script src="~/Scripts/Excel/xlsx.js"></script>
+<script src="~/Scripts/Excel/jszip.js"></script>
+<script src="~/Scripts/Excel/FileSaver.js"></script>
+<script src="~/Scripts/Excel/myexcel.js"></script>
+
+<div ng-app="PLDBLoanappReportMod" ng-controller="PLDBLoanappReportCont">
+
+    <div class="col-md-12">
+        <h3 class="h3heading citizen-dash-head">{{translation.PLDBLoanApplicationReport}}</h3>
+    </div>
+
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="devpage-breadcrumb">
+            <ul class="page-breadcrumb">
+                <li class="dev-page-br">
+                    <i class="fa fa-home"> </i>
+                    <a href="#"> {{translation.MIS}}  </a>
+                    <i class="fa fa-angle-right"> </i>
+                </li>
+                <li style="float: left">
+                    <span style="margin: 0 5px;">{{translation.PLDBLoanApplicationReport}}</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" >
+        <div class="table-responsive citizen-dash-head">
+
+
+            <div class="table-dropdown" id="search-filter" style="margin-bottom: 0px;">
+                <div class="col-md-2 margin-Top20">
+                    <label for="search" class="ng-binding">{{translation.YEAR}}</label>
+                    <select name="fy" class="form-control" ng-model="AppLoanReport.FinancialYear" ng-init="AppLoanReport.FinancialYear=''">
+                        <option value="">{{translation.SelectOption}}</option>
+                        <option value="2015">2015</option>
+                        <option value="2016">2016</option>
+                        <option value="2017">2017</option>
+                        <option value="2018">2018</option>
+                        <option value="2019">2019</option>
+                        <option value="2020">2020</option>
+                        <option value="2019">2021</option>
+                        <option value="2020">2022</option>
+                    </select>
+                </div>
+
+                <div class="col-md-2 margin-Top20" style="">
+                    <label>{{ translation.Month}}</label>
+                    <select name="MY" ng-model="AppLoanReport.Month" class="form-control" ng-init="AppLoanReport.Month=''">
+                        <option value="">{{translation.SelectOption}}</option>
+                        <option ng-repeat="item in MonthList" value="{{item.Month_Id}}">
+                            {{_language =='en-us' ?  item.Month_En : item.Month_Hi}}
+                        </option>
+                    </select>
+                </div>
+                @*<div class="col-md-2 margin-Top20" style="padding-left: 0;">
+            <label>{{ translation.DistrictHeading}}</label>
+            <select name="Districtdll" ng-model="AppLoanReport.DistrictId" class="form-control" ng-init="AppLoanReport.DistrictId=''" ng-change="BlockList()">
+                <option value="">{{translation.SelectOption}}</option>
+                <option ng-repeat="district in DistrictList" value="{{district.DISTRICT_ID}}">
+                    {{_language =='en-us' ?  district.DISTRICT_ENG : district.DISTRICT_MANGAL}}
+                </option>
+            </select>
+        </div>
+
+        <div class="col-md-2 margin-Top20" style="padding-left: 0;">
+            <label>{{ translation.BlockHeading}}</label>
+            <select ng-model="AppLoanReport.BLOCK_ID" name="blockdll" class="form-control" ng-init="AppLoanReport.BLOCK_ID=''">
+                <option value="">{{translation.SelectOption}}</option>
+                <option ng-repeat="item in Blocks | orderBy:'BLOCK_ENG'" value="{{item.BLOCK_ID}}">
+                    {{_language =='en-us' ?  item.BLOCK_ENG : item.BLOCK_MANGAL}}
+                </option>
+            </select>
+        </div>*@
+
+                <div class="col-md-2 margin-Top20" style="">
+                    <label>{{ translation.DistrictHeading}}:</label>
+                    <select name="Districtdll" ng-model="MembershipReport.DistrictId" class="form-control" ng-init="MembershipReport.DistrictId=''" ng-change="BlockList()">
+                        <option value="">{{translation.SelectOption}}</option>
+                        <option ng-repeat="district in DistrictList" value="{{district.DISTRICT_ID}}">
+                            {{_language =='en-us' ?  district.DISTRICT_ENG : district.DISTRICT_MANGAL}}
+                        </option>
+                    </select>
+                </div>
+                <div class="col-md-2 margin-Top20" style="">
+                    <label for="search">{{translation.PLDB}}</label>
+                    <select ng-model="AppLoanReport.PLDB_ID" name="ddlPldbId" class="form-control" ng-init="AppLoanReport.PLDB_ID=''" ng-change="PLDBBranchList()">
+                        <option value="">{{translation.SelectOption}}</option>
+                        <option ng-repeat="itemPLDB in PLDB | orderBy:'PldbId'" value="{{itemPLDB.PldbId}}">
+                            {{itemPLDB.PLDBName}}
+                        </option>
+                    </select>
+                </div>
+
+                <div class="col-md-2 margin-Top20" style="">
+                    <label for="search">{{translation.Branch}}</label>
+                    <select ng-model="AppLoanReport.Branch_ID" name="ddlbranch" class="form-control" ng-init="AppLoanReport.Branch_ID=''">
+                        <option value="">{{translation.SelectOption}}</option>
+                        <option ng-repeat="itemBlock in PLDBBranches | orderBy:'BLOCK_ENG'" value="{{itemBlock.BLOCK_ID}}">
+                            {{_language =='en-us' ?  itemBlock.BLOCK_ENG : itemBlock.BLOCK_MANGAL}}
+                        </option>
+                    </select>
+                </div>
+                <div class="col-md-2 margin-Top20" style="">
+                    <label>{{ translation.Age}}</label>
+                    <select name="ddlAge" ng-model="MembershipReport.AgeId" class="form-control" ng-init="MembershipReport.AgeId=''">
+                        <option value="">{{translation.SelectOption}}</option>
+                        <option value="1-10">1-10 </option>
+                        <option value="11-20">11-20</option>
+                        <option value="21-30">21-30</option>
+                        <option value="31-40">31-40</option>
+                        <option value="41-50">41-50</option>
+                        <option value="51-60">51-60</option>
+                        <option value="61-70">61-70</option>
+                        <option value="71-80">71-80</option>
+                        <option value="81-90">81-90</option>
+                        <option value="91-200">Above 90</option>
+                    </select>
+                </div>
+                <div class="col-md-2 margin-Top20" style="">
+                    <label>{{ translation.CategoryEN}}</label>
+                    <select name="ddlCategory" ng-model="MembershipReport.CategoryId" class="form-control" ng-init="MembershipReport.CategoryId=''">
+                        <option value="">{{translation.SelectOption}}</option>
+                        <option ng-repeat="item in CategoryList | orderBy:'CODEID'" value="{{item.CODEID}}">
+                            {{_language =='en-us' ?  item.CODENAME : item.CODENAME_MANGAL}}
+                        </option>
+                    </select>
+                </div>
+                <div class="col-md-4  margin-Top20">
+                    <label>&nbsp;</label><br>
+                    <button type="button" ng-click="searchRequest(SearchData)" class="btn btn-primary dev-btn ng-binding">{{translation.Search}}</button>
+                    <button type="button" ng-click="ClearSearch()" class="btn btn-primary dev-btn ng-binding">{{translation.Clear}}</button>
+                </div>
+
+                <div class="col-lg-12" style="margin-top:20px;">
+                    <input style="" type="radio" ng-click="GetReportTypeFilterList('L')" checked="checked" name="Type" value="Generate" />Loan Application
+                    <input style="" type="radio" ng-click="GetReportTypeFilterList('FY')" name="Type" value="Generate" />{{translation.yearwise}}
+                    <input type="radio" style="" ng-click="GetReportTypeFilterList('MW')" name="Type" value="New" />{{translation.monthwise}}
+                    <input type="radio" style="" ng-click="GetReportTypeFilterList('QA')" name="Type" value="New" />{{translation.quartalywise}}
+                    <input type="radio" style="" ng-click="GetReportTypeFilterList('PUW')" name="Type" value="New" />{{translation.purposewise}}
+                    <input type="radio" style="" ng-click="GetReportTypeFilterList('SW')" name="Type" value="New" />{{translation.sectorwise}}
+                    <input type="radio" style="" ng-click="GetReportTypeFilterList('SEMW')" name="Type" value="New" />{{translation.schemewise}}
+                    @*<input type="radio" style="" ng-click="GetReportTypeFilterList('BW')" name="Type" value="New" />block wise
+            <input type="radio" style="" ng-click="GetReportTypeFilterList('DW')" name="Type" value="New" />district wise*@
+                    <input type="radio" style="" ng-click="GetReportTypeFilterList('PW')" name="Type" value="New" />{{translation.pldbwise}}
+                    <input type="radio" style="" ng-click="GetReportTypeFilterList('PB')" name="Type" value="New" />{{translation.Pldbbranchwise}}
+                    <input type="radio" style="" ng-click="GetReportTypeFilterList('CW')" name="Type" value="New" />{{translation.categorywise}}
+                    <input type="radio" style="" ng-click="GetReportTypeFilterList('AW')" name="Type" value="New" />{{translation.agewise}}
+
+                    @*<input type="radio" style="" ng-click="GetReportTypeFilterList('STW')" name="Type" value="New" />status wise*@
+
+                </div>
+
+            </div>
+
+
+            <table id="example" class="table devtable" style="border:1px solid rgb(222, 221, 221); float: left;"   ng-show="!SepterdList">
+                <thead>
+                    <tr>
+                        <th>  {{translation.SRNO}}</th>
+                        <th ng-if="ReportType=='FY'">
+                            {{translation.YEAR}}
+                        </th>
+
+                        <th ng-if="ReportType=='MW'">
+                            {{translation.Month}}
+                        </th>
+                        <th ng-if="ReportType=='QA'">
+
+                            {{translation.Quartaly}}
+                        </th>
+
+                        <th ng-if="ReportType=='PUW'">
+
+                            {{translation.Purpose}}
+                        </th>
+
+                        <th ng-if="ReportType=='PW'">
+
+                            {{translation.PLDBw}}
+                        </th>
+                        <th ng-if="ReportType=='PB'">
+
+                            {{translation.PLDBBranch}}
+                        </th>
+                        <th ng-if="ReportType=='CW'">
+
+                            {{translation.CategoryEN}}
+                        </th>
+                        <th ng-if="ReportType=='AW'">
+
+                            {{translation.Age}}
+                        </th>
+                        <th ng-if="ReportType=='SW'">
+
+                            {{translation.Sector}}
+                        </th>
+                        <th ng-if="ReportType=='SEMW'">
+
+                            {{translation.Scheme}}
+                        </th>
+
+
+
+                        <th>{{translation.TotalApplication}}</th>
+                        <th>{{translation.Details}}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="item in PLDBLoanAppListCount">
+
+                        <td>{{$index+1}}</td>
+
+                        <td ng-if="ReportType=='FY'">
+                            {{item.years}}
+                        </td>
+
+                        <td ng-if="ReportType=='MW'">
+                            {{item.months=='1'?'Jan':item.months=='2'?'Feb':item.months=='3'?'Mar':item.months=='4'?'April':item.months=='5'?'May':item.months=='6'?'June':item.months=='7'?'july':item.months=='8'?'Aug':item.months=='9'?'sep':item.months=='10'?'Oct':item.months=='11'?'Nov':item.months=='12'?'Dec':''}}
+                        </td>
+
+
+                        <td ng-if="ReportType=='QA'">
+
+                            {{item.Quarter}}
+                        </td>
+
+                        <td ng-if="ReportType=='PUW'">
+
+                            {{item.purpose_name_en}}
+                        </td>
+
+                        <td ng-if="ReportType=='PW'">
+
+                            {{item.PLDBName}}
+                        </td>
+                        <td ng-if="ReportType=='PB'">
+
+                            {{item.BranchName_En}}
+                        </td>
+                        <td ng-if="ReportType=='CW'">
+
+                            {{item.CODENAME}}
+                        </td>
+                        <td ng-if="ReportType=='AW'">
+
+                            {{item.Age}}
+                        </td>
+                        <td ng-if="ReportType=='SW'">
+                            {{item.sector_name_en}}
+                        </td>
+
+                        <td ng-if="ReportType=='SEMW'">
+                            {{item.scheme_name_en}}
+                        </td>
+
+                        <td>{{item.LoanAppCount}}</td>
+
+
+
+
+                        <td ng-if="ReportType=='FY'">
+                            <button type="submit" class="btn btn-primary dev-btn" ng-click="GetDetials(item.years)">{{translation.Details}}</button>
+                        </td>
+
+                        <td ng-if="ReportType=='MW'">
+                            <button type="submit" class="btn btn-primary dev-btn" ng-click="GetDetials(item.months)">{{translation.Details}}</button>
+                        </td>
+
+
+                        @*<td ng-if="ReportType=='BW'">
+
+                        <button type="submit" class="btn btn-primary dev-btn" ng-click="GetDetials(item.BLOCK_ID)">Details</button>
+                    </td>*@
+
+                        <td ng-if="ReportType=='QA'">
+
+                            <button type="submit" class="btn btn-primary dev-btn" ng-click="GetDetials(item.Quarter)">{{translation.Details}}</button>
+                        </td>
+
+
+                        <td ng-if="ReportType=='PUW'">
+
+                            <button type="submit" class="btn btn-primary dev-btn" ng-click="GetDetials(item.purpose_id)">{{translation.Details}}</button>
+                        </td>
+                        <td ng-if="ReportType=='PW'">
+
+                            <button type="submit" class="btn btn-primary dev-btn" ng-click="GetDetials(item.PldbId)">{{translation.Details}}</button>
+                        </td>
+                        <td ng-if="ReportType=='PB'">
+
+                            <button type="submit" class="btn btn-primary dev-btn" ng-click="GetDetials(item.BranchId)">{{translation.Details}}</button>
+                        </td>
+                        <td ng-if="ReportType=='CW'">
+
+                            <button type="submit" class="btn btn-primary dev-btn" ng-click="GetDetials(item.CODEID)">{{translation.Details}}</button>
+                        </td>
+                        <td ng-if="ReportType=='AW'">
+
+                            <button type="submit" class="btn btn-primary dev-btn" ng-click="GetDetials(item.Age)">{{translation.Details}}</button>
+                        </td>
+                        <td ng-if="ReportType=='SW'">
+
+                            <button type="submit" class="btn btn-primary dev-btn" ng-click="GetDetials(item.sector_id)">{{translation.Details}}</button>
+                        </td>
+                        <td ng-if="ReportType=='SEMW'">
+
+                            <button type="submit" class="btn btn-primary dev-btn" ng-click="GetDetials(item.scheme_id)">{{translation.Details}}</button>
+                        </td>
+
+
+                    </tr>
+                </tbody>
+            </table>
+            <div class="table-responsive citizen-dash-head"  ng-show="SepterdList">
+                <table id="example" class="table devtable" style="border:1px solid rgb(222, 221, 221); float: left;">
+                    <thead>
+                        <tr>
+                            <th>
+                                #
+                            </th>
+                            <th>
+                                {{translation.ApplicationNo}}
+                            </th>
+                            <th>
+                                {{translation.MemberName}}
+                            </th>
+                            <th>
+                                {{translation.MembershipNo}}
+                            </th>
+                            <th>
+                                {{translation.PLDB}}
+                            </th>
+                            <th>
+                                {{translation.Branch}}
+                            </th>
+                            <th>{{translation.Type}}</th>
+                            <th>{{translation.Sector}}</th>
+                            <th>{{translation.Scheme}}</th>
+                            <th>{{translation.PurposeOfLoan}}</th>
+                            <th>{{translation.LoanType}}</th>
+                            <th>{{translation.EstimatedTotalAmount}}</th>
+                            <th>{{translation.LoanAmountApplied}}</th>
+                            <th>{{translation.ApprovedAmount}}</th>
+                            <th>{{translation.DisbursedAmount}}</th>
+
+                            <th>
+                                {{translation.SubmissionDate}}
+                            </th>
+                            <th>
+                                {{translation.Status}}
+                            </th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="item in PLDBLoanappCountbylist">
+                            <td>{{(((DataPagingDetails.PageNumber - 1) * DataPagingDetails.PageSize) + 1)+$index}}</td>
+                            <td>{{item.application_no}}</td>
+                            <td>{{item.MemberName}}</td>
+                            <td>{{item.MembershipNo}}</td>
+                            <td>{{item.PLDBName}}</td>
+                            <td>{{_language =='en-us' ?  item.BLOCK_ENG : item.BLOCK_MANGAL}}</td>
+                            <td>{{_language =='en-us' ?  item.Farming_NonFarming : item.Farming_NonFarming}}</td>
+                            <td>{{_language =='en-us' ?  item.sector_name_en : item.sector_name_hi}}</td>
+                            <td>{{_language =='en-us' ?  item.scheme_name_en : item.scheme_name_hi}}</td>
+                            <td>{{_language =='en-us' ?  item.purpose_name_en : item.purpose_name_hi}}</td>
+                            <td>{{_language =='en-us' ?  item.loan_type_en : item.loan_type_hi}}</td>
+                            <td>{{item.estimated_total_amount}}</td>
+                            <td>{{item.loan_amount_applied}}</td>
+                            <td>{{item.loan_amount_applied}}</td>
+                            <td>{{item.amount_disbursed}}</td>
+                            <td>{{item.FormatedDate}}</td>
+                            <td>{{_language =='en-us' ?  item.ProceesStatusTextEn : item.ProceesStatusTextHi}}</td>
+                            <td class="add-more-td">
+                                <a title="{{translation.ShowDetails}}" href="../pldb/LoanApplicationFormReport?pid={{item.PurposeId}}&id={{item.loanIdINc}}" target="_blank"><i class="fa fa-info-circle infoicon-edit"></i></a>
+                            </td>
+                        </tr>
+                        <tr ng-if="DataPagingDetails.TotalPages>1">
+                            <td colspan="18">
+                                <div ng-if="DataPagingDetails.TotalPages>1" class="dataTables_paginate paging_simple_numbers" id="dataTables-example_paginate">
+                                    <div class="dataTables_info" id="dataTables-example_info" role="status" aria-live="polite">
+                                        Total Records: {{DataPagingDetails.TotalRecords}}
+                                    </div>
+                                    <ul class="pagination pagination_1" style="margin-left: 10px !important;">
+                                        <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« First</span></li>
+                                        <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« Previous</span></li>
+
+                                        <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest('1',GetPLDBLoanAppCountbylist)" style="cursor: pointer;">
+                                            <span>«First</span>
+                                        </li>
+                                        <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest(DataPagingDetails.PageNumber-1,GetPLDBLoanAppCountbylist)" style="cursor:pointer;">
+                                            <span>« Previous</span>
+                                        </li>
+                                        <li class="{{n==DataPagingDetails.PageNumber?'active':''}}" style="{{n==DataPagingDetails.PageNumber?'':'cursor: pointer'}}" ng-repeat="n in PagingRange(DataPagingDetails.StartPageNumber,DataPagingDetails.EndPageNumber,DataPagingDetails.TotalPages)" ng-click="pageRequest(n,GetPLDBLoanAppCountbylist)"><span>{{n}}</span></li>
+                                        <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Next</span></li>
+                                        <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Last</span></li>
+                                        <li ng-if="DataPagingDetails.PageNumber!= DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.PageNumber+1,GetPLDBLoanAppCountbylist)" style="cursor:pointer;">
+                                            <span>Next »</span>
+                                        </li>
+                                        <li ng-if="DataPagingDetails.PageNumber != DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.TotalPages,GetPLDBLoanAppCountbylist)" style="cursor:pointer;">
+                                            <span>Last »</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="col-md-12">
+                    <input ng-if="PLDBLoanappCountbylist.length>0" type="button" id="btnExport" class="btn btn-primary dev-btn" style="" ng-click="ExportData()" value="Export" />
+                </div>
+                <div class="col-md-12" style="text-align:right;">
+                    <button type="submit" class="btn btn-primary dev-btn" ng-click="Back()">{{translation.Back}}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

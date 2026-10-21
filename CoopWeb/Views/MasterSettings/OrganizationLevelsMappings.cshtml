@@ -1,0 +1,294 @@
+﻿
+<script src="~/Scripts/AngularFramework/OrganizationLevelsMapping.js"></script>
+
+<div ng-app="MappingModule">
+    <div ng-controller="MappingCont">
+        <div class="col-md-12">
+            <h3 class="h3heading citizen-dash-head">{{translation.OrganizationLevelsMappings}}</h3>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#"> Home </a>
+                        <i class="fa fa-angle-right"> </i>
+                        <a href="#"> Mapping </a>
+                        <i class="fa fa-angle-right"> </i>
+
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;"> {{translation.OrganizationLevelsMappings}}</span>
+                    </li>
+                    <li style="float: right;" id="divAddBtn">
+                        <i class="fa fa-angle-double-right" style="color: #025e63;"></i>
+                        <a ng-click="AddNewClick()" data-toggle="modal" data-target="#myModal" style="color: #025e63; cursor: pointer; text-decoration:none;  font-weight: bold;" class="ng-binding">{{translation.AddNew}}</a>
+                    </li>
+
+                </ul>
+            </div>
+        </div>
+        @*<div class="col-md-12">
+                <div class="master-detail" style="margin-left:15px;">
+                    @if (ViewBag.BreadCrumbPath != null)
+                    {
+                        <h5> @ViewBag.BreadCrumbPath </h5>
+
+                    }
+
+                </div>
+            </div>*@
+
+        
+
+        <div class="dev-popup-body modal fade" id="myModal" role="dialog">
+            <div class="modal-dialog">
+                <!-- Modal content-->               
+                <div class="modal-content">
+                    <div class="form-group col-md-6" hidden>
+                        <input class="form-control" type="hidden" ng-model="Mapping.MappingID">
+                    </div>
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title"> {{translation.OrganizationLevelsMappings}}</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form class="dev-search-form" name="MyRoleForm" style="overflow: hidden;">
+                            <div class="form-group">
+                                <label>{{translation.DepartmentHeading}}</label>
+                                <select ng-model="Mapping.DepartmentId" class="form-control" ng-init="Mapping.DEPTCODE='0'" ng-change="GetAllOrganisationList()">
+                                    <option value="0" disabled>{{translation.SelectOption}}-</option>
+                                    <option ng-repeat="item in Departments" value="{{item.ID}}">
+                                        {{_language =='en-us' ?  item.DEPTNAMEENGLISH : item.DEPTNAMEENGLISH}}
+                                    </option>
+                                </select>
+                                <label ng-show="MyRoleForm.LeveID.$error.required && !MyRoleForm.LeveID.$pristine" class="help-block">{{translation.Level}} - {{translation.Required}}</label>
+                            </div>
+                            <div class="form-group">
+                                <label>Organization</label>
+                                <select class="form-control" id="ddlOrganisation" ng-model="Mapping.OrganisationId" ng-init="Mapping.OrganisationId='0'">
+                                    <option value="0" disabled>{{translation.SelectOrganisation}}</option>
+                                    <option ng-repeat="item in OrganisationData" value="{{item.OrganisationId}}">
+                                        {{_language =='en-us' ?  item.OrganisationNameEn : item.OrganisationNameHi}}
+                                    </option>
+                                </select>
+                                <label ng-show="MyRoleForm.LeveID.$error.required && !MyRoleForm.LeveID.$pristine" class="help-block">{{translation.Level}} - {{translation.Required}}</label>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label no-padding-right">{{translation.Level}}</label>
+                                <div class="col-sm-9">
+                                    <label ng-repeat="item in Level">
+                                        <input type="checkbox" name="Mapping{{item.LevelId}}" ng-model="item.Checked" value="item.Checked==true ? true : false">
+                                        {{_language =='en-us' ?  item.LevelNameEn : item.LevelNameHi}}
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="form-check form-check-inline">
+                                    <label class="check-box" for="inlineRadio1" style="margin-right: 15px;"> {{translation.IsActive}} </label>
+                                    <input class="form-check-input" type="checkbox" id="inlineCheckbox1" value="option1" ng-true-value="1" ng-false-value="0" ng-checked="Mapping.IsActive == 1" ng-model="Mapping.IsActive" /> @*ng-checked="menuaction.IsActive == 1"*@
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="dev-align-btn">
+                                    <button type="submit" class="btn btn-primary dev-btn" ng-disabled="MyRoleForm.$invalid" ng-click="SaveOrganizationLevelsMapping()" style="margin-right:15px;">{{translation.Submit}}</button>
+                                    <button type="button" class="btn btn-primary dev-btn" ng-click="ClearRoleForm()">{{translation.Clear}}</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="">
+            <div class="col-md-12">
+                <div class="citizen-dash-head">
+                    <div class="table-dropdown">
+                        <div class="col-md-4">
+                            <label for="search">{{translation.Search}}:</label>
+                            <input ng-model="q" id="search" class="form-control" placeholder="Filter text" autocomplete="off">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="search">{{translation.ItemPerPage}}:</label>
+                            <input type="number" min="1" max="100" class="form-control" ng-model="pageSize">
+                        </div>
+                        <div class="col-md-4">
+                            <label>{{translation.DepartmentHeading}}</label>
+                            <select ng-model="Mapping.DepartmentId" class="form-control" ng-init="Mapping.DepartmentId='0'" ng-change="OrganizationLevelsListByDept();GetAllOrganisationList()">
+                                <option value="0" disabled>{{translation.SelectOption}}-</option>
+                                <option ng-repeat="item in Departments" value="{{item.ID}}">
+                                    {{_language =='en-us' ?  item.DEPTNAMEENGLISH : item.DEPTNAMEENGLISH}}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label>{{translation.Organization}}</label>
+                            <select class="form-control" id="ddlOrganisation" ng-model="Mapping.OrganisationId" ng-init="Mapping.OrganisationId='0'" ng-change="OrganizationLevelsListByOrg()">
+                                <option value="0" disabled>{{translation.SelectOption}}</option>
+                                <option ng-repeat="item in OrganisationData" value="{{item.OrganisationId}}">
+                                    {{_language =='en-us' ?  item.OrganisationNameEn : item.OrganisationNameHi}}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+
+
+                    <table class="table table-responsive devtable">
+                        <thead>
+                            <tr>
+                                <th>
+                                    {{translation.SRNO}}
+                                </th>
+                                <th>{{translation.DepartmentHeading}}</th>
+                                <th ng-click="sortData('OrganisationNameEn')">
+                                    {{translation.Organization}}
+                                    <div ng-class="getSortClass('RoleName_EN')"></div>
+                                </th>
+
+
+                                <th ng-click="sortData('IsActive')">
+                                    {{translation.Level}}
+                                    <div ng-class="getSortClass('IsActive')"></div>
+                                </th>
+
+                                <th>{{translation.IsActive}}</th>
+                                <th>{{translation.Edit}}</th>
+                                <th>{{translation.Delete}}</th>
+
+
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr dir-paginate="item in OrganizationLevel | filter: q | orderBy:colsort:reverseSort | itemsPerPage: pageSize" current-page="currentPage" pagination-id="rolePagination">
+                                <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                                <td>{{ item.DEPTNAMEENGLISH | uppercase }}</td>
+                                <td>{{ _language =='en-us' ?  item.OrganisationNameEn : item.OrganisationNameHi | uppercase }}</td>
+                                <td>{{ _language =='en-us' ?  item.LevelNameEn : item.LevelNameHi | uppercase }}</td>
+
+                                <td>
+                                    <div class="dev-action">
+                                        <label class="switch">
+                                            <input type="checkbox" ng-checked="item.IsActive == 1" ng-click="SetStatus(item.MappingID,item.IsActive)">
+                                            <span class="slider round"></span>
+                                        </label>
+                                    </div>
+                                </td>
+                                <td>
+                                    <i class="fa fa-edit" data-target="#myModal" data-toggle="modal" ng-click="update(item)"></i>
+                                </td>
+                                <td>
+                                    <i class="fa fa-trash" ng-click="SetStatus(item.MappingID,2)"></i>
+                                </td>
+
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="col-md-10">
+                <div class="text-center">
+                    <dir-pagination-controls boundary-links="true" pagination-id="rolePagination" on-page-change="pageChangeHandler(newPageNumber)" template-url="/dirPagination.tpl.html"></dir-pagination-controls>
+                </div>
+            </div>
+            <div class="form-group col-md-12">
+                <div class="dev-align-btn">
+
+                    <a class="btn btn-primary dev-btn" style="text-transform:capitalize;" href="../User/DashBoard"> Back</a>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <h5 class="dev-page"> {{translation.Page}}: {{ currentPage }} </h5>
+            </div>
+        </div>
+        <div ng-show='IsVisible'>
+            <div class="form-group">
+                <div class="col-md-12">
+                    <div class="table-responsive citizen-dash-head">
+                        <table class="table devtable">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        {{translation.SRNO}}
+                                    </th>
+                                    <th align="center">
+                                        <input id="CheckAll" type="checkbox" ng-click="toggleAll()" ng-model="isAllSelected" />
+                                    </th>
+                                    <th ng-click="sortData('Parent_Name_En')">
+                                        {{translation.ParentMenuNameEn}}
+                                        <div ng-class="getSortClass('Parent_Name_En')"></div>
+                                    </th>
+                                    <th ng-click="sortData('Parent_Name_Hi')">
+                                        {{translation.ParentMenuNameHi}}
+                                        <div ng-class="getSortClass('Parent_Name_Hi')"></div>
+                                    </th>
+                                    <th ng-click="sortData('MenuNameEn')">
+                                        {{translation.MenuNameEn}}
+                                        <div ng-class="getSortClass('MenuNameEn')"></div>
+                                    </th>
+                                    <th ng-click="sortData('MenuNameHi')">
+                                        {{translation.MenuNameHi}}
+                                        <div ng-class="getSortClass('MenuNameHi')"></div>
+                                    </th>
+                                    <th ng-click="sortData('MenuNameHi')">
+                                        {{translation.MenueAction}}
+                                        <div ng-class="getSortClass('MenuNameHi')"></div>
+                                    </th>
+
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr dir-paginate="AllMenu in AllMenuList  | orderBy:colsort:reverseSort | itemsPerPage: 100">
+
+
+                                    <td>{{ $index+1 }}</td>
+                                    <td align="center">
+                                        <input type="checkbox" name="{{AllMenu.MenuId}}" ng-model="AllMenu.Checked" ng-change="optionToggled()" ng-checked="AllMenu.MenuIdChecked == 1" ng-click="SetUncheckStatus(AllMenu,AllMenu.MenuIdChecked,AllMenu.Checked)" />
+
+                                    </td>
+                                    <td>{{ AllMenu.Parent_Name_En | uppercase }}</td>
+                                    <td>{{ AllMenu.Parent_Name_Hi | uppercase }}</td>
+                                    <td>{{ AllMenu.MenuNameEn | uppercase }}</td>
+                                    <td>{{ AllMenu.MenuNameHi | uppercase }}</td>
+                                    <td>
+
+                                        <div ng-repeat="item in AllMenu.MenuActionList">
+
+                                            <input type="checkbox" name="Actionchecked{{item.Key}}" ng-model="item.RoleMenuActionCheck" ng-checked="item.RoleMenuActionCheck" value="item.Key" /> {{item.Value}}
+
+                                        </div>
+
+                                    </td>
+
+
+                                </tr>
+
+
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+                <div class="col-md-12">
+                    <div class="dev-align-btn">
+                        <button type="button" class="btn btn-primary dev-btn" ng-click="SaveAssignRights()" style="margin-right:15px;">{{translation.Submit}}</button>
+                        <button type="button" class="btn btn-primary dev-btn" ng-click="ClearAssignRightsForm()">{{translation.Clear}}</button>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+    <div class="se-pre-con"></div>
+    <div id="stop" class="scrollTop">
+        <span><a href=""><i class="fa fa-arrow-up">Top</i></a></span>
+    </div>
+</div>
+

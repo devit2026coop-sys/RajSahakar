@@ -1,0 +1,199 @@
+﻿@{
+    ViewBag.Title = "PLDB Loan Application Purpose Wise List";
+}
+<script src="~/Scripts/AngularFramework/PLBDLoanApplicationPurposeWiseList.js?v=1.1"></script>
+<link href="~/Scripts/google_hindi/google_transliteration.css" rel="stylesheet" />
+
+<style>
+    .inputapi-transliterate-indic-suggestion-menu {
+        z-index: 99999 !important;
+        display: block;
+    }
+
+    .table > tbody > tr > td, .table > tbody > tr > th, .table > tfoot > tr > td, .table > tfoot > tr > th, .table > thead > tr > td {
+        padding-right: 5px;
+        padding-left: 5px;
+    }
+
+    .freeze-select {
+        pointer-events: none;
+        background-color: #ffffff !important;
+        color: #000 !important;
+        border: 1px solid #ced4da !important;
+        cursor: default !important;
+    }
+
+    .clickable-cell {
+        cursor: pointer;
+        color: #0d6efd;       
+    }
+
+        .clickable-cell:hover {
+            color: #084298;
+        }
+
+
+</style>
+<script type="text/javascript">
+    var tableToExcel = (function () {
+        var uri = 'data:application/vnd.ms-excel;base64,'
+            , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>'
+            , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) }
+            , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
+        return function (table, name) {
+            if (!table.nodeType) table = document.getElementById(table)
+            var ctx = { worksheet: name || 'Worksheet', table: table.innerHTML }
+            window.location.href = uri + base64(format(template, ctx))
+        }
+    })()
+</script>
+
+<div ng-app="ApplicationFlowPurposeLoanWiseModule" ng-controller="ApplicationPurposeLoanWiseFlowCont" ng-cloak="">
+    <div>
+        <div class="col-md-12">
+            <h3 class="citizen-dash-head ng-binding" style="margin-top:0px;">PLDB Loan Application Purpose Wise List</h3>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#"> {{translation.Home}}</a> <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;"> {{translation.New}} </span>
+                        <i class="fa fa-angle-right"> </i>
+                        <span style="margin: 0 5px;"> PLDB Loan Application Purpose Wise List </span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div style="margin-top:30px;padding-top:30px">
+            <div class="col-md-12">
+                <div class="citizen-dash-head" style="overflow: hidden;">
+                    <div class="table-dropdown" id="search-filter" style="margin-bottom: 5px;">
+                        <div class="col-lg-12" style="margin-bottom: 5px; padding-left: 0;">
+                            <input type="hidden" id="hdnRoleId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).RoleId)" />
+                            <input type="hidden" id="hdnDistrictId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DistrictId)" />
+                            <input type="hidden" id="hdnPldbId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).PLDBId)" />
+                            <input type="hidden" id="hdnPldbBranchId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).PLDBBrancchId)" />
+                            <input type="hidden" id="hdnUserId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).UserId)" />
+                            <input type="hidden" id="hdnLevelId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).LevelId)" />
+
+                            @*PLDB Bank*@
+                            <div class="form-group col-md-3">
+                                <label for="">PLDB Name</label>
+                                <select name="PLDB_ID" ng-model="PLDB.PldbId" id="Pldb_Id" class="form-control" ng-change="PLDBBranchList('0')" ng-init="PLDB.PldbId='0'" ng-disabled="IsPldbFreezed">
+                                    <option value="0" disabled>--चुनें--</option>
+                                    <option ng-repeat="itemPLDB in PLDBList | orderBy:'PLDBName' track by itemPLDB.PLDBName " value="{{itemPLDB.PldbId}}">
+                                        {{itemPLDB.PLDBName}}
+                                    </option>
+                                </select>
+                            </div>
+
+                            @*PLDB Branch*@
+                            <div class="form-group col-md-3">
+                                <label for="">Branch Name</label>
+                                <select name="BRANCH_ID" ng-model="PLDB.BranchId" id="Branch_Id" class="form-control" ng-init="PLDB.BranchId='0'" ng-disabled="IsPldbBranchFreezed">
+                                    <option value="0" disabled>--चुनें--</option>
+                                    <option ng-repeat="itemBlock in PLDBBranches | orderBy:'BLOCK_ENG'" value="{{itemBlock.BLOCK_ID}}">
+                                        {{_language =='en-us' ?  itemBlock.BLOCK_ENG : itemBlock.BLOCK_MANGAL}}
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-4 margin-Top20">
+                                <label>&nbsp;</label><br>
+                                <button type="button" ng-click="searchRequest(PLDBLoanApplicationPurposeWiseList)" class="btn btn-primary dev-btn ng-binding">{{translation.Search}}</button>
+                                <button type="button" ng-show="showClearButton" ng-click="ClearSearch()" class="btn btn-primary dev-btn ng-binding">{{translation.Clear}}</button>
+                                <button type="button" ng-click="exportCSV()" class="btn btn-success dev-btn">
+                                    <i class="fa fa-file-excel-o"></i> Export Excel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="overflow-x: auto;">
+                        <table id="PLDBLoanApplicationPurposeWise" class="table table-bordered devtable text-center">
+
+                            <thead>
+
+                                <!-- ROW 1 : SR / PLDB / SECTOR -->
+                                <tr>
+                                    <th rowspan="3" width="60">Sr No.</th>
+                                    <th rowspan="3" style="min-width:140px;">PLDB Name</th>
+
+                                    <th ng-repeat="s in SectorHeaderList track by $index" colspan="{{ s.Purposes.length * 2 }}" class="text-center">
+                                        {{ s.SectorShortName }}
+                                    </th>
+                                    <th rowspan="3" style="min-width:120px; vertical-align:middle !important;"> Crop Loan Total No </th>
+                                    <th rowspan="3" style="min-width:120px; vertical-align:middle !important;"> Crop Loan Total Amt </th>
+                                    <th rowspan="3" style="min-width:120px; vertical-align:middle !important;"> Div 1 Total No </th>
+                                    <th rowspan="3" style="min-width:120px; vertical-align:middle !important;"> Div 1 Total Amt </th>
+                                    <th rowspan="3" style="min-width:120px; vertical-align:middle !important;"> F.M.S Total No </th>
+                                    <th rowspan="3" style="min-width:120px; vertical-align:middle !important;"> F.M.S Total Amt </th>
+                                    <th rowspan="3" style="min-width:120px; vertical-align:middle !important;"> M.I.S Total No </th>
+                                    <th rowspan="3" style="min-width:120px; vertical-align:middle !important;"> M.I.S Total Amt </th>
+                                    <th rowspan="3" style="min-width:120px; vertical-align:middle !important;"> N.F.S Total No </th>
+                                    <th rowspan="3" style="min-width:120px; vertical-align:middle !important;"> N.F.S Total Amt </th>
+                                    <th rowspan="3" style="min-width:120px; vertical-align:middle !important;"> R.H. Total No </th>
+                                    <th rowspan="3" style="min-width:120px; vertical-align:middle !important;"> R.H. Total Amt </th>
+                                    <th rowspan="3" style="min-width:120px; vertical-align:middle !important;"> Div 2 Total No </th>
+                                    <th rowspan="3" style="min-width:120px; vertical-align:middle !important;"> Div 2 Total Amt </th>
+                                    <th rowspan="3" style="min-width:120px; vertical-align:middle !important;"> Mortagage Loan No</th>
+                                    <th rowspan="3" style="min-width:120px; vertical-align:middle !important;"> Mortagage Loan Amt</th>
+                                    <th rowspan="3" style="min-width:120px; vertical-align:middle !important;"> Personal Loan No</th>
+                                    <th rowspan="3" style="min-width:120px; vertical-align:middle !important;"> Personal Loan Amt</th>
+                                </tr>
+
+                                <!-- ROW 2 : PURPOSE -->
+                                <tr>
+                                    <th style="display:none;" ng-repeat-start="s in SectorHeaderList track by $index"></th>
+                                    <th ng-repeat="p in s.Purposes track by $index" colspan="2" class="text-center">
+                                        {{ p.PurposeName }}
+                                    </th>
+                                    <th style="display:none;" ng-repeat-end></th>
+                                </tr>
+
+                                <!-- ROW 3 : STATIC No / Amt -->
+                                <tr>
+                                    <th ng-repeat="col in dynamicColumns track by $index">
+                                        {{ col.endsWith('_Amt') ? 'Amt.' : 'No.' }}
+                                    </th>                                    
+                                </tr>                                              
+
+                            </thead>
+
+                            <tbody ng-if="dynamicCols.length > 0"> 
+                                
+                                <tr style="text-align:left;" ng-repeat="item in pldbLoanApplicationPurposeList.data" ng-style="item.PLDBName=='TOTAL' && {'font-weight':'bold','color':'#fff','background':'#466b6d'}">
+                                    <td> <span ng-hide="item.PLDBName == 'TOTAL'">{{$index + 1}}</span> </td>
+                                    <td style="text-transform:uppercase;"> {{ item.PLDBName }} </td>
+                                    <td ng-repeat="col in dynamicCols" ng-if="col !== 'SortOrder' && col !== 'BranchId'">
+                                        <span ng-if="col.endsWith('_Amt')">
+                                            {{ item[col] || 0 }}
+                                        </span>
+                                        <span ng-if="!col.endsWith('_Amt')"
+                                              ng-click="!col.includes('_TOTAL_') && openCountDetails(item, col)"
+                                              ng-class="{'clickable-cell': !col.includes('_TOTAL_') && item[col] > 0 && item.PLDBName !== 'TOTAL'}">
+                                            {{ item[col] || 0 }}
+                                        </span>
+                                    </td>
+                                </tr>
+
+                                <!-- No record -->
+                                <tr ng-if="!pldbLoanApplicationPurposeList.data || pldbLoanApplicationPurposeList.data.length === 0">
+                                    <td colspan="{{ dynamicCols.length + 2 }}" class="text-center">
+                                        Record Not Found
+                                    </td>
+                                </tr>
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="se-pre-con"></div>
+    </div>
+</div>
+

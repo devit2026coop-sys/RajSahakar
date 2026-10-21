@@ -1,0 +1,187 @@
+﻿<script src="~/Scripts/AngularFramework/WomanInformationSocietyRPT.js"></script>
+<link href="~/Content/Stylesheets/jqueryuitimepicker.css" rel="stylesheet" />
+<script src="~/Scripts/Excel/jszip_v1.js"></script>
+<script src="~/Scripts/Excel/xlsx.js"></script>
+<script src="~/Scripts/Excel/jszip.js"></script>
+<script src="~/Scripts/Excel/FileSaver.js"></script>
+<script src="~/Scripts/Excel/myexcel.js"></script>
+<div ng-app="WomanInformationSocietyRPTMod" ng-controller="WomenInformationSocietyRPTCont">
+
+    <div class="col-md-12">
+        <h3 class="h3heading citizen-dash-head">{{_language =='en-us' ? 'इकजाई सूचना प्रपत्र':'Unit Type Tnformation Form'}}</h3>
+    </div>
+
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="devpage-breadcrumb">
+            <ul class="page-breadcrumb">
+                <li class="dev-page-br">
+                    <i class="fa fa-home"> </i>
+                    <a href="#"> {{translation.MIS}}  </a>
+                    <i class="fa fa-angle-right"> </i>
+                </li>
+                <li style="float: left">
+                    <span style="margin: 0 5px;">{{_language =='en-us' ? 'इकजाई सूचना प्रपत्र':'Unit Type Tnformation Form'}}</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="table-responsive citizen-dash-head">
+            <div class="table-dropdown" id="search-filter" style="overflow:inherit; float:left;width: 100%;margin-bottom: 10px;">
+                <div class="col-md-2 margin-Top20 y_dropdown" style="padding-left: 0;">
+                    <label for="search" class="ng-binding" >{{translation.Month}}:</label>
+                    <input id="txtFromMonth"  type="month" class="form-control" autocomplete="off" onkeypress="return false;" />
+                </div>
+                <div class="col-md-2 margin-Top20 y_dropdown" style="padding-left: 0;">
+                    <label>{{ translation.DistrictHeading}}:</label>
+                    <input type="hidden" id="hdnDistrictId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DistrictId)" />
+
+                    <select name="Districtdll" ng-model="DistrictId" class="form-control" ng-init="DistrictId='0'" id="ddrDistrictId">
+                        <option value="0">{{translation.SelectOption}}</option>
+                        <option ng-repeat="district in DistrictList" value="{{district.DISTRICT_ID}}">
+                            {{_language =='en-us' ?  district.DISTRICT_MANGAL : district.DISTRICT_MANGAL}}
+                        </option>
+                    </select>
+                </div>
+                <div class="col-md-2 margin-Top20 y_dropdown" style="padding-left: 0;">
+                    <br />
+                    <button type="submit" class="btn btn-primary dev-btn" ng-click="GetWomenInformationSociety()">{{translation.Search}}</button>
+                    <input type="button" class="btn btn-primary dev-btn" ng-click="ExportData()" value="Export to Excel">
+                </div>
+            </div>
+            <table class="table devtable">
+                <thead>
+                    <tr>
+                        <th>
+                            {{translation.SRNO}}
+                        </th>
+                        <th>
+                            {{translation.NameClassifiedWomenSocieties}}
+                        </th>
+                        <th>
+                            {{translation.NoWomenSocietiesRegistered}}
+                        </th>
+                        <th>
+                            {{translation.NumberOfActiveSocieties}}
+                        </th>
+                        <th>
+                            {{translation.NumberOfInactiveSocieties}}
+                        </th>
+                        <th>
+                            {{translation.NumberOfLiquidationSocieties}}
+                        </th>
+
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="items in WomenInformationSociety">
+                        <td>{{$index+1}}</td>
+                        <td style="text-align:left;">   {{ items.CategoryNameHi }}</td>
+                        <td style="text-align:center;"> {{ items.TotReg}}</td>
+                        <td style="text-align:center;"> {{ items.TotActive}}</td>
+                        <td style="text-align:center;"> {{ items.TotInactive }}</td>
+                        <td style="text-align:center;"> {{ items.TotResedential }}</td>
+                    </tr>
+                    <tr>
+                        <th></th>
+                        <th style="text-align:left;">{{translation.Yog}}</th>
+                        <th style="text-align:center;">{{TotReg        }}</th>
+                        <th style="text-align:center;">{{TotActive     }}</th>
+                        <th style="text-align:center;">{{TotInactive   }}</th>
+                        <th style="text-align:center;">{{TotResedential}}</th>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+
+    @*<div class="table-responsive citizen-dash-head">
+
+            <table class="table devtable">
+                <thead>
+                    <tr>
+                        <th>
+                            SR. NO.
+                        </th>
+                        <th>
+                            Name of Classified Women Co-operative Societies
+                        </th>
+                        <th>
+                            No. of Women Co-operative Societies Registered
+                        </th>
+                        <th>
+                            Number of active committees
+                        </th>
+                        <th>
+                            Number of Inactive Committees
+                        </th>
+                        <th>
+                            No. of non-working committees
+                        </th>
+
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr dir-paginate="items in WomenInformationSociety | filter: q | orderBy:colsort:reverseSort | itemsPerPage: pageSize" current-page="currentPage" pagination-id="rolePagination">
+                        <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                        <td> <a href="">{{ items.WomenCSNameEng }}</a></td>
+                        <td> <a href="" ng-click="GetWomenInformationSocietyDetails(items.ClassId)">{{items.TotReg}}</a></td>
+                        <td> <a href=""> {{ items.TotActive}}</a></td>
+                        <td> <a href="">{{ items.TotInactive }}</a></td>
+                        <td> <a href="">{{ items.TotResedential }}</a></td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="table-dropdown" ng-show="truevalue">
+                <div class="col-md-4">
+                    <label for="search">{{translation.Search}}:</label>
+                    <input ng-model="q" id="search" class="form-control" placeholder={{translation.filttertext}} autocomplete="off">
+                </div>
+                <div class="col-md-4">
+                    <label for="search">{{translation.ItemPerPage}}:</label>
+                    <input type="number" min="1" max="100" class="form-control" ng-model="pageSize">
+                </div>
+            </div>
+            <table class="table devtable" ng-show="truevalue">
+                <thead>
+                    <tr>
+                        <th>
+                            SR. NO.
+                        </th>
+                        <th>
+                            RegistrationNo
+                        </th>
+                        <th>
+                            SocietyName
+                        </th>
+                        <th>
+                            CategoryNameEn
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr dir-paginate="item in WomenInformationSocietyDetail | filter: q | orderBy:colsort:reverseSort | itemsPerPage: pageSize" current-page="currentPage" pagination-id="rolePagination">
+                        <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                        <td>{{item.RegistrationNo}}</td>
+                        <td>{{item.SocietyName}}</td>
+                        <td>{{item.CategoryNameEn}}</td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+        <div class="col-md-10">
+            <div class="text-center">
+                <dir-pagination-controls boundary-links="true" pagination-id="rolePagination" on-page-change="pageChangeHandler(newPageNumber)" template-url="/dirPagination.tpl.html"></dir-pagination-controls>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <h5 class="dev-page"> {{translation.Page}}: {{ currentPage }} </h5>
+        </div>*@
+
+</div>
+
+

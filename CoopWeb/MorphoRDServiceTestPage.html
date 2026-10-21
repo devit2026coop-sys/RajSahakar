@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!--<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />-->
+    <script src="http://rajsahakarapp.rajasthan.gov.in/Scripts/jquery-3.1.0.js"></script>
+
+
+    <script type="text/javascript">
+        var uri = "http://127.0.0.1:11100/rd/"; //Non-Secure
+
+        function startCaptureRD(fpdevice, authType, fcallback) {
+            var error_msg = "Use following possible steps to resolve the issue:<br>1. Register your device from vendor or using Register Your Device link.<br>2. Download and install the latest registered device drivers.<br>3. Start/ restart the registered device service.";
+            rdCapture(uri + 'capture', authType, function (err, data) {
+                if (err != null) {
+                    fcallback({ type: "rd", status: "error", data: error_msg });
+                } else {
+                    var $xml = $($.parseXML(String(data)));
+                    if ($xml.find("Resp").attr("errCode") === '0') {
+                        fcallback({ type: "rd", status: "success", data: Base64.encode(String(data)) });
+                    }
+                    else if ($xml.find("Resp").attr("errCode") === '999') {
+                        fcallback({ type: "rd", status: "failed", data: error_msg });
+                    }
+                    else {
+                        fcallback({ type: "rd", status: "failed", data: "Error: " + $xml.find("Resp").attr("errInfo") + " (" + $xml.find("Resp").attr("errCode") + ")" });
+                        console.log(String(data));
+                    }
+                }
+            });
+        }
+
+        var rdCapture = function (url, authType, callback) {
+            
+            var xhr = new XMLHttpRequest();
+            xhr.open('CAPTURE', url, true);
+            xhr.responseType = 'text';    //json
+            var wadh = "";
+            if (authType.toLowerCase() === "ekyc") { wadh = "XXXXXXXXX"; }
+
+            var pidXml = '<PidOptions ver="1.0"><Opts fCount="1" fType="0" format="0" pidVer="2.0" timeout="20000" posh="UNKNOWN" env="P" wadh="' + wadh + '" /></PidOptions>';//prod
+            console.log(pidXml);
+
+            xhr.onload = function () {
+                if (xhr.status == 200) { callback(null, xhr.response); }
+                else { callback(xhr.status); }
+            };
+            xhr.onerror = function () {
+                callback(xhr.status);
+                console.log(xhr.status);
+            };
+            xhr.ontimeout = function () {
+                callback(xhr.status);
+                console.log(xhr.response);
+            };
+            xhr.abort = function () {
+                callback(xhr.status);
+                console.log(xhr.response);
+            };
+            xhr.send(pidXml);
+        };
+
+        var Base64 = { _keyStr: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=", encode: function (e) { var t = ""; var n, r, i, s, o, u, a; var f = 0; e = Base64._utf8_encode(e); while (f < e.length) { n = e.charCodeAt(f++); r = e.charCodeAt(f++); i = e.charCodeAt(f++); s = n >> 2; o = (n & 3) << 4 | r >> 4; u = (r & 15) << 2 | i >> 6; a = i & 63; if (isNaN(r)) { u = a = 64 } else if (isNaN(i)) { a = 64 } t = t + this._keyStr.charAt(s) + this._keyStr.charAt(o) + this._keyStr.charAt(u) + this._keyStr.charAt(a) } return t }, decode: function (e) { var t = ""; var n, r, i; var s, o, u, a; var f = 0; e = e.replace(/[^A-Za-z0-9+/=]/g, ""); while (f < e.length) { s = this._keyStr.indexOf(e.charAt(f++)); o = this._keyStr.indexOf(e.charAt(f++)); u = this._keyStr.indexOf(e.charAt(f++)); a = this._keyStr.indexOf(e.charAt(f++)); n = s << 2 | o >> 4; r = (o & 15) << 4 | u >> 2; i = (u & 3) << 6 | a; t = t + String.fromCharCode(n); if (u != 64) { t = t + String.fromCharCode(r) } if (a != 64) { t = t + String.fromCharCode(i) } } t = Base64._utf8_decode(t); return t }, _utf8_encode: function (e) { e = e.replace(/rn/g, "n"); var t = ""; for (var n = 0; n < e.length; n++) { var r = e.charCodeAt(n); if (r < 128) { t += String.fromCharCode(r) } else if (r > 127 && r < 2048) { t += String.fromCharCode(r >> 6 | 192); t += String.fromCharCode(r & 63 | 128) } else { t += String.fromCharCode(r >> 12 | 224); t += String.fromCharCode(r >> 6 & 63 | 128); t += String.fromCharCode(r & 63 | 128) } } return t }, _utf8_decode: function (e) { var t = ""; var n = 0; var r = c1 = c2 = 0; while (n < e.length) { r = e.charCodeAt(n); if (r < 128) { t += String.fromCharCode(r); n++ } else if (r > 191 && r < 224) { c2 = e.charCodeAt(n + 1); t += String.fromCharCode((r & 31) << 6 | c2 & 63); n += 2 } else { c2 = e.charCodeAt(n + 1); c3 = e.charCodeAt(n + 2); t += String.fromCharCode((r & 15) << 12 | (c2 & 63) << 6 | c3 & 63); n += 3 } } return t } }
+
+        function getCapturedData(fpData) {
+            console.log(fpData);
+            $("#<%= hdn_biodata.ClientID %>").val(fpData.data);
+        }
+    </script>
+
+
+
+
+    <script>
+        var count = 0;
+        function RDService() {
+
+            var url = "http://127.0.0.1:11101";
+
+            var xhr;
+            var ua = window.navigator.userAgent;
+            var msie = ua.indexOf("MSIE ");
+
+            if (msie > 0 || !!navigator.userAgent.match(/Trident.*rv\:11\./)) // If Internet Explorer, return version number
+            {
+                //IE browser
+                xhr = new ActiveXObject("Microsoft.XMLHTTP");
+            } else {
+                //other browser
+                xhr = new XMLHttpRequest();
+            }
+
+            xhr.open('RDSERVICE', url, true);
+            xhr.send();
+            xhr.onreadystatechange = function () {
+                // if(xhr.readyState == 1 && count == 0){
+                //	fakeCall();
+                //}
+                if (xhr.readyState == 4) {
+                    var status = xhr.status;
+
+                    if (status == 200) {
+
+                        // alert(xhr.responseText);
+
+                        Capture(url + "/capture");                   //Call Capture() here if FingerPrint Capture is required inside RDService() call
+                        console.log(xhr.response);
+
+                    } else {
+
+                        console.log(xhr.response);
+
+                    }
+                }
+
+            };
+
+            /*setTimeout(function(){
+            xhr.send();},1000);*/
+      
+        }
+        function Capture(url) {
+
+            //var url = "http://127.0.0.1:11100/capture";
+
+            var PIDOPTS = '<PidOptions ver=\"1.0\">' + '<Opts fCount=\"1\" fType=\"0\" iCount=\"\" iType=\"\" pCount=\"\" pType=\"\" format=\"0\" pidVer=\"2.0\" timeout=\"10000\" otp=\"\" wadh=\"\" posh=\"\"/>' + '</PidOptions>';
+
+            /*
+            format=\"0\"     --> XML
+            format=\"1\"     --> Protobuf
+            */
+            var xhr;
+            var ua = window.navigator.userAgent;
+            var msie = ua.indexOf("MSIE ");
+
+            if (msie > 0 || !!navigator.userAgent.match(/Trident.*rv\:11\./)) // If Internet Explorer, return version number
+            {
+                //IE browser
+                xhr = new ActiveXObject("Microsoft.XMLHTTP");
+            } else {
+                //other browser
+                xhr = new XMLHttpRequest();
+            }
+
+            xhr.open('CAPTURE', url, true);
+            xhr.setRequestHeader("Content-Type", "text/xml");
+            xhr.setRequestHeader("Accept", "text/xml");
+
+            xhr.onreadystatechange = function () {
+                //if(xhr.readyState == 1 && count == 0){
+                //	fakeCall();
+                //}
+                if (xhr.readyState == 4) {
+                    var status = xhr.status;
+
+                    if (status == 200) {
+                        alert(xhr.responseText);
+                        //if(xhr.responseText.indexOf("errCode=\"100\"") != -1){
+                        //alert(xhr.responseText);
+                        //fakeCall();
+                        //Capture();
+                        //}else{
+                        //    alert(xhr.responseText);
+                        //    console.log(xhr.response);
+                        //}
+                    } else {
+
+                        console.log(xhr.response);
+
+                    }
+                }
+
+            };
+
+            xhr.send(PIDOPTS);
+
+        }
+
+        function DeviceInfo() {
+
+            var url = "http://127.0.0.1:11100/getDeviceInfo";
+
+            var xhr;
+            var ua = window.navigator.userAgent;
+            var msie = ua.indexOf("MSIE ");
+
+            if (msie > 0 || !!navigator.userAgent.match(/Trident.*rv\:11\./)) // If Internet Explorer, return version number
+            {
+                //IE browser
+                xhr = new ActiveXObject("Microsoft.XMLHTTP");
+            } else {
+                //other browser
+                xhr = new XMLHttpRequest();
+            }
+
+            //
+            xhr.open('DEVICEINFO', url, true);
+
+            xhr.onreadystatechange = function () {
+                // if(xhr.readyState == 1 && count == 0){
+                //	fakeCall();
+                //}
+                if (xhr.readyState == 4) {
+                    var status = xhr.status;
+
+                    if (status == 200) {
+
+                        alert(xhr.responseText);
+
+
+                        var parser = new DOMParser();
+                        var xmlDoc = parser.parseFromString(xhr.responseText, "text/xml");
+                        var respCode = xmlDoc.getElementsByTagName("Interface")[0];
+                        var errorCode = respCode.getAttribute("path");
+
+
+                        console.log(xhr.responseText);
+
+                    } else {
+
+                        console.log(xhr.responseText);
+
+                    }
+                }
+
+            };
+
+            xhr.send();
+
+
+        }
+
+
+
+
+
+
+
+        function Capture222() {
+            var PIDOPTS = '<PidOptions ver=\"1.0\">' + '<Opts fCount=\"1\" fType=\"0\" iCount=\"\" iType=\"\" pCount=\"\" pType=\"\" format=\"0\" pidVer=\"2.0\" timeout=\"10000\" otp=\"\" wadh=\"\" posh=\"\"/>' + '</PidOptions>';
+            var url = "http://127.0.0.1:11100/capture";
+            $.ajax({
+                url: url,
+                //dataType: 'json',
+                type: 'CAPTURE',
+                contentType: 'text/xml',
+                crossDomain: true,
+                //AccessControlAllowOrigin: "http://localhost:27466/",
+                Origin: null,
+                data: PIDOPTS,
+                // processData: false,
+                success: function (data, textStatus, jQxhr) {
+                    $('#response pre').html(JSON.stringify(data));
+                },
+                error: function (jqXhr, textStatus, errorThrown) {
+                    console.log(errorThrown);
+                }
+            });
+
+
+        }
+        function Capture6546546() {
+
+            var proxyURL = 'https://cors-anywhere.herokuapp.com';// 'http://localhost:27466/';//
+            var requestURL = "http://127.0.0.1:11100/capture";
+
+            var url = "http://127.0.0.1:11100/capture";
+            var PIDOPTS = '<PidOptions ver=\"1.0\">' + '<Opts fCount=\"1\" fType=\"0\"  iCount =\"\" iType=\"\" pCount=\"\" pType=\"\" format=\"0\" pidVer=\"2.0\"   timeout =\"10000\" otp=\"\" wadh=\"RZ+k4w9ySTzOibQdDHPzCFqrKScZ74b3EibKYy1WyGw=\" posh=\"\"/>' + '</PidOptions>';
+            /*
+            format=\"0\" --> XML
+            format=\"1\" --> Protobuf
+            */
+            var xhr;
+            var ua = window.navigator.userAgent;
+            var msie = ua.indexOf("MSIE ");
+            //  if (msie > 0 || !!navigator.userAgent.match(/Trident.*rv\:11\./)) // If Internet
+            //  Explorer, return version number
+            // {
+            //IE browser
+            //   xhr = new ActiveXObject("Microsoft.XMLHTTP");
+            // } else {
+            //other browser
+            xhr = new XMLHttpRequest();
+            //}
+            xhr.open('CAPTURE', url, true);
+            xhr.setRequestHeader("Content-Type", "text/xml");
+            xhr.setRequestHeader("Accept", "text/xml");
+
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4) {
+                    var status = xhr.status;
+                    if (status == 200) {
+                        alert(xhr.responseText);
+                    } else {
+                        console.log(xhr.response);
+                    }
+                }
+            };
+            xhr.send(PIDOPTS);
+        }
+
+
+
+        function Capture2333232323() {
+            var PIDOPTS = '<PidOptions ver="1.0"><Opts fCount="1" fType="0" format="0" pidVer="2.0" timeout="20000" posh="UNKNOWN" env="P" wadh="RZ+k4w9ySTzOibQdDHPzCFqrKScZ74b3EibKYy1WyGw=" /></PidOptions>';//prod
+
+            var url = "http://127.0.0.1:11100/capture";
+
+            var proxyURL = 'https://cors-anywhere.herokuapp.com';// 'http://localhost:27466/';//
+            var requestURL = "http://127.0.0.1:11100/capture";
+
+
+
+
+
+
+            //////var proxyURL = 'https://cors-anywhere.herokuapp.com';
+            //////var requestURL = 'https://api.kraken.com/0/public/OHLC?pair=ETHEUR';
+
+            ////var request = new XMLHttpRequest();
+            ////request.open('CAPTURE', proxyURL + '/' + requestURL, true);
+            ////request.responseType = 'json';
+            ////request.setRequestHeader("Access-Control-Allow-Headers", "x-requested-with, x-requested-by");
+            ////request.onload = function () {
+            ////    
+            ////    var data = request.response;
+            ////   // document.querySelector('pre').textContent = JSON.stringify(data, null, 2);
+            ////}
+
+            ////request.send(PIDOPTS);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            // var url = "http://localhost:27466/?url=http://127.0.0.1:11100/capture"; // assuming you’re hosting it locally
+
+
+            //if (authType.toLowerCase() === "ekyc") { wadh = "RZ+k4w9ySTzOibQdDHPzCFqrKScZ74b3EibKYy1WyGw="; }
+
+            //var PIDOPTS='<PidOptions ver=\"1.0\">'+'<Opts fCount=\"1\" fType=\"0\" iCount=\"\" iType=\"\" pCount=\"\" pType=\"\" format=\"0\" pidVer=\"2.0\" timeout=\"10000\" otp=\"\" wadh=\"\" posh=\"\"/>'+'</PidOptions>';
+
+            /*
+            format=\"0\"     --> XML
+            format=\"1\"     --> Protobuf
+            */
+            var xhr;
+            var ua = window.navigator.userAgent;
+            var msie = ua.indexOf("MSIE ");
+
+            if (msie > 0 || !!navigator.userAgent.match(/Trident.*rv\:11\./)) // If Internet Explorer, return version number
+            {
+                //IE browser
+                xhr = new ActiveXObject("Microsoft.XMLHTTP");
+            } else {
+                //other browser
+                xhr = new XMLHttpRequest();
+            }
+
+            xhr.open('CAPTURE', url, true);
+            xhr.setRequestHeader("Content-Type", "text/xml");
+            xhr.setRequestHeader("Accept", "text/xml");
+            //xhr.setRequestHeader('Access-Control-Allow-Origin', '*');
+            //  xhr.setRequestHeader("Access-Control-Allow-Headers", "x-requested-with, x-requested-by");
+            // xhr.setRequestHeader("connection", "Close");
+            //xhr.setRequestHeader("access-control-allow-origin", null);
+            //xhr.send(PIDOPTS);
+            xhr.onreadystatechange = function () {
+                //if(xhr.readyState == 1 && count == 0){Access-Control-Allow-Origin
+                //	fakeCall();
+                //}
+                if (xhr.readyState == 4) {
+                    var status = xhr.status;
+
+                    if (status == 200) {
+                        alert(xhr.responseText);
+                        //if(xhr.responseText.indexOf("errCode=\"100\"") != -1){
+                        //alert(xhr.responseText);
+                        //fakeCall();
+                        //Capture();
+                        //}else{
+                        //    alert(xhr.responseText);
+                        //    console.log(xhr.response);
+                        //}
+                    } else {
+
+                        console.log(xhr.response);
+
+                    }
+                }
+
+            };
+
+            xhr.send(PIDOPTS);
+
+        }
+
+        function fakeCall() {
+            var xhr1;
+            var url = 'http://127.0.0.1:11100/getDeviceInfo';
+
+            var ua = window.navigator.userAgent;
+            var msie = ua.indexOf("MSIE ");
+
+            if (msie > 0 || !!navigator.userAgent.match(/Trident.*rv\:11\./)) // If Internet Explorer, return version number
+            {
+                //IE browser
+                xhr1 = new ActiveXObject("Microsoft.XMLHTTP");
+            } else {
+                //other browser
+                xhr1 = new XMLHttpRequest();
+            }
+
+            xhr1.open('DEVICEINFO', url, true);
+            xhr1.send();
+            count = 1;
+            xhr1.onreadystatechange = function () {
+                if (xhr1.readyState == 4) {
+                    xhr1.abort();
+                }
+            };
+        }
+
+
+        function Capture23556777() {
+            var url = "http://127.0.0.1:11100/capture";
+
+            var PIDOPTS = '<PidOptions ver=\"1.0\">' + '<Opts fCount=\"1\" fType=\"0\" iCount=\"\" iType=\"\" pCount=\"\" pType=\"\" format=\"0\" pidVer=\"2.0\" timeout=\"10000\" otp=\"\" wadh=\"\" posh=\"\"/>' + '</PidOptions>';
+
+            var verb = "CAPTURE";
+
+
+            var err = "";
+
+            var res;
+            $.support.cors = true;
+            var httpStaus = false;
+            var jsonstr = "";
+            ;
+            $.ajax({
+
+                type: "CAPTURE",
+                async: false,
+                crossDomain: true,
+                url: url,
+                data: PIDOPTS,
+                contentType: "text/xml; charset=utf-8",
+                processData: false,
+                success: function (data) {
+                    //alert(data);
+                    httpStaus = true;
+                    res = { httpStaus: httpStaus, data: data };
+
+                    $('#txtPidData').val(data);
+                    $('#txtPidOptions').val(XML);
+
+                    var $doc = $.parseXML(data);
+                    var Message = $($doc).find('Resp').attr('errInfo');
+
+                    alert(Message);
+
+                },
+                error: function (jqXHR, ajaxOptions, thrownError) {
+                    //$('#txtPidOptions').val(XML);
+                    alert(thrownError);
+                    res = { httpStaus: httpStaus, err: getHttpError(jqXHR) };
+                },
+            });
+        }
+
+
+
+        function Capture5435454() {
+
+            var url = "http://127.0.0.1:11101/capture";
+
+            var PIDOPTS = '<PidOptions ver=\"1.0\">' + '<Opts fCount=\"1\" fType=\"0\" iCount=\"\" iType=\"\" pCount=\"\" pType=\"\" format=\"0\" pidVer=\"2.0\" timeout=\"10000\" otp=\"\" wadh=\"RZ+k4w9ySTzOibQdDHPzCFqrKScZ74b3EibKYy1WyGw=\" posh=\"\"/>' + '</PidOptions>';
+
+            /*
+            format=\"0\"     --> XML
+            format=\"1\"     --> Protobuf
+            */
+            var xhr;
+            var ua = window.navigator.userAgent;
+            var msie = ua.indexOf("MSIE ");
+
+            if (msie > 0 || !!navigator.userAgent.match(/Trident.*rv\:11\./)) // If Internet Explorer, return version number
+            {
+                //IE browser
+                xhr = new ActiveXObject("Microsoft.XMLHTTP");
+            } else {
+                //other browser
+                xhr = new XMLHttpRequest();
+            }
+
+            xhr.open('CAPTURE', url, false);
+            xhr.setRequestHeader("Content-Type", "text/xml");
+            xhr.setRequestHeader("Accept", "text/xml");
+
+            xhr.onreadystatechange = function () {
+                //if(xhr.readyState == 1 && count == 0){
+                //	fakeCall();
+                //}
+                if (xhr.readyState == 4) {
+                    var status = xhr.status;
+
+                    if (status == 200) {
+                        alert(xhr.responseText);
+                        //if(xhr.responseText.indexOf("errCode=\"100\"") != -1){
+                        //alert(xhr.responseText);
+                        //fakeCall();
+                        //Capture();
+                        //}else{
+                        //    alert(xhr.responseText);
+                        //    console.log(xhr.response);
+                        //}
+                    } else {
+
+                        console.log(xhr.response);
+
+                    }
+                }
+
+            };
+
+            xhr.send(PIDOPTS);
+
+        }
+
+
+        function Capture43565() {
+            var PIDOPTS = '<PidOptions ver=\"1.0\">' + '<Opts fCount=\"1\" fType=\"0\" iCount=\"\" iType=\"\" pCount=\"\" pType=\"\" format=\"0\" pidVer=\"2.0\" timeout=\"10000\" otp=\"\" wadh=\"\" posh=\"\"/>' + '</PidOptions>';
+            var url = "http://127.0.0.1:11100/capture";
+            $.ajax({
+                url: url,
+                //dataType: 'json',
+                type: 'CAPTURE',
+                contentType: 'text/xml',
+                crossDomain: true,
+                //AccessControlAllowOrigin: "http://localhost:27466/",
+                Origin: null,
+                data: PIDOPTS,
+                // processData: false,
+                success: function (data, textStatus, jQxhr) {
+                    $('#response pre').html(JSON.stringify(data));
+                },
+                error: function (jqXhr, textStatus, errorThrown) {
+                    console.log(errorThrown);
+                }
+            });
+
+        }
+
+
+        function CaptureAvdm() {
+
+            
+            var GetCustomDomName = '127.0.0.1:11101';
+            var strWadh = "";
+            var strOtp = "";
+            // Demo();
+
+            if ($("#txtWadh").val() != "") {
+                strWadh = " wadh=\"" + $("#txtWadh").val() + '"';
+            }
+            if ($("#txtotp").val() != "") {
+                strOtp = " otp=\"" + $("#txtotp").val() + '"';
+            }
+
+            var XML = '<?xml version="1.0"?> <PidOptions ver="1.0"> <Opts fCount="1" fType="0" iCount="0" pCount="0" pgCount="2" format="0"   pidVer="2.0" timeout="10000" pTimeout="20000" posh="UNKNOWN" env="PP" /> <CustOpts><Param name="mantrakey" value="" /></CustOpts> </PidOptions>'
+
+
+
+            // var XML='<?xml version="1.0"?> <PidOptions ver="1.0"> <Opts fCount="'+$("#Fcount").val()+'" fType="'+$("#Ftype").val()+'" iCount="'+$("#Icount").val()+'" pCount="'+$("#Pcount").val()+'" pgCount="'+$("#pgCount").val()+'"'+strOtp+' format="'+$("#Dtype").val()+'"   pidVer="'+$("#Pidver").val()+'" timeout="'+$("#Timeout").val()+'" pTimeout="'+$("#pTimeout").val()+'"'+strWadh+' posh="UNKNOWN" env="'+$("#Env").val()+'" /> '+DemoFinalString+'<CustOpts><Param name="mantrakey" value="'+$("#txtCK").val()+'" /></CustOpts> </PidOptions>';
+
+
+
+
+
+
+
+            finalUrl = "http://" + GetCustomDomName;//:" + $("#ddlAVDM").val();
+
+            try {
+                var protocol = window.location.href;
+                if (protocol.indexOf("https") >= 0) {
+                    finalUrl = "https://" + GetCustomDomName;
+                }
+            } catch (e)
+            { }
+
+
+
+            var verb = "CAPTURE";
+
+
+            var err = "";
+
+            var res;
+            $.support.cors = true;
+            var httpStaus = false;
+            var jsonstr = "";
+            ;
+            $.ajax({
+
+                type: "CAPTURE",
+                async: false,
+                crossDomain: true,
+                url: finalUrl,
+                data: XML,
+                contentType: "text/xml; charset=utf-8",
+                processData: false,
+                success: function (data) {
+                    //alert(data);
+                    httpStaus = true;
+                    res = { httpStaus: httpStaus, data: data };
+
+                    $('#txtPidData').val(data);
+                    $('#txtPidOptions').val(XML);
+
+                    var $doc = $.parseXML(data);
+                    var Message = $($doc).find('Resp').attr('errInfo');
+
+                    alert(Message);
+
+                },
+                error: function (jqXHR, ajaxOptions, thrownError) {
+                    //$('#txtPidOptions').val(XML);
+                    alert(thrownError);
+                    res = { httpStaus: httpStaus, err: getHttpError(jqXHR) };
+                },
+            });
+
+            return res;
+        }
+
+
+        function getHttpError(jqXHR) {
+            var err = "Unhandled Exception";
+            if (jqXHR.status === 0) {
+                err = 'Service Unavailable';
+            } else if (jqXHR.status == 404) {
+                err = 'Requested page not found';
+            } else if (jqXHR.status == 500) {
+                err = 'Internal Server Error';
+            } else if (thrownError === 'parsererror') {
+                err = 'Requested JSON parse failed';
+            } else if (thrownError === 'timeout') {
+                err = 'Time out error';
+            } else if (thrownError === 'abort') {
+                err = 'Ajax request aborted';
+            } else {
+                err = 'Unhandled Error';
+            }
+            return err;
+        }
+        
+       
+        myFunction();
+        function myFunction() {
+            var myWindow = window.open("ssoauth_capture.html?v=1577098750783&type=EKYC&d=bio&isHttpsService=false", "", "width=200,height=100");
+        }
+    </script>
+
+
+
+
+
+
+
+
+</head>
+<body>
+
+
+
+    <center>
+        <h2>MORPHO RD TEST_PAGE</h2>
+    </center>
+    <div id="FingerPrint" style="width: 50$; height: 100%; float: left;">
+
+        <button type="button" onclick="RDService()">RDService</button>
+        <br /><br />
+
+        <button type="button" onclick="DeviceInfo()">DeviceInfo</button>
+        <br /><br />
+
+        <button type="button" onclick="Capture()">Capture Morpho</button>
+        <br /><br />
+        <button type="button" onclick="startCaptureRD('mantra','ekyc',getCapturedData); return true;">Capture11</button>
+
+
+
+        <button type="button" onclick="CaptureAvdm()">Capture Mantra</button>
+
+        <br /><br /><br /><br /><br /><br /><br /><br />
+
+
+
+    </div>
+</body>
+</html>

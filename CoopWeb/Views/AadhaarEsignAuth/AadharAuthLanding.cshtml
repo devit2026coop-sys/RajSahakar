@@ -1,0 +1,133 @@
+﻿
+
+@*<script src="~/Scripts/AngularFramework/AadharAuthLanding.js?id=1"></script>*@
+<script src="https://aadhaarauth.rajasthan.gov.in/service/aadhaarauth.js"></script>
+<script src="~/Scripts/angular.js"></script>
+<script src="~/Scripts/jquery-3.1.0.js"></script>
+<script src="~/Scripts/dirPagination.js"></script>
+<input type="hidden" id="PdfPath" value='~/content/SocietyProfiling/TestEsignPdf/0003EFB0052A4F0DAEF1F413208F32D7.pdf'>
+
+
+
+<script>
+
+    var app = angular.module('authApp', []);
+    app.controller('authCtrl', function ($scope, $http) {
+
+        $scope.result = '';
+        const urlParams = new URLSearchParams(window.location.search);
+       
+
+        var EncData = "";
+        var ReqId = "";
+        var _isESign = false;
+        _language == 'en-us' ? '' : '';
+        _Directory = "";
+        _RegistrationNo = "";
+
+
+
+        $scope.GetEncryptedData = function () {
+            $http.get("../ApplicationFlow/GenerateAadhaarOTPEsign_Test1/")
+                .then(function (response) {
+                    if (response.data != null) {
+                        console.log(response.data);
+                        EncData = response.data.EncData;
+                        ReqId = response.data.RequestID;
+                        generateOTPEsign();
+                    }
+
+                    //ReqId =;
+
+                })
+                .catch(function (error) {
+                    console.error('Error:', error);
+                });
+        };
+        //  var url = window.location.href;
+
+
+        function generateOTPEsign() {
+
+            if (EncData != '') {
+                var AppCodeData = "PRAVL22868ABFAP012";
+
+                if (window.location.href.indexOf('10.70.234.208') > -1) {
+                    alert("hello");
+                    AppCodeData = "PRAVL22868ABFAP021";
+                }
+
+                const authInstance = new window.AadhaarAuth({ AppCode: AppCodeData, Data: EncData });//live
+                //const authInstance = new window.AadhaarAuth({ AppCode: 'PRAVL22868ABFAP021', Data: EncData });//stagging
+                authInstance.open({
+                    handler: (response) => {
+                        debugger;
+                        console.log("Authentication successful", response);
+                        console.log("Authentication successful", response.Data);
+
+                        if (response && response.Data != null && response.Data != '') {
+                            $scope.GetDecryptedResponse(response.Data);
+                            $scope.$apply(); // Ensure AngularJS digest cycle is triggered
+                        } else {
+                            console.error("Authentication failed or response invalid", response);
+                        }
+
+                        // $scope.GetDecryptedResponse(response);
+
+                    }
+                });
+            }
+
+        }
+
+        $scope.GetDecryptedResponse = function (encdata) {
+            $http.get("../ApplicationFlow/GenerateAadhaarOTPDec_Test1/?encData=" + encodeURIComponent(encdata))
+                .then(function (response) {
+                    debugger;
+                    console.log(response.data);
+                    // EncResponse = response.data;
+                    var authData = {
+                        TransId: response.data
+                    }
+                    if (ReqId != "" && ReqId == response.data); {
+                        $('#txnId').val(response.data);
+                        if (response.data != '') {
+                            $scope.EsignPdf(response.data);
+                        }
+                    }
+                    // _callback(aadhaarData);
+                })
+                .catch(function (error) {
+                    console.error('Error:', error);
+                });
+        };
+
+
+        $scope.EsignPdf = function (txnId) {
+            debugger;
+            $http.get("../ApplicationFlow/VerifyAadhaarOTPForEsing_Test/?txnId=" + txnId + "&pdfPath=" + $('#PdfPath').val())
+                .then(function (data) {
+                    console.log("Esign" + data);
+                    // $scope.result = response.data.message;
+                })
+                .catch(function (error) {
+                    console.error('Error:', error);
+                });
+        };     
+        
+       
+    $scope.GetEncryptedData();
+   
+    });
+</script>
+<div ng-app="authApp" ng-controller="authCtrl">
+    <form>
+        @*<input type="hidden" id="TxnIdDecData" value="@System.Web.HttpContext.Current.Session["TxnIdDecData"]">*@
+        <input type="hidden" id="TxnIdDecData" value="@System.Web.HttpContext.Current.Session["EsignTxnId"]">
+        <input type="hidden" id="Aadhar" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).AadharNo)">
+
+
+    </form>
+</div>
+
+

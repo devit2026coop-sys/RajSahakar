@@ -1,0 +1,228 @@
+﻿
+<script src="~/Scripts/AngularFramework/Tilam_PurchaseRegisterReport.js"></script>
+
+<script type="text/javascript">
+    var tableToExcel = (function () {
+        var uri = 'data:application/vnd.ms-excel;base64,'
+            , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>'
+            , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) }
+            , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
+        return function (table, name) {
+            if (!table.nodeType) table = document.getElementById(table)
+            var ctx = { worksheet: name || 'Worksheet', table: table.innerHTML }
+            window.location.href = uri + base64(format(template, ctx))
+        }
+    })()
+</script>
+
+<div ng-app="TilamSangh_PurchaseRegisterReportCnt">
+    <div ng-controller="TilamSangh_PurchaseRegisterReportMod">
+        <div class="col-md-12">
+            <h3 class="citizen-dash-head">{{translation.PurchaseRegisterReport}}</h3>
+            <hr style="margin: 0;">
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#"> {{translation.MIS}}</a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;"> {{translation.PurchaseRegisterReport}} </span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <form class="citizen-dash-head">
+
+                <div class="col-lg-12 form-group">
+                    <div class="col-lg-2">{{ translation.Product}}<span class="error">*</span></div>
+                    <div class="col-lg-4">
+                        <select class="form-control" ng-model="PurchaseRegisterRpt.ProductId" ng-init="PurchaseRegisterRpt.ProductId='0'" ng-change="ProductSubCategoryList()">
+                            <option value="0">{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in Products" value="{{item.ProductId}}">
+                                {{_language =='en-us' ?  item.ProductNameEng : item.ProductNameHi}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-lg-2">{{ translation.ProductSubCategory}}</div>
+                    <div class="col-lg-4">
+                        <select class="form-control" ng-model="PurchaseRegisterRpt.ProductSubCategoryId" ng-init="PurchaseRegisterRpt.ProductSubCategoryId='0'">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in ProductSubCategories" value="{{item.ProductSubCategoryId}}">
+                                {{_language =='en-us' ?  item.ProductSubCategoryNameEng : item.ProductSubCategoryNameHi}}
+                            </option>
+                        </select>
+                    </div>
+                   
+                </div>
+
+                <div class="col-lg-12 form-group">
+                    <div class="col-lg-2">{{ translation.ProcessingUnit}}</div>
+                    <div class="col-lg-4">
+                        <select class="form-control" ng-model="PurchaseRegisterRpt.PlantId" ng-init="PurchaseRegisterRpt.PlantId='0'">
+                            <option value="0">{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in Plants" value="{{item.ProcessingUnitId}}">
+                                {{_language =='en-us' ?  item.ProcessingUnitNameEng : item.ProcessingUnitNameHi}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-lg-2">{{ translation.SaleContractNo}}</div>
+                    <div class="col-lg-4">
+                        <input type="text" class="form-control" ng-model="PurchaseRegisterRpt.SaleContractNo" ng-init="PurchaseRegisterRpt.SaleContractNo=''"/>
+                    </div>
+                </div>
+
+                <div class="form-group col-md-12">
+                    <div class="dev-menu-btn">
+                        <button type="button" class="btn btn-primary" ng-click="ShowSearchData()">{{translation.Show}}</button>
+                        <button type="button" class="btn btn-primary" ng-click="ClearForm()">{{translation.Clear}}</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" ng-show="divSearchResult">
+            <div class="citizen-dash-head">
+                <input type="button" class="btn btn-primary dev-btn" onclick="tableToExcel('divExcelDownload', 'AuditReportDistrictWise')" value="{{translation.ExportToExcel}}">
+            </div>
+            <div id="divExcelDownload">
+                <div class="citizen-dash-head">
+                    <div ng-repeat="item in SearchData">
+                        <table class="table table-responsive devtable" style="overflow-x:auto;">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        {{translation.SRNO}}
+                                    </th>
+                                    <th>
+                                        {{translation.PartyNameOnly}}
+                                    </th>
+                                    <th>
+                                        {{translation.BrokerNameOnly}}
+                                    </th>
+
+                                    <th>
+                                        {{translation.Product}}
+                                    </th>
+
+                                    <th>
+                                        {{translation.Rate}}
+                                    </th>
+                                    <th>
+                                        {{translation.PaymentDate}}
+                                    </th>
+                                    <th>
+                                        {{translation.ExpectedDeliveryDate}}
+                                    </th>
+                                    <th>
+                                        {{translation.SaleContractNo}}
+                                    </th>
+                                    <th>
+                                        {{translation.Conditions}}
+                                    </th>
+                                    <th>
+                                        {{translation.Remarks}}
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>{{$index+1}}</td>
+                                    <td>
+                                        {{ _language === 'en-us' ? item.PartyName : item.PartyNameHi}}
+                                    </td>
+                                    <td>
+                                        {{ _language === 'en-us' ? item.BrokerName : item.BrokerNameHi}}
+                                    </td>
+                                    <td>
+                                        {{ _language === 'en-us' ? item.ProductSubCategoryDetails.ProductSubCategoryNameEng : item.ProductSubCategoryDetails.ProductSubCategoryNameHi }}
+                                        ({{ _language === 'en-us' ? item.ProductDetails.ProductNameEng : item.ProductDetails.ProductNameHi }})
+                                    </td>
+                                    <td>
+                                        {{ item.RateQuantity }}  {{ _language === 'en-us' ? item.RateUnitDetails.UnitNameEng : item.RateUnitDetails.UnitNameHi }} @@ &#8377; {{item.Rate}}
+                                    </td>
+                                    <td>
+                                        {{ item.PurchasePaymentDate}}
+                                    </td>
+                                    <td>
+                                        {{ item.ExpectedDeliveryDate}}
+                                    </td>
+
+                                    <td>
+                                        {{ item.SaleContractNo}}
+                                    </td>
+                                    <td>
+                                        {{ item.Conditions}}
+                                    </td>
+                                    <td>
+                                        {{ item.Remark}}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div class="col-lg-12 form-group">
+                            <h4 class="heading-hr ng-binding"> {{translation.StockPurchaseDetails}}</h4>
+                        </div>
+
+                        <table class="table table-responsive devtable" style="overflow-x:auto;">
+
+                            <thead>
+                                <tr>
+                                    <th rowspan="2">{{translation.SRNO}}</th>
+                                    <th rowspan="2">{{translation.VehicleNo}}</th>
+                                    <th rowspan="2">{{translation.Capacity}}</th>
+                                    <th colspan="6" style="text-align:center;">{{translation.ActionTakenAtPlant}}</th>
+                                    <th colspan="6" style="text-align:center;">{{translation.ActionTakenAtHq}}</th>
+                                </tr>
+                                <tr>
+                                    <th>{{translation.IsQualityProduct}}</th>
+                                    <th>{{translation.IsDeliveryAccepted}}</th>
+                                    <th>{{translation.AcceptanceFilebyPlant}}</th>
+                                    <th>{{translation.RejectionReasonMaster}}</th>
+                                    <th>{{translation.Remarks}}</th>
+                                    <th>{{translation.Activity}}</th>
+
+                                    <th>{{translation.IsFinalApprovedByHq}}</th>
+                                    <th>{{translation.RejectionReasonMaster}}</th>
+                                    <th>{{translation.IsDebitNote}}</th>
+                                    <th>{{translation.DebitNoTeFile}}</th>
+                                    <th>{{translation.Remarks}}</th>
+                                    <th>{{translation.Activity}}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="item2 in item.StockDetails">
+                                    <td>{{$index+1}}</td>
+                                    <td>{{item2.VehicleNo}}</td>
+                                    <td>{{item2.Quantity}} {{_language === 'en-us' ? item2.UnitDetails.UnitNameEng : item2.UnitDetails.UnitNameHi}}</td>
+                                    <td><span ng-if="item2.IsQualityCheckOkay === null || item2.IsQualityCheckOkay === undefined ">&nbsp;</span> <span ng-if="item2.IsQualityCheckOkay !== null && item2.IsQualityCheckOkay !== undefined ">  {{item2.IsQualityCheckOkay ? translation.Yes : translation.No}}</span></td>
+                                    <td><span ng-if="item2.IsAccepted === null || item2.IsAccepted === undefined ">&nbsp;</span> <span ng-if="item2.IsAccepted !== null && item2.IsAccepted !== undefined ">  {{item2.IsAccepted ? translation.Yes : translation.No}}</span></td>
+                                    <td><span ng-if="item2.IsAccepted !== null && item2.IsAccepted !== undefined && item2.IsAccepted">  <a target="_blank" href="~/Content/TilamSangh/StockDeliveryFiles/{{item.AcceptanceFile}}">{{translation.AcceptanceFilebyPlant}}</a></span></td>
+                                    <td><span ng-if="item2.RejectionId > 0 ">{{_language === 'en-us' ? item2.RejectDetailsOfPlant.RejectionReasonEng : item2.RejectDetailsOfPlant.RejectionReasonHi}}</span> </td>
+                                    <td><span ng-if="item2.PlantUserId > 0 ">{{_language === 'en-us' ? item2.PlantUserDetails.OfficerNameEn : item2.PlantUserDetails.OfficerNameHi}}</span> <span ng-if="item2.PlantUserActivityDateTime != '' ">{{item2.PlantUserActivityDateTime}}</span></td>
+                                    <td>{{item2.RemarkByPlant}}</td>
+                                    <td><span ng-if="item2.IsApprovedByHQ === null || item2.IsApprovedByHQ === undefined ">&nbsp;</span> <span ng-if="item2.IsApprovedByHQ !== null && item2.IsApprovedByHQ !== undefined ">  {{item2.IsApprovedByHQ ? translation.Yes : translation.No}}</span></td>
+                                    <td><span ng-if="item2.RejectionId > 0 ">{{_language === 'en-us' ? item2.RejectDetailsOfHq.RejectionReasonEng : item2.RejectDetailsOfHq.RejectionReasonHi}}</span> </td>
+                                    <td><span ng-if="item2.IsDebitNote === null || item2.IsDebitNote === undefined ">&nbsp;</span> <span ng-if="item2.IsDebitNote !== null && item2.IsDebitNote !== undefined ">  {{item2.IsDebitNote ? translation.Yes : translation.No}}</span></td>
+                                    <td><span ng-if="item2.IsDebitNote !== null && item2.IsDebitNote !== undefined && item2.IsDebitNote">  <a target="_blank" href="~/Content/TilamSangh/StockDeliveryFiles/{{item.DebitNoteFile}}">{{translation.DebitNoTeFile}}</a></span></td>
+                                    <td>{{translation.RemarkByHQ}}</td>
+                                    <td><span ng-if="item2.HQUserId > 0 ">{{_language === 'en-us' ? item2.HqUserDetails.OfficerNameEn : item2.HqUserDetails.OfficerNameHi}}</span> <span ng-if="item2.HQUserActivityDateTime != '' ">{{item2.HQUserActivityDateTime}}</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+
+        <div class="se-pre-con"></div>
+    </div>
+
+</div>

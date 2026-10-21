@@ -1,0 +1,239 @@
+﻿@{
+
+    Layout = "~/Views/Shared/_CitizenLayout.cshtml"; ;
+}
+<script src="~/Scripts/AngularFramework/ObjecedSocieties.js?v=1"></script>
+
+<div ng-app="SocietyAmendmentModule">
+    <div ng-controller="SocietyAmendmentCont" ng-cloak="">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <h3 class="citizen-dash-head">Society Objection</h3>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#"> {{translation.Home}} </a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;">Society Objection </span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <input type="hidden" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).SSOID)" id="hdncurrentSSOID" />
+
+        @*<form class="dev-search-form citizen-dash-head " style="overflow: hidden;" name="SocietyAmendmentForm">*@
+        <div class="col-lg-12 form-group citizen-dash-head " ng-show="!ShowTab">
+            <div class="col-lg-12 form-group" ng-show="GetSocietyDetails">
+
+                <div class="col-lg-12" style="margin-top:10px;"></div>
+                <div class="col-lg-4" style="margin-top:10px;">
+                    <label style="color:black">Please enter your society Registration No/BRN :</label>
+                    <input ng-disabled="disableTxtRegNo" type="text" name="SocietyName" class="form-control" ng-model="SocietyRegistration.SocietyRegistrationNo" placeholder="{{translation.SocietyRegistrationNo}}" autocomplete="off">
+                    <input ng-hide="true" type="text" name="SocietyName" class="form-control" ng-model="MemberRegistration.RegNo" autocomplete="off">
+                </div>
+
+                <div class="col-md-4" style="margin-top:-15px;">
+                    <label></label><br />
+                    <button style="margin-top: 25px;" type="submit" class="btn btn-primary dev-btn" ng-click="GetSocityDataForObjection();" ng-disabled="SocietyRegistration.SocietyRegistrationNo==undefined || SocietyRegistration.SocietyRegistrationNo==''">{{translation.GetSocieties}}</button>
+                </div>
+
+                <div class="col-lg-12" style="margin-top:10px;display:none"><label>OR</label></div>
+                <div class="col-lg-4" style="display:none;">
+                    <label>    {{_language =='en-us' ?  'Select Society from list': 'सूची से सोसाइटी चुनें'}}</label>
+                    <select class="form-control" ng-model="SocietyAmendment.SocietyIdEnc" ng-init="SocietyAmendment.SocietyIdEnc='0'" ng-change="OnChangeSociety()">
+                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                        <option ng-repeat="item in SocietyList" value="{{item.SocietyIdENC}}~{{item.SocietyDirectory}}~{{item.ActId}}">
+                            {{item.SocietyName}}
+                        </option>
+                    </select>
+                </div>
+            </div>
+
+   
+            <div id="dvProfiling">
+                <table class="table table-responsive devtable citizen-dash-head" ng-show="SocietyRegdata.length>0">
+                    <thead>
+                        <tr>
+                            <th>
+                                {{translation.SRNO}}
+                            </th>
+                            <th> <input type="checkbox" ng-model="CheckedAll" ng-change="SelectAllSocieties()" /> </th>
+                            <th>
+                                {{translation.SocietyName}}
+
+                            </th>
+                            <th>
+                                {{translation.SocietyRegistrationNo}}
+                            </th>
+                            <th>
+                                {{translation.Status}}
+                            </th>
+                            <th>
+                                {{translation.Section}}
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                      
+                        <tr ng-repeat="items in SocietyRegdata">                 
+                            <td>{{$index+1}}</td>
+                            <td><input type="checkbox" ng-model="items.IsChecked" ng-change="SelectSociety()" /></td>
+                            <td>{{ items.SocietyName }}</td>
+                            <td>{{ items.RegistrationNo }}</td>
+                            <td>{{ items.ProceesStatusTextEn }}</td>
+                            <td>{{ items.Section }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+              
+            </div>
+
+        </div>
+
+        <div class="citizen-dash-head" ng-show="!chkBulkSelected">
+
+            <div class="col-lg-12 form-group">
+                <div class="table-responsive">
+                    <h2>Objection History</h2>
+                    <div class="row">
+                        <div class="col-lg-12 form-group">                           
+                            <div class="col-md-2">
+                                <label for="search">{{translation.ItemPerPage}}:</label>
+                                <input type="number" min="1" max="500" class="form-control" ng-model="pageSize">
+                            </div>                         
+                        </div>
+                    </div>
+
+
+                    <table class="table devtable" style="">
+                        <thead>
+
+                            <tr>
+                                <th>{{translation.SRNO}}</th>
+                                @*<th> {{translation.Select}}</th>*@
+                                <th>
+                                    {{translation.SocietyName}}
+                                </th>
+                                <th>
+                                    {{translation.RegistrationNo}}
+                                </th>
+                                <th>
+                                    {{translation.Section}}
+                                </th>
+                                <th>
+                                    {{translation.Status}}
+                                </th>
+
+                                <th>
+                                    {{translation.Remark}}
+                                </th>
+                                <th>Issued Documents</th>
+                                <th>
+                                    {{translation.Actions}}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr dir-paginate="item in ObjectedSocietyList | orderBy:colsort:reverseSort | itemsPerPage: pageSize" current-page="currentPage" pagination-id="SocietyIdForTbl">
+                                @*<tr ng-repeat="item in ObjectedSocietyList">*@
+                                @*<td>{{$index+1}}</td>*@
+                                <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                                @*<td><input type="radio" ng-model="item.IsSelect" name="amdchoose" ng-init="item.IsSelect==false" ng-checked="false" ng-click="ChooseSociety(item)" /></td>*@
+                                <td>
+                                    {{item.SocietyName}}
+                                </td>
+                                <td>
+                                    {{item.RegistrationNo}}
+                                </td>
+                                <td>
+                                    {{item.AmendmentType}}
+                                </td>
+                                <td>{{ item.ProceesStatusTextEn }}</td>
+                                <td> {{item.Remark}}</td>
+                                <td>
+                                    <a href="~/Content/ObjectedSocietyDoc/{{item.doc}}" target="_blank">Objection Document</a>
+                                </td>
+                                <td>
+
+                                    @*<a href="javascript:void(0)" ng-click="ChangeStatus(item)"><i class="fa fa-edit"></i></a>*@
+                                    <img src="{{item.IsActive == 1?'../../Images/btnON.png':'../../Images/btnOFF.png'}}" ng-click="ChangeStatus(item)" style="cursor:pointer;" />
+
+                                    @*<a href="javascript:void(0)" ng-click="ChooseSociety(item)"><i class="fa fa-eye"></i></a>*@
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="col-md-10">
+                        <div class="text-center">
+                            <dir-pagination-controls boundary-links="true" pagination-id="SocietyIdForTbl" on-page-change="pageChangeHandler(newPageNumber)" template-url="/dirPagination.tpl.html"></dir-pagination-controls>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 citizen-dash-head" ng-show="chkBulkSelected">
+            <div class=" profile-d1" style="margin-top: 30px;">
+                <fieldset class="dvfieldset">
+                    <legend class="dvlegend">Society Objection</legend>
+                    <div class="col-lg-12 profile-d1">
+                        <form class="dev-search-form" name="MyClassForm" ng-show="BaseUserId==ApplicationFlowMaster.UserId" style="overflow: hidden; margin-bottom:35px;">
+
+                            <div class="row">
+                                <div class="form-group col-md-6" ng-hide="ShowOTPDiv">
+                                    <label> {{translation.OtherAttachment}} : </label>
+                                    <input type="file" name="File" accept="application/pdf" filetype='pdf' id="flReportFile" class="form-control" ng-model="Objection.ReportGccFile" onchange="angular.element(this).scope().UploadReportFile(this.files)">
+
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="form-group col-md-12" ng-hide="ShowOTPDiv">
+                                    <label>{{translation.Remarks}}</label>
+                                    <textarea type="text" rows="4" cols="50" class="form-control" id="Remarks" name="Remarks" ng-bind="Remarks" ng-model="Objection.Remark" placeholder={{translation.Remarks}} ng-keypress="checkInput($event)"></textarea>
+                                    <code style="float: left;">
+                                    </code>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="form-group col-md-12" ng-hide="ShowOTPDiv">
+                                    <div class="dev-menu-btn">
+                                        <button type="button" class="btn btn-primary" ng-click="SaveObjectionSocieties()">{{translation.Submit}}</button>
+                                        <button type="button" class="btn btn-primary" ng-click="BackToPage()">{{translation.Back}}</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6" ng-show="ShowOTPDiv">
+                                    <label>{{translation.EnterOTP}}</label>
+                                    <input type="text" class="form-control" name="otp" ng-bind="OTP" ng-model="ApplicationFlowMaster.OTP" placeholder={{translation.EnterOTP}} autocomplete="off" /><br />
+                                    <button type="button" class="btn btn-primary" ng-click="VerifyOTP()">{{translation.Submit}}</button>
+                                    <button type="button" class="btn btn-primary" ng-click="SaveGSSApplicationFlowStatus()">{{translation.ReSendOTP}}</button>
+
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </fieldset>
+
+            </div>
+
+        </div>
+
+
+        <div class="se-pre-con"></div>
+        <div id="stop" class="scrollTop">
+            <span><a href=""><i class="fa fa-arrow-up">Top</i></a></span>
+        </div>
+
+
+    </div>
+
+</div>

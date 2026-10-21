@@ -1,0 +1,146 @@
+﻿@{
+    ViewBag.Title = "Bank Statement";
+}
+
+@if (((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]) != null)
+{
+    if (((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).UserType == "C")
+    {
+        Layout = "~/Views/Shared/_CitizenLayout.cshtml";
+    }
+    else
+    {
+        Layout = "~/Views/Shared/_Layout.cshtml";
+    }
+}
+else
+{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+
+<script src="~/Scripts/AngularFramework/BankStatement.js"></script>
+
+<div ng-app="BankStatmentModule">
+    <div ng-controller="BankStatmentCont">
+        <div class="col-md-12">
+            <h3 class="citizen-dash-head">{{translation.BankDetails}}</h3>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#"> {{translation.Home}} </a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;"> {{translation.BankDetails}} </span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="col-md-12">
+            <div class="citizen-dash-head" style="overflow: hidden;">
+                <div class="col-md-12 citizen-dash-head">
+                    <div class="col-lg-12 form-group">
+                        <div class="col-lg-2">
+                            <label>{{_language=='en-us' ? translation.Act: translation.Act}}</label>
+                        </div>
+                        <div class="col-lg-4">
+                            {{ _language=='en-us' ?  BasicDetails.ActNameEn :  BasicDetails.ActNameHi }}
+                        </div>
+                        <div class="col-lg-2">
+                            <label>{{_language=='en-us' ? translation.BRN: translation.BRN}}</label>
+                        </div>
+                        <div class="col-lg-4">
+                            {{ _language=='en-us' ?  BasicDetails.BRN :  BasicDetails.BRN }}
+                        </div>
+                    </div>
+                    <div class="col-lg-12 form-group">
+                        <div class="col-lg-2">
+                            <label>{{_language=='en-us' ? translation.SocietyRegistrationNo: translation.SocietyRegistrationNo}}</label>
+                        </div>
+                        <div class="col-lg-4">
+                            {{ _language=='en-us' ?  BasicDetails.RegistrationNo :  BasicDetails.RegistrationNo }}
+                        </div>
+                        <div class="col-lg-2"><label>{{_language=='en-us' ? translation.SocietyName: translation.SocietyName}}</label></div>
+                        <div class="col-lg-4">
+                            {{_language=='en-us' ?  BasicDetails.SocietyName:  BasicDetails.SocietyName}}
+                        </div>
+                    </div>
+                    <div class="col-lg-12 form-group">
+                        <div class="col-lg-2">
+                            <label>{{translation.UploadBankPassbook}}</label>
+                        </div>
+                        <div class="col-lg-4">
+                            <input type="file" name="File" filetype='pdf' id="flBankStatement" class="form-control" ng-model="BankStatement.BankPassbookFile" onchange="angular.element(this).scope().UploadBankPassbook(this.files)">
+                        </div>
+                        <div class="col-lg-2"><label>{{_language=='en-us' ? translation.OpeningBalance: translation.OpeningBalance}}</label></div>
+                        <div class="col-lg-4">
+                            <input type="text" name="OpeningBalance" class="form-control" ng-model="BankStatement.OpeningBalance" placeholder="{{translation.OpeningBalance}}" onkeypress='return event.charCode >= 48 && event.charCode <= 57' autocomplete="off">
+                        </div>
+                    </div>
+                    <div class="form-group col-md-12">
+                        <div class="dev-align-btn">
+                            <button type="submit" ng-show="hidebankbtn" class="btn btn-primary dev-btn" ng-click="SaveBankDetails()">{{ translation.Submit}}</button>
+                            <button type="button" ng-show="hidebankbtn" class="btn btn-primary dev-btn" ng-click="ClearSocietyDetailsForm()">{{ translation.Clear}}</button>
+
+                        </div>
+                    </div>
+                </div>
+                <table id="example" class="table devtable" style="margin-top: 30px;border:1px solid rgb(222, 221, 221); float: left;">
+                    <thead>
+                        <tr>
+                            <th>
+                                {{translation.SRNO}}
+                            </th>
+
+                            <th ng-click="sortData('SocietyName')">
+                                {{translation.SocietyName}}
+                                <div ng-class="getSortClass('SocietyName')"></div>
+                            </th>
+                            <th>
+                                {{translation.SocietyRegistrationNo}}
+                            </th>
+                            <th>
+                                {{translation.PaidUpShareCapitals}}
+                            </th>
+                            <th>
+                                {{translation.BankPassBook}}
+                            </th>
+                            <th>
+                                {{translation.BankOpeningCertificate}}
+                            </th>
+
+
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr dir-paginate="item in TableData | filter: q | orderBy:colsort:reverseSort | itemsPerPage: pageSize" current-page="currentPage" pagination-id="SocietyIdForTbl">
+                            <td>{{$index+1}}</td>
+                            <td>{{item.SocietyName}}</td>
+                            <td>{{item.RegistrationNo}}</td>
+                            <td>{{item.PaidUpShareCapital}}  </td>
+                            <td>
+                                <a style="color:#505050;" target="_blank" href="{{item.BankPassBookUrl}}"><i class="fa fa-info-circle infoicon-edit"></i></a>
+                            </td>
+                            <td>
+                                <a style="color:#505050;" target="_blank" href="{{item.BankOpeningCertificateUrl}}"><i class="fa fa-info-circle infoicon-edit"></i></a>
+                            </td>
+
+
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="se-pre-con"></div>
+    <div id="stop" class="scrollTop">
+        <span><a href=""><i class="fa fa-arrow-up">Top</i></a></span>
+    </div>
+</div>
+

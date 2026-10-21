@@ -1,0 +1,831 @@
+﻿@if (((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]) != null)
+{
+    if (((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).UserType == "C")
+    {
+        Layout = "~/Views/Shared/_CitizenLayout.cshtml";
+    }
+    else
+    {
+        Layout = "~/Views/Shared/_Layout.cshtml";
+    }
+}
+else
+{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script>
+    function printpage() {
+        var divToPrint = document.getElementById("printTable");
+        newWin = window.print();
+        newWin.document.write(divToPrint.outerHTML);
+        newWin.print();
+        newWin.close();
+    }
+</script>
+<script src="~/Scripts/AngularFramework/LoanApplicationForm.js?id=4"></script>
+<script src="~/Scripts/jquery.unobtrusive-ajax.min.js"></script>
+<script type="text/javascript">
+    function OnSuccess(data) {
+        $('#preloader').hide();
+        if (data.UserType == 'C') {
+            $('#FormPost').html(data.result);
+            $('#FormPost').find('form').submit();
+        }
+        else {
+            if (data.result == 'Sucess') {
+                alert('Details Save Successful');
+                window.location = "../Citizen/MemberApplicationView?ApplicationIdEnc=" + data.IdEnc;
+            }
+            else {
+                ShowModelAlert("Society Member Registration", 'Issue in Payment Receiveing Please Try after Some time');
+            }
+        }
+    }
+    function OnFailure(data) {
+        $('#preloader').hide();
+        alert(JSON.stringify(data));
+    }
+    function OnBegin() {
+        $('#preloader').show();
+    }
+
+    function isNumber(evt) {
+        var iKeyCode = (evt.which) ? evt.which : evt.keyCode
+        if (iKeyCode != 46 && iKeyCode > 31 && (iKeyCode < 48 || iKeyCode > 57))
+            return false;
+
+        return true;
+    }
+    function ValidateAlpha(evt) {
+        var keyCode = (evt.which) ? evt.which : evt.keyCode
+        if ((keyCode < 65 || keyCode > 90) && (keyCode < 97 || keyCode > 123) && keyCode != 32)
+
+            return false;
+        return true;
+    };
+    $(document).ready(function () {
+        $("select").on("change", function () {
+            $(this).removeClass("notValid");
+        });
+
+
+        $(".expandDetails").click(function () {
+            var panl_id = $(this).attr("dat-val");
+            if ($(this).hasClass("fa-plus-circle")) {
+                $(this).removeClass("fa-plus-circle").addClass("fa-minus-circle")
+            } else {
+                $(this).addClass("fa-plus-circle").removeClass("fa-minus-circle")
+            }
+            $("#" + panl_id).slideToggle("slow");
+        });
+
+    });
+
+    function previewFile(ths) {
+        var indx = ths.id.split('_')[1];
+        var preview = document.querySelector('img_' + indx);
+        var file = ths.files[0];
+        var reader = new FileReader();
+        reader.onloadend = function () {
+            $('#img_' + indx).attr("src", reader.result);
+        }
+
+        if (file) {
+            reader.readAsDataURL(file);
+        }
+    }
+
+</script>
+<style>
+    label {
+        display: inline-block;
+        width: 100% !important;
+        margin-bottom: 5px;
+        font-weight: 700;
+    }
+
+    .zoom {
+        transition: transform .2s; /* Animation */
+        margin: 0 auto;
+    }
+
+        .zoom:hover {
+            padding-left: 30px;
+            transform: scale(2.5); /* (150% zoom - Note: if the zoom is too large, it will go outside of the viewport) */
+        }
+
+
+    ul.pagination {
+        margin: 3px 0 0 0 !important;
+    }
+
+    .dataTables_info {
+        float: left;
+        margin-top: 10px;
+    }
+
+    .table-responsive .form-group {
+        margin-bottom: 0px;
+        margin-top: 10px;
+       
+    }
+
+        .table-responsive .form-group .heading-hr {
+            margin-bottom: 0px;
+        }
+</style>
+
+<style>
+    @@media print {
+
+        .profile-d1 {
+            color: #000 !important;
+            background: #fff !important;
+            border-radius: 5px !important;
+            margin-bottom: 20px !important;
+        }
+
+        .profile-d1-hr {
+            font-size: 17px !important;
+            background: #025e63 !important;
+            padding: 10px 15px !important;
+            color: #fff !important;
+            border-radius: 4px !important;
+        }
+
+        .dev-spancon {
+            font-size: 13px !important;
+            color: #424242 !important;
+            font-weight: 500 !important;
+        }
+
+        label {
+            color: #025e63 !important;
+            font-size: 14px !important;
+        }
+
+        .devtable thead tr th {
+            background: #64c0c5 !important;
+            color: #fff !important;
+        }
+
+        .col-lg-12, .col-md-12, .col-sm-12, .col-xs-12 {
+            display: block !important;
+            width: auto !important;
+            height: auto !important;
+            overflow: visible !important;
+        }
+
+        .table-responsive {
+            display: block !important;
+            width: auto !important;
+            height: auto !important;
+            overflow: visible !important;
+        }
+
+        .table > tbody > tr > td, .table > tbody > tr > th, .table > tfoot > tr > td, .table > tfoot > tr > th, .table > thead > tr > td, .table > thead > tr > th {
+            border-top: unset !important;
+        }
+
+        .main-header {
+            display: none !important;
+        }
+
+        .sidebar {
+            display: none !important;
+        }
+
+        .dev-toggle-bg {
+            display: none !important;
+        }
+
+        .printhideth {
+            display: none !important;
+        }
+
+        .copydev {
+            display: none !important;
+        }
+
+        .print {
+            display: none !important;
+        }
+
+        .devpage-breadcrumb {
+            display: none !important;
+        }
+
+        .visible-print {
+            display: block !important;
+        }
+
+        table.visible-print {
+            display: table !important;
+        }
+
+        tr.visible-print {
+            display: table-row !important;
+        }
+
+        th.visible-print,
+        td.visible-print {
+            display: table-cell !important;
+        }
+    }
+</style>
+
+<style>
+    @@media print {
+        .visible-print {
+            display: block !important
+        }
+
+        table.visible-print {
+            display: table !important
+        }
+
+        tr.visible-print {
+            display: table-row !important
+        }
+
+        td.visible-print, th.visible-print {
+            display: table-cell !important
+        }
+    }
+
+    .visible-print-block {
+        display: none !important
+    }
+
+    @@media print {
+        .visible-print-block {
+            display: block !important
+        }
+    }
+
+    .visible-print-inline {
+        display: none !important
+    }
+
+    @@media print {
+        .visible-print-inline {
+            display: inline !important
+        }
+    }
+
+    .visible-print-inline-block {
+        display: none !important
+    }
+
+    @@media print {
+        .visible-print-inline-block {
+            display: inline-block !important
+        }
+    }
+
+    @@media print {
+        .hidden-print {
+            display: none !important
+        }
+    }
+
+    .profile-d1 {
+        color: #000;
+        background: #fff;
+        border-radius: 5px;
+        margin-bottom: 20px;
+    }
+
+    .profile-d1-hr {
+        font-size: 17px;
+        background: #025e63;
+        padding: 10px 15px;
+        color: #fff;
+        border-radius: 4px;
+    }
+
+    .dev-spancon {
+        font-size: 13px;
+        color: #424242;
+        font-weight: 500;
+    }
+
+    label {
+        color: #025e63;
+        font-size: 14px;
+    }
+
+    .devtable thead tr th {
+        background: #64c0c5;
+        color: #fff;
+    }
+
+    .table > tbody > tr > td, .table > tbody > tr > th, .table > tfoot > tr > td, .table > tfoot > tr > th, .table > thead > tr > td, .table > thead > tr > th {
+        border-top: unset;
+    }
+</style>
+
+
+<style>
+    a > i.fa.fa-plus-circle {
+        font-size: 25px;
+        cursor: pointer;
+    }
+
+    a:hover > i.fa.fa-plus-circle {
+        font-size: 26px;
+        cursor: pointer;
+    }
+
+    a > i.fa.fa-eye {
+        font-size: 25px;
+        cursor: pointer;
+    }
+
+    a:hover > i.fa.fa-eye {
+        font-size: 26px;
+        cursor: pointer;
+    }
+
+    .add-more {
+    }
+
+    .thCenter {
+        text-align: center !important;
+    }
+
+    .thverticalMiddle {
+        vertical-align: middle !important;
+    }
+
+    .notValid {
+        border: solid 1px red !important
+    }
+
+    .rowdeleteBtn {
+        color: #fff !important;
+        font-weight: bold !important;
+        font-size: 18px !important;
+    }
+</style>
+<div ng-app="LoanApplicationMod">
+    <div ng-controller="LoanApplicationCnt">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <h4 class="citizen-dash-head">{{translation.AgriculturalLoanApplicationLetter}}</h4>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#"> {{translation.PLDB}} </a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;">{{translation.AgriculturalLoanApplicationLetter}} </span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="col-lg-12">
+            <div class="table-responsive citizen-dash-head">
+                <div id="divUserRegistration1">
+
+                    <form class="dev-masters" name="MyUserForm">
+                        @*<div class="col-lg-12 form-group">
+                                <h4 class="heading-hr ng-binding">  {{translation.MembershipRequest}}</h4>
+                            </div>*@
+                        <div ng-show="divParentDataSelection" ng-if="!IsSubmiApplication">
+                            <div class="col-lg-12 form-group">
+                                <div class="col-lg-2">{{ translation.PLDB}} <span class="error">*</span></div>
+                                <div class="col-lg-4">
+                                    <select ng-model="MemberRegistration.PLDB_ID" ng-show="!LoanMembers[0].IsValidate" ng-disabled="IsSubmiApplication" id="ddlDistrict" class="form-control" ng-init="MemberRegistration.PLDB_ID='0'" ng-change="PLDBBranchList('0')">
+                                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                                        <option ng-repeat="itemPLDB in PLDB | orderBy:'PldbId'" value="{{itemPLDB.PldbId}}">
+                                            {{itemPLDB.PLDBName}}
+                                        </option>
+                                    </select>
+                                    <input ng-if="LoanMembers[0].IsValidate" class="form-control" type="text" disabled value="{{GetNameFromList(PLDB,MemberRegistration.PLDB_ID,'District')}}" />
+
+                                </div>
+                                <div class="col-lg-2">{{ translation.Branch}} <span class="error">*</span></div>
+                                <div class="col-lg-4">
+                                    <select ng-show="!LoanMembers[0].IsValidate" ng-model="MemberRegistration.Branch_ID" ng-disabled="IsSubmiApplication" id="ddlblock" class="form-control" ng-init="MemberRegistration.Branch_ID='0'" ng-change="GetGramPanchayatData()">
+                                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                                        <option ng-repeat="itemBlock in PLDBBranches | orderBy:'BLOCK_ENG'" value="{{itemBlock.BLOCK_ID}}">
+                                            {{_language =='en-us' ?  itemBlock.BLOCK_ENG : itemBlock.BLOCK_MANGAL}}
+                                        </option>
+                                    </select>
+                                    <input ng-if="LoanMembers[0].IsValidate" class="form-control" type="text" disabled value="{{GetNameFromList(PLDBBranches,MemberRegistration.Branch_ID,'Branch')}}" />
+                                </div>
+                            </div>
+                        </div>
+                        <div id="dvLoanApplicationForm" ng-if="LoanApplicationLetter">
+                            <div class="col-lg-12 form-group" ng-if="IsSubmiApplication">
+                                <h4 class="heading-hr ng-binding">{{translation.LoanDetails}} <a ng-show="IsSubmiApplication" href="javascript:void(0);" dat-val="panal_0" class="fa fa-plus-circle expandDetails" style="float:right;font-size: 25px;"></a></h4>
+                            </div>
+                            <div class="col-lg-12 clspanal" id="panal_0" ng-if="IsSubmiApplication">
+                                <div class="col-lg-12">
+                                    <div class="col-lg-1"><label>{{translation.ApplicationNo}}</label></div>
+                                    <div class="col-lg-4">
+                                        {{LoanDetails.application_no}}
+                                    </div>
+                                </div>
+                                <div class="col-lg-12">
+                                    <div class="col-lg-1"><label>{{translation.PLDB}}</label></div>
+                                    <div class="col-lg-4">
+                                        {{GetNameFromList(PLDB,LoanDetails.pldb_id,'District')}}
+                                    </div>
+                                </div>
+                                <div class="col-lg-12">
+                                    <div class="col-lg-1"><label>{{translation.Branch}}</label></div>
+                                    <div class="col-lg-4">
+                                        {{GetNameFromList(PLDBBranches,LoanDetails.branch_id,'Branch')}}
+                                    </div>
+                                </div>
+                                <div class="col-lg-12">
+                                    <div class="col-lg-1"><label>{{translation.Status}}</label></div>
+                                    <div class="col-lg-4">
+                                        {{LoanDetails.status}}
+                                    </div>
+                                </div>
+                            </div>
+
+                           @*Loan Amount Details*@
+                           @Html.Partial("_LoanAmount")
+                           @*Applicant Details*@
+
+                            <div class="col-lg-12 form-group">
+                                <h4 class="heading-hr ng-binding">{{translation.ApplicantDetails}} <a ng-show="IsSubmiApplication" href="javascript:void(0);" dat-val="panal_1" class="fa fa-plus-circle expandDetails" style="float:right;font-size: 25px;"></a></h4>
+                            </div>
+
+                            <div class="col-lg-12 clspanal" id="panal_1">
+                                <div class="table-responsive">
+
+                                    <table class="table devtable" id="tblLoanMembersDetail">
+                                        <thead>
+                                            <tr>
+                                                <th>{{translation.SRNO}}</th>
+                                                <th>{{translation.AADHARNo}}/{{translation.MembershipNumber}}</th>
+                                                <th>{{translation.Name}}</th>
+                                                <th>{{translation.FatherName}}</th>
+                                                <th>{{translation.Age}}</th>
+                                                <th>{{translation.CastHI}}</th>
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr ng-repeat="item in LoanMembers">
+                                                <td>{{$index+1}}</td>
+                                                <td>
+                                                    <input type="text" ng-if="!item.IsValidate" class="form-control" style="float: left; width: 50%; margin-right: 10px;" maxlength="15" name="ApplicantAadharNumber" placeholder="{{translation.AADHARNo}}/{{translation.MembershipNumber}}" ng-model="item.ApplicantAadharNumber" ng-change="ChooseDefaultMember($index)" onKeyPress="return isNumber(event);" autocomplete="off" />
+                                                    <input type="text" disabled ng-if="item.IsValidate" class="form-control" style="float: left; width: 50%; margin-right: 10px;" maxlength="15" name="ApplicantAadharNumber" placeholder="{{translation.AADHARNo}}/{{translation.MembershipNumber}}" value="{{item.ApplicantAadharNumber}}"  onKeyPress="return isNumber(event);" autocomplete="off" />
+                                                    <button type="submit" ng-if="!item.IsValidate" class="btn btn-primary dev-btn ng-binding ng-scope" ng-click="GetMemberDetails(item.ApplicantAadharNumber,$index)">{{translation.SearchMember}}</button>
+                                                </td>
+                                                <td>
+                                                    <input type="text" disabled name="ApplicantName" class="form-control" placeholder="{{translation.Name}}" ng-model="item.ApplicantName" onkeypress='return ValidateAlpha(event);' autocomplete="off">
+                                                </td>
+                                                <td>
+                                                    <input type="text" disabled name="ApplicantName" class="form-control" placeholder="{{translation.FatherName}}" ng-model="item.FatherName" onkeypress='return ValidateAlpha(event);' autocomplete="off">
+                                                </td>
+                                                <td>
+                                                    <input type="text" disabled name="ApplicantAge" class="form-control" placeholder="{{translation.Age}}" title="{{item.ApplicantAge}}" ng-model="item.ApplicantAge" onKeyPress="return isNumber(event);" autocomplete="off">
+                                                </td>
+                                                <td class="CastDropdown">
+                                                    <input type="text" name="Category" disabled class="form-control" tite="{{item.CategoryId}}" style="" placeholder="{{translation.Category}}" value="{{item.CategoryId}}" maxlength="2" autocomplete="off" onKeyPress="return isNumber(event);">
+
+                                                </td>
+                                                <td style="text-align: right !important">
+                                                    <i class="fa fa-trash clsShowHide btn btn btn-xs btn-danger tooltips rowdeleteBtn" id="Remove_2" ng-if="LoanMembers.length>1 || LoanMembers[0].IsValidate" ng-click="RemoveMemberRow($index)" style=""></i>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <td colspan="5"></td>
+                                                <td colspan="2" style="text-align:right;cursor:pointer;" ng-click="AddNewMember()"><i class="fa fa-plus" title="Add New"></i>{{translation.Add}}</td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+
+
+
+                            <div class="col-lg-12 form-group">
+                                <h4 class="heading-hr ng-binding">आवेदक की भूमि व अन्य सम्पत्ति का विवरण<a ng-show="IsSubmiApplication" href="javascript:void(0);" dat-val="panal_3" class="fa fa-plus-circle expandDetails" style="float:right;font-size: 25px;"></a></h4>
+                            </div>
+
+                            <div class="col-lg-12  clspanal" id="panal_3">
+                                <div class="table-responsive">
+
+                                    <table class="table devtable" id="tblPropertyDetails">
+                                        <thead>
+                                            <tr>
+                                                <th rowspan="3" class="thverticalMiddle">{{translation.SRNO}}</th>
+                                                <th rowspan="3" class="thverticalMiddle">{{translation.KhasaraNo}}</th>
+                                                <th rowspan="3" class="thverticalMiddle">{{translation.TotalArea}} (हैक्टर में)</th>
+                                                @*<th rowspan="3" class="thverticalMiddle">{{translation.UnitOfArea}}</th>*@
+                                                <th rowspan="3" class="thverticalMiddle">{{translation.Address}}</th>
+                                                <th rowspan="3" class="thverticalMiddle">{{translation.AnyaVivran}}</th>
+                                                <th rowspan="3" class="thverticalMiddle">{{translation.Specifications}}</th>
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr ng-repeat="item in PropertyDetailsList" ng-if="!item.IsDelete">
+                                                <td>{{$index+1}}</td>
+                                                <td><input type="text" name="MembershipNumber" class="form-control" placeholder="{{translation.KhasaraNo}}" ng-model="item.Khasara" autocomplete="off" onKeyPress=""></td>
+                                                <td>
+                                                    <input type="text" name="GuarantorPropertyTotalArea" id="txtGuarantorPropertyTotalArea" placeholder="{{translation.GuarantorPropertyTotalArea}}" class="form-control" ng-model="item.TotalArea" autocomplete="off">
+                                                </td>
+                                                @*<td>
+                                                        <select ng-model="item.GuarantorPropertyUnitOfArea" id="GuarantorPropertyUnitOfArea" placeholder="{{translation.GuarantorPropertyUnitOfArea}}" class="form-control" ng-init="GuarantorPropertyUnitOfArea=''" ng-change="">
+                                                            <option value="">{{translation.SelectOption}}</option>
+                                                            <option ng-repeat="itm in PropertyUnitOfArea" value="{{itm.value}}">
+                                                                {{_language =='en-us' ?  itm.TextEn : itm.TextHi}}
+                                                            </option>
+                                                        </select>
+                                                    </td>*@
+
+                                                <td><textarea rows="1" id="txtAddress_{{$index}}" class="form-control" maxlength="150" placeholder="{{translation.Address}}" ng-model="item.Address" onKeyPress="return isAlphaNumeric(event);"></textarea></td>
+
+                                                <td>
+                                                    <textarea rows="1" class="form-control" maxlength="150" placeholder="{{translation.OtherDetails}}" ng-model="item.OtherDetails" onKeyPress="return isAlphaNumeric(event);"></textarea>
+                                                </td>
+                                                <td>
+                                                    <textarea rows="1" class="form-control" maxlength="150" placeholder="{{translation.Specifications}}" ng-model="item.Specifications" onKeyPress="return isAlphaNumeric(event);"></textarea>
+                                                </td>
+                                                <td style="text-align: right !important">
+                                                    <i class="fa fa-trash clsShowHide btn btn btn-xs btn-danger tooltips rowdeleteBtn" id="Remove_7" ng-if="PropertyDetailsList.length>1" ng-click="RemovePropertyRow($index)" style=""></i>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <td colspan="6"></td>
+                                                <td style="text-align:right;cursor:pointer;" ng-click="AddNewPropertyDetails()"><i class="fa fa-plus" title="Add New"></i>{{translation.Add}}</td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+
+
+                            <div class="col-lg-12 form-group">
+                                <h4 class="heading-hr ng-binding">गारण्टरों का विवरण<a ng-show="IsSubmiApplication" href="javascript:void(0);" dat-val="panal_4" class="fa fa-plus-circle expandDetails" style="float:right;font-size: 25px;"></a></h4>
+                            </div>
+                            <div class="col-lg-12 clspanal" id="panal_4">
+                                <table class="table devtable" id="tblLoanGuarantorDetail">
+                                    <thead>
+                                        <tr>
+                                            <th style="width:10px;">{{translation.SRNO}}</th>
+                                            <th>{{translation.AADHARNo}}</th>
+                                            <th>{{translation.Name}}</th>
+                                            <th>पिता/पति का नाम</th>
+                                            <th>{{translation.Age}}</th>
+                                            <th>{{translation.MobileNo}}</th>
+                                            <th>{{translation.Address}}</th>
+                                            <th>{{translation.CategoryHeading}}</th>
+                                            <th style="width:20px;"></th>
+
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="item in LoanGuarantor">
+                                            <td>{{$index+1}}</td>
+                                            <td>
+                                                <input type="text" name="AADHARNo" maxlength="12" ng-if="!item.IsValidate" class="form-control" placeholder="{{translation.AADHARNo}}" style="float:left;width: 90%;" ng-model="item.AADHARNo" autocomplete="off" onKeyPress="return isNumber(event);">
+                                                <a href="javascript:void(0);" ng-if="!item.IsValidate" title="click to varify aadhaar number" ng-click="OpenOtpPopUp(item.AADHARNo,$index)" style="cursor: pointer;float: left;margin-top: 7px;margin-left: 5px;"><i class="fa fa-lock green-m1"></i></a>
+                                                <input type="text" disabled ng-if="item.IsValidate" name="AADHARNo" class="form-control" placeholder="{{translation.AADHARNo}}" style="float:left;width: 90%;" value="{{item.AADHARNo}}" autocomplete="off" onKeyPress="return isNumber(event);">
+                                                <a href="javascript:void(0);" ng-if="item.IsValidate" title="Verified" style="float: left;margin-top: 7px;margin-left: 5px;"><i style="color:#34ab34" class="fa fa-check-circle-o"></i></a>
+                                            </td>
+                                            <td>
+                                                <input type="text" name="Name" disabled class="form-control" placeholder="{{translation.Name}}" title="{{item.Name}}" value="{{item.Name}}" autocomplete="off" onKeyPress="return ValidateAlpha(event);">
+                                            </td>
+                                            <td>
+                                                <input type="text" name="FatherName" disabled class="form-control" title="{{item.FatherName}}" placeholder="{{translation.NameOfFather}}" value="{{item.FatherName}}" autocomplete="off" onKeyPress="return ValidateAlpha(event);">
+                                            </td>
+                                            <td>
+                                                <input type="text" name="Age" style="" disabled class="form-control" placeholder="{{translation.Age}}" value="{{item.Age}}" maxlength="2" autocomplete="off" onKeyPress="return isNumber(event);">
+                                            </td>
+
+                                            <td>
+                                                <input type="text" style="" name="MobileNo" class="form-control" placeholder="{{translation.MobileNo}}" ng-model="item.MobileNo" maxlength="15" autocomplete="off" onKeyPress="return isNumber(event);">
+                                            </td>
+                                            <td>
+                                                <textarea name="Address" disabled class="form-control" placeholder="{{translation.Address}}" maxlength="100" value="{{item.Address}}" rows="1" onKeyPress="return isAlphaNumeric(event);">{{item.Address}}</textarea>
+                                            </td>
+                                            <td>
+                                                <select ng-model="item.CategoryId" class="form-control" ng-init="item.CategoryId=''">
+                                                    <option value="">{{translation.SelectOption}}</option>
+                                                    <option ng-repeat="itm in CategoryList | orderBy:'CODEID'" value="{{itm.CODEID}}">
+                                                        {{_language =='en-us' ?  itm.CODENAME : itm.CODENAME_MANGAL}}
+                                                    </option>
+                                                </select>
+                                            </td>
+                                            <td style="text-align: right !important">
+                                                <i class="fa fa-trash clsShowHide btn btn btn-xs btn-danger tooltips rowdeleteBtn" id="Remove_2" ng-if="item.IsValidate || LoanGuarantor.length>1" ng-click="RemoveGuarantorRow($index)" style=""></i>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="6"></td>
+                                            <td colspan="3" style="text-align:right;cursor:pointer;"><a href="javascript:void(0);" ng-if="LoanGuarantor[LoanGuarantor.length-1].IsValidate" ng-click="AddNewGuarantor()"><i class="fa fa-plus" title="Add New"></i>{{translation.Add}}</a></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                            <div class="col-lg-12 form-group">
+                                <h4 class="heading-hr ng-binding">गारण्टरों की भूमि व अन्य सम्पत्ति का विवरण<a ng-show="IsSubmiApplication" href="javascript:void(0);" dat-val="panal_5" class="fa fa-plus-circle expandDetails" style="float:right;font-size: 25px;"></a></h4>
+                            </div>
+                            <div class="col-lg-12  clspanal" id="panal_5">
+                                <div class="table-responsive">
+                                    <table class="table devtable" id="tblGuarantorPropertyDetails">
+                                        <thead>
+                                            <tr>
+                                                <th rowspan="3" class="thverticalMiddle">{{translation.SRNO}}</th>
+                                                <th rowspan="3" class="thverticalMiddle">{{translation.KhasaraNo}}</th>
+                                                <th rowspan="3" class="thverticalMiddle">{{translation.TotalArea}} (हैक्टर में)</th>
+                                                @*<th rowspan="3" class="thverticalMiddle">{{translation.UnitOfArea}}</th>*@
+                                                <th rowspan="3" class="thverticalMiddle">{{translation.Address}}</th>
+                                                <th rowspan="3" class="thverticalMiddle">{{translation.AnyaVivran}}</th>
+                                                <th rowspan="3" class="thverticalMiddle">{{translation.Specifications}}</th>
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr ng-repeat="item in GuarantorPropertyDetailsList" ng-if="!item.IsDelete">
+                                                <td>{{$index+1}}</td>
+                                                <td><input type="text" name="MembershipNumber" class="form-control" placeholder="{{translation.KhasaraNo}}" ng-model="item.Khasara" autocomplete="off" onKeyPress=""></td>
+                                                <td>
+                                                    <input type="text" name="GuarantorPropertyTotalArea" id="txtGuarantorPropertyTotalArea" placeholder="{{translation.TotalArea}}" class="form-control" ng-model="item.TotalArea" autocomplete="off">
+                                                </td>
+                                                @*<td>
+                                                        <select ng-model="item.GuarantorPropertyUnitOfArea" id="GuarantorPropertyUnitOfArea" placeholder="{{translation.GuarantorPropertyUnitOfArea}}" class="form-control" ng-init="GuarantorPropertyUnitOfArea=''" ng-change="">
+                                                            <option value="">{{translation.SelectOption}}</option>
+                                                            <option ng-repeat="itm in PropertyUnitOfArea" value="{{itm.value}}">
+                                                                {{_language =='en-us' ?  itm.TextEn : itm.TextHi}}
+                                                            </option>
+                                                        </select>
+                                                    </td>*@
+
+                                                <td><textarea rows="1" class="form-control" maxlength="150" placeholder="{{translation.Address}}" ng-model="item.Address" onKeyPress="return isAlphaNumeric(event);"></textarea></td>
+
+                                                <td>
+                                                    <textarea rows="1" class="form-control" maxlength="150" placeholder="{{translation.OtherDetails}}" ng-model="item.OtherDetails" onKeyPress="return isAlphaNumeric(event);"></textarea>
+                                                </td>
+                                                <td>
+                                                    <textarea rows="1" class="form-control" maxlength="150" placeholder="{{translation.Specifications}}" ng-model="item.Specifications" onKeyPress="return isAlphaNumeric(event);"></textarea>
+                                                </td>
+                                                <td style="text-align: right !important">
+                                                    <i class="fa fa-trash clsShowHide btn btn btn-xs btn-danger tooltips rowdeleteBtn" id="Remove_7" ng-if="GuarantorPropertyDetailsList.length>1" ng-click="RemoveGuarantorRow($index)" style=""></i>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                        @*<tfoot>
+                                                <tr>
+                                                    <td colspan="3"></td>
+                                                    <td style="text-align:right;cursor:pointer;" ng-click="AddNewGuarantorPropertyDetails()"><i class="fa fa-plus" title="Add New"></i>{{translation.Add}}</td>
+                                                </tr>
+                                            </tfoot>*@
+                                    </table>
+
+
+
+                                </div>
+                            </div>
+
+                            @*Pre Loan Details*@
+                            <div class="col-lg-12 form-group">
+                                <h4 class="heading-hr ng-binding">{{translation.PreLoanDetails}}<a ng-show="IsSubmiApplication" href="javascript:void(0);" dat-val="panal_6" class="fa fa-plus-circle expandDetails" style="float:right;font-size: 25px;"></a></h4>
+                            </div>
+
+                            <div class="col-lg-12 clspanal" id="panal_6">
+                                <div class="table-responsive">
+                                    <table class="table devtable" id="tblPreLoanDetails">
+                                        <thead>
+                                            <tr>
+                                                <th rowspan="3" class="thverticalMiddle">{{translation.SRNO}}</th>
+                                                <th rowspan="3" class="thverticalMiddle">{{translation.CooperativeBankName}}</th>
+                                                <th rowspan="3" class="thverticalMiddle">{{translation.LoanAmount}}</th>
+                                                <th rowspan="3" class="thverticalMiddle">बकाया ऋण</th>
+                                                <th rowspan="3" class="thverticalMiddle">{{translation.MonthlyInstallment}}</th>
+                                                @*<th rowspan="3" class="thverticalMiddle">यदि राशि अवधिपार हो, तो विवरण</th>*@
+                                                <th rowspan="3" class="thverticalMiddle">{{translation.Tenure}}</th>
+                                                <th rowspan="3" class="thverticalMiddle">{{translation.IntrestRate}}</th>
+                                                <th rowspan="3" class="thverticalMiddle">{{translation.Source}}</th>
+                                                <th class="thCenter"></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr ng-repeat="item in LoadPreLoanDetails" ng-if="!item.IsDelete">
+                                                <td>{{$index+1}}</td>
+                                                <td>
+                                                    <input type="text" id="txtOrganization_{{$index}}" name="CooperativeBankName" class="form-control" placeholder="{{translation.CooperativeBankName}}" ng-model="item.Organization" autocomplete="off" onKeyPress="return ValidateAlpha(event);">
+                                                </td>
+                                                <td>
+                                                    <input type="text" id="txtPreLoanAmount_{{$index}}" name="PreLoanAmount" class="form-control" placeholder="{{translation.LoanAmount}}" maxlength="9" ng-model="item.PreLoanAmount" onKeyPress="return isNumber(event);" autocomplete="off">
+                                                </td>
+
+                                                <td>
+                                                    <input type="text" id="txtRestAmount_{{$index}}" name="Rest Amount" class="form-control" maxlength="9" placeholder="{{translation.RestAmount}}" ng-model="item.RestAmount" autocomplete="off" onKeyPress="return isNumber(event);">
+                                                </td>
+
+                                                <td>
+                                                    <input type="text" name="MembershipNumber" id="txtMonthlyInstallment_{{$index}}" class="form-control" placeholder="{{translation.MonthlyInstallment}}" maxlength="9" ng-model="item.MonthlyInstallment" autocomplete="off" onKeyPress="return isNumber(event);">
+                                                </td>
+                                                @*<td>
+                                                    <textarea class="form-control" rows="1" placeholder="यदि राशि अवधिपार हो, तो विवरण"></textarea>
+                                                </td>*@
+                                                <td>
+                                                    <input type="text" id="txtTenure_{{$index}}" name="Tenure" class="form-control" placeholder="{{translation.Tenure}}" ng-model="item.Tenure" maxlength="2" onKeyPress="return isNumber(event);" autocomplete="off">
+                                                </td>
+                                                <td>
+                                                    <input type="text" id="txtIntrestRate_{{$index}}" name="Intrest Rate" class="form-control" placeholder="{{translation.IntrestRate}}" maxlength="5" ng-model="item.IntrestRate" onKeyPress="return isNumber(event);" autocomplete="off">
+                                                </td>
+                                                <td>
+                                                    <input type="text" id="txtSource_{{$index}}" name="Source" class="form-control" placeholder="{{translation.Source}}" ng-model="item.Source" autocomplete="off" onKeyPress="return ValidateAlpha(event);">
+                                                </td>
+                                                <td style="text-align: right !important">
+                                                    <i class="fa fa-trash clsShowHide btn btn btn-xs btn-danger tooltips rowdeleteBtn" id="Remove_4" ng-if="LoadPreLoanDetails.length>1" ng-click="RemovePreLoanDetailsRow($index)" style=""></i>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <td colspan="8"></td>
+                                                <td style="text-align:right;cursor:pointer;" ng-click="AddNewPreLoanDetails()"><i class="fa fa-plus" title="Add New"></i>{{translation.Add}}</td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+
+                            @*<div class="form-group col-md-12" style="margin-top:10px;" >
+                                    <center>
+                                        <a class="btn btn-primary dev-btn" style="text-transform:capitalize;" href="javascript:void(0);" ng-click="SowApplicationGrid()">{{translation.Back}}</a>
+                                        <button type="submit" class="btn btn-primary dev-btn" ng-if="IsSubmiApplication==false" ng-click="ShowSelfDeclarationLetter()">&nbsp;&nbsp;{{translation.Next}}</button>
+                                    </center>
+                                </div>*@
+
+                            <div class="form-group col-md-12">
+                                <center>
+                                    <a class="btn btn-primary dev-btn" style="text-transform:capitalize;" href="javascript:void(0);" ng-click="SowApplicationGrid()">{{translation.Back}}</a>
+
+                                    <button type="submit" class="btn btn-primary dev-btn" ng-click="SaveLoanApplication(false)">&nbsp;&nbsp;{{translation.PartialSave}}</button>
+
+                                    <button type="submit" class="btn btn-success" ng-click="SaveLoanApplication(true)">&nbsp;&nbsp;{{translation.Submit}}</button>
+                                </center>
+                            </div>
+
+
+                        </div>
+
+
+
+
+
+                        <div class="col-lg-12 form-group" style="text-align: center;" ng-if="SelfDeclarationLetter && IsSubmiApplication==false">
+                            <h4 class="heading-hr ng-binding">{{translation.SelfDeclarationLetter}}</h4>
+                        </div>
+                        <div class="col-lg-12 form-group" style="margin-left: 19%; margin-right: 19%;width: 62%;border: 1px solid gray; padding-top: 23px;" id="dvSelfDeclarationLetter" ng-if="SelfDeclarationLetter && IsSubmiApplication==false">
+                            <div class="col-lg-12" id="dvMemberPhoto">
+                                <div class="table-responsive">
+                                    <table class="" id="tblLandMemberDetail" cellspacing="1">
+                                        <tr>
+                                            <td ng-repeat="item in LoanMembers" ng-if="item.IsDelete==false">
+                                                <div style="border: 1px solid gray;padding: 5px;margin-left: 20px;">
+                                                    <img id="img_{{$index}}" src="{{item.Photo!=''?item.Photo:'../Content/Images/Balnk.png'}}" style="width: 130px;height: 145px;" />
+                                                </div>
+                                                <a style="margin-left: 138px;position: absolute;top: -3px;" href="javascript:void(0);" class="facebook" title="Add Photo">
+                                                    <i class="fa fa-boxed fa-fw fa-plus-circle"></i><span class="hidden-xs"></span>
+                                                    <input type="file" id="fl_{{$index}}" accept="image/*" style="position: absolute;margin-top: -25px;width: 133px;margin-left: 20px;opacity: 0;" onchange='previewFile(this)' />
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                           
+
+                        </div>
+                        <div class="form-group col-md-12" ng-if="SelfDeclarationLetter && IsSubmiApplication==false">
+                            <center>
+                                <a class="btn btn-primary dev-btn" style="text-transform:capitalize;" href="javascript:void(0);" ng-click="ShowLoanApplication()">{{ translation.Back}}</a>
+
+                                <button type="submit" class="btn btn-primary dev-btn" ng-click="SaveLoanApplication(false)">&nbsp;&nbsp;{{translation.PartialSave}}</button>
+
+                                <button type="submit" class="btn btn-success" ng-click="SaveLoanApplication(true)">&nbsp;&nbsp;{{translation.Submit}}</button>
+                            </center>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    @Html.Partial("_AadhaarValidation")
+</div>
+<div id="FormPost">
+</div>

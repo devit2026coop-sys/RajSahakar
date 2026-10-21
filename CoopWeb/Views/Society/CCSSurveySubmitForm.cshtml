@@ -1,0 +1,808 @@
+﻿<script src="~/Scripts/AngularFramework/CSSSurveySubmitClient.js"></script>
+<link href="~/Content/Stylesheets/jqueryuitimepicker.css" rel="stylesheet" />
+<style type="text/css">
+    .ui-datepicker-trigger {
+        top: 0px;
+        position: absolute;
+        right: 15px;
+        height: 34px;
+        width: 33px;
+    }
+</style>
+<div ng-app="CCSConsolidatedReportCnt">
+    <div ng-controller="CCSConsolidatedReportMod">
+        <div class="col-md-12">
+            <h3 class="citizen-dash-head" ng-show="ShowForm1">{{translation.CCSSurveyReport}}</h3>
+            <hr style="margin: 0;">
+        </div>
+        <div class="col-md-12">
+            <h3 class="citizen-dash-head" ng-show="ShowForm">{{translation.AddCCSSurveyReport}}</h3>
+            <hr style="margin: 0;">
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#">{{translation.CCS1}} </a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;" ng-show="ShowForm1">{{translation.AddCCSSurveyReport}}</span>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;" ng-show="ShowForm">{{translation.AddCCSSurveyReport}}</span>
+                    </li>
+                    <li style="float: right;" ng-show="ShowForm1" id="divAddBtn">
+                        <a ng-click="AddRoleClick()" data-toggle="modal" data-target="#myModal" style="color: #025e63; cursor: pointer; text-decoration:none;  font-weight: bold;" class="ng-binding" ng-show="ShowForm1"><i class="fa fa-angle-double-right"></i>{{translation.AddCCSSurveyReport}}</a>
+                    </li>
+                    <li style="float: right;" ng-show="ShowForm" id="divBackBtn">
+                        <a href="javascript:void(0);" style="color: #025e63; cursor: pointer; text-decoration:none;  font-weight: bold;" onclick="WindowRelode();" ng-click="ShowForm1=true;ShowForm=false;"><i class="fa fa-angle-double-left"></i>&nbsp;{{translation.Back1}}</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <form class="citizen-dash-head">
+                <div class="dev-search-form" id="search-filter" ng-show="ShowForm">
+                    <div class="col-lg-12 form-group">
+                        <input type="hidden" ng-model="CCSReport.Id" />
+                        <div class="col-lg-2">{{translation.CCSType1}}</div>
+                        <div class="col-lg-4">
+                            <input type="radio" name="CCSType" ng-checked="false" ng-model="Type" value="1" ng-change="GetCCSListNew()" ng-init="Type" ng-disabled="DistrictName" />{{translation.SingleState1}}
+                            <input type="radio" name="CCSType" ng-model="Type" value="0" ng-change="GetCCSListNew()" ng-init="Type" ng-disabled="DistrictName" />{{translation.MultiState1}}
+                        </div>
+                        <div class="col-sm-2">{{translation.District1}}</div>
+                        <div class="col-lg-4">
+                            <select id="ddlDistrict" name="District" ng-model="CCSReport.DistrictId" ng-change="GetCCSListNew()" class="form-control form-control" ng-init="CCSReport.DistrictId" ng-disabled="DistrictName">
+                                <option value="">{{translation.SelectOption1}}</option>
+                                <option ng-repeat="item in Districts" value="{{item.DISTRICT_ID}}">
+                                    {{_language =='en-us' ?  item.DISTRICT_ENG : item.DISTRICT_MANGAL}}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-lg-12 form-group">
+                        <div class="col-lg-12 form-group">
+                            <h4 style="color:black" class="heading-hr ng-binding">{{translation.AdministratorDetails}}</h4>
+                        </div>
+                        <div class="col-lg-12 form-group">
+                            <div class="col-lg-2">{{ translation.CCSName1}}</div>
+                            <div class="col-lg-4">
+                                <select id="CCSlist" name="CCSId" class="form-control" ng-model="CCSReport.CCSlist" ng-init="CCSReport.CCSlist" ng-disabled="DistrictName">
+                                    <option value="" disabled>{{translation.SelectOption1}}</option>
+                                    <option ng-repeat="item in CCSList" value="{{item.SocietyID}}">
+                                        {{item.SocietyName}}
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="col-lg-2 ">{{translation.RegistrationNumber}}:</div>
+                            <div class="col-lg-4">
+                                <input class="form-control" ng-model="CCSReport.RegistrationNo" type="text" placeholder="{{translation.RegistrationNumber}}" />
+                            </div>
+                        </div>
+                        <div class="col-lg-12 form-group">
+                            <div class="col-lg-2">{{translation.RegistrationDate}} :</div>
+                            <div class="col-lg-4">
+                                <input class="form-control" type="date" ng-model="CCSReport.RegistrationDate" id="idddate" value="" />
+
+                            </div>
+                            <div class="col-lg-2">{{translation.AreaofOperation1}} :</div>
+                            <div class="col-lg-4">
+                                <input class="form-control" ng-model="CCSReport.AreaOperation" type="Text" placeholder="{{translation.AreaofOperation1}}" ng-init="CCSReport.AreaOperation" />
+                            </div>
+                        </div>
+                        <div class="col-lg-12 form-group">
+                            <div class="col-lg-2">{{translation.HeadOfficeAddress}} :</div>
+                            <div class="col-lg-4">
+                                <input class="form-control" ng-model="CCSReport.HO_Address" type="text" placeholder="{{translation.HeadOfficeAddress}}:" />
+                            </div>
+                            <div class="col-lg-2">{{translation.Numberlocationofbranches}} :</div>
+                            <div class="col-lg-4">
+                                <input class="form-control" ng-model="CCSReport.Num_location_branches" type="Text" placeholder="{{translation.Numberlocationofbranches}}" />
+                            </div>
+                        </div>
+                        <div class="col-lg-12 form-group">
+                            <div style=" font-weight :bold " class="col-lg-2">{{translation.NumberofMembers}}:-</div>
+                        </div>
+                        <div class="col-lg-12 form-group">
+                            <div class="col-lg-2">1. {{translation.Ordinary}} :</div>
+                            <div class="col-lg-4">
+                                <input class="form-control" ng-model="CCSReport.Ordinary" type="text" placeholder="{{translation.Ordinary}}" />
+                            </div>
+                            <div class="col-lg-2">2. {{translation.Nominal}}  :</div>
+                            <div class="col-lg-4">
+                                <input style="width:510px " ng-model="CCSReport.Nominal" class="form-control" type="Text" placeholder="{{translation.Nominal}}" />
+                            </div>
+                        </div>
+                        <div class="col-lg-12 form-group">
+                            <div class="col-lg-2">{{translation.BoardofDirectorsdetailswithnameaddressmobilenumber}}:</div>
+                            <div class="col-lg-4">
+                                <textarea class="form-control" ng-model="CCSReport.BOD_details" placeholder="{{translation.BoardofDirectorsdetailswithnameaddressmobilenumber}}"> </textarea>
+                            </div>
+                            <div class="col-lg-2">{{translation.BoardofDirectorsmeetinghappeningregularlyornot}} :</div>
+                            <div class="col-lg-4">
+                                <input type="radio" ng-model="CCSReport.BOD_meeting_regularly_or_not" name="SocietyType" value="1" ng-init="CCSReport.BOD_meeting_regularly_or_not" />{{translation.Yes1}}
+                                <input type="radio" ng-model="CCSReport.BOD_meeting_regularly_or_not" name="SocietyType" value="0" ng-init="CCSReport.BOD_meeting_regularly_or_not" />{{translation.No1}}
+                            </div>
+                        </div>
+                        <div class="col-lg-12 form-group">
+                            <div class="col-lg-2">{{translation.Anyresolutiontakenytheboardofdirectorswhichisrevocable}}:</div>
+                            <div class="col-lg-4">
+                                <input class="form-control" ng-model="CCSReport.ResolutiontakenBODRevocable" type="text" placeholder="{{translation.Anyresolutiontakenytheboardofdirectorswhichisrevocable}}" />
+                            </div>
+                            <div class="col-lg-2">{{translation.Generalmeeting}}:</div>
+                            <div class="col-lg-4">
+                                <input class="form-control" ng-model="CCSReport.General_meeting" type="number" placeholder="{{translation.Generalmeeting}}" />
+                            </div>
+                        </div>
+                        <div class="col-lg-12 form-group">
+                            <div class="col-lg-2">{{translation.Whenistheauditcompleted}}:</div>
+                            <div class="col-lg-4">
+                                <input class="form-control" ng-model="CCSReport.Audit_completed" type="date" placeholder="{{translation.Whenistheauditcompleted}}:" id="Audit_completed_date" value="" />
+                            </div>
+                            <div class="col-lg-2">{{translation.Howlongistheauditcompliance}}:</div>
+                            <div class="col-lg-4">
+                                <input class="form-control" ng-model="CCSReport.long_audit_compliance" type="date" placeholder="{{translation.Howlongistheauditcompliance}}" id="long_audit_compliance_Date" value="" />
+                            </div>
+                        </div>
+                        <div class="col-lg-12 form-group">
+                            <div class="col-lg-2">{{translation.StatusofinquiryproceedingundertheAct}}:</div>
+                            <div class="col-lg-4">
+                                <select name="Status_inquiry" id="statusdetails" ng-model="CCSReport.Status_inquiry" class="form-control" ng-init="CCSReport.Status_inquiry=''">
+                                    <option value="" selected>{{translation.SelectOption1}}</option>
+                                    <option value="0">{{translation.Pending1}}</option>
+                                    <option value="1">{{translation.Complete1}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-lg-12 form-group">
+                            <div style=" font-weight :bold " class="col-lg-2">{{translation.Complaints}}:-</div>
+                        </div>
+                        <div class="col-lg-12 form-group">
+                            <div class="col-lg-2">1.{{translation.Received}}:</div>
+                            <div class="col-lg-4">
+                                <input ng-model="CCSReport.Complaints_Received" class="form-control" type="number" placeholder="{{translation.Received}}:" />
+                            </div>
+                            <div class="col-lg-2">2.{{translation.Disposed}}:</div>
+                            <div class="col-lg-4">
+                                <input ng-model="CCSReport.Complaints_Disposed" class="form-control" type="number" placeholder="{{translation.Disposed}}:" />
+                            </div>
+                        </div>
+                        <div class="col-lg-12 form-group">
+                            <div class="col-lg-2">{{translation.EmployeeDetailsNameAddressMobileNumber}}:</div>
+                            <div class="col-lg-4">
+                                <textarea ng-model="CCSReport.EmployeeDetails" class="form-control" type="text" placeholder="{{translation.EmployeeDetailsNameAddressMobileNumber}}"></textarea>
+                            </div>
+                        </div>
+                        <div class="col-lg-12 form-group">
+                            <h4 style="color:black" class="heading-hr ng-binding">{{translation.FinancialDetails}}</h4>
+                        </div>
+                        <div class="col-lg-12 form-group">
+                            <div class="col-lg-2">{{translation.FundReserve}}:</div>
+                            <div class="col-lg-4">
+                                <input ng-model="CCSReport.Fund_Reserve" class="form-control" type="text" ng-init="CCSReport.Fund_Reserve" placeholder="{{translation.FundReserve}}..." />
+                            </div>
+                            <div style="width:160px; font-weight :bold " class="col-lg-1">{{translation.Deposits1}}:-</div>
+                            <div style="width:78px" class="col-lg-1">Total SB :</div>
+                            <div class="col-lg-1">
+                                <input class="form-control" ng-model="CCSReport.Deposit_SB" type="number" placeholder="Amount" />
+                            </div>
+                            <div style="width:80px" class="col-lg-1">Total FD:</div>
+                            <div class="col-lg-1">
+                                <input class="form-control" ng-model="CCSReport.Deposit_FD" type="number" placeholder="Amount" />
+                            </div>
+                            <div style="width:80px" class="col-lg-1">Total RD:</div>
+                            <div class="col-lg-1">
+                                <input class="form-control" ng-model="CCSReport.Deposit_RD" type="number" placeholder="Amount" />
+                            </div>
+                        </div>
+                        <div class="col-lg-12 form-group">
+                            <div class="col-lg-2">{{translation.Whethertheappropriationpolicyisapplicableinthecommitteeornot}}:</div>
+                            <div class="col-lg-4">
+                                <input type="radio" ng-model="CCSReport.appropriation_policy_applicable_in_committee" name="SocietyType1" @*ng-checked="true" *@ value="1" @*ng-init="CCSReport.appropriation_policy_applicable_in_committee"*@ />{{translation.Yes1}}
+                                <input type="radio" ng-model="CCSReport.appropriation_policy_applicable_in_committee" name="SocietyType1" value="0" @*ng-init="CCSReport.appropriation_policy_applicable_in_committee"*@ />{{translation.No1}}
+                            </div>
+                        </div>
+                        <div class="col-lg-12 form-group">
+                            <div style=" font-weight :bold " class="col-lg-12">{{translation.Investment}}:-</div>
+                        </div>
+                        <div class="col-lg-12 form-group">
+                            <div class="col-lg-2">1.{{translation.CCB}}:</div>
+                            <div class="col-lg-4">
+                                <input class="form-control" ng-model="CCSReport.Investment_CCB" id="NumberCCB" type="number" placeholder="{{translation.CCB}}" onkeyup="sum();" />
+                            </div>
+                            <div class="col-lg-2"> 2. {{translation.OtherBankOrganisation}}:</div>
+                            <div class="col-lg-4">
+                                <input class="form-control" ng-model="CCSReport.Investment_OtherBank" id="NumberOtherBank" type="number" placeholder="{{translation.OtherBankOrganisation}}" onkeyup="sum();" />
+                            </div>
+                        </div>
+                        <div class="col-lg-12 form-group">
+                            <div class="col-lg-2">3. {{translation.SharePurchase}}:</div>
+                            <div class="col-lg-4">
+                                <input class="form-control" ng-model="CCSReport.Investment_Share_Purchase" id="NumberShare" type="number" placeholder="{{translation.SharePurchase}}" onkeyup="sum();" />
+                            </div>
+                        </div>
+                        <div class="clearfix"></div>
+                        <div class="col-lg-6 form-group">
+                            <table id="Investmenaddmore" class="table devtable" @*ng-show="AdministrativeIdhideshow"*@>
+                                <tbody>
+                                    <tr ng-repeat="item in SocietyOthersDocuments">
+                                        <td><label>{{$index+4}} </label></td>
+                                        <td><div><input type="text" class="form-control OtherDocuemnt" ng-model="item.addmorelabel" /></div></td>
+                                        <td><div><input class="form-control" type="number" name="array[]" ng-model="item.addmore" ng-click="AddFile(1,1)" onkeyup="sum(); " /></div></td>
+                                        <td><i class="fa fa-trash" ng-model="item.AdministrativeId" @*ng-show="AdministrativeIdhideshow"*@ ng-click="DeleteOtherDocument($index,item.AdministrativeId)"></i></td>
+                                        <td><input type="hidden" value={{item.AdministrativeId}} ng-model="item.AdministrativeId" /></td>
+                                    </tr>
+                                    <tr><td colspan="4" style="text-align:right;"><button type="submit" class="btn btn-primary dev-btn ng-binding" ng-click="AddOthersDocuments()">Add Other Row</button></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <input type="hidden" name="Id" value="" ng-model="CCSReport.Id" />
+                        <div class="col-lg-12 form-group">
+                            <div class="col-lg-2">{{translation.TotalValue}} :</div>
+                            <div class="col-lg-4">
+                                <input class="form-control" ng-model="Total" id="NumberTotal" value="" placeholder="{{translation.TotalValue}}" readonly />
+                            </div>
+                        </div>
+                        <div class="col-lg-12 form-group">
+                            <div style=" font-weight :bold " class="col-lg-2">{{translation.loanDisbursement}}:-</div>
+                        </div>
+                        <div class="col-lg-12 form-group">
+                            <div class="col-lg-2">1. {{translation.Objective}} :</div>
+                            <div class="col-lg-4">
+                                <input class="form-control" ng-model="CCSReport.loan_Disbursement_Objective" type="text" placeholder="{{translation.Objective}}" />
+                            </div>
+                            <div class="col-lg-2">2.{{translation.Amount1}}:</div>
+                            <div class="col-lg-4">
+                                <input class="form-control" ng-model="CCSReport.loan_Disbursement_Amount" type="number" placeholder="{{translation.Amount1}}" />
+                            </div>
+                        </div>
+                        <div class="col-lg-12 form-group">
+                            <div style=" font-weight :bold " class="col-lg-2">{{translation.DebtRecovery}}:-</div>
+                        </div>
+                        <div class="col-lg-12 form-group">
+                            <div class="col-lg-2">1.{{translation.Demand}}:</div>
+                            <div class="col-lg-4">
+                                <input class="form-control" ng-model="CCSReport.Debt_Recovery_Demand" type="text" placeholder="{{translation.Demand}}" />
+                            </div>
+                            <div class="col-lg-2">2.{{translation.Recovery}}:</div>
+                            <div class="col-lg-4">
+                                <input class="form-control" ng-model="CCSReport.Debt_Recovery_Recovery" type="number" placeholder="{{translation.Recovery}}" />
+                            </div>
+                        </div>
+                        <div class="col-lg-12 form-group">
+                            <div class="col-lg-2">3.वसूली % में:</div>
+                            <div class="col-lg-4">
+                                <input class="form-control" ng-model="CCSReport.Debt_Recovery_RecoveryPer" type="number" placeholder="{{translation.Recovery}} % में" />
+                            </div>
+                        </div>
+                        <div class="col-lg-12 form-group">
+                            <div style=" font-weight :bold " class="col-lg-2">{{translation.Termfee}}:-</div>
+                        </div>
+                        <div class="col-lg-12 form-group">
+                            <div class="col-lg-2">1. {{translation.CaseNumber}}:</div>
+                            <div class="col-lg-4">
+                                <input class="form-control" ng-model="CCSReport.Term_fee_CaseNumber" type="number" placeholder="{{translation.CaseNumber}}" />
+                            </div>
+                            <div class="col-lg-2">2.{{translation.Amount1}}:</div>
+                            <div class="col-lg-4">
+                                <input class="form-control" ng-model="CCSReport.Term_fee_Amount" type="number" placeholder="{{translation.Amount1}}" />
+                            </div>
+                        </div>
+                        <div class="col-lg-12 form-group">
+                            <div style=" font-weight :bold " class="col-lg-2">{{translation.StakeAmount}}:-</div>
+                        </div>
+                        <div class="col-lg-12 form-group">
+                            <div class="col-lg-2">1.{{translation.AuthorizedAmount}}:</div>
+                            <div class="col-lg-4">
+                                <input class="form-control" ng-model="CCSReport.StakeAmount_AuthorizedAmount" type="number" placeholder="{{translation.AuthorizedAmount}} :" />
+                            </div>
+                            <div class="col-lg-2">2.{{translation.PaidupCapital}}:</div>
+                            <div class="col-lg-4">
+                                <input class="form-control" ng-model="CCSReport.StakeAmount_PaidupCapital" type="number" placeholder="{{translation.PaidupCapital}}:" />
+                            </div>
+                        </div>
+                        <div class="col-lg-12 form-group">
+                            <div class="col-lg-2">{{translation.WorkingCapital1}}:-</div>
+                            <div class="col-lg-4">
+                                <input class="form-control" ng-model="CCSReport.StakeAmount_WorkingCapital" type="number" placeholder="{{translation.WorkingCapital1}}" />
+                            </div>
+                        </div>
+                        <div class="col-lg-12 form-group">
+                            <div style=" font-weight :bold " class="col-lg-2">{{translation.ProfitLoss}}:-</div>
+                        </div>
+                        <div class="col-lg-12 form-group">
+                            <div class="col-lg-2">1.{{translation.AccumulatedProfit}}</div>
+                            <div class="col-lg-4">
+                                <input class="form-control" ng-model="CCSReport.Profit_AccumulatedProfit" type="number" placeholder="{{translation.AccumulatedProfit}}" />
+                            </div>
+                            <div class="col-lg-2">2. {{translation.YearlyProfit}}</div>
+                            <div class="col-lg-4">
+                                <input class="form-control" ng-model="CCSReport.Profit_YearlyProfit" type="number" placeholder="{{translation.YearlyProfit}}" />
+                            </div>
+                        </div>
+                        <div class="col-lg-12 form-group">
+                            <div class="col-lg-2">{{translation.Generalmeeting}}</div>
+                            <div class="col-lg-4">
+                                <input class="form-control" ng-model="CCSReport.GeneralMeeting" type="number" placeholder="{{translation.Generalmeeting}}" />
+                            </div>
+                            <div class="col-lg-2">{{translation.ProfitDistribution}}</div>
+                            <div class="col-lg-4">
+                                <input class="form-control" ng-model="CCSReport.ProfitDistribution" type="number" placeholder="{{translation.ProfitDistribution}}" />
+                            </div>
+                        </div>
+                        <div class="col-lg-12 form-group">
+                            <div class="col-lg-2">{{translation.NumberofestgasauregisteredunderBudsAct}}</div>
+                            <div class="col-lg-4">
+                                <input class="form-control" ng-model="CCSReport.Number_estgasau_registered" type="text" placeholder="{{translation.NumberofestgasauregisteredunderBudsAct}}" />
+                            </div>
+                            <div class="col-lg-2">{{translation.StatusofinquiryproceedingundertheAct}}:</div>
+                            <div class="col-lg-4">
+
+                                <select name="Status_inquiry1" id="Status_inquiry1" ng-model="CCSReport.Status_inquiry1" class="form-control" ng-init="CCSReport.Status_inquiry1=''">
+                                    <option value="" selected>{{translation.SelectOption1}}</option>
+                                    <option value="0">{{translation.Pending1}}</option>
+                                    <option value="1">{{translation.Complete1}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-lg-12 form-group">
+                            <div class="col-lg-2">{{translation.ConclusionsTestingthe10BiggestDebtQuestionnairesTested}}</div>
+                            <div class="col-lg-4">
+                                <input class="form-control" ng-model="CCSReport.Testing10BiggestDebtQuestionnaires" type="text" placeholder="{{translation.ConclusionsTestingthe10BiggestDebtQuestionnairesTested}}" />
+                            </div>
+                            <div class="col-lg-2">{{translation.ConclusionofPhysicalVerificationof10TestedCreditTests}}:</div>
+                            <div class="col-lg-4">
+                                <input class="form-control" ng-model="CCSReport.Physical_Verification_10_Tested" type="text" placeholder="{{translation.ConclusionofPhysicalVerificationof10TestedCreditTests}}" />
+                            </div>
+                        </div>
+                        <div class="col-lg-12 form-group">
+                            <div style=" font-weight :bold " class="col-lg-3">{{translation.DetailsofimmovablepropertyheldbytheSociety}}-</div>
+                        </div>
+                        <div class="col-lg-12 form-group">
+                            <div class="col-lg-2">1.{{translation.Type1}}:</div>
+                            <div class="col-lg-4">
+                                <input class="form-control" ng-model="CCSReport.immovablepropertyheld_Society_Type" type="number" placeholder="{{translation.Type1}}" />
+                            </div>
+                            <div class="col-lg-2">2.{{translation.Bookvalue}}:</div>
+                            <div class="col-lg-4">
+                                <input class="form-control" ng-model="CCSReport.immovablepropertyheld_Society_Bookvalue" type="number" placeholder="{{translation.Bookvalue}}" />
+                            </div>
+                        </div>
+                        <div class="col-lg-12 form-group">
+                            <div class="col-lg-2">3.{{translation.PresentValue}}:</div>
+                            <div class="col-lg-4">
+                                <input class="form-control" ng-model="CCSReport.immovablepropertyheld_Society_PresentValue" type="number" placeholder="{{translation.PresentValue}}" />
+                            </div>
+                        </div>
+                        <div class="col-lg-12 form-group">
+                            <div class="col-lg-2">{{translation.CommentonCreditPolicyoftheSociet}}:</div>
+                            <div class="col-lg-4">
+                                <textarea class="form-control" ng-model="CCSReport.CommentCreditPolicy" type="text" placeholder="{{translation.CommentonCreditPolicyoftheSociet}}"></textarea>
+                            </div>
+                            <div class="col-lg-2">{{translation.Commentoncomplianceofauditreportoflastthreeyears}}:</div>
+                            <div class="col-lg-4">
+                                <textarea class="form-control" ng-model="CCSReport.Comment_compliance_auditreport_lastthreeyears" type="text" placeholder="{{translation.Commentoncomplianceofauditreportoflastthreeyears}}"></textarea>
+                            </div>
+                        </div>
+                        <div class="col-lg-12 form-group">
+                            <div class="col-lg-2">{{translation.DetailedCommentbytheCommitteeontheimplementationofRCSActRulesandByelaws}}:</div>
+                            <div class="col-lg-4">
+                                <textarea class="form-control" ng-model="CCSReport.Detailed_CommitteimplementationRCSActRulesandByelaws" type="text" placeholder="{{translation.DetailedCommentbytheCommitteeontheimplementationofRCSActRulesandByelaws}}"></textarea>
+                            </div>
+                        </div>
+                        <div class="clearfix"></div>
+                        <div class="panel-footer" id="divFooter">
+                            <div class="dev-align-btn">
+                                <button type="submit" class="btn btn-primary dev-btn" ng-click="InsertSave(0)" style="margin-right:15px;">{{translation.PartiallySubmit}}</button>
+                                <button type="submit" class="btn btn-primary dev-btn" ng-click="InsertSave(1)" style="margin-right:15px;">{{translation.Submit}}</button>
+                                <a href="javascript:void(0);" class="btn btn-primary dev-btn" onclick="WindowRelode();" ng-click="ShowForm1=true;ShowForm=false;"><i class="fa fa-angle-left"></i>&nbsp;{{translation.Back}}</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" ng-show="ShowForm1">
+                    <div class="col-md-6">
+                        <label for="search">{{translation.Search}}:</label>
+                        <input ng-model="q" aria-label="q" id="search" class="form-control" placeholder={{translation.filttertext}} autocomplete="off">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="search">{{translation.ItemPerPage}}:</label>
+                        <input type="number" min="1" max="100" class="form-control" ng-model="pageSize">
+                    </div>
+                </div>
+                <div class="citizen-dash-head" ng-show="ShowForm1">
+                    <div class="col-lg-12">
+                        <div>
+                            <table class="table table-responsive devtable">
+                                <thead>
+                                    <tr>
+                                        <th>Sr.No</th>
+                                        <th>{{translation.CCSType1}}</th>
+                                        <th>{{translation.CCSName1}}</th>
+                                        <th>{{translation.District1}}</th>
+                                        <th>{{translation.Date}}</th>
+                                        <th>Submit BY</th>
+                                        <th>{{translation.Status1}}</th>
+                                        <th>Remark</th>
+                                        <th>Approved by</th>
+                                        <th>View/Edit</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr dir-paginate="item in AssignedAuditor | filter: q  | orderBy:colsort:reverseSort | itemsPerPage: pageSize" current-page="currentPage" pagination-id="rolePagination">
+                                        <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                                        <td>{{item.CCS_Type}}  </td>
+                                        <td>{{item.SocietyName}}  </td>
+                                        <td>{{item.DISTRICT_ENG}}</td>
+                                        <td>{{item.Date}}</td>
+                                        <td>{{item.Username}}</td>
+                                        <td>{{item.Status}}</td>
+                                        <td>{{item.Remarks}}</td>
+                                        <td>{{item.Approvedbydr}}</td>
+                                        <td ng-show="true">
+                                            <i class="fa fa-eye" data-target="#popupDetailView" data-toggle="modal" ng-click="ShowDivForView(item.Id)"></i>
+                                            <a data-target="#myModalFeedback" ng-model="item.Id" data-toggle="modal" ng-click="Update(item.Id)" title="Edit" ng-show="item.Submit_Status==0"><i class="fa fa-edit" aria-hidden="true"></i> </a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-10" ng-show="ShowForm1">
+                    <div class="text-center">
+                        <dir-pagination-controls boundary-links="true" pagination-id="rolePagination" on-page-change="pageChangeHandler(newPageNumber)" template-url="/dirPagination.tpl.html"></dir-pagination-controls>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="dev-popup-body modal fade" id="popupDetailView" role="dialog" data-backdrop="static" data-keyboard="false">
+            <div class="modal-dialog" style="width:80%">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">{{translation.CCSSurveyReport}} </h4>
+                    </div>
+                    <div class="modal-body maxHeight" style="color:#333 !important">
+                        <div class="panel panel-default">
+                            <div class="panel-heading flex flexEqual flexMiddel">
+                                <h4 style="margin:0px">{{translation.AdministratorDetails}}</h4>
+                            </div>
+                            <div class="panel-body">
+                                <div class="col-md-6 form-group">
+                                    <label>{{translation.CCSType1}}:</label>
+                                    <span>
+                                        {{CCSSurveyView['Table'][0].CCS_Type}}
+                                    </span>
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label>{{translation.District}}:</label>
+                                    <span> {{CCSSurveyView['Table'][0].DISTRICT_ENG}}</span>
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label>{{translation.CCSName}} :</label>
+                                    <span> {{CCSSurveyView['Table'][0].SocietyName}}</span>
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label>{{translation.RegistrationNumber}} :</label>
+                                    <span> {{CCSSurveyView['Table'][0].RegiNo}}</span>
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label>{{translation.RegistrationDate}} :</label>
+                                    <span> {{CCSSurveyView['Table'][0].Date}}</span>
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label>{{translation.AreaofOperation1}} :</label>
+                                    <span> {{CCSSurveyView['Table'][0].Area_of_Operation}}</span>
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label>{{translation.HeadOfficeAddress}} :</label>
+                                    <span> {{CCSSurveyView['Table'][0].HO_Address}}</span>
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label>{{translation.Numberlocationofbranches}} :</label>
+                                    <span> {{CCSSurveyView['Table'][0].Num_location_branches}}</span>
+                                </div>
+                                <div class="col-md-12 form-group">
+                                    <label style="font-size:20px">{{translation.NumberofMembers}}:-</label>
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label>1. {{translation.Ordinary}} :</label>
+                                    <span> {{CCSSurveyView['Table'][0].Ordinary}}</span>
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label>2. {{translation.Nominal}}:</label>
+                                    <span> {{CCSSurveyView['Table'][0].Nominal}}</span>
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label>{{translation.BoardofDirectorsdetailswithnameaddressmobilenumber}}:</label>
+                                    <span> {{CCSSurveyView['Table'][0].BOD_details}}</span>
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label>{{translation.BoardofDirectorsmeetinghappeningregularlyornot}}:</label>
+                                    <span> {{CCSSurveyView['Table'][0].BOD_meeting}}</span>
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label>{{translation.Anyresolutiontakenytheboardofdirectorswhichisrevocable}}:</label>
+                                    <span> {{CCSSurveyView['Table'][0].ResolutiontakenBODRevocable}}</span>
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label>{{translation.Generalmeeting}}:</label>
+                                    <span> {{CCSSurveyView['Table'][0].General_meeting}}</span>
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label>{{translation.Whenistheauditcompleted}}:</label>
+                                    <span> {{CCSSurveyView['Table'][0].Audit_completed}}</span>
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label>{{translation.Howlongistheauditcompliance}}:</label>
+                                    <span> {{CCSSurveyView['Table'][0].long_audit_compliance}}</span>
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label>{{translation.StatusofinquiryproceedingundertheAct}}:</label>
+                                    <span> {{CCSSurveyView['Table'][0].Status}}</span>
+                                </div>
+                                <div class="col-md-12 form-group">
+                                    <label style="font-size:20px">{{translation.Complaints}}:-</label>
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label>1. {{translation.Received}} :</label>
+                                    <span> {{CCSSurveyView['Table'][0].Complaints_Received}}</span>
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label>2. {{translation.Disposed}}:</label>
+                                    <span> {{CCSSurveyView['Table'][0].Complaints_Disposed}}</span>
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label>{{translation.EmployeeDetailsNameAddressMobileNumber}} :</label>
+                                    <span>
+                                        {{CCSSurveyView['Table'][0].EmployeeDetails}}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-body maxHeight" style="color:#333 !important">
+                        <div class="panel panel-default">
+                            <div class="panel-heading flex flexEqual flexMiddel">
+                                <h4 style="margin:0px">{{translation.FinancialDetails}}</h4>
+                                @*<button type="button" onclick="js_PanleCollapse(this)" class="panelCollapsebtn"><i class="fa fa-minus"></i></button>*@
+                            </div>
+                            <div class="panel-body">
+                                <div class="col-md-6 form-group">
+                                    <label>{{translation.FundReserve}} :</label>
+                                    <span>
+                                        {{CCSSurveyView['Table'][0].Fund_Reserve}}
+                                    </span>
+                                </div>
+                                <div class="col-md-2 form-group">
+                                    <label>{{translation.Deposits1}}:-</label>
+                                </div>
+                                <div class="col-md-1 form-group">
+                                    <label>SB :</label>
+                                    <span>
+                                        {{CCSSurveyView['Table'][0].Deposit_SB}}
+                                    </span>
+                                </div>
+                                <div class="col-md-1 form-group">
+                                    <label>FD:</label>
+                                    <span> {{CCSSurveyView['Table'][0].Deposit_FD}}</span>
+                                </div>
+                                <div class="col-md-1 form-group">
+                                    <label>RD:</label>
+                                    <span> {{CCSSurveyView['Table'][0].Deposit_RD}}</span>
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label>{{translation.Whethertheappropriationpolicyisapplicableinthecommitteeornot}}:</label>
+                                    <span> {{CCSSurveyView['Table'][0].appropriation_policy_applicable}}</span>
+                                </div>
+                                <div class="col-md-12 form-group">
+                                    <label style="font-size:20px">{{translation.Investment}}:-</label>
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label>1. {{translation.CCB}} :</label>
+                                    <span> {{CCSSurveyView['Table'][0].Investment_CCB}}</span>
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label>2 .{{translation.OtherBankOrganisation}} :</label>
+                                    <span> {{CCSSurveyView['Table'][0].Investment_OtherBank}}</span>
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label>3. {{translation.SharePurchase}} :</label>
+                                    <span> {{CCSSurveyView['Table'][0].Investment_Share_Purchase}}</span>
+                                </div>
+                                <div class="col-lg-12">
+                                    <div>
+                                        <table>
+                                            <tbody id="CSSInvestment">
+                                                <tr ng-repeat="item in CSSInvestmentAddmore">
+                                                    <td>{{$index+4}}.</td>
+                                                    <td><label class="col-lg-6 form-group" style="width:auto">{{item.Investment_AddMorelabel}}:</label></td>
+                                                    <td><span class="col-lg-6 form-group ">{{item.Investment_AddMore}}</span></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label>{{translation.Total}} :</label>
+                                    <span> {{CCSSurveyView['Table'][0].Total}}</span>
+
+                                </div>
+                                <div class="col-md-12 form-group">
+                                    <label style="font-size:20px">{{translation.loanDisbursement}}:-</label>
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label>1. {{translation.Objective}} :</label>
+                                    <span> {{CCSSurveyView['Table'][0].loan_Disbursement_Objective}}</span>
+
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label>2.{{translation.Amount1}}:</label>
+                                    <span> {{CCSSurveyView['Table'][0].loan_Disbursement_Amount}}</span>
+
+                                </div>
+                                <div class="col-md-12 form-group">
+                                    <label style="font-size:20px">{{translation.DebtRecovery}}:-</label>
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label>1.{{translation.Demand}} :</label>
+                                    <span> {{CCSSurveyView['Table'][0].Debt_Recovery_Demand}}</span>
+
+                                </div>
+
+                                <div class="col-md-6 form-group">
+                                    <label>2.{{translation.Recovery}}:</label>
+                                    <span> {{CCSSurveyView['Table'][0].Debt_Recovery_Recovery}}</span>
+
+                                </div>
+
+                                <div class="col-md-6 form-group">
+                                    <label>3.{{translation.Recovery}}% मै :</label>
+                                    <span> {{CCSSurveyView['Table'][0].Debt_Recovery_RecoveryPer}}</span>
+                                </div>
+
+
+                                <div class="col-md-12 form-group">
+                                    <label style="font-size:20px">{{translation.Termfee}}:-</label>
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label>1. {{translation.CaseNumber}}:</label>
+                                    <span> {{CCSSurveyView['Table'][0].Term_fee_CaseNumber}}</span>
+
+                                </div>
+
+                                <div class="col-md-6 form-group">
+                                    <label>2.{{translation.Amount1}}:</label>
+                                    <span> {{CCSSurveyView['Table'][0].Term_fee_Amount}}</span>
+
+                                </div>
+                                <div class="col-md-12 form-group">
+                                    <label style="font-size:20px">{{translation.StakeAmount}}:-</label>
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label>1.{{translation.AuthorizedAmount}}:</label>
+                                    <span> {{CCSSurveyView['Table'][0].StakeAmount_AuthorizedAmount}}</span>
+
+                                </div>
+
+                                <div class="col-md-6 form-group">
+                                    <label>2.{{translation.PaidupCapital}}:</label>
+                                    <span> {{CCSSurveyView['Table'][0].StakeAmount_PaidupCapital}}</span>
+
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label>{{translation.WorkingCapital}}:-</label>
+                                    <span> {{CCSSurveyView['Table'][0].StakeAmount_WorkingCapital}}</span>
+                                </div>
+                                <div class="col-md-12 form-group">
+                                    <label style="font-size:20px">{{translation.ProfitLoss}}:-</label>
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label>1.{{translation.AccumulatedProfit}}</label>
+                                    <span> {{CCSSurveyView['Table'][0].Profit_AccumulatedProfit}}</span>
+                                </div>
+
+                                <div class="col-md-6 form-group">
+                                    <label>2. {{translation.YearlyProfit}}</label>
+                                    <span> {{CCSSurveyView['Table'][0].Profit_YearlyProfit}}</span>
+
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label>{{translation.Generalmeeting}}</label>
+                                    <span> {{CCSSurveyView['Table'][0].GeneralMeeting}}</span>
+
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label>{{translation.ProfitDistribution}}</label>
+                                    <span> {{CCSSurveyView['Table'][0].ProfitDistribution}}</span>
+
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label>{{translation.NumberofestgasauregisteredunderBudsAct}}</label>
+                                    <span> {{CCSSurveyView['Table'][0].Number_estgasau_registered}}</span>
+
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label>{{translation.StatusofinquiryproceedingundertheAct}}:</label>
+                                    <span> {{CCSSurveyView['Table'][0].Status1}}</span>
+
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label>{{translation.ConclusionsTestingthe10BiggestDebtQuestionnairesTested}}</label>
+                                    <span> {{CCSSurveyView['Table'][0].Testing10BiggestDebtQuestionnaires}}</span>
+
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label>{{translation.ConclusionofPhysicalVerificationof10TestedCreditTests}}:</label>
+                                    <span> {{CCSSurveyView['Table'][0].Physical_Verification_10_Tested}}</span>
+
+                                </div>
+                                <div class="col-md-12 form-group">
+                                    <label style="font-size:20px">{{translation.DetailsofimmovablepropertyheldbytheSociety}}:-</label>
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label>1.{{translation.Type1}} :</label>
+                                    <span> {{CCSSurveyView['Table'][0].immovablepropertyheld_Society_Type}}</span>
+
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label>2.{{translation.Bookvalue}}:</label>
+                                    <span> {{CCSSurveyView['Table'][0].immovablepropertyheld_Society_Bookvalue}}</span>
+
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label>3.{{translation.PresentValue}}:</label>
+                                    <span> {{CCSSurveyView['Table'][0].immovablepropertyheld_Society_PresentValue}}</span>
+
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label>{{translation.CommentonCreditPolicyoftheSociet}}:</label>
+                                    <span> {{CCSSurveyView['Table'][0].CommentCreditPolicy}}</span>
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label>{{translation.Commentoncomplianceofauditreportoflastthreeyears}}:</label>
+                                    <span> {{CCSSurveyView['Table'][0].Comment_compliance_auditreport_lastthreeyears}}</span>
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label>{{translation.DetailedCommentbytheCommitteeontheimplementationofRCSActRulesandByelaws}}:</label>
+                                    <span> {{CCSSurveyView['Table'][0].Detailed_CommitteimplementationRCSActRulesandByelaws}}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-footer text-center">
+                        <button data-dismiss="modal" type="button" class="btn btn-primary dev-btn">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    function sum() {
+        var txtFirstNumberValue = document.getElementById('NumberCCB').value;
+        var txtSecondNumberValue = document.getElementById('NumberOtherBank').value;
+        var txtThridNumberValue = document.getElementById('NumberShare').value;
+        var input = document.getElementsByName('array[]');
+        if (txtFirstNumberValue == "")
+            txtFirstNumberValue = 0;
+        if (txtSecondNumberValue == "")
+            txtSecondNumberValue = 0;
+        if (txtThridNumberValue == "")
+            txtThridNumberValue = 0;
+        var tot = parseInt(txtFirstNumberValue) + parseInt(txtSecondNumberValue) + parseInt(txtThridNumberValue);
+        for (var i = 0; i < input.length; i++) {
+            var a = input[i];
+            tot = tot + parseInt(a.value);
+        }
+        document.getElementById('NumberTotal').value = tot;
+    }
+</script>
+<script>
+    function WindowRelode() {
+        window.location.reload();
+    }
+</script>

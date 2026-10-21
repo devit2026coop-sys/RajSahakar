@@ -1,0 +1,190 @@
+﻿<script src="~/Scripts/AngularFramework/Organisation.js"></script>
+<script type="text/javascript">
+    var tableToExcel = (function () {
+        var uri = 'data:application/vnd.ms-excel;base64,'
+            , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>'
+            , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) }
+            , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
+        return function (table, name) {
+            if (!table.nodeType) table = document.getElementById(table)
+            var ctx = { worksheet: name || 'Worksheet', table: table.innerHTML }
+            window.location.href = uri + base64(format(template, ctx))
+        }
+    })()
+</script>
+<div ng-app="OrganisationMastersModule">
+    <div ng-controller="OrganisationMasterCont">
+        <div class="col-md-12">
+            <h3 class="citizen-dash-head">{{translation.Organisation}}</h3>
+            <hr style="margin: 0;">
+        </div>
+
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#"> {{translation.Master}} </a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;">  {{translation.Organisation}}</span>
+                    </li>
+                    <li style="float: right;">
+                        <button type="button" class="btn btn-info btn-lg dev-popup-btn" data-toggle="modal" data-target="#myModal" style="color: #025e63; cursor: pointer; text-decoration:none;  font-weight: bold;" ng-click="ClearOrganisationForm()"> <h5>&#187; {{translation.AddOrganisation}}</h5> </button>
+                    </li>
+
+                </ul>
+            </div>
+        </div>
+
+        <div class="col-md-12">
+            <div class="citizen-dash-head">
+                <div class="table-dropdown">
+                    <div class="col-md-4" style="padding-left: 0;">
+                        <label for="search">{{translation.Search}}:</label>
+                        <input ng-model="q" id="search" class="form-control" placeholder="{{translation.filttertext}}" autocomplete="off">
+                    </div>
+                    <div class="col-md-4">
+                        <label for="search">{{translation.ItemPerPage}}:</label>
+                        <input type="number" min="1" max="100" class="form-control" ng-model="pageSize">
+                    </div>
+                    <div class="col-md-4" style="padding-top: 25px; ">
+                        <input type="button" class="btn btn-primary dev-btn" onclick="tableToExcel('tblgetsuport', 'Get Support Data')" value="Export to Excel">
+                    </div>
+                </div>
+            </div>
+            <div class="dev-popup-body modal fade" id="myModal" role="dialog">
+                <div class="modal-dialog">
+                    <!-- Modal content-->
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" ng-click="ClearOrganisationForm()">&times;</button>
+                            <h4 class="modal-title"> {{translation.AddOrganisation}} </h4>
+                        </div>
+                        <div class="modal-body">
+                            <form class="dev-search-form" style="overflow: hidden; margin-bottom: 35px;" name="OrganisationForm">
+                                <div class="col-md-6">
+                                    <label>
+                                        {{translation.DepartmentHeading}} :
+                                    </label>
+
+                                    <select ng-model="OrganisationMaster.DepartmentId" class="form-control" ng-init="OrganisationMaster.DepartmentId='0'">
+                                        <option value="0" disabled>{{translation.SelectOption}}-</option>
+                                        <option ng-repeat="item in Departments" value="{{item.ID}}">
+                                            {{_language =='en-us' ?  item.DEPTNAMEENGLISH : item.DEPTNAMEHINDI}}
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group col-md-6">
+                                    <label>{{translation.OrganisationNameEng}}</label>
+                                    <input type="text" class="form-control" name="OrganisationNameEn" ng-model="OrganisationMaster.OrganisationNameEn" placeholder={{translation.OrganisationNameEng}} ng-required="true" autocomplete="off" />
+                                    <label ng-show="OrganisationForm.OrganisationNameEng.$error.required && !OrganisationForm.OrganisationNameEng.$pristine" class="help-block">{{translation.OrganisationNameEng}} - {{translation.Required}}</label>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label>{{translation.OrganisationNameHin}}</label>
+                                    <input type="text" class="form-control" name="OrganisationNameHi" ng-bind="OrganisationNameHi" ng-model="OrganisationMaster.OrganisationNameHi" placeholder={{translation.OrganisationNameEng}} ng-required="true" autocomplete="off" />
+                                    <label ng-show="OrganisationForm.OrganisationNameHin.$error.required && !OrganisationForm.OrganisationNameHin.$pristine" class="help-block">{{translation.OrganisationNameHin}} - {{translation.Required}}</label>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label class="check-box" for="inlineRadio1"> {{translation.IsActive}} </label>
+
+                                    <input class="form-check-input ng-pristine ng-untouched ng-valid ng-not-empty" type="checkbox" id="inlineCheckbox1" ng-true-value="true" ng-false-value="false" ng-model="OrganisationMaster.IsActive" ng-checked="OrganisationMaster.IsActive">
+
+                                </div>
+
+                                <div class="col-md-12">
+                                    <div class="dev-menu-btn">
+                                        <button type="submit" class="btn btn-primary" ng-disabled="OrganisationForm.$invalid" ng-click="SaveOrganisationForm()">{{translation.Submit}}</button>
+                                        <button type="submit" class="btn btn-primary" ng-click="ClearOrganisationForm()">{{translation.Clear}}</button>
+                                        <input type="hidden" ng-model="OrganisationMaster.OrganisationId" />
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-responsive citizen-dash-head">
+                <table class="table devtable" id="tblgetsuport">
+                    <thead>
+                        <tr>
+                            <th>
+                                {{translation.SRNO}}
+                            </th>
+                            <th ng-click="sortData('OrganisationNameEn')">
+                                {{translation.OrganisationNameEng}}
+                                <div ng-class="getSortClass('OrganisationNameEn')"></div>
+                            </th>
+                            <th ng-click="sortData('OrganisationNameHi')">
+                                {{translation.OrganisationNameHin}}
+                                <div ng-class="getSortClass('OrganisationNameHi')"></div>
+                            </th>
+                            <th>
+                                {{translation.DepartmentHeading}}
+                            </th>
+                            <th>
+                                {{translation.IsActive}}
+                            </th>
+                            <th>
+                                {{translation.Edit}}
+                            </th>
+                            <th>
+                                {{translation.Delete}}
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr dir-paginate="Class in OrganisationData | filter:q | orderBy:colsort:reverseSort | itemsPerPage: pageSize" current-page="currentPage">
+                            <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                            <td>{{ Class.OrganisationNameEn }}</td>
+                            <td>{{ Class.OrganisationNameHi }}</td>
+                            <td>{{_language =='en-us' ?  Class.DEPTNAMEENGLISH : Class.DEPTNAMEHINDI}}</td>
+                            <td>
+                                <div class="dev-action">
+
+                                    <label class="switch">
+
+                                        <input type="checkbox" ng-checked="Class.IsActive == 1" ng-click="SetStatus(Class.OrganisationId,Class.IsActive)">
+
+                                        <span class="slider round"></span>
+                                    </label>
+                                </div>
+                            </td>
+                            <td>
+                                <i class="fa fa-edit" data-target="#myModal" data-toggle="modal" ng-click="update(Class)"></i>
+                            </td>
+                            <td>
+                                <i class="fa fa-trash" ng-click="SetStatus(Class.OrganisationId,2)"></i>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+
+        <div class="col-md-10">
+            <div class="text-center">
+                <dir-pagination-controls boundary-links="true" pagination-id="divisionPagination" on-page-change="pageChangeHandler(newPageNumber)" template-url="/dirPagination.tpl.html"></dir-pagination-controls>
+            </div>
+        </div>
+        <div class="form-group col-md-12">
+            <div class="dev-align-btn">
+
+                <a class="btn btn-primary dev-btn" style="text-transform:capitalize;" href="../User/DashBoard"> Back</a>
+            </div>
+
+        </div>
+        <div class="col-md-2">
+            <h5 class="dev-page"> {{translation.Page}}: {{ currentPage }} </h5>
+        </div>
+
+    </div>
+    <div class="se-pre-con"></div>
+    <div id="stop" class="scrollTop">
+        <span><a href=""><i class="fa fa-arrow-up">Top</i></a></span>
+    </div>
+</div>

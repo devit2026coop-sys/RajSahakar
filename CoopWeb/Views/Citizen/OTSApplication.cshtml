@@ -1,0 +1,207 @@
+﻿@{
+    ViewBag.Title = "OTS 2025-26 Application List";
+}
+<script src="~/Scripts/AngularFramework/OTSApplication.js?v=1.2"></script>
+<link href="~/Scripts/google_hindi/google_transliteration.css" rel="stylesheet" />
+
+<style>
+    .inputapi-transliterate-indic-suggestion-menu {
+        z-index: 99999 !important;
+        display: block;
+    }
+
+    .table > tbody > tr > td, .table > tbody > tr > th, .table > tfoot > tr > td, .table > tfoot > tr > th, .table > thead > tr > td {
+        padding: 1px;
+        padding-right: 5px;
+        padding-left: 5px;
+    }
+</style>
+<div ng-app="ApplicationFlowModule" ng-controller="ApplicationFlowCont" ng-cloak="">
+    <div>
+        <div class="col-md-12">
+            <h3 class="citizen-dash-head ng-binding" style="margin-top:0px;">{{translation.OtsApplicationList}}</h3>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#">  {{translation.Home}}</a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;"> {{translation.New}} </span>
+                        <i class="fa fa-angle-right"> </i>
+                        <span style="margin: 0 5px;"> {{translation.OtsApplicationList}} </span>
+                    </li>
+
+                </ul>
+            </div>
+        </div>
+        <div style="margin-top:30px;padding-top:30px">
+            <div class="col-md-12">
+                <div class="citizen-dash-head" style="overflow: hidden;">
+                    <div class="table-dropdown" id="search-filter" style="margin-bottom: 5px;">
+                        <div class="col-lg-12" style="margin-bottom: 5px; padding-left: 0;">
+                            <input type="hidden" id="hdnDistrictId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DistrictId)" />
+                            <input type="hidden" id="hdnPldbId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).PLDBId)" />
+                            <input type="hidden" id="hdnPldbBranchId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).PLDBBrancchId)" />
+
+                            <div class="col-md-2 margin-Top20" style="padding-left: 0;" id="ddrDistrictId">
+                                <label>{{ translation.DistrictHeading}}:</label>
+                                <select name="DISTRICT_ID" ng-model="DISTRICT_ID" class="form-control" ng-change="PLDBListData('0')">
+                                    <option value="">{{translation.SelectOption}}</option>
+                                    <option ng-repeat="district in DistrictList" value="{{district.DISTRICT_ID}}">
+                                        {{_language =='en-us' ?  district.DISTRICT_ENG : district.DISTRICT_MANGAL}}
+                                    </option>
+                                </select>
+                            </div>
+                        
+                            <div class="col-md-2">
+                                <label for="search">Mobile Number / Loan Account Number / Notice No:</label>
+                                <input ng-model="q" name="SearchText" id="search" class="form-control" placeholder={{translation.filttertext}} autocomplete="off">
+                            </div>
+                            <div class="col-md-2">
+                                <label for="search">{{translation.ItemPerPage}}:</label>
+                                <input type="number" min="1" max="1000" class="form-control" ng-model="pageSize">
+                            </div>
+                            <div class="col-md-4  margin-Top20">
+                                <label>&nbsp;</label><br>
+                                <button type="button" ng-click="searchRequest(GetOTSList)" class="btn btn-primary dev-btn ng-binding">{{translation.Search}}</button>
+                                <button type="button" ng-click="ClearSearch()" class="btn btn-primary dev-btn ng-binding">{{translation.Clear}}</button>
+
+                            </div>
+                            <div class="col-md-8 margin-Top20" style="text-align:right">
+                                <label>&nbsp;</label><br>
+                                <button type="button" class="btn btn-primary" ng-show="chkBulkSelected" ng-click="DownloadMultipleOTSForm()">{{translation.Download}}</button>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div style="overflow-x: auto;">
+                        <table class="table table-responsive devtable" style="">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        {{translation.SRNO}}                                       
+                                    </th>
+                                    <th ng-click="sortData('ApplicantName')">
+                                        {{translation.ApplicantName}}
+                                        <div ng-class="getSortClass('ApplicantName')"></div>
+                                    </th>
+                                    <th style=" min-width: 125px;">
+                                        {{translation.PLDB}}
+                                    </th>
+                                    <th style=" min-width: 125px;">
+                                        {{translation.Branch}}
+                                    </th>
+                                    <th>
+                                        {{translation.MobileNo}}
+                                    </th>
+                                    <th>
+                                        Loan Account No @*{{translation.BankAccountNo}}*@
+                                    </th>
+                                    <th>
+                                        {{translation.Sector}}
+                                    </th>
+                                    <th>
+                                        {{translation.PurposeOfLoan}}
+                                    </th>
+                                    <th>
+                                        {{translation.DateOfFirstDisbursement}}
+                                    </th>
+                                    <th>
+                                        {{translation.LoanSanctionAmt}}
+                                    </th>
+                                    <th>
+                                        {{translation.Notice}}/
+                                        {{translation.Taamili}}
+                                    </th>
+                                    <th>
+                                        {{translation.Actions}}
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="OTS in OTSList">
+                                    <td>
+                                        {{(((DataPagingDetails.PageNumber - 1) * DataPagingDetails.PageSize) + 1)+$index}}
+                                        <input type="checkbox" ng-model="OTS.selected" ng-change="toggleSelection(OTS)">
+
+                                    </td>
+                                    <td>
+                                        <b> <i>{{OTS.ApplicantName }}</i></b><br />
+
+                                        @*{{translation.FarmerFatherHusbandName}} : *@ {{OTS.FatherHusbandName}}
+                                    </td>
+                                    <td>{{OTS.PLDBName}}  </td>
+                                    <td>{{OTS.PLDBBranch }}</td>
+                                    <td>{{OTS.MobileNo }}</td>
+                                    <td>{{OTS.LoanAccNo }}</td>
+                                    <td>{{OTS.Sector }}</td>
+                                    <td>{{OTS.Purpose }}</td>
+                                    <td>{{OTS.DateOfFirstDisbursement |date:'dd-MM-yyyy'}}</td>
+                                    <td>{{OTS.LoanSanctionAmt }}</td>
+
+                                    <td style="width: 220px;text-align:center;">
+                                        <a ng-show="OTS.TaamilDoc!=null && OTS.TaamilDoc!=''" target="_blank" href="~/Content/OTS/AcceptanceLetter/{{OTS.TaamilDoc}}"class="btn btn-sm btn-primary text-white"><i class="fa fa-eye text-white"></i>  View</a>
+                                        <a class="btn btn-sm btn-primary dev-btn" title="Upload Taamil" ng-click="Redirect(OTS.EncPldbOtsSchemeId,'UploadTaamil')"><i class="fa fa-upload text-white"></i> Upload</a>
+
+                                    </td>
+                                    <td>
+                                        <div style="display:flex;gap:5px;">
+                                            <a n class="btn btn-sm btn-success" title="Make Payment" ng-click="Redirect(OTS.EncPldbOtsSchemeId,'PreLoanPayment')">PR Payment</a>
+                                            @if (((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).RoleId == 10188 ||
+                                                ((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).RoleId == 10064)
+                                            {
+                                                <a class="btn btn-sm btn-primary" title="EDIT" ng-click="Redirect(OTS.EncPldbOtsSchemeId,'Edit')"><i class="fa fa-edit text-white"></i></a>
+                                            }
+                                            <a class="btn btn-sm btn-primary" title="View" ng-click="Redirect(OTS.EncPldbOtsSchemeId,'View')"><i class="fa fa-eye text-white"></i></a>
+                                            <button ng-click="downloadFile(OTS)" title="Download Notice" class="btn btn-sm btn-warning"> <i class="fa fa-download text-white"></i></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-md-12">
+                        <div ng-if="DataPagingDetails.TotalPages>1" class="dataTables_paginate paging_simple_numbers" id="dataTables-example_paginate">
+                            <div class="dataTables_info" id="dataTables-example_info" role="status" aria-live="polite">
+                                Total Records: {{DataPagingDetails.TotalRecords}}
+                            </div>
+                            <ul class="pagination pagination_1" style="margin-left: 10px !important;">
+                                <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« First</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« Previous</span></li>
+
+                                <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest('1',GetOTSList)" style="cursor: pointer;">
+                                    <span>«First</span>
+                                </li>
+                                <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest(DataPagingDetails.PageNumber-1,GetOTSList)" style="cursor:pointer;">
+                                    <span>« Previous</span>
+                                </li>
+                                <li class="{{n==DataPagingDetails.PageNumber?'active':''}}" style="{{n==DataPagingDetails.PageNumber?'':'cursor: pointer'}}" ng-repeat="n in PagingRange(DataPagingDetails.StartPageNumber,DataPagingDetails.EndPageNumber,DataPagingDetails.TotalPages)" ng-click="pageRequest(n,GetOTSList)"><span>{{n}}</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Next</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Last</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber!= DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.PageNumber+1,GetOTSList)" style="cursor:pointer;">
+                                    <span>Next »</span>
+                                </li>
+                                <li ng-if="DataPagingDetails.PageNumber != DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.TotalPages,GetOTSList)" style="cursor:pointer;">
+                                    <span>Last »</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+        <div class="se-pre-con"></div>
+        <div id="stop" class="scrollTop">
+            <span><a href=""><i class="fa fa-arrow-up">Top</i></a></span>
+        </div>
+
+    </div>
+
+</div>
+

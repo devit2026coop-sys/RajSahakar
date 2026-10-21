@@ -1,0 +1,841 @@
+﻿@{
+
+    Layout = "~/Views/Shared/_CitizenLayout.cshtml";
+}
+
+
+<script src="~/Scripts/AngularFramework/UserSocietyMappingValid_v1.js?v=1.11"></script>
+
+
+<script>
+    $(document).ready(function () {
+        if ($("#hdnLoginAadhar").val() == undefined || $("#hdnLoginAadhar").val() == '' || $("#hdnLoginAadhar").val() == null) {
+            $("#myModelAlert").modal('show');
+        }
+    });
+    function DateCheck() {
+
+        return true;
+    }
+    function EntrenceFeeCalculate(value) {
+        if (value > 0) {
+            if ($('#lblFeeCalculate').html() == "0") {
+                $('#txtEntranceFees').val(0);
+            }
+            else {
+                $('#txtEntranceFees').val(value * 11);
+            }
+        }
+        else if (value == 0)
+            $('#txtEntranceFees').val(0);
+        CheckMembervalidetion();
+    }
+    function CheckMembervalidetion() {
+        var NumberOfMembers = $('#txtTotalNumberOfMembers').val();
+        var NoOfMemberInAGM = $('#txtNoOfMemberInAGM').val();
+        if (NumberOfMembers != "" && NoOfMemberInAGM != "") {
+            if (parseInt(NoOfMemberInAGM, 10) > parseInt(NumberOfMembers, 10)) {
+                alert("No of Members who Participated in AGM should not be greater than Total Number of Members applying for the Society");
+                $('#txtNoOfMemberInAGM').val("");
+            }
+        }
+    }
+
+    function ValidateAlphaNumericAndSlash(evt) {
+        // alert(evt.keyCode);
+        var keyCode = (evt.which) ? evt.which : evt.keyCode
+        if ((evt.which == 8 || evt.keyCode == 8 || evt.charCode == 8))
+            return true;
+        if ((evt.which == 45 || evt.keyCode == 45 || evt.charCode == 45))
+            return true;
+        if ((evt.which == 95 || evt.keyCode == 95 || evt.charCode == 95))
+            return true;
+
+        if ((keyCode < 65 || keyCode > 90) && (keyCode < 97 || keyCode > 123) && keyCode != 32) {
+            //    alert("not cahr");
+            if ((keyCode >= 48 && keyCode <= 57) || keyCode == 47) {
+                //     alert(" num or slash");
+                return true;
+            }
+            else {
+                //    alert("not cahr and num");
+                return false;
+            }
+        } else {
+            //    alert("cahr");
+            return true;
+        }
+    };
+
+
+    function EntrenceFeeCalculate(value) {
+        if (value > 0) {
+            if ($('#lblFeeCalculate').html() == "0") {
+                $('#txtEntranceFees').val(0);
+            }
+            else {
+                $('#txtEntranceFees').val(value * 11);
+            }
+        }
+        else if (value == 0)
+            $('#txtEntranceFees').val(0);
+
+        CheckMembervalidetion();
+
+    }
+
+
+
+
+</script>
+
+@*@model List<Cooperative.Models.SocietyRegistrationEntity>*@
+<style>
+    label {
+        display: inline-block;
+        width: 100% !important;
+        margin-bottom: 5px;
+        font-weight: 700;
+    }
+
+    .zoom {
+        transition: transform .2s; /* Animation */
+        margin: 0 auto;
+    }
+
+        .zoom:hover {
+            padding-left: 30px;
+            transform: scale(2.5); /* (150% zoom - Note: if the zoom is too large, it will go outside of the viewport) */
+        }
+</style>
+<style>
+    a > i.fa.fa-plus-circle {
+        font-size: 25px;
+        cursor: pointer;
+    }
+
+    a:hover > i.fa.fa-plus-circle {
+        font-size: 26px;
+        cursor: pointer;
+    }
+
+    a > i.fa.fa-eye {
+        font-size: 25px;
+        cursor: pointer;
+    }
+
+    a:hover > i.fa.fa-eye {
+        font-size: 26px;
+        cursor: pointer;
+    }
+
+    .add-more {
+    }
+</style>
+
+
+
+<div ng-app="UserSocietyMappingValidModule" ng-controller="UserSocietyMappingValidCont">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <h3 class="citizen-dash-head"> {{ translation.SocietyProfile}} </h3>
+        <input type="hidden" id="MantraAVDNPort" />
+        <input type="hidden" id="MorphoAVDNPort" value="11100" />
+    </div>
+    <input type="hidden" id="hdnLoginAadhar" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).AadharNo)" />
+
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="devpage-breadcrumb">
+            <ul class="page-breadcrumb">
+                <li class="dev-page-br">
+                    <i class="fa fa-home"> </i>
+                    <a href="#"> {{translation.Home}} </a>
+                    <i class="fa fa-angle-right"> </i>
+                </li>
+                <li style="float: left">
+                    <span style="margin: 0 5px;"> {{translation.SocietyProfile}} </span>
+                </li>
+
+            </ul>
+        </div>
+    </div>
+
+    <div class="col-md-12">
+        <div class="citizen-dash-head">
+            <div class="table-dropdown">
+                <div class="col-lg-12 form-group" ng-show="GetSocietyDetails">
+                    <div class="col-md-4" style="margin-top:10px;">
+                        <label>
+                            {{translation.District}} :
+                        </label>
+                        <select class="form-control" ng-model="ddlDistrct" ng-change="BlockList()" ng-options="_language == 'en-us' ?  item.DISTRICT_ENG : item.DISTRICT_MANGAL for item in Districts">
+                            <option value="" disabled>{{translation.SelectOption}}-</option>
+                        </select>
+                    </div>
+                    <div class="col-lg-4" style="margin-top:10px;">
+                        <label style="color:black">Please enter your society Registration No/Society Name/BRN :</label>
+                        <input ng-disabled="disableTxtRegNo" type="text" name="SocietyName" class="form-control" ng-model="SocietyRegistration.SocietyRegistrationNo" placeholder="{{translation.SocietyRegistrationNo}}" autocomplete="off">
+                        <input ng-hide="true" type="text" name="SocietyName" class="form-control" ng-model="MemberRegistration.RegNo" autocomplete="off">
+                    </div>
+                    <div class="col-md-4" style="margin-top:-15px;">
+                        <label>&nbsp;</label>
+                        <button style="margin-top: 25px;" type="submit" class="btn btn-primary dev-btn" ng-click="GetSocityDataForOtp();" ng-disabled="SocietyRegistration.SocietyRegistrationNo==undefined || SocietyRegistration.SocietyRegistrationNo==''">{{translation.GetSocieties}}</button>
+                    </div>
+                </div>
+
+                <div id="dvProfiling" ng-show="IsSearchResult">
+                    <table class="table table-responsive devtable" ng-show="showSoceitygride">
+                        <thead>
+                            <tr>
+                                <th>Select</th>
+                                <th>
+                                    {{translation.SRNO}}
+                                </th>
+                                <th>
+                                    {{translation.SocietyName}}
+
+                                </th>
+                                <th>
+                                    {{translation.Act}}
+                                </th>
+                                <th>
+                                    {{translation.SocietyRegistrationNo}}
+
+                                </th>
+                                <th>
+                                    {{translation.SocietyTyped}}
+                                </th>
+                                <th>
+                                    {{translation.CEOName}}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr dir-paginate="items in SocietyRegdata | orderBy:colsort:reverseSort | itemsPerPage: pageSize" current-page="currentPage" pagination-id="SocietyIdForTbl">
+                                <td><input type="checkbox" name="name" ng-click="SelectSocietyForVerify(items,$index)" ng-model="items.ischecked" value="{{ items.SocietyID }}" /> </td>
+                                <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                                <td>{{ items.SocietyName }}</td>
+                                <td>{{ items.ActNameEn }}</td>
+                                <td>{{ items.RegistrationNo }}</td>
+                                <td>{{ items.TypeameEng }}</td>
+                                <td>{{ items.Name }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="col-md-10">
+                        <div class="text-center">
+                            <dir-pagination-controls boundary-links="true" pagination-id="SocietyIdForTbl" on-page-change="pageChangeHandler(newPageNumber)" template-url="/dirPagination.tpl.html"></dir-pagination-controls>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" ng-if="IsShowSSOMAP">
+                    <table class="table table-responsive devtable">
+                        <thead>
+                            <tr>
+                                <th>
+                                    {{translation.SocietyName}}
+                                </th>
+                                <th>
+                                    {{translation.Act}}
+                                </th>
+                                <th>
+                                    {{translation.SocietyRegistrationNo}}
+                                </th>
+                                <th>
+                                    {{translation.SocietyTyped}}
+                                </th>
+                                <th>
+                                    {{translation.CEOName}}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="items in SocietyRegdataSelected">
+                                <td>{{ items.SocietyName }}</td>
+                                <td>{{ items.ActNameEn }}</td>
+                                <td>{{ items.RegistrationNo }}</td>
+                                <td>{{ items.TypeameEng }}</td>
+                                <td>{{ items.Name }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    @*क्यां आप अपनी SSOID को मैप करने के लिए सोसाइटी के मौजूदा अध्यक्ष या सचिव द्वारा आधार OTP सत्यापनं करना चाहते हैं ?*@
+                    @*क्यां आप अपनी SSOID को मैप करने के लिए सम्बंधित कार्यालय में अनुरोध भेजना चाहते हैं  ?*@
+                    <span style="font-size: 17px; font-weight: bold; margin-left: 7px;">SSO ID की मैपिंग में परिवर्तन हेतु निम्न विकल्प का चयन करें:</span>
+                    <label class="checkbox"> <input type="radio" value="1" name="mapSSSO" ng-model="mapSSSO.ValidateByCEO" ng-click="getlistchairman(SocietyRegdataSelected[0].SocietyIDEnc)" />चेयरमैन /सचिव के आधार पर OTP भेजें | </label>
+                    <label class="checkbox">  <input type="radio" value="2" name="mapSSSO" ng-model="mapSSSO.ValidateByCEO" />विभाग कार्यालय में आवेदन भेजें</label>
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                    </div>
+                    <div class="col-lg-12" ng-if="mapSSSO.ValidateByCEO==1">
+                        <table class="table table-responsive devtable" ng-show="ShowAlertForUserwithData">
+                            <thead>
+                                <tr>
+                                    <th>Select</th>
+                                    <th>
+                                        {{translation.SRNO}}
+                                    </th>
+                                    <th>
+                                        {{translation.Name}}
+                                    </th>
+                                    <th>
+                                        District Name
+                                    </th>
+                                    <th>
+                                        {{translation.Post}}
+                                    </th>
+                                    <th ng-show="NowShowAdhardiv">
+                                        {{translation.AADHARNo}}
+                                    </th>
+
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr dir-paginate="items in datasetUsers | filter:q | orderBy:colsort:reverseSort | itemsPerPage: pageSize" current-page="currentPage" pagination-id="statePagination">
+                                    <td><input type="checkbox" name="name" ng-click="SelectUserForVerify(items,$index)" ng-model="items.ischecked" value="{{ items.SocietyID }}" /> </td>
+                                    <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                                    <td>{{ items.Name }}</td>
+                                    <td>{{ items.DISTRICT_ENG}}</td>
+                                    <td>{{ items.POSTNAME}}</td>
+                                    <td ng-show="NowShowAdhardiv">
+                                        <div class="col-lg-12" ng-show="items.ischecked">
+                                            <div class="col-lg-2"><label>{{translation.AADHARNo}}<span class="error">*</span></label></div>
+                                            <div class="col-lg-4">
+                                                <input type="text" class="form-control" placeholder="{{translation.AADHARNo}}" ng-model="MemberRegistration.AdhaNoPure=items.AadharNo" disabled="disabled" autocomplete="off" required onkeypress='return event.charCode >= 48 && event.charCode <= 57' min="1" maxlength="12">
+                                            </div>
+                                            <div class="col-lg-4">
+                                                <button type="button" class="btn btn-success ng-binding" ng-click="VerifyAADHARNo_Step_1_2(items.Aadh)">&nbsp;&nbsp;{{translation.SendOTP}}</button>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+
+
+                            </tbody>
+                        </table>
+
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" ng-show="Showgride2">
+                            <div class="citizen-dash-head">
+                                <div class="col-lg-12 form-group">
+                                    <h4 class="heading-hr ng-binding"><label>  {{translation.ApplicantDetails}}</label></h4>
+                                </div>
+
+                                <div class="col-lg-12 form-group">
+                                    <div class="col-lg-2"><label>{{translation.Name}}</label></div>
+                                    <div class="col-lg-4">
+                                        <input type="text" class="form-control" placeholder="{{translation.Name}}" ng-model="MemberRegistration.Name" autocomplete="off" required maxlength="50">
+                                    </div>
+                                    <div class="col-lg-2"><label>{{translation.FatherHusbandName}}</label></div>
+                                    <div class="col-lg-4">
+                                        <input type="text" class="form-control" placeholder="{{translation.FatherHusbandName}}" ng-model="MemberRegistration.FatherHusbandName" autocomplete="off" required maxlength="50">
+                                    </div>
+                                </div>
+
+
+                                <div class="col-lg-12 form-group">
+                                    <div class="col-lg-2"><label>{{translation.MobileNo}}</label></div>
+                                    <div class="col-lg-4">
+                                        <input type="text" class="form-control" placeholder="{{translation.MobileNo}}" ng-model="MemberRegistration.MobileNo" autocomplete="off" required onkeypress='return event.charCode >= 48 && event.charCode <= 57' min="10" maxlength="10">
+                                    </div>
+                                    <div class="col-lg-2"><label>{{translation.Category}}</label></div>
+                                    <div class="col-lg-4">
+                                        <select id="ddlCategory" ng-model="MemberRegistration.CategoryId" class="form-control" ng-init="MemberRegistration.CategoryId='0'">
+                                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                                            <option ng-repeat="item in CategoryList | orderBy:'CODEID'" value="{{item.CODEID}}">
+                                                {{_language =='en-us' ?  item.CODENAME : item.CODENAME_MANGAL}}
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-lg-12 form-group">
+                                    <div class="col-lg-2"><label>{{translation.PostHeading}}</label></div>
+                                    <div class="col-lg-4">
+                                        <select class="form-control" ng-model="MemberRegistration.PostName">
+                                            <option value="0">{{translation.SelectOption}}</option>
+                                            <option value="सचिव">सचिव</option>
+                                            <option value="अध्यक्ष">अध्यक्ष</option>
+                                            <option value="उपाध्यक्ष">उपाध्यक्ष</option>
+                                            <option value="कोषाध्यक्ष">कोषाध्यक्ष</option>
+                                            <option value="मंत्री">मंत्री</option>
+                                            <option value="संचालक">संचालक</option>
+                                            <option value="मुख्य कार्यकारी अधिकारी">मुख्य कार्यकारी अधिकारी</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-lg-2"><label>{{translation.Occupation}}</label></div>
+                                    <div class="col-lg-4">
+                                        <input type="text" class="form-control" placeholder="{{translation.Occupation}}" ng-model="MemberRegistration.Occupation" autocomplete="off" onKeyPress="return ValidateAlpha(event);" maxlength="40">
+                                    </div>
+                                </div>
+                                <div class="col-lg-12 form-group">
+                                    <div class="col-lg-2"><label>Reason For Mapping</label></div>
+                                    <div class="col-lg-4">
+                                        <textarea type="text" class="form-control" placeholder="Reason For Mapping" ng-model="MemberRegistration.ReasonMapping" autocomplete="off" onKeyPress="return ValidateAlpha(event);" maxlength="200"></textarea>
+                                    </div>
+                                    <div class="col-lg-2"><label>Attachment</label></div>
+                                    <div class="col-lg-4">
+                                        <div class="col-lg-8">
+                                            <div class="col-lg-12" ng-show="!IsFileUpload('MapplingFileAtt')">
+                                                <input type="file" accept="application/pdf" dat-val="nocheck" ng-model="MemberRegistration.flResoloutionNotice" id="MapplingFileAtt" ng-click="AddFile(1,1)" validfile />
+                                            </div>
+                                            <div class="col-lg-12" ng-if="IsFileUpload('MapplingFileAtt')">
+                                                <a href="javascript:void(1);" ng-if="GetFileUploaded('MapplingFileAtt')!=''"><i class="fa fa-check-circle-o" style="font-size: 18px;margin-right: 5px;    color: #20cc20;"></i></a>
+                                                <a href="~/Content/SocietyProfiling/{{GetFileUploaded('MapplingFileAtt')}}" ng-if="GetFileUploaded('MapplingFileAtt')!=''" target="_blank"><i class="fa fa-eye-slash" style="font-size: 18px;margin-right: 5px;font-weight: bold"></i>View File</a>
+                                                <a href="javascript:void(1);" ng-if="GetFileUploaded('MapplingFileAtt')==''" ng-click="UploadFile('MapplingFileAtt',1,1,'MapplingFileAtt')"><i class="fa fa-upload" style="font-size: 18px;margin-right: 5px;font-weight: bold"></i>Upload File</a>
+                                                <a href="javascript:void(1);" ng-if="IsFileUpload('MapplingFileAtt')" ng-click="ChangeFile('MapplingFileAtt')"><i class="fa fa-undo" style="font-size: 18px;margin-right: 5px;font-weight: bold"></i>Change File</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-12 form-group heading-hr ng-binding" ng-show="mapSSSO.ValidateByCEO==2">
+                                    <input type="hidden" id="hdnSSOID" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).SSOID)" />
+                                    <input type="hidden" id="hdnCurrentAadhar" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).AadharNo)" />
+                                    <h3>में शपथ पूर्वक घोषणा करता हूँ :-</h3>
+                                    कि में इस समिति का {{item.Post}} हूँ, इसलिए में इस सोसाइटी से अपनी SSO ID मैप कर रहा हूँ।<br />
+                                    यदि यह तथ्य गलत पाया जाता है तो सहकारिता विभाग मेरे विरुद्ध आवश्यक कानूनी कार्यवाही करने में स्वतंत्र होगा।
+                                </div>
+                                <div class="col-lg-12 form-group">
+                                    <center>
+                                        <button type="button" class="btn btn-primary dev-btn" ng-click="InsertSocietyMappingRequest(1)"> <i class="fa fa-edit"></i> {{translation.Submit}}</button>
+                                    </center>
+                                </div>
+
+                            </div>
+                        </div>
+
+
+                    </div>
+                    <div class="col-lg-12" ng-if="mapSSSO.ValidateByCEO==2">
+                        <div class="col-lg-12 form-group">
+                            <div class="col-lg-2"><label>{{translation.AADHARNo}}<span class="error">*</span></label></div>
+                            <div class="col-lg-4">
+                                @if (!string.IsNullOrWhiteSpace(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).AadharNo))
+                                {
+                                    <input type="hidden" id="hdnSSOID" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).SSOID)" />
+                                    <input type="hidden" id="hdnCurrentAadhar" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).AadharNo)" />
+                                    <input type="text" class="form-control" placeholder="{{translation.AADHARNo}}" value="@("XXXXXXXX" + ((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).AadharNo.Substring(8, 4))" disabled="disabled" autocomplete="off" required onkeypress='return event.charCode >= 48 && event.charCode <= 57' min="1" maxlength="12">
+                                }
+                            </div>
+
+                            <div class="col-lg-4">
+                                <button type="button" class="btn btn-success ng-binding" ng-click="VerifyAADHARNoForRequest('940396382715')">&nbsp;&nbsp;{{translation.SendOTP}}</button>
+                            </div>
+                            <div class="col-lg-2">&nbsp;</div>
+                        </div>
+
+
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" ng-show="ShowAADHARNoForRequest">
+                            <div class="citizen-dash-head">
+                                <div class="col-lg-12 form-group">
+                                    <h4 class="heading-hr ng-binding">  <label>{{translation.ApplicantDetails}}</label></h4>
+                                </div>
+                                <div class="col-lg-12 form-group">
+                                    <div class="col-lg-2"><label>{{translation.Name}}</label></div>
+                                    <div class="col-lg-4">
+                                        {{MemberRegistration.Name}}
+                                    </div>
+                                    <div class="col-lg-2"><label>{{translation.FatherHusbandName}}</label></div>
+                                    <div class="col-lg-4">
+                                        {{MemberRegistration.FatherName}}
+                                    </div>
+                                </div>
+                                <div class="col-lg-12 form-group">
+                                    <div class="col-lg-2"><label>{{translation.AADHARNo}}</label></div>
+                                    <div class="col-lg-4">
+                                        {{MemberRegistration.AADHARNo}}
+                                    </div>
+                                    <div class="col-lg-2"><label>{{translation.DOB}}</label></div>
+                                    <div class="col-lg-4">
+                                        {{MemberRegistration.DOB}}
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-12 form-group">
+                                    <div class="col-lg-2"><label>{{translation.Gender}}</label></div>
+                                    <div class="col-lg-4">
+                                        {{MemberRegistration.Gender ==='M' ? translation.GenderMale : translation.GenderFeMale}}
+                                    </div>
+                                    <div class="col-lg-2"><label>{{translation.Photo}}</label></div>
+                                    <div class="col-lg-4">
+                                        <img src="{{MemberRegistration.Photo}}" alt="Userphoto" width="100" height="100" />
+                                    </div>
+                                </div>
+                                <div class="col-lg-12 form-group">
+                                    <div class="col-lg-2"><label>{{translation.MobileNo}}</label></div>
+                                    <div class="col-lg-4">
+                                        <input type="text" class="form-control" placeholder="{{translation.MobileNo}}" ng-model="MemberRegistration.MobileNo" autocomplete="off" required onkeypress='return event.charCode >= 48 && event.charCode <= 57' min="10" maxlength="10">
+                                    </div>
+                                    <div class="col-lg-2"><label>{{translation.Category}}</label></div>
+                                    <div class="col-lg-4">
+                                        <select id="ddlCategory" ng-model="MemberRegistration.CategoryId" class="form-control" ng-init="MemberRegistration.CategoryId='0'">
+                                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                                            <option ng-repeat="item in CategoryList | orderBy:'CODEID'" value="{{item.CODEID}}">
+                                                {{_language =='en-us' ?  item.CODENAME : item.CODENAME_MANGAL}}
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-lg-12 form-group">
+                                    <div class="col-lg-2"><label>{{translation.PostHeading}}</label></div>
+                                    <div class="col-lg-4">
+                                        <select class="form-control" ng-model="MemberRegistration.PostName">
+                                            <option value="">{{translation.SelectOption}}</option>
+                                            <option value="सचिव">सचिव</option>
+                                            <option value="अध्यक्ष">अध्यक्ष</option>
+                                            <option value="उपाध्यक्ष">उपाध्यक्ष</option>
+                                            <option value="कोषाध्यक्ष">कोषाध्यक्ष</option>
+                                            <option value="मंत्री">मंत्री</option>
+                                            <option value="संचालक">संचालक</option>
+                                            <option value="मुख्य कार्यकारी अधिकारी">मुख्य कार्यकारी अधिकारी</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-lg-2"><label>{{translation.Occupation}}</label></div>
+                                    <div class="col-lg-4">
+                                        <input type="text" class="form-control" placeholder="{{translation.Occupation}}" ng-model="MemberRegistration.Occupation" autocomplete="off" onKeyPress="return ValidateAlpha(event);" maxlength="40">
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-12 form-group">
+                                    <div class="col-lg-2"><label>Reason For Mapping</label></div>
+                                    <div class="col-lg-4">
+                                        <textarea type="text" class="form-control" placeholder="Reason For Mapping" ng-model="MemberRegistration.ReasonMapping" autocomplete="off" onKeyPress="return ValidateAlpha(event);" maxlength="200"></textarea>
+                                    </div>
+                                    <div class="col-lg-2"><label>Attachment</label></div>
+                                    <div class="col-lg-4">
+                                        <div class="col-lg-8">
+                                            <div class="col-lg-12" ng-show="!IsFileUpload('MapplingFileAtt')">
+                                                <input type="file" accept="application/pdf" dat-val="nocheck" ng-model="MemberRegistration.flResoloutionNotice" id="MapplingFileAtt" ng-click="AddFile(1,1)" validfile />
+                                            </div>
+                                            <div class="col-lg-12" ng-if="IsFileUpload('MapplingFileAtt')">
+                                                <a href="javascript:void(1);" ng-if="GetFileUploaded('MapplingFileAtt')!=''"><i class="fa fa-check-circle-o" style="font-size: 18px;margin-right: 5px;    color: #20cc20;"></i></a>
+                                                <a href="~/Content/SocietyProfiling/{{GetFileUploaded('MapplingFileAtt')}}" ng-if="GetFileUploaded('MapplingFileAtt')!=''" target="_blank"><i class="fa fa-eye-slash" style="font-size: 18px;margin-right: 5px;font-weight: bold"></i>View File</a>
+                                                <a href="javascript:void(1);" ng-if="GetFileUploaded('MapplingFileAtt')==''" ng-click="UploadFile('MapplingFileAtt',1,1,'MapplingFileAtt')"><i class="fa fa-upload" style="font-size: 18px;margin-right: 5px;font-weight: bold"></i>Upload File</a>
+                                                <a href="javascript:void(1);" ng-if="IsFileUpload('MapplingFileAtt')" ng-click="ChangeFile('MapplingFileAtt')"><i class="fa fa-undo" style="font-size: 18px;margin-right: 5px;font-weight: bold"></i>Change File</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-12 form-group heading-hr ng-binding">
+                                    <input type="hidden" id="hdnSSOID" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).SSOID)" />
+
+                                    @*<h3>मै शपथ पूर्वक यहाँ घोषणा करता हूँ|</h3><br />
+                                        <input class="form-check-input" type="checkbox" name="SelfAcceptence" id="ChkAcceptence" value="" ng-model="AAAcceptence">
+                                        यह कि में इस समिति का निर्वाचित {{MemberRegistration.PostName}} हूँ| तथा मेरे द्वारा इस समिति को राजसहाकर पोर्टल पर मैप किया जा रहा है। <br /><br />
+                                        मै यहाँ सत्यापित करता हूँ| की उक्त समिति की समस्त जानकारी मेरे पास उपलब्ध है।<br /><br />
+                                        मै यहाँ शपथ पूर्वक कहता हूँ की मेरे द्वारा कोई भी गलत जानकारी अथवा मिथ्य तथ्य इस पोर्टल पर दर्ज नहीं करवाए गए है।<br /><br />
+                                        यदि कोई जानकारी गलत पाई जाती है तो सहकारिता विभाग मेरे विरुद्ध आवश्यक कानूनी कर्यवाही आईटी एक्ट एवं अन्य सपठित अधिनियमों के अंतर्गत कर्यवाही करने में
+                                        स्वतंत्र होगा।<br /><br />*@
+
+                                    <h3>में शपथ पूर्वक घोषणा करता हूँ :-</h3>
+                                    कि में इस समिति का {{MemberRegistration.PostName}} हूँ, इसलिए में इस सोसाइटी से अपनी SSO ID मैप कर रहा हूँ।<br />
+                                    यदि यह तथ्य गलत पाया जाता है तो सहकारिता विभाग मेरे विरुद्ध आवश्यक कानूनी कार्यवाही करने में स्वतंत्र होगा।
+
+
+                                </div>
+                                <div class="col-lg-12 form-group">
+                                    <center>
+                                        <button type="button" class="btn btn-primary dev-btn" ng-click="InsertSocietyMappingRequest(2)"> <i class="fa fa-edit"></i> {{translation.Submit}}</button>
+                                    </center>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                    <input type="hidden" name="name" value="{{SocietyRegdataSelected[0].SocietyIDEnc}}" ng-model="MemberRegistration.SocietyIDEnc" />
+                </div>
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" ng-if="IsShowSSOMAPNoMAP">
+                    <table class="table table-responsive devtable">
+                        <thead>
+                            <tr>
+                                <th>
+                                    {{translation.SocietyName}}
+                                </th>
+                                <th>
+                                    {{translation.Act}}
+                                </th>
+                                <th>
+                                    {{translation.SocietyRegistrationNo}}
+                                </th>
+                                <th>
+                                    {{translation.SocietyTyped}}
+                                </th>
+                                <th>
+                                    {{translation.CEOName}}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="items in SocietyRegdataSelected">
+                                <td>{{ items.SocietyName }}</td>
+                                <td>{{ items.ActNameEn }}</td>
+                                <td>{{ items.RegistrationNo }}</td>
+                                <td>{{ items.TypeameEng }}</td>
+                                <td>{{ items.Name }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="col-lg-12">
+                        <div class="col-lg-12 form-group">
+                            <div class="col-lg-2"><label>{{translation.AADHARNo}}<span class="error">*</span></label></div>
+                            <div class="col-lg-4">
+                                <input type="hidden" id="hdnSSOID" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).SSOID)" />
+                                <input type="hidden" id="hdnCurrentAadhar" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).AadharNo)" />
+                                @if (!string.IsNullOrWhiteSpace(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).AadharNo))
+                                {
+                                    <input type="text" class="form-control" placeholder="{{translation.AADHARNo}}" value="@("XXXXXXXX" + ((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).AadharNo.Substring(8, 4))" disabled="disabled" autocomplete="off" required onkeypress='return event.charCode >= 48 && event.charCode <= 57' min="1" maxlength="12">
+                                }
+                            </div>
+                            <div class="col-lg-4">
+                                <button type="button" class="btn btn-success ng-binding" ng-click="VerifyAADHARNoForRequest('940396382715')">&nbsp;&nbsp;{{translation.SendOTP}}</button>
+                            </div>
+                            <div class="col-lg-2">&nbsp;</div>
+                        </div>
+
+
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" ng-show="ShowAADHARNoForRequest">
+                            <div class="citizen-dash-head">
+                                <div class="col-lg-12 form-group">
+                                    <h4 class="heading-hr ng-binding">  <label>{{translation.ApplicantDetails}}</label></h4>
+                                </div>
+                                <div class="col-lg-12 form-group">
+                                    <div class="col-lg-2"><label>{{translation.Name}}</label></div>
+                                    <div class="col-lg-4">
+                                        {{MemberRegistration.Name}}
+                                    </div>
+                                    <div class="col-lg-2"><label>{{translation.FatherHusbandName}}</label></div>
+                                    <div class="col-lg-4">
+                                        {{MemberRegistration.FatherName}}
+                                    </div>
+                                </div>
+                                <div class="col-lg-12 form-group">
+                                    <div class="col-lg-2"><label>{{translation.AADHARNo}}</label></div>
+                                    <div class="col-lg-4">
+                                        {{MemberRegistration.AADHARNo}}
+                                    </div>
+                                    <div class="col-lg-2"><label>{{translation.DOB}}</label></div>
+                                    <div class="col-lg-4">
+                                        {{MemberRegistration.DOB}}
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-12 form-group">
+                                    <div class="col-lg-2"><label>{{translation.Gender}}</label></div>
+                                    <div class="col-lg-4">
+                                        {{MemberRegistration.Gender ==='M' ? translation.GenderMale : translation.GenderFeMale}}
+                                    </div>
+                                    <div class="col-lg-2"><label>{{translation.Photo}}</label></div>
+                                    <div class="col-lg-4">
+                                        <img src="{{MemberRegistration.Photo}}" alt="Userphoto" width="100" height="100" />
+                                    </div>
+                                </div>
+                                <div class="col-lg-12 form-group">
+                                    <div class="col-lg-2"><label>{{translation.MobileNo}}</label></div>
+                                    <div class="col-lg-4">
+                                        <input type="text" class="form-control" placeholder="{{translation.MobileNo}}" ng-model="MemberRegistration.MobileNo" autocomplete="off" required onkeypress='return event.charCode >= 48 && event.charCode <= 57' min="10" maxlength="10">
+                                    </div>
+                                    <div class="col-lg-2"><label>{{translation.Category}}</label></div>
+                                    <div class="col-lg-4">
+                                        <select id="ddlCategory" ng-model="MemberRegistration.CategoryId" class="form-control" ng-init="MemberRegistration.CategoryId='0'">
+                                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                                            <option ng-repeat="item in CategoryList | orderBy:'CODEID'" value="{{item.CODEID}}">
+                                                {{_language =='en-us' ?  item.CODENAME : item.CODENAME_MANGAL}}
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-lg-12 form-group">
+                                    <div class="col-lg-2"><label>{{translation.PostHeading}}</label></div>
+                                    <div class="col-lg-4">
+                                        <select class="form-control" ng-model="MemberRegistration.PostName">
+                                            <option value="">{{translation.SelectOption}}</option>
+                                            <option value="सचिव">सचिव</option>
+                                            <option value="अध्यक्ष">अध्यक्ष</option>
+                                            <option value="उपाध्यक्ष">उपाध्यक्ष</option>
+                                            <option value="कोषाध्यक्ष">कोषाध्यक्ष</option>
+                                            <option value="मंत्री">मंत्री</option>
+                                            <option value="संचालक">संचालक</option>
+                                            <option value="मुख्य कार्यकारी अधिकारी">मुख्य कार्यकारी अधिकारी</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-lg-2"><label>{{translation.Occupation}}</label></div>
+                                    <div class="col-lg-4">
+                                        <input type="text" class="form-control" placeholder="{{translation.Occupation}}" ng-model="MemberRegistration.Occupation" autocomplete="off" onKeyPress="return ValidateAlpha(event);" maxlength="40">
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-12 form-group">
+                                    <div class="col-lg-2"><label>Reason For Mapping</label></div>
+                                    <div class="col-lg-4">
+                                        <textarea type="text" class="form-control" placeholder="Reason For Mapping" ng-model="MemberRegistration.ReasonMapping" autocomplete="off" onKeyPress="return ValidateAlpha(event);" maxlength="200"></textarea>
+                                    </div>
+                                    <div class="col-lg-2"><label>Attachment</label></div>
+                                    <div class="col-lg-4">
+                                        <div class="col-lg-8">
+                                            <div class="col-lg-12" ng-show="!IsFileUpload('MapplingFileAtt')">
+                                                <input type="file" accept="application/pdf" dat-val="nocheck" ng-model="MemberRegistration.flResoloutionNotice" id="MapplingFileAtt" ng-click="AddFile(1,1)" validfile />
+                                            </div>
+                                            <div class="col-lg-12" ng-if="IsFileUpload('MapplingFileAtt')">
+                                                <a href="javascript:void(1);" ng-if="GetFileUploaded('MapplingFileAtt')!=''"><i class="fa fa-check-circle-o" style="font-size: 18px;margin-right: 5px;    color: #20cc20;"></i></a>
+                                                <a href="~/Content/SocietyProfiling/{{GetFileUploaded('MapplingFileAtt')}}" ng-if="GetFileUploaded('MapplingFileAtt')!=''" target="_blank"><i class="fa fa-eye-slash" style="font-size: 18px;margin-right: 5px;font-weight: bold"></i>View File</a>
+                                                <a href="javascript:void(1);" ng-if="GetFileUploaded('MapplingFileAtt')==''" ng-click="UploadFile('MapplingFileAtt',1,1,'MapplingFileAtt')"><i class="fa fa-upload" style="font-size: 18px;margin-right: 5px;font-weight: bold"></i>Upload File</a>
+                                                <a href="javascript:void(1);" ng-if="IsFileUpload('MapplingFileAtt')" ng-click="ChangeFile('MapplingFileAtt')"><i class="fa fa-undo" style="font-size: 18px;margin-right: 5px;font-weight: bold"></i>Change File</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-12 form-group heading-hr ng-binding">
+                                    <input type="hidden" id="hdnSSOID" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).SSOID)" />
+
+                                    @*<h3>मै शपथ पूर्वक यहाँ घोषणा करता हूँ|</h3><br />
+                                        <input class="form-check-input" type="checkbox" name="SelfAcceptence" id="ChkAcceptence" value="" ng-model="AAAcceptence">
+                                        यह कि में इस समिति का निर्वाचित {{MemberRegistration.PostName}} हूँ| तथा मेरे द्वारा इस समिति को राजसहाकर पोर्टल पर मैप किया जा रहा है। <br /><br />
+                                        मै यहाँ सत्यापित करता हूँ| की उक्त समिति की समस्त जानकारी मेरे पास उपलब्ध है।<br /><br />
+                                        मै यहाँ शपथ पूर्वक कहता हूँ की मेरे द्वारा कोई भी गलत जानकारी अथवा मिथ्य तथ्य इस पोर्टल पर दर्ज नहीं करवाए गए है।<br /><br />
+                                        यदि कोई जानकारी गलत पाई जाती है तो सहकारिता विभाग मेरे विरुद्ध आवश्यक कानूनी कर्यवाही आईटी एक्ट एवं अन्य सपठित अधिनियमों के अंतर्गत कर्यवाही करने में
+                                        स्वतंत्र होगा।<br /><br />*@
+
+                                    <h3>में शपथ पूर्वक घोषणा करता हूँ :-</h3>
+                                    कि में इस समिति का {{MemberRegistration.PostName}} हूँ, इसलिए में इस सोसाइटी से अपनी SSO ID मैप कर रहा हूँ।<br />
+                                    यदि यह तथ्य गलत पाया जाता है तो सहकारिता विभाग मेरे विरुद्ध आवश्यक कानूनी कार्यवाही करने में स्वतंत्र होगा।
+
+
+                                </div>
+                                <div class="col-lg-12 form-group">
+                                    <center>
+                                        <button type="button" class="btn btn-primary dev-btn" ng-click="InsertSocietyMappingRequest(1)"> <i class="fa fa-edit"></i> {{translation.Submit}}</button>
+                                    </center>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+    <!-- start main-content -->
+    <!-- end main-content -->
+    <!-- start show details t -->
+    <!-- end  show details -->
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('.nav-tabs > li a[title]').tooltip();
+
+            $('a[data-toggle="tab"]').on('show.bs.tab', function (e) {
+
+                var $target = $(e.target);
+
+                if ($target.parent().hasClass('disabled')) {
+                    return false;
+                }
+            });
+
+            $(".next-step").click(function (e) {
+                var $active = $('.wizardShow .nav-tabs li.active');
+                $active.next().removeClass('disabled');
+                var $active = $('.wizardShow .nav-tabs li.active').attr('id');
+                if ($active == "SocietyStep_11") {
+
+                    $("#SocietyStep_11").removeClass("active stepactive1");
+                    $("#SocietyStep_11").addClass("disabled stepactive1");
+                    $("#SocietyStep_22").addClass("active stepactive2");
+
+                    $("#step11").removeClass("tab-pane active");
+                    $("#step11").addClass("tab-pane ng-hide");
+                    $("#step22").removeClass("tab-pane ng-hide");
+                    $("#step22").addClass("tab-pane active");
+                }
+                if ($active == "SocietyStep_22") {
+
+                    $("#SocietyStep_22").removeClass("active stepactive1");
+                    $("#SocietyStep_22").addClass("disabled stepactive1");
+                    $("#SocietyStep_33").addClass("active stepactive3");
+
+                    $("#step22").removeClass("tab-pane active");
+                    $("#step22").addClass("tab-pane ng-hide");
+                    $("#step33").removeClass("tab-pane ng-hide");
+                    $("#step33").addClass("tab-pane active");
+
+                }
+
+
+                //nextTab($active);
+                $('.wizardShow .nav-tabs li.active .connecting-line').css({ "border-bottom-left-radius": 0, "border-top-left-radius": 0 });
+
+            });
+            $(".prev-step").click(function (e) {
+
+                var $active = $('.wizard .nav-tabs li.active');
+                prevTab($active);
+                $active.next().removeClass('disabled');
+                var $active = $('.wizardShow .nav-tabs li.active').attr('id');
+                if ($active == "SocietyStep_22") {
+                    $("#SocietyStep_22").removeClass("active");
+                    $("#SocietyStep_11").addClass("disabled stepactive2");
+                    $("#SocietyStep_11").addClass("active stepactive1");
+
+                    $("#step22").removeClass("tab-pane active");
+                    $("#step22").addClass("tab-pane ng-hide");
+                    $("#step11").removeClass("tab-pane ng-hide");
+                    $("#step11").addClass("tab-pane active");
+                }
+                if ($active == "SocietyStep_33") {
+
+                    $("#SocietyStep_33").removeClass("active stepactive1");
+                    $("#SocietyStep_33").addClass("disabled stepactive1");
+                    $("#SocietyStep_22").addClass("active stepactive3");
+
+                    $("#step33").removeClass("tab-pane active");
+                    $("#step33").addClass("tab-pane ng-hide");
+                    $("#step22").removeClass("tab-pane ng-hide");
+                    $("#step22").addClass("tab-pane active");
+
+                }
+                //nextTab($active);
+                $('.wizardShow .nav-tabs li.active .connecting-line').css({ "border-bottom-left-radius": 0, "border-top-left-radius": 0 });
+
+
+            });
+        });
+        function nextTab(elem) {
+            $(elem).next().find('a[data-toggle="tab"]').click();
+        }
+        function prevTab(elem) {
+            $(elem).prev().find('a[data-toggle="tab"]').click();
+        }
+    </script>
+
+
+
+    <div id="myModelAlert" class="modal fade" role="dialog" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="" style="padding-left: 20px;padding-top: 15px;">
+                    <i style="font-size: 50px;color: darkred;" class="fa fa-warning"></i>
+                </div>
+                <div class="modal-body">
+                    <p style="color: #9a2f2f;font-size: 21px; text-align:left;">
+                        {{translation == 'en-us' ?'Your sso id is not linked with any aadhar number. ':'आपका @(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).SSOID) किसी भी आधार नंबर से जुड़ा हुवा नहीं है। '}}
+                        {{translation == 'en-us' ?'Please first link your @(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).SSOID) with Aadhar number to link the society':'कृपया सोसाइटी को लिंक करने के लिए पहले अपने SSO ID  को आधार नंबर से जोड़ें '}}
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" onclick="window.location.href='../login/BackToSSO'" id="btnAlertYes">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="se-pre-con"></div>
+    <div id="stop" class="scrollTop">
+        <span><a href=""><i class="fa fa-arrow-up">Top</i></a></span>
+    </div>
+    @*@Html.Partial("_AadhaarValidation")*@
+    @Html.Partial("_JanAadhaarValidation")
+</div>

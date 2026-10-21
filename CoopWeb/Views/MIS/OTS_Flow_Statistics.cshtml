@@ -1,0 +1,128 @@
+﻿@{
+    ViewBag.Title = "OTS Flow Statistics";
+}
+<style>
+    .flexEqualCenter {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    a.backBtn {
+        padding: 3px 5px;
+        background: rgb(99,205,219);
+        color: #fff;
+        border: 0px;
+        outline: none;
+        display: inline-block;
+        text-decoration: none;
+    }
+
+        a.backBtn i {
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+    .tblthfont {
+        font-weight: bold;
+    }
+</style>
+<script src="~/Scripts/AngularFramework/OTS_Flow_Statistics.js?v=2"></script>
+<div ng-app="otsMod" ng-controller="otsCtrl" ng-cloak="">
+    <div class="container-fluid citizen-dash-head">
+        <input type="hidden" id="hdnDistrictId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DistrictId)" />
+        <input type="hidden" id="hdnPldbId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).PLDBId)" />
+        <input type="hidden" id="hdnPldbBranchId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).PLDBBrancchId)" />
+
+        <div class="panel panel-default">
+            <div class="panel-heading flexEqualCenter">
+                <b><i class="fa fa-th-list"></i>&nbsp; OTS Application Flow Statistics</b>
+                <div class="text-right">
+                    <button ng-click="BackToPage()" class="btn btn-primary dev-btn">Back To List</button>
+                    <button ng-show="GetPldbOtsSchemaList!=null && GetPldbOtsSchemaList.length>0" ng-click="ReportDownload()" class="btn btn-primary dev-btn">Export Excel</button>
+                </div>
+            </div>
+            <div class="panel-body">
+                <input type="hidden" id="hdnDistrictId" ng-model="search.LoanDistrictId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DistrictId)" />
+
+                <div class="row">
+                    <div class="col-md-6 form-group">
+                        <label class="help-block-gender">
+                            <input type="radio" id="PldbPendrncy" name="ReportType" ng-value="1" ng-model="ReportType" ng-change="ReportTypeChange() " selected> Pendency
+                        </label>
+                        <label class="help-block-gender">
+                            <input type="radio" id="PldbOverAll" ng-value="2" name="ReportType" ng-model="ReportType" ng-change="ReportTypeChange()"> Over All
+                        </label>
+                    </div>
+                    <div class="col-md-6 form-group">
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-2 form-group">
+                        <label>{{ translation.District}}<span class="error">*</span></label>
+                        <select id="DISTRICT_ID" ng-model="search.DISTRICT_ID" class="form-control" ng-init="search.DISTRICT_ID='0'" ng-change="PLDBListData(0)">
+                            <option value="0">{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in DistrictList" value="{{item.DISTRICT_ID}}">
+                                {{_language =='en-us' ?  item.DISTRICT_ENG : item.DISTRICT_MANGAL}}
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="col-lg-2 margin-Top20" style="padding-left: 0;" id="ddlPLDBID">
+                        <label for="PLDB_ID">{{ translation.PLDB}} </label>
+                        <select id="PLDB_ID" name="PLDB_ID" ng-model="search.PLDB_ID" class="form-control" ng-init="PLDB_ID='0'" ng-change="PLDBBranchList('0')">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="itemPLDB in PLDBList  track by itemPLDB.PldbId " value="{{itemPLDB.PldbId}}">
+                                {{itemPLDB.PLDBName}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-lg-2 margin-Top20" style="padding-left: 0;" id="ddlPldbBranchID">
+                        <label for="PLDB_Branch_ID">{{ translation.Branch}}</label>
+                        <select ng-model="search.PLDB_Branch_ID" name="PLDB_Branch_ID" id="PLDB_Branch_ID" class="form-control" ng-init="PLDB_Branch_ID='0'" ng-change="GetPldbOtsPendencySummaryDetails('0')">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="itemBlock in PLDBBranches " value="{{itemBlock.BLOCK_ID}}">
+                                {{_language =='en-us' ?  itemBlock.BLOCK_ENG : itemBlock.BLOCK_MANGAL}}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="table-responsive devtable">
+                    <table class="table table-hover table-striped table-bordered mb-0" id="{{PLDBOtsReport}}">
+                        <thead>
+                            <tr>
+                                <th rowspan="2" width="60">{{translation.SRNO}}</th>
+                                <th ng-show="search.DISTRICT_ID==0 || search.DISTRICT_ID!=0 && search.PLDB_ID!=0 && search.PLDB_Branch_ID!=0">{{translation.District}}</th>
+                                <th ng-show="search.DISTRICT_ID!=0">{{translation.PLDB }}</th>
+                                <th ng-show="search.DISTRICT_ID!=0 && search.PLDB_ID!=0">{{translation.PLDBBranch }}</th>
+                                <th>{{translation.TotalApplications}} </th>
+                                <th>{{_language =='en-us'?'Recovery Payment Done':'Recovery Payment Done'}} </th>
+                                <th>{{_language =='en-us'?'FR Generated':'FR Generated'}} </th>
+                                <th>{{_language =='en-us'?'Approve Certificate Generated':'Approve Certificate Generated'}} </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="item in GetPldbOtsSchemaList">
+                                <td><span>{{$index+1}}.</span></td>
+                                <td ng-show="search.DISTRICT_ID==0 || search.DISTRICT_ID!=0 && search.PLDB_ID!=0 && search.PLDB_Branch_ID!=0">{{item.DistrictName}}</td>
+                                <td ng-show="search.DISTRICT_ID!=0">{{item.PLDBName}}</td>
+                                <td ng-show="search.DISTRICT_ID!=0 && search.PLDB_ID!=0">{{item.PLDBBranch}}</td>
+                                <td>{{item.TotalApplication}}</td>
+                                <td>{{item.AllRecoveryPaymentDone}}</td>
+                                <td>{{item.FrGenerated}}</td>
+                                <td>{{item.ApproveCertificateGenerated}}</td>
+                            </tr>
+                            <tr ng-show="isNoRecord">
+                                <td colspan="{{colspan}}" style="text-align: center;">No Records</td>
+                            </tr>
+                        </tbody>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+        </div>
+    </div>
+</div>

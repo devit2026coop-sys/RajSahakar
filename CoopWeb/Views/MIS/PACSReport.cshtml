@@ -1,0 +1,217 @@
+﻿@{
+    ViewBag.Title = "PACS (Primary Agriculture Credit Co-operative Societies) Report (State-District-Block Wise)";
+    Layout = "~/Views/Shared/_CitizenLayout.cshtml";
+}
+
+<script src="~/Scripts/AngularFramework/PACSReport.js"></script>
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.22/pdfmake.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js"></script>
+
+
+<div ng-app="PACSReportMod" ng-controller="PACSReportCnt">
+
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <h3 class="citizen-dash-head">{{translation.PACSReport}} </h3>
+    </div>
+
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="devpage-breadcrumb">
+            <ul class="page-breadcrumb">
+                <li class="dev-page-br">
+                    <i class="fa fa-home"> </i>
+                    <a href="../Citizen/Index"> {{translation.MIS}} </a>
+                    <i class="fa fa-angle-right"> </i>
+                </li>
+                <li style="float: left">
+                    <span style="margin: 0 5px;"> {{translation.PACSReport}} </span>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" ng-show="divStateData">
+        <div class="table-responsive citizen-dash-head">
+            <table id="example" class="table devtable" style="margin-top: 30px;border:1px solid rgb(222, 221, 221); float: left;">
+                <thead>
+                    <tr>
+                        <th>
+                            {{translation.SRNO}}
+                        </th>
+                        <th>
+                            {{translation.State}}
+                        </th>
+                        <th>
+                            {{translation.SocietyCount}}
+                        </th>
+                        <th>
+                            {{translation.MemberCount}}
+                        </th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <tr dir-paginate="item in StateData | filter: q | orderBy:colsort:reverseSort | itemsPerPage: 1000">
+                        <td>{{$index+1}}</td>
+                        <td><a ng-click="ShowDistrictData()">{{item.LevelHi}}</a></td>
+                        <td>{{item.PACSSocietyCount}}</td>
+                        <td>{{item.PACSMemberCount}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div  ng-show="divDistrictWisePACS">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <h3 class="citizen-dash-head">{{translation.PACSForDistrict}} </h3>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="table-responsive citizen-dash-head">
+                <table id="example" class="table devtable" style="margin-top: 30px;border:1px solid rgb(222, 221, 221); float: left;">
+                    <thead>
+                        <tr>
+                            <th>
+                                {{translation.SRNO}}
+                            </th>
+                            <th>
+                                {{translation.District}}
+                            </th>
+                            <th>
+                                {{translation.SocietyCount}}
+                            </th>
+                            <th>
+                                {{translation.MemberCount}}
+                            </th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr dir-paginate="item in DistrictData | filter: q | orderBy:colsort:reverseSort | itemsPerPage: 1000">
+                            <td>{{$index+1}}</td>
+                            <td><a ng-click="GetFilterData(item,1)">{{ _languahe=='en-us'? item.LevelEng : item.LevelHi}}</a></td>
+                            <td>{{item.PACSSocietyCount}}</td>
+                            <td>{{item.PACSMemberCount}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <div ng-show="divBlockWisePACS">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <h3 class="citizen-dash-head">{{translation.PACSForBlock}} ({{translation.DistrictHeading}} - {{DistrictName}}) <a ng-click="BackTODCCB('divDistrictWisePACS')" style="float:right; font-size:12px" class="btn btn-primary dev-btn">{{translation.Back}}</a></h3>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="table-responsive citizen-dash-head">
+                <table id="example" class="table devtable" style="margin-top: 30px;border:1px solid rgb(222, 221, 221); float: left;">
+                    <thead>
+                        <tr>
+                            <th>
+                                {{translation.SRNO}}
+                            </th>
+                            <th>
+                                {{translation.BlockHeading}}
+                            </th>
+                            <th>
+                                {{translation.SocietyCount}}
+                            </th>
+                            <th>
+                                {{translation.MemberCount}}
+                            </th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr dir-paginate="item in BlockData | filter: q | orderBy:colsort:reverseSort | itemsPerPage: 1000">
+                            <td>{{$index+1}}</td>
+                            <td><a ng-click="GetFilterData(item,3)">{{ _languahe=='en-us'? item.LevelEng : item.LevelHi}}</a></td>
+                            <td>{{item.PACSSocietyCount}}</td>
+                            <td>{{item.PACSMemberCount}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div ng-show="divSocietyWisePACS">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <h3 class="citizen-dash-head">{{translation.PACSForSociety}} <a ng-click="BackTODCCB('divBlockWisePACS')" style="float:right; font-size:12px" class="btn btn-primary dev-btn">{{translation.Back}}</a></h3>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="table-responsive citizen-dash-head">
+                <table id="example" class="table devtable" style="margin-top: 30px;border:1px solid rgb(222, 221, 221); float: left;">
+                    <thead>
+                        <tr>
+                            <th>
+                                {{translation.SRNO}}
+                            </th>
+                            <th>
+                                {{translation.BlockHeading}}
+                            </th>
+                            <th>
+                                {{translation.Society}}
+                            </th>
+                            <th>
+                                {{translation.SocietyRegistrationNo}}
+                            </th>
+                            <th>
+                                {{translation.MemberCount}}
+                            </th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr dir-paginate="item in SocietyData | filter: q | orderBy:colsort:reverseSort | itemsPerPage: 1000">
+                            <td>{{$index+1}}</td>
+                            <td>{{ _languahe=='en-us'? item.BLOCK_ENG : item.BLOCK_MANGAL}}</td>
+                            <td><a ng-click="GetFilterData(item,4)">{{item.SocietyName}}</a></td>
+                            <td>{{item.RegistrationNo}}</td>
+                            <td>{{item.TotalMember}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div ng-show="divMemberWisePACS">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <h3 class="citizen-dash-head">{{translation.PACSForMembers}} <a ng-click="BackTODCCB('divSocietyWisePACS')" style="float:right; font-size:12px" class="btn btn-primary dev-btn">{{translation.Back}}</a></h3>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="table-responsive citizen-dash-head">
+                <table id="example" class="table devtable" style="margin-top: 30px;border:1px solid rgb(222, 221, 221); float: left;">
+                    <thead>
+                        <tr>
+                            <th>
+                                {{translation.SRNO}}
+                            </th>
+                            <th>
+                                {{translation.Society}}
+                            </th>
+                            <th>
+                                {{translation.Member}}
+                            </th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr dir-paginate="item in SocietyMemberData | filter: q | orderBy:colsort:reverseSort | itemsPerPage: 1000">
+                            <td>{{$index+1}}</td>
+                            <td>{{ item.SocietyName}}</td>
+                            <td>{{item.Name}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="se-pre-con"></div>
+</div>
+
+
+

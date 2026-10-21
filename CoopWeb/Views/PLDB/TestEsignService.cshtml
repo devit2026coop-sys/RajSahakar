@@ -1,0 +1,178 @@
+﻿
+<!DOCTYPE html>
+<html lang="en" ng-app="myApp">
+
+
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AngularJS HTTP Example</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+</head>
+<body ng-controller="MyController">
+    <button ng-click="callController()">Call Controller Function</button>
+    <input type="hidden" id="txnId">
+    <input type="hidden" id="PdfPath">
+    <button ng-click="EsignPdf()" ng-show="txnId!=''">EsignPdf</button>
+    <button ng-click="DecResponseData()" ng-show="txnId!=''">ExcelImport</button>
+    <input type="hidden" id="hiddenData" value="<%= Request.Form[" data"] %>">
+
+
+    <div>{{ result }}</div>
+    <script>
+        var app = angular.module('myApp', []);
+
+        app.controller('MyController', function ($scope, $http) {
+            $scope.result = '';
+
+            $scope.callController = function () {
+                $http.get("../ApplicationFlow/GenerateAadhaarOTPForEsing_Test")
+                    .then(function (response) {
+                        console.log(response.data);
+                        debugger;
+                        // $('#txnId').val(response.data);
+
+                        var responseHtml = response.data
+                        // Create a new div and insert the response HTML into it
+                        var tempDiv = document.createElement('div');
+                        tempDiv.innerHTML = responseHtml;
+
+                        // Append the generated form to the body
+                        document.body.appendChild(tempDiv);
+
+
+                        var form = tempDiv.querySelector('form');
+                        form.onsubmit = function (event) {
+                            event.preventDefault(); // Prevent the default form submission
+
+                            // Create FormData to handle the form inputs
+                            var formData = new FormData(form);
+
+                            // Send the form data via AJAX (using AngularJS $http.post)
+                            $http({
+                                method: 'POST',
+                                url: form.action, // Get the form's action URL
+                                data: formData,
+                                headers: { 'Content-Type': undefined },
+                                transformRequest: angular.identity
+                            })
+                                .then(function (response) {
+                                    console.log("Form submission response: ", response.data);
+                                    // Handle the response from the server here
+                                })
+                                .catch(function (error) {
+                                    console.error('Error during form submission:', error);
+                                });
+                        };
+
+                        // Manually trigger the form submission
+                        form.submit();
+
+
+                        //$scope.result = response.data.message;
+                    })
+                    .catch(function (error) {
+                        console.error('Error:', error);
+                    });
+            };
+            $scope.EsignPdf = function () {
+                debugger;
+
+
+                //COMMON_FUNCTION.EsinghPDF_Test($('#txnId').val(), $('#txnId').val(), _Model.LoanBankName_ENG, "Managing Director")
+                $http.get("../ApplicationFlow/VerifyAadhaarOTPForEsing_Test/?txnId=" + $('#txnId').val() + "&pdfPath=" + $('#PdfPath').val())
+                    .then(function (data) {
+                        console.log(data);
+                        // $scope.result = response.data.message;
+                    })
+                    .catch(function (error) {
+                        console.error('Error:', error);
+                    });
+            };
+
+            $scope.DecResponseData = function () {
+                debugger;
+
+
+                //COMMON_FUNCTION.EsinghPDF_Test($('#txnId').val(), $('#txnId').val(), _Model.LoanBankName_ENG, "Managing Director")
+                $http.get("../ApplicationFlow/GenerateAadhaarOTPForEsingDec_Test/?encData=" + $('#encData').val())
+                    .then(function (data) {
+                        alert(data)
+                        // $scope.result = response.data.message;
+                    })
+                    .catch(function (error) {
+                        console.error('Error:', error);
+                    });
+            };
+            $scope.ExcelImport = function () {
+                debugger;
+
+
+                //COMMON_FUNCTION.EsinghPDF_Test($('#txnId').val(), $('#txnId').val(), _Model.LoanBankName_ENG, "Managing Director")
+                $http.get("../ExcelImport/ImportExcelToSql/")
+                    .then(function (data) {
+                        console.log(data);
+                        // $scope.result = response.data.message;
+                    })
+                    .catch(function (error) {
+                        console.error('Error:', error);
+                    });
+            };
+
+
+
+            document.addEventListener('DOMContentLoaded', function () {
+                var responseData = document.getElementById('hiddenData').value;
+                alert(responseData);
+                //var esignResponseDiv = document.getElementById('esignResponse');
+
+                //// Display the response data
+                //if (responseData) {
+                //    esignResponseDiv.innerText = "Response Data: " + responseData;
+                //} else {
+                //    esignResponseDiv.innerText = "No response data received.";
+                //}
+            });
+        });
+
+
+
+
+    </script>
+    <script>
+
+        //function callMethod() {
+        //    $(".se-pre-con").fadeIn("slow");
+        //    debugger;
+        //    express().get("localhost:27466/ApplicationFlow/GenerateAadhaarOTPForEsing_Test").
+        //        success(function (data, status) {
+        //            $(".se-pre-con").fadeOut("slow");
+        //            if (data.indexOf('NO#') >= 0) {
+        //                alert("Due to some issue OTP not send");
+
+        //            } else {
+        //                if (data != "LOGOUT") {
+        //                    // alert(data);
+        //                    $scope.ApplicationFlowMaster.TXN = data;
+        //                    console.log(data);
+        //                    alert(_language == 'en-us' ? 'OTP has been sent to aaddhaar mobile number.\n' : 'ओटीपी को मोबाइल नंबर पर भेजा गया है|\n');
+        //                    $scope.ShowOTPDiv = true;
+        //                }
+        //                else {
+        //                    $(".se-pre-con").fadeOut("slow");
+        //                    window.location = 'https://sso.rajasthan.gov.in/signin';
+        //                }
+        //            }
+        //        }).
+        //        error(function (data, status) {
+        //            $(".se-pre-con").fadeOut("slow");
+        //            alert(_language == 'en-us' ? 'Some Error is Occured \n' : 'कुछ त्रुटि हुई है \n');
+        //        });
+        //}
+
+
+
+    </script>
+</body>
+</html>

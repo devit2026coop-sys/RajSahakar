@@ -1,0 +1,223 @@
+﻿
+<script src="~/Scripts/AngularFramework/RSWC_MIS_Report.js"></script>
+
+<script type="text/javascript">
+    var tableToExcel = (function () {
+        var uri = 'data:application/vnd.ms-excel;base64,'
+            , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>'
+            , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) }
+            , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
+        return function (table, name) {
+            if (!table.nodeType) table = document.getElementById(table)
+            var ctx = { worksheet: name || 'Worksheet', table: table.innerHTML }
+            window.location.href = uri + base64(format(template, ctx))
+        }
+    })()
+</script>
+
+<div ng-app="RSWC_MIS_Cnt">
+    <div ng-controller="RSWC_MIS_Mod">
+        <div class="col-md-12">
+            <h3 class="citizen-dash-head">{{translation.RSWCMISreport}}</h3>
+            <hr style="margin: 0;">
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#"> {{translation.StockManagement}}</a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;"> {{translation.RSWCMISreport}} </span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <form class="citizen-dash-head">
+                <div class="col-lg-12 form-group">
+                    <div class="col-lg-2">{{translation.FincialYearHeading}}</div>
+                    <div class="col-lg-4">
+                        <select class="form-control" ng-model="RSWC.FIN_YEAR_MASTR_ID" ng-init="RSWC.FIN_YEAR_MASTR_ID='0'">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in FYList" value="{{item.FIN_YEAR_MASTR_ID}}">
+                                {{item.FIN_YEAR_NAME}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-lg-2">{{translation.District}}</div>
+                    <div class="col-lg-4">
+                        <select class="form-control" ng-model="RSWC.DistrictId" ng-init="RSWC.DistrictId='0'" ng-change="DistrictChange()">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in Districts" value="{{item.DISTRICT_ID}}">
+                                {{_language =='en-us' ?  item.DISTRICT_ENG : item.DISTRICT_MANGAL}}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+
+
+                <div class="col-lg-12 form-group">
+                    <div class="col-lg-2">{{translation.Commodity}}</div>
+                    <div class="col-lg-4">
+                        <select class="form-control" ng-model="RSWC.CommodityId" ng-init="RSWC.CommodityId='0'" ng-change="GetPurchaseCenterList()">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in Commodities" value="{{item.CommodityId}}">
+                                {{_language =='en-us' ?  item.CommodityNameEn : item.CommodityNameHi}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-lg-2">{{translation.Warehouse}}</div>
+                    <div class="col-lg-4">
+                        <select class="form-control" ng-model="RSWC.WarehouseId" ng-init="RSWC.WarehouseId='0'">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in Warehouses" value="{{item.wharehouse_id}}">
+                                {{_language =='en-us' ?  item.WarehousNameEn : item.WarehousNameHi}}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-lg-12 form-group">
+                    <div class="col-lg-2">{{translation.KVSSMPRForm}}</div>
+                    <div class="col-lg-4">
+                        <select class="form-control" ng-model="RSWC.KVSSId" ng-init="RSWC.KVSSId='0'">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="itm in KVSSList" value="{{itm.SocietyID}}">
+                                {{_language =='en-us' ?  itm.SocietyName : itm.SocietyName}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-lg-2">{{translation.PurchaseCenter}}</div>
+                    <div class="col-lg-4">
+                        <select class="form-control" ng-model="RSWC.PurchaseCenterId" ng-init="RSWC.PurchaseCenterId='0'">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="itm in PurchaseCenterList" value="{{itm.Center_Id}}">
+                                {{_language =='en-us' ?  itm.CenterNameEn : itm.CenterNameHi}}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group col-md-12">
+                    <div class="dev-menu-btn">
+                        <button type="submit" class="btn btn-primary" ng-click="GetMISList()">{{translation.Submit}}</button>
+                        <button type="submit" class="btn btn-primary" ng-click="ClearForm()">{{translation.Clear}}</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <h3 class="citizen-dash-head"> <i style="float:right" onclick="tableToExcel('tbl1', 'Data')" class="fa fa-file-excel-o" aria-hidden="true"></i></h3>
+            </div>
+
+            <div class="table-responsive citizen-dash-head">
+                <table id="tbl1" class="table devtable">
+                    <thead>
+                        <tr>
+                            <th>
+                                #
+                            </th>
+                            <th>
+                                {{translation.ReceiptNo}}
+                            </th>
+
+                            <th>
+                                {{translation.District}}
+                            </th>
+                            <th>
+                                {{translation.KVSSMPRForm}}
+                            </th>
+                            <th>
+                                {{translation.Commodity}}
+                            </th>
+                            <th>
+                                {{translation.PurchaseCenter}}
+                            </th>
+                            <th>
+                                {{translation.Price}}
+                            </th>
+                            <th>{{translation.PackagesLots}}</th>
+                            <th>{{translation.NetQuantity}}</th>
+                            <th>{{translation.TotalValue}}</th>
+                            <th>{{translation.PrivateMarkofDepositor}}</th>
+                            <th>{{translation.StorageRateCharge}}</th>
+                            <th>{{translation.IndemnifiedInsurance}}</th>
+                            <th>{{translation.InsuredName}}</th>
+                            <th>
+
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="item in RSWCViewList">
+                            <td>{{$index+1}}</td>
+                            <td>
+                                {{item.receipt_no}}
+                            </td>
+
+                            <td>
+                                {{_language =='en-us' ?  item.DISTRICT_ENG : item.DISTRICT_MANGAL}}
+                            </td>
+                            <td>
+                                {{ item.SocietyName}}
+                            </td>
+                            <td>
+                                {{_language =='en-us' ?  item.CommodityNameEn : item.CommodityNameHi}}
+                            </td>
+                            <td>
+                                {{_language =='en-us' ?  item.PurchaseCenterEng : item.PurchaseCenterHi}}
+                            </td>
+                            <td>{{item.Price}}</td>
+                            <td>{{item.packages_lots}}</td>
+                            <td>{{item.net_quantity}}</td>
+                            <td>{{item.TotalProce}}</td>
+                            <th>{{item.PrivateMarkofDepositor}}</th>
+                            <th>{{item.StorageRateCharge}}</th>
+                            <th>{{item.IndemnifiedInsurance}}</th>
+                            <th>{{item.InsuredName}}</th>
+                            <td>
+                                <a style="color:#505050;" ng-if="item.EntryFile!=''" target="_blank" href="../Content/FertilizerSupply/{{item.EntryFile}}"><i class="fa fa-download"></i></a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="col-md-12">
+                    <div ng-if="DataPagingDetails.TotalPages>1" class="dataTables_paginate paging_simple_numbers" id="dataTables-example_paginate">
+                        <div class="dataTables_info" id="dataTables-example_info" role="status" aria-live="polite">
+                            Total Records: {{DataPagingDetails.TotalRecords}}
+                        </div>
+                        <ul class="pagination pagination_1" style="margin-left: 10px !important;">
+                            <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« First</span></li>
+                            <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« Previous</span></li>
+
+                            <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest('1',GetWarehouseList)" style="cursor: pointer;">
+                                <span>«First</span>
+                            </li>
+                            <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest(DataPagingDetails.PageNumber-1,GetWarehouseList)" style="cursor:pointer;">
+                                <span>« Previous</span>
+                            </li>
+                            <li class="{{n==DataPagingDetails.PageNumber?'active':''}}" style="{{n==DataPagingDetails.PageNumber?'':'cursor: pointer'}}" ng-repeat="n in PagingRange(DataPagingDetails.StartPageNumber,DataPagingDetails.EndPageNumber,DataPagingDetails.TotalPages)" ng-click="pageRequest(n,GetWarehouseList)"><span>{{n}}</span></li>
+                            <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Next</span></li>
+                            <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Last</span></li>
+                            <li ng-if="DataPagingDetails.PageNumber!= DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.PageNumber+1,GetWarehouseList)" style="cursor:pointer;">
+                                <span>Next »</span>
+                            </li>
+                            <li ng-if="DataPagingDetails.PageNumber != DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.TotalPages,GetWarehouseList)" style="cursor:pointer;">
+                                <span>Last »</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+                   
+                </div>
+            </div>
+
+        </div>

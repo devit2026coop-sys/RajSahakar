@@ -1,0 +1,170 @@
+﻿<script src="~/Scripts/AngularFramework/WrHoliday.js"></script>
+<script src="~/Scripts/jquery-1.11.3.min.js"></script>
+<script type="text/javascript" src="~/Scripts/jqueryuitimepicker.js"></script>
+<link href="~/Content/Stylesheets/jqueryuitimepicker.css" rel="stylesheet" />
+<style>
+    h5, p {
+        text-align: center;
+    }
+
+    .ui-timepicker-table th.periods {
+        padding: 0.1em !important;
+        width: 2.2em !important;
+    }
+
+    .ui-timepicker-table td span {
+        display: block !important;
+        padding: 0.2em 0.3em 0.2em 0.5em !important;
+        width: 1.2em !important;
+        text-align: right !important;
+        text-decoration: none !important;
+    }
+    /* anchors for clickable cells */
+    .ui-timepicker-table td a {
+        display: block !important;
+        padding: 0.2em 0.3em 0.2em 0.5em !important;
+        width: 2.2em !important;
+        cursor: pointer !important;
+        text-align: right !important;
+        text-decoration: none !important;
+    }
+</style>
+<script type="text/javascript">
+
+    function ValidateAlpha(evt) {
+        var keyCode = (evt.which) ? evt.which : evt.keyCode
+        if ((evt.which == 8 || evt.keyCode == 8 || evt.charCode == 8))
+            return true;
+
+        if (((keyCode < 49 || keyCode > 90) && (keyCode < 97 || keyCode > 123) && keyCode != 32))
+            return false;
+        return true;
+    };
+
+</script>
+
+<div ng-app="WrHolidayMod">
+    <div ng-controller="WrHolidayCnt">
+        <div class="col-md-12">
+            <h3 class="citizen-dash-head">{{translation.WrHolidayMaster}}</h3>
+            <hr style="margin: 0;">
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#"> {{translation.Home}} </a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;"> {{translation.WrHolidayMaster}} </span>
+                    </li>
+                    <li style="float: right;" id="divAddBtn">
+                        <button type="button" ng-click="ShowDivProductInsert()" class="btn btn-info btn-lg dev-popup-btn" data-toggle="modal" style="color: #025e63; cursor: pointer; text-decoration:none;  font-weight: bold;">
+                            <h5>&#187; {{translation.InsertWrHolidayMaster}}</h5>
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" ng-show="divInsertProduct">
+            <form class="citizen-dash-head">
+                <div class="col-lg-12 form-group">
+                    <div class="col-lg-2">{{ translation.HolidayDate}}<span class="error">*</span></div>
+                    <div class="col-lg-4">
+                        <input type="date" name="holidaydate" id="txtHolidayDate" dateformat="dd MM yyyy" style="display:inline; margin-top: 0px;" class="form-control" placeholder="{{translation.HolidayDate}}" ng-model="WrHolidayModel.HolidayDate" autocomplete="off" /> &nbsp;
+                    </div>
+                    <div class="col-lg-2">{{ translation.HolidayTime}}<span class="error">*</span></div>
+                    <div class="col-lg-4">
+                        <input type='text' id='txtendtime' name="endtime" class="form-control devcalender" ng-model="WrHolidayModel.EndTime" placeholder="{{translation.Time}}" autocomplete="off" />
+                    </div>
+                </div>
+
+
+                <div class="form-group col-md-12">
+                    <div class="dev-menu-btn">
+                        <button type="submit" class="btn btn-primary" ng-click="SaveWrHoliday()">{{translation.Submit}}</button>
+                        <button type="submit" class="btn btn-primary" ng-click="Clear()">{{translation.Clear}}</button>
+                        <a class="btn btn-primary dev-btn" style="text-transform:capitalize;" ng-click="BackToPage()"> {{translation.Back}}</a>
+                        <input type="hidden" ng-model="WrHolidayModel.Id" />
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" ng-show="GridProducts">
+            <div>
+                <div class="citizen-dash-head">
+                    <div class="table-dropdown">
+                        <div class="col-lg-12 form-group">
+                            <div class="col-md-4" style="padding-left: 0;">
+                                <label for="search">{{translation.Search}}:</label>
+                                <input ng-model="q" id="search" class="form-control" placeholder={{translation.filttertext}} autocomplete="off">
+                            </div>
+                            <div class="col-md-4" style="padding-left: 0;">
+                                <label for="search">{{translation.ItemPerPage}}:</label>
+                                <input type="number" min="1" max="100" class="form-control" onkeypress='return event.charCode >= 48 && event.charCode <= 57' ng-model="pageSize">
+                            </div>
+                        </div>
+                    </div>
+                    <table class="table table-responsive devtable" style="overflow-x:auto;">
+                        <thead>
+                            <tr>
+                                <th>
+                                    {{translation.SRNO}}
+                                </th>
+                                <th>
+                                    {{translation.HolidayDate}}
+                                </th>
+                                <th>
+                                    {{translation.HolidayTime}}
+                                </th>
+                                <th>
+                                    {{translation.IsActive}}
+                                </th>
+                                <th>
+                                    {{translation.Edit}}
+                                </th>
+                                <th>
+                                    {{translation.Delete}}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr dir-paginate="item in WrHoildayData | filter: q | orderBy:colsort:reverseSort | itemsPerPage: pageSize" current-page="currentPage" pagination-id="TrainningFormatPagination">
+                                <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                                <td>
+                                    {{ item.Date}}
+                                </td>
+                                <td>
+                                    {{ item.EndTime}}
+                                </td>
+
+                                <td>
+                                    <div class="dev-action">
+                                        <label class="switch">
+                                            <input type="checkbox" ng-checked="item.IsActive == 1" ng-click="SetStatus(item.Id,item.IsActive)">
+                                            <span class="slider round"></span>
+                                        </label>
+                                    </div>
+                                </td>
+                                <td><a ng-click="update(item)"><i class="fa fa-edit"></i></a></td>
+                                <td><a ng-click="SetStatus(item.Id,2)"><i class="fa fa-trash"></i></a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="col-md-10">
+                <div class="text-center">
+                    <dir-pagination-controls boundary-links="true" pagination-id="TrainningFormatPagination" on-page-change="pageChangeHandler(newPageNumber)" template-url="/dirPagination.tpl.html"></dir-pagination-controls>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+

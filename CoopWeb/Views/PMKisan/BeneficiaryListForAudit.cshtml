@@ -1,0 +1,178 @@
+﻿@{
+    ViewBag.Title = "Beneficiary Audit Details List";
+    Layout = "~/Views/Shared/_PMKisanLayout.cshtml";
+}
+<style>
+    .text-dark {
+        color: #000000 !important
+    }
+</style>
+<script src="~/Scripts/AngularFramework/BeneficiaryListForAudit.js?id=5"></script>
+<div ng-app="BeneficiaryAuditDetailsMod" ng-controller="BeneficiaryAuditDetailsCnt" ng-cloak="">
+    <div class="container-fluid dashHeader">
+        <div class="row">
+            <div class="col-md-8">
+                <h3>Beneficiary Audit Details List</h3>
+            </div>
+        </div>
+    </div>
+    <div class="container-fluid QuarterlyOverviewSection">
+        <div class="panel panel-default">
+            <div class="panel-heading flexEqualCenter">
+                <b><i class="fa fa-th-list"></i> Beneficiary Audit Details List</b>
+                <div>
+                    <a href="~/pmkisan/BeneficiaryListForAudit" class="backBtn"><i class="fa fa-angle-left"></i>Back</a>
+                    <button type="button" class="btn btn-warning" ng-click="exportExcel()"><i class="fa fa-file-excel-o"></i> Export Excel</button>
+                </div>
+            </div>
+            <div id="search-filter">
+                <input type="hidden" id="hdnDistId" ng-model="search.DistId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DistrictId)" />
+                <div class="table-dropdown">
+                    <div class="col-md-2">
+                        <label class="text-dark">Installment Type:</label>
+                        <select class="form-control" ng-model="search.InstallmentTypeId">
+                            <option value="" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="li in InstallmentTypeList" value="{{li.MasterInstallmentID}}">
+                                {{li.NameEn}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="text-dark">{{translation.District}}:</label>
+                        <select ng-model="search.districtId" class="form-control" ng-change="GetSubDistrictList()">
+                            <option value="" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="li in DistrictList | orderBy:'DISTRICT_ENG'" value="{{li.DISTRICT_ID}}">
+                                {{_language =='en-us' ?  li.DISTRICT_ENG : li.DISTRICT_MANGAL}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="text-dark">{{translation.Sub}} {{translation.District}}:</label>
+                        <select ng-model="search.subDistrictName" class="form-control" ng-init="search.subDistrictName=''" ng-change="GetBeneficiaryAuditList()">
+                            <option value="" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="li in SubDistrictList | orderBy:'SubDistrictName'" value="{{li.SubDistrictName}}">
+                                {{li.SubDistrictName}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="text-dark">{{translation.Search}}:</label>
+                        <div class="input-group">
+                            <input type="text"
+                                   ng-model="search.searchText"
+                                   class="form-control"
+                                   placeholder="{{translation.filttertext}}"
+                                   autocomplete="off">
+
+                            <span class="input-group-btn">
+                                <button class="btn btn-success"
+                                        ng-click="GetBeneficiaryAuditList()">
+                                    Search
+                                </button>
+                            </span>
+                        </div>
+                    </div>
+
+
+                    <div class="col-md-2">
+                        <label class="text-dark">{{translation.ItemPerPage}}:</label>
+                        <select ng-model="obj.pageSize" class="form-control" ng-change="pagechange()" ng-init="obj.pageSize='50'">
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                            <option value="200">200</option>
+                            <option value="500">500</option>
+                            <option value="1000">1000</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="panel-body">
+                <div class="table-responsive devtable">
+                    @*<div class="row">
+                            <div class="col-xs-12 text-left" style="margin-bottom:5px">
+                                <input ng-if="BeneficiaryDetailList.length>0" type="button" class="btn btn-primary dev-btn" onclick="tableToExcel('tblBeneficiaryDetail', 'Get Beneficiary Detail Data')" value="Export to Excel">
+                            </div>
+                        </div>*@
+                    <table class="table table-hover table-striped table-bordered mb-0" id="tblBeneficiaryDetail">
+                        <thead>
+                            <tr>
+                                <th>Sr. No.</th>
+                                <th>RegNo.</th>
+                                <th>Farmer Name</th>
+                                <th>Credit Name</th>
+                                <th>Father Name</th>
+                                <th>Gender</th>
+                                <th>District Name</th>
+                                <th>SubDistrict Name</th>
+                                <th>Village Name</th>
+                                <th>Mobile No.</th>
+                                <th>Home Address</th>
+                                <th>Amount</th>
+                                <th>Transaction Date</th>
+                                <th>Bank IFSC Code</th>
+                                <th>Bank Account No</th>
+                                <th>Credit Bank Code</th>
+                                <th>Credit Status</th>
+                                <th>Credit Remarks</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr dir-paginate="item in BeneficiaryAuditDetailList | filter:q | orderBy:colsort:reverseSort | itemsPerPage: obj.pageSize" current-page="currentPage" pagination-id="SubclassPagination">
+                                <td>{{(((DataPagingDetails.PageNumber - 1) * DataPagingDetails.PageSize) + 1)+$index}}</td>
+                                <td> {{item.RegNo}} </td>
+                                <td> {{item.FarmerName}} </td>
+                                <td>{{item.CreditName}}</td>
+                                <td>{{item.FatherName}}</td>
+                                <td>{{item.Gender}}</td>
+                                <td>{{item.DistrictName}}</td>
+                                <td>{{item.SubDistrictName}}</td>
+                                <td>{{item.VillageName}}</td>
+                                <td>{{item.MobileNo}}</td>
+                                <td>{{item.HomeAddress}}</td>
+                                <td>{{item.PaidAmount | inrCurrency}}</td>
+                                <td>{{item.CreditTransactionDate |date:'dd-MM-yyyy'}}</td>
+                                <td>{{item.BankIFSCCode}}</td>
+                                <td>{{item.BankAccountNo}}</td>
+                                <td>{{item.CreditBankCode}}</td>
+                                <td>{{item.CreditStatus}}</td>
+                                <td>{{item.CreditRemarks}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div ng-if="DataPagingDetails.TotalPages>1" class="dataTables_paginate paging_simple_numbers" id="dataTables-example_paginate" style="display: flex; align-items: center; justify-content: space-between;">
+                            <div class="dataTables_info" id="dataTables-example_info" role="status" aria-live="polite">
+                                Total Records: {{DataPagingDetails.TotalRecords}}
+                            </div>
+                            <ul class="pagination pagination_1" style="margin-left: 10px !important; margin:0">
+                                <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« First</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« Previous</span></li>
+
+                                <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest('1',SearchData)" style="cursor: pointer;">
+                                    <span>« First</span>
+                                </li>
+                                <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest(DataPagingDetails.PageNumber-1,SearchData)" style="cursor:pointer;">
+                                    <span>« Prev</span>
+                                </li>
+                                <li class="{{n==DataPagingDetails.PageNumber?'active':''}}" style="{{n==DataPagingDetails.PageNumber?'':'cursor: pointer'}}" ng-repeat="n in PagingRange(DataPagingDetails.StartPageNumber,DataPagingDetails.EndPageNumber,DataPagingDetails.TotalPages)" ng-click="pageRequest(n,SearchData)"><span>{{n}}</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Next</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Last</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber!= DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.PageNumber+1,SearchData)" style="cursor:pointer;">
+                                    <span>Next »</span>
+                                </li>
+                                <li ng-if="DataPagingDetails.PageNumber != DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.TotalPages,SearchData)" style="cursor:pointer;">
+                                    <span>Last »</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

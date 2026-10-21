@@ -1,0 +1,148 @@
+﻿@{
+    ViewBag.Title = "Financial Trunover Report";
+}
+<style>
+    .flexEqualCenter {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    a.backBtn {
+        padding: 3px 5px;
+        background: rgb(99,205,219);
+        color: #fff;
+        border: 0px;
+        outline: none;
+        display: inline-block;
+        text-decoration: none;
+    }
+
+        a.backBtn i {
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+    .tblthfont {
+        font-weight: bold;
+    }
+
+    .header-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 15px;
+        border-bottom: 1px solid #1e2cff;
+        background: #fff;
+    }
+
+    .header-left {
+        font-size: 16px;
+        font-weight: 600;
+    }
+
+    .header-right {
+        text-align: right;
+    }
+
+    .cursor {
+        cursor: pointer;
+    }
+</style>
+<script src="~/Scripts/AngularFramework/FinancialTrunOverReport.js?v=3"></script>
+<div ng-app="financialMod" ng-controller="financialCtrl" ng-cloak="">
+    <div class="container-fluid citizen-dash-head">
+        <input type="hidden" id="hdnDistrictId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DistrictId)" />
+
+        <div class="panel panel-default">
+            <div class="panel-heading flexEqualCenter">
+                <b><i class="fa fa-th-list"></i> Summary Report-Data Entry Program of Turnover & Profit/Loss</b>
+            </div>
+            <div class="panel-body">
+                <div class="row" id="search-filter">
+                    <div class="col-md-3 form-group">
+                        <label>District</label>
+                        <div class="form-group">
+                            <select ng-model="search.districtcode" class="form-control" required ng-options="d.district_code as d.district_name for d in districtDataList" ng-change="getFinacialTrunOverDetail(false)">
+                                <option value="" selected>All</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-3">
+                    </div>
+                    <div class="col-md-4 d-flex justify-content-end" style="gap: 10px;">
+                        <button ng-click="getFinacialTrunOverDetail(false)" class="btn btn-primary dev-btn">
+                            <i class="fa fa-search"></i> Search
+                        </button>
+                        <button ng-click="ClearFilter()" class="btn btn-primary dev-btn">
+                            Reset
+                        </button>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <div class="header-bar">
+                            <div class="header-left">
+                                State - RAJASTHAN <span ng-if="districtData">{{ districtData }}</span>
+                            </div>
+                            <div class="header-right" ng-if="TrunoverDataList && TrunoverDataList.length > 0">
+                                <button type="button" class="btn btn-primary" ng-click="exportExcel()">
+                                    <i class="fa fa-file-excel-o"></i> Export to Excel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-responsive devtable">
+                    <table class="table table-hover table-striped table-bordered mb-0" id="FinancialTrunoverReport">
+                        <thead>
+                            <tr>
+                                <th width="60">Sr.No</th>
+                                <th>District Name</th>
+                                <th>No of Functional Societies</th>
+                                <th>No of Not Updated Societies</th>
+                                <th>No of Data Updated</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="item in TrunoverDataList" ng-style="(item.district_code=='All' || item.district_name=='Total') && {'font-weight': 'bold', 'color': 'black'}">
+                                <td>
+                                    <span ng-hide="item.district_code=='All' || item.district_name=='Total'">{{$index+1}}.</span>
+                                </td>
+                                <td>{{item.district_name}}</td>
+                                <td>{{item.functional_count}}</td>
+                                <td>
+                                    <a ng-if="(item.district_name != 'Total' || item.district_code != 'All') && item.not_updated_societies_no > 0" class="cursor" ng-href="/NcdData/Financialdetails?district_code={{item.district_code}}&financial_update=0" target="_blank">
+                                        {{item.not_updated_societies_no}}
+                                    </a>
+
+                                    <span ng-if="item.district_name == 'Total' || item.district_code=='All' || item.not_updated_societies_no <= 0">
+                                        {{item.not_updated_societies_no}}
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <a ng-if="(item.district_name != 'Total' || item.district_code != 'All') && item.data_update_no > 0" class="cursor" ng-href="/NcdData/Financialdetails?district_code={{item.district_code}}" target="_blank">
+                                        {{item.data_update_no}}
+                                    </a>
+
+                                    <span ng-if="item.district_name == 'Total' || item.district_code=='All' || item.data_update_no <= 0">
+                                        {{item.data_update_no}}
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr ng-show="isNoRecord">
+                                <td colspan="{{colspan}}" style="text-align: center;">No Records</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </div>
+                <div class="clearfix"></div>
+            </div>
+        </div>
+    </div>
+</div>

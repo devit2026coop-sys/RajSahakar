@@ -1,0 +1,348 @@
+﻿@{
+    ViewBag.Title = "NCD Dashboard";
+}
+
+<style>
+    .form-control {
+        border-radius: 0;
+        box-shadow: none;
+        border-color: #d2d6de;
+    }
+
+        .form-control:not(select) {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+
+    .ncd-box {
+        background: #ecf8ee !important;
+        border: 1px dashed #ccc !important;
+        padding: 20px;
+        margin-bottom: 30px;
+        width: 100%;
+    }
+
+    fieldset legend {
+        border: none;
+        background: #bf8313;
+        width: auto;
+        color: #ffffff;
+        padding: 2px 10px;
+    }
+
+    .flexEqualCenter {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    a.backBtn {
+        padding: 3px 5px;
+        background: rgb(99,205,219);
+        color: #fff;
+        border: 0px;
+        outline: none;
+        display: inline-block;
+        text-decoration: none;
+    }
+
+        a.backBtn i {
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+    .tblthfont {
+        font-weight: bold;
+    }
+
+    .d-flex {
+        display: flex;
+    }
+
+    table thead th {
+        background-color: #64c0c5 !important;
+        color: #fff !important;
+        text-align: center;
+    }
+
+
+    .scrollable-table {
+        overflow-x: auto;
+        max-height: 900px;
+        overflow-y: auto;
+        display: block;
+    }
+
+    .table {
+        min-width: 500px; /* Adjust depending on how many columns you have */
+        /* Required for sticky columns */
+    }
+
+        .table thead th {
+            position: sticky;
+            top: 0;
+            background: #f8f9fa; /* Header background */
+            z-index: 10;
+        }
+
+        .table th {
+            white-space: nowrap;
+        }
+
+        .table td:nth-child(1),
+        .table td:nth-child(2) {
+            position: sticky;
+            left: 0;
+            background: #fff;
+            z-index: 12;
+            border-right: 1px solid #ddd;
+        }
+
+        .table th:nth-child(1),
+        .table th:nth-child(2) {
+            position: sticky;
+            left: 0;
+            background: #fff;
+            z-index: 13;
+            border-right: 1px solid #ddd;
+        }
+
+        .table td:nth-child(2),
+        .table th:nth-child(2) {
+            left: 45px;
+            width: 45px;
+            text-align: left;
+        }
+
+
+    .dashTabs > li > a {
+        border: solid 1px #dddddd !important;
+        padding: 8px 20px;
+        color: #333;
+        background: #e6feff;
+        `
+    }
+
+        .dashTabs > li > a:hover, .dashTabs > li > a:focus, .dashTabs > li.active > a, .dashTabs > li.active > a:hover {
+            border: solid 1px #dddddd !important;
+            background: #025e63 !important;
+            color: #fff !important;
+        }
+
+    .dashTabsContent {
+        border: solid 1px #dddddd !important;
+        border-top: 0px !important;
+    }
+</style>
+
+<script type="text/javascript">
+    var tableToExcel = (function () {
+        var uri = 'data:application/vnd.ms-excel;base64,'
+            , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>'
+            , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) }
+            , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
+        return function (table, name) {
+            if (!table.nodeType) table = document.getElementById(table)
+            var ctx = { worksheet: name || 'Worksheet', table: table.innerHTML }
+            window.location.href = uri + base64(format(template, ctx))
+        }
+    })()
+</script>
+<script src="~/Scripts/AngularFramework/NcdDasboard.js?v=@DateTime.Now.Ticks"></script>
+<script src="~/Scripts/zingchart.min.js"></script>
+<script src="~/Scripts/zingchart-angularjs.js"></script>
+<script src="~/Scripts/AngularFramework/ng-google-chart.min.js"></script>
+<script src="~/Scripts/loader.js"></script>
+
+<div ng-app="ncdMod" ng-controller="ncdCtrl" ng-cloak="">
+    <input type="hidden" id="hdnDistrictId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DistrictId)" />
+
+    <div class="container-fluid citizen-dash-head">
+        <div class="panel panel-default">
+            <div class="panel-heading flexEqualCenter">
+                <b><i class="fa fa-th-list"></i>&nbsp; NCD Dashboard</b>
+            </div>
+            <div class="panel-body">
+
+                <!-- Filters Row -->
+                <div class="row mb-3">
+
+                    <div class="col-sm-3">
+                        <label for="from_date">From Date</label>
+                        <input type="date" id="from_date"
+                               ng-model="ncd.from_date"
+                               class="form-control" autocomplete="off" />
+                    </div>
+
+                    <div class="col-sm-3">
+                        <label for="to_date">To Date</label>
+                        <input type="date" id="to_date" ng-model="ncd.to_date" class="form-control" autocomplete="off" />
+                    </div>
+
+                    <div class="col-sm-3">
+                        <label for="district">District</label>
+                        <select id="district" ng-model="ncd.district_code" class="form-control">
+                            <option value="0" disabled selected>{{translation.SelectOption}}</option>
+                            <option value="{{d.district_code}}" ng-repeat="d in NCDDistrictDetails">
+                                {{d.district_name}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-sm-3">
+                        <label for="prsent_functional_status">Present Functional Status</label>
+                        <select ng-model="ncd.functional_status" class="form-control">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option value="{{s.Id}}" ng-repeat="s in SocietyFunctionalStatusList">
+                                {{s.FunctionalName}}
+                            </option>
+                        </select>
+                    </div>
+
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-sm-12 text-center">
+                        <button class="btn btn-primary dev-btn" ng-click="searchDashboard()">Search</button>
+                        <button class="btn btn-primary dev-btn" ng-click="resetSearch()">Clear</button>
+                    </div>
+                </div>
+
+                <!-- Sector Society Table -->
+                <div class="row">
+                    <div class="col-sm-12">
+                        <!-- Tabs Navigation -->
+                        <ul class="nav nav-tabs dashTabs" id="dashboardTabs">
+                            <li class="active" ng-class="{active: activeTab === 'sector'}">
+                                <a href="#sectorTab" data-toggle="tab" ng-click="setActiveTab('sectorTab')">Sector Wise Cooperative</a>
+                            </li>
+                            <li ng-class="{active: activeTab === 'district'}">
+                                <a href="#districtTab" data-toggle="tab" ng-click="setActiveTab('districtTab')">District Wise Cooperative</a>
+                            </li>
+                            <li ng-class="{active: activeTab === 'sectorMembers'}">
+                                <a href="#sectorMembersTab" data-toggle="tab" ng-click="setActiveTab('sectorMembersTab')">Sector Wise Society Members</a>
+                            </li>
+                        </ul>
+
+                        <!-- Tabs Content -->
+                        <div class="tab-content p-0 dashTabsContent">
+                            <div class="tab-pane" ng-class="{'active': activeTab === 'sectorTab'}" id="sectorTab">
+                                <div class="row mt-2">
+                                    <div class="col-sm-5">
+                                        <div style="display:flex;justify-content:space-between">
+                                            <label>Sector Society List</label>
+                                            <button class="btn btn-success btn-sm"
+                                                    onclick="tableToExcel('sectorTable', 'Sector Dashboard')">
+                                                <i class="fa fa-file-excel-o"></i> Export to Excel
+                                            </button>
+                                        </div>
+                                        <table id="sectorTable" class="table table-bordered text-center mt-2">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th style="width:60px;">Sr.No</th>
+                                                    <th style="width:450px;" class="text-center">Sector Name</th>
+                                                    <th class="text-center">Numbers of Societies</th>
+                                                    <th class="text-center">Number of Members</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr ng-repeat="item in SectorList track by $index" ng-style="item.SectorName == 'Total' && {'font-weight':'bold','color':'black'}">
+                                                    <td><span ng-hide="item.SectorName=='Total'">{{$index + 1}}</span></td>
+                                                    <td class="text-left">{{item.SectorName}}</td>
+                                                    <td>{{item.NumberOfSocieties | number}}</td>
+                                                    <td>{{item.NumberOfMembers | number}}</td>
+                                                </tr>
+                                                <tr ng-show="isNoRecord">
+                                                    <td colspan="{{colspan}}" style="text-align: center;">
+                                                        No Records
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <h4 class="text-center">SECTOR WISE COOPERATIVE SOCIETIES</h4>
+                                        <div id="SectorChart" style="width:950px;height:450px; border:1px solid #ddd; padding:25px; background:white;" ng-if="SectorList && SectorList.length > 0">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane" ng-class="{'active': activeTab === 'districtTab'}" id="districtTab">
+                                <div class="row">
+                                    <div class="col-sm-5">
+                                        <div style="display:flex;justify-content:space-between">
+                                            <label>District Society List</label>
+                                            <button class="btn btn-success btn-sm"
+                                                    onclick="tableToExcel('districtTable', 'District Dashboard')">
+                                                <i class="fa fa-file-excel-o"></i> Export to Excel
+                                            </button>
+                                        </div>
+                                        <table id="districtTable" class="table table-bordered text-center mt-2">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th style="width:60px;">Sr.No</th>
+                                                    <th style="width:450px;">District</th>
+                                                    <th class="text-center">No. of Cooperatives</th>
+                                                    <th class="text-center">No. of Members</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr ng-repeat="item in DistrictList track by $index" ng-style="item.DistrictName == 'Total' && {'font-weight':'bold','color':'black'}">
+                                                    <td><span ng-hide="item.DistrictName=='Total'"> {{$index + 1}}</span></td>
+                                                    <td class="text-left">{{item.DistrictName}}</td>
+                                                    <td>{{item.NumberOfCooperatives | number}}</td>
+                                                    <td>{{item.NumberOfMembers | number}}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <div class="col-sm-6 mt-4">
+                                        <h4 class="text-center">Based on No. of Societies & Members</h4>
+                                        <div id="DistrictPieChart"
+                                             style="width:950px;height:450px;border:1px solid #ccc;background:white;">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane" ng-class="{'active': activeTab === 'sectorMembersTab'}" id="sectorMembersTab">
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <div style="display:flex;justify-content:space-between">
+                                            <label>Sector-wise Society Members</label>
+                                            <button class="btn btn-success btn-sm"
+                                                    onclick="tableToExcel('sectorMembersTable', 'Sector Members Dashboard')">
+                                                <i class="fa fa-file-excel-o"></i> Export to Excel
+                                            </button>
+                                        </div>
+                                        <div class="table-responsive scrollable-table mt-2">
+                                            <table id="sectorMembersTable" class="table table-bordered text-center">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th ng-repeat="col in TableColumns track by $index">{{col}}</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="row in SectorWiseDistrictList track by $index" ng-if="SectorWiseDistrictList && SectorWiseDistrictList.length > 0">
+                                                        <td ng-repeat="col in TableColumns track by $index">{{row[col] || 0}}</td>
+                                                    </tr>
+                                                    <tr ng-if="!SectorWiseDistrictList || SectorWiseDistrictList.length === 0">
+                                                        <td colspan="{{TableColumns.length}}" class="text-left">Record not found</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

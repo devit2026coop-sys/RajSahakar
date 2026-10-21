@@ -1,0 +1,383 @@
+﻿@{
+    ViewBag.Title = "Call Center OD Cases";
+}
+<script src="~/Scripts/AngularFramework/PLDBSummaryInterestSubventionODCasesList.js?v=1.13"></script>
+<link href="~/Scripts/google_hindi/google_transliteration.css" rel="stylesheet" />
+<script src="~/Scripts/xlsx.full.min.js"></script>
+
+<style>
+    .inputapi-transliterate-indic-suggestion-menu {
+        z-index: 99999 !important;
+        display: block;
+    }
+
+    .table > tbody > tr > td, .table > tbody > tr > th, .table > tfoot > tr > td, .table > tfoot > tr > th, .table > thead > tr > td {
+        padding: 1px;
+        padding-right: 5px;
+        padding-left: 5px;
+    }
+</style>
+<div ng-app="ApplicationFlowODCasesModule" ng-controller="ApplicationFlowODCasesCont" ng-cloak="">
+    <div>
+        <div class="col-md-12">
+            <h3 class="citizen-dash-head ng-binding" style="margin-top:0px;">Call Center OD Cases</h3>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#">  {{translation.Home}}</a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;"> {{translation.New}} </span>
+                        <i class="fa fa-angle-right"> </i>
+                        <span style="margin: 0 5px;"> Call Center OD Cases </span>
+                    </li>
+
+                </ul>
+            </div>
+        </div>
+        <div style="margin-top:30px;padding-top:30px">
+            <div class="col-md-12">
+                <div class="citizen-dash-head" style="overflow: hidden;">
+                    <div class="table-dropdown" id="search-filter" style="margin-bottom: 5px;">
+                        <div class="col-lg-12" style="margin-bottom: 5px; padding-left: 0;">
+                            <input type="hidden" id="hdnRoleId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).RoleId)" />
+                            <input type="hidden" id="hdnDistrictId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DistrictId)" />
+                            <input type="hidden" id="hdnPldbId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).PLDBId)" />
+                            <input type="hidden" id="hdnPldbBranchId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).PLDBBrancchId)" />
+                            <input type="hidden" id="hdnLevelId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).LevelId)" />
+
+
+                            <div class="col-lg-2 margin-Top20" style="padding-left: 0;" id="ddlPLDBID">
+                                <label for="PLDB_ID">{{ translation.PLDB}} </label>
+                                <select id="PLDB_ID" name="PLDB_ID" ng-model="PLDB_ID" class="form-control" ng-init="PLDB_ID='0'" ng-change="PLDBBranchList('0')">
+                                    <option value="0" disabled>{{translation.SelectOption}}</option>
+                                    <option ng-repeat="itemPLDB in PLDBList  track by itemPLDB.PldbId " value="{{itemPLDB.PldbId}}">
+                                        {{itemPLDB.PLDBName}}
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="col-lg-2 margin-Top20" style="padding-left: 0;" id="ddlPldbBranchID">
+                                <label for="PLDB_Branch_ID">{{ translation.Branch}}</label>
+                                <select ng-model="PLDB_Branch_ID" name="PLDB_Branch_ID" id="PLDB_Branch_ID" class="form-control" ng-init="PLDB_Branch_ID='0'">
+                                    <option value="0" disabled>{{translation.SelectOption}}</option>
+                                    <option ng-repeat="itemBlock in PLDBBranches " value="{{itemBlock.BLOCK_ID}}">
+                                        {{_language =='en-us' ?  itemBlock.BLOCK_ENG : itemBlock.BLOCK_MANGAL}}
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-2">
+                                <label for="search">{{translation.Search}}:</label>
+                                <input ng-model="q" name="SearchText" id="search" class="form-control" placeholder={{translation.filttertext}} autocomplete="off">
+                            </div>
+                            @*<div class="col-md-1">
+                                <label for="search">Land Mortgage</label>
+                                <select name="IsLandMortgaged" ng-model="IsLandMortgaged" class="form-control" ng-change="searchRequest(GetOTSList)">
+                                    <option value="">{{translation.SelectOption}}</option>
+                                    <option value="Y">Yes</option>
+                                    <option value="N">No</option>
+                                </select>
+                            </div>*@
+                            <div class="col-md-2">
+                                <label for="search">{{translation.ItemPerPage}}:</label>
+                                <input type="number" min="1" max="1000" class="form-control" ng-model="pageSize">
+                            </div>
+                            @*<div class="col-lg-12" style="margin-top: 10px;padding-left: 0px;" ng-init="Cases103='B'">
+                                <div>
+                                    <label><input type="radio" value="NC" name="ApplicationStatus" ng-model="Cases103" ng-click="searchRequest(GetOTSList)">Normal Cases</label>
+                                    <label><input type="radio" value="103C" name="ApplicationStatus" ng-model="Cases103" ng-click="searchRequest(GetOTSList)">103 Cases</label>
+                                    <label><input type="radio" value="B" name="ApplicationStatus" ng-model="Cases103" ng-click="searchRequest(GetOTSList)" checked>Both</label>
+                                </div>
+                            </div>*@
+                            <div class="col-md-4 margin-Top20">
+                                <label>&nbsp;</label><br>
+                                <button type="button" ng-click="searchRequest(GetOTSList)" class="btn btn-primary dev-btn ng-binding">{{translation.Search}}</button>
+                                <button type="button" ng-show="showClearButton" ng-click="ClearSearch()" class="btn btn-primary dev-btn ng-binding">{{translation.Clear}}</button>
+                                <!-- Add New -->
+                                <!--<a href="../PLDB/PLDBSummaryODApplicationForm" class="btn btn-success dev-btn ng-binding" title="Add New Application" target="_blank">
+                                    <i class="fa fa-plus"></i> Add
+                                </a>-->
+                                <button type="button" ng-click="exportAllToExcel()" class="btn btn-success dev-btn">
+                                    <i class="fa fa-file-excel-o"></i> Export Excel
+                                </button>
+                            </div>
+                            <div class="col-md-8 margin-Top20" style="text-align:right">
+                                <label>&nbsp;</label><br>
+                                <button type="button" class="btn btn-primary" ng-show="chkBulkSelected" ng-click="DownloadMultipleOTSForm()">{{translation.Download}}</button>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div style="overflow-x: auto;">
+                        <table id="OTSListTable" class="table table-responsive devtable" style="">
+                            <thead>
+                                <tr>
+                                    <th rowspan="2" style="white-space: nowrap;">क्रम संख्या</th>
+                                    <th rowspan="2" style="white-space: nowrap;">प्राथमिक बैंक</th>
+                                    <th rowspan="2" style="white-space: nowrap;">शाखा</th>
+                                    <th rowspan="2">ऋणी का नाम</th>
+                                    <th rowspan="2" style="white-space: nowrap;">पिता / पति का नाम</th>
+                                    <th rowspan="2" style="white-space: nowrap;">मोबाइल नंबर</th>
+                                    <th rowspan="2">निवासी</th>
+                                    <th rowspan="2" style="white-space: nowrap;">नोमिनी का नाम</th>
+                                    <th rowspan="2" style="white-space: nowrap;">नोमिनी का मोबाइल नं.</th>
+                                    <th rowspan="2" style="text-align:center;">खाता संख्या</th>
+                                    <th rowspan="2">सेक्टर</th>
+                                    <th rowspan="2">उद्देश्य</th>
+                                    <th rowspan="2" style="white-space: nowrap;">अंतिम किस्त भुगतान दिनांक</th>
+                                    <th rowspan="2" style="white-space: nowrap;">कुल ऋण राशि</th>
+                                    <th rowspan="2" style="white-space: nowrap;">अवधिपार दिनांक</th>
+
+                                    <th colspan="5" style="text-align:center;">दिनांक 01.07.2025 को अवधिपार</th>
+                                    <th colspan="4" style="text-align:center;">दिनांक 01.07.2025 के पश्चात की मांग</th>
+                                    <th rowspan="2" style="white-space: nowrap;"> कुल योग</th>
+                                    <th colspan="4" style="text-align:center;">दिनांक 30.06.2025 के पश्चात वसूली</th>
+
+                                </tr>
+
+                                <tr>
+                                    <!-- OD -->
+                                    <th>मूल</th>
+                                    <th>बीमा</th>
+                                    <th>ब्याज</th>
+                                    <th>द. ब्याज</th>
+                                    <th>कुल</th>
+
+                                    <!-- Demand -->
+                                    <th>मूल</th>
+                                    <th>ब्याज</th>
+                                    <th>द. ब्याज</th>
+                                    <th>कुल</th>
+
+                                    <!-- Recovery -->
+                                    <th>मूल</th>
+                                    <th>ब्याज</th>
+                                    <th>द. ब्याज</th>
+                                    <th>कुल</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="OTS in OTSList">
+                                    <td>
+                                        {{(((DataPagingDetails.PageNumber - 1) * DataPagingDetails.PageSize) + 1)+$index}}
+                                        @*<input type="checkbox" ng-model="OTS.selected" ng-change="toggleSelection(OTS)">*@
+
+                                    </td>
+                                    @*
+                                    <td style="text-transform:uppercase;">
+                                        *@
+
+                                        @*
+                                    <td>{{$index+1}}</td>*@
+                                    <td>{{OTS.PLDBName}}</td>
+                                    <td>{{OTS.PLDBBranch}}</td>
+                                    <td>{{OTS.ApplicantName}}</td>
+                                    <td>{{OTS.FatherHusbandName}}</td>
+                                    <td>{{OTS.MobileNo}}</td>
+                                    <td>{{OTS.Village}}</td>
+                                    <td>{{OTS.NomineeName}}</td>
+                                    <td>{{OTS.NomineeMobileNo}}</td>
+                                    <td>{{OTS.LoanAccNo}}</td>
+                                    <td style="white-space: nowrap;">{{OTS.Sector}}</td>
+                                    <td style="white-space: nowrap;">{{OTS.Purpose}}</td>
+                                    <td style="white-space: nowrap;">{{OTS.DateOfFirstDisbursement | date:'dd-MM-yyyy' }}</td>
+                                    <td>{{OTS.TotalDisbursedAmt}}</td>
+                                    <td style="white-space: nowrap;">{{OTS.DateOfOD | date:'dd-MM-yyyy' }}</td>
+
+                                    <td>{{OTS.ODPrincipal}}</td>
+                                    <td>{{OTS.ODInsurancePremium}}</td>
+                                    <td>{{OTS.ODInterest}}</td>
+                                    <td>{{OTS.ODPenalInterast}}</td>
+                                    <td>{{OTS.ODTotal}}</td>
+
+                                    <td>{{OTS.CDPrincipal}}</td>
+                                    <td>{{OTS.CDInterest}}</td>
+                                    <td>{{OTS.CDPenalInterest}}</td>
+                                    <td>{{OTS.CDTotal}}</td>
+
+                                    <td>{{OTS.ODCDTotal}}</td>
+
+                                    <td>{{OTS.Principal}}</td>
+                                    <td>{{OTS.OtherCharges}}</td>
+                                    <td>{{OTS.IntSubvention}}</td>
+                                    <td>{{OTS.ReccoveryTotalAmount}}</td>
+
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-md-12">
+                        <div ng-if="DataPagingDetails.TotalPages>1" class="dataTables_paginate paging_simple_numbers" id="dataTables-example_paginate">
+                            <div class="dataTables_info" id="dataTables-example_info" role="status" aria-live="polite">
+                                Total Records: {{DataPagingDetails.TotalRecords}}
+                            </div>
+                            <ul class="pagination pagination_1" style="margin-left: 10px !important;">
+                                <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« First</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« Previous</span></li>
+
+                                <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest('1',GetOTSList)" style="cursor: pointer;">
+                                    <span>«First</span>
+                                </li>
+                                <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest(DataPagingDetails.PageNumber-1,GetOTSList)" style="cursor:pointer;">
+                                    <span>« Previous</span>
+                                </li>
+                                <li class="{{n==DataPagingDetails.PageNumber?'active':''}}" style="{{n==DataPagingDetails.PageNumber?'':'cursor: pointer'}}" ng-repeat="n in PagingRange(DataPagingDetails.StartPageNumber,DataPagingDetails.EndPageNumber,DataPagingDetails.TotalPages)" ng-click="pageRequest(n,GetOTSList)"><span>{{n}}</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Next</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Last</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber!= DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.PageNumber+1,GetOTSList)" style="cursor:pointer;">
+                                    <span>Next »</span>
+                                </li>
+                                <li ng-if="DataPagingDetails.PageNumber != DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.TotalPages,GetOTSList)" style="cursor:pointer;">
+                                    <span>Last »</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="pendingLevelModal" class="modal fade" role="dialog" style="color:#444;" data-backdrop="static">
+            <div class="modal-dialog" style="min-width:500px;max-width:800px;">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <b class="text-info">बंधक विवरण के लिए लंबित स्तर संपादित करें</b>
+                        <a data-dismiss="modal" class="pull-right"><i class="fa fa-times"></i></a>
+                    </div>
+                    <div class="modal-body" style="display:grid;">
+                        <form id="pendingLevelForm" ng-submit="SavePendingLevelData()">
+                            <div id="otherDetails">
+                                <div class="col-md-12">
+                                    <div class="row" ng-show="PLDB.IsNormalCase==0">
+                                        <div class="col-sm-6">
+                                            <div class="form-group ">
+                                                <label for="PendingLevel"> धारा 103 के तहत लम्बित स्तर</label>
+                                                <select id="PendingLevel" ng-model="PLDB.PendingLevelId" class="form-control pending-level" ng-disabled="allDisable">
+                                                    <option value="0" disabled>{{translation.SelectOption}}</option>
+                                                    <option ng-repeat="li in PendingLevelList track by li.OtsPendingLevelId" value="{{li.OtsPendingLevelId}}" ng-selected="li.OtsPendingLevelId==PLDB.PendingLevelId">
+                                                        {{li.Name}}
+                                                    </option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="form-group col-sm-6" ng-show="PLDB.PendingLevelId==6">
+                                            <label for="MutationNo">नामान्तरण सं.</label>
+                                            <input type="text" class="form-control mutation-no" id="MutationNo" ng-model="PLDB.MutationNo" ng-disabled="allDisable" placeholder="नामान्तरण सं." autocomplete="off">
+                                        </div>
+                                        <div class="form-group col-sm-6" ng-show="PLDB.PendingLevelId==6">
+                                            <label for="MutationDate">दिनांक</label>
+                                            <input type="date" class="form-control mutation-date" id="MutationDate" ng-model="PLDB.MutationDate" ng-disabled="allDisable" autocomplete="off">
+                                        </div>
+                                        <div class="col-sm-6 form-group" ng-show="PLDB.PendingLevelId==6">
+                                            <label>दस्तावेज़ (जमाबंदी)<span class="error">(max 5MB)</span>:</label>
+                                            <div ng-show="PLDB.MutationDocument!=null && PLDB.MutationDocument!=''">
+                                                <a href="~/Content/OTS/MutationDoc/{{PLDB.MutationDocument}}" class="btn btn-primary dev-btn" target="_blank">देखें</a>
+                                            </div>
+                                            <div ng-show="PLDB.MutationDocument==null || PLDB.MutationDocument==''">
+                                                <input type="file" accept=".pdf" class="form-control mutation-doc" checkmaxsize="5120" multiple onchange="angular.element(this).scope().FileUploader(this.files,'MutationDocument')" />
+                                                <input type="hidden" ng-model="PLDB.MutationDocument" id="MutationDocument" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row" ng-show="PLDB.IsNormalCase==1">
+                                        <div class="col-md-12">
+                                            <label>क्या ऋण नीति अनुसार भूमि बैंक पक्ष में रहन दर्ज आवश्यक हैं?</label>
+                                            <div style="display:inline-flex;min-width:400px;">
+                                                <label> <input type="radio" name="IsMortgageMandatory" class="ml-mortgage-mandatory" value="1" ng-model="PLDB.IsMortgageMandatory" /> हाँ</label>
+                                                <label> <input type="radio" name="IsMortgageMandatory" class="ml-mortgage-mandatory" value="0" ng-model="PLDB.IsMortgageMandatory" /> नहीं</label>
+                                            </div>
+                                            <div class="row" ng-show="PLDB.IsMortgageMandatory==1">
+
+                                                <div class="form-group col-md-6">
+                                                    <label for="MLPendingLevel">रहन से वंचित लम्बित स्तर</label>
+                                                    <select id="MLPendingLevel" ng-model="PLDB.LandMortgagedPendingLevelId" class="form-control ml-pending-level" ng-disabled="allDisable">
+                                                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                                                        <option ng-repeat="li in MLPendingLevelList" value="{{li.OtsPendingLevelId}}">
+                                                            {{li.Name}}
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group col-md-6" ng-show="PLDB.LandMortgagedPendingLevelId==6">
+                                                    <label for="MLMutationNo">नामान्तरण सं.</label>
+                                                    <input type="text" class="form-control ml-mutation-no" id="MLMutationNo" ng-model="PLDB.LandMortgagedMutationNo" ng-disabled="allDisable" placeholder="नामान्तरण सं." autocomplete="off">
+                                                </div>
+                                                <div class="form-group col-md-6" ng-show="PLDB.LandMortgagedPendingLevelId==6">
+                                                    <label for="MLMutationDate">दिनांक</label>
+                                                    <input type="date" class="form-control ml-mutation-date" id="MLMutationDate" ng-model="PLDB.LandMortgagedMutationDate" ng-disabled="allDisable" autocomplete="off">
+                                                </div>
+                                                <div class="col-sm-6 form-group" ng-show="PLDB.LandMortgagedPendingLevelId==6">
+                                                    <label>दस्तावेज़ (जमाबंदी)<span class="error">(max 5MB)</span>:</label>
+                                                    <div ng-show="PLDB.LandMortgagedMutationDocument!=null && PLDB.LandMortgagedMutationDocument!=''">
+                                                        <a href="~/Content/OTS/MutationDoc/{{PLDB.LandMortgagedMutationDocument}}" class="btn btn-primary dev-btn" target="_blank">देखें</a>
+                                                    </div>
+                                                    <div ng-show="PLDB.LandMortgagedMutationDocument==null || PLDB.LandMortgagedMutationDocument==''">
+                                                        <input type="file" accept=".pdf" class="form-control ml-mutation-doc" checkmaxsize="5120" multiple onchange="angular.element(this).scope().FileUploader(this.files,'LandMortgagedMutationDocument')" />
+                                                        <input type="hidden" ng-model="PLDB.LandMortgagedMutationDocument" id="ML_MutationDocument" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-12 text-center">
+                                            @if (((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).RoleId == 10188 ||
+                                            ((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).RoleId == 10189 ||
+                                            ((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).RoleId == 10236)
+                                            {
+                                            <input type="submit" class="btn btn-primary dev-btn" value="संचित करें" />
+                                            <input type="button" class="btn btn-danger" value="रद्द करें" data-dismiss="modal" />
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="caseNotMortgageModal" class="modal fade" role="dialog" style="color:#444;" data-backdrop="static">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <b class="text-info">रहन से वंचित मामले में संपादन </b>
+                        <a data-dismiss="modal" class="pull-right"><i class="fa fa-times"></i></a>
+                    </div>
+                    <div class="modal-body" style="display:grid;">
+                        <form id="pendingLevelForm" ng-submit="SaveCaseNotMortgageStatus()">
+                            <div id="otherDetails">
+                                <div class="col-md-12">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <label>यदि मामला रहन से वंचित है तो हाँ (Yes) चुने </label>
+                                            <div style="display:inline-flex;min-width:400px;">
+                                                <label> <input type="radio" name="CaseNotMortgagedStatus" class="ml-mortgage-mandatory" value="1" ng-model="PLDB.CaseNotMortgagedStatus" /> हाँ</label>
+                                                <label> <input type="radio" name="CaseNotMortgagedStatus" class="ml-mortgage-mandatory" value="0" ng-model="PLDB.CaseNotMortgagedStatus" /> नहीं</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-12 text-center">
+                                            @if (((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).RoleId == 10235 ||
+                                            ((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).RoleId == 10236)
+                                            {
+                                            <input type="submit" class="btn btn-primary dev-btn" value="संचित करें" />
+                                            <input type="button" class="btn btn-danger" value="रद्द करें" data-dismiss="modal" />
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="se-pre-con"></div>
+    </div>
+</div>
+

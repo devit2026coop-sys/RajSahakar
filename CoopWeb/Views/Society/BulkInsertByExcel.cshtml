@@ -1,0 +1,332 @@
+﻿<script src="~/Scripts/AngularFramework/BulkInsert.js?id=5"></script>
+<script>
+    function isNumber(evt) {
+        var iKeyCode = (evt.which) ? evt.which : evt.keyCode
+        if (iKeyCode != 46 && iKeyCode > 31 && (iKeyCode < 48 || iKeyCode > 57))
+            return false;
+
+        return true;
+    }
+    function ValidateAlpha(evt) {
+        var keyCode = (evt.which) ? evt.which : evt.keyCode
+        if ((keyCode < 65 || keyCode > 90) && (keyCode < 97 || keyCode > 123) && keyCode != 32)
+
+            return false;
+        return true;
+    };
+</script>
+<style>
+    .dev-popup-body .modal-dialog {
+        width: 767px;
+    }
+</style>
+<div ng-app="BulkInsertMod" ng-controller="BulkInsertCnt">
+    <div class="col-md-12">
+        <h3 class="citizen-dash-head"> {{translation.ExcelUpload}} <a target="_blank" style="float:right; font-size:12px" href="~/Content/UserManual/BulkUpload.pdf">उपयोगकर्ता पुस्तिका</a></h3>
+    </div>
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="devpage-breadcrumb">
+            <ul class="page-breadcrumb">
+                <li class="dev-page-br">
+                    <i class="fa fa-home"> </i>
+                    <a href="#"> {{translation.Home}}</a>
+                    <i class="fa fa-angle-right"> </i>
+                </li>
+                <li style="float: left">
+                    <span style="margin: 0 5px;">  {{translation.New}}</span>
+                    <i class="fa fa-angle-right"> </i>
+                    <span style="margin: 0 5px;"> {{translation.ExcelUpload}} </span>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="col-lg-12 form-group">
+        <div class="citizen-dash-head">
+            <div class="col-lg-3 btn-lg">{{translation.Act}}<span class="error">*</span></div>
+            <div class="col-lg-3">
+                <select ng-model="ActIdVal" class="form-control" ng-init="ActIdVal='0'" ng-change="ActChange()">
+                    <option value="0">{{translation.SelectOption}}</option>
+                    @*
+                    <option value="111">Credit Cooperative Society</option>*@
+                    <option ng-repeat="itemAct in ActList" value="{{itemAct.ActId}}">
+                        {{_language =='en-us' ?  itemAct.ActNameEn : itemAct.ActNameHi}}
+                    </option>
+                </select>
+            </div>
+            <div class="col-lg-3 btn-lg"><a id="ExlSampleLink" href="~/Content/SocietyExcel/SocietySample.xlsx">DownLoad Act 1958 Sample</a></div>
+            <div class="col-lg-3">&nbsp;</div>
+            <div class="clearfix"></div>
+
+            <div class="col-lg-3 btn-lg">{{ translation.ExcelUpload}}<span class="error">*</span></div>
+            <div class="col-lg-3">
+                <input type="file" style="margin-top:7px;padding-top:7px; border:1px solid blue;" filetype='excel' name="File" id="fluBulkInsert" class="btn btn-outline-primary btn-lg active" ng-model="BulkInsert.BulkInsertFile" onchange="angular.element(this).scope().UploadBulkInsertFile(this.files)">
+            </div>
+            <div class="col-lg-3 btn-lg">&nbsp;</div>
+            <div class="col-lg-3">
+                @*<a id="ExlSampleLink" href="~/Content/SocietyExcel/SocietySample.xlsx">DownLoad Act 1958 Sample</a>*@
+            </div>
+            <div class="clearfix"></div>
+            <br /><br />
+            <div class="col-lg-12">
+                <ul style="margin-left: 20px;">
+                    <li>Act 1958 /2001  के लिए CEO का विवरण दर्ज करना अनिवार्य नहीं हैं | किन्तु  यथा संभव हो इसे दर्ज करें |</li>
+                    <li>आप संबंधित  ACT की Excel  डाउनलोड करके ही डेटा  अपलोड करें |</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-group col-md-12">
+        <div class="dev-align-btn">
+            <button type="submit" class="btn btn-primary dev-btn" ng-click="SaveBulkInsert()">{{ translation.Submit}}</button>
+            <button type="button" class="btn btn-primary dev-btn" ng-click="ClearBulkInsertForm()">{{ translation.Clear}}</button>
+            <a class="btn btn-primary dev-btn" style="text-transform:capitalize;" href="../User/DashBoard"> Back </a>
+        </div>
+    </div>
+    <div class="se-pre-con"></div>
+    <div class="form-group col-md-12" ng-show="ExlFileShow">
+        <div class="citizen-dash-head table-responsive">
+            <table class="table table-responsive devtable" style="margin-top: 30px;color:black" id="a">
+                <thead>
+                    <tr>
+                        <th>
+                            {{translation.SRNO}}
+                        </th>
+                        <th>
+                            {{translation.File}}
+                        </th>
+                        <th>
+                            {{translation.CreationDate}}
+                        </th>
+                        <th>
+                            {{translation.Total}}
+                        </th>
+                        <th>
+                            {{translation.FailedRecord}}
+                        </th>
+                        <th>
+                            {{translation.Action}}
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="itemm in SocityExcelDetailsData">
+                        <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                        <td>
+                            <a ng-if="itemm.RecordType==1" href="~/Content/SocietyExcel/{{itemm.ExcelSheetName}}">View File</a>
+                            <a ng-if="itemm.RecordType==2" href="javascript:void(0)">{{itemm.ExcelSheetName}}</a>
+                             
+                        </td>
+                        <td>{{itemm.CreationDate}}</td>
+                        <td><a href="javascript:void(0)" ng-click="GetExlSociety(itemm.Id,1,itemm.RecordType)">{{itemm.TotSocieties}}</a></td>
+                        <td><a href="javascript:void(0)" ng-click="GetExlSociety(itemm.Id,0,itemm.RecordType)">{{itemm.FaildRecord}}</a></td>
+                        <td><a ng-if="itemm.TotSocieties!=0" href="javascript:void(0)" ng-click="GetExlSociety(itemm.Id,1,itemm.FaildRecord)"><i class="fa fa-edit editicon-edit"></i></a></td>
+                    </tr>
+                </tbody>
+            </table>
+
+
+
+        </div>
+    </div>
+    <div class="form-group col-md-12" ng-show="ExlSocietyShow">
+        <div class="citizen-dash-head table-responsive">
+            <div class="table-dropdown">
+                <div class="col-md-3" style="padding-left: 0;">
+                    <label for="search">{{translation.Search}}:</label>
+                    <input ng-model="q" id="search" class="form-control" placeholder={{translation.filttertext}} autocomplete="off">
+                </div>
+                <div class="col-md-2">
+                    <label for="search">{{translation.ItemPerPage}}:</label>
+                    <input type="number" min="1" max="100" class="form-control" ng-model="pageSize">
+                </div>
+            </div>
+            <table class="table table-responsive devtable" style="margin-top: 30px;color:black" id="a">
+                <thead>
+                    <tr>
+                        <th>{{translation.SRNO}}</th>
+                        <th>{{translation.SocietyName}}</th>
+                        <th>{{translation.RegistrationNo}}</th>
+                        <th>{{translation.RegistrationDate}}</th>
+                        <th>{{translation.Act}}</th>
+                        <th>{{translation.Type}}</th>
+                        <th>{{translation.CEOName}}</th>
+                        <th>{{translation.ContactNo}}</th>
+                        <th>{{translation.AADHARNo}}</th>
+                        <th>{{translation.District}}</th>
+                        <th>{{translation.City}}</th>
+                        <th>{{translation.PanchayatSamiti}}</th>
+                        <th>Edit</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @*
+                    <tr ng-repeat="itemm in ExlSocietyDetailsData">*@
+                    <tr dir-paginate="itemm in ExlSocietyDetailsData | filter:q | orderBy:colsort:reverseSort | itemsPerPage: pageSize" current-page="currentPage" pagination-id="PageExlSocietyDetailsData">
+                        <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                        <td><labl ng-if="itemm.show">{{itemm.SocietyName}}</labl> <input class="form-control" ng-if="!itemm.show" type="text" ng-model="itemm.SocietyName" autocomplete="off"></td>
+                        <td><labl ng-if="itemm.show">{{itemm.RegistrationNo}}</labl><input class="form-control" ng-if="!itemm.show" type="text" ng-model="itemm.RegistrationNo" autocomplete="off"></td>
+                        <td><labl ng-if="itemm.show">{{itemm.RegistrationDate}}</labl><input class="form-control" ng-if="!itemm.show" type="text" ng-model="itemm.RegistrationDate" autocomplete="off"></td>
+                        <td>{{itemm.ActNameEn}}</td>
+                        @*<td ng-show="itemm.TypeameEng!=''">*@
+                        <td>
+
+                            <labl ng-if="itemm.show">{{itemm.TypeameEng}}</labl>
+                            <select ng-if="!itemm.show" {{itemm.TypeameEng}} ng-model="itemm.SocietyTypeId" class="form-control" id="ddrSocietyTypeId">
+                                <option value="0">{{translation.SelectOption}}</option>
+                                <option ng-repeat="SocietyType in SocietyTypeList" value="{{SocietyType.SocietyTypeId}}">
+                                    {{_language =='en-us' ?  SocietyType.TypeameEng : SocietyType.TypeNameHin}}
+                                </option>
+                            </select>
+
+
+                        </td>
+                        @*<td ng-show="itemm.TypeameEng==''">{{itemm.Sports}} <br /> {{itemm.ISRSSC}}</td>*@
+                        <td><labl ng-if="itemm.show">{{itemm.Name}}</labl><input class="form-control" ng-if="!itemm.show" type="text" ng-model="itemm.Name" value="{{itemm.Name}}" autocomplete="off"   maxlength="30" onKeyPress="return ValidateAlpha(event);"></td>
+                        <td><labl ng-if="itemm.show">{{itemm.ContactNo}}</labl><input class="form-control" ng-if="!itemm.show" type="text" ng-model="itemm.ContactNo" value="{{itemm.ContactNo}}" maxlength="10" autocomplete="off"  onKeyPress="return isNumber(event);"></td>
+                        <td><labl ng-if="itemm.show">{{itemm.Aadh}}</labl><input class="form-control" type="text" ng-if="!itemm.show" ng-model="itemm.Aadh" value="{{itemm.Aadh}}" autocomplete="off" maxlength="12"  onKeyPress="return isNumber(event);"></td>
+                        <td>{{itemm.DISTRICT_ENG}}</td>
+                        <td>{{itemm.CITY_ENG}}</td>
+                        <td>{{itemm.BLOCK_ENG}}</td>
+                        <td>
+                            <a ng-if="itemm.show" href="javascript:void(0);" ng-click="EditShowRow(itemm,pageSize *(currentPage-1)+$index)"><i class="fa fa-edit"></i></a>
+                            <a ng-if="!itemm.show" href="javascript:void(0);" ng-click="SaveEditData(itemm,pageSize *(currentPage-1)+$index)"><i class="fa fa-save"></i></a><br />
+                            <a ng-if="!itemm.show" href="javascript:void(0);" ng-click="CancelEditData(itemm,pageSize *(currentPage-1)+$index)"><i class="fa fa-undo"></i></a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="14"><a class="btn btn-primary dev-btn" style="text-transform:capitalize;" href="javascript:void(0);" ng-click="ExlSocietyShow=false;ExlFileShow=true;"> Back </a></td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="col-md-10">
+                <div class="text-center">
+                    <dir-pagination-controls boundary-links="true" pagination-id="PageExlSocietyDetailsData" on-page-change="pageChangeHandler(newPageNumber)" template-url="/dirPagination.tpl.html"></dir-pagination-controls>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <h5 class="dev-page"> {{translation.Page}}: {{ currentPage }} </h5>
+            </div>
+
+        </div>
+    </div>
+    <div class="dev-popup-body modal fade" id="myModals" role="dialog" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" >&times;</button>
+                    <h4 class="modal-title"> Bulk insert Society Data </h4>
+                </div>
+                <div class="modal-body">
+                    <form class="dev-search-form" name="MySchemeForm" style="overflow: hidden;">
+
+
+
+                        <table class="table devtable">
+                            <thead>
+                                <tr>
+                                    <th>SocietyName</th>
+                                    <th>RegistrationNo</th>
+                                    <th>RegistrationDate</th>
+                                    <th>Act</th>
+                                    <th>CEOName</th>
+                                    <th>Action</th>
+
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="items in SocietiesDetails">
+                                    <td style="color:black">{{items.SocietyName}}</td>
+                                    <td style="color:black">{{items.RegistrationNo}}</td>
+                                    <td style="color:black">{{items.RegistrationDate}}</td>
+                                    <td style="color:black">{{items.Act}}</td>
+                                    <td style="color:black">{{items.CEOName}}</td>
+                                    <td> <button type="submit" class="btn btn-primary" ng-click="DeleteDuplicateData(items.SocietyID)">Remove</button></td>
+
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="form-group">
+                            <div class="dev-menu-btn">
+
+                                <button type="submit" class="btn btn-primary" data-dismiss="modal">Cancel</button>
+                            </div>
+                        </div>
+                    </form>
+
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <div class="form-group col-md-12" ng-show="ExlSocietyShowFail">
+        <div class="citizen-dash-head table-responsive">
+            <table class="table table-responsive devtable" style="margin-top: 30px;color:black" id="a">
+                <thead>
+                    <tr>
+                        <th>{{translation.SRNO}}</th>
+                        <th>{{translation.SocietyName}}</th>
+                        <th>{{translation.RegistrationNo}}</th>
+                        <th>{{translation.RegistrationDate}}</th>
+                        <th>{{translation.Act}}</th>
+                        <th>{{translation.Type}}</th>
+                        <th>{{translation.CEOName}}</th>
+                        <th>{{translation.ContactNo}}</th>
+                        <th>{{translation.AADHARNo}}</th>
+                        <th>{{translation.District}}</th>
+                        <th>{{translation.City}}</th>
+                        <th>{{translation.PanchayatSamiti}}</th>
+                        <th>{{translation.Reasion}}</th>
+                        <th>Delete</th>
+
+                    </tr>
+                </thead>
+                <tbody>
+                    @*
+                    <tr ng-repeat="itemm in ExlSocietyDetailsDataFail">*@
+                    <tr dir-paginate="itemm in ExlSocietyDetailsDataFail | filter:q | orderBy:colsort:reverseSort | itemsPerPage: pageSize" current-page="currentPage" pagination-id="PageExlSocietyDetailsDataFail">
+                        <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                        <td>
+                            @*<a href="~/Content/SocietyExcel/{{itemm.ExcelSheetName}}">View File</a>*@
+                            {{itemm.SocietyName}}
+                        </td>
+                        <td>{{itemm.RegistrationNo}}</td>
+                        <td>{{itemm.RegistrationDateNew}}</td>
+                        <td>{{itemm.Act}}</td>
+                        <td ng-show="itemm.SocietyType!=''">{{itemm.SocietyType}}</td>
+                        <td ng-show="itemm.SocietyType==''">{{itemm.Sports}} <br /> {{itemm.StateDistrictlevel}}</td>
+                        <td>{{itemm.CEOName}}</td>
+                        <td>{{itemm.CEOContactNo}}</td>
+                        <td>{{itemm.CEOAadhar}}</td>
+                        <td>{{itemm.SocietyOfficeDistrict}}</td>
+                        <td>{{itemm.SocietyOfficeCity}}</td>
+                        <td>{{itemm.SocietyOfficePanchayatSamiti}}</td>
+                        <td>{{itemm.Reasion}}</td>
+                        <td>
+                            <i class="fa fa-trash btn btn btn-xs tooltips" id="" ng-click="getActualSociety(itemm.RegistrationNo)" data-toggle="modal" data-target="#myModals"></i>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="col-md-10">
+                <div class="text-center">
+                    <dir-pagination-controls boundary-links="true" pagination-id="PageExlSocietyDetailsDataFail" on-page-change="pageChangeHandler(newPageNumber)" template-url="/dirPagination.tpl.html"></dir-pagination-controls>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <h5 class="dev-page"> {{translation.Page}}: {{ currentPage }} </h5>
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+    <div id="stop" class="scrollTop">
+        <span><a href=""><i class="fa fa-arrow-up">Top</i></a></span>
+    </div>
+</div>

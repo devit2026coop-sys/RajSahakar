@@ -1,0 +1,293 @@
+﻿
+
+<script src="~/Scripts/AngularFramework/RegistrationAmountReport.js?id=1"></script>
+<script type="text/javascript" src="~/Scripts/jqueryuitimepicker.js"></script>
+<link href="~/Content/Stylesheets/jqueryuitimepicker.css" rel="stylesheet" />
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $('.SetCalender').datepicker({
+            showOn: "both",
+            changeMonth: true,
+            buttonImage: "../images/calender.png",
+            changeYear: true,
+            dateFormat: "dd/mm/yy",
+            //minDate: (new Date()).getDate() + '/' + ((new Date()).getMonth()+1) + '/' + ((new Date()).getFullYear()).toString(),
+            //defaultDate: (new Date()).getDate() + '/' + ((new Date()).getMonth() + 1) + '/' + ((new Date()).getFullYear()).toString(),
+        });
+
+
+    });
+</script>
+
+<style type="text/css">
+    body {
+        font-family: Arial;
+        font-size: 10pt;
+    }
+
+    /*table {
+        border: 1px solid #ccc;
+        border-collapse: collapse;
+    }
+
+        table th {
+            background-color: #F7F7F7;
+            color: #333;
+            font-weight: bold;
+        }
+
+        table th, table td {
+            padding: 5px;
+            border: 1px solid #ccc;
+        }*/
+
+    .NewMemberdob input {
+        float: left;
+        width: 90%;
+    }
+
+    .NewMemberdob button {
+        float: left;
+    }
+
+    .notValid {
+        border: solid 1px red !important
+    }
+
+    .NewRequestList td {
+        color: black !important;
+    }
+
+    .rowdeleteBtn {
+        color: #fff !important;
+        font-weight: bold !important;
+        font-size: 12px !important;
+    }
+
+    .margin-Top20 {
+        margin-top: 20px;
+    }
+</style>
+<div ng-app="RegAmountRepMod" ng-controller="RegAmountRepCont">
+    <div class="col-md-12">
+        <h3 class="h3heading citizen-dash-head">{{translation.RegistrationAmountReport}}</h3>
+    </div>
+
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="devpage-breadcrumb">
+            <ul class="page-breadcrumb">
+                <li class="dev-page-br">
+                    <i class="fa fa-home"> </i>
+                    <a href="#"> {{translation.MIS}}  </a>
+                    <i class="fa fa-angle-right"> </i>
+                </li>
+                <li style="float: left">
+                    <span style="margin: 0 5px;">{{translation.RegistrationAmountReport}}   </span>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="table-responsive citizen-dash-head">
+            <div>
+                <input type="hidden" id="DivisionId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DivisionId)" />
+                <input type="hidden" id="hdnActId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).ActId)" />
+                <input type="hidden" id="hdnDistrictId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DistrictId)" />
+                <div class="table-dropdown" id="search-filter">
+                    <div class="col-md-2 margin-Top20">
+                        <label for="search" class="ng-binding">{{translation.FincialYearHeading}}:</label>
+                        <select name="fy" style="" class="form-control" ng-model="Filter.FinancialYear" ng-init="Filter.FinancialYear=''" ng-change="searchRequest(GetCommodityReleaseOrderList)">
+                            <option value="">{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in FinancialYearList" value="{{item.FIN_YEAR_NAME}}">
+                                {{item.FIN_YEAR_NAME}}
+                            </option>
+                        </select>
+                    </div>
+                    @*<div class="col-md-4 margin-Top20" style="padding-left: 0;">
+                        <label>{{ translation.Act}}</label>
+                        <select name="s.ActId" ng-model="ActId" class="form-control" ng-init="ActId='0'" ng-change="GetSocietyTypeList()" id="ddrActId">
+                            <option value="0">{{translation.All}}</option>
+                            <option ng-repeat="item in Actlist" value="{{item.ActId}}">
+                                {{_language =='en-us' ?  item.ActNameEn : item.ActNameHi}}
+                            </option>
+                        </select>
+                    </div>*@
+                    <div class="col-md-2 margin-Top20" style="padding-left: 0;">
+                        <label>{{ translation.DistrictHeading}}</label>
+                        <select name="sro.DISTRICT_ID" ng-model="WrSearch.DistrictId" class="form-control" ng-init="WrSearch.DistrictId=''" ng-change="GetKVSSList()" id="ddrDistrictId">
+                            <option value="">{{translation.SelectOption}}</option>
+                            <option ng-repeat="district in DistrictList" value="{{district.DISTRICT_ID}}">
+                                {{_language =='en-us' ?  district.DISTRICT_ENG : district.DISTRICT_MANGAL}}
+                            </option>
+                        </select>
+                    </div>
+
+
+
+
+
+
+                    @*<div class="col-md-2 NewMemberdob margin-Top20">
+                        <label>
+                            {{translation.FromDate}}
+                        </label>
+                        <input id="txtFromDate" name="FromDate" disabled="disabled" class="form-control SetCalender" ng-model="Filter.FromDate" placeholder="{{translation.FromDate}}" onkeypress="return event.charCode >= 48 &amp;&amp; event.charCode <= 57" autocomplete="off">
+                    </div>
+                    <div class="col-md-2 NewMemberdob margin-Top20">
+                        <label>
+                            {{translation.ToDate}}
+                        </label>
+                        <input id="txtToDate" name="ToDate" disabled="disabled" class="form-control SetCalender" ng-model="Filter.ToDate" placeholder="{{translation.ToDate}}" onkeypress="return event.charCode >= 48 &amp;&amp; event.charCode <= 57" autocomplete="off">
+                    </div>*@
+
+                    @*<div class="col-md-2" style="padding-left: 0;">
+                            <label>{{ translation.Search}}</label>
+                            <input type="text" ng-model="WrSearch.Search" class="form-control" />
+                        </div>
+                        <div class="col-md-4" ng-show="showSearchText">
+                            <label for="search" class="ng-binding">Search:</label>
+                            <input name="searchText" id="search" class="form-control ng-pristine ng-valid ng-empty ng-touched" ng-model="Filter.SearchText" placeholder="Filter Text" autocomplete="off">
+                        </div>*@
+                    <div class="col-md-4  margin-Top20">
+                        <label>&nbsp;</label><br>
+                        <button type="button" ng-click="SearchData()" class="btn btn-primary dev-btn ng-binding">{{translation.Search}}</button>
+                        <button type="button" ng-click="ClearSearch()" class="btn btn-primary dev-btn ng-binding">{{translation.Clear}}</button>
+                    </div>
+                </div>
+
+                @*<div class="col-lg-12" style="margin-bottom: 10px;">
+                    <input style="" type="radio" ng-click="GetWarehouseFilterList('FY')" checked="checked" name="Type" value="Generate" />{{translation.FYWiseReport}}
+                    <input type="radio" style="" ng-click="GetWarehouseFilterList('Warehouse')" name="Type" value="New" />{{translation.WarehouseWiseReport}}
+                    <input type="radio" style="" ng-click="GetWarehouseFilterList('Commodity')" name="Type" value="New" />{{translation.CommodityWiseReport}}
+                    <input type="radio" style="" ng-click="GetWarehouseFilterList('RO')" name="Type" value="New" />{{translation.ROWiseReport}}
+                    <input type="radio" style="" ng-click="GetWarehouseFilterList('KVSS')" name="Type" value="New" />{{translation.KVSSWiseReport}}
+                    <input type="radio" style="" ng-click="GetWarehouseFilterList('PurchaseCenter')" name="Type" value="New" />{{translation.PurchaseCenterWiseReport}}
+                    <input type="radio" style="" ng-click="GetWarehouseFilterList('WR')" name="Type" value="New" />{{translation.WRWiseReport}}
+                </div>*@
+                <div ng-show="DivShowCount">
+
+
+                    <table id="example" class="table devtable" style="border:1px solid rgb(222, 221, 221); float: left;">
+                        <thead>
+                            <tr>
+                                <th>
+                                    #
+                                </th>
+                                <th> {{translation.District}}</th>
+                                <th style="text-align:right">
+                                    {{translation.Total}} {{translation.Society}}
+                                </th>
+                                <th style="text-align:right">
+                                    {{translation.Total}} {{translation.Amount}}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="item in ReportData" ng-click="ShowSocietyDetails(item.DISTRICT_ID)" style="cursor: pointer;">
+                                <td>{{$index+1}}</td>
+                                <td>
+                                    {{_language =='en-us' ?  item.DISTRICT_ENG : item.DISTRICT_MANGAL}}
+                                </td>
+                                <td style="text-align:right">
+                                    {{item.TotalSocieties}}
+                                </td>
+                                <td style="text-align:right">
+                                    {{item.TotalAmount}}
+                                </td>
+                            </tr>
+                        </tbody>
+                        <tfoot ng-if="ReportData.length>0">
+                            <tr>
+                                <th colspan="2" style="text-align:right">Total</th>
+                                <th style="text-align:right">{{TotalSocietie}}</th>
+                                <th style="text-align:right">{{TotalAmount}}</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+
+               
+
+                    <input ng-if="WRDetails.length>0" type="button" id="btnExport" class="btn btn-primary dev-btn" style="" ng-click="ExportData()" value="Export" />
+                </div>
+
+                <div ng-show="DivShowDetail">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <div class="table-responsive citizen-dash-head">
+                            <div class="col-md-12 dev-search-form">
+                                <div class="col-xs-4">
+                                    <label for="search">{{translation.Search}}:</label>
+                                    <input ng-model="q" id="search" class="form-control" placeholder={{translation.filttertext}} autocomplete="off">
+                                </div>
+                                <div class="col-xs-4">
+                                    <label for="search">{{translation.ItemPerPage}}:</label>
+                                    <input type="number" min="1" max="9999" class="form-control" ng-model="pageSize">
+                                </div>
+                                <div class="col-xs-4" style="padding-top: 25px; ">
+                                    <input type="button" class="btn btn-primary dev-btn" onclick="tableToExcel('tblData', 'Get Society Detail Data')" value="Export to Excel">
+                                </div>
+                            </div>
+                            <br>
+                            <table id="tblData" class="table devtable" style="margin-top: 30px;border:1px solid rgb(222, 221, 221); float: left;">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            {{translation.SRNO}}
+                                        </th>
+                                        <th>
+                                            {{translation.SocietyName}}
+                                        </th>
+                                        <th>
+                                            {{translation.RegistrationNo}}
+                                        </th>
+
+                                        <th>
+                                            {{translation.District}}
+                                        </th>                                    
+                                        <th style="text-align:right">
+                                            {{translation.Amount}}
+                                        </th>
+                                      
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr dir-paginate="item in SocietyList | filter:q | orderBy:colsort:reverseSort | itemsPerPage: pageSize" current-page="currentPage" pagination-id="SubclassPagination">
+                                        <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                                        <td>{{item.SocietyName}}</td>
+                                        <td>{{item.RegistrationNo}}</td>
+                                        <td>{{_language =='en-us' ?  item.DISTRICT_ENG : item.DISTRICT_MANGAL}}</td>                                                                      
+                                        <td style="text-align:right">{{item.Amount}}</td>                                       
+                                    </tr>
+                                    <tr>
+                                        <td colspan="4"  style="text-align:right">Total</td>
+                                        <td style="text-align:right">{{TotalDistrictTotalAmount}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="5"><button type="button" class="btn btn-primary dev-btn" ng-click="BackDetails()">{{translation.Back}}</button></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <br />
+                            <div class="col-md-12">
+                                <div class="text-center">
+                                    <dir-pagination-controls boundary-links="true" pagination-id="SubclassPagination" on-page-change="pageChangeHandler(newPageNumber)" template-url="/dirPagination.tpl.html"></dir-pagination-controls>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <h5 class="dev-page"> {{translation.Page}}: {{ currentPage }} </h5>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <input type="hidden" value="@ViewBag.FromDate" id="fromdateserver" />
+        <input type="hidden" value="@ViewBag.TodateDate" id="todateserver" />
+        <input type="hidden" value="@ViewBag.MinDate" id="mindateserver" />
+    </div>
+</div>
+
+
+

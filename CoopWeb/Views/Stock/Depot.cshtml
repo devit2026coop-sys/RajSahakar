@@ -1,0 +1,173 @@
+﻿
+<script src="~/Scripts/AngularFramework/StockManagemenetMaster.js?888"></script>
+<script type="text/javascript">
+
+    function ValidateAlpha(evt) {
+        var keyCode = (evt.which) ? evt.which : evt.keyCode
+        if ((evt.which == 8 || evt.keyCode == 8 || evt.charCode == 8))
+            return true;
+
+        if (((keyCode < 49 || keyCode > 90) && (keyCode < 97 || keyCode > 123) && keyCode != 32))
+            return false;
+        return true;
+    };
+
+</script>
+
+
+
+<div ng-app="DepotMasterCnt">
+    <div ng-controller="DepotMasterMod">
+        <div class="col-md-12">
+            <h3 class="citizen-dash-head">{{translation.Depot}}</h3>
+            <hr style="margin: 0;">
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#"> {{translation.StockManagement}}</a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;"> {{translation.Depot}} </span>
+                    </li>
+                    <li style="float: right;" id="divAddBtn">
+                        <button type="button" ng-click="ShowDivDepotInsert()" class="btn btn-info btn-lg dev-popup-btn" data-toggle="modal" style="color: #025e63; cursor: pointer; text-decoration:none;  font-weight: bold;">
+                            <h5>&#187; {{translation.InsertNewDepot}}</h5>
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" ng-show="divInsertDepot">
+            <form class="citizen-dash-head">
+                <div class="col-lg-12 form-group">
+                    <div class="col-lg-2">{{translation.District}}</div>
+                    <div class="col-lg-4">
+                        <select class="form-control" ng-model="Depot.DistrictId" ng-init="Depot.DistrictId='0'">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in Districts" value="{{item.DISTRICT_ID}}">
+                                {{_language =='en-us' ?  item.DISTRICT_ENG : item.DISTRICT_MANGAL}}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-lg-12 form-group">
+                    <div class="col-lg-2">{{ translation.DepotNameEng}}<span class="error">*</span></div>
+                    <div class="col-lg-4">
+                        <input type="text" class="form-control" ng-model="Depot.DepotNameEng" placeholder={{translation.DepotNameEng}} autocomplete="off" onKeyPress="return ValidateAlpha(event);" maxlength="100" />
+                    </div>
+                    <div class="col-lg-2">{{ translation.DepotNameHi}}<span class="error">*</span></div>
+                    <div class="col-lg-4">
+                        <input type="text" class="form-control" ng-model="Depot.DepotNameHi" placeholder={{translation.DepotNameHi}} autocomplete="off" maxlength="100" />
+                    </div>
+                </div>
+
+                <div class="col-lg-12 form-group">
+                    <div class="col-lg-2">{{ translation.DepotAgenetEng}}<span class="error">*</span></div>
+                    <div class="col-lg-4">
+                        <input type="text" class="form-control" ng-model="Depot.AgentNameEng" placeholder={{translation.DepotAgenetEng}} autocomplete="off" onKeyPress="return ValidateAlpha(event);" maxlength="100" />
+                    </div>
+                    <div class="col-lg-2">{{ translation.DepotAgenetHi}}<span class="error">*</span></div>
+                    <div class="col-lg-4">
+                        <input type="text" class="form-control" ng-model="Depot.AgentNameHi" placeholder={{translation.DepotAgenetHi}} autocomplete="off" maxlength="100" />
+                    </div>
+                </div>
+
+                <div class="form-group col-md-12">
+                    <div class="dev-menu-btn">
+                        <button type="submit" class="btn btn-primary" ng-click="InsertDepot()">{{translation.Submit}}</button>
+                        <button type="submit" class="btn btn-primary" ng-click="ClearForm()">{{translation.Clear}}</button>
+                        <a class="btn btn-primary dev-btn" style="text-transform:capitalize;" ng-click="BackToList()"> {{translation.Back}}</a>
+                        <input type="hidden" ng-model="Depot.DepotId" />
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" ng-show="GridDepot">
+            <div>
+                <div class="citizen-dash-head">
+                    <table class="table table-responsive devtable" style="overflow-x:auto;">
+                        <thead>
+                            <tr>
+                                <th>
+                                    {{translation.SRNO}}
+                                </th>
+                                <th ng-click="sortData('DISTRICT_ENG')">
+                                    {{translation.District}}
+                                    <div ng-class="getSortClass('DISTRICT_ENG')"></div>
+                                </th>
+                                <th ng-click="sortData('DepotNameEng')">
+                                    {{translation.DepotNameEng}}
+                                    <div ng-class="getSortClass('DepotNameEng')"></div>
+                                </th>
+                                <th ng-click="sortData('DepotNameHi')">
+                                    {{translation.DepotNameHi}}
+                                    <div ng-class="getSortClass('DepotNameHi')"></div>
+                                </th>
+                                <th ng-click="sortData('AgentNameEng')">
+                                    {{translation.DepotAgenetEng}}
+                                    <div ng-class="getSortClass('AgentNameEng')"></div>
+                                </th>
+                                <th ng-click="sortData('AgentNameHi')">
+                                    {{translation.DepotAgenetHi}}
+                                    <div ng-class="getSortClass('AgentNameHi')"></div>
+                                </th>
+                                <th>
+                                    {{translation.IsActive}}
+                                </th>
+                                <th>
+                                    {{translation.Edit}}
+                                </th>
+                                <th>
+                                    {{translation.Delete}}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr dir-paginate="item in Depots | filter: q | orderBy:colsort:reverseSort | itemsPerPage: pageSize" current-page="currentPage" pagination-id="TrainningFormatPagination">
+                                <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                                <td>
+                                    {{ _language === 'en-us' ?  item.DISTRICT_ENG : item.DISTRICT_MANGAL }}
+                                </td>
+                                <td>
+                                    {{ item.DepotNameEng}}
+                                </td>
+                                <td>
+                                    {{ item.DepotNameHi}}
+                                </td>
+                                <td>
+                                    {{ item.AgentNameEng}}
+                                </td>
+                                <td>
+                                    {{ item.AgentNameHi}}
+                                </td>
+                                <td>
+                                    <div class="dev-action">
+                                        <label class="switch">
+                                            <input type="checkbox" ng-checked="item.IsActive === 'True' || item.IsActive === 'true' || item.IsActive === true" ng-click="SetStatus(item.DepotId,1)">
+                                            <span class="slider round"></span>
+                                        </label>
+                                    </div>
+                                </td>
+                                <td><a href="javascript:void(0)"><i class="fa fa-edit" aria-hidden="true" ng-click="Edit(item)"></i></a></td>
+                                <td><a href="javascript:void(0)"><i class="fa fa-trash" aria-hidden="true" ng-click="SetStatus(item.DepotId,2)"></i></a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="col-md-10">
+                <div class="text-center">
+                    <dir-pagination-controls boundary-links="true" pagination-id="TrainningFormatPagination" on-page-change="pageChangeHandler(newPageNumber)" template-url="/dirPagination.tpl.html"></dir-pagination-controls>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

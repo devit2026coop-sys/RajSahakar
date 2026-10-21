@@ -1,0 +1,195 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml"; ;
+}
+<script src="~/Scripts/AngularFramework/SocietyAuditDetailsCitizenClient.js"></script>
+
+
+@model List<Cooperative.Models.SocietyRegistrationEntity>
+
+<div ng-app="CitizenSocietyAuditMod" ng-controller="CitizenSocietyAuditCnt">
+    <div class="col-md-12">
+        <h3 class="citizen-dash-head">{{ translation.SocietyAuditReport}}<a target="_blank" style="float:right; font-size:12px" href="~/Content/UserManual/auditor citizen verification.pdf">उपयोगकर्ता पुस्तिका</a></h3>
+    </div>
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="devpage-breadcrumb">
+            <ul class="page-breadcrumb">
+                <li class="dev-page-br">
+                    <i class="fa fa-home"> </i>
+                    <a href="../Citizen/Index"> {{translation.Home}} </a>
+                    <i class="fa fa-angle-right"> </i>
+                </li>
+                <li style="float: left">
+
+                    <span style="margin: 0 5px;">{{translation.SocietyAuditReport}} </span>
+                </li>
+
+            </ul>
+        </div>
+    </div>
+
+    <div ng-show="divTabulation">
+        <div class="col-md-12">
+            <div class="table-responsive citizen-dash-head">
+                <div class="table-dropdown">
+                    <div class="col-md-4" style="padding-left: 0;">
+                        <label>{{ translation.Act}}</label>
+                        <select ng-model="SocietyRegistration.ActId" class="form-control" ng-change="getSocietyfilter()" ng-init="SocietyRegistration.ActId='0'">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in ActList" value="{{item.ActId}}">
+                                {{_language =='en-us' ?  item.ActNameEn : item.ActNameHi}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label>{{ translation.SocietyType}}</label>
+                        <select ng-model="SocietyRegistration.SocietyTypeId" class="form-control" ng-init="SocietyRegistration.SocietyTypeId='0'" ng-change="getSocietyfilterBySocietyType()">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in SocietyTypeList" value="{{item.SocietyTypeId}}">
+                                {{_language =='en-us' ?  item.TypeameEng : item.TypeNameHin}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-md-4" style="padding-right: 0;">
+                        <label>{{ translation.SocietyClass}}</label>
+                        <select ng-model="SocietyRegistration.ClassId" class="form-control" ng-init="SocietyRegistration.ClassId='0'" ng-change="getSocietyfilterByClass()">
+                            <option value="0" disabled>{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in SocietyClassList" value="{{item.ClassId}}">
+                                {{_language =='en-us' ?  item.ClassNameEn : item.ClassNameHi}}
+                            </option>
+                        </select>
+                    </div>
+                    <br />
+
+                    <div class="col-md-4" style="padding-left: 0;">
+                        <label for="search">{{translation.Search}}:</label>
+                        <input ng-model="q" id="search" class="form-control" placeholder="{{translation.filttertext}}" autocomplete="off">
+                    </div>
+                    <div class="col-md-4">
+                        <label for="search">{{translation.ItemPerPage}}:</label>
+                        <input type="number" min="1" max="100" class="form-control" ng-model="pageSize">
+                    </div>
+
+                </div>
+
+                <h5 class="heading-hr ng-binding"> {{translation.SocietyListForAudit}} </h5>
+                <table id="example" class="table devtable" style="margin-top: 10px;border:1px solid rgb(222, 221, 221); float: left;">
+                    <thead>
+                        <tr>
+                            <th>
+                                {{translation.SRNO}}
+                            </th>
+                            <th>
+                                {{translation.SocietyName}}
+                            </th>
+                            <th>
+                                {{translation.SocietyRegistrationNo}}
+                            </th>
+                            <th>
+                                {{translation.FincialYearHeading}}
+                            </th>
+                            <th>
+                                {{translation.Status}}
+                            </th>
+                            <th>
+                                {{translation.Order}}   {{translation.File}}
+                            </th>
+                            <th>
+                                {{translation.Actions}}
+                            </th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+
+                        <tr dir-paginate="item in TableData | filter:q | orderBy:colsort:reverseSort | itemsPerPage: pageSize" current-page="currentPage" pagination-id="CityPagination">
+
+                            <td>{{pageSize *(currentPage-1)+$index+1}}</td>
+                            <td>{{item.SocietyName}}</td>
+                            <td>{{item.RegistrationNo}}</td>
+                            <td>{{item.FIN_YEAR_NAME}} </td>
+                            <td>
+                                {{item.SocietyAuditReportId!=0 ? item.IsPermanentSave=='True' ? 'Permanent Save':'Partial Save' : 'Pending'}}
+                            </td>
+                            <td>
+                                @*{{item.AuditorAssignFilePath}}*@
+                                <a ng-show="item.AuditorAssignFilePath!=''" href="{{item.AuditorAssignFilePath}}" target="_blank" style="color:#505050;" class="fa fa-download"></a>
+                            </td>
+                            <td class="add-more-td">
+                                @*ng-show="item.IsPermanentSave=='False'"*@
+                                <a ng-click="AddAdministrativeDetails(item.SocietyIDEnc,'AddMoreDetails',item.SocietyName,item.FinancialYear,item.SocietyAuditorAssigmentsId,item.IsFirm)"> <i class="fa fa-upload"></i> </a>
+
+
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-md-10">
+                <div class="text-center">
+                    <dir-pagination-controls boundary-links="true" pagination-id="CityPagination" on-page-change="pageChangeHandler(newPageNumber)" template-url="/dirPagination.tpl.html"></dir-pagination-controls>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div ng-show="divSocietyAuditReport">
+        @Html.Partial("~/Views/Society/_SocietyAuditInformation.cshtml")
+    </div>
+
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" ng-show="divSocietyAuditReportShow">
+
+        <form class="dev-masters" name="SocietyAuditReportForm" style="margin:20px 0px 20px 0px;">
+            <div class="col-md-12">
+                <div class="table-responsive">
+                    <table class="table dev-table" style="margin-top: 30px;">
+                        <thead>
+                            <tr>
+                                <th>
+                                    {{translation.SRNO}}
+                                </th>
+                                <th>
+                                    {{translation.IsAuditReportAudit}}
+                                </th>
+                                <th>
+                                    {{translation.IsSocietyWorking}}
+                                </th>
+
+                                <th>
+                                    {{translation.FinancialYearAuditReportAvailable}}
+                                </th>
+
+                                <th>
+                                    {{translation.IsSocietyWorking}}
+                                </th>
+
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="items in SocietyAuditDetails">
+                                <td>{{$index+1}}</td>
+                                <td>{{items.IsApprovedByRegistrar ? translation.Yes : translation.No}}</td>
+                                <td>{{items.IsSocietyWorking ? translation.Yes : translation.No}}</td>
+                                <td>{{items.FIN_YEAR_NAME}}</td>
+                                <td>
+                                    <a style="color:#000;" target="_blank" href="{{ items.AuditReport == '' ? 'javascript:' : '/Content/SocietyProfiling/'+items.AuditReport }}">{{translation.Download}}</a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            @*<div class="form-group col-md-12">
+                <div class="dev-align-btn">
+                    <a ng-click="BackToPage()" data-toggle="modal" style="color:#ef0707;float:right;text-decoration:none;cursor:pointer" class="ng-binding">» {{translation.Back}}</a>
+                </div>
+            </div>*@
+
+        </form>
+    </div>
+    
+    <div class="se-pre-con"></div>
+    <div id="stop" class="scrollTop">
+        <span><a href=""><i class="fa fa-arrow-up">Top</i></a></span>
+    </div>
+</div>

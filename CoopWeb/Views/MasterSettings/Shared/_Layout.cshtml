@@ -1,0 +1,333 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" name="viewport" content="width=device-width" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>@ViewBag.Title</title>
+    <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="EO" content="Directorate of Rajcooperatives (Government of Rajasthan)">
+    <link href="~/Content/Stylesheets/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="~/Content/Stylesheets/font-awesome.min.css">
+    <link href="~/Content/Stylesheets/SiteStyle.css" rel="stylesheet" type="text/css" />
+    <link href="~/Content/Stylesheets/responsive.css" rel="stylesheet" type="text/css" />
+    <link href="~/Content/Stylesheets/custom.css" rel="stylesheet" type="text/css" />
+    <script src="~/Scripts/angular.js"></script>
+    <script src="~/Scripts/LanguageSelector.js"></script>
+    <script src="~/Scripts/jquery-3.1.0.js"></script>
+    <link href="~/Content/Stylesheets/PaginationStyleSheet.css" rel="stylesheet" />
+    <link href="~/Scripts/jquery-ui/themes/base/jquery.ui.datepicker.css" rel="stylesheet" />
+    <link href="~/Scripts/jquery-ui/themes/base/jquery.ui.theme.css" rel="stylesheet" />
+    <link href="~/Scripts/jquery-ui/themes/base/jquery.ui.core.css" rel="stylesheet" />
+    <script src="~/Scripts/dirPagination.js"></script>
+    <script src="~/Scripts/CommonScript.js"></script>
+    <script src="~/Scripts/HIndiTypist.js"></script>
+    <link href="~/Scripts/jquery-ui/themes/base/jquery.ui.core.css" rel="stylesheet" />
+    <link href="~/Content/Stylesheets/StyleSheet1.css" rel="stylesheet" />
+    <script src="~/Scripts/angular-cookies.js"></script>
+    <script type="text/javascript">
+
+        window.history.forward();
+        function noBack() {
+            window.history.forward();
+            window.onhashchange = function () { window.location.hash = "no-back-button"; }
+        }
+    </script>
+
+    <script type="text/javascript">
+
+        function ReadCookie(control) {
+
+            if ($(control).children().first().attr('class') == "plus minus") {
+                window.location = $(control).children().first().children().first().attr('href');
+            }
+            else {
+                window.location = $(control).children().first().children().first().siblings().attr('href')
+            }
+        };
+
+        function UserProfileChangeByRoleId(role) {
+            $.ajax({
+                url: "../Login/UserProfileChangeByRoleId",
+                method: "POST",
+                data: {
+                    UserRoleDeptMappingId: role
+                },
+                dataType: "json",
+                success: function (data) {
+                    window.location = "../User/DashBoard";
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    window.location = "~/Error/General";
+                }
+            });
+        }
+    </script>
+
+    <script type="text/javascript">
+        var _language = getlanguagefromcookie();
+        if (_language === undefined)
+            _language = 'en-us';
+
+        _language = _language.toLowerCase();
+        $(document).ready(function () {
+            // var _language = navigator.language || navigator.userLanguage; // get value from browser culture
+            if (_language == 'en-us') {
+                $('#LanguageToggle').text('Hindi Translation Link');
+                $('#English').show();
+                $('#Hindi').hide();
+            }
+            else if (_language == 'hi-in') {
+                $('#LanguageToggle').text('हिन्दी अनुवाद लिंक');
+                $('#English').hide();
+                $('#Hindi').show();
+            }
+        });
+        function NoBack() {
+            window.history.forward();
+        }
+    </script>
+
+</head>
+<body onload="noBack();" onpageshow="if (event.persisted) noBack();" onunload="">
+    @*<div id="preloader" style="display: block;">
+            <div class="pre-container">
+                <div class="spinner">
+                    <div class="double-bounce1"></div>
+                    <div class="double-bounce2"></div>
+                </div>
+            </div>
+        </div>*@
+
+    <div id="wrapper">
+        <div class="main-header">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-lg-2 col-md-2 col-sm-4 col-xs-12">
+                        <div class="logo">
+                            <a href="../User/DashBoard"><img src="~/Images/cooperative_logo.png" class="img-responsive"></a>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-10 col-md-10 col-sm-8 col-xs-12">
+                        <ul class="dev-links">
+                            @if (((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).UserType == "D")
+                            {
+                                <li class="dropbtn dropdown dev-links-menu dev-notification">
+                                    <i class="fa fa-users link-icon" aria-hidden="true"></i>
+                                    <span>@((Request.Cookies[Cooperative.Controllers.SessionIdentity.Culture]).Value.ToLower() == "en-us" ? "Roles" : "भूमिकाएं")</span> <i class="fa fa-caret-down" aria-hidden="true"></i>
+                                    <div class="dropdown-content">
+                                        <ul class="extended tasks">
+                                            <li class="external">
+                                                <h3>
+                                                    @((Request.Cookies[Cooperative.Controllers.SessionIdentity.Culture]).Value.ToLower() == "en-us" ? "Select Role" : "भूमिकाएं चुनें")
+                                                </h3>
+                                            </li>
+                                            <select class="form-control form-control" onchange="UserProfileChangeByRoleId(value)">
+                                                @Html.Action("MyUsersRolesShowDDL", "User", new { UserId = ((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).UserId })
+                                            </select>
+                                        </ul>
+                                    </div>
+                                </li>
+                            }
+                            <li class="dropbtn dropdown dev-links-menu">
+                                <img src="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).ImageUrl)" />
+
+                                <span>@((Request.Cookies[Cooperative.Controllers.SessionIdentity.Culture]).Value.ToLower() == "en-us" ? ((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).OfficerNameEn : ((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).OfficerNameEn)</span> @*<i class="fa fa-caret-down" aria-hidden="true"></i>*@
+                                <ul class="dropdown-content">
+                                    <li class="text-red">
+                                        <a href="../User/UserProfile"> <i class="fa fa-user dev-icon" aria-hidden="true"></i> @((Request.Cookies[Cooperative.Controllers.SessionIdentity.Culture]).Value.ToLower() == "en-us" ? "Profile" : "प्रोफाइल") </a>
+                                    </li>
+                                    <li>
+                                        <a href="../Login/BackToSSO"> <i class="fa fa-reply-all dev-icon" aria-hidden="true"></i> @((Request.Cookies[Cooperative.Controllers.SessionIdentity.Culture]).Value.ToLower() == "en-us" ? "Back To SSO" : "वापस SSO पर") </a>
+                                    </li>
+                                    <li>
+                                        <a href="../Login/Logout"> <i class="fa fa-power-off dev-icon" aria-hidden="true"></i> @((Request.Cookies[Cooperative.Controllers.SessionIdentity.Culture]).Value.ToLower() == "en-us" ? "Sign Out" : "साइन आउट")  </a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="dev-links-menu" onclick="ReadCookie(this)" style="cursor:pointer;">
+                                <div class="@((Request.Cookies[Cooperative.Controllers.SessionIdentity.Culture]).Value.ToLower() == "en-us" ? "plus minus" : "plus")">
+                                    @Html.ActionLink("English", "ChangeLanguage", "Language", new { id = "en-US", returnURL = @HttpContext.Current.Request.Url.ToString().ToLower() }, new { @style = "display:none;", rel = "external" })
+                                    @Html.ActionLink("हिंदी", "ChangeLanguage", "Language", new { id = "hi-IN", returnURL = @HttpContext.Current.Request.Url.ToString().ToLower() }, new { @style = "display:none;", rel = "external" })
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="container-fluid">
+            <div class="row">
+                <!-- start mobile view -->
+                <div class="dev-toggle-bg">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="#"> Menu </a>
+                </div>
+                <!-- end mobile view -->
+                <!-- Sidebar Holder -->
+
+                <div id="sidebar">
+                    <div class="col-lg-1 col-md-1 col-sm-2 col-xs-12" style="padding-right: 0; padding-left: 0;">
+                        @*<nav id="site-navigation">
+                            <div id="bs-example-navbar-collapse-1" class="collapse navbar-collapse">*@
+                        @Html.Action("MyMenuGenerator", "User", new { UserId = ((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).UserId, RoleId = ((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).RoleId })
+                        @*</div>
+                            </nav>*@
+                    </div>
+
+                    <div class="col-lg-11 col-md-11 col-sm-10 col-xs-12" style="background: #e8e9ea; min-height: 1030px;">
+                        <div class="dev-bg-color">
+                            @RenderBody()
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <button type="button" class="btn btn-info btn-lg" style="display:none" data-toggle="modal" id="modelBTN" data-target="#myModalAlert">Open Modal</button>
+    <div id="myModalAlert" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title" id="modelHeader"></h4>
+                </div>
+                <div class="modal-body">
+                    <p id="modelAlertMessage"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <div class="footer">
+        <div class="copydev"> @DateTime.Now.Year © DOITC <a href="#"> DOITC.RAJASTHAN.GOV.IN </a> </div>
+    </div>
+    @*<script src="~/Scripts/jquery-3.2.1.js"></script>*@
+    <script src="~/Scripts/bootstrap.min.js"></script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
+    <!-- drop down on click -->
+    <script>
+        /* When the user clicks on the button,
+        toggle between hiding and showing the dropdown content */
+        function myFunction() {
+            document.getElementById("myDropdown").classList.toggle("show");
+        }
+
+        // Close the dropdown if the user clicks outside of it
+        window.onclick = function (event) {
+            if (!event.target.matches('.dropbtn')) {
+
+                var dropdowns = document.getElementsByClassName("dropdown-content");
+                var i;
+                for (i = 0; i < dropdowns.length; i++) {
+                    var openDropdown = dropdowns[i];
+                    if (openDropdown.classList.contains('show')) {
+                        openDropdown.classList.remove('show');
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Change image onclick -->
+    <script>
+        $(".plus").click(function () {
+            $(this).toggleClass("minus");
+        })
+
+
+
+
+
+    </script>
+    <!-- Collapsible sidebar -->
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#sidebarCollapse').on('click', function () {
+                $('#sidebar').toggleClass('active');
+            });
+        });
+
+
+        function ShowOkMessage(title, msg, callback) {
+            $("#dvmessgesOkBoxTitle ").html(title);
+            $("#dvmessgesOkBox ").html(msg);
+            $("#messageOkModel").modal("show");
+            $(document).on('click', '#btnOkYes', function () { callback(); });
+        }
+        function ShowAlertMessage(title, msg, callback) {
+            $("#dvmessgesAlertBox ").html(msg);
+            $("#messageAlertModel").modal("show");
+            $(document).on('click', '#btnAlertYes', function () { callback(); });
+        }
+
+        function onUserImageLoadError(ths) {
+            // data = ths.alt; //$("#" + ths.id).attr("data");
+            ths.src = "/Content/Images/Balnk.png";
+        }
+    </script>
+    @RenderSection("scripts", required: false)
+
+
+    <div id="messageOkModel" class="modal fade" role="dialog" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-body">
+                    <p style="color: #000; font-size: 14px;font-weight:800;text-align:left;" id="dvmessgesOkBoxTitle"></p>
+                </div>
+                <div class="modal-body">
+                    <p style="color: #000; font-size: 14px;" id="dvmessgesOkBox"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal" id="btnOkYes">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="messageAlertModel" class="modal fade" role="dialog" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="" style="padding-left: 20px;padding-top: 15px;">
+
+                    <i style="font-size: 50px;color: darkred;" class="fa fa-warning"></i>
+
+                </div>
+                <div class="modal-body">
+                    <p style="color: #9a2f2f;font-size: 21px; text-align:left;" id="dvmessgesAlertBox"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal" id="btnAlertYes">Yes</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">No</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @Html.Partial("_loader")
+    <script type="text/javascript">
+        $(document).ready(function () {
+            setTimeout(function () {
+                $('#preloader').css('display', 'none');
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

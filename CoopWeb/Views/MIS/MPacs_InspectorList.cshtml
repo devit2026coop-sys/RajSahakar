@@ -1,0 +1,361 @@
+﻿@*@{
+        ViewBag.Title = "Gopal Credit Card Appliation List";
+    }*@
+<style>
+    .flexEqualCenter {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    a.backBtn {
+        padding: 3px 5px;
+        background: rgb(99,205,219);
+        color: #fff;
+        border: 0px;
+        outline: none;
+        display: inline-block;
+        text-decoration: none;
+    }
+
+
+        a.backBtn i {
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+    .ui-datepicker {
+        z-index: 9999 !important;
+    }
+
+
+    .SetCalender {
+        background: url("../images/calender.png") no-repeat right 8px center;
+        background-size: 20px 20px;
+        padding-right: 30px; /* space for icon */
+        cursor: pointer;
+    }
+</style>
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $('.SetCalender').datepicker({
+            changeMonth: true,
+            changeYear: true,
+            dateFormat: "dd/mm/yy",
+            showOn: "focus",
+            maxDate: 0,
+            // defaultDate: new Date()
+        });//.datepicker("setDate", new Date());
+
+    });
+</script>
+<script src="~/Scripts/AngularFramework/MPacs_InspectorList.js?v=1.0"></script>
+<div ng-app="GccApplicationListMod" ng-controller="GccApplicationListCnt" ng-cloak="">
+    <input type="hidden" id="hdnGccId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).GccId)" />
+    <input type="hidden" id="hdnDistrictId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DistrictId)" />
+
+    <div class="container-fluid  citizen-dash-head">
+        <div class="panel panel-default">
+            <div class="panel-heading flexEqualCenter">
+                <b><i class="fa fa-th-list"></i>&nbsp;Inspector List</b>
+                <div>
+
+              
+                </div>
+            </div>
+            <div id="search-filter" ng-show="!InspectorStatus">
+                <div class="table-dropdown">
+                    <div class="form-group col-md-12">
+                        <div class="col-xs-4">
+                            <label for="search">{{translation.Search}}:</label>
+                            <input ng-model="q" id="search" name="SearchText" class="form-control" placeholder={{translation.filttertext}} autocomplete="off">
+                        </div>
+                        <div class="col-xs-2">
+                            <label for="search">{{translation.ItemPerPage}}:</label>
+                            <select ng-model="obj.pageSize" class="form-control" ng-change="pagechange()" ng-init="obj.pageSize='50'">
+                                <option value="10">10</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                                <option value="200">200</option>
+                                <option value="500">500</option>
+                                <option value="1000">1000</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group col-md-12">
+
+                        @* <div class="col-md-2  form-group">
+                         <label>
+                             {{translation.FromDate}}
+                         </label>
+                         <input id="txtFromDate" type="text" name="FromDate" class="form-control SetCalender " ng-model="Filter.FromDate" placeholder="{{translation.FromDate}}" autocomplete="off" readonly>
+                     </div>
+                     <div class="col-md-2 NewMemberdob form-group">
+                         <label>
+                             {{translation.ToDate}}
+                         </label>
+                         <input id="txtToDate" type="text" name="ToDate" class="form-control SetCalender Todate" ng-model="Filter.ToDate" placeholder="{{translation.ToDate}}" autocomplete="off" readonly>
+                     </div>
+
+                   *@
+
+                        <div class="col-lg-2">
+                            <label>{{translation.District}}</label>
+                            <select ng-model="DistrictId" name="DistrictId" id="ddlDistrict" ng-init="DistrictId='0'" class="form-control"
+                                    ng-change="getBlock()">
+                                <option value="0">{{translation.SelectOption}}</option>
+                                <option ng-repeat="item in DistrictLst" value="{{item.DISTRICT_ID}}">
+                                    {{_language =='en-us' ? item.DISTRICT_ENG : item.DISTRICT_MANGAL}}
+                                </option>
+                            </select>
+                        </div>
+
+                        <!-- Block Selection -->
+                        <div class="col-lg-2">
+                            <label>Block</label>
+                            <select ng-model="BlockId" name="BlockId" id="ddlBlock" class="form-control"
+                                    ng-init="BlockId='0'" ng-change="getGrampanchyat()">
+                                <option value="0">{{translation.SelectOption}}</option>
+                                <option ng-repeat="item in BlockDataList" value="{{item.BLOCK_ID}}">
+                                    {{_language =='en-us' ? item.BLOCK_ENG : item.BLOCK_ENG}}
+                                </option>
+                            </select>
+                        </div>
+
+                        <!-- Gram Panchayat Selection -->
+                        <div class="col-lg-2 ">
+                            <label>Gram Panchayat</label>
+                            <select ng-model="PanchayatId" name="PanchayatId" id="ddlGramPanchayat" class="form-control"
+                                    ng-init="PanchayatId='0'" ng-change="getPresentGSS()">
+                                <option value="0">{{translation.SelectOption}}</option>
+                                <option ng-repeat="item in GramPancyatList" value="{{item.GP_ID}}">
+                                    {{_language =='en-us' ? item.GP_ENG : item.GP_ENG}}
+                                </option>
+                            </select>
+                        </div>
+
+
+
+
+                    </div>
+
+
+                    <div class="form-group col-md-12">
+                        <div class="dev-align-btn">
+                            <button type="submit" class="btn btn-primary dev-btn" ng-click="searchRequest(GetGccApplicationList)">{{translation.Search}}</button>
+                            <button type="button" class="btn btn-warning" ng-click="exportExcel()"><i class="fa fa-file-excel-o"></i> Export Excel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-body" ng-show="!InspectorStatus">
+                <div class="table-responsive devtable">
+                    <table class="table table-hover table-striped table-bordered mb-0">
+                        <thead>
+                            <tr>
+                                <th>Sr. No.</th>
+                                <th>DISTRICT</th>
+                                <th>BLOCK</th>
+                                <th>GP</th>
+                                <th>Inspector Name</th>
+                                <th>Mobile No</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr dir-paginate="item in GccApplicationList | filter:q | orderBy:colsort:reverseSort | itemsPerPage: obj.pageSize" current-page="currentPage" pagination-id="SubclassPagination">
+                                <td>{{(((DataPagingDetails.PageNumber - 1) * DataPagingDetails.PageSize) + 1)+$index}}</td>
+                                <td>{{item.DISTRICT}}</td>
+                                <td>{{item.BLOCK}}</td>
+                                <td>{{item.GP}}</td>
+                                <td>{{item.InspectorName}}</td>
+                                <td>{{item.MobileNo}}</td>
+                                <td>{{item.Status}}</td>
+
+                                <td>
+                                    <a href="#" ng-click="GetInspectorStatusList(item.InspactorTargetsId)">
+                                        <i class="fa fa-eye"></i>
+                                    </a>
+                                    @*@if (System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin] != null)
+                                {
+                                    <a title="VIEW" ng-show="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).UserId)==1" ng-click="ApplicationActionView(item.encGccid)"><i class="fa fa-info-circle infoicon-edit"></i></a>
+                                }*@
+                                </td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div ng-if="DataPagingDetails.TotalPages>1" class="dataTables_paginate paging_simple_numbers" id="dataTables-example_paginate" style="display: flex; align-items: center; justify-content: space-between;">
+                            <div class="dataTables_info" id="dataTables-example_info" role="status" aria-live="polite">
+                                Total Records: {{DataPagingDetails.TotalRecords}}
+                            </div>
+                            <ul class="pagination pagination_1" style="margin-left: 10px !important; margin:0">
+                                <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« First</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« Previous</span></li>
+
+                                <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest('1',SearchData)" style="cursor: pointer;">
+                                    <span>« First</span>
+                                </li>
+                                <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest(DataPagingDetails.PageNumber-1,SearchData)" style="cursor:pointer;">
+                                    <span>« Prev</span>
+                                </li>
+                                <li class="{{n==DataPagingDetails.PageNumber?'active':''}}" style="{{n==DataPagingDetails.PageNumber?'':'cursor: pointer'}}" ng-repeat="n in PagingRange(DataPagingDetails.StartPageNumber,DataPagingDetails.EndPageNumber,DataPagingDetails.TotalPages)" ng-click="pageRequest(n,SearchData)"><span>{{n}}</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Next</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Last</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber!= DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.PageNumber+1,SearchData)" style="cursor:pointer;">
+                                    <span>Next »</span>
+                                </li>
+                                <li ng-if="DataPagingDetails.PageNumber != DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.TotalPages,SearchData)" style="cursor:pointer;">
+                                    <span>Last »</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+
+
+            <div class="col-md-12" style="margin-top: 10px;" ng-show="InspectorStatus">
+
+                <div class="panel panel-default text-black">
+                    <div class="panel-heading">
+                        <strong>Details</strong>
+                    </div>
+                    <div class="panel-body">
+
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <label>{{translation.InspectorName}}:</label>
+
+                                <span>{{GetInspectorStatus[0].InspacorName}}</span>
+                            </div>
+                            <div class="col-md-6">
+                                <label>{{translation.PrecentNameGSS_M}}:</label>
+                                <span>{{GetInspectorStatus[0].PrecentNameGSS}}</span>
+                            </div>
+
+                        </div>
+
+
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <label>{{translation.NewGSSName_M}}:</label>
+                                <span>{{GetInspectorStatus[0].NewGSSName}}</span>
+                            </div>
+                            <div class="col-md-6">
+                                <label>{{translation.NewGSSMemNo_M}}:</label>
+                                <span>{{GetInspectorStatus[0].NoofMember}}</span>
+                            </div>
+                        </div>
+
+
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <label>{{translation.NewGSSAmanat_M}}:</label>
+                                <span>{{GetInspectorStatus[0].NewGSSprecious}}</span>
+                            </div>
+                            <div class="col-md-6">
+                                <label>{{translation.NewGssAmount_M}}:</label>
+                                <span>{{GetInspectorStatus[0].NewGSSFinanceAmount}}</span>
+                            </div>
+                        </div>
+
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <label>{{translation.SurveyDate}} : </label>
+                                <span>{{GetInspectorStatus[0].SurveyDate | date:'dd/MM/yyyy' }}</span>
+                            </div>
+                            <div class="col-md-6">
+                                <label>{{translation.DateOfSubmission}} : </label>
+                                <span>{{GetInspectorStatus[0].DateOfSubmission | date:'dd/MM/yyyy' }}</span>
+                            </div>
+                        </div>
+
+
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <label>{{translation.DateOfApproval}} : </label>
+                                <span>{{GetInspectorStatus[0].DateOfApproval | date:'dd/MM/yyyy' }}</span>
+                            </div>
+                            <div class="col-md-6">
+                                <label>{{translation.CompetentAcceptanceLetter}} : </label>
+                                <a ng-if="GetInspectorStatus[0].CompetentAcceptanceLetter" ng-href="../Content/InspactorDocument/{{GetInspectorStatus[0].CompetentAcceptanceLetter}}" target="_blank">
+                                    View File
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="row mt-4">
+
+                            <div class="col-md-6">
+                                <label>{{translation.AllotmentLetter}} : </label>
+                                <a ng-if="GetInspectorStatus[0].AllotmentLetter" ng-href="../Content/InspactorDocument/{{GetInspectorStatus[0].AllotmentLetter}}" target="_blank">
+                                    View File
+                                </a>
+
+                            </div>
+                            <div class="col-md-6">
+                                <label>{{translation.SanctionLetter}} : </label>
+                                <a ng-if="GetInspectorStatus[0].SanctionLetter" ng-href="../Content/InspactorDocument/{{GetInspectorStatus[0].SanctionLetter}}" target="_blank">
+                                    View File
+                                </a>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+
+
+                <div class="table-responsive"  ng-show="GetInspectorStatus.length >1">
+                    <table class="table table-responsive devtable" style="margin-top: 30px;">
+                        <thead>
+                            <tr>
+                                <th>{{translation.SRNO}}</th>
+                                <th>{{translation.CreationDate}}</th>
+                                <th>{{translation.Remarks}}</th>
+                                <th>{{translation.Status}}</th>
+                                <th>{{translation.Document}}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="item in GetInspectorStatus" style="color: black;" >
+                                <td>{{$index+1}}</td>
+
+                                <td>
+                                    {{item.CreationDate | date:'dd/MM/yyyy' }}
+                                </td>
+                                <td>
+                                    {{item.Remark}}
+                                </td>
+                                <td>
+                                    {{item.status}}
+                                </td>
+                                <td>
+                                    <a ng-if="item.Documentname" ng-href="../Content/InspactorDocument/{{item.Documentname}}" download="{{item.Documentname}}">
+                                        <i class="fa fa-download"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+
+
+            </div>
+            <div class="col-md-12">
+                <button type="button" ng-click="backStaushistory()" class="btn btn-primary dev-btn ng-binding">{{translation.Back}}</button>
+
+            </div>
+        </div>
+    </div>
+</div>

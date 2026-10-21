@@ -1,0 +1,384 @@
+﻿<script src="~/Scripts/AngularFramework/WRReport.js?id=6"></script>
+<script type="text/javascript" src="~/Scripts/jqueryuitimepicker.js"></script>
+<link href="~/Content/Stylesheets/jqueryuitimepicker.css" rel="stylesheet" />
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $('.SetCalender').datepicker({
+            showOn: "both",
+            changeMonth: true,
+            buttonImage: "../images/calender.png",
+            changeYear: true,
+            dateFormat: "dd/mm/yy",
+            //minDate: (new Date()).getDate() + '/' + ((new Date()).getMonth()+1) + '/' + ((new Date()).getFullYear()).toString(),
+            //defaultDate: (new Date()).getDate() + '/' + ((new Date()).getMonth() + 1) + '/' + ((new Date()).getFullYear()).toString(),
+        });
+       
+
+    });
+</script>
+
+<style type="text/css">
+    body {
+        font-family: Arial;
+        font-size: 10pt;
+    }
+
+    /*table {
+        border: 1px solid #ccc;
+        border-collapse: collapse;
+    }
+
+        table th {
+            background-color: #F7F7F7;
+            color: #333;
+            font-weight: bold;
+        }
+
+        table th, table td {
+            padding: 5px;
+            border: 1px solid #ccc;
+        }*/
+
+    .NewMemberdob input {
+        float: left !important;
+        width: 90% !important;
+    }
+
+    .NewMemberdob button {
+        float: left;
+    }
+
+    .notValid {
+        border: solid 1px red !important
+    }
+
+    .NewRequestList td {
+        color: black !important;
+    }
+
+    .rowdeleteBtn {
+        color: #fff !important;
+        font-weight: bold !important;
+        font-size: 12px !important;
+    }
+
+    .margin-Top20 {
+        margin-top: 20px;
+    }
+</style>
+<div ng-app="WRReportMod" ng-controller="WRReportCont">
+    <div class="col-md-12">
+        <h3 class="h3heading citizen-dash-head">{{translation.WRReport}}</h3>
+    </div>
+
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="devpage-breadcrumb">
+            <ul class="page-breadcrumb">
+                <li class="dev-page-br">
+                    <i class="fa fa-home"> </i>
+                    <a href="#"> {{translation.MIS}}  </a>
+                    <i class="fa fa-angle-right"> </i>
+                </li>
+                <li style="float: left">
+                    <span style="margin: 0 5px;">{{translation.WRReport}}   </span>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <input type="hidden" id="hdnRoleId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).RoleId)" />
+
+        <div class="table-responsive citizen-dash-head">
+            <div>
+                <div class="table-dropdown" id="search-filter">
+                    <div class="col-md-2 margin-Top20">
+                        <label for="search" class="ng-binding">{{translation.FincialYearHeading}}:</label>
+                        <select name="fy" style="" class="form-control" ng-model="Filter.FinancialYear" ng-init="Filter.FinancialYear=''">
+                            <option value="">{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in FinancialYearList" value="{{item.FIN_YEAR_NAME}}">
+                                {{item.FIN_YEAR_NAME}}
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2 margin-Top20" style="padding-left: 0;">
+                        <label>{{ translation.Commodity}}</label>
+                        <select name="item_kind" ng-model="WrSearch.CommodityId" class="form-control" ng-init="WrSearch.CommodityId=''" ng-change="GetPurchaseCenterList()">
+                            <option value="">{{translation.SelectOption}}</option>
+                            <option ng-repeat="commodity in Commodities" value="{{commodity.CommodityId}}">
+                                {{_language =='en-us' ?  commodity.CommodityNameEn : commodity.CommodityNameHi}}
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2 margin-Top20" style="padding-left: 0;">
+                        <label>{{ translation.Warehouse}}</label>
+                        <select name="wharehouse_id" ng-model="WrSearch.WarehouseId" class="form-control" ng-init="WrSearch.WarehouseId=''">
+                            <option value="">{{translation.SelectOption}}</option>
+                            <option ng-repeat="itm in WarehouseList" value="{{itm.WarehousId}}">
+                                {{_language =='en-us' ?  itm.WarehousNameEn : itm.CommodityNameEn}}
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="col-lg-2 margin-Top20" style="padding-left: 0;">
+                        <label for="search" class="ng-binding">{{translation.RegionalOffice}}:</label>
+                        <select name="dst1.RajfedROId " class="form-control ng-pristine ng-valid ng-not-empty ng-touched" ng-model="WrSearch.RegionalOffice" ng-change="GetAllDistrictListByRO(GetWarehouseList)" ng-init="WrSearch.RegionalOffice=''">
+                            <option value="" selected="selected">{{translation.SelectOption}}</option>
+                            <option ng-repeat="itm in ROList" value="{{itm.RajfedROId}}">
+                                {{_language =='en-us' ?  itm.RONameEn : itm.RONameHn}}
+                            </option>
+                        </select>
+                    </div>
+
+
+                    <div class="col-md-2 margin-Top20" style="padding-left: 0;">
+                        <label>{{ translation.DistrictHeading}}</label>
+                        <select name="pc.DistrictId" ng-model="WrSearch.DistrictId" class="form-control" ng-init="WrSearch.DistrictId=''" ng-change="GetKVSSList()">
+                            <option value="">{{translation.SelectOption}}</option>
+                            <option ng-repeat="district in DistrictList" value="{{district.DISTRICT_ID}}">
+                                {{_language =='en-us' ?  district.DISTRICT_ENG : district.DISTRICT_MANGAL}}
+                            </option>
+                        </select>
+                    </div>
+
+
+
+                    <div class="col-md-2 margin-Top20">
+                        <label>{{ translation.KVSSMPRForm}}</label>
+                        <select name="received_from_kvss" ng-model="WrSearch.KVSSId" class="form-control" ng-init="WrSearch.KVSSId=''" ng-change="GetPurchaseCenterList()">
+                            <option value="">{{translation.SelectOption}}</option>
+                            <option ng-repeat="KVSS in KVSSList track by KVSS.KvssId" value="{{KVSS.KvssId}}">
+                                {{_language =='en-us' ?  KVSS.KVSS : KVSS.KVSS}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 margin-Top20">
+                        <label>{{ translation.PurchaseCenter}}</label>
+                        <select name="purchase_center_id" ng-model="WrSearch.PurchaseCenterId" class="form-control" ng-init="WrSearch.PurchaseCenterId=''">
+                            <option value="">{{translation.SelectOption}}</option>
+                            <option ng-repeat="purchaseCenter in PurchaseCenterList  track by purchaseCenter.Center_Id" value="{{purchaseCenter.Center_Id}}">
+                                {{_language =='en-us' ?  purchaseCenter.CenterNameEn : purchaseCenter.CenterNameHi}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 margin-Top20">
+                        <label>Commodity Type</label>
+                        <select name="commoditytype" ng-model="WrSearch.commoditytype" class="form-control" ng-init="WrSearch.commoditytype=''">
+                            <option value="">{{translation.SelectOption}}</option>
+                            <option value="1">खरीफ</option>
+                            <option value="0">रबी </option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 NewMemberdob margin-Top20">
+                        <label>
+                            {{translation.FromDate}}
+                        </label>
+                        <input id="txtFromDate" name="FromDate" disabled="disabled" class="form-control SetCalender" ng-model="Filter.FromDate" placeholder="{{translation.FromDate}}" onkeypress="return event.charCode >= 48 &amp;&amp; event.charCode <= 57" autocomplete="off">
+                    </div>
+                    <div class="col-md-2 NewMemberdob margin-Top20">
+                        <label>
+                            {{translation.ToDate}}
+                        </label>
+                        <input id="txtToDate" name="ToDate" disabled="disabled" class="form-control SetCalender" ng-model="Filter.ToDate" placeholder="{{translation.ToDate}}" onkeypress="return event.charCode >= 48 &amp;&amp; event.charCode <= 57" autocomplete="off">
+                    </div>
+
+                    @*<div class="col-md-2" style="padding-left: 0;">
+                        <label>{{ translation.Search}}</label>
+                        <input type="text" ng-model="WrSearch.Search" class="form-control" />
+                    </div>
+                    <div class="col-md-4" ng-show="showSearchText">
+                        <label for="search" class="ng-binding">Search:</label>
+                        <input name="searchText" id="search" class="form-control ng-pristine ng-valid ng-empty ng-touched" ng-model="Filter.SearchText" placeholder="Filter Text" autocomplete="off">
+                    </div>*@
+                    <div class="col-md-4  margin-Top20">
+                        <label>&nbsp;</label><br>
+                        <button type="button" ng-click="searchRequest(SearchData)" class="btn btn-primary dev-btn ng-binding">{{translation.Search}}</button>
+                        <button type="button" ng-click="ClearSearch()" class="btn btn-primary dev-btn ng-binding">{{translation.Clear}}</button>
+                    </div>
+                </div>
+
+                <div class="col-lg-12" style="margin-bottom: 10px;">
+                    <input style="" type="radio" ng-click="GetWarehouseFilterList('FY')" checked="checked" name="Type" value="Generate" />{{translation.FYWiseReport}}
+                    <input type="radio" style="" ng-click="GetWarehouseFilterList('Warehouse')" name="Type" value="New" />{{translation.WarehouseWiseReport}}
+                    <input type="radio" style="" ng-click="GetWarehouseFilterList('Commodity')" name="Type" value="New" />{{translation.CommodityWiseReport}}
+                    <input type="radio" style="" ng-click="GetWarehouseFilterList('RO')" name="Type" value="New" />{{translation.ROWiseReport}}
+                    <input type="radio" style="" ng-click="GetWarehouseFilterList('KVSS')" name="Type" value="New" />{{translation.KVSSWiseReport}}
+                    <input type="radio" style="" ng-click="GetWarehouseFilterList('PurchaseCenter')" name="Type" value="New" />{{translation.PurchaseCenterWiseReport}}
+                    <input type="radio" style="" ng-click="GetWarehouseFilterList('WR')" name="Type" value="New" />{{translation.WRWiseReport}}
+                </div>
+                <table id="example" class="table devtable" style="border:1px solid rgb(222, 221, 221); float: left;" ng-if="ReportType=='FY'||ReportType=='Warehouse'||ReportType=='Commodity'||ReportType=='KVSS'||ReportType=='PurchaseCenter'||ReportType=='RO'">
+                    <thead>
+                        <tr>
+                            <th>
+                                #
+                            </th>
+                            <th ng-if="ReportType=='PurchaseCenter'">{{translation.District}}</th>
+                            <th>
+                                {{ReportType=='FY'?translation.FinancialYear:ReportType=='Warehouse'?translation.Warehouse:ReportType=='Commodity'?translation.Commodity:ReportType=='KVSS'?translation.KVSSMPRForm:ReportType=='PurchaseCenter'?translation.PurchaseCenter:ReportType=='RO'?translation.RegionalOffice:''}}
+                            </th>
+                            <th style="text-align:right">{{translation.Total}} {{translation.WR}}</th>
+                            <th style="text-align:right">
+                                {{translation.PackagesLots}}
+                            </th>
+                            <th style="text-align:right">
+                                {{translation.NetQuantityInQTL}}
+                            </th>
+                            <th style="text-align:right">{{translation.TotalValue}}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="item in WRDetails">
+                            <td>{{(((DataPagingDetails.PageNumber - 1) * DataPagingDetails.PageSize) + 1)+$index}}</td>
+                            <td ng-if="ReportType=='PurchaseCenter'"> {{_language =='en-us' ?  item.DISTRICT_ENG : item.DISTRICT_MANGAL}}</td>
+                            <td>
+                                {{_language =='en-us' ?  item.NameEn : item.NameHi}}
+                            </td>
+                            <td style="text-align:right">{{item.TotalWR}}</td>
+                            <td style="text-align:right">
+                                {{ item.packages_lots}}
+                            </td>
+                            <td style="text-align:right">
+                                {{ item.net_quantity}}
+                            </td>
+                            <td style="text-align:right">{{item.TotalValue}}</td>
+                        </tr>
+                    </tbody>
+                    <tfoot ng-if="WRDetails.length>0">
+                        <tr>
+                            <th colspan="2" style="text-align:right">Total</th>
+                            <th style="text-align:right">{{TotalWR}}</th>
+                            <th style="text-align:right">{{PackagesLots}}</th>
+                            <th style="text-align:right">{{TotalNetQuantity}}</th>
+                            <th style="text-align:right">{{TotalNetQuantityValue}}</th>
+                        </tr>
+                    </tfoot>
+                </table>
+
+                <table id="example" class="table devtable" style="border:1px solid rgb(222, 221, 221); float: left;" ng-if="ReportType=='WR'">
+                    <thead>
+                        <tr>
+                            <th>
+                                #
+                            </th>
+                            <th> {{translation.Warehouse}}</th>
+                            <th>
+                                {{translation.WRNo}}
+                            </th>
+                            <th>
+                                {{translation.SrNoOfPhysicalReceipt}}
+                            </th>
+
+                            <th>
+                                {{translation.District}}
+                            </th>
+                            <th>
+                                {{translation.KVSSMPRForm}}
+                            </th>
+                            <th>
+                                {{translation.Commodity}}
+                            </th>
+                            <th>
+                                {{translation.PurchaseCenter}}
+                            </th>
+                            <th>{{translation.WRDate}}</th>
+                            <th>{{translation.FromDate}}</th>
+                            <th>{{translation.ToDate}}</th>
+
+                            <th>
+                                {{translation.Price}}
+                            </th>
+                            <th style="text-align:right">{{translation.PackagesLots}}</th>
+                            <th style="text-align:right">{{translation.NetQuantityInQTL}}</th>
+                            <th style="text-align:right">{{translation.TotalValue}}</th>
+                            <th>&nbsp;</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="item in WRDetails">
+                            <td>{{(((DataPagingDetails.PageNumber - 1) * DataPagingDetails.PageSize) + 1)+$index}}</td>
+                            <td>
+                                {{_language =='en-us' ?  item.WarehousNameEn : item.WarehousNameHi}}
+                            </td>
+                            <td>
+                                {{item.receipt_no}}
+                            </td>
+                            <td>
+                                {{item.receipt_serial_no}}
+                            </td>
+                            <td>
+                                {{_language =='en-us' ?  item.DISTRICT_ENG : item.DISTRICT_MANGAL}}
+                            </td>
+                            <td>
+                                {{ item.SocietyName}}
+                            </td>
+                            <td>
+                                {{_language =='en-us' ?  item.CommodityNameEn : item.CommodityNameHi}}
+                            </td>
+                            <td>
+                                {{_language =='en-us' ?  item.PurchaseCenterEng : item.PurchaseCenterHi}}
+                            </td>
+                            <td>{{item.WRGenerateDate}}</td>
+                            <td>{{item.from_date}}</td>
+                            <td>{{item.to_date}}</td>
+
+                            <td>{{item.Price}}</td>
+                            <td style="text-align:right">{{item.packages_lots}}</td>
+                            <td style="text-align:right">{{item.net_quantity}}</td>
+                            <td style="text-align:right">{{item.TotalValue}}</td>
+                            <td><a style="color:#505050;" ng-if="item.EntryFile!=''" target="_blank" href="../Content/RSWC/{{item.EntryFile}}"><i class="fa fa-download"></i></a></td>
+                        </tr>
+                    </tbody>
+                    <tfoot ng-if="WRDetails.length>0">
+                        <tr>
+                            <th colspan="13" style="text-align:right">Total</th>
+                            <th style="text-align:right">{{TotalNetQuantity}}</th>
+                            <th style="text-align:right">{{TotalNetQuantityValue}}</th>
+                            <th></th>
+                        </tr>
+                    </tfoot>
+                </table>
+
+                <div class="col-md-12">
+                    <div ng-if="DataPagingDetails.TotalPages>1" class="dataTables_paginate paging_simple_numbers" id="dataTables-example_paginate">
+                        <div class="dataTables_info" id="dataTables-example_info" role="status" aria-live="polite">
+                            Total Records: {{DataPagingDetails.TotalRecords}}
+                        </div>
+                        <ul class="pagination pagination_1" style="margin-left: 10px !important;">
+                            <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« First</span></li>
+                            <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« Previous</span></li>
+
+                            <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest('1',SearchData)" style="cursor: pointer;">
+                                <span>«First</span>
+                            </li>
+                            <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest(DataPagingDetails.PageNumber-1,SearchData)" style="cursor:pointer;">
+                                <span>« Previous</span>
+                            </li>
+                            <li class="{{n==DataPagingDetails.PageNumber?'active':''}}" style="{{n==DataPagingDetails.PageNumber?'':'cursor: pointer'}}" ng-repeat="n in PagingRange(DataPagingDetails.StartPageNumber,DataPagingDetails.EndPageNumber,DataPagingDetails.TotalPages)" ng-click="pageRequest(n,SearchData)"><span>{{n}}</span></li>
+                            <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Next</span></li>
+                            <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Last</span></li>
+                            <li ng-if="DataPagingDetails.PageNumber!= DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.PageNumber+1,SearchData)" style="cursor:pointer;">
+                                <span>Next »</span>
+                            </li>
+                            <li ng-if="DataPagingDetails.PageNumber != DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.TotalPages,SearchData)" style="cursor:pointer;">
+                                <span>Last »</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <input ng-if="WRDetails.length>0" type="button" id="btnExport" class="btn btn-primary dev-btn" style="" ng-click="ExportData()" value="Export" />
+
+            </div>
+        </div>
+        <input type="hidden" value="@ViewBag.FromDate" id="fromdateserver" />
+        <input type="hidden" value="@ViewBag.TodateDate" id="todateserver" />
+        <input type="hidden" value="@ViewBag.MinDate" id="mindateserver" />
+    </div>
+</div>
+
+
+

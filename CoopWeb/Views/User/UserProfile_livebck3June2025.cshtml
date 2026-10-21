@@ -1,0 +1,309 @@
+﻿
+@{
+    Cooperative.Models.UserEntity _LoggedInUser = (Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin];
+    string _language = (Request.Cookies[Cooperative.Controllers.SessionIdentity.Culture]).Value.ToLower();
+    <div class="col-md-12">
+        <h3 class="citizen-dash-head"> @(_language == "en-us" ? "User Profile" : "उपयोगकर्ता प्रोफ़ाइल") </h3>
+    </div>
+   
+    <div class="col-md-12">
+        <div class="citizen-dash-head">
+            <div class="dev-userfirstpart">
+                <div class="col-md-4">
+                    <img src="@(!string.IsNullOrEmpty(_LoggedInUser.ImageUrl) ? (_LoggedInUser.ImageUrl) : "/Content/Images/userprofile.png")" class="img-responsive dev-userprofile" alt="UserProfile" />
+                    <h4 class="dev-username"> @(_language == "en-us" ? _LoggedInUser.OfficerNameEn : _LoggedInUser.OfficerNameHi)  </h4> <span> @(_language == "en-us" ? _LoggedInUser.RoleName_EN : _LoggedInUser.RoleName_HI) </span>
+                </div>
+            </div>
+
+            <div class="dev-usertable">
+                <div class="col-md-8">
+                    <table class="table table-user-information">
+                        <tbody>
+                            <tr>
+                                <td>@(_language == "en-us" ? "Name" : "नाम") :</td>
+                                <td> @(_language == "en-us" ? _LoggedInUser.OfficerNameEn : _LoggedInUser.OfficerNameHi) </td>
+                            </tr>
+
+                            <tr>
+                                <td>@(_language == "en-us" ? "Role" : "भूमिका") :</td>
+                                <td> @(_language == "en-us" ? _LoggedInUser.RoleName_EN : _LoggedInUser.RoleName_HI) </td>
+                            </tr>
+
+                            <tr>
+                                <td>@(_language == "en-us" ? "Address" : "पता") :</td>
+                                <td> @(_language == "en-us" ? _LoggedInUser.AddressEn : _LoggedInUser.AddressHi) </td>
+                            </tr>
+
+                            <tr>
+                                <td>@(_language == "en-us" ? "Phone No." : "फ़ोन नंबर") :</td>
+                                <td> @(_LoggedInUser.PhoneNo) </td>
+                            </tr>
+                            <tr>
+                                <td>@(_language == "en-us" ? "Mobile No." : "मोबाइल नंबर") :</td>
+                                <td> @(_LoggedInUser.MobileNo) </td>
+                            </tr>
+
+                            <tr>
+                                <td>@(_language == "en-us" ? "Email" : "ईमेल") :</td>
+                                <td> @(_LoggedInUser.EmailId) </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="~/Scripts/AngularFramework/UserProfile.js"></script>
+   
+
+    <div  ng-app="UserProfileMod" ng-controller="UserProfileCnt">
+        <div class="col-md-12">
+            <h3 class="citizen-dash-head"> Role </h3>
+        </div>
+
+        <div class="col-md-12">
+            <div class="citizen-dash-head table-responsive">
+                <table class="table table-responsive devtable">
+                    <thead>
+                        <tr>
+                            <th>
+                                {{translation.SRNO}}
+                            </th>
+                            <th>
+                                {{translation.RoleHeading}}
+                            </th>
+                            <th>
+                                {{translation.DepartmentHeading}}
+                            </th>
+                            <th>
+                                {{translation.Organization}}
+                            </th>
+                            <th>
+                                {{translation.Level}}
+                            </th>
+                            <th>
+                                {{translation.DesignationHeading}}
+                            </th>
+                            <th>
+                                {{translation.Division}}
+                            </th>
+                            <th>
+                                {{translation.District}}
+                            </th>
+                            <th>
+                                {{translation.City}}
+                            </th>
+                            <th>
+                                {{translation.BlockHeading}}
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="items in UserRoleProfile">
+                            <td>{{$index+1}}</td>
+                            <td>{{ items.RoleName_EN }}</td>
+                            <td>{{ items.DEPTNAMEENGLISH }}</td>
+                            <td>{{ items.OrganisationNameEn }}</td>
+                            <td>{{ items.LevelNameEn }}</td>
+                            <td>{{ items.DESIGNATIONDESCENGLISH }}</td>
+                            <td>{{ items.DIVISION_ENG }}</td>
+                            <td>{{ items.DISTRICT_ENG }}</td>
+                            <td>{{ items.CITY_ENG }}</td>
+                            <td>{{ items.BLOCK_ENG }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="dev-popup-body modal fade" id="myModal" role="dialog">
+            <div class="modal-dialog">
+                <!-- Modal content-->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" id="btnClose" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title"> {{translation.TransferRoleDetails}} </h4>
+                    </div>
+                    <div class="modal-body">
+
+                        <form class="dev-search-form" name="MyRoleForm" style="overflow: hidden;">
+                          
+                            <div class="bottom-padding"></div>
+                            <div class="form-group col-md-6">
+                                <label>{{translation.DepartmentHeading}}</label>
+                                <select class="form-control" ng-change="UnitList()" id="ddlDept" ng-model="UserProfile.DEPTCODE" ng-init="UserProfile.DEPTCODE='0'">
+                                    <option value="0" disabled>{{translation.SelectDept}}</option>
+                                    <option ng-repeat="item in Departments" value="{{item.DEPTCODE}}">
+                                        {{_language =='en-us' ?  item.DEPTNAMEENGLISH : item.DEPTNAMEHINDI}}
+
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label>{{translation.Unit}}</label>
+                                <select class="form-control" id="ddlunit" ng-model="UserProfile.UnitId" ng-init="UserProfile.UnitId='0'">
+                                    <option value="0" disabled>{{translation.SelectUnit}}</option>
+                                    <option ng-repeat="item in Unit" value="{{item.UnitId}}">
+                                        {{_language =='en-us' ?  item.UnitNameEn : item.UnitNameHi}}
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label>{{translation.Level}}</label>
+                                <select class="form-control" id="ddllevel" ng-model="UserProfile.LevelId" ng-init="UserProfile.LevelId='0'">
+                                    <option value="0" disabled>{{translation.SelectLevel}}</option>
+                                    <option ng-repeat="item in Level" value="{{item.LevelId}}">
+                                        {{_language =='en-us' ?  item.LevelNameHi : item.LevelNameHi}}
+                                    </option>
+                                </select>
+                            </div>
+
+
+                            <div class="form-group col-md-6">
+                                <label>{{translation.DesignationHeading}}</label>
+                                <select class="form-control" id="ddlDesignation" ng-model="UserProfile.DESIGNATIONCODE" ng-init="UserProfile.DESIGNATIONCODE='0'">
+                                    <option selected value="0" disabled>{{translation.SelectDesig}}</option>
+                                    <option ng-repeat="item in Designations" value="{{item.DESIGNATIONCODE}}">
+                                        {{_language =='en-us' ?  item.DESIGNATIONDESCENGLISH : item.DESIGNATIONDESCHINDI}}
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="form-group col-md-6">
+                                <label>{{translation.PostHeading}}</label>
+                                <select class="form-control" id="ddlPost" ng-model="UserProfile.PostId" ng-init="UserProfile.PostId='0'">
+                                    <option value="0" disabled>{{translation.SelectPost}}</option>
+                                    <option ng-repeat="item in Posts" value="{{item.CAD_ID}}">
+                                        {{_language =='en-us' ?  item.CAD_NAME : item.CAD_NAME}}
+                                    </option>
+                                </select>
+                            </div>
+
+
+                            <div class="form-group col-md-6">
+                                <label>{{translation.RoleHeading}}</label>
+                                <select class="form-control" id="ddlRole" ng-model="UserProfile.RoleID" ng-init="UserProfile.RoleID='0'">
+                                    <option value="0" disabled>{{translation.SelectRole}}</option>
+                                    <option ng-repeat="item in Roles" value="{{item.RoleID}}">
+                                        {{_language =='en-us' ?  item.RoleName_EN : item.RoleName_HI}}
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label>{{translation.DivisionHeading}}</label>
+                                <select ng-model="UserProfile.DivisionId" id="ddlDivision" name="division" ng-change="DistrictList()" class="form-control" ng-init="UserProfile.DivisionId ='0'">
+                                    <option value="0" disabled>{{translation.SelectOption}}</option>
+                                    <option ng-repeat="item in Divisions" value="{{item.DIVISION_ID}}">
+                                        {{_language =='en-us' ?  item.DIVISION_ENG : item.DIVISION_MANGAL}}
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="form-group col-md-6">
+                                <label>{{translation.District}}</label>
+                                <select ng-model="UserProfile.DistrictId" id="ddlDistrict" class="form-control" ng-init="UserProfile.DistrictId='0'">
+                                    <option value="0" disabled>{{translation.SelectOption}}</option>
+                                    <option ng-repeat="item in Districts" value="{{item.DISTRICT_ID}}">
+                                        {{_language =='en-us' ?  item.DISTRICT_ENG : item.DISTRICT_MANGAL}}
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="form-group col-md-6" style="margin-top: 15px;">
+                                <div class="form-check form-check-inline col-md-4" style="padding: 0;">
+                                    <label class="form-check-label">{{translation.UrbanRural}}</label>
+                                </div>
+
+                                <div class="form-check form-check-inline col-md-4">
+                                    <div class="radio-item">
+                                        <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1" value="true" ng-model="UserProfile.IsRuralUrban" ng-change="RuralUrbanBlock()" ng-checked="UserProfile.IsRuralUrban">
+                                        <label class="form-check-label option_value" for="inlineRadio1">{{translation.Urban}}</label>
+                                    </div>
+                                </div>
+
+
+                                <div class="form-check form-check-inline col-md-4">
+                                    <div class="radio-item">
+                                        <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio2" value="false" ng-model="UserProfile.IsRuralUrban" ng-change="RuralUrbanBlock()" ng-checked="UserProfile.IsRuralUrban">
+                                        <label class="form-check-label option_value" for="inlineRadio2">{{translation.Rural}}</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div ng-show="UrbanDiv">
+                                <div class="form-group col-md-6">
+                                    <label>{{translation.Tehsil}}</label>
+                                    <select ng-model="UserProfile.TehsilId" id="ddlTehsil" class="form-control" ng-change="GetCity()" ng-init="UserProfile.TehsilId='0'">
+                                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                                        <option ng-repeat="item in Tehsil" value="{{item.DISTRICT_ID}}">
+                                            {{_language =='en-us' ?  item.TEHSIL_ENG : item.TEHSIL_MANGAL}}
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label>{{translation.City}}</label>
+                                    <select ng-model="UserProfile.CityId" id="ddlCity" class="form-control" ng-change="WardList()" ng-init="UserProfile.CityId='0'">
+                                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                                        <option ng-repeat="item in City" value="{{item.CITY_ID}}">
+                                            {{_language =='en-us' ?  item.CITY_ENG : item.CITY_MANGAL}}
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label>{{translation.Ward}}</label>
+                                    <select ng-model="UserProfile.WardId" id="ddlWard" class="form-control" ng-init="UserProfile.WardId='0'">
+                                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                                        <option ng-repeat="item in Ward" value="{{item.WARD_ID}}">
+                                            {{_language =='en-us' ?  item.WARD_ENG : item.WARD_MANGAL}}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+
+
+                            <div ng-show="RuralDiv">
+                                <div class="form-group col-md-6">
+                                    <label>{{translation.PanchayatSamiti}}</label>
+                                    <select ng-model="UserProfile.BlockId" id="ddlPanchayatSamiti" class="form-control" ng-change="GramPanchayatList()" ng-init="UserProfile.BlockId='0'">
+                                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                                        <option ng-repeat="item in Blocks" value="{{item.BLOCK_ID}}">
+                                            {{_language =='en-us' ?  item.BLOCK_ENG : item.BLOCK_MANGAL}}
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label>{{translation.GramPanchayat}}</label>
+                                    <select ng-model="UserProfile.GPId" id="ddlGramPanchayat" class="form-control" ng-change="VillageList()" ng-init="UserProfile.GPId='0'">
+                                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                                        <option ng-repeat="item in GramPanchayats" value="{{item.GP_ID}}">
+                                            {{_language =='en-us' ?  item.GP_ENG : item.GP_MANGAL}}
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label>{{translation.Village}}</label>
+                                    <select ng-model="UserProfile.VillageId" id="ddlVillage" class="form-control" ng-init="UserProfile.VillageId='0'">
+                                        <option value="0" disabled>{{translation.SelectOption}}</option>
+                                        <option ng-repeat="item in Villages" value="{{item.VILLAGE_ID}}">
+                                            {{_language =='en-us' ?  item.VILLAGE_ENG : item.VILLAGE_MANGAL}}
+                                        </option>
+                                    </select>
+                                </div>
+
+                            </div>
+                            
+                            <div class="form-group col-md-6">
+                                <button type="submit" class="btn btn-primary dev-btn" ng-disabled="MyUserForm.$invalid" ng-click="SaveData()">{{translation.Submit}}</button>
+                                <button type="button" class="btn btn-primary dev-btn" ng-click="ClearForm()">{{translation.Clear}}</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="se-pre-con"></div>
+        <div id="stop" class="scrollTop">
+            <span><a href=""><i class="fa fa-arrow-up">Top</i></a></span>
+        </div>
+    </div>
+}

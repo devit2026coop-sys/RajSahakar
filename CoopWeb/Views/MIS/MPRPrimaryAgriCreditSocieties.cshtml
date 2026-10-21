@@ -1,0 +1,406 @@
+﻿<script src="~/Scripts/AngularFramework/MPRPrimaryAgriCreditSocieties.js"></script>
+<script src="~/Scripts/Excel/jszip_v1.js"></script>
+<script src="~/Scripts/Excel/xlsx.js"></script>
+<script src="~/Scripts/Excel/jszip.js"></script>
+<script src="~/Scripts/Excel/FileSaver.js"></script>
+<script src="~/Scripts/Excel/myexcel.js"></script>
+
+<div ng-app="societyDistrictwisemodule" ng-controller="societyDistrictwiseCount">
+    <div class="col-md-12">
+        <h3 class="h3heading citizen-dash-head">{{translation.MPRPrimaryAgriCreditSocieties}}</h3>
+    </div>
+    <input type="hidden" id="roleid" value="@ViewBag.RoleId" />
+    <div ng-show="@ViewBag.RoleId !=10222" class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="devpage-breadcrumb">
+            <ul  class="page-breadcrumb">
+                <li class="dev-page-br">
+                    <i class="fa fa-home"> </i>
+                    <a href="#"> {{translation.MIS}}  </a>
+                    <i class="fa fa-angle-right"> </i>
+                </li>
+                <li style="float: left">
+                    <span style="margin: 0 5px;">{{translation.MPRPrimaryAgriCreditSocieties}}   </span>
+                </li>
+                <li  style="float: right;">
+                    <button type="button" ng-click="showEntryForm()" class="btn btn-info btn-lg dev-popup-btn" data-toggle="modal" style="color: #025e63; cursor: pointer; text-decoration:none;  font-weight: bold;" data-target="#myModal">
+                        <h5>&#187; {{translation.NewEntry}}</h5>
+                    </button>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 dataList" ng-show="dataList">
+        <div class="table-responsive citizen-dash-head">
+            <div class="table-dropdown" id="search-filter" style="overflow:inherit; float:left;width: 100%;margin-bottom: 10px;">
+                <div class="col-sm-4 form-group">
+                    <label>Financial Year</label>
+                    <select class="form-control" ng-click="GetDataByFinancialYear()" ng-init="FY=''" id="FY" ng-model="FY">
+                        <option value="">{{translation.SelectOption}}</option>
+                        <option ng-repeat="district in FinancialYearList" value="{{district.FIN_YEAR_NAME}}">
+                            {{_language =='en-us' ?  district.FIN_YEAR_NAME : district.FIN_YEAR_NAME}}
+                        </option>
+                    </select>
+
+                </div>
+                <div class="col-md-2 margin-Top20 y_dropdown" style="padding-left: 0;">
+                    <input type="button" class="btn btn-primary dev-btn" ng-click="getdetails()" value="Search">
+                </div>
+            </div>
+            <table class="table devtable" id="tblgetsuport">
+                <thead>
+                    <tr>
+                        <th>{{translation.SRNO}}</th>
+                        <th style="text-align:center;">{{translation.Item}}</th>
+                        <th style="text-align:center;">{{translation.TotalNumberofsociety}}</th>
+                        <th style="text-align:center;">{{translation.TotalAmountInRs}}</th>
+                        <th colspan="2" style="text-align:center;">{{translation.ScheduledCaste}}</th>
+                        <th colspan="2" style="text-align:center;">{{translation.ScheduledTribe}}</th>
+                    </tr>
+                    <tr>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th style="text-align:center;"> Number</th>
+                        <th style="text-align:center;"> Amount</th>
+                        <th style="text-align:center;"> Number</th>
+                        <th style="text-align:center;"> Amount</th>
+                    </tr>
+                </thead>
+                <tbody style="text-align:center">
+                    <tr ng-repeat="BData in CoopMain">
+                    <tr>
+                        <td style="text-align:center;">1.</td>
+                        <td style="text-align:left;">Membership Actual No.</td>
+                        <td style="text-align:left;">{{CoopMain[0].Membership_SocietyNo}}</td>
+                        <td style="text-align:left;">{{CoopMain[0].Membership_TotalAm}}</td>
+                        <td style="text-align:left;">{{CoopMain[0].Membership_ScNO}}</td>
+                        <td style="text-align:left;">{{CoopMain[0].Membership_ScAmount}}</td>
+                        <td style="text-align:left;">{{CoopMain[0].Membership_StNo}}</td>
+                        <td style="text-align:left;">{{CoopMain[0].Membership_StAmount}}</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align:center;">2.</td>
+                        <td style="text-align:left;">Borrowings Members No.</td>
+                        <td style="text-align:left;">{{CoopMain[0].BorrowingMember_SocietyNo}}</td>
+                        <td style="text-align:left;">{{CoopMain[0].BorrowingMember_TotalAm}}</td>
+                        <td style="text-align:left;">{{CoopMain[0].BorrowingMember_ScNO}}</td>
+                        <td style="text-align:left;">{{CoopMain[0].BorrowingMember_ScAmount}}</td>
+                        <td style="text-align:left;">{{CoopMain[0].BorrowingMember_StNo}}</td>
+                        <td style="text-align:left;">{{CoopMain[0].BorrowingMember_StAmount}}</td>
+                    </tr>
+                    <tr>
+
+                        <td style="text-align:center;">3.</td>
+                        <td style="text-align:left;">Members indebted at the end of the year No.</td>
+                        <td style="text-align:left;">{{CoopMain[0].MemberaIndebted_SocietyNo}}</td>
+                        <td style="text-align:left;">{{CoopMain[0].MemberaIndebted_TotalAm}}</td>
+                        <td style="text-align:left;">{{CoopMain[0].MemberaIndebted_ScNO}}</td>
+                        <td style="text-align:left;">{{CoopMain[0].MemberaIndebted_ScAmount}}</td>
+                        <td style="text-align:left;">{{CoopMain[0].MemberaIndebted_StNo}}</td>
+                        <td style="text-align:left;">{{CoopMain[0].MemberaIndebted_StAmount}}</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align:center;">4.</td>
+
+                        <td style="text-align:left;">Members defaulting at the end of the year No.</td>
+                        <td style="text-align:left;">{{CoopMain[0].MemberaDefaulting_SocietyNo}}</td>
+                        <td style="text-align:left;">{{CoopMain[0].MemberaDefaulting_TotalAm}}</td>
+                        <td style="text-align:left;">{{CoopMain[0].MemberaDefaulting_ScNO}}</td>
+                        <td style="text-align:left;">{{CoopMain[0].MemberaDefaulting_ScAmount}}</td>
+                        <td style="text-align:left;">{{CoopMain[0].MemberaDefaulting_StNo}}</td>
+                        <td style="text-align:left;">{{CoopMain[0].MemberaDefaulting_StAmount}}</td>
+                    </tr>
+
+                    <tr>
+                        <td rowspan="3" style="text-align:center;vertical-align:top;">5.</td>
+                        <td colspan="2" style="text-align:left;">Loan Advanced Rs. In Thousands</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+
+                        <td style="text-align:left;">(a) Short Term</td>
+                        <td style="text-align:left;">{{CoopMain[0].St_Loan_Advancement_SocietyNo}}</td>
+                        <td style="text-align:left;">{{CoopMain[0].St_Loan_Advancement_TotalAm}}</td>
+                        <td style="text-align:left;">{{CoopMain[0].St_Loan_Advancement_ScNO}}</td>
+                        <td style="text-align:left;">{{CoopMain[0].St_Loan_Advancement_ScAmount}}</td>
+                        <td style="text-align:left;">{{CoopMain[0].St_Loan_Advancement_StNo}}</td>
+                        <td style="text-align:left;">{{CoopMain[0].St_Loan_Advancement_StAmount}}</td>
+
+                    </tr>
+                    <tr>
+
+                        <td style="text-align:left;">(b) Medium Term</td>
+                        <td style="text-align:left;">{{CoopMain[0].Mt_Loan_Advancement_SocietyNo}}</td>
+                        <td style="text-align:left;">{{CoopMain[0].Mt_Loan_Advancement_TotalAm}}</td>
+                        <td style="text-align:left;">{{CoopMain[0].Mt_Loan_Advancement_ScNO}}</td>
+                        <td style="text-align:left;">{{CoopMain[0].Mt_Loan_Advancement_ScAmount}}</td>
+                        <td style="text-align:left;">{{CoopMain[0].Mt_Loan_Advancement_StNo}}</td>
+                        <td style="text-align:left;">{{CoopMain[0].Mt_Loan_Advancement_StAmount}}</td>
+
+                    </tr>
+                    <tr>
+                        <td rowspan="3" style="text-align:center;vertical-align:top;">6.</td>
+                        <td colspan="2" style="text-align:left;">Loan Recovered Rs. In Thousands</td>
+
+                    </tr>
+                    <tr>
+
+                        <td style="text-align:left;">(a) Short Term</td>
+                        <td style="text-align:left;">{{CoopMain[0].St_Loan_Recovered_SocietyNo}}</td>
+                        <td style="text-align:left;">{{CoopMain[0].St_Loan_Recovered_TotalAm}}</td>
+                        <td style="text-align:left;">{{CoopMain[0].St_Loan_Recovered_ScNO}}</td>
+                        <td style="text-align:left;">{{CoopMain[0].St_Loan_Recovered_ScAmount}}</td>
+                        <td style="text-align:left;">{{CoopMain[0].St_Loan_Recovered_StNo}}</td>
+                        <td style="text-align:left;">{{CoopMain[0].St_Loan_Recovered_StAmount}}</td>
+
+                    </tr>
+                    <tr>
+
+                        <td style="text-align:left;">(b) Medium Term</td>
+                        <td style="text-align:left;">{{CoopMain[0].Mt_Loan_Recovered_SocietyNo}}</td>
+                        <td style="text-align:left;">{{CoopMain[0].Mt_Loan_Recovered_TotalAm}}</td>
+                        <td style="text-align:left;">{{CoopMain[0].Mt_Loan_Recovered_ScNO}}</td>
+                        <td style="text-align:left;">{{CoopMain[0].Mt_Loan_Recovered_ScAmount}}</td>
+                        <td style="text-align:left;">{{CoopMain[0].Mt_Loan_Recovered_StNo}}</td>
+                        <td style="text-align:left;">{{CoopMain[0].Mt_Loan_Recovered_StAmount}}</td>
+
+                    </tr>
+                    <tr>
+                        <td rowspan="3" style="text-align:center;vertical-align:top;">7.</td>
+                        <td colspan="2" style="text-align:left;">Loan Outstanding Rs. In Thousands</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+
+                        <td style="text-align:left;">(a) Short Term</td>
+                        <td style="text-align:left;">{{CoopMain[0].St_Loan_Outstanding_SocietyNo}}</td>
+                        <td style="text-align:left;">{{CoopMain[0].St_Loan_Outstanding_TotalAm}}</td>
+                        <td style="text-align:left;">{{CoopMain[0].St_Loan_Outstanding_ScNO}}</td>
+                        <td style="text-align:left;">{{CoopMain[0].St_Loan_Outstanding_ScAmount}}</td>
+                        <td style="text-align:left;">{{CoopMain[0].St_Loan_Outstanding_StNo}}</td>
+                        <td style="text-align:left;">{{CoopMain[0].St_Loan_Outstanding_StAmount}}</td>
+
+                    </tr>
+                    <tr>
+
+                        <td style="text-align:left;">(b) Medium Term</td>
+                        <td style="text-align:left;">{{CoopMain[0].MT_Loan_Outstanding_SocietyNo}}</td>
+                        <td style="text-align:left;">{{CoopMain[0].MT_Loan_Outstanding_TotalAm}}</td>
+                        <td style="text-align:left;">{{CoopMain[0].MT_Loan_Outstanding_ScNO}}</td>
+                        <td style="text-align:left;">{{CoopMain[0].MT_Loan_Outstanding_ScAmount}}</td>
+                        <td style="text-align:left;">{{CoopMain[0].MT_Loan_Outstanding_StNo}}</td>
+                        <td style="text-align:left;">{{CoopMain[0].MT_Loan_Outstanding_StAmount}}</td>
+
+                    </tr>
+                    <tr>
+                        <td rowspan="3" style="text-align:center;vertical-align:top;">8.</td>
+                        <td colspan="2" style="text-align:left;">Loan Over Due Rs. In Thousands</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td style="text-align:left;">(a) Short Term</td>
+                        <td style="text-align:left;">{{CoopMain[0].St_Loan_OverDue_SocietyNo}}</td>
+                        <td style="text-align:left;">{{CoopMain[0].St_Loan_OverDue_TotalAm}}</td>
+                        <td style="text-align:left;">{{CoopMain[0].St_Loan_OverDue_ScNO}}</td>
+                        <td style="text-align:left;">{{CoopMain[0].St_Loan_OverDue_ScAmount}}</td>
+                        <td style="text-align:left;">{{CoopMain[0].St_Loan_OverDue_StNo}}</td>
+                        <td style="text-align:left;">{{CoopMain[0].St_Loan_OverDue_StAmount}}</td>
+
+                    </tr>
+                    <tr>
+                        <td style="text-align:left;">(b) Medium Term</td>
+                        <td style="text-align:left;">{{CoopMain[0].Mt_Loan_OverDue_SocietyNo}}</td>
+                        <td style="text-align:left;">{{CoopMain[0].Mt_Loan_OverDue_TotalAm}}</td>
+                        <td style="text-align:left;">{{CoopMain[0].Mt_Loan_OverDue_ScNO}}</td>
+                        <td style="text-align:left;">{{CoopMain[0].Mt_Loan_OverDue_ScAmount}}</td>
+                        <td style="text-align:left;">{{CoopMain[0].Mt_Loan_OverDue_StNo}}</td>
+                        <td style="text-align:left;">{{CoopMain[0].Mt_Loan_OverDue_StAmount}}</td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 EntryForm" ng-show="EntryForm">
+        <div class="table-responsive citizen-dash-head">
+            <div class="table-dropdown" id="search-filter" style="overflow:inherit; float:left;width: 100%;margin-bottom: 10px;">
+                <div class="col-sm-4 form-group">
+                    <label>Financial Year</label>
+                    <select class="form-control" ng-click="GetDataByFinancialYear()" ng-init="FIN_YEAR_NAME=''" id="Fyear" ng-model="Fyear">
+                        <option value="">{{translation.SelectOption}}</option>
+                        <option ng-repeat="district in FinancialYearList" value="{{district.FIN_YEAR_NAME}}">
+                            {{_language =='en-us' ?  district.FIN_YEAR_NAME : district.FIN_YEAR_NAME}}
+                        </option>
+                    </select>
+
+                </div>
+            </div>
+            <table class="table devtable" id="tblgetsuport">
+                <thead>
+                    <tr>
+                        <th>{{translation.SRNO}}</th>
+                        <th style="text-align:center;">{{translation.Item}}</th>
+                        <th style="text-align:center;">{{translation.TotalNumberofsociety}}</th>
+                        <th style="text-align:center;">{{translation.TotalAmountInRs}}</th>
+                        <th colspan="2" style="text-align:center;">{{translation.ScheduledCaste}}</th>
+                        <th colspan="2" style="text-align:center;">{{translation.ScheduledTribe}}</th>
+                    </tr>
+                </thead>
+                <tbody style="text-align:center">
+                    <tr>
+                        <td style="text-align:center;">1.</td>
+                        <td style="text-align:left;">Membership Actual No.</td>
+                        <td><input type="number" class="form-control" placeholder="Number" ng-model="Coop.MASTN" /></td>
+                        <td><input type="number" class="form-control" placeholder="In Rs." ng-model="Coop.MATA" /></td>
+                        <td><input type="number" class="form-control" placeholder="Number" ng-model="Coop.MAScN" /></td>
+                        <td><input type="number" class="form-control" placeholder="In Rs." ng-model="Coop.MASR" /></td>
+                        <td><input type="number" class="form-control" placeholder="Number" ng-model="Coop.MAStN1" /></td>
+                        <td><input type="number" class="form-control" placeholder="In Rs." ng-model="Coop.MAStR" /></td>
+
+                    </tr>
+                    <tr>
+                        <td style="text-align:center;">2.</td>
+                        <td style="text-align:left;">Borrowings Members No.</td>
+                        <td><input type="number" class="form-control" placeholder="Number" ng-model="Coop.BoSTN" /></td>
+                        <td><input type="number" class="form-control" placeholder="In Rs" ng-model="Coop.BoTA" /></td>
+                        <td><input type="number" class="form-control" placeholder="Number" ng-model="Coop.BoScN" /></td>
+                        <td><input type="number" class="form-control" placeholder="In Rs" ng-model="Coop.BoSR" /></td>
+                        <td><input type="number" class="form-control" placeholder="Number" ng-model="Coop.BoStN1" /></td>
+                        <td><input type="number" class="form-control" placeholder="In Rs" ng-model="Coop.BoStR" /></td>
+
+                    </tr>
+                    <tr>
+                        <td style="text-align:center;">3.</td>
+                        <td style="text-align:left;">Members indebted at the end of the year No.</td>
+                        <td><input type="number" class="form-control" placeholder="Number" ng-model="Coop.InSTN" /></td>
+                        <td><input type="number" class="form-control" placeholder="In Rs." ng-model="Coop.InTA" /></td>
+                        <td><input type="number" class="form-control" placeholder="Number" ng-model="Coop.InScN" /></td>
+                        <td><input type="number" class="form-control" placeholder="In Rs." ng-model="Coop.InSR" /></td>
+                        <td><input type="number" class="form-control" placeholder="Number" ng-model="Coop.InStN1" /></td>
+                        <td><input type="number" class="form-control" placeholder="In Rs." ng-model="Coop.InStR" /></td>
+
+                    </tr>
+                    <tr>
+                        <td style="text-align:center;">4.</td>
+                        <td style="text-align:left;">Members defaulting at the end of the year No.</td>
+                        <td><input type="number" class="form-control" placeholder="Number" ng-model="Coop.DeSTN" /></td>
+                        <td><input type="number" class="form-control" placeholder="In Rs." ng-model="Coop.DeTA" /></td>
+                        <td><input type="number" class="form-control" placeholder="Number" ng-model="Coop.DeScN" /></td>
+                        <td><input type="number" class="form-control" placeholder="In Rs." ng-model="Coop.DeSR" /></td>
+                        <td><input type="number" class="form-control" placeholder="Number" ng-model="Coop.DeStN1" /></td>
+                        <td><input type="number" class="form-control" placeholder="In Rs." ng-model="Coop.DeStR" /></td>
+
+                    </tr>
+                    <tr>
+                        <td rowspan="3" style="text-align:center;vertical-align:top;">5.</td>
+                        <td colspan="2" style="text-align:left;">Loan Advanced Rs. In Thousands</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td style="text-align:left;">(a) Short Term</td>
+                        <td><input type="number" class="form-control" placeholder="Number" ng-model="Coop.LsSTN" /></td>
+                        <td><input type="number" class="form-control" placeholder="In Thousands" ng-model="Coop.LsTA" /></td>
+                        <td><input type="number" class="form-control" placeholder="Number" ng-model="Coop.LsScN" /></td>
+                        <td><input type="number" class="form-control" placeholder="In Thousands" ng-model="Coop.LsSR" /></td>
+                        <td><input type="number" class="form-control" placeholder="Number" ng-model="Coop.LsStN1" /></td>
+                        <td><input type="number" class="form-control" placeholder="In Thousands" ng-model="Coop.LsStR" /></td>
+
+                    </tr>
+                    <tr>
+                        <td style="text-align:left;">(b) Medium Term</td>
+                        <td><input type="number" class="form-control" placeholder="Number" ng-model="Coop.LmSTN" /></td>
+                        <td><input type="number" class="form-control" placeholder="In Thousands" ng-model="Coop.LmTA" /></td>
+                        <td><input type="number" class="form-control" placeholder="Number" ng-model="Coop.LmScN" /></td>
+                        <td><input type="number" class="form-control" placeholder="In Thousands" ng-model="Coop.LmSR" /></td>
+                        <td><input type="number" class="form-control" placeholder="Number" ng-model="Coop.LmStN1" /></td>
+                        <td><input type="number" class="form-control" placeholder="In Thousands" ng-model="Coop.LmStR" /></td>
+
+                    </tr>
+                    <tr>
+                        <td rowspan="3" style="text-align:center;vertical-align:top;">6.</td>
+                        <td colspan="2" style="text-align:left;">Loan Recovered Rs. In Thousands</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td style="text-align:left;">(a) Short Term</td>
+                        <td><input type="number" class="form-control" placeholder="Number" ng-model="Coop.RsSTN" /></td>
+                        <td><input type="number" class="form-control" placeholder="In Thousands" ng-model="Coop.RsTA" /></td>
+                        <td><input type="number" class="form-control" placeholder="Number" ng-model="Coop.RsScN" /></td>
+                        <td><input type="number" class="form-control" placeholder="In Thousands" ng-model="Coop.RsSR" /></td>
+                        <td><input type="number" class="form-control" placeholder="Number" ng-model="Coop.RsStN1" /></td>
+                        <td><input type="number" class="form-control" placeholder="In Thousands" ng-model="Coop.RsStR" /></td>
+
+                    </tr>
+                    <tr>
+                        <td style="text-align:left;">(b) Medium Term</td>
+                        <td><input type="number" class="form-control" placeholder="Number" ng-model="Coop.RmSTN" /></td>
+                        <td><input type="number" class="form-control" placeholder="In Thousands" ng-model="Coop.RmTA" /></td>
+                        <td><input type="number" class="form-control" placeholder="Number" ng-model="Coop.RmScN" /></td>
+                        <td><input type="number" class="form-control" placeholder="In Thousands" ng-model="Coop.RmSR" /></td>
+                        <td><input type="number" class="form-control" placeholder="Number" ng-model="Coop.RmStN1" /></td>
+                        <td><input type="number" class="form-control" placeholder="In Thousands" ng-model="Coop.RmStR" /></td>
+
+                    </tr>
+                    <tr>
+                        <td rowspan="3" style="text-align:center;vertical-align:top;">7.</td>
+                        <td colspan="2" style="text-align:left;">Loan Outstanding Rs. In Thousands</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td style="text-align:left;">(a) Short Term</td>
+                        <td><input type="number" class="form-control" placeholder="Number" ng-model="Coop.LOSSTN" /></td>
+                        <td><input type="number" class="form-control" placeholder="In Thousands" ng-model="Coop.LOSTA" /></td>
+                        <td><input type="number" class="form-control" placeholder="Number" ng-model="Coop.LOSScN" /></td>
+                        <td><input id="LsScRsSc" type="number" class="form-control" ng-model="Coop.LsScRsSc" value="{{Coop.LsSR - Coop.RsSR}}" disabled /></td>
+                        <td><input type="number" class="form-control" placeholder="Number" ng-model="Coop.LOSStN1" /></td>
+                        <td><input id="LsStRsSt" type="number" class="form-control" ng-model="Coop.LsStRsSt" value="{{Coop.LsStR - Coop.RsStR}}" disabled /></td>
+
+                    </tr>
+                    <tr>
+                        <td style="text-align:left;">(b) Medium Term</td>
+                        <td><input type="number" class="form-control" placeholder="Number" ng-model="Coop.LOMSTN" /></td>
+                        <td><input type="number" class="form-control" placeholder="In Thousands" ng-model="Coop.LOMTA" /></td>
+                        <td><input type="number" class="form-control" placeholder="Number" ng-model="Coop.LOMScN" /></td>
+                        <td><input id="LmScRmSc" type="number" class="form-control" ng-model="Coop.LmScRmSc" value="{{Coop.LmSR - Coop.RmSR}}" disabled /></td>
+                        <td><input type="number" class="form-control" placeholder="Number" ng-model="Coop.LOMStN1" /></td>
+                        <td><input id="LmStRmSt" type="number" class="form-control" ng-model="Coop.LmStRmSt" value="{{Coop.LmStR - Coop.RmStR}}" disabled /></td>
+                    </tr>
+                    <tr>
+                        <td rowspan="3" style="text-align:center;vertical-align:top;">8.</td>
+                        <td colspan="2" style="text-align:left;">Loan Over Due Rs. In Thousands</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td style="text-align:left;">(a) Short Term</td>
+                        <td><input type="number" class="form-control" placeholder="Number" ng-model="Coop.OsSTN" /></td>
+                        <td><input type="number" class="form-control" placeholder="In Thousands" ng-model="Coop.OsTA" /></td>
+                        <td><input type="number" class="form-control" placeholder="Number" ng-model="Coop.OsScN" /></td>
+                        <td><input type="number" class="form-control" placeholder="In Thousands" ng-model="Coop.OsSR" /></td>
+                        <td><input type="number" class="form-control" placeholder="Number" ng-model="Coop.OsStN1" /></td>
+                        <td><input type="number" class="form-control" placeholder="In Thousands" ng-model="Coop.OsStR" /></td>
+
+                    </tr>
+                    <tr>
+                        <td style="text-align:left;">(b) Medium Term</td>
+                        <td><input type="number" class="form-control" placeholder="Number" ng-model="Coop.OmSTN" /></td>
+                        <td><input type="number" class="form-control" placeholder="In Thousands" ng-model="Coop.OmTA" /></td>
+                        <td><input type="number" class="form-control" placeholder="Number" ng-model="Coop.OmScN" /></td>
+                        <td><input type="number" class="form-control" placeholder="In Thousands" ng-model="Coop.OmSR" /></td>
+                        <td><input type="number" class="form-control" placeholder="Number" ng-model="Coop.OmStN1" /></td>
+                        <td><input type="number" class="form-control" placeholder="In Thousands" ng-model="Coop.OmStR" /></td>
+                    </tr>
+
+                </tbody>
+            </table>
+            <div class="row">
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 text-center">
+                    <button type="submit" class="btn btn-primary dev-btn" ng-click="MainCooperativeSocieties()">Save</button>
+                    <button type="button" class="btn btn-primary dev-btn">Reset</button>
+                    <button type="submit" class="btn btn-primary dev-btn" ng-click="back()">Back</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

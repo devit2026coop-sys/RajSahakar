@@ -1,0 +1,149 @@
+﻿@*@{
+        ViewBag.Title = "Gopal Credit Card Appliation List";
+    }*@
+<style>
+    .flexEqualCenter {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    a.backBtn {
+        padding: 3px 5px;
+        background: rgb(99,205,219);
+        color: #fff;
+        border: 0px;
+        outline: none;
+        display: inline-block;
+        text-decoration: none;
+    }
+
+
+        a.backBtn i {
+            display: inline-block;
+            margin-right: 5px;
+        }
+</style>
+<script src="~/Scripts/AngularFramework/GccMahilaNidhiApplicationList.js?id=3"></script>
+<div ng-app="GccApplicationListMod" ng-controller="GccApplicationListCnt" ng-cloak="">
+    <div class="container-fluid  citizen-dash-head">
+        <div class="panel panel-default">
+            <div class="panel-heading flexEqualCenter">
+                <b><i class="fa fa-th-list"></i>&nbsp;GCC Mahila Nidhi Appliation List</b>
+                <div>
+
+                    <div class="row">
+                        <div class="col-xs-12" align="right">
+                            <a href="~/MIS/GccMahilaNidhiDistrictWiseSummary" class="backBtn"><i class="fa fa-angle-left"></i>Back</a>
+                            <button type="button" class="btn btn-warning" ng-click="exportExcel()"><i class="fa fa-file-excel-o"></i> Export Excel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="search-filter">
+                <div class="table-dropdown">
+                    <div class="col-xs-4">
+                        <label for="search">{{translation.Search}}:</label>
+                        <input ng-model="q" id="search" class="form-control" placeholder={{translation.filttertext}} autocomplete="off">
+                    </div>
+                    <div class="col-xs-4">
+                        <label for="search">{{translation.ItemPerPage}}:</label>
+                        <select ng-model="obj.pageSize" class="form-control" ng-change="pagechange()" ng-init="obj.pageSize='50'">
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                            <option value="200">200</option>
+                            <option value="500">500</option>
+                            <option value="1000">1000</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="table-responsive devtable">
+                    <table class="table table-hover table-striped table-bordered mb-0">
+                        <thead>
+                            <tr>
+                                <th>Sr. No.</th>
+                                @*<th>Application No</th>*@
+                                <th>Name</th>
+                                <th ng-show="DistrictWise">District</th>
+                                <th ng-show="DistrictWise">Block</th>
+                                @*<th ng-show="DistrictWise">Gram Panchayat</th>*@
+                                <th ng-hide="DistrictWise">Branch</th>
+                                <th ng-hide="DistrictWise">GSS/PACS</th>
+                                <th>Loan Amount</th>
+                                <th>Status</th>
+                                <th>Registration Date</th>
+                                <th>Action Date</th>
+                                @*<th>Action</th>*@
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr dir-paginate="item in GccApplicationList | filter:q | orderBy:colsort:reverseSort | itemsPerPage: obj.pageSize" current-page="currentPage" pagination-id="SubclassPagination">
+                                <td>{{(((DataPagingDetails.PageNumber - 1) * DataPagingDetails.PageSize) + 1)+$index}}</td>
+                                @*<td>{{item.RegistrationNo}}</td>*@
+                                <td>
+                                    {{item.Name_ENG}}
+                                    @*<small>Gender: {{item.Gender}}, (M){{item.MobileNo}}</small>*@
+                                </td>
+                                <td ng-show="DistrictWise">{{item.DistrictName}}</td>
+                                <td ng-show="DistrictWise">{{item.BLOCK_ENG}}</td>
+                                @*<td ng-show="DistrictWise">{{item.GP_ENG}}</td>*@
+                                <td ng-hide="DistrictWise">
+                                    @*{{item.CCBName}},*@ {{item.BankBranchName}}
+                                </td>
+                                <td ng-hide="DistrictWise">{{item.PACSName}}</td>
+                                <td>
+                                    @*Recommended : {{item.LoanAmountRecommended |inrCurrency}}*@
+                                    <span ng-show="item.SanctionAmt!=0"><br />Sanction : {{item.SanctionAmt |inrCurrency}}</span>
+                                </td>
+                                <td>{{item.Status}}</td>
+                                <td>{{item.RegistrationDate |date:'dd-MM-yyyy'}}</td>
+                                <td>{{item.LastActionDate |date:'dd-MM-yyyy'}}</td>
+                                @*<td>                                   
+                                    <a href="#" target="_blank" ng-click="ApplicationView(item.encGccid)">
+                                        <i class="fa fa-eye"></i>
+                                    </a>
+                                    @if (System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin] != null)
+                                    {
+                                        <a title="VIEW" ng-show="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).UserId)==1" ng-click="ApplicationActionView(item.encGccid)"><i class="fa fa-info-circle infoicon-edit"></i></a>
+                                    }
+                                </td>*@
+                            </tr>
+
+                        </tbody>
+                    </table>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div ng-if="DataPagingDetails.TotalPages>1" class="dataTables_paginate paging_simple_numbers" id="dataTables-example_paginate" style="display: flex; align-items: center; justify-content: space-between;">
+                            <div class="dataTables_info" id="dataTables-example_info" role="status" aria-live="polite">
+                                Total Records: {{DataPagingDetails.TotalRecords}}
+                            </div>
+                            <ul class="pagination pagination_1" style="margin-left: 10px !important; margin:0">
+                                <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« First</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« Previous</span></li>
+
+                                <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest('1',SearchData)" style="cursor: pointer;">
+                                    <span>« First</span>
+                                </li>
+                                <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest(DataPagingDetails.PageNumber-1,SearchData)" style="cursor:pointer;">
+                                    <span>« Prev</span>
+                                </li>
+                                <li class="{{n==DataPagingDetails.PageNumber?'active':''}}" style="{{n==DataPagingDetails.PageNumber?'':'cursor: pointer'}}" ng-repeat="n in PagingRange(DataPagingDetails.StartPageNumber,DataPagingDetails.EndPageNumber,DataPagingDetails.TotalPages)" ng-click="pageRequest(n,SearchData)"><span>{{n}}</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Next</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Last</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber!= DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.PageNumber+1,SearchData)" style="cursor:pointer;">
+                                    <span>Next »</span>
+                                </li>
+                                <li ng-if="DataPagingDetails.PageNumber != DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.TotalPages,SearchData)" style="cursor:pointer;">
+                                    <span>Last »</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

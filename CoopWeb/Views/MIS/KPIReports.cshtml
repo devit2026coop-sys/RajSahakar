@@ -1,0 +1,2333 @@
+﻿@{
+    ViewBag.Title = "KPI Reports List";
+}
+<script src="~/Scripts/AngularFramework/KPIReports.js?v=1.13"></script>
+<link href="~/Scripts/google_hindi/google_transliteration.css" rel="stylesheet" />
+@*<script src="~/Scripts/xlsx.full.min.js"></script>*@
+<script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<script>
+    //For All KPI'S Expect PLDB KPI (Excel)
+    async function ExportKPIReportToExcel() {
+
+        var report = document.getElementById("KPIReportExport");
+
+        if (!report) {
+            alert("Report not found.");
+            return;
+        }
+
+        if (typeof ExcelJS === "undefined") {
+            alert("ExcelJS library is not loaded.");
+            return;
+        }
+
+        var workbook = new ExcelJS.Workbook();
+        var worksheet = workbook.addWorksheet("KPI Report");
+        worksheet.views = [{ showGridLines: false }];
+
+        var COLORS = {
+            BLUE: "FF0070C0",
+            YELLOW: "FFFFD966",
+            PURPLE: "FF6F31A1",
+            A_PLUS: "FF7D9631",
+            A: "FF92D051",
+            B: "FFFFFF01",
+            C: "FFFDC100",
+            D: "FFC11D1C",
+            WHITE: "FFFFFFFF",
+            BLACK: "FF000000",
+            BORDER: "FF1F4E78"
+        };
+
+        function applyBorder(cell) {
+            cell.border = {
+                top: { style: "thin", color: { argb: COLORS.BORDER } },
+                bottom: { style: "thin", color: { argb: COLORS.BORDER } },
+                left: { style: "thin", color: { argb: COLORS.BORDER } },
+                right: { style: "thin", color: { argb: COLORS.BORDER } }
+            };
+        }
+
+        function applyCellStyle(cell, backgroundColor, fontColor, bold) {
+
+            cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: backgroundColor } };
+
+            cell.font = { name: "Calibri", size: 11, bold: bold === true, color: { argb: fontColor || COLORS.BLACK } };
+
+            cell.alignment = { horizontal: "left", vertical: "middle", wrapText: true };
+
+            applyBorder(cell);
+        }
+
+        function getCriteriaColor(category) {
+
+            category = (category || "").trim();
+
+            switch (category) {
+
+                case "A+":
+                    return COLORS.A_PLUS;
+
+                case "A":
+                    return COLORS.A;
+
+                case "B":
+                    return COLORS.B;
+
+                case "C":
+                    return COLORS.C;
+
+                case "D":
+                    return COLORS.D;
+
+                default:
+                    return COLORS.WHITE;
+            }
+        }
+
+        function addTableToExcel(table, startRow, tableType) {
+
+            var rows = table.querySelectorAll("tr");
+
+            var currentRow = startRow;
+
+            var occupied = {};
+
+            rows.forEach(function (htmlRow) {
+
+                var cells = htmlRow.querySelectorAll(":scope > th, :scope > td");
+                var currentColumn = 1;
+
+                cells.forEach(function (htmlCell) {
+
+                    while (occupied[currentRow + "_" + currentColumn]) {
+                        currentColumn++;
+                    }
+
+                    var rowspan = parseInt(htmlCell.getAttribute("rowspan") || "1", 10);
+                    var colspan = parseInt(htmlCell.getAttribute("colspan") || "1", 10);
+                    var startColumn = currentColumn;
+                    var endColumn = startColumn + colspan - 1;
+                    var startExcelRow = currentRow;
+                    var endExcelRow = startExcelRow + rowspan - 1;
+                    var excelCell = worksheet.getCell(startExcelRow, startColumn);
+                    excelCell.value = htmlCell.innerText.replace(/\s+/g, " ").trim();
+                    var isHeader = htmlCell.tagName.toLowerCase() === "th";
+                    var backgroundColor = COLORS.WHITE;
+                    var fontColor = COLORS.BLACK;
+
+                    if (tableType === "detail") {
+
+                        // Header
+                        if (isHeader) {
+                            backgroundColor = COLORS.BLUE;
+                            fontColor = COLORS.WHITE;
+                        }
+
+                        // Total row
+                        else if (htmlRow.classList.contains("bg-info")) {
+                            backgroundColor = COLORS.BLUE;
+                            fontColor = COLORS.WHITE;
+                        }
+
+                        // Normal rows
+                        else {
+                            backgroundColor = COLORS.YELLOW;
+                            fontColor = COLORS.BLACK;
+                        }
+                    }
+
+                    else if (tableType === "performance") {
+
+                        // Header
+                        if (isHeader) {
+
+                            backgroundColor = COLORS.PURPLE;
+                            fontColor = COLORS.WHITE;
+                        }
+
+                        // Data row - Category Wise Color
+                        else {
+
+                            var performanceCells = htmlRow.querySelectorAll(":scope > td");
+
+                            var performanceCategory = "";
+
+                            // Category is the 6th column
+                            if (performanceCells.length >= 6) {
+                                performanceCategory = performanceCells[5].innerText.trim();
+                            }
+
+                            // Apply category-wise color
+                            if (performanceCategory === "A+") {
+                                backgroundColor = COLORS.A_PLUS;
+                                fontColor = COLORS.WHITE;
+
+                            }
+                            else if (performanceCategory === "A") {
+                                backgroundColor = COLORS.A;
+                                fontColor = COLORS.BLACK;
+
+                            }
+                            else if (performanceCategory === "B") {
+                                backgroundColor = COLORS.B;
+                                fontColor = COLORS.BLACK;
+                            }
+                            else if (performanceCategory === "C") {
+                                backgroundColor = COLORS.C;
+                                fontColor = COLORS.BLACK;
+                            }
+                            else if (performanceCategory === "D") {
+                                backgroundColor = COLORS.D;
+                                fontColor = COLORS.WHITE;
+                            }
+                            else {
+                                backgroundColor = COLORS.WHITE;
+                                fontColor = COLORS.BLACK;
+                            }
+                        }
+                    }
+
+                    else if (tableType === "criteria") {
+
+                        // Header
+                        if (isHeader) {
+                            backgroundColor = COLORS.PURPLE;
+                            fontColor = COLORS.WHITE;
+                        }
+
+                        else {
+                            var rowCells = htmlRow.querySelectorAll(":scope > td");
+
+                            var category = "";
+
+                            if (rowCells.length >= 3) {
+                                category = rowCells[2].innerText.trim();
+                            }
+
+                            backgroundColor = getCriteriaColor(category);
+                            if (category === "D") {
+                                fontColor = COLORS.WHITE;
+                            }
+                        }
+                    }
+
+                    applyCellStyle(excelCell, backgroundColor, fontColor, isHeader);
+
+                    if (rowspan > 1 || colspan > 1) {
+                        worksheet.mergeCells(startExcelRow, startColumn, endExcelRow, endColumn);
+                    }
+
+                    for (var r = startExcelRow; r <= endExcelRow; r++) {
+                        for (var c = startColumn; c <= endColumn; c++) {
+                            occupied[r + "_" + c] = true;
+                        }
+                    }
+                    currentColumn = endColumn + 1;
+                });
+
+                worksheet.getRow(currentRow).height = 32;
+                currentRow++;
+            });
+
+            return currentRow;
+        }
+
+        var heading = report.querySelector("h3");
+        var currentRow = 1;
+
+        if (heading) {
+            var headingCell = worksheet.getCell(currentRow, 1);
+            headingCell.value = heading.innerText.trim();
+            headingCell.font = { name: "Calibri", size: 16, bold: true, color: { argb: COLORS.BLACK } };
+            headingCell.alignment = { horizontal: "center", vertical: "middle" };
+            worksheet.mergeCells(currentRow, 1, currentRow, 8);
+            worksheet.getRow(currentRow).height = 30;
+            currentRow += 2;
+        }
+
+        var detailTable = report.querySelector("#KPIDetailTable");
+
+        if (detailTable) {
+            currentRow = addTableToExcel(detailTable, currentRow, "detail");
+            currentRow += 1;
+        }
+
+        var performanceTable = report.querySelector("#KPIPerformanceTable");
+
+        if (performanceTable) {
+            currentRow = addTableToExcel(performanceTable, currentRow, "performance");
+            currentRow += 1;
+        }
+
+        var criteriaTable = report.querySelector("#KPICriteriaTable");
+
+        if (criteriaTable) {
+            currentRow = addTableToExcel(criteriaTable, currentRow, "criteria");
+        }
+
+        worksheet.getColumn(1).width = 10;
+        worksheet.getColumn(2).width = 38;
+        worksheet.getColumn(3).width = 48;
+        worksheet.getColumn(4).width = 28;
+        worksheet.getColumn(5).width = 20;
+        worksheet.getColumn(6).width = 20;
+        worksheet.getColumn(7).width = 20;
+        worksheet.getColumn(8).width = 20;
+
+        worksheet.views = [{ state: "frozen", ySplit: 3, showGridLines: false }];
+        var buffer = await workbook.xlsx.writeBuffer();
+        var blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+        var url = window.URL.createObjectURL(blob);
+        var link = document.createElement("a");
+        link.href = url;
+        link.download = "KPI_Report.xlsx";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+    }
+    //For All KPI'S Expect PLDB KPI (PDF)
+    async function ExportKPIReportToPDFold() {
+
+        var report = document.getElementById("KPIReportExport");
+
+        if (!report) {
+            alert("Report not found.");
+            return;
+        }
+
+        if (typeof html2canvas === "undefined") {
+            alert("html2canvas library is not loaded.");
+            return;
+        }
+
+        if (typeof window.jspdf === "undefined") {
+            alert("jsPDF library is not loaded.");
+            return;
+        }
+
+        try {
+
+            if (document.fonts && document.fonts.ready) {
+                await document.fonts.ready;
+            }
+
+            var reportWidth = report.clientWidth;
+            var reportHeight = report.scrollHeight;
+
+            var canvas = await html2canvas(report, {
+                scale: 2,
+                useCORS: true,
+                allowTaint: false,
+                backgroundColor: "#ffffff",
+                logging: false,
+                width: reportWidth,
+                height: reportHeight,
+                windowWidth: reportWidth,
+                windowHeight: reportHeight,
+                scrollX: 0,
+                scrollY: 0,
+                onclone: function (clonedDocument) {
+
+                    var clonedReport = clonedDocument.getElementById("KPIReportExport");
+
+                    if (!clonedReport) {
+                        return;
+                    }
+
+                    clonedReport.style.width = reportWidth + "px";
+                    clonedReport.style.maxWidth = "none";
+                    clonedReport.style.minWidth = reportWidth + "px";
+                    clonedReport.style.margin = "0";
+                    clonedReport.style.padding = "0";
+                    clonedReport.style.boxSizing = "border-box";
+
+                    clonedReport.querySelectorAll("table, .table-responsive, .container, .container-fluid").forEach(function (element) {
+                        element.style.width = "100%";
+                        element.style.maxWidth = "100%";
+                        element.style.minWidth = "100%";
+                        element.style.marginLeft = "0";
+                        element.style.marginRight = "0";
+                        element.style.boxSizing = "border-box";
+                    });
+
+                    clonedReport.querySelectorAll(".row").forEach(function (row) {
+                        row.style.width = "100%";
+                        row.style.maxWidth = "100%";
+                        row.style.marginLeft = "0";
+                        row.style.marginRight = "0";
+                        row.style.boxSizing = "border-box";
+                    });
+
+                    clonedReport.querySelectorAll("button").forEach(function (button) {
+                        button.style.display = "none";
+                    });
+
+                    var table = clonedReport.querySelector("#KPIDetailTable");
+
+                    if (!table) {
+                        return;
+                    }
+
+                    table.style.width = "100%";
+                    table.style.maxWidth = "100%";
+                    table.style.minWidth = "100%";
+                    table.style.marginLeft = "0";
+                    table.style.marginRight = "0";
+                    table.style.boxSizing = "border-box";
+
+                    var tbody = table.querySelector("tbody");
+
+                    if (!tbody) {
+                        return;
+                    }
+
+                    var rows = Array.from(tbody.querySelectorAll("tr"));
+                    var rowIndex = 0;
+
+                    while (rowIndex < rows.length) {
+
+                        var currentRow = rows[rowIndex];
+
+                        if (currentRow.classList.contains("bg-info")) {
+                            rowIndex++;
+                            continue;
+                        }
+
+                        var cells = Array.from(currentRow.children);
+
+                        if (cells.length < 2) {
+                            rowIndex++;
+                            continue;
+                        }
+
+                        var srNoCell = cells[0];
+                        var kpiAreaCell = cells[1];
+                        srNoCell.style.textAlign = "right";
+                        srNoCell.style.paddingRight = "5px";
+
+                        if (!kpiAreaCell.hasAttribute("rowspan")) {
+                            rowIndex++;
+                            continue;
+                        }
+
+                        var rowspan = parseInt(kpiAreaCell.getAttribute("rowspan"), 10) || 1;
+                        srNoCell.removeAttribute("rowspan");
+                        kpiAreaCell.removeAttribute("rowspan");
+                        kpiAreaCell.style.backgroundColor = "#FFD966";
+                        kpiAreaCell.style.background = "#FFD966";
+                        kpiAreaCell.style.verticalAlign = "middle";
+                        kpiAreaCell.style.border = "1px solid #1F4E78";
+                        srNoCell.style.backgroundColor = "#FFD966";
+                        srNoCell.style.background = "#FFD966";
+                        srNoCell.style.verticalAlign = "middle";
+                        srNoCell.style.textAlign = "right";
+                        srNoCell.style.paddingRight = "5px";
+                        srNoCell.style.border = "1px solid #1F4E78";
+
+                        for (var i = 1; i < rowspan; i++) {
+
+                            var nextRow = rows[rowIndex + i];
+
+
+                            if (!nextRow) {
+                                break;
+                            }
+
+                            var blankSrNo = clonedDocument.createElement("td");
+                            blankSrNo.innerHTML = "";
+
+                            blankSrNo.style.backgroundColor = "#FFD966";
+                            blankSrNo.style.background = "#FFD966";
+                            blankSrNo.style.textAlign = "right";
+                            blankSrNo.style.paddingRight = "5px";
+                            blankSrNo.style.borderLeft = "1px solid #1F4E78";
+                            blankSrNo.style.borderRight = "1px solid #1F4E78";
+                            blankSrNo.style.borderTop = "none";
+                            blankSrNo.style.borderBottom = "none";
+                            var blankKpiArea = clonedDocument.createElement("td");
+                            blankKpiArea.innerHTML = "";
+                            blankKpiArea.style.backgroundColor = "#FFD966";
+                            blankKpiArea.style.background = "#FFD966";
+                            blankKpiArea.style.borderLeft = "1px solid #1F4E78";
+                            blankKpiArea.style.borderRight = "1px solid #1F4E78";
+                            blankKpiArea.style.borderTop = "none";
+                            blankKpiArea.style.borderBottom = "none";
+                            nextRow.insertBefore(blankSrNo, nextRow.firstChild);
+                            nextRow.insertBefore(blankKpiArea, nextRow.children[1]);
+                        }
+
+                        var lastRow = rows[Math.min(rowIndex + rowspan - 1, rows.length - 1)];
+
+
+                        if (lastRow) {
+
+                            var lastCells = Array.from(lastRow.children);
+
+                            if (lastCells.length >= 2) {
+                                lastCells[0].style.borderBottom = "1px solid #1F4E78";
+                                lastCells[1].style.borderBottom = "1px solid #1F4E78";
+                            }
+                        }
+                        rowIndex += rowspan;
+                    }
+                }
+            });
+
+            var { jsPDF } = window.jspdf;
+
+            var pdf = new jsPDF({
+                orientation: "landscape",
+                unit: "mm",
+                format: "a4",
+                compress: true
+            });
+
+            var pageWidth = 297;
+            var pageHeight = 210;
+            var margin = 5;
+            var availableWidth = pageWidth - (margin * 2);
+            var availableHeight = pageHeight - (margin * 2);
+            var imageWidth = canvas.width;
+            var imageHeight = canvas.height;
+            var widthRatio = availableWidth / imageWidth;
+            var heightRatio = availableHeight / imageHeight;
+            var fitRatio = Math.min(widthRatio, heightRatio);
+            var pdfImageWidth = imageWidth * fitRatio;
+            var pdfImageHeight = imageHeight * fitRatio;
+            var x = (pageWidth - pdfImageWidth) / 2;
+            var y = (pageHeight - pdfImageHeight) / 2;
+            var pageImage = canvas.toDataURL("image/jpeg", 0.95);
+            pdf.addImage(pageImage, "JPEG", x, y, pdfImageWidth, pdfImageHeight);
+            pdf.save("KPI_Report.pdf");
+
+
+        }
+        catch (error) {
+            console.error("PDF Export Error:", error);
+            alert("Unable to generate PDF.");
+        }
+    }
+    //For All KPI'S Expect PLDB KPI (PDFNEw)
+    async function ExportKPIReportToPDF() {
+
+        var report = document.getElementById("KPIReportExport");
+
+        if (!report) {
+            alert("Report not found.");
+            return;
+        }
+
+        if (typeof html2canvas === "undefined") {
+            alert("html2canvas library is not loaded.");
+            return;
+        }
+
+        if (typeof window.jspdf === "undefined") {
+            alert("jsPDF library is not loaded.");
+            return;
+        }
+
+        try {
+
+            if (document.fonts && document.fonts.ready) {
+                await document.fonts.ready;
+            }
+
+            var reportWidth = report.clientWidth;
+            var reportHeight = report.scrollHeight;
+            var scale = 2;
+
+            // Row boundaries captured from the cloned HTML.
+            var rowBoundaries = [];
+
+            var canvas = await html2canvas(report, {
+                scale: scale,
+                useCORS: true,
+                allowTaint: false,
+                backgroundColor: "#ffffff",
+                logging: false,
+                width: reportWidth,
+                height: reportHeight,
+                windowWidth: reportWidth,
+                windowHeight: reportHeight,
+                scrollX: 0,
+                scrollY: 0,
+
+                onclone: function (clonedDocument) {
+
+                    var clonedReport =
+                        clonedDocument.getElementById("KPIReportExport");
+
+                    if (!clonedReport) {
+                        return;
+                    }
+
+                    clonedReport.style.width = reportWidth + "px";
+                    clonedReport.style.maxWidth = "none";
+                    clonedReport.style.minWidth = reportWidth + "px";
+                    clonedReport.style.margin = "0";
+                    clonedReport.style.padding = "0";
+                    clonedReport.style.boxSizing = "border-box";
+
+                    clonedReport.querySelectorAll(
+                        "table, .table-responsive, .container, .container-fluid"
+                    ).forEach(function (element) {
+
+                        element.style.width = "100%";
+                        element.style.maxWidth = "100%";
+                        element.style.minWidth = "100%";
+                        element.style.marginLeft = "0";
+                        element.style.marginRight = "0";
+                        element.style.boxSizing = "border-box";
+                    });
+
+                    clonedReport.querySelectorAll(".row").forEach(function (row) {
+
+                        row.style.width = "100%";
+                        row.style.maxWidth = "100%";
+                        row.style.marginLeft = "0";
+                        row.style.marginRight = "0";
+                        row.style.boxSizing = "border-box";
+                    });
+
+                    clonedReport.querySelectorAll("button").forEach(function (button) {
+                        button.style.display = "none";
+                    });
+
+                    var table =
+                        clonedReport.querySelector("#KPIDetailTable");
+
+                    if (table) {
+
+                        table.style.width = "100%";
+                        table.style.maxWidth = "100%";
+                        table.style.minWidth = "100%";
+                        table.style.marginLeft = "0";
+                        table.style.marginRight = "0";
+                        table.style.boxSizing = "border-box";
+
+                        var tbody = table.querySelector("tbody");
+
+                        if (tbody) {
+
+                            var rows = Array.from(
+                                tbody.querySelectorAll("tr")
+                            );
+
+                            var rowIndex = 0;
+
+                            while (rowIndex < rows.length) {
+
+                                var currentRow = rows[rowIndex];
+
+                                if (currentRow.classList.contains("bg-info")) {
+                                    rowIndex++;
+                                    continue;
+                                }
+
+                                var cells = Array.from(
+                                    currentRow.children
+                                );
+
+                                if (cells.length < 2) {
+                                    rowIndex++;
+                                    continue;
+                                }
+
+                                var srNoCell = cells[0];
+                                var kpiAreaCell = cells[1];
+
+                                srNoCell.style.textAlign = "right";
+                                srNoCell.style.paddingRight = "5px";
+
+                                if (!kpiAreaCell.hasAttribute("rowspan")) {
+                                    rowIndex++;
+                                    continue;
+                                }
+
+                                var rowspan =
+                                    parseInt(
+                                        kpiAreaCell.getAttribute("rowspan"),
+                                        10
+                                    ) || 1;
+
+                                srNoCell.removeAttribute("rowspan");
+                                kpiAreaCell.removeAttribute("rowspan");
+
+                                kpiAreaCell.style.backgroundColor = "#FFD966";
+                                kpiAreaCell.style.background = "#FFD966";
+                                kpiAreaCell.style.verticalAlign = "middle";
+                                kpiAreaCell.style.border =
+                                    "1px solid #1F4E78";
+
+                                srNoCell.style.backgroundColor = "#FFD966";
+                                srNoCell.style.background = "#FFD966";
+                                srNoCell.style.verticalAlign = "middle";
+                                srNoCell.style.textAlign = "right";
+                                srNoCell.style.paddingRight = "5px";
+                                srNoCell.style.border =
+                                    "1px solid #1F4E78";
+
+                                for (var i = 1; i < rowspan; i++) {
+
+                                    var nextRow = rows[rowIndex + i];
+
+                                    if (!nextRow) {
+                                        break;
+                                    }
+
+                                    var blankSrNo =
+                                        clonedDocument.createElement("td");
+
+                                    blankSrNo.innerHTML = "";
+                                    blankSrNo.style.backgroundColor = "#FFD966";
+                                    blankSrNo.style.background = "#FFD966";
+                                    blankSrNo.style.textAlign = "right";
+                                    blankSrNo.style.paddingRight = "5px";
+                                    blankSrNo.style.borderLeft =
+                                        "1px solid #1F4E78";
+                                    blankSrNo.style.borderRight =
+                                        "1px solid #1F4E78";
+                                    blankSrNo.style.borderTop = "none";
+                                    blankSrNo.style.borderBottom = "none";
+
+                                    var blankKpiArea =
+                                        clonedDocument.createElement("td");
+
+                                    blankKpiArea.innerHTML = "";
+                                    blankKpiArea.style.backgroundColor = "#FFD966";
+                                    blankKpiArea.style.background = "#FFD966";
+                                    blankKpiArea.style.borderLeft =
+                                        "1px solid #1F4E78";
+                                    blankKpiArea.style.borderRight =
+                                        "1px solid #1F4E78";
+                                    blankKpiArea.style.borderTop = "none";
+                                    blankKpiArea.style.borderBottom = "none";
+
+                                    nextRow.insertBefore(
+                                        blankSrNo,
+                                        nextRow.firstChild
+                                    );
+
+                                    nextRow.insertBefore(
+                                        blankKpiArea,
+                                        nextRow.children[1]
+                                    );
+                                }
+
+                                var lastRow = rows[
+                                    Math.min(
+                                        rowIndex + rowspan - 1,
+                                        rows.length - 1
+                                    )
+                                ];
+
+                                if (lastRow) {
+
+                                    var lastCells =
+                                        Array.from(lastRow.children);
+
+                                    if (lastCells.length >= 2) {
+                                        lastCells[0].style.borderBottom =
+                                            "1px solid #1F4E78";
+
+                                        lastCells[1].style.borderBottom =
+                                            "1px solid #1F4E78";
+                                    }
+                                }
+
+                                rowIndex += rowspan;
+                            }
+                        }
+                    }
+
+                    // Capture actual row boundaries AFTER formatting.
+                    var reportRect =
+                        clonedReport.getBoundingClientRect();
+
+                    var reportTop = reportRect.top;
+
+                    rowBoundaries = Array.from(
+                        clonedReport.querySelectorAll("#KPIDetailTable tr")
+                    ).map(function (row) {
+
+                        var rect = row.getBoundingClientRect();
+
+                        return {
+                            top: Math.round(
+                                (rect.top - reportTop) * scale
+                            ),
+                            bottom: Math.round(
+                                (rect.bottom - reportTop) * scale
+                            )
+                        };
+
+                    }).filter(function (boundary) {
+                        return boundary.bottom > boundary.top;
+                    });
+
+                }
+            });
+
+            var { jsPDF } = window.jspdf;
+
+            var pdf = new jsPDF({
+                orientation: "landscape",
+                unit: "mm",
+                format: "a4",
+                compress: true
+            });
+
+            var pageWidth = 297;
+            var pageHeight = 210;
+            var margin = 5;
+
+            var availableWidth = pageWidth - (margin * 2);
+            var availableHeight = pageHeight - (margin * 2);
+
+            var imageWidth = canvas.width;
+            var imageHeight = canvas.height;
+
+            var widthRatio = availableWidth / imageWidth;
+
+            // Maximum image height that fits on one PDF page.
+            var maxSliceHeight = Math.floor(
+                availableHeight / widthRatio
+            );
+
+            // If the complete report fits, export a single page.
+            if (imageHeight <= maxSliceHeight) {
+
+                var fitRatio = Math.min(
+                    availableWidth / imageWidth,
+                    availableHeight / imageHeight
+                );
+
+                var pdfImageWidth = imageWidth * fitRatio;
+                var pdfImageHeight = imageHeight * fitRatio;
+
+                var x = (pageWidth - pdfImageWidth) / 2;
+                var y = (pageHeight - pdfImageHeight) / 2;
+
+                pdf.addImage(
+                    canvas.toDataURL("image/jpeg", 0.95),
+                    "JPEG",
+                    x,
+                    y,
+                    pdfImageWidth,
+                    pdfImageHeight
+                );
+
+            } else {
+
+                var currentY = 0;
+                var pageNumber = 0;
+
+                // Avoid cutting a table row across page boundaries.
+                while (currentY < imageHeight) {
+
+                    var targetY = Math.min(
+                        currentY + maxSliceHeight,
+                        imageHeight
+                    );
+
+                    var sliceEnd = targetY;
+
+                    if (targetY < imageHeight) {
+
+                        // Find rows that cross the proposed page boundary.
+                        var crossingRows = rowBoundaries.filter(
+                            function (boundary) {
+                                return boundary.top < targetY &&
+                                    boundary.bottom > targetY;
+                            }
+                        );
+
+                        if (crossingRows.length > 0) {
+
+                            // Move the boundary to the start of the
+                            // first row crossing the proposed boundary.
+                            var safeBoundary = Math.min.apply(
+                                null,
+                                crossingRows.map(function (boundary) {
+                                    return boundary.top;
+                                })
+                            );
+
+                            if (safeBoundary > currentY) {
+                                sliceEnd = safeBoundary;
+                            } else {
+
+                                // A single row is taller than the page.
+                                // It cannot fit intact on a normal page.
+                                sliceEnd = targetY;
+                            }
+                        }
+                    }
+
+                    // Ensure forward progress.
+                    if (sliceEnd <= currentY) {
+                        sliceEnd = Math.min(
+                            currentY + maxSliceHeight,
+                            imageHeight
+                        );
+                    }
+
+                    var sliceHeight = sliceEnd - currentY;
+
+                    var pageCanvas =
+                        document.createElement("canvas");
+
+                    pageCanvas.width = imageWidth;
+                    pageCanvas.height = sliceHeight;
+
+                    var ctx = pageCanvas.getContext("2d");
+
+                    if (!ctx) {
+                        throw new Error(
+                            "Unable to create page canvas."
+                        );
+                    }
+
+                    ctx.fillStyle = "#ffffff";
+                    ctx.fillRect(
+                        0,
+                        0,
+                        pageCanvas.width,
+                        pageCanvas.height
+                    );
+
+                    ctx.drawImage(
+                        canvas,
+                        0,
+                        currentY,
+                        imageWidth,
+                        sliceHeight,
+                        0,
+                        0,
+                        imageWidth,
+                        sliceHeight
+                    );
+
+                    if (pageNumber > 0) {
+                        pdf.addPage("a4", "landscape");
+                    }
+
+                    var pageImage =
+                        pageCanvas.toDataURL("image/jpeg", 0.95);
+
+                    pdf.addImage(
+                        pageImage,
+                        "JPEG",
+                        margin,
+                        margin,
+                        availableWidth,
+                        sliceHeight * widthRatio
+                    );
+
+                    currentY = sliceEnd;
+                    pageNumber++;
+
+                    pageCanvas.width = 0;
+                    pageCanvas.height = 0;
+                }
+            }
+
+            pdf.save("KPI_Report.pdf");
+
+            canvas.width = 0;
+            canvas.height = 0;
+
+        }
+        catch (error) {
+
+            console.error("PDF Export Error:", error);
+            alert("Unable to generate PDF.");
+        }
+    }
+    //For PLDB KPI (Excel)
+    async function ExportKPIPLDBReportToExcel() {
+
+        var report = document.getElementById("PLDBReportExport");
+
+        if (!report) {
+            alert("Report not found.");
+            return;
+        }
+
+        if (typeof ExcelJS === "undefined") {
+            alert("ExcelJS library is not loaded.");
+            return;
+        }
+
+        var workbook = new ExcelJS.Workbook();
+        var worksheet = workbook.addWorksheet("KPI Report");
+
+        worksheet.views = [{
+            showGridLines: false
+        }];
+
+        var COLORS = {
+            BLUE: "FF0070C0",
+            YELLOW: "FFFFD966",
+            PURPLE: "FF6F31A1",
+            A_PLUS: "FF7D9631",
+            A: "FF92D051",
+            B: "FFFFFF01",
+            C: "FFFDC100",
+            D: "FFC11D1C",
+            WHITE: "FFFFFFFF",
+            BLACK: "FF000000",
+            BORDER: "FF1F4E78"
+        };
+
+        function applyBorder(cell) {
+
+            cell.border = {
+                top: { style: "thin", color: { argb: COLORS.BORDER } },
+                bottom: { style: "thin", color: { argb: COLORS.BORDER } },
+                left: { style: "thin", color: { argb: COLORS.BORDER } },
+                right: { style: "thin", color: { argb: COLORS.BORDER } }
+            };
+        }
+
+        function applyCellStyle(cell, backgroundColor, fontColor, bold) {
+
+            cell.fill = {
+                type: "pattern", pattern: "solid", fgColor: { argb: backgroundColor }
+            };
+
+            cell.font = {
+                name: "Calibri", size: 11, bold: bold === true, color: { argb: fontColor || COLORS.BLACK }
+            };
+
+            cell.alignment = {
+                horizontal: "left", vertical: "middle", wrapText: true
+            };
+
+            applyBorder(cell);
+        }
+
+        function getCriteriaColor(category) {
+
+            category = (category || "").trim();
+
+            switch (category) {
+
+                case "A+":
+                    return COLORS.A_PLUS;
+
+                case "A":
+                    return COLORS.A;
+
+                case "B":
+                    return COLORS.B;
+
+                case "C":
+                    return COLORS.C;
+
+                case "D":
+                    return COLORS.D;
+
+                default:
+                    return COLORS.WHITE;
+            }
+        }
+
+        function addTableToExcel(table, startRow, tableType) {
+
+            var rows = table.querySelectorAll("tr");
+            var currentRow = startRow;
+            var occupied = {};
+
+            rows.forEach(function (htmlRow) {
+
+                var cells = htmlRow.querySelectorAll(":scope > th, :scope > td");
+                var currentColumn = 1;
+
+                cells.forEach(function (htmlCell) {
+
+                    while (occupied[currentRow + "_" + currentColumn]) {
+                        currentColumn++;
+                    }
+
+                    var rowspan = parseInt(htmlCell.getAttribute("rowspan") || "1", 10);
+                    var colspan = parseInt(htmlCell.getAttribute("colspan") || "1", 10);
+
+                    var startColumn = currentColumn;
+                    var endColumn = startColumn + colspan - 1;
+                    var startExcelRow = currentRow;
+                    var endExcelRow = startExcelRow + rowspan - 1;
+                    var excelCell = worksheet.getCell(startExcelRow, startColumn);
+                    excelCell.value = htmlCell.innerText.replace(/\s+/g, " ").trim();
+                    var isHeader = htmlCell.tagName.toLowerCase() === "th";
+                    var backgroundColor = COLORS.WHITE;
+                    var fontColor = COLORS.BLACK;
+
+                    if (tableType === "detail") {
+
+                        if (isHeader) {
+                            backgroundColor = COLORS.BLUE;
+                            fontColor = COLORS.WHITE;
+                        }
+                        else if (htmlRow.classList.contains("bg-info")) {
+                            backgroundColor = COLORS.BLUE;
+                            fontColor = COLORS.WHITE;
+                        }
+                        else {
+                            backgroundColor = COLORS.YELLOW;
+                            fontColor = COLORS.BLACK;
+                        }
+                    }
+                    else if (tableType === "performance") {
+
+                        if (isHeader) {
+                            backgroundColor = COLORS.PURPLE;
+                            fontColor = COLORS.WHITE;
+                        }
+                        else {
+                            var performanceCells = htmlRow.querySelectorAll(":scope > td");
+
+                            var performanceCategory = "";
+
+                            if (performanceCells.length >= 6) {
+                                performanceCategory = performanceCells[5].innerText.trim();
+                            }
+
+                            if (performanceCategory === "A+") {
+                                backgroundColor = COLORS.A_PLUS;
+                                fontColor = COLORS.WHITE;
+                            }
+                            else if (performanceCategory === "A") {
+                                backgroundColor = COLORS.A;
+                                fontColor = COLORS.BLACK;
+                            }
+                            else if (performanceCategory === "B") {
+                                backgroundColor = COLORS.B;
+                                fontColor = COLORS.BLACK;
+                            }
+                            else if (performanceCategory === "C") {
+                                backgroundColor = COLORS.C;
+                                fontColor = COLORS.BLACK;
+                            }
+                            else if (performanceCategory === "D") {
+                                backgroundColor = COLORS.D;
+                                fontColor = COLORS.WHITE;
+                            }
+                            else {
+
+                                backgroundColor = COLORS.WHITE;
+                                fontColor = COLORS.BLACK;
+                            }
+                        }
+                    }
+                    else if (tableType === "criteria") {
+
+                        if (isHeader) {
+                            backgroundColor = COLORS.PURPLE;
+                            fontColor = COLORS.WHITE;
+                        }
+                        else {
+
+                            var rowCells = htmlRow.querySelectorAll(":scope > td");
+                            var category = "";
+                            if (rowCells.length >= 3) {
+                                category = rowCells[2].innerText.trim();
+                            }
+                            backgroundColor = getCriteriaColor(category);
+                            if (category === "D") {
+                                fontColor = COLORS.WHITE;
+                            }
+                        }
+                    }
+
+                    applyCellStyle(excelCell, backgroundColor, fontColor, isHeader);
+
+                    if (rowspan > 1 || colspan > 1) {
+                        worksheet.mergeCells(startExcelRow, startColumn, endExcelRow, endColumn);
+                    }
+
+                    for (var r = startExcelRow; r <= endExcelRow; r++) {
+                        for (var c = startColumn; c <= endColumn; c++) {
+                            occupied[r + "_" + c] = true;
+                        }
+                    }
+
+                    currentColumn = endColumn + 1;
+                });
+
+                worksheet.getRow(currentRow).height = 32;
+
+                currentRow++;
+            });
+
+            return currentRow;
+        }
+
+        var heading = report.querySelector("h3");
+        var currentRow = 1;
+
+        var TOTAL_COLUMNS = 8;
+
+        if (heading) {
+            var headingCell = worksheet.getCell(currentRow, 1);
+            headingCell.value = heading.innerText.trim();
+            headingCell.font = { name: "Calibri", size: 16, bold: true, color: { argb: COLORS.BLACK } };
+            headingCell.alignment = { horizontal: "center", vertical: "middle" };
+            worksheet.mergeCells(currentRow, 1, currentRow, TOTAL_COLUMNS);
+            worksheet.getRow(currentRow).height = 30;
+            currentRow += 2;
+        }
+
+        var detailTable = report.querySelector("#PLDBReportDetails");
+
+        if (detailTable) {
+            currentRow = addTableToExcel(detailTable, currentRow, "detail");
+            currentRow += 1;
+        }
+
+        var performanceTable = report.querySelector("#PLDBOverRating");
+
+        if (performanceTable) {
+            currentRow = addTableToExcel(performanceTable, currentRow, "performance");
+            currentRow += 1;
+        }
+
+        var criteriaTable = report.querySelector("#PLDBCriteria");
+
+        if (criteriaTable) {
+            currentRow = addTableToExcel(criteriaTable, currentRow, "criteria");
+        }
+
+        worksheet.getColumn(1).width = 10;
+        worksheet.getColumn(2).width = 38;
+        worksheet.getColumn(3).width = 48;
+        worksheet.getColumn(4).width = 28;
+        worksheet.getColumn(5).width = 20;
+        worksheet.getColumn(6).width = 20;
+        worksheet.getColumn(7).width = 20;
+        worksheet.getColumn(8).width = 20;
+
+        worksheet.pageSetup = {
+            paperSize: 9, // A4
+            orientation: "landscape",
+            fitToPage: true,
+            fitToWidth: 1,
+            fitToHeight: 0,
+            margins: {
+                left: 0.25,
+                right: 0.25,
+                top: 0.5,
+                bottom: 0.5,
+                header: 0.2,
+                footer: 0.2
+            }
+        };
+
+        worksheet.pageSetup.printArea = "A1:H" + (currentRow - 1);
+        worksheet.views = [{ state: "frozen", ySplit: 3, showGridLines: false }];
+        var buffer = await workbook.xlsx.writeBuffer();
+        var blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+        var url = window.URL.createObjectURL(blob);
+        var link = document.createElement("a");
+        link.href = url;
+        link.download = "KPI_Report.xlsx";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+    }
+    //For PLDB KPI (PDF)
+    async function ExportKPIPLDBReportToPDF() {
+
+        var report = document.getElementById("PLDBReportExport");
+
+        if (!report) {
+            alert("Report not found.");
+            return;
+        }
+
+        if (typeof html2canvas === "undefined") {
+            alert("html2canvas library is not loaded.");
+            return;
+        }
+
+        if (typeof window.jspdf === "undefined") {
+            alert("jsPDF library is not loaded.");
+            return;
+        }
+
+        try {
+
+            if (document.fonts && document.fonts.ready) {
+                await document.fonts.ready;
+            }
+
+            var reportWidth = report.clientWidth;
+            var reportHeight = report.scrollHeight;
+
+            var canvas = await html2canvas(report, {
+                scale: 2,
+                useCORS: true,
+                allowTaint: false,
+                backgroundColor: "#ffffff",
+                logging: false,
+                width: reportWidth,
+                height: reportHeight,
+                windowWidth: reportWidth,
+                windowHeight: reportHeight,
+                scrollX: 0,
+                scrollY: 0,
+                onclone: function (clonedDocument) {
+
+                    var clonedReport = clonedDocument.getElementById("PLDBReportExport");
+
+                    if (!clonedReport) {
+                        return;
+                    }
+
+                    clonedReport.style.width = reportWidth + "px";
+                    clonedReport.style.maxWidth = "none";
+                    clonedReport.style.minWidth = reportWidth + "px";
+                    clonedReport.style.margin = "0";
+                    clonedReport.style.padding = "0";
+                    clonedReport.style.boxSizing = "border-box";
+
+                    clonedReport.querySelectorAll("table, .table-responsive, .container, .container-fluid").forEach(function (element) {
+                        element.style.width = "100%";
+                        element.style.maxWidth = "100%";
+                        element.style.minWidth = "100%";
+                        element.style.marginLeft = "0";
+                        element.style.marginRight = "0";
+                        element.style.boxSizing = "border-box";
+                    });
+
+                    clonedReport.querySelectorAll(".row").forEach(function (row) {
+                        row.style.width = "100%";
+                        row.style.maxWidth = "100%";
+                        row.style.marginLeft = "0";
+                        row.style.marginRight = "0";
+                        row.style.boxSizing = "border-box";
+                    });
+
+                    clonedReport.querySelectorAll("button").forEach(function (button) {
+                        button.style.display = "none";
+                    });
+
+                    var table = clonedReport.querySelector("#PLDBReportDetails");
+
+                    if (!table) {
+                        return;
+                    }
+
+                    table.style.width = "100%";
+                    table.style.maxWidth = "100%";
+                    table.style.minWidth = "100%";
+                    table.style.marginLeft = "0";
+                    table.style.marginRight = "0";
+                    table.style.boxSizing = "border-box";
+
+                    var tbody = table.querySelector("tbody");
+
+                    if (!tbody) {
+                        return;
+                    }
+
+                    var rows = Array.from(tbody.querySelectorAll("tr"));
+                    var rowIndex = 0;
+
+                    while (rowIndex < rows.length) {
+
+                        var currentRow = rows[rowIndex];
+
+                        if (currentRow.classList.contains("bg-info")) {
+                            rowIndex++;
+                            continue;
+                        }
+
+                        var cells = Array.from(currentRow.children);
+
+                        if (cells.length < 2) {
+                            rowIndex++;
+                            continue;
+                        }
+
+                        var srNoCell = cells[0];
+                        var kpiAreaCell = cells[1];
+                        srNoCell.style.textAlign = "right";
+                        srNoCell.style.paddingRight = "5px";
+
+                        if (!kpiAreaCell.hasAttribute("rowspan")) {
+                            rowIndex++;
+                            continue;
+                        }
+
+                        var rowspan = parseInt(kpiAreaCell.getAttribute("rowspan"), 10) || 1;
+                        srNoCell.removeAttribute("rowspan");
+                        kpiAreaCell.removeAttribute("rowspan");
+                        kpiAreaCell.style.backgroundColor = "#FFD966";
+                        kpiAreaCell.style.background = "#FFD966";
+                        kpiAreaCell.style.verticalAlign = "middle";
+                        kpiAreaCell.style.border = "1px solid #1F4E78";
+                        srNoCell.style.backgroundColor = "#FFD966";
+                        srNoCell.style.background = "#FFD966";
+                        srNoCell.style.verticalAlign = "middle";
+                        srNoCell.style.textAlign = "right";
+                        srNoCell.style.paddingRight = "5px";
+                        srNoCell.style.border = "1px solid #1F4E78";
+
+                        for (var i = 1; i < rowspan; i++) {
+
+                            var nextRow = rows[rowIndex + i];
+
+
+                            if (!nextRow) {
+                                break;
+                            }
+
+                            var blankSrNo = clonedDocument.createElement("td");
+                            blankSrNo.innerHTML = "";
+
+                            blankSrNo.style.backgroundColor = "#FFD966";
+                            blankSrNo.style.background = "#FFD966";
+                            blankSrNo.style.textAlign = "right";
+                            blankSrNo.style.paddingRight = "5px";
+                            blankSrNo.style.borderLeft = "1px solid #1F4E78";
+                            blankSrNo.style.borderRight = "1px solid #1F4E78";
+                            blankSrNo.style.borderTop = "none";
+                            blankSrNo.style.borderBottom = "none";
+                            var blankKpiArea = clonedDocument.createElement("td");
+                            blankKpiArea.innerHTML = "";
+                            blankKpiArea.style.backgroundColor = "#FFD966";
+                            blankKpiArea.style.background = "#FFD966";
+                            blankKpiArea.style.borderLeft = "1px solid #1F4E78";
+                            blankKpiArea.style.borderRight = "1px solid #1F4E78";
+                            blankKpiArea.style.borderTop = "none";
+                            blankKpiArea.style.borderBottom = "none";
+                            nextRow.insertBefore(blankSrNo, nextRow.firstChild);
+                            nextRow.insertBefore(blankKpiArea, nextRow.children[1]);
+                        }
+
+                        var lastRow = rows[Math.min(rowIndex + rowspan - 1, rows.length - 1)];
+
+
+                        if (lastRow) {
+
+                            var lastCells = Array.from(lastRow.children);
+
+                            if (lastCells.length >= 2) {
+                                lastCells[0].style.borderBottom = "1px solid #1F4E78";
+                                lastCells[1].style.borderBottom = "1px solid #1F4E78";
+                            }
+                        }
+                        rowIndex += rowspan;
+                    }
+                }
+            });
+
+            var { jsPDF } = window.jspdf;
+
+            var pdf = new jsPDF({
+                orientation: "landscape",
+                unit: "mm",
+                format: "a4",
+                compress: true
+            });
+
+            var pageWidth = 297;
+            var pageHeight = 210;
+            var margin = 5;
+            var availableWidth = pageWidth - (margin * 2);
+            var availableHeight = pageHeight - (margin * 2);
+            var imageWidth = canvas.width;
+            var imageHeight = canvas.height;
+            var widthRatio = availableWidth / imageWidth;
+            var heightRatio = availableHeight / imageHeight;
+            var fitRatio = Math.min(widthRatio, heightRatio);
+            var pdfImageWidth = imageWidth * fitRatio;
+            var pdfImageHeight = imageHeight * fitRatio;
+            var x = (pageWidth - pdfImageWidth) / 2;
+            var y = (pageHeight - pdfImageHeight) / 2;
+            var pageImage = canvas.toDataURL("image/jpeg", 0.95);
+            pdf.addImage(pageImage, "JPEG", x, y, pdfImageWidth, pdfImageHeight);
+            pdf.save("KPI_Report.pdf");
+
+
+        }
+        catch (error) {
+            console.error("PDF Export Error:", error);
+            alert("Unable to generate PDF.");
+        }
+    }
+    //Offices Excel
+    async function ExportKPIReportListToExcel() {
+
+        var table = document.getElementById("KPIReportListTable");
+
+        if (!table) {
+            alert("KPI Report List table not found.");
+            return;
+        }
+
+        if (typeof ExcelJS === "undefined") {
+            alert("ExcelJS library is not loaded.");
+            return;
+        }
+
+        try {
+
+            var workbook = new ExcelJS.Workbook();
+
+            var worksheet = workbook.addWorksheet("KPI Report List");
+
+            worksheet.views = [{ showGridLines: false }];
+
+            var COLORS = { PURPLE: "FF6F31A1", WHITE: "FFFFFFFF", BLACK: "FF000000", BORDER: "FF1F4E78", A_PLUS: "FF7D9631", A: "FF92D051", B: "FFFFFF01", C: "FFFDC100", D: "FFC11D1C" };
+
+            function applyBorder(cell) {
+
+                cell.border = {
+                    top: {
+                        style: "thin",
+                        color: {
+                            argb: COLORS.BORDER
+                        }
+                    },
+                    bottom: {
+                        style: "thin",
+                        color: {
+                            argb: COLORS.BORDER
+                        }
+                    },
+                    left: {
+                        style: "thin",
+                        color: {
+                            argb: COLORS.BORDER
+                        }
+                    },
+                    right: {
+                        style: "thin",
+                        color: {
+                            argb: COLORS.BORDER
+                        }
+                    }
+                };
+            }
+
+            var currentRow = 1;
+
+            var titleCell = worksheet.getCell(currentRow, 1);
+
+            titleCell.value = "KPI Report List";
+
+            titleCell.font = {
+                name: "Calibri",
+                size: 16,
+                bold: true,
+                color: {
+                    argb: COLORS.BLACK
+                }
+            };
+
+            titleCell.alignment = {
+                horizontal: "center",
+                vertical: "middle"
+            };
+
+            worksheet.mergeCells(currentRow, 1, currentRow, 8);
+
+            worksheet.getRow(currentRow).height = 30;
+
+            currentRow += 2;
+
+            var rows = table.querySelectorAll("tr");
+
+            rows.forEach(function (htmlRow) {
+
+                var cells = htmlRow.querySelectorAll(
+                    ":scope > th, :scope > td"
+                );
+
+                var cellsToExport = [];
+
+                for (var i = 0; i < cells.length - 1; i++) {
+
+                    cellsToExport.push(cells[i]);
+
+                }
+
+                var excelRow = worksheet.getRow(currentRow);
+
+                cellsToExport.forEach(function (htmlCell, index) {
+
+                    var cell = excelRow.getCell(index + 1);
+
+                    var value = htmlCell.innerText.replace(/\s+/g, " ").trim();
+
+                    cell.value = value;
+
+
+                    // Header
+                    if (htmlCell.tagName.toLowerCase() === "th") {
+
+                        cell.fill = {
+                            type: "pattern",
+                            pattern: "solid",
+                            fgColor: {
+                                argb: COLORS.PURPLE
+                            }
+                        };
+
+                        cell.font = {
+                            name: "Calibri",
+                            size: 11,
+                            bold: true,
+                            color: {
+                                argb: COLORS.WHITE
+                            }
+                        };
+
+                        cell.alignment = {
+                            horizontal: "center",
+                            vertical: "middle",
+                            wrapText: true
+                        };
+
+                    }
+
+                    // Data
+                    else {
+
+                        cell.font = {
+                            name: "Calibri",
+                            size: 11,
+                            color: {
+                                argb: COLORS.BLACK
+                            }
+                        };
+
+                        cell.alignment = {
+                            horizontal: "center",
+                            vertical: "middle",
+                            wrapText: true
+                        };
+
+
+                        // Category based row color
+                        var category = "";
+
+                        var rowCells = htmlRow.querySelectorAll(":scope > th, :scope > td");
+
+                        // Category is second-last column before Action
+                        if (rowCells.length >= 2) {
+
+                            category = rowCells[rowCells.length - 2].innerText.trim();
+
+                        }
+
+
+                        switch (category) {
+
+                            case "A+":
+
+                                cell.fill = {
+                                    type: "pattern",
+                                    pattern: "solid",
+                                    fgColor: {
+                                        argb: COLORS.A_PLUS
+                                    }
+                                };
+
+                                break;
+
+
+                            case "A":
+
+                                cell.fill = {
+                                    type: "pattern",
+                                    pattern: "solid",
+                                    fgColor: {
+                                        argb: COLORS.A
+                                    }
+                                };
+
+                                break;
+
+
+                            case "B":
+
+                                cell.fill = {
+                                    type: "pattern",
+                                    pattern: "solid",
+                                    fgColor: {
+                                        argb: COLORS.B
+                                    }
+                                };
+
+                                break;
+
+
+                            case "C":
+
+                                cell.fill = {
+                                    type: "pattern",
+                                    pattern: "solid",
+                                    fgColor: {
+                                        argb: COLORS.C
+                                    }
+                                };
+
+                                break;
+
+
+                            case "D":
+
+                                cell.fill = {
+                                    type: "pattern",
+                                    pattern: "solid",
+                                    fgColor: {
+                                        argb: COLORS.D
+                                    }
+                                };
+
+                                cell.font = {
+                                    name: "Calibri",
+                                    size: 11,
+                                    color: {
+                                        argb: COLORS.WHITE
+                                    }
+                                };
+
+                                break;
+                        }
+                    }
+
+                    applyBorder(cell);
+
+                });
+
+                excelRow.height = 25;
+                currentRow++;
+            });
+
+            worksheet.getColumn(1).width = 10;
+            worksheet.getColumn(2).width = 30;
+            worksheet.getColumn(3).width = 20;
+            worksheet.getColumn(4).width = 22;
+            worksheet.getColumn(5).width = 15;
+            worksheet.getColumn(6).width = 20;
+            worksheet.getColumn(7).width = 15;
+            worksheet.getColumn(8).width = 10;
+
+
+            // Freeze header row
+            worksheet.views = [{ state: "frozen", ySplit: 3, showGridLines: false }];
+
+            var buffer = await workbook.xlsx.writeBuffer();
+
+            var blob = new Blob(
+                [buffer],
+                {
+                    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                }
+            );
+
+            var url = window.URL.createObjectURL(blob);
+            var link = document.createElement("a");
+            link.href = url;
+            link.download = "KPI_Report_List.xlsx";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+
+        }
+        catch (error) {
+            console.error("KPI Report List Excel Export Error:", error);
+            alert("Unable to export KPI Report List.");
+        }
+    }
+</script>
+<style>
+    .inputapi-transliterate-indic-suggestion-menu {
+        z-index: 99999 !important;
+        display: block;
+    }
+
+    .TpInptCrd {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 15px;
+    }
+
+    .no-left-border {
+        border-left: none !important;
+    }
+
+    @@media (max-width: 1200px) {
+        .TplnptCrd {
+            grid-template-columns: repeat(4, 1fr);
+        }
+    }
+
+    @@media (max-width: 992px) {
+        .TplnptCrd {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+
+    @@media (max-width: 767px) {
+        .TplnptCrd {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @@media (max-width: 576px) {
+        .TplnptCrd {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* KPI Detail Report - Excel Style */
+    .kpi-detail-table {
+        border-collapse: collapse !important;
+        width: 100%;
+    }
+
+        /* Header */
+        .kpi-detail-table thead th {
+            background-color: #0070C0 !important;
+            color: #FFFFFF !important;
+            font-weight: bold !important;
+            text-align: center;
+            vertical-align: middle !important;
+            border: 1px solid #1F4E78 !important;
+        }
+
+        /* KPI Detail Data */
+        .kpi-detail-table tbody tr:not(.bg-info) td,
+        .kpi-detail-table tbody tr:not(.bg-info) th {
+            background-color: #FFD966 !important;
+            border: 1px solid #1F4E78 !important;
+            vertical-align: middle !important;
+        }
+
+        /* Important: KPI Area rowspan cells */
+        .kpi-detail-table tbody td[rowspan] {
+            background-color: #FFD966 !important;
+            vertical-align: middle !important;
+            color: #000000 !important;
+        }
+
+        /* KPI Area column - keep merged area yellow */
+        .kpi-detail-table tbody td[rowspan] {
+            background: #FFD966 !important;
+        }
+
+        /* Total */
+        .kpi-detail-table tbody tr.bg-info td,
+        .kpi-detail-table tbody tr.bg-info th {
+            background-color: #0070C0 !important;
+            color: #FFFFFF !important;
+            font-weight: bold !important;
+            border: 1px solid #1F4E78 !important;
+        }
+
+    .unsatisfactory-row {
+        background: #c11d1c !important;
+    }
+
+    .average-row {
+        background: #fdc100 !important;
+    }
+
+    .good-row {
+        background: #ffff01 !important;
+    }
+
+    .very-good-row {
+        background: #92d051 !important;
+    }
+
+    .outstanding-row {
+        background: #7d9631 !important;
+    }
+
+    .tble-main-row {
+        display: flex;
+        align-items: start;
+        gap: 20px;
+    }
+
+    #PLDBReportDetails {
+        border-collapse: collapse !important;
+        border: 1px solid #555 !important;
+    }
+
+        #PLDBReportDetails th,
+        #PLDBReportDetails td {
+            border: 1px solid #8aa6b8 !important;
+        }
+
+    #KPIReportExport {
+        font-family: "Noto Sans Devanagari", Arial, sans-serif;
+    }
+
+        #KPIReportExport table {
+            border-collapse: collapse !important;
+        }
+
+        #KPIReportExport th,
+        #KPIReportExport td {
+            /*            white-space: normal !important;*/
+            word-break: normal !important;
+            overflow-wrap: break-word !important;
+        }
+</style>
+<div ng-app="SocietyKPIReportModule" ng-controller="SocietKPIReportECont" ng-cloak="">
+    <div>
+        <div class="col-md-12">
+            <h3 class="citizen-dash-head ng-binding" style="margin-top:0px;">KPI Report List</h3>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#">  {{translation.Home}}</a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;"> {{translation.New}} </span>
+                        <i class="fa fa-angle-right"> </i>
+                        <span style="margin: 0 5px;"> KPI Report List </span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div style="margin-top:30px;padding-top:30px">
+            <div class="col-md-12">
+                <div class="citizen-dash-head" style="overflow: hidden;">
+                    <div class="table-dropdown" id="search-filter" style="margin-bottom: 5px;">
+                        <div class="col-lg-12" style="margin-bottom: 5px; padding-left: 0;">
+                            <input type="hidden" id="hdnRoleId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).RoleId)" />
+                            <input type="hidden" id="hdnDistrictId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DistrictId)" />
+                            <input type="hidden" id="hdnPldbId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).PLDBId)" />
+                            <input type="hidden" id="hdnPldbBranchId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).PLDBBrancchId)" />
+                            <input type="hidden" id="hdnLevelId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).LevelId)" />
+
+                            <div class="TpInptCrd">
+                                <div class="form-group" ng-show="ShowSummary">
+                                    <label for="search" class="ng-binding">{{translation.FincialYearHeading}}:</label>
+                                    <select ng-model="FinYear" class="form-control" ng-init="FinYear='0'">
+                                        <option value="0">--Select--</option>
+                                        <option value="{{FinYear.FinYearId}}" ng-repeat="FinYear in FinancialYearList">{{FinYear.FinYearName}}</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" ng-show="ShowSummary">
+                                    <label for="search">Month:</label>
+                                    <select class="form-control" ng-model="Month">
+                                        <option value="">--Month--</option>
+                                        <option value="1">January</option>
+                                        <option value="2">February</option>
+                                        <option value="3">March</option>
+                                        <option value="4">April</option>
+                                        <option value="5">May</option>
+                                        <option value="6">June</option>
+                                        <option value="7">July</option>
+                                        <option value="8">August</option>
+                                        <option value="9">September</option>
+                                        <option value="10">October</option>
+                                        <option value="11">November</option>
+                                        <option value="12">December</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" ng-show="ShowSummary">
+                                    <label for="search">KPI Report Type:</label>
+                                    <select class="form-control" ng-model="KPIFor" ng-change="KPIChanged()">
+                                        <option value="">--Select KPI--</option>
+                                        <option value="RAO"> RAO KPI </option>
+                                        <option value="SA">SAO KPI </option>
+                                        <option value="UpbhoktaBhandars">  Upbhokta Bhandars KPI  </option>
+                                        <option value="PACS"> KPI For Pacs  </option>
+                                        <option value="PLDB">  KPI For PLDB  </option>
+                                        <option value="UnitOffice">  KPI For Unit Office  </option>
+                                    </select>
+                                </div>
+
+                                <div class="text-center">
+                                    <label>&nbsp;</label><br>
+                                    <button type="button" ng-show="ShowSummary" ng-click="KPITypeChanged()" class="btn btn-primary dev-btn ng-binding text-center">{{translation.Search}}</button>
+                                    <button type="button" ng-show="ShowSummary" ng-click="ClearSearch()" class="btn btn-primary dev-btn ng-binding text-center">{{translation.Clear}}</button>
+                                    <!-- NEW EXPORT BUTTON -->
+                                    <button type="button" ng-show="ShowSummary && Offices.length > 0" onclick="ExportKPIReportListToExcel()" class="btn btn-success dev-btn">
+                                        <i class="fa fa-file-excel-o"></i>
+                                        Export Excel
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="overflow-x:auto" ng-show="ShowSummary && Offices.length > 0">
+                        <table id="KPIReportListTable" class="table table-bordered table-striped devtable">
+                            <thead>
+                                <tr>
+                                    <th style="background: #6f31a1;">Sr.No</th>
+                                    <th style="background: #6f31a1;" ng-if="KPIFor  == 'UpbhoktaBhandars'">District</th>
+                                    <th style="background: #6f31a1;" ng-if="KPIFor  == 'PACS'">Pacs Name</th>
+                                    <th style="background: #6f31a1;" ng-if="KPIFor  == 'PLDB'">PLDB Name</th>
+                                    <th style="background: #6f31a1;" ng-if="KPIFor  != 'UpbhoktaBhandars' && KPIFor  != 'PACS' && KPIFor  != 'PLDB' ">Office</th>
+                                    <th style="background: #6f31a1;">Total Weight Marks</th>
+                                    <th style="background: #6f31a1;">Total Marks Obtained</th>
+                                    <th style="background: #6f31a1;">Percentage</th>
+                                    <th style="background: #6f31a1;">Performance</th>
+                                    <th style="background: #6f31a1;">Category</th>
+                                    <th style="background: #6f31a1;">Rank</th>
+                                    <th style="background: #6f31a1;">Action</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <tr ng-repeat="item in Offices" ng-class="{'outstanding-row': item.Category == 'A+', 'very-good-row': item.Category == 'A', 'good-row': item.Category == 'B', 'average-row': item.Category == 'C', 'unsatisfactory-row': item.Category == 'D'}">
+                                    <td>{{$index+1}}</td>
+                                    <th ng-if="KPIFor  == 'UpbhoktaBhandars'">{{item.DistrictName}}</th>
+                                    <th ng-if="KPIFor  == 'PACS'">{{item.PACSNameEn}}</th>
+                                    <th ng-if="KPIFor  == 'PLDB'">{{item.PLDBName}}</th>
+                                    <td ng-if="KPIFor  != 'UpbhoktaBhandars' && KPIFor  != 'PACS' && KPIFor  != 'PLDB' ">{{item.OfficeNameEn}}</td>
+                                    <td>{{item.TotalWeightedMarks}}</td>
+                                    <td>{{item.TotalMarksObtained}}</td>
+                                    <td>{{item.TotalPercentage}}</td>
+                                    <td>{{item.Performance}}</td>
+                                    <td>{{item.Category}}</td>
+                                    <td>{{item.Rank}}</td>
+                                    <td ng-if="KPIFor != 'PLDB'">
+                                        <button class="btn btn-primary btn-sm" ng-click="ViewReport(item)"> View </button>
+                                    </td>
+                                    <td ng-if="KPIFor == 'PLDB'">
+                                        <button type="button" class="btn btn-primary" ng-click="ViewPLDB(item)">View</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div ng-show="ShowDetails && KPIFor != 'PLDB'" id="KPIReportExport">
+
+                        <div class="row" ng-show="ShowDetails">
+
+                            <div class="col-md-10 text-center">
+                                <h3 style="font-weight:bold; margin-top:10px;">
+                                    {{ReportHeading}}
+                                </h3>
+                            </div>
+
+                            <div class="col-md-2 text-right">
+                                <button type="button" class="btn btn-success" onclick="ExportKPIReportToExcel();">
+                                    <i class="fa fa-file-excel-o"></i>
+                                    Export Excel
+                                </button>
+                                <button type="button" class="btn btn-danger" onclick="ExportKPIReportToPDF();">
+                                    <i class="fa fa-file-pdf-o"></i>  Export PDF
+                                </button>
+                            </div>
+
+                        </div>
+
+                        <table class="table devtable kpi-detail-table mt-4" id="KPIDetailTable">
+                            <thead>
+                                <tr>
+                                    <th>Sr.No</th>
+                                    <th>KPI Area</th>
+                                    <th>Indicator</th>
+                                    <th ng-if="KPIFor != 'PACS' && KPIFor != 'UpbhoktaBhandars'">Target</th>
+                                    <th ng-if="KPIFor != 'PACS' && KPIFor != 'UpbhoktaBhandars'">Achievement</th>
+                                    <th ng-if="KPIFor != 'PACS' && KPIFor != 'UpbhoktaBhandars'">Progress</th>
+                                    <!-- For PACS & Upbhokta -->
+                                    <th ng-if="KPIFor == 'PACS' || KPIFor == 'UpbhoktaBhandars'">  Instructions to fill Indicators </th>
+                                    <th>Weighted Marks</th>
+                                    <th>Marks Obtained</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <tr ng-repeat="item in ReportData">
+
+                                    <td ng-if="$index == 0 || item.KPIAreaId != ReportData[$index - 1].KPIAreaId" ng-attr-rowspan="{{getKPIAreaRowSpan(item.KPIAreaId, $index)}}">
+                                        {{getKPINumber(item.KPIAreaId, $index)}}
+                                    </td>
+
+                                    <td ng-if="$index == 0 || item.KPIAreaId != ReportData[$index - 1].KPIAreaId" ng-attr-rowspan="{{getKPIAreaRowSpan(item.KPIAreaId, $index)}}">
+                                        {{item.KPIArea}}
+                                    </td>
+
+                                    <td>{{item.KPIIndicators}}</td>
+
+                                    <td class="text-right" ng-if="item.KPIFor != 'PACS'    && item.KPIFor != 'UpbhoktaBhandars'    && !(item.KPIFor == 'PLDB' && item.KPIIndicatorsId == 97)">
+                                        {{item.Target}}
+                                    </td>
+
+                                    <td class="text-right" ng-if="item.KPIFor == 'PLDB' && item.KPIIndicatorsId == 97">
+                                        @*{{item.inputtype}}*@
+                                    </td>
+
+                                    <td class="text-right" ng-if="(item.KPIAreaId == 9 || item.KPIIndicatorsId == 19 && item.KPIFor == 'RAO')">
+                                        {{GetAchievementText(item.Achievement)}}
+                                    </td>
+
+                                    <td class="text-right" ng-if="(item.KPIAreaId == 19 || item.KPIIndicatorsId == 39 && item.KPIFor == 'SA')">
+                                        {{GetAchievementText(item.Achievement)}}
+                                    </td>
+
+                                    <td class="text-right" ng-if="item.KPIFor != 'PACS' && item.KPIFor != 'UpbhoktaBhandars'  && !((item.KPIFor == 'RAO' && item.KPIAreaId == 9 || item.KPIIndicatorsId == 19) || (item.KPIFor == 'SA' && item.KPIAreaId == 19 || item.KPIIndicatorsId == 39) )" ng-class="{'no-left-border': item.KPIFor == 'PLDB' && item.KPIIndicatorsId == 97}">
+                                        <span ng-if="item.KPIFor == 'PLDB' && item.KPIIndicatorsId == 97">
+                                            {{item.inputtype}}
+                                        </span>
+
+                                        <span ng-if="!(item.KPIFor == 'PLDB' && item.KPIIndicatorsId == 97)">
+                                            {{item.Achievement}}
+                                        </span>
+                                    </td>
+
+                                    <td ng-if="item.KPIFor != 'PACS' && item.KPIFor != 'UpbhoktaBhandars'">{{item.Progress}}</td>
+                                    <!-- PACS & Upbhokta -->
+                                    <td class="text-right" ng-if="KPIFor == 'PACS' || KPIFor == 'UpbhoktaBhandars'">
+
+                                        <div ng-if="item.KPIIndicatorsId == 40 || item.KPIIndicatorsId == 42">
+                                            <strong>Target:</strong> {{item.Target}} <br />
+                                            <strong>Achievement:</strong> {{item.Achievement}}
+                                        </div>
+
+                                        {{item.inputtype}}
+                                    </td>
+
+                                    <td class="text-right">{{item.WeightedMarks}}</td>
+                                    <td class="text-right">{{item.MarksObtained}}</td>
+                                </tr>
+
+                                <tr class="bg-info">
+                                    <td colspan="{{ (KPIFor == 'PACS' || KPIFor == 'UpbhoktaBhandars' ) ? 4 : 6 }}" class="text-center"><b>Total</b></td>
+                                    <td class="text-right"><b>{{OverallRating.TotalWeightedMarks}}</b></td>
+                                    <td class="text-right"><b>{{OverallRating.TotalMarksObtained}}</b></td>
+                                </tr>
+
+                            </tbody>
+                        </table>
+
+                        <div ng-if="OverallRating" ng-show="ShowDetails" class="tble-main-row">
+                            <div class="performance-tble" style="width:100%;">
+                                <table class="table table-responsive devtable mt-0" id="KPIPerformanceTable">
+                                    <thead>
+                                        <tr>
+                                            <th style="background: #6f31a1;">Work Performance Evaluation</th>
+                                            <th style="background: #6f31a1;">Total Weight Marks</th>
+                                            <th style="background: #6f31a1;">Total Marks Obtained</th>
+                                            <th style="background: #6f31a1;">Total Percentage</th>
+                                            <th style="background: #6f31a1;">Performance</th>
+                                            <th style="background: #6f31a1;">Category</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-class="{'outstanding-row': OverallRating.Category === 'A+','very-good-row': OverallRating.Category === 'A', 'good-row': OverallRating.Category === 'B','average-row': OverallRating.Category === 'C', 'unsatisfactory-row': OverallRating.Category === 'D'}">
+                                            <td><b>Marks Obtained</b></td>
+                                            <td><b>{{OverallRating.TotalWeightedMarks}}</b></td>
+                                            <td><b>{{OverallRating.TotalMarksObtained | number:2}}</b></td>
+                                            <td><b>{{OverallRating.PercentageObtained}}</b></td>
+                                            <td><b>{{OverallRating.Performance}}</b></td>
+                                            <td><b>{{OverallRating.Category}}</b></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="rating-criteria" style="width:100%;">
+                                <table class="table table-bordered table-striped devtable" id="KPICriteriaTable">
+                                    <thead>
+                                        <tr>
+                                            <th style="background: #6f31a1;">Criteria</th>
+                                            <th style="background: #6f31a1;">Performance</th>
+                                            <th style="background: #6f31a1;">Category</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+                                        <tr ng-repeat="item in PerformanceCriteria" ng-class="{'outstanding-row': item.Category == 'A+', 'very-good-row': item.Category == 'A', 'good-row': item.Category == 'B','average-row': item.Category == 'C', 'unsatisfactory-row': item.Category == 'D' }">
+                                            <td><b>{{item.Criteria}}</b></td>
+                                            <td><b>{{item.Performance}}</b></td>
+                                            <td><b>{{item.Category}}</b></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div ng-if="ShowPLDBDetails" id="PLDBReportExport">
+
+                        <div class="row">
+                            <div class="col-md-10 text-center">
+                                <h3 style="font-weight:bold;">
+                                    PLDB {{SelectedPLDBName}} {{PreviousMonth}} 2026 तक प्रगति रिपोर्ट
+                                </h3>
+                            </div>
+
+                            <div class="col-md-2 text-right">
+                                <button type="button" class="btn btn-success" onclick="ExportKPIPLDBReportToExcel()">
+                                    <i class="fa fa-file-excel-o"></i>  Export Excel
+                                </button>
+                                <button type="button" class="btn btn-danger" onclick="ExportKPIPLDBReportToPDF();">
+                                    <i class="fa fa-file-pdf-o"></i>  Export PDF
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- PLDB Details Table -->
+
+                        <table id="PLDBReportDetails" class="table table-bordered table-striped devtable">
+                            <thead>
+                                <tr>
+                                    <th rowspan="2" style="background:#0070C0; color:white;"> KPI No.  </th>
+                                    <th rowspan="2" style="background:#0070C0; color:white;"> Key Task / KPI Area </th>
+                                    <th rowspan="2" style="background:#0070C0; color:white;"> Details of Indicators </th>
+                                    <th rowspan="2" style="background:#0070C0; color:white;"> Target </th>
+                                    <th rowspan="2" style="background:#0070C0; color:white;"> Achievement </th>
+                                    <th rowspan="2" style="background:#0070C0; color:white;"> Progress % </th>
+                                    <th colspan="2" style="background:#0070C0; color:white;"> SUB TOTAL  </th>
+                                </tr>
+                                <tr>
+                                    <th style="background:#0070C0; color:white;"> WEIGHTED<br />MARKS  </th>
+                                    <th style="background:#0070C0; color:white;"> MARKS<br />OBTAINED </th>
+                                </tr>
+
+                            </thead>
+
+                            <tbody>
+
+                                <tr ng-repeat="item in PLDBReportData" style="background:#FFDA6A;">
+
+                                    <td class="text-center" ng-if="$index == 0 || item.KPIAreaId != PLDBReportData[$index - 1].KPIAreaId" ng-attr-rowspan="{{getPLDBKPIAreaRowSpan(item.KPIAreaId, $index)}}">
+                                        {{getPLDBKPINumber(item.KPIAreaId, $index)}}
+                                    </td>
+                                    <td ng-if="$index == 0 || item.KPIAreaId != PLDBReportData[$index - 1].KPIAreaId" ng-attr-rowspan="{{getPLDBKPIAreaRowSpan(item.KPIAreaId, $index)}}">
+                                        {{item.KPIArea}}
+                                    </td>
+                                    <td>{{item.KPIIndicators}} </td>
+                                    <td class="text-right">
+                                        <span ng-if="item.inputtype">{{item.inputtype}}</span>
+                                        <span ng-if="!item.inputtype">{{item.Target}}</span>
+                                    </td>
+
+                                    <td class="text-right">
+                                        <span ng-if="!item.inputtype">{{item.Achievement}}</span>
+                                    </td>
+
+                                    <td class="text-right">
+                                        {{item.Progress}}
+                                    </td>
+
+                                    <td class="text-right">
+                                        {{item.WeightedMarks}}
+                                    </td>
+
+                                    <td class="text-right">
+                                        {{item.MarksObtained}}
+                                    </td>
+                                </tr>
+
+                                <!-- Records Not Found -->
+                                <tr ng-if="!PLDBReportData || PLDBReportData.length == 0">
+                                    <td colspan="9" class="text-center" style="font-weight:bold; padding:15px;">
+                                        Records Not Found
+                                    </td>
+                                </tr>
+
+                                <!-- Total -->
+                                <tr class="bg-info" ng-if="PLDBReportData && PLDBReportData.length > 0" style="background:#0070C0; color:white;">
+                                    <td colspan="6" class="text-center">  <b>Total</b> </td>
+                                    <td class="text-right"> <b>{{PLDBTotalWeightedMarks}}</b></td>
+                                    <td class="text-right"> <b>{{PLDBTotalMarksObtained}}</b> </td>
+                                </tr>
+
+                            </tbody>
+
+                        </table>
+
+                        <div ng-if="PLDBOverallRating" class="tble-main-row">
+
+                            <!-- Performance -->
+                            <div class="performance-tble" style="width:100%;">
+
+                                <table class="table table-responsive devtable mt-0" id="PLDBOverRating">
+
+                                    <thead>
+                                        <tr>
+                                            <th style="background:#6f31a1;"> Work Performance Evaluation </th>
+                                            <th style="background:#6f31a1;"> Total Weight Marks </th>
+                                            <th style="background:#6f31a1;"> Total Marks Obtained  </th>
+                                            <th style="background:#6f31a1;"> Total Percentage </th>
+                                            <th style="background:#6f31a1;">  Performance   </th>
+                                            <th style="background:#6f31a1;"> Category  </th>
+                                            <th style="background:#6f31a1;"> Rank  </th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+
+                                        <tr ng-class="{'outstanding-row': PLDBOverallRating.Category === 'A+','very-good-row': PLDBOverallRating.Category === 'A', 'good-row': PLDBOverallRating.Category === 'B', 'average-row': PLDBOverallRating.Category === 'C', 'unsatisfactory-row': PLDBOverallRating.Category === 'D'}">
+                                            <td> <b>Marks Obtained</b> </td>
+                                            <td> <b>{{PLDBOverallRating.TotalWeightedMarks}}</b> </td>
+                                            <td> <b>{{PLDBOverallRating.TotalMarksObtained | number:2}}</b> </td>
+                                            <td> <b>{{PLDBOverallRating.PercentageObtained}}</b> </td>
+                                            <td> <b>{{PLDBOverallRating.Performance}}</b></td>
+                                            <td> <b>{{PLDBOverallRating.Category}}</b> </td>
+                                            <td> <b>{{PLDBOverallRating.Rank}}</b> </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+
+                            <!-- Criteria -->
+                            <div class="rating-criteria" style="width:100%;">
+                                <table class="table table-bordered table-striped devtable" id="PLDBCriteria">
+                                    <thead>
+                                        <tr>
+                                            <th style="background:#6f31a1;"> Criteria </th>
+                                            <th style="background:#6f31a1;">  Performance </th>
+                                            <th style="background:#6f31a1;">  Category  </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+
+                                        <tr ng-repeat="item in PerformanceCriteria" ng-class="{'outstanding-row': item.Category == 'A+', 'very-good-row': item.Category == 'A','good-row': item.Category == 'B','average-row': item.Category == 'C','unsatisfactory-row': item.Category == 'D'}">
+                                            <td><b>{{item.Criteria}}</b></td>
+                                            <td><b>{{item.Performance}}</b></td>
+                                            <td><b>{{item.Category}}</b></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="text-center">
+                            <button type="button" class="btn btn-primary" ng-click="BackFromPLDB()">
+                                Back
+                            </button>
+                        </div>
+
+                    </div>
+                    <div class="text-center mt-3">
+                        <button type="button" ng-show="ShowDetails" ng-click="BackToSummary()" class="btn btn-primary dev-btn ng-binding">Back</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="se-pre-con"></div>
+    </div>
+</div>
+
