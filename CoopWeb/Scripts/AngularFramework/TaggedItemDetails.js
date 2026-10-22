@@ -71,6 +71,7 @@ TaggedItemController.controller("TaggedItemMod", function ($scope, $http, $windo
             //formData.append("IFMSPOSId", $scope.TagData.IFMSPOSId);
             //formData.append("IsCreditFacility", $scope.TagData.IsCreditFacility);
 
+            //change
             $(".se-pre-con").fadeIn("slow");
             $http.post(SiteUrl + "/Society/SaveTaggingItemForm", formData, { withCredentials: true, headers: { 'Content-Type': undefined }, transformRequest: angular.identity }).success(function (data, status) {
                 $(".se-pre-con").fadeOut("slow");
