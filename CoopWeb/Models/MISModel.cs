@@ -9200,6 +9200,47 @@ namespace Cooperative.Models
             return ds;
         }
 
+
+
+        public DataSet GetTaggedItemDetail(ref DataPagingModel Details, bool isExport = false)
+        {
+            var ds = new DataSet();
+            dt.Clear();
+            string qry = "";
+            try
+            {
+                string DistrictId = "0";
+
+                if (Details.SearchParameter.Where(x => x.Key == "DISTRICT_ID").Any())
+                {
+                    DistrictId = Details.SearchParameter.Where(x => x.Key == "DISTRICT_ID").Select(x => x.Value).FirstOrDefault();
+                }
+
+                objDBAccess.OpenConnection();
+                UserEntity _LoggedInUser = (UserEntity)System.Web.HttpContext.Current.Session[SessionIdentity.Admin];
+                SqlCommand cmd = new SqlCommand();
+                objDBAccess.OpenConnection();
+                cmd = objDBAccess.CreateCommand("USP_GetTaggingItemReport", DBFactoryCommandType.PROCEDURE_COMMAND);
+                objDBAccess.AddParameterToCommand("@DistrictId", DBFactoryParameterType.Int, DistrictId);
+                objDBAccess.AddParameterToCommand("@PageSize", DBFactoryParameterType.Int, isExport == true ? 5000000 : Details.PageSize);
+                objDBAccess.AddParameterToCommand("@PageNumber", DBFactoryParameterType.Int, isExport == true ? 1 : Details.PageNumber);
+                objDBAccess.AddParameterToCommand("@IsRowCount", DBFactoryParameterType.Int, true);
+                return objDBAccess.GetDataSet();
+            }
+            catch (Exception ex)
+            {
+                objILogger.ErrorHandle(new ErrorLogEntity() { PageName = "Cooperative.Models.MisModel", FunctionName = "GetTaggedItemDetail(ref DataPagingModel Details, bool isExport = false)" + qry }, ex);
+            }
+            finally
+            {
+                objDBAccess.CloseConnection();
+                ds.Dispose();
+            }
+
+            return ds;
+        }
+
+
         public DataTable GetKPI_PerformanceCriteria(string criteriaForKPI)
         {
             DataTable dt = new DataTable();

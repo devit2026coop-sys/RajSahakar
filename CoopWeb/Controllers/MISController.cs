@@ -7272,6 +7272,40 @@ namespace Cooperative.Controllers
             return COMMON_FUNCTION.DataTableToJSONString(ds.Tables[0]);
 
         }
+
+
+       
+
+
+        public ActionResult TaggedItemDetailsReport()
+        {
+            return View();
+        }
+
+        public string GetTaggedItemDetail(DataPagingModel Details, bool isExport = false)
+        {
+            MISModel misModel = new MISModel(new DBLogger());
+            var ds = misModel.GetTaggedItemDetail(ref Details, isExport);
+            if (isExport)
+            {
+                DataTable dt = new DataTable();
+                dt = ds.Tables[0];
+                if (dt.Columns.Contains("TotalRecords"))
+                    dt.Columns.Remove("TotalRecords");
+                dt.Columns.Remove("TagId");
+
+
+                var filename = new ExcelGenerator(new FileLogger()).GenerateExcel(ds.Tables[0], "TaggedItemDetailReport.xlsx");
+                return filename;
+            }
+            return COMMON_FUNCTION.DataTableToJSONString(ds.Tables[0]);
+
+        }
+
+       
+
+
+
         #endregion
 
 
