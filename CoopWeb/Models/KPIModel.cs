@@ -54,7 +54,6 @@ namespace Cooperative.Models
                     //old
                     //objDBAccess.AddParameterToCommand("@OfficeId", DBFactoryParameterType.Int, item.OfficeId);
                     objDBAccess.AddParameterToCommand("@OfficeId", DBFactoryParameterType.Int, item.KPIFor == "PACS" ? _LoggedInUser.GccId : item.OfficeId);
-                    objDBAccess.AddParameterToCommand("@ResionId", DBFactoryParameterType.Int, item.ResionId);
                     objDBAccess.AddParameterToCommand("@KPIIndicatorsId", DBFactoryParameterType.Int, item.KPIIndicatorsId);
                     objDBAccess.AddParameterToCommand("@Target", DBFactoryParameterType.Float, item.KPIIndicatorsTarget);
                     objDBAccess.AddParameterToCommand("@CCBId", DBFactoryParameterType.Int, item.CCBId);
@@ -266,7 +265,7 @@ namespace Cooperative.Models
 
         }
 
-        public DataTable GetKPIAllDetails(int officeId, int? pldbId, int month, string kpiFor, int DistrictId, bool isDevelopment = false , int resionId = 0)
+        public DataTable GetKPIAllDetails(int officeId, int? pldbId, int month, string kpiFor, int DistrictId, bool isDevelopment = false)
         {
             DataTable dt = new DataTable();
             UserEntity _LoggedInUser = (UserEntity)System.Web.HttpContext.Current.Session[SessionIdentity.Admin];
@@ -283,7 +282,6 @@ namespace Cooperative.Models
                 else { objDBAccess.AddParameterToCommand("@PldbId", DBFactoryParameterType.Int, (_LoggedInUser.RoleId == 10235) ? pldbId : _LoggedInUser.PLDBId); }
                 objDBAccess.AddParameterToCommand("@KPIFor", DBFactoryParameterType.NVarchar, kpiFor);
                 objDBAccess.AddParameterToCommand("@DistrictId", DBFactoryParameterType.NVarchar, DistrictId);
-                objDBAccess.AddParameterToCommand("@ResionId", DBFactoryParameterType.NVarchar, resionId);
 
                 dt = objDBAccess.GetTable();
             }
