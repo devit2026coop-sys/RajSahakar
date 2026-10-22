@@ -266,7 +266,7 @@ namespace Cooperative.Models
 
         }
 
-        public DataTable GetKPIAllDetails(int officeId, int? pldbId, int month, string kpiFor, int DistrictId, bool isDevelopment = false , int resionId = 0)
+        public DataTable GetKPIAllDetails(int officeId, int? pldbId, int month, string kpiFor, int DistrictId, bool isDevelopment = false, int resionId = 0, int DivisionId = 0)
         {
             DataTable dt = new DataTable();
             UserEntity _LoggedInUser = (UserEntity)System.Web.HttpContext.Current.Session[SessionIdentity.Admin];
@@ -284,6 +284,7 @@ namespace Cooperative.Models
                 objDBAccess.AddParameterToCommand("@KPIFor", DBFactoryParameterType.NVarchar, kpiFor);
                 objDBAccess.AddParameterToCommand("@DistrictId", DBFactoryParameterType.NVarchar, DistrictId);
                 objDBAccess.AddParameterToCommand("@ResionId", DBFactoryParameterType.NVarchar, resionId);
+                objDBAccess.AddParameterToCommand("@DivisionId", DBFactoryParameterType.NVarchar, DivisionId);
 
                 dt = objDBAccess.GetTable();
             }
