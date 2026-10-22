@@ -7273,10 +7273,6 @@ namespace Cooperative.Controllers
 
         }
 
-
-       
-
-
         public ActionResult TaggedItemDetailsReport()
         {
             return View();
@@ -7301,10 +7297,6 @@ namespace Cooperative.Controllers
             return COMMON_FUNCTION.DataTableToJSONString(ds.Tables[0]);
 
         }
-
-       
-
-
 
         #endregion
 

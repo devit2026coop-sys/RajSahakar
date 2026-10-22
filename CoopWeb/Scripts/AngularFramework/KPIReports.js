@@ -196,14 +196,15 @@ MasterMod.controller("SocietKPIReportECont", function ($scope, $rootScope, $http
         $scope.GetKPIReport();
     };
 
-    $scope.GetKPIReport = function (officeId, financialYearId, month, kpiFor, DistrictId, ResionId) {
-        var formData = { OfficeId: officeId, FY: financialYearId, Month: month, KPIFor: kpiFor, DistrictId: DistrictId, ResionId: ResionId };
+    $scope.GetKPIReport = function (officeId, financialYearId, month, kpiFor, DistrictId) {
+        var formData = { OfficeId: officeId, FY: financialYearId, Month: month, KPIFor: kpiFor, DistrictId: DistrictId };
         $http({ method: "POST", url: '/MIS/GetKPIReport', data: JSON.stringify(formData) }).then(function (response) {
             $scope.ReportData = response.data;
 
             if ($scope.ReportData.length > 0) {
 
-                var first = $scope.ReportData[0];               
+                var first = $scope.ReportData[0];
+                console.log('first', first);
 
                 $scope.OfficeName = first.OfficeNameEn;
                 $scope.MonthName = first.MonthName;
@@ -497,7 +498,7 @@ MasterMod.controller("SocietKPIReportECont", function ($scope, $rootScope, $http
     $scope.ViewReport = function (item) {
         $scope.ShowSummary = false;
         $scope.ShowDetails = true;
-        $scope.GetKPIReport(item.OfficeId, $scope.FinYear, $scope.Month, $scope.KPIFor, item.districtId, item.ResionId);
+        $scope.GetKPIReport(item.OfficeId, $scope.FinYear, $scope.Month, $scope.KPIFor, item.districtId);
         $scope.GetKPIOverallRating(item.OfficeId, item.districtId);
         $scope.GetKPI_PerformanceCriteria($scope.KPIFor);
     };

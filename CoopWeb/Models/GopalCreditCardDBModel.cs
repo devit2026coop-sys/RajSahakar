@@ -237,7 +237,6 @@ namespace Cooperative.Models
                 objDBAccess.AddParameterToCommand("@IsWorkingChild", DBFactoryParameterType.VARCHAR, model.IsWorkingChild);
                 objDBAccess.AddParameterToCommand("@IsInfrastructureChild", DBFactoryParameterType.VARCHAR, model.IsInfrastructureChild);
                 objDBAccess.AddParameterToCommand("@IsApparatusChild", DBFactoryParameterType.VARCHAR, model.IsApparatusChild);
-                objDBAccess.AddParameterToCommand("@IsTheCattleinsuredMMPBY", DBFactoryParameterType.Bit, model.IsTheCattleinsuredMMPBY);
 
                 /*MahilaNidhi*/
                 /*

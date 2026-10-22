@@ -9201,8 +9201,6 @@ namespace Cooperative.Models
             return ds;
         }
 
-
-
         public DataSet GetTaggedItemDetail(ref DataPagingModel Details, bool isExport = false)
         {
             var ds = new DataSet();
@@ -9240,7 +9238,6 @@ namespace Cooperative.Models
 
             return ds;
         }
-
 
         public DataTable GetKPI_PerformanceCriteria(string criteriaForKPI)
         {

@@ -2,6 +2,7 @@
 using Cooperative.Models;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Web.Mvc;
 
 namespace Cooperative.Controllers
@@ -64,20 +65,20 @@ namespace Cooperative.Controllers
         [HttpGet]
         public ActionResult DesignationLevelMapping()
         {
-          //  ViewBag.BreadCrumbPath = new MasterModel(new DBLogger()).GetBreadCrumb((Request.Cookies[SessionIdentity.Culture]).Value);
-           // ViewBag.Title = PageTitleMetaSetting.SetPageTitle(PageTitleFactory.DesignationLevelMapping, (Request.Cookies[SessionIdentity.Culture]).Value);
+            //  ViewBag.BreadCrumbPath = new MasterModel(new DBLogger()).GetBreadCrumb((Request.Cookies[SessionIdentity.Culture]).Value);
+            // ViewBag.Title = PageTitleMetaSetting.SetPageTitle(PageTitleFactory.DesignationLevelMapping, (Request.Cookies[SessionIdentity.Culture]).Value);
             return View();
         }
 
         [HttpPost]
         [ActionName("SaveDesignationLevelMappingForm")]
-        public JsonResult DesignationLevelMappinginsert( int DESIGNATIONCODE, string IsHOD, string IsActive, int DesignationLevelMappingId, int OrganizationLevelsMappingID,int OfficeId)
+        public JsonResult DesignationLevelMappinginsert(int DESIGNATIONCODE, string IsHOD, string IsActive, int DesignationLevelMappingId, int OrganizationLevelsMappingID, int OfficeId)
         {
             DesignationLevelMappingModel _Modal = new DesignationLevelMappingModel();
             ModelState.Remove("UpdationDate"); ModelState.Remove("Createdate");
             if (!ModelState.IsValid)
                 return Json(JsonModelError.Get(ModelState.Values));
-            return Json(_Modal.AddDesignationLevelMapping(DESIGNATIONCODE,  IsHOD, IsActive, DesignationLevelMappingId, OrganizationLevelsMappingID, OfficeId));
+            return Json(_Modal.AddDesignationLevelMapping(DESIGNATIONCODE, IsHOD, IsActive, DesignationLevelMappingId, OrganizationLevelsMappingID, OfficeId));
 
         }
 
@@ -89,14 +90,30 @@ namespace Cooperative.Controllers
             DesignationLevelMappingModel objDesignationLevelMappingModel = new DesignationLevelMappingModel(new DBLogger());
             return Json(objDesignationLevelMappingModel.ChangeStatusDesignationLevelMapping(id, Action), JsonRequestBehavior.AllowGet);
         }
-        
+
         [HttpGet]
         [ActionName("GetAllDesignationByOrganizationLevelsMappingID")]
-        public string GetAllDesignationByOrganizationLevelsMappingID(string OrganizationLevelsMappingID,string OfficeId)
+        public string GetAllDesignationByOrganizationLevelsMappingID(string OrganizationLevelsMappingID, string OfficeId)
         {
             DesignationLevelMappingModel objDesignationLevelMapping = new DesignationLevelMappingModel(new FileLogger());
             return COMMON_FUNCTION.DataTableToJSONString(objDesignationLevelMapping.GetAllDesignationByOrganizationLevelsMappingID(OrganizationLevelsMappingID, OfficeId));
         }
         // End DesignationLevelMappings
+
+
+        [HttpGet]
+        public ActionResult KPIEntrySetting()
+        {
+            return View();
+        }
+
+        //[HttpPost]
+        //public string GetAllKPIList()
+        //{
+        //    SocietyModel objMenuActionModel = new SocietyModel(new FileLogger());
+        //    DataTable DT = objMenuActionModel.KVSSGSSbyDRorMDCCB(); 
+        //    return COMMON_FUNCTION.DataTableToJSONWithJSONNet(DT);
+        //} 
+
     }
 }

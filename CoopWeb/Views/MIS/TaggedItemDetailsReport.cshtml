@@ -1,0 +1,144 @@
+﻿@{
+    ViewBag.Title = "Tagged Item Details Report ";
+}
+
+<script src="~/Scripts/AngularFramework/TaggedItemDetailsReport.js?v=@DateTime.Now.Ticks"></script>
+<script src="~/Scripts/xlsx.full.min.js"></script>
+<div ng-app="TaggedItemMod" ng-controller="TaggedItemCtrl" ng-cloak="">
+    <div class="container-fluid citizen-dash-head">
+        <div class="panel panel-default">
+            <div class="panel-heading flexEqualCenter">
+                <b>
+                    <i class="fa fa-th-list"></i>&nbsp;  Tagged Item Details Report
+                </b>
+            </div>
+
+            <div class="panel-body">
+                <div class="row mb-3" id="search-filter">
+                    <!-- District -->
+                    <div class="col-md-2">
+                        <label>{{ translation.DistrictHeading}}</label>
+                        <select name="DISTRICT_ID" ng-model="DISTRICT_ID" id="ddlDistrictId" class="form-control" ng-init="DISTRICT_ID='0'">
+                            <option value="0">{{translation.SelectOption}}</option>
+                            <option ng-repeat="district in DistrictList" value="{{district.DISTRICT_ID}}">
+                                {{_language =='en-us' ? district.DISTRICT_ENG : district.DISTRICT_MANGAL}}
+                            </option>
+                        </select>
+                    </div>
+                     
+                    <!-- Search -->
+                    <div class="col-md-2" style="margin-top:25px;">
+                        <button type="button" class="btn btn-primary" style="background-color: #64c0c5; border:0;" ng-click="searchRequest(GetTaggedItemDetail)">
+                            Search
+                        </button>
+                        <button type="button" class="btn btn-primary" style="background-color: #64c0c5; border: 0;" ng-click="ClearSearch()">
+                            Clear
+                        </button>
+                        <button type="button" class="btn btn-success" ng-click="exportToExcel()">
+                            <i class="fa fa-file-excel-o"></i>
+                            Excel
+                        </button>
+                    </div>
+                </div>
+                <table class="table table-responsive devtable mb-2">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width:60px;">Sr.No</th>
+                            <th class="text-center">District Name </th>
+                            <th class="text-center">Block Name </th>
+                            <th class="text-center">Society Name </th>
+                            <th class="text-center">Registration No</th>
+                            <th class="text-center">Product Type</th>
+                            <th class="text-center">Product Name</th>
+                            <th class="text-center">Company Name</th>
+                            <th class="text-center">Purchase Date</th>
+                            <th class="text-center">Expiration Date</th>
+                            <th class="text-center">Packaging Type</th>
+                            <th class="text-center">Measurement Unit</th>
+                            <th class="text-center">Quantity</th>
+                            <th class="text-center">Price</th>
+                            <th class="text-center">Total Price</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="item in TaggedItemDataList track by $index">
+                            <td>{{(((DataPagingDetails.PageNumber - 1) * DataPagingDetails.PageSize) + 1)+$index}}</td>
+                            <td>
+                                {{item.DistrictName}}
+                            </td>
+                            <td>
+                                {{item.Block}}
+                            </td>
+                            <td>
+                                {{item.SocietyName}}
+                            </td>
+                            <td>
+                                {{item.RegistrationNo}}
+                            </td>
+                            <td>
+                                {{item.ProductType}}
+                            </td>
+                            <td>
+                                {{item.ProductName}}
+                            </td>
+                            <td>
+                                {{item.CompanyName}}
+                            </td>
+                            <td>
+                                {{item.PurchaseDate}}
+                            </td>
+                            <td>
+                                {{item.ExpirationDate}}
+                            </td>
+                            <td>
+                                {{item.PackagingType}}
+                            </td>
+                            <td>
+                                {{item.MeasurementUnit}}
+                            </td>
+                            <td>
+                                {{item.ItemQuantity}}
+                            </td>
+                            <td>
+                                {{item.ItemPrice}}
+                            </td>
+                            <td>
+                                {{item.TotalPrice}}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <div ng-if="DataPagingDetails.TotalPages>1" class="dataTables_paginate paging_simple_numbers" id="dataTables-example_paginate" style="display: flex; align-items: center; justify-content: space-between;">
+                            <div class="dataTables_info" id="dataTables-example_info" role="status" aria-live="polite">
+                                Total Records: {{DataPagingDetails.TotalRecords}}
+                            </div>
+                            <ul class="pagination pagination_1" style="margin-left: 10px !important; margin:0">
+                                <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« First</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber == 1" class="previous-off"><span>« Previous</span></li>
+
+                                <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest('1',SearchData)" style="cursor: pointer;">
+                                    <span>« First</span>
+                                </li>
+                                <li ng-if="DataPagingDetails.PageNumber > 1" class="previous-off" ng-click="pageRequest(DataPagingDetails.PageNumber-1,SearchData)" style="cursor:pointer;">
+                                    <span>« Prev</span>
+                                </li>
+                                <li class="{{n==DataPagingDetails.PageNumber?'active':''}}" style="{{n==DataPagingDetails.PageNumber?'':'cursor: pointer'}}" ng-repeat="n in PagingRange(DataPagingDetails.StartPageNumber,DataPagingDetails.EndPageNumber,DataPagingDetails.TotalPages)" ng-click="pageRequest(n,SearchData)"><span>{{n}}</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Next</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber == DataPagingDetails.TotalPages" class="next"><span>« Last</span></li>
+                                <li ng-if="DataPagingDetails.PageNumber!= DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.PageNumber+1,SearchData)" style="cursor:pointer;">
+                                    <span>Next »</span>
+                                </li>
+                                <li ng-if="DataPagingDetails.PageNumber != DataPagingDetails.TotalPages" class="next" ng-click="pageRequest(DataPagingDetails.TotalPages,SearchData)" style="cursor:pointer;">
+                                    <span>Last »</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div> 
+            </div>
+        </div>
+    </div>
+</div>

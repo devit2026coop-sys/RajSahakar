@@ -1732,24 +1732,26 @@ namespace Cooperative.Controllers
         }
 
 
-        [HttpPost]
-        public string GetDistrictWiseNCDRegistrationCount(DataPagingModel Details, bool isExport = false, int type = 0, string actionType = "", int districtId = 0)
+        [HttpGet]
+        public JsonResult GetDistrictWiseNCDRegistrationCount(int type = 0, string actionType = "")
         {
-            var ds = _nCDDataModel.GetDistrictWiseNCDRegistrationCount(ref Details, isExport, type, actionType, districtId);
-            if (isExport)
+            var responce = new APIResponce();
+            var ds = _nCDDataModel.GetDistrictWiseNCDRegistrationCount(type, actionType);
+            if (ds != null)
             {
-                DataTable dt = new DataTable();
-                dt = ds.Tables[0];
-                if (dt.Columns.Contains("TotalRecords"))
-                    dt.Columns.Remove("TotalRecords");
-                dt.Columns.Remove("SocietyID");
-                dt.Columns.Remove("ApplicationStatus");
-                dt.Columns.Remove("IsPermanentSave");
-                var filename = "";
-                filename = new ExcelGenerator(new FileLogger()).GenerateExcel(ds.Tables[0], "MappingPendingData.xlsx");
-                return filename;
+                responce.Data = new
+                {
+                    ncdDataReport = ds.Tables.Count > 0 ? COMMON_FUNCTION.DataTableToJSONString(ds.Tables[0]) : null,
+                };
+                responce.Status = "200";
+                responce.Message = "Success";
             }
-            return COMMON_FUNCTION.DataTableToJSONString(ds.Tables[0]);
+            else
+            {
+                responce.Status = "500";
+                responce.Message = "Internal Server Error.";
+            }
+            return Json(new { Result = responce }, JsonRequestBehavior.AllowGet);
         }
         #endregion
     }

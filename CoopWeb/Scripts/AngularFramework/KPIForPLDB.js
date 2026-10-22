@@ -185,6 +185,7 @@ CooperativeSocietyFormModule.controller("CooperativePLDBKPIFormCont", function (
     $scope.GetKPIResult = function () {
         debugger;
         $scope.PldbDistrictID = $('#hdnDistrictId').val();
+        console.log($scope.PldbDistrictID);
         $http.get(SiteUrl + "/KPI/GetKPIDetails", {
             params: { officeId: 0, pldbId: $scope.PLDB.PldbId, month: $scope.PreviousMonthId, kpiFor: "PLDB", DistrictId: $scope.PldbDistrictID }
         }).success(function (data) {

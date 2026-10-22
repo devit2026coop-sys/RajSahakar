@@ -11,7 +11,10 @@ using Cooperative.Controllers;
 
 namespace Cooperative.Models
 {
+    public class MasterSettingModel
+    {
 
+    }
     public class OrganizationLevelsMapping
     {
         private ILogger objILogger;
@@ -202,8 +205,7 @@ namespace Cooperative.Models
 
 
     }
-
-
+     
     public class DesignationLevelMappingModel
     {
 
