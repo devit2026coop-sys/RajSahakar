@@ -116,7 +116,7 @@ CooperativeSocietyFormModule.controller("CooperativeSAOKPIFormCont", function ($
 
     $scope.GetKPIResult = function () {
         $http.get(SiteUrl + "/KPI/GetKPIDetails", {
-            params: { officeId: $scope.OfficeId, month: $scope.PreviousMonthId, kpiFor: "SA", DistrictId: $scope.DistrictId, resionId: $scope.ResionId }
+            params: { officeId: $scope.OfficeId, month: $scope.PreviousMonthId, kpiFor: "SA", DistrictId: $scope.DistrictId }
         }).success(function (data) {
 
             if (data && data.length > 0) {
@@ -387,7 +387,6 @@ CooperativeSocietyFormModule.controller("CooperativeSAOKPIFormCont", function ($
                     Month: $scope.PreviousMonthId,
                     KPIFor: "SA",
                     OfficeId: $scope.OfficeId,
-                    ResionId: $scope.ResionId,
                     KPIIndicatorsId: item.KPIIndicatorsId,
                     KPIIndicatorsTarget: item.Target || 0,
                     KPIIndicatorsAchievement: item.Achievement || 0,
@@ -405,7 +404,7 @@ CooperativeSocietyFormModule.controller("CooperativeSAOKPIFormCont", function ($
             return;
 
         $(".se-pre-con").fadeIn("slow");
-        $http.post(SiteUrl + "/KPI/SaveKPIResult", SaveData).success(function (data) {
+        $http.post(SiteUrl + "/Society/SaveKPIResult", SaveData).success(function (data) {
             $(".se-pre-con").fadeOut("slow");
             if (data > 0) {
                 alert("Record Saved Successfully.");
@@ -446,7 +445,6 @@ CooperativeSocietyFormModule.controller("CooperativeSAOKPIFormCont", function ($
                     Month: $scope.PreviousMonthId,
                     KPIFor: "SA",
                     OfficeId: $scope.OfficeId,
-                    ResionId: $scope.ResionId,
                     KPIIndicatorsId: item.KPIIndicatorsId,
                     KPIIndicatorsTarget: item.Target || 0,
                     KPIIndicatorsAchievement: item.Achievement || 0,
@@ -463,7 +461,7 @@ CooperativeSocietyFormModule.controller("CooperativeSAOKPIFormCont", function ($
         if (!isValid)
             return;
         $(".se-pre-con").fadeIn("slow");
-        $http.post(SiteUrl + "/KPI/SaveKPIResult", SaveData)
+        $http.post(SiteUrl + "/Society/SaveKPIResult", SaveData)
             .success(function (data) {
                 $(".se-pre-con").fadeOut("slow");
                 if (data > 0) {
@@ -487,8 +485,6 @@ CooperativeSocietyFormModule.controller("CooperativeSAOKPIFormCont", function ($
             $scope.UserDetails = data[0];
             $scope.OfficeId = data[0].OfficeId;
             $scope.DistrictId = data[0].DISTRICT_ID;
-            $scope.ResionId = data[0].ResionId;
-            $scope.ResionName = data[0].ResionName;
             $(".se-pre-con").fadeOut("slow");
         })
             .error(function () {
