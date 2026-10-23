@@ -34,11 +34,13 @@ KPIForPacsMod.controller("KPIForPacsCtrl", function ($rootScope, $scope, $http) 
         };
 
         //$scope.LoanBankList();
+        $scope.SetCurrentFY();
         $scope.GetSAKPISAODetails();
+
         //$scope.GetUserDetailsBySSO();
         //$scope.GetKPIResult();
         $scope.SetPreviousMonth();
-        $scope.SetCurrentFY();
+
         //$scope.GetSocietyBySSO();
         if ($scope.pacsDetail.GCCLoginId != null && $scope.pacsDetail.GCCLoginId > 0) {
             $scope.GetDetailsByPacs();
@@ -315,17 +317,27 @@ KPIForPacsMod.controller("KPIForPacsCtrl", function ($rootScope, $scope, $http) 
 
     $scope.GetSAKPISAODetails = function () {
         $(".se-pre-con").fadeIn("slow");
-        return $http.get(SiteUrl + "/KPI/GetPacsKPIDetails").success(function (data) {
+
+        return $http.get(SiteUrl + "/KPI/GetPacsKPIDetails", {
+            params: {
+                financialYear: $scope.FY
+            }
+        }).success(function (data) {
+
             $scope.KPIData = data;
-            //console.log('$scope.KPIData', $scope.KPIData);
-            //$scope.GetKPIResult();
             $scope.KPIAreas = [];
+
             if ($scope.KPIData != null && $scope.KPIData.length > 0) {
-                $scope.pacsDetail.PacsRegistrationNo = $scope.KPIData[0].PacsRegistrationNo && $scope.KPIData[0].PacsRegistrationNo.trim() ? $scope.KPIData[0].PacsRegistrationNo.trim() : "";
+                $scope.pacsDetail.PacsRegistrationNo =
+                    $scope.KPIData[0].PacsRegistrationNo &&
+                        $scope.KPIData[0].PacsRegistrationNo.trim()
+                        ? $scope.KPIData[0].PacsRegistrationNo.trim()
+                        : "";
             }
 
             angular.forEach($scope.KPIData, function (item) {
                 var area = null;
+
                 for (var i = 0; i < $scope.KPIAreas.length; i++) {
                     if ($scope.KPIAreas[i].KPIAreaId == item.KPIAreaId) {
                         area = $scope.KPIAreas[i];
@@ -334,11 +346,17 @@ KPIForPacsMod.controller("KPIForPacsCtrl", function ($rootScope, $scope, $http) 
                 }
 
                 if (area == null) {
-                    area = { KPIAreaId: item.KPIAreaId, KPIArea: item.KPIArea, Indicators: [] };
+                    area = {
+                        KPIAreaId: item.KPIAreaId,
+                        KPIArea: item.KPIArea,
+                        Indicators: []
+                    };
+
                     $scope.KPIAreas.push(area);
                 }
 
                 var indicator = null;
+
                 for (var j = 0; j < area.Indicators.length; j++) {
                     if (area.Indicators[j].KPIIndicatorsId == item.KPIIndicatorsId) {
                         indicator = area.Indicators[j];
@@ -370,11 +388,14 @@ KPIForPacsMod.controller("KPIForPacsCtrl", function ($rootScope, $scope, $http) 
             });
 
             $(".se-pre-con").fadeOut("slow");
+
         }).error(function () {
             $(".se-pre-con").fadeOut("slow");
             $scope.KPIAreas = [];
         });
     };
+
+
     $scope.GetKPIResult = function () {
 
         $http.get(SiteUrl + "/KPI/GetKPIDetails", {
@@ -713,7 +734,6 @@ KPIForPacsMod.controller("KPIForPacsCtrl", function ($rootScope, $scope, $http) 
 
 
     $scope.UpdateKPIResult = function () {
-        debugger;
         $scope.SaveData = [];
         var isValid = true;
         var rowNo = 0;
@@ -784,7 +804,8 @@ KPIForPacsMod.controller("KPIForPacsCtrl", function ($rootScope, $scope, $http) 
     $scope.SetCurrentFY = function () {
         $http.get(SiteUrl + "/Society/GetCurrentFinancialYear")
             .success(function (data) {
-                $scope.FY = data;
+                $scope.FY = data[0].CurrentFY;
+                console.log('$scope.FY', $scope.FY);
             })
             .error(function () {
                 alert("Unable to load Current Financial Year.");
@@ -1057,3 +1078,34 @@ KPIForPacsMod.directive('maxValue', function () {
         }
     };
 });
+
+KPIForPacsMod.directive('numberOnly', function () {
+    return {
+        restrict: 'A',
+        require: 'ngModel',
+        link: function (scope, element, attrs, ngModelCtrl) {
+
+            element.on('input', function () {
+                var value = element.val();
+
+                var hasDecimal = value.indexOf('.') !== -1;
+
+                if (hasDecimal) {
+                    value = value.split('.')[0];
+                    element.val(value);
+                    ngModelCtrl.$setViewValue(value);
+                    ngModelCtrl.$render();
+                }
+
+                scope.$applyAsync(function () {
+                    scope.decimalError = hasDecimal;
+                });
+            });
+
+            scope.$on('$destroy', function () {
+                element.off('input');
+            });
+        }
+    };
+});
+
