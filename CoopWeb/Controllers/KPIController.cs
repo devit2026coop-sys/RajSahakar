@@ -160,10 +160,10 @@ namespace Cooperative.Controllers
 
         [HttpGet]
         [ActionName("GetKPIDetails")]
-        public string GetSAKPIDetails(int officeId, int? pldbId, int month, string kpiFor, int DistrictId)
+        public string GetSAKPIDetails(int officeId, int? pldbId, int month, string kpiFor, int DistrictId, int resionId = 0, int DivisionId = 0)
         {
             bool isLocal = Request.Url.Host.Contains("localhost");
-            DataTable dt = new KPIModel().GetKPIAllDetails(officeId, pldbId, month, kpiFor, DistrictId, isLocal);
+            DataTable dt = new KPIModel().GetKPIAllDetails(officeId, pldbId, month, kpiFor, DistrictId, isLocal, resionId, DivisionId);
             return COMMON_FUNCTION.DataTableToJSONString(dt);
         }
 
