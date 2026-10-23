@@ -63,7 +63,7 @@ TaggedItemController.controller("TaggedItemMod", function ($scope, $http, $windo
             formData.append("PurchaseDate", formatDate($scope.TagData.PurchaseDate));
             formData.append("ExpirationDate", formatDate($scope.TagData.ExpirationDate));
             formData.append("PackagingType", $scope.TagData.PackagingType);
-            formData.append("MeasurementUnit", $scope.TagData.MeasurementUnit);
+            formData.append("MeasurementUnit", "Ml");
             formData.append("ItemQuantity", $scope.TagData.ItemQuantity);
             formData.append("ItemPrice", $scope.TagData.ItemPrice);
             formData.append("TotalPrice", $scope.TagData.TotalPrice);
@@ -90,7 +90,7 @@ TaggedItemController.controller("TaggedItemMod", function ($scope, $http, $windo
                     window.location.reload();
                 }
                 else if (parseInt(data, 10) == -2) {
-                    var Msg = (_language == 'en-us' ? 'Record already exists.' : 'डुप्लिकेट डेटा।');
+                    var Msg = (_language == 'en-us' ? 'Record already exists for the Selected Society, Product Type, Product Name, Company Name and Purchase Date. Duplicate entries are not allowed.' : 'डुप्लिकेट डेटा।');
                     alert(Msg);
                 }
                 else if (parseInt(data, 10) == -1 || parseInt(data, 10) == 0) {
@@ -167,9 +167,9 @@ TaggedItemController.controller("TaggedItemMod", function ($scope, $http, $windo
         if ($scope.TagData.PackagingType == '' || $scope.TagData.PackagingType == null || $scope.TagData.PackagingType == undefined) {
             message += $scope._language == 'en-us' ? '\n <br /> Select Packaging Type' : '\n <br /> Select Packaging Type';
         }
-        if ($scope.TagData.MeasurementUnit == '' || $scope.TagData.MeasurementUnit == null || $scope.TagData.MeasurementUnit == undefined) {
-            message += $scope._language == 'en-us' ? '\n <br /> Select Measurement Unit' : '\n <br /> Select Measurement Unit';
-        }
+        //if ($scope.TagData.MeasurementUnit == '' || $scope.TagData.MeasurementUnit == null || $scope.TagData.MeasurementUnit == undefined) {
+        //    message += $scope._language == 'en-us' ? '\n <br /> Select Measurement Unit' : '\n <br /> Select Measurement Unit';
+        //}
         if ($scope.TagData.ItemQuantity == undefined || $scope.TagData.ItemQuantity == '0' || $scope.TagData.ItemQuantity == null) {
             message += $scope._language == 'en-us' ? '\n <br /> Enter Quantity' : '\n <br /> Enter Quantity';
         }
@@ -289,7 +289,7 @@ TaggedItemController.controller("TaggedItemMod", function ($scope, $http, $windo
                 $scope.TagData.PurchaseDate = res[0].PurchaseDate ? new Date(res[0].PurchaseDate) : null;
                 $scope.TagData.ExpirationDate = res[0].ExpirationDate ? new Date(res[0].ExpirationDate) : null;
                 $scope.TagData.PackagingType = res[0].PackagingType + '';
-                $scope.TagData.MeasurementUnit = res[0].MeasurementUnit + '';
+                //$scope.TagData.MeasurementUnit = res[0].MeasurementUnit + '';
                 $scope.TagData.ItemQuantity = Number(res[0].ItemQuantity); 
                 $scope.TagData.ItemPrice = Number(res[0].ItemPrice);
                 $scope.TagData.TotalPrice = res[0].TotalPrice;
