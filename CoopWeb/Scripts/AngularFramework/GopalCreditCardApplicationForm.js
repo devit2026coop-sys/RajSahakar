@@ -1803,6 +1803,10 @@ AppTrainning.controller("GopalCreditCard", function ($scope, $http) {
                 message += '<br />';
             }
         }
+        if ($scope.GopalCreditCardModel.IsTheCattleinsuredMMPBY == null) {
+            message += $scope._language == 'en-us' ? '\nPlease select, Is the cattle insured under MMPBY?' : '\nPlease select, Is the cattle insured under MMPBY?';
+            message += '<br />';
+        }
 
 
 
@@ -1840,22 +1844,26 @@ AppTrainning.controller("GopalCreditCard", function ($scope, $http) {
         //    message += '<br />';
         //}
         //else {
-        if ($scope.GopalCreditCardModel.BankAccountNo == "" || $scope.GopalCreditCardModel.BankAccountNo == null || $scope.GopalCreditCardModel.BankAccountNo.length == 0) {
-            message += $scope._language == 'en-us' ? '\nPlease Enter Account Number' : '\nकृपया खाता संख्या दर्ज करें|';
-            message += '<br />';
-        }
-        if ($scope.GopalCreditCardModel.BankIFSCCode == "" || $scope.GopalCreditCardModel.BankIFSCCode == null || $scope.GopalCreditCardModel.BankIFSCCode.length == 0) {
-            message += $scope._language == 'en-us' ? '\nPlease Enter Bank IFSC Code' : '\nकृपया बैंक IFSC कोड दर्ज करें|';
-            message += '<br />';
-        }
-        if ($scope.GopalCreditCardModel.BankName == "" || $scope.GopalCreditCardModel.BankName == null || $scope.GopalCreditCardModel.BankName.length == 0) {
-            message += $scope._language == 'en-us' ? '\nPlease Enter Bank Name' : '\nकृपया बैंक का नाम दर्ज करें|';
-            message += '<br />';
-        }
-        if ($scope.GopalCreditCardModel.BankBranchName == "" || $scope.GopalCreditCardModel.BankBranchName == null || $scope.GopalCreditCardModel.BankBranchName.length == 0) {
-            message += $scope._language == 'en-us' ? '\nPlease Enter Bank Branch Name' : '\nकृपया बैंक शाखा का नाम दर्ज करें|';
-            message += '<br />';
-        }
+
+        //again open start
+        //if ($scope.GopalCreditCardModel.BankAccountNo == "" || $scope.GopalCreditCardModel.BankAccountNo == null || $scope.GopalCreditCardModel.BankAccountNo.length == 0) {
+        //    message += $scope._language == 'en-us' ? '\nPlease Enter Account Number' : '\nकृपया खाता संख्या दर्ज करें|';
+        //    message += '<br />';
+        //}
+        //if ($scope.GopalCreditCardModel.BankIFSCCode == "" || $scope.GopalCreditCardModel.BankIFSCCode == null || $scope.GopalCreditCardModel.BankIFSCCode.length == 0) {
+        //    message += $scope._language == 'en-us' ? '\nPlease Enter Bank IFSC Code' : '\nकृपया बैंक IFSC कोड दर्ज करें|';
+        //    message += '<br />';
+        //}
+        //if ($scope.GopalCreditCardModel.BankName == "" || $scope.GopalCreditCardModel.BankName == null || $scope.GopalCreditCardModel.BankName.length == 0) {
+        //    message += $scope._language == 'en-us' ? '\nPlease Enter Bank Name' : '\nकृपया बैंक का नाम दर्ज करें|';
+        //    message += '<br />';
+        //}
+        //if ($scope.GopalCreditCardModel.BankBranchName == "" || $scope.GopalCreditCardModel.BankBranchName == null || $scope.GopalCreditCardModel.BankBranchName.length == 0) {
+        //    message += $scope._language == 'en-us' ? '\nPlease Enter Bank Branch Name' : '\nकृपया बैंक शाखा का नाम दर्ज करें|';
+        //    message += '<br />';
+        //}
+        //again open enc
+
         //}
         if ($scope.GopalCreditCardModel.LoanDistrictId == "" || $scope.GopalCreditCardModel.LoanDistrictId == null || $scope.GopalCreditCardModel.LoanDistrictId == "0") {
             message += $scope._language == 'en-us' ? '\nPlease Select District for Loan' : '\nकृपया ऋण के लिए जिला चुनें|';
@@ -1930,6 +1938,7 @@ AppTrainning.controller("GopalCreditCard", function ($scope, $http) {
             message += $scope._language == 'en-us' ? '\nPlease select, Does the cattle keeper sell the milk to the dairy cooperative society?' : '\nकृपया सेलेक्ट करें,क्या पशुपालक द्वारा दूध का बेचान डेयरी सहकारी समिति को किया जाता है या नहीं|';
             message += '<br />';
         }
+       
         if (!($scope.GopalCreditCardModel.IsWorking || $scope.GopalCreditCardModel.IsInfrastructure || $scope.GopalCreditCardModel.IsApparatus)) {
             message += $scope._language === 'en-us' ? '\nPlease select Purpose of Loan.' : '\nकृपया लोन का उद्देश्य चयन करें।';
             message += '<br />';
@@ -2042,14 +2051,15 @@ AppTrainning.controller("GopalCreditCard", function ($scope, $http) {
         }
 
 
+        //again open start
+        //if (($scope.GopalCreditCardModel.G1AadharNo != null && $scope.GopalCreditCardModel.G1AadharNo != '') && ($scope.GopalCreditCardModel.G2AadharNo != null && $scope.GopalCreditCardModel.G2AadharNo != '')) {
+        //    if ($scope.GopalCreditCardModel.G1AadharNo == $scope.GopalCreditCardModel.G2AadharNo) {
+        //        message += $scope._language == 'en-us' ? '\nPlease enter individual aadhaar details of guarantor' : '\nकृपया जमानतदार का अलग-अलग आधार का विवरण दर्ज करें';
+        //        message += '<br />';
+        //    }
 
-        if (($scope.GopalCreditCardModel.G1AadharNo != null && $scope.GopalCreditCardModel.G1AadharNo != '') && ($scope.GopalCreditCardModel.G2AadharNo != null && $scope.GopalCreditCardModel.G2AadharNo != '')) {
-            if ($scope.GopalCreditCardModel.G1AadharNo == $scope.GopalCreditCardModel.G2AadharNo) {
-                message += $scope._language == 'en-us' ? '\nPlease enter individual aadhaar details of guarantor' : '\nकृपया जमानतदार का अलग-अलग आधार का विवरण दर्ज करें';
-                message += '<br />';
-            }
-
-        }
+        //}
+        //again open start
 
         if (($scope.GopalCreditCardModel.G1PANCardNo != null && $scope.GopalCreditCardModel.G1PANCardNo != '') && ($scope.GopalCreditCardModel.G2PANCardNo != null && $scope.GopalCreditCardModel.G2PANCardNo != '')) {
             if ($scope.GopalCreditCardModel.G1PANCardNo == $scope.GopalCreditCardModel.G2PANCardNo) {

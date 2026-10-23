@@ -4704,7 +4704,8 @@ namespace Cooperative.Models
         public decimal TotalPrice { get; set; } 
         public string CompanyName { get; set; }
         public string CreatedBy { get; set; }
-        public int SocietyID { get; set; } 
+
+        public int SocietyID { get; set; }
         public string RegistrationNo { get; set; }
         public string DistrictName { get; set; }
         public int DistrictId { get; set; }
@@ -4776,6 +4777,8 @@ namespace Cooperative.Models
         public decimal? FertilizerQuantity { get; set; }
         public bool IsActive { get; set; } = true;
     }
+
+
 
     public class KPIForPacsSaveModel
     {

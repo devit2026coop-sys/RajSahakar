@@ -8920,7 +8920,7 @@ namespace Cooperative.Models
             return Result;
         }
 
-        public DataTable GetKPIReport(string KPIFor, int Month, string FY, int OfficeId, int DistrictId, int ResionId = 0, int DivisionId = 0)
+        public DataTable GetKPIReport(string KPIFor, int Month, string FY, int OfficeId, int DistrictId , int ResionId = 0)
         {
             DataTable dt = new DataTable();
             UserEntity _LoggedInUser = (UserEntity)System.Web.HttpContext.Current.Session[SessionIdentity.Admin];
@@ -8934,7 +8934,6 @@ namespace Cooperative.Models
                 objDBAccess.AddParameterToCommand("@OfficeId", DBFactoryParameterType.Int, OfficeId);
                 objDBAccess.AddParameterToCommand("@DistrictId", DBFactoryParameterType.Int, DistrictId);
                 objDBAccess.AddParameterToCommand("@ResionId", DBFactoryParameterType.Int, ResionId);
-                objDBAccess.AddParameterToCommand("@DivisionId", DBFactoryParameterType.Int, DivisionId);
 
                 dt = objDBAccess.GetTable();
             }
@@ -9201,6 +9200,8 @@ namespace Cooperative.Models
             return ds;
         }
 
+
+
         public DataSet GetTaggedItemDetail(ref DataPagingModel Details, bool isExport = false)
         {
             var ds = new DataSet();
@@ -9238,6 +9239,7 @@ namespace Cooperative.Models
 
             return ds;
         }
+
 
         public DataTable GetKPI_PerformanceCriteria(string criteriaForKPI)
         {

@@ -11653,9 +11653,9 @@ namespace Cooperative.Models
             int Result = -1;
 
             UserEntity _LoginUserId = (UserEntity)System.Web.HttpContext.Current.Session[SessionIdentity.Admin];
-            
+
             try
-            { 
+            {
                 objDBAccess.OpenConnection();
                 SqlCommand cmd = objDBAccess.CreateCommand("USP_InsertTaggingItem", DBFactoryCommandType.PROCEDURE_COMMAND);
                 objDBAccess.AddParameterToCommand("@TagId", DBFactoryParameterType.Int, obj.TagId);
@@ -11680,7 +11680,7 @@ namespace Cooperative.Models
                 objDBAccess.AddParameterToCommand("@SocietyType", DBFactoryParameterType.NVarchar, obj.SocietyType);
 
                 Result = Convert.ToInt32(objDBAccess.ExecuteScalarCommand());
-              
+
             }
             catch (Exception ex)
             {
@@ -11694,6 +11694,7 @@ namespace Cooperative.Models
             }
             return Result;
         }
+
 
         public DataSet GetTaggingItemByUser()
         {
