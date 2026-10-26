@@ -13,7 +13,7 @@ MasterMod.controller("CooperativeAuditorPurchaseSaleFormCont", function ($scope,
         $scope._language = 'en-us';
         $(".se-pre-con").fadeIn("slow");
         if (_language == 'en-us') {
-            $http.get(SiteUrl +"/Translations/Translation_EN.json").
+            $http.get(SiteUrl + "/Translations/Translation_EN.json").
                 success(function (data, status) {
                     $scope.translation = data;
                 }).
@@ -22,7 +22,7 @@ MasterMod.controller("CooperativeAuditorPurchaseSaleFormCont", function ($scope,
                 });
         }
         else {
-            $http.get(SiteUrl +"/Translations/Translation_HI.json").
+            $http.get(SiteUrl + "/Translations/Translation_HI.json").
                 success(function (data, status) {
                     $scope.translation = data;
                 }).
@@ -41,7 +41,7 @@ MasterMod.controller("CooperativeAuditorPurchaseSaleFormCont", function ($scope,
 
 
         $scope.Department = [];
-        $http.get(SiteUrl +"/Master/GetMasterData/?MasterType=Department&MasterCode=-1").
+        $http.get(SiteUrl + "/Master/GetMasterData/?MasterType=Department&MasterCode=-1").
 
             success(function (data, status) {
 
@@ -69,7 +69,7 @@ MasterMod.controller("CooperativeAuditorPurchaseSaleFormCont", function ($scope,
     };
     $scope.GetAllAuditorList = function () {
         $(".se-pre-con").fadeIn("slow");
-        $http.get(SiteUrl +"/Auditor/AuditorList").
+        $http.get(SiteUrl + "/Auditor/AuditorList").
             success(function (data, status) {
                 $scope.AuditData = data;
                 $scope.colsort = "";
@@ -97,6 +97,12 @@ MasterMod.controller("CooperativeAuditorPurchaseSaleFormCont", function ($scope,
         $scope.AuditorMaster.UnitNameHi = item.UnitNameHi;
         $scope.AuditorMaster.IsActive = item.IsActive == 1 ? true : false;
         $scope.AuditorMaster.UnitId = item.UnitId;
+    };
+
+
+
+    $scope.NextClick = function () {
+        window.location.href = '/Auditor/AuditorEquityLiabilities';
     };
 
     $scope.OnPageLoad();
