@@ -927,5 +927,22 @@ namespace Cooperative.Controllers
         }
 
         #endregion
+
+
+        #region Audiotr Form 
+        [HttpGet]
+        public ActionResult AuditorCurrentYearForm()
+        {
+            return View();
+        }
+        #endregion
+
+        #region Auditor Purchase Sale
+        [HttpGet]
+        public ActionResult AuditorPurchaseSale()
+        {
+            return View();
+        }
+        #endregion
     }
 }

@@ -8978,7 +8978,7 @@ namespace Cooperative.Models
             return dt;
         }
 
-        public DataTable GetKPIOverallRating(string KPIFor, int Month, string FY, int OfficeId, int DistrictId)
+        public DataTable GetKPIOverallRating(string KPIFor, int Month, string FY, int OfficeId, int DistrictId = 0, int DivisionId = 0, int ResionId = 0)
         {
             DataTable dt = new DataTable();
 
@@ -8992,6 +8992,8 @@ namespace Cooperative.Models
                 objDBAccess.AddParameterToCommand("@FY", DBFactoryParameterType.VARCHAR, FY);
                 objDBAccess.AddParameterToCommand("@OfficeId", DBFactoryParameterType.Int, OfficeId);
                 objDBAccess.AddParameterToCommand("@DistrictId", DBFactoryParameterType.Int, DistrictId);
+                objDBAccess.AddParameterToCommand("@DivisionId", DBFactoryParameterType.Int, DivisionId);
+                objDBAccess.AddParameterToCommand("@ResionId", DBFactoryParameterType.Int, ResionId);
 
                 dt = objDBAccess.GetTable();
 
