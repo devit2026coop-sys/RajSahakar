@@ -301,6 +301,8 @@ namespace Cooperative.Models
             public string ApplicantSignedFormPacs { get; set; }
             public string ApplicantSignedFormGuarantor { get; set; }
 
+            public bool IsTheCattleinsuredMMPBY { get; set; }
+
         }
         public class JanAaadharFamilyMemberModel
         {

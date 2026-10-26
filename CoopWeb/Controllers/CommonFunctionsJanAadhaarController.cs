@@ -173,7 +173,7 @@ namespace Cooperative.Controllers
                     DecResponseString = await _service.getResponseData(SchemeName, "ValidateOTP_FetchRequestedData", "", memberId, tid, otp);
                 }
 
-
+               
                 OTPResponse parsedResponse = JsonConvert.DeserializeObject<OTPResponse>(DecResponseString);
                 if (parsedResponse != null && parsedResponse.response.status && parsedResponse.response.data?.Count > 0)
                 {
@@ -245,9 +245,9 @@ namespace Cooperative.Controllers
                         //changes by govind 10-03-2026 start
                         DataTable DT = null;
                         GopalCreditCardDBModel objGopalCreditCardDBModel = new GopalCreditCardDBModel(new DBLogger());
-                        DT = objGopalCreditCardDBModel.Get_CheckExistsInMMPBY(janAadharNo);
-                        if (DT.Rows.Count > 0)
-                        {
+                        //DT = objGopalCreditCardDBModel.Get_CheckExistsInMMPBY(janAadharNo);
+                        //if (DT.Rows.Count > 0)
+                        //{
                             var familyData = (List<JanAaadharFamilyMemberDetailsModel>)Session["JanAadharFamilyDataModel"];
                             var familyDataModelNew = familyData.Where(x => x.Encrypted_JAN_MEMBER_ID != parsedResponse.response.data[0].Encrypted_JAN_MEMBER_ID).ToList();
                             var familyDataModel = new List<JanAadharModel.JanAaadharFamilyMemberModel>();
@@ -289,14 +289,14 @@ namespace Cooperative.Controllers
                                 gopalFamilyDataModel.Add(janModel);
                             });
                             parsedResponse.response.data[0].janAaadharFamilyMemberList = gopalFamilyDataModel;
-                        }
-                        else
-                        {
+                        //}
+                        //else
+                        //{
 
-                            parsedResponse.response.status = false;
-                            parsedResponse.response.message = "Cattle is not Insured under MMPBY";
+                        //    parsedResponse.response.status = false;
+                        //    parsedResponse.response.message = "Cattle is not Insured under MMPBY";
 
-                        }
+                        //}
                     }
                     parsedResponse.response.data[0].tid = parsedResponse.response.tid;
                     parsedResponse.response.data[0].transactionId = parsedResponse.response.transactionId;

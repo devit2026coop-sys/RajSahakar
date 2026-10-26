@@ -54,6 +54,7 @@ namespace Cooperative.Models
                     //old
                     //objDBAccess.AddParameterToCommand("@OfficeId", DBFactoryParameterType.Int, item.OfficeId);
                     objDBAccess.AddParameterToCommand("@OfficeId", DBFactoryParameterType.Int, item.KPIFor == "PACS" ? _LoggedInUser.GccId : item.OfficeId);
+                    objDBAccess.AddParameterToCommand("@ResionId", DBFactoryParameterType.Int, item.ResionId);
                     objDBAccess.AddParameterToCommand("@KPIIndicatorsId", DBFactoryParameterType.Int, item.KPIIndicatorsId);
                     objDBAccess.AddParameterToCommand("@Target", DBFactoryParameterType.Float, item.KPIIndicatorsTarget);
                     objDBAccess.AddParameterToCommand("@CCBId", DBFactoryParameterType.Int, item.CCBId);
@@ -265,7 +266,7 @@ namespace Cooperative.Models
 
         }
 
-        public DataTable GetKPIAllDetails(int officeId, int? pldbId, int month, string kpiFor, int DistrictId, bool isDevelopment = false, int resionId = 0, int DivisionId = 0)
+        public DataTable GetKPIAllDetails(int officeId, int? pldbId, int month, string kpiFor, int DistrictId, bool isDevelopment = false, int resionId = 0)
         {
             DataTable dt = new DataTable();
             UserEntity _LoggedInUser = (UserEntity)System.Web.HttpContext.Current.Session[SessionIdentity.Admin];
@@ -283,7 +284,6 @@ namespace Cooperative.Models
                 objDBAccess.AddParameterToCommand("@KPIFor", DBFactoryParameterType.NVarchar, kpiFor);
                 objDBAccess.AddParameterToCommand("@DistrictId", DBFactoryParameterType.NVarchar, DistrictId);
                 objDBAccess.AddParameterToCommand("@ResionId", DBFactoryParameterType.NVarchar, resionId);
-                objDBAccess.AddParameterToCommand("@DivisionId", DBFactoryParameterType.NVarchar, DivisionId);
 
                 dt = objDBAccess.GetTable();
             }
@@ -611,7 +611,64 @@ namespace Cooperative.Models
             return dt;
         }
 
+        public DataSet GetKPIFormExpiryDetails(string requireFor = "")
+        {
+            try
+            {
+                objDBAccess.OpenConnection();
+                SqlCommand cmd = objDBAccess.CreateCommand("USP_GetKPIName", DBFactoryCommandType.PROCEDURE_COMMAND);
+                objDBAccess.AddParameterToCommand("@Action", DBFactoryParameterType.NVarchar, "Validate");
+                objDBAccess.AddParameterToCommand("@RequireFor", DBFactoryParameterType.NVarchar, requireFor);
+                return objDBAccess.GetDataSet();
+            }
+            catch (Exception ex)
+            {
+                objILogger.ErrorHandle(new ErrorLogEntity()
+                {
+                    PageName = "Cooperative.Models.KPIModel",
+                    FunctionName = "GetKPIFormExpiryDetails()"
+                }, ex);
+            }
+            finally
+            {
+                objDBAccess.CloseConnection();
+            }
+            return null;
+        }
 
 
+        public DataSet InsertUpdateKpiValidate(KPIMasterModel model)
+        {
+            DataSet ds = new DataSet();
+            UserEntity _LoggedInUser = (UserEntity)System.Web.HttpContext.Current.Session[SessionIdentity.Admin];
+
+            try
+            {
+                objDBAccess.OpenConnection();
+                SqlCommand cmd = objDBAccess.CreateCommand("USP_KPIMasterValidate", DBFactoryCommandType.PROCEDURE_COMMAND);
+                objDBAccess.AddParameterToCommand("@Action", DBFactoryParameterType.VARCHAR, model.Id > 0 ? "Update" : "Save");
+                objDBAccess.AddParameterToCommand("@Id", DBFactoryParameterType.Int, model.Id);
+                objDBAccess.AddParameterToCommand("@KPIRequireFor", DBFactoryParameterType.NVarchar, model.KPIRequireFor);
+                objDBAccess.AddParameterToCommand("@ValidateEntryDate", DBFactoryParameterType.Int, model.ValidateEntryDate);
+                objDBAccess.AddParameterToCommand("@ValidateEntryTime", DBFactoryParameterType.Int, model.ValidateEntryTime);
+                objDBAccess.ExecuteCommand();
+                ds = objDBAccess.GetDataSet();
+                return ds;
+            }
+            catch (Exception ex)
+            {
+                objILogger.ErrorHandle(new ErrorLogEntity()
+                {
+                    PageName = "KPIModel",
+                    FunctionName = "InsertUpdateKpiValidate"
+                }, ex);
+
+                return ds;
+            }
+            finally
+            {
+                objDBAccess.CloseConnection();
+            }
+        }
     }
 }
