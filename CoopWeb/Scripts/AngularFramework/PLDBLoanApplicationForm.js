@@ -10,6 +10,8 @@ CommityRegistrtionModule.controller('PLDBLoanApplicationCnt', function ($scope, 
 
         $scope.mode = urlParams.get('mode');
 
+        $scope.IsFinalSubmitEditOpen = false;
+
         $scope.isViewMode = ($scope.mode === 'v');
         $scope.isEditMode = ($scope.mode === 'e');
         $scope.isNewMode = (!$scope.mode || $scope.mode === 'n');
@@ -1154,7 +1156,7 @@ CommityRegistrtionModule.controller('PLDBLoanApplicationCnt', function ($scope, 
                 $scope.Disbursement = JSON.parse(data.Disbursement); // Loan disbursement              
 
                 //here PLDB Loan Application Details
-
+                $scope.IsFinalSubmitEditOpen = $scope.PLDB.IsFinalSubmitEditOpn;
                 $scope.PLDB.PANNumber = $scope.PLDB.PANNumber;
                 $scope.PLDB.GP_Other = $scope.PLDB.GP_Other;
                 $scope.PLDB.Village_Other = $scope.PLDB.Village_Other;
