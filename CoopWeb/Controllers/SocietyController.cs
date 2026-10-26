@@ -11041,7 +11041,7 @@ namespace Cooperative.Controllers
 
         [HttpPost]
         public int SaveTaggingItemForm(TaggedItemFormEntity _Entity)
-        { 
+        {
             _Entity.CreatedBy = _LoggedInUser.UserId.ToString();
 
             SocietyModel objSocietyModel = new SocietyModel(new DBLogger());
@@ -13862,6 +13862,7 @@ public class KPIResultModel
     public int Month { get; set; }
     public string KPIFor { get; set; }
     public int OfficeId { get; set; }
+    public int ResionId { get; set; }
     public int KPIIndicatorsId { get; set; }
     public int CCBId { get; set; }
     public int KPI_MarksId { get; set; }
@@ -13888,5 +13889,15 @@ public class KPIResultModel
     public bool? selectOptionAnyOther1 { get; set; }
     public bool? selectOptionAnyOther2 { get; set; }
 
+
+}
+
+
+public class KPIMasterModel
+{
+    public int? Id { get; set; }
+    public string KPIRequireFor { get; set; }
+    public int? ValidateEntryDate { get; set; }
+    public int? ValidateEntryTime { get; set; }
 
 }

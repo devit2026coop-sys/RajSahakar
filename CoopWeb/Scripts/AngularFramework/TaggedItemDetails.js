@@ -12,15 +12,10 @@ TaggedItemController.controller("TaggedItemMod", function ($scope, $http, $windo
     $scope.ProductDataList = [];
     $scope.CompanyDataList = [];
     $scope.TaggingItemDataList = [];
-    $scope.SocietySearch = "";
-    $scope.IsSocietyDropdownOpen = false;
-    $scope.BlockDataList = [];
 
     $scope.TagData = {
         ProductTypeId: "0",
         ProductId: "0",
-        SocietyType: "",
-        BlockId: "0",
         CompanyId: "0"
     };
 
@@ -49,21 +44,13 @@ TaggedItemController.controller("TaggedItemMod", function ($scope, $http, $windo
 
             var isUpdate = ($scope.TagData.TagId && $scope.TagData.TagId > 0);
             formData.append("TagId", $scope.TagData.TagId || 0);
-
-            formData.append("SocietyID", $scope.TagData.SocietyID);
-            formData.append("RegistrationNo", $scope.TagData.RegistrationNo);
-            formData.append("DistrictName", $scope.TagData.DistrictName);
-            formData.append("DistrictId", $scope.TagData.DistrictFID);
-            formData.append("BlockId", $scope.TagData.BlockId);
-            formData.append("SocietyType", $scope.TagData.SocietyType);
-
             formData.append("ProductTypeId", $scope.TagData.ProductTypeId);
             formData.append("ProductId", $scope.TagData.ProductId);
             formData.append("CompanyId", $scope.TagData.CompanyId);
             formData.append("PurchaseDate", formatDate($scope.TagData.PurchaseDate));
             formData.append("ExpirationDate", formatDate($scope.TagData.ExpirationDate));
             formData.append("PackagingType", $scope.TagData.PackagingType);
-            formData.append("MeasurementUnit", "Ml");
+            formData.append("MeasurementUnit", $scope.TagData.MeasurementUnit);
             formData.append("ItemQuantity", $scope.TagData.ItemQuantity);
             formData.append("ItemPrice", $scope.TagData.ItemPrice);
             formData.append("TotalPrice", $scope.TagData.TotalPrice);
@@ -71,7 +58,6 @@ TaggedItemController.controller("TaggedItemMod", function ($scope, $http, $windo
             //formData.append("IFMSPOSId", $scope.TagData.IFMSPOSId);
             //formData.append("IsCreditFacility", $scope.TagData.IsCreditFacility);
 
-            //change
             $(".se-pre-con").fadeIn("slow");
             $http.post(SiteUrl + "/Society/SaveTaggingItemForm", formData, { withCredentials: true, headers: { 'Content-Type': undefined }, transformRequest: angular.identity }).success(function (data, status) {
                 $(".se-pre-con").fadeOut("slow");
@@ -90,7 +76,7 @@ TaggedItemController.controller("TaggedItemMod", function ($scope, $http, $windo
                     window.location.reload();
                 }
                 else if (parseInt(data, 10) == -2) {
-                    var Msg = (_language == 'en-us' ? 'Record already exists for the Selected Society, Product Type, Product Name, Company Name and Purchase Date. Duplicate entries are not allowed.' : 'डुप्लिकेट डेटा।');
+                    var Msg = (_language == 'en-us' ? 'Record already exists for the selected Month, Year, Fertilizer Name, and Society. Duplicate demand entries are not allowed..' : 'डुप्लिकेट डेटा।');
                     alert(Msg);
                 }
                 else if (parseInt(data, 10) == -1 || parseInt(data, 10) == 0) {
@@ -108,21 +94,6 @@ TaggedItemController.controller("TaggedItemMod", function ($scope, $http, $windo
     $scope.validatdataSubmit = function () {
 
         var message = $scope._language == 'en-us' ? 'निम्नलिखित की पुष्टि करें : ' : 'निम्नलिखित की पुष्टि करें:';
-        if ($scope.TagData.SocietyID == '0') {
-            message += $scope._language == 'en-us' ? '\n <br /> Select KVSS/GSS' : '\n <br /> Select KVSS/GSS';
-        }
-        if ($scope.TagData.DistrictName == undefined || $scope.TagData.DistrictName == '' || $scope.TagData.DistrictName == null) {
-            message += $scope._language == 'en-us' ? '\n <br /> Enter District Name ' : '\n <br />  Enter District Name';
-        }
-        //if ($scope.TagData.RegistrationNo == undefined || $scope.TagData.RegistrationNo == '' || $scope.TagData.RegistrationNo == null) {
-        //    message += $scope._language == 'en-us' ? '\n <br /> Enter Registration No' : '\n <br /> Enter Registration No';
-        //}
-        if ($scope.TagData.SocietyType == '' || $scope.TagData.SocietyType == null || $scope.TagData.SocietyType == undefined) {
-            message += $scope._language == 'en-us' ? '\n <br /> Select Society Type' : '\n <br /> Select Society Type';
-        }
-        if ($scope.TagData.BlockId == '0' || $scope.TagData.BlockId == undefined) {
-            message += $scope._language == 'en-us' ? '\n <br /> Select Block' : '\n <br /> Select Block';
-        }
         if ($scope.TagData.ProductTypeId == '0' || $scope.TagData.ProductTypeId == undefined) {
             message += $scope._language == 'en-us' ? '\n <br /> Select Product Type' : '\n <br /> Select Product Type';
         }
@@ -139,20 +110,8 @@ TaggedItemController.controller("TaggedItemMod", function ($scope, $http, $windo
                 message += $scope._language == 'en-us' ? '\n <br /> Enter Company Name' : '\n <br /> Enter Company Name';
             }
         }
-        //if ($scope.TagData.PurchaseDate == undefined || $scope.TagData.PurchaseDate == '' || $scope.TagData.PurchaseDate == null) {
-        //    message += $scope._language == 'en-us' ? '\n <br /> Enter Date of Purchase/Tagging' : '\n <br />  Enter Date of Purchase/Tagging';
-        //}
         if ($scope.TagData.PurchaseDate == undefined || $scope.TagData.PurchaseDate == '' || $scope.TagData.PurchaseDate == null) {
-            message += '\n <br /> Enter Date of Purchase/Tagging';
-        } else {
-            var purchaseDate = new Date($scope.TagData.PurchaseDate);
-            var today = new Date(); 
-            // Ignore current time; compare only dates
-            today.setHours(0, 0, 0, 0);
-            purchaseDate.setHours(0, 0, 0, 0); 
-            if (purchaseDate > today) {
-                message += '\n <br /> Date of Purchase/Tagging cannot be a future date';
-            }
+            message += $scope._language == 'en-us' ? '\n <br /> Enter Date of Purchase/Tagging' : '\n <br />  Enter Date of Purchase/Tagging';
         }
         if ($scope.TagData.ExpirationDate == undefined || $scope.TagData.ExpirationDate == '' || $scope.TagData.ExpirationDate == null) {
             message += $scope._language == 'en-us' ? '\n <br /> Enter Date of Expiration' : '\n <br /> Enter Date of Expiration';
@@ -167,9 +126,9 @@ TaggedItemController.controller("TaggedItemMod", function ($scope, $http, $windo
         if ($scope.TagData.PackagingType == '' || $scope.TagData.PackagingType == null || $scope.TagData.PackagingType == undefined) {
             message += $scope._language == 'en-us' ? '\n <br /> Select Packaging Type' : '\n <br /> Select Packaging Type';
         }
-        //if ($scope.TagData.MeasurementUnit == '' || $scope.TagData.MeasurementUnit == null || $scope.TagData.MeasurementUnit == undefined) {
-        //    message += $scope._language == 'en-us' ? '\n <br /> Select Measurement Unit' : '\n <br /> Select Measurement Unit';
-        //}
+        if ($scope.TagData.MeasurementUnit == '' || $scope.TagData.MeasurementUnit == null || $scope.TagData.MeasurementUnit == undefined) {
+            message += $scope._language == 'en-us' ? '\n <br /> Select Measurement Unit' : '\n <br /> Select Measurement Unit';
+        }
         if ($scope.TagData.ItemQuantity == undefined || $scope.TagData.ItemQuantity == '0' || $scope.TagData.ItemQuantity == null) {
             message += $scope._language == 'en-us' ? '\n <br /> Enter Quantity' : '\n <br /> Enter Quantity';
         }
@@ -289,7 +248,7 @@ TaggedItemController.controller("TaggedItemMod", function ($scope, $http, $windo
                 $scope.TagData.PurchaseDate = res[0].PurchaseDate ? new Date(res[0].PurchaseDate) : null;
                 $scope.TagData.ExpirationDate = res[0].ExpirationDate ? new Date(res[0].ExpirationDate) : null;
                 $scope.TagData.PackagingType = res[0].PackagingType + '';
-                //$scope.TagData.MeasurementUnit = res[0].MeasurementUnit + '';
+                $scope.TagData.MeasurementUnit = res[0].MeasurementUnit + '';
                 $scope.TagData.ItemQuantity = Number(res[0].ItemQuantity); 
                 $scope.TagData.ItemPrice = Number(res[0].ItemPrice);
                 $scope.TagData.TotalPrice = res[0].TotalPrice;
@@ -314,20 +273,15 @@ TaggedItemController.controller("TaggedItemMod", function ($scope, $http, $windo
     };
 
     $scope.deleteTaggedItem = function (tagId) {
-        if (!confirm("Are you sure you want to delete this tagged item?")) {
-            return;
-        }
         $(".se-pre-con").fadeIn("slow");
         return $http.get(SiteUrl + "/Society/DeleteTaggedItemById?TagId=" + tagId).then(function (response) {
             if (response.data != null) {
-                alert("Tagged item deleted successfully.");
                 $scope.GetTaggingItemByUser();
                 return data;
             }
             return [];
         }, function (error) {
             console.error("Error loading data:", error); 
-            alert("Failed to delete tagged item. Please try again.");
             return [];
         }).finally(function () {
             $(".se-pre-con").fadeOut("slow");
@@ -336,101 +290,10 @@ TaggedItemController.controller("TaggedItemMod", function ($scope, $http, $windo
 
     $scope.OnPageLoad = function () {
         $(".se-pre-con").fadeIn("slow");
-        $scope.GetSocietyBySSO();
         $scope.GetProductType();
         $scope.GetCompany();
         $scope.GetTaggingItemByUser();
     };
-
-
-    $scope.OnSocietyChange = function () {
-        //debugger;
-        $scope.TagData.RegistrationNo = "";
-        $scope.TagData.DistrictFID = "";
-        $scope.TagData.DistrictName = "";
-
-        if (!$scope.SocietyDataList || $scope.SocietyDataList.length == 0) {
-            console.warn("SocietyDataList is empty");
-            return;
-        }
-
-        var row = $scope.SocietyDataList.find(function (x) {
-            return x.SocietyID.toString() === $scope.TagData.SocietyID.toString();
-        });
-
-        if (!row) {
-            console.warn("No matching society found for ID:", $scope.TagData.SocietyID);
-            return;
-        }
-
-        $scope.TagData.SocietyID = row.SocietyID.toString();
-        $scope.TagData.RegistrationNo = row.RegistrationNo;
-        $scope.TagData.DistrictFID = row.DistrictId;
-        $scope.TagData.DistrictName = row.DistrictName;
-        $scope.getblock($scope.TagData.DistrictFID);
-    };
-
-    $scope.GetSocietyBySSO = function (ActId, SocietyTypeId, ClassId) {
-        $(".se-pre-con").fadeIn("slow");
-        $http.post(SiteUrl + "/Society/KVSSGSSbyDRorMDCCB", {
-            "ActId": ActId == undefined ? 0 : parseInt(ActId), "SocietyTypeId": SocietyTypeId == undefined ? 0 : parseInt(SocietyTypeId), "ClassId": ClassId == undefined ? 0 : parseInt(ClassId)
-        }).success(function (data, status) {
-            $scope.TableData = data;
-            $scope.SocietyDataList = $scope.TableData;
-            $scope.SocietyList = $scope.SocietyDataList;
-            $(".se-pre-con").fadeOut("slow");
-        }).error(function (data, status) {
-            $(".se-pre-con").fadeOut("slow");
-            $scope.TableData = [];
-            $scope.SocietyList = [];
-        });
-    };
-
-    $scope.OnSocietySearchChange = function () {
-        $scope.TagData.DistrictName = "";
-        $scope.TagData.RegistrationNo = "";
-        $scope.IsSocietyDropdownOpen = true;
-    };
-
-
-    $scope.OpenSocietyDropdown = function () {
-        $scope.IsSocietyDropdownOpen = true;
-    };
-
-
-    $scope.SocietyFilter = function (item) {
-        if (!$scope.SocietySearch) {
-            return true;
-        }
-
-        var search = $scope.SocietySearch.toLowerCase().trim();
-        var societyName = item.SocietyName ? item.SocietyName.toLowerCase() : "";
-        var registrationNo = item.RegistrationNo ? item.RegistrationNo.toLowerCase() : "";
-        return societyName.indexOf(search) !== -1 || registrationNo.indexOf(search) !== -1;
-    };
-    $scope.SelectSociety = function (item) {
-        $scope.TagData.SocietyID = item.SocietyID.toString();
-        $scope.SocietySearch = item.SocietyName;
-        $scope.IsSocietyDropdownOpen = false;
-        $scope.OnSocietyChange();
-    };
-
-    $scope.getblock = function (item) {
-        $(".se-pre-con").fadeIn("slow");
-        return $http.get(SiteUrl + "/Master/GetMasterData/?MasterType=PANCHAYATSAMITY&MasterCode=" + item).
-            then(function (resp) {
-                $scope.BlockDataList = resp.data;
-                //$scope.BlockId = '0';
-                $(".se-pre-con").fadeOut("slow");
-                return resp.data;
-            }).
-            catch(function () {
-                $scope.BlockDataList = [];
-                $(".se-pre-con").fadeOut("slow");
-            });
-
-    };
-
 
     $scope.OnPageLoad();
 });;

@@ -160,10 +160,10 @@ namespace Cooperative.Controllers
 
         [HttpGet]
         [ActionName("GetKPIDetails")]
-        public string GetSAKPIDetails(int officeId, int? pldbId, int month, string kpiFor, int DistrictId, int resionId = 0, int DivisionId = 0)
+        public string GetSAKPIDetails(int officeId, int? pldbId, int month, string kpiFor, int DistrictId, int resionId = 0)
         {
             bool isLocal = Request.Url.Host.Contains("localhost");
-            DataTable dt = new KPIModel().GetKPIAllDetails(officeId, pldbId, month, kpiFor, DistrictId, isLocal, resionId, DivisionId);
+            DataTable dt = new KPIModel().GetKPIAllDetails(officeId, pldbId, month, kpiFor, DistrictId, isLocal, resionId);
             return COMMON_FUNCTION.DataTableToJSONString(dt);
         }
 
@@ -290,6 +290,69 @@ namespace Cooperative.Controllers
         }
 
 
+        #region Added New on 23-10-2026
+
+        [HttpGet]
+        public JsonResult GetKPIFormExpiryDetails(string requireFor = "")
+        {
+            KPIModel objModal = new KPIModel(new FileLogger());
+            var responce = new APIResponce();
+            try
+            {
+                var ds = objModal.GetKPIFormExpiryDetails(requireFor);
+                if (ds != null)
+                {
+                    responce.Data = new
+                    {
+                        validData = ds.Tables.Count > 0 ? COMMON_FUNCTION.DataTableToJSONString(ds.Tables[0]) : null,
+                    };
+                    responce.Status = "200";
+                    responce.Message = "Success";
+                }
+                else
+                {
+                    responce.Status = "404";
+                    responce.Message = "Record not founds.";
+                }
+            }
+            catch (Exception ex)
+            {
+                responce.Status = "500";
+                responce.Message = "Internal Server Error.";
+            }
+
+            return Json(new { Result = responce }, JsonRequestBehavior.AllowGet);
+        }
+
+
+        [HttpPost]
+        public JsonResult InsertUpdateKPIValidate(KPIMasterModel modal)
+        {
+            var response = new APIResponce();
+            try
+            {
+                DataSet ds = new KPIModel().InsertUpdateKpiValidate(modal);
+                if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+                {
+                    response.Data = COMMON_FUNCTION.DataTableToJSONString(ds.Tables[0]);
+                    response.Status = "200";
+                    response.Message = "Success";
+                }
+                else
+                {
+                    response.Status = "500";
+                    response.Message = "No response returned from save procedure.";
+                }
+            }
+            catch (Exception ex)
+            {
+                response.Status = "500";
+                response.Message = "Unable to save KPI validation details.";
+            }
+            return Json(new { Result = response });
+        }
+
+        #endregion
     }
 }
 

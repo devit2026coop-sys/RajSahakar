@@ -348,7 +348,17 @@ AppClasses.controller("AmendmentCnt", function ($scope, $http, $rootScope) {
 
                         link.download = fileName;
                         link.click();
-                         
+
+
+
+
+
+
+
+
+
+
+
                     }).
                     error(function (data, status) {
                         $scope.DigitalRegisterList = [];

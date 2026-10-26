@@ -11,10 +11,7 @@ using Cooperative.Controllers;
 
 namespace Cooperative.Models
 {
-    public class MasterSettingModel
-    {
 
-    }
     public class OrganizationLevelsMapping
     {
         private ILogger objILogger;
@@ -205,7 +202,8 @@ namespace Cooperative.Models
 
 
     }
-     
+
+
     public class DesignationLevelMappingModel
     {
 
@@ -244,7 +242,7 @@ namespace Cooperative.Models
 
 
 
-        public int AddDesignationLevelMapping(int DESIGNATIONCODE, string IsHOD, string IsActive, int DesignationLevelMappingID, int OrganizationLevelsMappingID,int OfficeId)
+        public int AddDesignationLevelMapping(int DESIGNATIONCODE, string IsHOD, string IsActive, int DesignationLevelMappingID, int OrganizationLevelsMappingID, int OfficeId)
         {
             DesignationLevelMappingModel _Model;
             int Result = 0;
@@ -330,10 +328,58 @@ namespace Cooperative.Models
             return Result;
         }
 
-        public DataTable GetAllDesignationByOrganizationLevelsMappingID(string OrganizationLevelsMappingID,string OfficeId)
+        public DataTable GetAllDesignationByOrganizationLevelsMappingID(string OrganizationLevelsMappingID, string OfficeId)
         {
-            return GetAllDesignationLevelMappings(" and o.isactive=1 and o.OrganizationLevelsMappingID=" + OrganizationLevelsMappingID.ToString() + " and o.OfficeId="+ OfficeId.ToString());
+            return GetAllDesignationLevelMappings(" and o.isactive=1 and o.OrganizationLevelsMappingID=" + OrganizationLevelsMappingID.ToString() + " and o.OfficeId=" + OfficeId.ToString());
         }
 
+
+        public DataSet GetKPIMasterName(string actionName = "")
+        {
+            try
+            {
+                objDBAccess.OpenConnection();
+                SqlCommand cmd = objDBAccess.CreateCommand("USP_GetKPIName", DBFactoryCommandType.PROCEDURE_COMMAND);
+                objDBAccess.AddParameterToCommand("@Action", DBFactoryParameterType.NVarchar, "GetKPIName");
+                return objDBAccess.GetDataSet();
+            }
+            catch (Exception ex)
+            {
+                objILogger.ErrorHandle(new ErrorLogEntity()
+                {
+                    PageName = "Cooperative.Models.MasterSettings",
+                    FunctionName = "GetKPIMasterName()"
+                }, ex);
+            }
+            finally
+            {
+                objDBAccess.CloseConnection();
+            }
+            return null;
+        }
+
+        public DataSet GetKPIMasterDetails(string actionName = "")
+        {
+            try
+            {
+                objDBAccess.OpenConnection();
+                SqlCommand cmd = objDBAccess.CreateCommand("USP_GetKPIName", DBFactoryCommandType.PROCEDURE_COMMAND);
+                objDBAccess.AddParameterToCommand("@Action", DBFactoryParameterType.NVarchar, actionName);
+                return objDBAccess.GetDataSet();
+            }
+            catch (Exception ex)
+            {
+                objILogger.ErrorHandle(new ErrorLogEntity()
+                {
+                    PageName = "Cooperative.Models.MasterSettings",
+                    FunctionName = "GetKPIMasterDetails()"
+                }, ex);
+            }
+            finally
+            {
+                objDBAccess.CloseConnection();
+            }
+            return null;
+        }
     }
 }

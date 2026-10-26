@@ -7127,9 +7127,9 @@ namespace Cooperative.Controllers
 
         [HttpPost]
         [ActionName("GetKPIReport")]
-        public string GetKPIReport(string KPIFor, int Month, string FY, int OfficeId, int DistrictId, int ResionId = 0, int DivisionId = 0)
+        public string GetKPIReport(string KPIFor, int Month, string FY, int OfficeId, int DistrictId , int ResionId = 0)
         {
-            DataTable dt = new MISModel().GetKPIReport(KPIFor, Month, FY, OfficeId, DistrictId, ResionId, DivisionId);
+            DataTable dt = new MISModel().GetKPIReport(KPIFor, Month, FY, OfficeId, DistrictId , ResionId);
 
             return COMMON_FUNCTION.DataTableToJSONString(dt);
         }
@@ -7145,9 +7145,9 @@ namespace Cooperative.Controllers
 
         [HttpGet]
         [ActionName("GetKPIOverallRating")]
-        public string GetKPIOverallRating(string KPIFor, int Month, string FY, int OfficeId = 0, int DistrictId = 0)
+        public string GetKPIOverallRating(string KPIFor, int Month, string FY, int OfficeId = 0, int DistrictId = 0, int DivisionId = 0, int ResionId = 0)
         {
-            DataTable dt = new MISModel().GetKPIOverallRating(KPIFor, Month, FY, OfficeId, DistrictId);
+            DataTable dt = new MISModel().GetKPIOverallRating(KPIFor, Month, FY, OfficeId, DistrictId, DivisionId, ResionId);
 
             return COMMON_FUNCTION.DataTableToJSONString(dt);
         }
@@ -7273,6 +7273,10 @@ namespace Cooperative.Controllers
 
         }
 
+
+       
+
+
         public ActionResult TaggedItemDetailsReport()
         {
             //string encAadhaarNo = COMMON_FUNCTION.Encrypt("200902504760");
@@ -7299,6 +7303,10 @@ namespace Cooperative.Controllers
             return COMMON_FUNCTION.DataTableToJSONString(ds.Tables[0]);
 
         }
+
+       
+
+
 
         #endregion
 

@@ -1,0 +1,255 @@
+﻿<script src="~/Scripts/AngularFramework/PacsFormForKPI.js?v=@DateTime.Today.Ticks"></script>
+<link href="~/Content/Stylesheets/toastr.min.css" rel="stylesheet" />
+<script src="~/Scripts/toastr.min.js?v=@DateTime.Today.Ticks"></script>
+<style>
+    .section-head {
+        font-weight: 600;
+        font-size: 16px;
+        margin: 20px 0 10px 0;
+        border-bottom: 1px solid #ddd;
+        padding-bottom: 5px;
+    }
+
+    .field-label {
+        font-weight: 500;
+    }
+
+    .db-value {
+        color: #555;
+        font-style: italic;
+    }
+
+    .table tbody td {
+        color: #000 !important;
+    }
+
+        .table tbody td input,
+        .table tbody td select {
+            color: #000 !important;
+        }
+
+        .table tbody td label {
+            color: #000 !important;
+        }
+
+    .form-group label {
+        color: #333 !important;
+    }
+</style>
+<div ng-app="ApplicationPacsKPIModule">
+    <div ng-controller="CooperativePacsKPIFormCont">
+        <div class="col-md-12">
+            <h3 class="citizen-dash-head" style="margin-top:30px;">
+                KPI Form For PACS
+            </h3>
+        </div>
+        <input type="hidden" id="hdnGCCLoginId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).GccId)" />
+        <input type="hidden" id="hdnLoginMappingId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).UserRoleDeptMappingId)" />
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 ">
+            <div class="citizen-dash-head">
+                <div class="row">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 form-group">
+                        <h2 style="text-align:center;font-weight:bold;color:#000;">
+                            KPI Form For {{ PACSName }} PACS
+                        </h2>
+                        <h4 style="text-align: center; font-weight: bold; color: #000;">
+                            कार्य प्रदर्शन के आधार पर (KPI)
+                        </h4>
+                    </div>
+                    @*<div class="col-md-3 form-group MarginTop20">
+                            <label for="ddlGSS"><b> Society Name </b></label>
+                            <select class="form-control" id="ddlGSS" ng-model="FormData.SocietyID" ng-init="FormData.SocietyID ='0'" ng-change="GetKPIResult()">
+                                <option value="0" selected="selected" disabled>--चुनें--</option>
+                                <option ng-repeat="item in SocietyList" value="{{item.SocietyID}}">
+                                    {{_language =='en-us' ?  item.SocietyName : item.SocietyName}}
+                                </option>
+                            </select>
+                        </div>*@
+                    <div class="col-md-3 form-group">
+                        <label class="field-label"><b>{{ translation.District}}</b> </label>
+                        <select ng-model="pacsDetail.DistrictId" class="form-control" ng-disabled="pacsDetail.DistrictId > 0">
+                            <option value="0">{{translation.SelectOption}}</option>
+                            <option ng-repeat="item in Districts" value="{{item.DISTRICT_ID}}">
+                                {{_language =='en-us' ?  item.DISTRICT_ENG : item.DISTRICT_MANGAL}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 form-group">
+                        <label class="field-label"><b>CCB Name</b> </label>
+                        <input class="form-control" type="text" ng-model="pacsDetail.CCBName" readonly="readonly" />
+                    </div>
+                    <div class="col-md-3 form-group">
+                        <label class="field-label"><b>CCB {{translation.BranchName}}</b> </label>
+                        <input class="form-control" type="text" ng-model="pacsDetail.CCBBranchName" readonly="readonly" />
+                    </div>
+                    <div class="col-md-3 form-group">
+                        <label class="field-label"><b>Pacs Name</b> </label>
+                        <input class="form-control" type="text" ng-model="pacsDetail.PacsName" readonly="readonly" />
+                    </div>
+                    <div class="col-md-3 form-group">
+                        <label class="field-label"><b>Pacs Manager Name</b> </label>
+                        <input class="form-control" type="text" ng-model="pacsDetail.PacsManagerName" readonly="readonly" />
+                    </div>
+                    <div class="col-md-3 form-group">
+                        <label class="field-label"><b>Pacs Registration No.</b> </label>
+                        <input class="form-control" type="text" ng-model="pacsDetail.PacsRegistrationNo" placeholder="Enter Registration No." />
+                    </div>
+
+                    @*<div class="col-md-3  form-group">
+                            <label class="field-label"><b> CCB {{translation.BranchName}} </b> </label>
+                            <select name="ClassId" ng-model="CCBId" class="form-control" ng-init="CCBId == '0'" ng-disabled="IsFormDisabled">
+                                <option value="">{{translation.SelectOption}}</option>
+                                <option ng-repeat="itemBlock in BankMasterList | orderBy:'CCBNameEn'" value="{{itemBlock.CCBId}}">
+                                    {{_language =='en-us' ?  itemBlock.CCBNameEn : itemBlock.CCBNameHi}}
+                                </option>
+                            </select>
+                        </div>*@
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover table-striped">
+                        <thead>
+                            <tr style="background:#64c0c5;color:white;text-align:center;">
+                                <th style="width:5%">KPI No.</th>
+                                <th style="width:20%">KPI Area</th>
+                                <th style="width:45%">Indicator</th>
+                                <th style="width:15%">Instructions to fill Indicators</th>
+                                <th style="width:20%;" ng-if="isEnableColumn">
+                                    Agriculture Distribution
+                                </th>
+                                <th style="width:6%;">Weight Marks</th>
+                                <th style="width:8%;">Obtained</th>
+
+                                @*display:none
+                                    display:none*@
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat-start="area in KPIAreas track by $index">
+                                <td rowspan="{{area.Indicators.length}}">
+                                    {{$index+1}}
+                                </td>
+                                <td rowspan="{{area.Indicators.length}}">
+                                    {{area.KPIArea}}
+                                </td>
+                                <!-- First Indicator -->
+                                <td>
+                                    {{area.Indicators[0].KPIIndicators}}
+                                </td>
+                                <td>
+                                    <div class="row" ng-if="isTextInput(area.Indicators[0])">
+                                        <div class="col-lg-6">
+                                            <span>Previous</span>
+                                            <input type="number" class="form-control" ng-model="area.Indicators[0].PreviousValue" placeholder="Enter Previous value" min="0" />
+                                        </div>
+
+                                        <div class="col-lg-6">
+                                            <span>Current</span>
+                                            <input type="number" class="form-control" ng-model="area.Indicators[0].CurrentValue" placeholder="Enter Current value" min="0" />
+                                        </div>
+                                    </div>
+
+                                    <!-- Loan = Single Textbox -->
+                                    <div ng-if="isLoanInput(area.Indicators[0])">
+                                        <input type="number" min="0" class="form-control" style="max-width:250px" ng-model="indicator.KCCLoanDisbursedAmt" placeholder="Enter Loan Amount" max="100000" />
+                                    </div>
+                                    <div ng-if="!isTextInput(area.Indicators[0]) && !isLoanInput(area.Indicators[0])">
+                                        <select class="form-control" style="max-width:250px" ng-model="area.Indicators[0].SelectedOption" ng-change="commonCalculate(area.Indicators[0])" ng-disabled="IsFormDisabled">
+                                            <option value="">--Select--</option>
+                                            <option ng-repeat="item in area.Indicators[0].Options" value="{{item.KPI_KEYId}}">
+                                                {{item.InputType}}
+                                            </option>
+                                        </select>
+                                    </div>
+
+
+                                    @*<select class="form-control" style="max-width:250px" ng-model="area.Indicators[0].SelectedOption" ng-change="Calculate(area.Indicators[0])" ng-disabled="IsFormDisabled">
+                                            <option value="">--Select--</option>
+                                            <option ng-repeat="item in area.Indicators[0].Options" value="{{item.KPI_KEYId}}">
+                                                {{item.InputType}}
+                                            </option>
+                                        </select>*@
+                                </td>
+                                <td ng-if="isEnableColumn">
+                                    <div ng-if="area.KPIAreaId == 34 && isYesOption(area.Indicators[0])">
+                                        <input type="number" min="0" max="100000" class="form-control" style="max-width:250px" ng-model="area.Indicators[0].AgricultureDistriution" placeholder="Enter Amount" />
+                                    </div>
+                                </td>
+                                @*display: none*@
+                                <td class="text-center" style=" vertical-align: middle;">
+                                    {{area.Indicators[0].WeightedMarks || 0}}
+                                </td>
+                                <td>
+                                    @*style="display: none"*@
+                                    <input type="text" class="form-control" ng-model="area.Indicators[0].MarksObtained" readonly />
+                                </td>
+                            </tr>
+
+                            <!-- Remaining Indicators -->
+                            <tr ng-repeat="indicator in area.Indicators.slice(1)" ng-repeat-end>
+                                <td>
+                                    {{indicator.KPIIndicators}}
+                                </td>
+                                <td>
+                                    <div class="row" ng-if="isTextInput(indicator)">
+                                        <div class="col-lg-6">
+                                            <span>Previous</span>
+                                            <input type="number" min="0" class="form-control" ng-model="indicator.PreviousTextValue" placeholder="Previous" />
+                                        </div>
+
+                                        <div class="col-lg-6">
+                                            <span>Current</span>
+                                            <input type="number" min="0" class="form-control" ng-model="indicator.CurrentTextValue" placeholder="Current" />
+                                        </div>
+                                    </div>
+                                    <div ng-if="isLoanInput(indicator)">
+                                        <input type="number" min="0" class="form-control" style="max-width:250px" ng-model="indicator.KCCLoanDisbursedAmt" placeholder="Enter Loan Amount" max="100000" />
+                                    </div>
+                                    <div ng-if="!isTextInput(indicator) && !isLoanInput(indicator)">
+                                        <select class="form-control" style="max-width:250px" ng-model="indicator.SelectedOption" ng-change="commonCalculate(indicator)"
+                                                ng-disabled="IsFormDisabled">
+                                            <option value="">--Select--</option>
+                                            <option ng-repeat="item in indicator.Options" value="{{item.KPI_KEYId}}">
+                                                {{item.InputType}}
+                                            </option>
+                                        </select>
+                                    </div>
+                                    @*<select class="form-control" style="max-width:250px" ng-model="indicator.SelectedOption" ng-change="Calculate(indicator)" ng-disabled="IsFormDisabled">
+                                            <option value="">--Select--</option>
+                                            <option ng-repeat="item in indicator.Options" value="{{item.KPI_KEYId}}">
+                                                {{item.InputType}}
+                                            </option>
+                                        </select>*@
+                                </td>
+                                <td ng-if="isEnableColumn">
+                                    <div ng-if="indicator.KPIAreaId == 34 && isYesOption(indicator)">
+                                        <input type="number" min="0" class="form-control" style="max-width:250px" ng-model="indicator.AgricultureDistriution" placeholder="Enter Amount" />
+                                    </div>
+                                </td>
+
+                                <td class="text-center" style=" vertical-align: middle;">
+                                    {{indicator.WeightedMarks || 0}}
+                                </td>
+                                <td>
+                                    @*style="display: none"*@
+                                    <input type="text" class="form-control" ng-model="indicator.MarksObtained" readonly />
+                                </td>
+                            </tr>
+                            <tr ng-if="!KPIAreas || KPIAreas.length==0">
+                                <td colspan="8" class="text-center">
+                                    No Data Found
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="text-center">
+                    <button type="button" class="btn btn-primary dev-btn" ng-disabled="IsFormDisabled" ng-click="IsUpdate ? UpdateKPIResult() : SaveKPIResult()">
+                        {{ IsUpdate ? 'Update' : 'Save' }}
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
