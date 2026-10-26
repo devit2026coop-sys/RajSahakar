@@ -927,5 +927,30 @@ namespace Cooperative.Controllers
         }
 
         #endregion
+
+
+
+        public ActionResult AuditorPurchaseSale()
+        {
+            return View();
+        }
+
+
+        public ActionResult AuditorCurrentYearForm()
+        {
+            return View();
+        }
+
+
+        public ActionResult AuditorEquityLiabilities()
+        {
+            return View();
+        }
+
+
+        public ActionResult AuditorSaleLiabilities()
+        {
+            return View();
+        }
     }
 }
