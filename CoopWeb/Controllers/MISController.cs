@@ -7145,9 +7145,9 @@ namespace Cooperative.Controllers
 
         [HttpGet]
         [ActionName("GetKPIOverallRating")]
-        public string GetKPIOverallRating(string KPIFor, int Month, string FY, int OfficeId = 0, int DistrictId = 0)
+        public string GetKPIOverallRating(string KPIFor, int Month, string FY, int OfficeId = 0, int DistrictId = 0, int DivisionId = 0, int ResionId = 0)
         {
-            DataTable dt = new MISModel().GetKPIOverallRating(KPIFor, Month, FY, OfficeId, DistrictId);
+            DataTable dt = new MISModel().GetKPIOverallRating(KPIFor, Month, FY, OfficeId, DistrictId, DivisionId, ResionId);
 
             return COMMON_FUNCTION.DataTableToJSONString(dt);
         }
