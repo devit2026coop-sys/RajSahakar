@@ -7279,6 +7279,8 @@ namespace Cooperative.Controllers
 
         public ActionResult TaggedItemDetailsReport()
         {
+            //string encAadhaarNo = COMMON_FUNCTION.Encrypt("200902504760");
+            //Ea5mTAPB9rlxfUe6TPKknA==
             return View();
         }
 
