@@ -69,33 +69,34 @@ namespace Cooperative.Controllers
             return View();
         }
 
-        //old
-        [HttpPost]
-        public int SaveKPIResult(List<KPIResultModel> model)
-        {
-            // bool isLocal = Request.Url.Host.Contains("localhost");
-            int result = new KPIModel().SaveKPIResult(model);
-
-            return result;
-        }
-
-        //new
+        ////old
         //[HttpPost]
         //public int SaveKPIResult(List<KPIResultModel> model)
         //{
-        //    bool isLocal = Request.Url.Host.Contains("localhost");
-        //    int result = new KPIModel().SaveKPIResult(model, isLocal);
+        //    // bool isLocal = Request.Url.Host.Contains("localhost");
+        //    int result = new KPIModel().SaveKPIResult(model);
+
         //    return result;
         //}
+
+        //new
+        [HttpPost]
+        public int SaveKPIResult(List<KPIResultModel> model)
+        {
+            bool isLocal = Request.Url.Host.Contains("localhost");
+            int result = new KPIModel().SaveKPIResult(model, isLocal);
+            return result;
+        }
 
 
         [HttpGet]
         [ActionName("GetPacsKPIDetails")]
-        public string GetPacsKPIDetails()
+        public string GetPacsKPIDetails(string financialYear)
         {
-            DataTable dt = new KPIModel().GetPacsKPIDetails();
+            DataTable dt = new KPIModel().GetPacsKPIDetails(financialYear);
             return COMMON_FUNCTION.DataTableToJSONString(dt);
         }
+
 
         [HttpGet]
         [ActionName("GetBhandarKPIDetails")]

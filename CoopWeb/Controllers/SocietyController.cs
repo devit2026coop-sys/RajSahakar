@@ -13804,6 +13804,14 @@ namespace Cooperative.Controllers
             return Json(new { Result = responce }, JsonRequestBehavior.AllowGet);
         }
 
+        [HttpGet]
+        [ActionName("GetCurrentFinancialYear")]
+        public string GetCurrentFinancialYear()
+        {
+            DataTable dt = new SocietyModel().GetCurrentFinancialYear();
+            return COMMON_FUNCTION.DataTableToJSONString(dt);
+        }
+
     }
 }
 public class objecedSocietyEntity
@@ -13860,6 +13868,7 @@ public class KPIResultModel
 {
     public string FY { get; set; }
     public int Month { get; set; }
+    public int ResionId { get; set; }
     public string KPIFor { get; set; }
     public int OfficeId { get; set; }
     public int ResionId { get; set; }
@@ -13868,6 +13877,10 @@ public class KPIResultModel
     public int KPI_MarksId { get; set; }
     public decimal KPIIndicatorsTarget { get; set; }
     public decimal KPIIndicatorsAchievement { get; set; }
+    public decimal DepositAmount { get; set; }
+    public decimal KCCRecoveryAmount { get; set; }
+    public decimal GCCRecoveryAmount { get; set; }
+    public decimal LoanRecoveryAmount { get; set; }
     public decimal ProgressPercentage { get; set; }
     public decimal WeightedMarks { get; set; }
     public decimal MarksObtained { get; set; }
@@ -13884,10 +13897,15 @@ public class KPIResultModel
     public decimal? AgricultureTrunOver { get; set; }
     public int? MembershipPrevious { get; set; }
     public int? MembershipCurrent { get; set; }
+    public int? ProfitFinancialid { get; set; }
+    public int? AGMFinancialId { get; set; }
+    public int? PacsBranchId { get; set; }
+    public int? PacsId { get; set; }
     public int? ShareCapitalPrevious { get; set; }
     public int? ShareCapitalCurrent { get; set; }
     public bool? selectOptionAnyOther1 { get; set; }
     public bool? selectOptionAnyOther2 { get; set; }
+    public DateTime? DynamicDate { get; set; }
 
 
 }
