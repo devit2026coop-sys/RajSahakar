@@ -70,23 +70,23 @@ namespace Cooperative.Controllers
         }
 
         ////old
-        //[HttpPost]
-        //public int SaveKPIResult(List<KPIResultModel> model)
-        //{
-        //    // bool isLocal = Request.Url.Host.Contains("localhost");
-        //    int result = new KPIModel().SaveKPIResult(model);
-
-        //    return result;
-        //}
-
-        //new
         [HttpPost]
         public int SaveKPIResult(List<KPIResultModel> model)
         {
-            bool isLocal = Request.Url.Host.Contains("localhost");
-            int result = new KPIModel().SaveKPIResult(model, isLocal);
+            // bool isLocal = Request.Url.Host.Contains("localhost");
+            int result = new KPIModel().SaveKPIResult(model);
+
             return result;
         }
+
+        //new
+        //[HttpPost]
+        //public int SaveKPIResult(List<KPIResultModel> model)
+        //{
+        //    bool isLocal = Request.Url.Host.Contains("localhost");
+        //    int result = new KPIModel().SaveKPIResult(model, isLocal);
+        //    return result;
+        //}
 
 
         [HttpGet]

@@ -13863,7 +13863,6 @@ public class KPIResultModel
     public int ResionId { get; set; }
     public string KPIFor { get; set; }
     public int OfficeId { get; set; }
-    public int ResionId { get; set; }
     public int KPIIndicatorsId { get; set; }
     public int CCBId { get; set; }
     public int KPI_MarksId { get; set; }
