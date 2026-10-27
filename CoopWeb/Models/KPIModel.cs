@@ -1,6 +1,7 @@
 ﻿using Cooperative.Controllers;
 using Cooperative.DBConnector;
 using Newtonsoft.Json;
+using PdfSharp.Pdf.Content.Objects;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -8,10 +9,10 @@ using System.Data;
 using System.Data.OleDb;
 using System.Data.SqlClient;
 using System.Globalization;
-using System.Web;
 using System.Linq;
+using System.Web;
 using System.Web.Mvc;
-using PdfSharp.Pdf.Content.Objects;
+using static iTextSharp.text.pdf.AcroFields;
 namespace Cooperative.Models
 {
     public class KPIModel
@@ -36,67 +37,15 @@ namespace Cooperative.Models
         UserEntity _LoggedInUser = (UserEntity)System.Web.HttpContext.Current.Session[SessionIdentity.Admin];
 
         //old
-        public int SaveKPIResult(List<KPIResultModel> model)
-        {
-            int Result = 0;
-            UserEntity _LoggedInUser = (UserEntity)System.Web.HttpContext.Current.Session[SessionIdentity.Admin];
-
-            try
-            {
-                objDBAccess.OpenConnection();
-
-                foreach (var item in model)
-                {
-                    SqlCommand cmd = objDBAccess.CreateCommand("USP_SaveSAKPIResult", DBFactoryCommandType.PROCEDURE_COMMAND);
-                    objDBAccess.AddParameterToCommand("@KPIFor", DBFactoryParameterType.VARCHAR, item.KPIFor);
-                    //objDBAccess.AddParameterToCommand("@FY", DBFactoryParameterType.VARCHAR, item.FY);
-                    objDBAccess.AddParameterToCommand("@Month", DBFactoryParameterType.Int, item.Month);
-                    //old
-                    //objDBAccess.AddParameterToCommand("@OfficeId", DBFactoryParameterType.Int, item.OfficeId);
-                    objDBAccess.AddParameterToCommand("@OfficeId", DBFactoryParameterType.Int, item.KPIFor == "PACS" ? _LoggedInUser.GccId : item.OfficeId);
-                    objDBAccess.AddParameterToCommand("@ResionId", DBFactoryParameterType.Int, item.ResionId);
-                    objDBAccess.AddParameterToCommand("@KPIIndicatorsId", DBFactoryParameterType.Int, item.KPIIndicatorsId);
-                    objDBAccess.AddParameterToCommand("@Target", DBFactoryParameterType.Float, item.KPIIndicatorsTarget);
-                    objDBAccess.AddParameterToCommand("@CCBId", DBFactoryParameterType.Int, item.CCBId);
-                    objDBAccess.AddParameterToCommand("@KPI_MarksId", DBFactoryParameterType.Int, item.KPI_MarksId);
-                    objDBAccess.AddParameterToCommand("@Achievement", DBFactoryParameterType.Float, item.KPIIndicatorsAchievement);
-                    objDBAccess.AddParameterToCommand("@ProgressPercentage", DBFactoryParameterType.Float, item.ProgressPercentage);
-                    objDBAccess.AddParameterToCommand("@WeightedMarks", DBFactoryParameterType.Float, item.WeightedMarks);
-                    objDBAccess.AddParameterToCommand("@MarksObtained", DBFactoryParameterType.Float, item.MarksObtained);
-                    objDBAccess.AddParameterToCommand("@CreatedBy", DBFactoryParameterType.Int, _LoggedInUser.UserId);
-                    objDBAccess.AddParameterToCommand("@UserRoleMappingDepId", DBFactoryParameterType.Int, _LoggedInUser.UserRoleDeptMappingId);
-                    //local
-                    objDBAccess.AddParameterToCommand("@PLDBId", DBFactoryParameterType.Int, (_LoggedInUser.RoleId == 1 || _LoggedInUser.RoleId == 10235) ? item.PLDBId : _LoggedInUser.PLDBId);
-                    //live
-                    //objDBAccess.AddParameterToCommand("@PLDBId", DBFactoryParameterType.Int, (_LoggedInUser.RoleId == 10235) ? item.PLDBId : _LoggedInUser.PLDBId);
-
-                    objDBAccess.ExecuteCommand();
-                    Result++;
-                }
-                //Result = 1;   
-            }
-            catch (Exception ex)
-            {
-                objILogger.ErrorHandle(new ErrorLogEntity() { PageName = "KPIModel", FunctionName = "SaveKPIResult" }, ex);
-                Result = 0;
-            }
-            finally
-            {
-                objDBAccess.CloseConnection();
-            }
-
-            return Result;
-        }
-
-
-        //New
-        //public int SaveKPIResult(List<KPIResultModel> model, bool isDevelopment = false)
+        //public int SaveKPIResult(List<KPIResultModel> model)
         //{
         //    int Result = 0;
         //    UserEntity _LoggedInUser = (UserEntity)System.Web.HttpContext.Current.Session[SessionIdentity.Admin];
+
         //    try
         //    {
         //        objDBAccess.OpenConnection();
+
         //        foreach (var item in model)
         //        {
         //            SqlCommand cmd = objDBAccess.CreateCommand("USP_SaveSAKPIResult", DBFactoryCommandType.PROCEDURE_COMMAND);
@@ -117,29 +66,9 @@ namespace Cooperative.Models
         //            objDBAccess.AddParameterToCommand("@CreatedBy", DBFactoryParameterType.Int, _LoggedInUser.UserId);
         //            objDBAccess.AddParameterToCommand("@UserRoleMappingDepId", DBFactoryParameterType.Int, _LoggedInUser.UserRoleDeptMappingId);
         //            //local
-        //            if (isDevelopment) { objDBAccess.AddParameterToCommand("@PLDBId", DBFactoryParameterType.Int, (_LoggedInUser.RoleId == 1 || _LoggedInUser.RoleId == 10235) ? item.PLDBId : _LoggedInUser.PLDBId); }
-        //            else
-        //            { objDBAccess.AddParameterToCommand("@PLDBId", DBFactoryParameterType.Int, (_LoggedInUser.RoleId == 10235) ? item.PLDBId : _LoggedInUser.PLDBId); }
-
-        //            if (item.KPIFor == "PACS")
-        //            {
-        //                objDBAccess.AddParameterToCommand("@CCBDistrictId", DBFactoryParameterType.Int, item.CCBDistrictId);
-        //                objDBAccess.AddParameterToCommand("@CCBName", DBFactoryParameterType.NVarchar, item.CCBName);
-        //                objDBAccess.AddParameterToCommand("@CCBDistrictName", DBFactoryParameterType.NVarchar, item.CCBDistrictName);
-        //                objDBAccess.AddParameterToCommand("@CCBBranchName", DBFactoryParameterType.NVarchar, item.CCBBranchName);
-        //                objDBAccess.AddParameterToCommand("@PacsManagerName", DBFactoryParameterType.NVarchar, item.PacsManagerName);
-        //                objDBAccess.AddParameterToCommand("@PacsName", DBFactoryParameterType.NVarchar, item.PacsName);
-        //                objDBAccess.AddParameterToCommand("@PacsRegistrationNo", DBFactoryParameterType.NVarchar, item.PacsRegistrationNo);
-        //                objDBAccess.AddParameterToCommand("@KCCLoanDisbursedAmt", DBFactoryParameterType.VARCHAR, item.KCCLoanDisbursedAmt);
-        //                objDBAccess.AddParameterToCommand("@AgricultureTrunOver", DBFactoryParameterType.VARCHAR, item.AgricultureTrunOver);
-        //                objDBAccess.AddParameterToCommand("@MembershipPreviousInd", DBFactoryParameterType.Int, item.MembershipPrevious);
-        //                objDBAccess.AddParameterToCommand("@MembershipCurrentInd", DBFactoryParameterType.Int, item.MembershipCurrent);
-        //                objDBAccess.AddParameterToCommand("@SharePreviousInd", DBFactoryParameterType.Int, item.ShareCapitalPrevious);
-        //                objDBAccess.AddParameterToCommand("@ShareCurrentInd", DBFactoryParameterType.Int, item.ShareCapitalCurrent);
-        //                objDBAccess.AddParameterToCommand("@selectOptionAnyOther1", DBFactoryParameterType.Bit, item.selectOptionAnyOther1);
-        //                objDBAccess.AddParameterToCommand("@selectOptionAnyOther2", DBFactoryParameterType.Bit, item.selectOptionAnyOther2);
-
-        //            }
+        //            objDBAccess.AddParameterToCommand("@PLDBId", DBFactoryParameterType.Int, (_LoggedInUser.RoleId == 1 || _LoggedInUser.RoleId == 10235) ? item.PLDBId : _LoggedInUser.PLDBId);
+        //            //live
+        //            //objDBAccess.AddParameterToCommand("@PLDBId", DBFactoryParameterType.Int, (_LoggedInUser.RoleId == 10235) ? item.PLDBId : _LoggedInUser.PLDBId);
 
         //            objDBAccess.ExecuteCommand();
         //            Result++;
@@ -155,17 +84,114 @@ namespace Cooperative.Models
         //    {
         //        objDBAccess.CloseConnection();
         //    }
+
         //    return Result;
         //}
 
 
-        public DataTable GetPacsKPIDetails()
+        //New
+        public int SaveKPIResult(List<KPIResultModel> model, bool isDevelopment = false)
+        {
+            int Result = 0;
+            UserEntity _LoggedInUser = (UserEntity)System.Web.HttpContext.Current.Session[SessionIdentity.Admin];
+            try
+            {
+                objDBAccess.OpenConnection();
+                foreach (var item in model)
+                {
+                    SqlCommand cmd = objDBAccess.CreateCommand("USP_SaveSAKPIResult", DBFactoryCommandType.PROCEDURE_COMMAND);
+                    objDBAccess.AddParameterToCommand("@KPIFor", DBFactoryParameterType.VARCHAR, item.KPIFor);
+                    //objDBAccess.AddParameterToCommand("@FY", DBFactoryParameterType.VARCHAR, item.FY);
+                    objDBAccess.AddParameterToCommand("@Month", DBFactoryParameterType.Int, item.Month);
+                    objDBAccess.AddParameterToCommand("@ResionId", DBFactoryParameterType.Int, item.ResionId);
+                    //old
+                    //objDBAccess.AddParameterToCommand("@OfficeId", DBFactoryParameterType.Int, item.OfficeId);
+                    objDBAccess.AddParameterToCommand("@OfficeId", DBFactoryParameterType.Int, item.KPIFor == "PACS" ? _LoggedInUser.GccId : item.OfficeId);
+                    objDBAccess.AddParameterToCommand("@KPIIndicatorsId", DBFactoryParameterType.Int, item.KPIIndicatorsId);
+                    objDBAccess.AddParameterToCommand("@Target", DBFactoryParameterType.Float, item.KPIIndicatorsTarget);
+                    objDBAccess.AddParameterToCommand("@CCBId", DBFactoryParameterType.Int, item.CCBId);
+                    objDBAccess.AddParameterToCommand("@KPI_MarksId", DBFactoryParameterType.Int, item.KPI_MarksId);
+                    objDBAccess.AddParameterToCommand("@Achievement", DBFactoryParameterType.Float, item.KPIIndicatorsAchievement);
+                    objDBAccess.AddParameterToCommand("@ProgressPercentage", DBFactoryParameterType.Float, item.ProgressPercentage);
+                    objDBAccess.AddParameterToCommand("@WeightedMarks", DBFactoryParameterType.Float, item.WeightedMarks);
+                    objDBAccess.AddParameterToCommand("@MarksObtained", DBFactoryParameterType.Float, item.MarksObtained);
+                    objDBAccess.AddParameterToCommand("@CreatedBy", DBFactoryParameterType.Int, _LoggedInUser.UserId);
+                    objDBAccess.AddParameterToCommand("@UserRoleMappingDepId", DBFactoryParameterType.Int, _LoggedInUser.UserRoleDeptMappingId);
+                    //local
+                    if (isDevelopment) { objDBAccess.AddParameterToCommand("@PLDBId", DBFactoryParameterType.Int, (_LoggedInUser.RoleId == 1 || _LoggedInUser.RoleId == 10235) ? item.PLDBId : _LoggedInUser.PLDBId); }
+                    else
+                    { objDBAccess.AddParameterToCommand("@PLDBId", DBFactoryParameterType.Int, (_LoggedInUser.RoleId == 10235) ? item.PLDBId : _LoggedInUser.PLDBId); }
+
+                    if (item.KPIFor == "PACS")
+                    {
+                        objDBAccess.AddParameterToCommand("@CCBDistrictId", DBFactoryParameterType.Int, item.CCBDistrictId);
+                        objDBAccess.AddParameterToCommand("@CCBName", DBFactoryParameterType.NVarchar, item.CCBName);
+                        objDBAccess.AddParameterToCommand("@CCBDistrictName", DBFactoryParameterType.NVarchar, item.CCBDistrictName);
+                        objDBAccess.AddParameterToCommand("@CCBBranchName", DBFactoryParameterType.NVarchar, item.CCBBranchName);
+                        objDBAccess.AddParameterToCommand("@PacsManagerName", DBFactoryParameterType.NVarchar, item.PacsManagerName);
+                        objDBAccess.AddParameterToCommand("@PacsName", DBFactoryParameterType.NVarchar, item.PacsName);
+                        objDBAccess.AddParameterToCommand("@PacsRegistrationNo", DBFactoryParameterType.NVarchar, item.PacsRegistrationNo);
+                        objDBAccess.AddParameterToCommand("@KCCLoanDisbursedAmt", DBFactoryParameterType.VARCHAR, item.KCCLoanDisbursedAmt);
+                        objDBAccess.AddParameterToCommand("@AgricultureTrunOver", DBFactoryParameterType.VARCHAR, item.AgricultureTrunOver);
+                        objDBAccess.AddParameterToCommand("@MembershipPreviousInd", DBFactoryParameterType.Int, item.MembershipPrevious);
+                        objDBAccess.AddParameterToCommand("@MembershipCurrentInd", DBFactoryParameterType.Int, item.MembershipCurrent);
+                        objDBAccess.AddParameterToCommand("@SharePreviousInd", DBFactoryParameterType.Int, item.ShareCapitalPrevious);
+                        objDBAccess.AddParameterToCommand("@ShareCurrentInd", DBFactoryParameterType.Int, item.ShareCapitalCurrent);
+                        objDBAccess.AddParameterToCommand("@selectOptionAnyOther1", DBFactoryParameterType.Bit, item.selectOptionAnyOther1);
+                        objDBAccess.AddParameterToCommand("@selectOptionAnyOther2", DBFactoryParameterType.Bit, item.selectOptionAnyOther2);
+
+                        if (item.KPIIndicatorsId == 86)
+                        {
+                            string dyanamicDateFormat = "";
+                            dyanamicDateFormat = item.DynamicDate.HasValue ? item.DynamicDate.Value.ToString("yyyy-MM-dd") : null;
+                            objDBAccess.AddParameterToCommand("@DynamicDate", DBFactoryParameterType.VARCHAR, dyanamicDateFormat);
+                        }
+                        if (item.KPIIndicatorsId == 57)
+                        {
+                            objDBAccess.AddParameterToCommand("@ProfitFinancialid", DBFactoryParameterType.Int, item.ProfitFinancialid ?? 0);
+                        }
+                        if (item.KPIIndicatorsId == 68)
+                        {
+                            objDBAccess.AddParameterToCommand("@AGMFinancialId", DBFactoryParameterType.Int, item.AGMFinancialId ?? 0);
+                        }
+                        objDBAccess.AddParameterToCommand("@PacsBranchId", DBFactoryParameterType.Int, item.PacsBranchId ?? 0); 
+                        objDBAccess.AddParameterToCommand("@PacsId", DBFactoryParameterType.Int, item.PacsId ?? 0);
+                        objDBAccess.AddParameterToCommand("@DepositAmount", DBFactoryParameterType.Float, item.DepositAmount);
+                        objDBAccess.AddParameterToCommand("@KCCRecoveryAmount", DBFactoryParameterType.Float, item.KCCRecoveryAmount);
+                        objDBAccess.AddParameterToCommand("@GCCRecoveryAmount", DBFactoryParameterType.Float, item.GCCRecoveryAmount);
+                        objDBAccess.AddParameterToCommand("@LoanRecoveryAmount", DBFactoryParameterType.Float, item.LoanRecoveryAmount);
+
+                    }
+
+                    objDBAccess.ExecuteCommand();
+                    Result++;
+                }
+                //Result = 1;   
+            }
+            catch (Exception ex)
+            {
+                objILogger.ErrorHandle(new ErrorLogEntity() { PageName = "KPIModel", FunctionName = "SaveKPIResult" }, ex);
+                Result = 0;
+            }
+            finally
+            {
+                objDBAccess.CloseConnection();
+            }
+            return Result;
+        }
+
+
+
+        public DataTable GetPacsKPIDetails(string financialYear)
         {
             DataTable dt = new DataTable();
+
             try
             {
                 objDBAccess.OpenConnection();
                 SqlCommand cmd = objDBAccess.CreateCommand("USP_GetPacsTable", DBFactoryCommandType.PROCEDURE_COMMAND);
+                objDBAccess.AddParameterToCommand("@FinancialYear", DBFactoryParameterType.VARCHAR, financialYear);
+
                 dt = objDBAccess.GetTable();
             }
             catch (Exception ex)
@@ -179,6 +205,7 @@ namespace Cooperative.Models
 
             return dt;
         }
+
 
 
         public DataTable GetBhandarKPIDetails()
