@@ -7,6 +7,14 @@ MasterMod.controller("auditorEquityLiabilitiesCtrl", function ($scope, $http) {
     $scope.Department = [];
     $scope.divClass = false;
     $scope.AuditorMasterData = [];
+    $scope.ShareCapitalOtherRows = [];
+    $scope.ReservesFundsOtherRows = [];
+    $scope.grantsSubsidiesOtherRows = [];
+    $scope.memberDepositOtherRows = [];
+    $scope.otherDepositRows = [];
+    $scope.borrowingsRows = [];
+    $scope.amt = { memberDepsoitAmt: "0" }
+
 
     // on page load
     $scope.OnPageLoad = function () {
@@ -91,7 +99,6 @@ MasterMod.controller("auditorEquityLiabilitiesCtrl", function ($scope, $http) {
     }
 
     $scope.update = function (item) {
-
         $scope.AuditorMaster.DepartmentId = item.departmentId;
         $scope.AuditorMaster.UnitNameEn = item.UnitNameEn;
         $scope.AuditorMaster.UnitNameHi = item.UnitNameHi;
@@ -103,7 +110,83 @@ MasterMod.controller("auditorEquityLiabilitiesCtrl", function ($scope, $http) {
         window.location.href = '/Auditor/AuditorSaleLiabilities';
 
     };
-    
+
+
+    //Added new dyanamic rows as per new
+    $scope.shareCapitalAddRow = function () {
+        $scope.ShareCapitalOtherRows.push({
+            OtherName: '',
+            TotalAmt: ''
+        });
+    };
+
+    $scope.shareCapitalRemoveRow = function (index) {
+        $scope.ShareCapitalOtherRows.splice(index, 1);
+    };
+
+    $scope.reservesFundsAddRow = function () {
+        $scope.ReservesFundsOtherRows.push({
+            OtherName: '',
+            TotalAmt: ''
+        });
+    };
+
+    $scope.reservesFundsRemoveRow = function (index) {
+        $scope.ReservesFundsOtherRows.splice(index, 1);
+    };
+
+    $scope.grantsSubsidiesAddRow = function () {
+        $scope.grantsSubsidiesOtherRows.push({
+            OtherName: '',
+            TotalAmt: ''
+        });
+    };
+
+    $scope.grantsSubsidiesRemoveRow = function (index) {
+        $scope.grantsSubsidiesOtherRows.splice(index, 1);
+    };
+
+    $scope.memberDepositAddRow = function () {
+        $scope.memberDepositOtherRows.push({
+            OtherName: '',
+            TotalAmt: ''
+        });
+    };
+
+    $scope.memberDepositRemoveRow = function (index) {
+        $scope.memberDepositOtherRows.splice(index, 1);
+        $scope.calculateMemberDepositAmount();
+    };
+
+    $scope.calculateMemberDepositAmount = function () {
+        let subTotal = 0;
+        $scope.memberDepositOtherRows.forEach(function (row) {
+            subTotal += parseFloat(row.TotalAmt ?? 0);
+        });
+        $scope.amt.memberDepsoitAmt = subTotal.toFixed(2);
+    };
+    $scope.otherDepositAddRow = function () {
+        $scope.otherDepositRows.push({
+            OtherName: '',
+            TotalAmt: ''
+        });
+    };
+    $scope.otherDepositRemoveRow = function (index) {
+        $scope.otherDepositRows.splice(index, 1);
+    };
+
+
+
+    $scope.borrowingsAddRow = function () {
+        $scope.borrowingsRows.push({
+            OtherName: '',
+            TotalAmt: ''
+        });
+    };
+    $scope.borrowingsRemoveRow = function (index) {
+        $scope.borrowingsRows.splice(index, 1);
+    };
+
     $scope.OnPageLoad();
     $scope.GetAllAuditorList();
 

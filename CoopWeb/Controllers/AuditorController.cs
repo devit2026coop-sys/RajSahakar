@@ -952,5 +952,55 @@ namespace Cooperative.Controllers
         {
             return View();
         }
+
+
+
+        #region GetAuditMPRCommiteeData On 27-10-2026
+        [HttpGet]
+        [ActionName("GetCurrentFinancialYearName")]
+        public string GetCurrentFinancialYearName()
+        {
+            DataTable dt = new AuditorModel().GetCurrentFinancialYearName();
+            return COMMON_FUNCTION.DataTableToJSONString(dt);
+        }
+
+        [HttpGet]
+        public JsonResult GetAuditMPRMasterData()
+        {
+            AuditorModel objModal = new AuditorModel(new FileLogger());
+            var responce = new APIResponce();
+            try
+            {
+                var ds = objModal.GetAuditMPRMasterData();
+                if (ds != null)
+                {
+                    responce.Data = new
+                    {
+                        MPRData = ds.Tables.Count > 0 ? COMMON_FUNCTION.DataTableToJSONString(ds.Tables[0]) : null,
+                    };
+                    responce.Status = "200";
+                    responce.Message = "Success";
+                }
+                else
+                {
+                    responce.Status = "404";
+                    responce.Message = "Record not founds.";
+                }
+            }
+            catch (Exception ex)
+            {
+                responce.Status = "500";
+                responce.Message = "Internal Server Error.";
+            }
+
+            return Json(new { Result = responce }, JsonRequestBehavior.AllowGet);
+        }
+
+
+        #endregion
+
+
+
+
     }
 }
