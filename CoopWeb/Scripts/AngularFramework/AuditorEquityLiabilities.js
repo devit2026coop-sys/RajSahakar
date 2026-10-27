@@ -103,11 +103,7 @@ MasterMod.controller("auditorEquityLiabilitiesCtrl", function ($scope, $http) {
         window.location.href = '/Auditor/AuditorSaleLiabilities';
 
     };
-
-    $scope.BackTo = function () {
-        window.location.href = '/Auditor/AuditorPurchaseSale';
-    };
-
+    
     $scope.OnPageLoad();
     $scope.GetAllAuditorList();
 

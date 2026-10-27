@@ -98,6 +98,10 @@ MasterMod.controller("auditorSaleLiabilitiesCtrl", function ($scope, $http) {
         $scope.AuditorMaster.IsActive = item.IsActive == 1 ? true : false;
         $scope.AuditorMaster.UnitId = item.UnitId;
     };
+    $scope.NextStep = function () {
+        window.location.href = '/Auditor/AuditorPurchaseSale';
+
+    };
 
     $scope.BackTo = function () {
         window.location.href = '/Auditor/AuditorEquityLiabilities';

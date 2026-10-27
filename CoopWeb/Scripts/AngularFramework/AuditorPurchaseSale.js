@@ -1,5 +1,5 @@
-﻿var MasterMod = angular.module('ApplicationAuditorPurchaseSaleFormModule', ['angularUtils.directives.dirPagination']);
-MasterMod.controller("CooperativeAuditorPurchaseSaleFormCont", function ($scope, $http) {
+﻿var MasterMod = angular.module('auditorPurchaseSaleMod', ['angularUtils.directives.dirPagination']);
+MasterMod.controller("auditorPurchaseSaleCtrl", function ($scope, $http) {
     // SCOPE
     $scope._language = 'en-us';
     $scope.currentPage = 1;
@@ -7,6 +7,7 @@ MasterMod.controller("CooperativeAuditorPurchaseSaleFormCont", function ($scope,
     $scope.Department = [];
     $scope.divClass = false;
     $scope.AuditorMasterData = [];
+    $scope.supportPriceRows = [];
 
     // on page load
     $scope.OnPageLoad = function () {
@@ -98,12 +99,37 @@ MasterMod.controller("CooperativeAuditorPurchaseSaleFormCont", function ($scope,
         $scope.AuditorMaster.IsActive = item.IsActive == 1 ? true : false;
         $scope.AuditorMaster.UnitId = item.UnitId;
     };
+    $scope.BackTo = function () {
+        window.location.href = '/Auditor/AuditorSaleLiabilities';
 
-
-
-    $scope.NextClick = function () {
-        window.location.href = '/Auditor/AuditorEquityLiabilities';
     };
+
+    $scope.supportPriceRows = [];
+
+    $scope.addRow = function () {
+        $scope.supportPriceRows.push({
+            ItemName: '',
+            ItemOpenQty: '',
+            ItemOpenRate: '',
+            ItemOpenAmount: '',
+            ItemRecQty: '',
+            ItemRecQty: '',
+            ItemRecAmount: '',
+            ItemSaleQty: '',
+            ItemSaleRate: '',
+            ItemSaleAmount: '',
+            ItemClosQty: '',
+            ItemClosQty: '',
+            ItemClosAmount: '',
+        });
+        console.table($scope.supportPriceRows);
+    };
+
+    $scope.removeRow = function (index) {
+        $scope.supportPriceRows.splice(index, 1);
+    };
+
+
 
     $scope.OnPageLoad();
     $scope.GetAllAuditorList();
