@@ -308,7 +308,7 @@ MasterMod.controller("PLDBApplicationListCont", function ($scope, $rootScope, $h
     };
 
     $scope.LoadMaster = function () {
-        debugger;
+        //debugger;
         return $http.get(SiteUrl + "/pldb/LoadMaster").
             success(function (data, status) {
                 $scope.PLDBList = JSON.parse(data.DataList).PLDB;
