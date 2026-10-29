@@ -141,6 +141,7 @@ TaggedItemController.controller("TaggedItemMod", function ($scope, $http, $windo
         //if ($scope.TagData.PurchaseDate == undefined || $scope.TagData.PurchaseDate == '' || $scope.TagData.PurchaseDate == null) {
         //    message += $scope._language == 'en-us' ? '\n <br /> Enter Date of Purchase/Tagging' : '\n <br />  Enter Date of Purchase/Tagging';
         //}
+
         if ($scope.TagData.PurchaseDate == undefined || $scope.TagData.PurchaseDate == '' || $scope.TagData.PurchaseDate == null) {
             message += '\n <br /> Enter Date of Purchase/Tagging';
         } else {
