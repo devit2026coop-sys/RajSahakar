@@ -7383,5 +7383,50 @@ namespace Cooperative.Controllers
             return View();
         }
 
+        [HttpGet]
+        public ActionResult AuditReportVIA()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        [ActionName("GetAuditMPRVIAReport")]
+        public string GetAuditMPRVIAReport()
+        {
+            DataTable dt = new MISModel().GetAuditMPRVIAReport();
+
+            return COMMON_FUNCTION.DataTableToJSONString(dt);
+        }
+
+        [HttpGet]
+        public ActionResult AuditReportVII()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        [ActionName("GetAuditMPRVIIReport")]
+        public string GetAuditMPRVIIReport()
+        {
+            DataTable dt = new MISModel().GetAuditMPRVIIReport();
+
+            return COMMON_FUNCTION.DataTableToJSONString(dt);
+        }
+
+        [HttpGet]
+        public ActionResult AuditReportVIII()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        [ActionName("GetAuditMPRVIIIReport")]
+        public string GetAuditMPRVIIIReport()
+        {
+            DataTable dt = new MISModel().GetAuditMPRVIIIReport();
+
+            return COMMON_FUNCTION.DataTableToJSONString(dt);
+        }
+
     }
 }
