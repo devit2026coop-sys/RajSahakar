@@ -7145,9 +7145,9 @@ namespace Cooperative.Controllers
 
         [HttpGet]
         [ActionName("GetKPIOverallRating")]
-        public string GetKPIOverallRating(string KPIFor, int Month, string FY, int OfficeId = 0, int DistrictId = 0, int DivisionId = 0, int ResionId = 0)
+        public string GetKPIOverallRating(string KPIFor, int Month, string FY, int OfficeId = 0, int DistrictId = 0)
         {
-            DataTable dt = new MISModel().GetKPIOverallRating(KPIFor, Month, FY, OfficeId, DistrictId, DivisionId, ResionId);
+            DataTable dt = new MISModel().GetKPIOverallRating(KPIFor, Month, FY, OfficeId, DistrictId);
 
             return COMMON_FUNCTION.DataTableToJSONString(dt);
         }
@@ -7279,6 +7279,8 @@ namespace Cooperative.Controllers
 
         public ActionResult TaggedItemDetailsReport()
         {
+            //string encAadhaarNo = COMMON_FUNCTION.Encrypt("200902504760");
+            //Ea5mTAPB9rlxfUe6TPKknA==
             return View();
         }
 

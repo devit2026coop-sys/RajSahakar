@@ -1,6 +1,7 @@
 ﻿using Cooperative.Controllers;
 using Cooperative.DBConnector;
 using Newtonsoft.Json;
+using PdfSharp.Pdf.Content.Objects;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -8,10 +9,10 @@ using System.Data;
 using System.Data.OleDb;
 using System.Data.SqlClient;
 using System.Globalization;
-using System.Web;
 using System.Linq;
+using System.Web;
 using System.Web.Mvc;
-using PdfSharp.Pdf.Content.Objects;
+using static iTextSharp.text.pdf.AcroFields;
 namespace Cooperative.Models
 {
     public class KPIModel
@@ -51,10 +52,10 @@ namespace Cooperative.Models
                     objDBAccess.AddParameterToCommand("@KPIFor", DBFactoryParameterType.VARCHAR, item.KPIFor);
                     //objDBAccess.AddParameterToCommand("@FY", DBFactoryParameterType.VARCHAR, item.FY);
                     objDBAccess.AddParameterToCommand("@Month", DBFactoryParameterType.Int, item.Month);
+                    objDBAccess.AddParameterToCommand("@ResionId", DBFactoryParameterType.Int, item.ResionId);
                     //old
                     //objDBAccess.AddParameterToCommand("@OfficeId", DBFactoryParameterType.Int, item.OfficeId);
                     objDBAccess.AddParameterToCommand("@OfficeId", DBFactoryParameterType.Int, item.KPIFor == "PACS" ? _LoggedInUser.GccId : item.OfficeId);
-                    objDBAccess.AddParameterToCommand("@ResionId", DBFactoryParameterType.Int, item.ResionId);
                     objDBAccess.AddParameterToCommand("@KPIIndicatorsId", DBFactoryParameterType.Int, item.KPIIndicatorsId);
                     objDBAccess.AddParameterToCommand("@Target", DBFactoryParameterType.Float, item.KPIIndicatorsTarget);
                     objDBAccess.AddParameterToCommand("@CCBId", DBFactoryParameterType.Int, item.CCBId);
@@ -103,6 +104,7 @@ namespace Cooperative.Models
         //            objDBAccess.AddParameterToCommand("@KPIFor", DBFactoryParameterType.VARCHAR, item.KPIFor);
         //            //objDBAccess.AddParameterToCommand("@FY", DBFactoryParameterType.VARCHAR, item.FY);
         //            objDBAccess.AddParameterToCommand("@Month", DBFactoryParameterType.Int, item.Month);
+        //            objDBAccess.AddParameterToCommand("@ResionId", DBFactoryParameterType.Int, item.ResionId);
         //            //old
         //            //objDBAccess.AddParameterToCommand("@OfficeId", DBFactoryParameterType.Int, item.OfficeId);
         //            objDBAccess.AddParameterToCommand("@OfficeId", DBFactoryParameterType.Int, item.KPIFor == "PACS" ? _LoggedInUser.GccId : item.OfficeId);
@@ -139,6 +141,27 @@ namespace Cooperative.Models
         //                objDBAccess.AddParameterToCommand("@selectOptionAnyOther1", DBFactoryParameterType.Bit, item.selectOptionAnyOther1);
         //                objDBAccess.AddParameterToCommand("@selectOptionAnyOther2", DBFactoryParameterType.Bit, item.selectOptionAnyOther2);
 
+        //                if (item.KPIIndicatorsId == 86)
+        //                {
+        //                    string dyanamicDateFormat = "";
+        //                    dyanamicDateFormat = item.DynamicDate.HasValue ? item.DynamicDate.Value.ToString("yyyy-MM-dd") : null;
+        //                    objDBAccess.AddParameterToCommand("@DynamicDate", DBFactoryParameterType.VARCHAR, dyanamicDateFormat);
+        //                }
+        //                if (item.KPIIndicatorsId == 57)
+        //                {
+        //                    objDBAccess.AddParameterToCommand("@ProfitFinancialid", DBFactoryParameterType.Int, item.ProfitFinancialid ?? 0);
+        //                }
+        //                if (item.KPIIndicatorsId == 68)
+        //                {
+        //                    objDBAccess.AddParameterToCommand("@AGMFinancialId", DBFactoryParameterType.Int, item.AGMFinancialId ?? 0);
+        //                }
+        //                objDBAccess.AddParameterToCommand("@PacsBranchId", DBFactoryParameterType.Int, item.PacsBranchId ?? 0); 
+        //                objDBAccess.AddParameterToCommand("@PacsId", DBFactoryParameterType.Int, item.PacsId ?? 0);
+        //                objDBAccess.AddParameterToCommand("@DepositAmount", DBFactoryParameterType.Float, item.DepositAmount);
+        //                objDBAccess.AddParameterToCommand("@KCCRecoveryAmount", DBFactoryParameterType.Float, item.KCCRecoveryAmount);
+        //                objDBAccess.AddParameterToCommand("@GCCRecoveryAmount", DBFactoryParameterType.Float, item.GCCRecoveryAmount);
+        //                objDBAccess.AddParameterToCommand("@LoanRecoveryAmount", DBFactoryParameterType.Float, item.LoanRecoveryAmount);
+
         //            }
 
         //            objDBAccess.ExecuteCommand();
@@ -159,13 +182,17 @@ namespace Cooperative.Models
         //}
 
 
-        public DataTable GetPacsKPIDetails()
+
+        public DataTable GetPacsKPIDetails(string financialYear)
         {
             DataTable dt = new DataTable();
+
             try
             {
                 objDBAccess.OpenConnection();
                 SqlCommand cmd = objDBAccess.CreateCommand("USP_GetPacsTable", DBFactoryCommandType.PROCEDURE_COMMAND);
+                objDBAccess.AddParameterToCommand("@FinancialYear", DBFactoryParameterType.VARCHAR, financialYear);
+
                 dt = objDBAccess.GetTable();
             }
             catch (Exception ex)
@@ -179,6 +206,7 @@ namespace Cooperative.Models
 
             return dt;
         }
+
 
 
         public DataTable GetBhandarKPIDetails()

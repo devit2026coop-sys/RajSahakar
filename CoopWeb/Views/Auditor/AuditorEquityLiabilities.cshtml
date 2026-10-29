@@ -27,6 +27,25 @@
         table.devtable tbody .add:hover {
             background: #168178;
         }
+
+    .remove {
+        width: 30px;
+        height: 30px;
+        border: none;
+        border-radius: 4px;
+        color: white;
+        font-size: 18px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .add {
+        background-color: #198754;
+    }
+
+    .remove {
+        background-color: #dc3545;
+    }
 </style>
 <div ng-app="auditorEquityLiabilitiesMod" ng-controller="auditorEquityLiabilitiesCtrl" ng-cloak="">
     <div class="page">
@@ -97,8 +116,21 @@
                         </tr>
                         <tr>
                             <td class=" sub-item">अन्य (Other) </td>
-                            <td><button type="button" class="add" onclick="addRow(this)">+ Add</button></td>
+                            <td><button type="button" class="add" ng-click="shareCapitalAddRow()">+ Add</button></td>
                             <td>Sum</td>
+                            <td></td>
+                        </tr>
+                        <tr ng-repeat="row in ShareCapitalOtherRows track by $index">
+                            <td class="sub-item">
+                                <input type="text" class="form-control" ng-model="row.OtherName" placeholder="Enter Other Details" />
+                            </td>
+                            <td>
+                                <button type="button" class="add" ng-click="shareCapitalAddRow()" title="Add Row"> + </button>
+                                <button type="button" class="remove" ng-click="shareCapitalRemoveRow($index)" title="Remove Row"> −  </button>
+                            </td>
+                            <td>
+                                <input type="number" min="0" class="form-control" ng-model="row.TotalAmt" placeholder="Sum" />
+                            </td>
                             <td></td>
                         </tr>
                         <tr class="custom-row">
@@ -157,14 +189,40 @@
                         </tr>
                         <tr data-group-row="reserves">
                             <td class=" sub-item">अन्य कोष (Other Funds) </td>
-                            <td><button type="button" class="add" onclick="addRow(this)">+ Add</button></td>
+                            <td><button type="button" class="add" ng-click="reservesFundsAddRow()">+ Add</button></td>
                             <td>Float value up to 2 decimal</td>
+                            <td></td>
+                        </tr>
+                        <tr ng-repeat="row in ReservesFundsOtherRows track by $index">
+                            <td class="sub-item">
+                                <input type="text" class="form-control" ng-model="row.OtherName" placeholder="Enter Other Details" />
+                            </td>
+                            <td>
+                                <button type="button" class="add" ng-click="reservesFundsAddRow()" title="Add Row"> + </button>
+                                <button type="button" class="remove" ng-click="reservesFundsRemoveRow($index)" title="Remove Row"> −  </button>
+                            </td>
+                            <td>
+                                <input type="number" min="0" class="form-control" ng-model="row.TotalAmt" placeholder="Sum" />
+                            </td>
                             <td></td>
                         </tr>
                         <tr data-group-row="reserves">
                             <td class=" sub-item">अनुदान (Grants/Subsidies) </td>
-                            <td><button type="button" class="add" onclick="addRow(this)">+ Add</button></td>
+                            <td><button type="button" class="add" ng-click="grantsSubsidiesAddRow()">+ Add</button></td>
                             <td>Float value up to 2 decimal</td>
+                            <td></td>
+                        </tr>
+                        <tr ng-repeat="row in grantsSubsidiesOtherRows track by $index">
+                            <td class="sub-item">
+                                <input type="text" class="form-control" ng-model="row.OtherName" placeholder="Enter Other Details" />
+                            </td>
+                            <td>
+                                <button type="button" class="add" ng-click="grantsSubsidiesAddRow()" title="Add Row"> + </button>
+                                <button type="button" class="remove" ng-click="grantsSubsidiesRemoveRow($index)" title="Remove Row"> −  </button>
+                            </td>
+                            <td>
+                                <input type="number" min="0" class="form-control" ng-model="row.TotalAmt" placeholder="Sum" />
+                            </td>
                             <td></td>
                         </tr>
                         <tr class="section-row">
@@ -193,8 +251,21 @@
                         </tr>
                         <tr data-group-row="deposits">
                             <td class=" sub-item">सुरक्षा निक्षेप / जमानत राशि (Security Deposits / Earnest Money) </td>
-                            <td><button type="button" class="add" onclick="addRow(this)">+ Add</button></td>
-                            <td>Sum</td>
+                            <td><button type="button" class="add" ng-click="memberDepositAddRow()">+ Add</button></td>
+                            <td>Sum <b ng-if="memberDepositOtherRows.length>0"> : {{amt.memberDepsoitAmt}}</b></td>
+                            <td></td>
+                        </tr>
+                        <tr ng-repeat="row in memberDepositOtherRows track by $index">
+                            <td class="sub-item">
+                                <input type="text" class="form-control" ng-model="row.OtherName" placeholder="Enter Other Details" />
+                            </td>
+                            <td>
+                                <button type="button" class="add" ng-click="memberDepositAddRow()" title="Add Row"> + </button>
+                                <button type="button" class="remove" ng-click="memberDepositRemoveRow($index)" title="Remove Row"> −  </button>
+                            </td>
+                            <td>
+                                <input type="number" min="0" class="form-control" ng-model="row.TotalAmt" placeholder="Sum" ng-change="calculateMemberDepositAmount()" />
+                            </td>
                             <td></td>
                         </tr>
                         <tr class="custom-row" data-group-row="deposits">
@@ -205,8 +276,21 @@
                         </tr>
                         <tr data-group-row="deposits">
                             <td class=" sub-item">अन्य जमायें (Other Deposits)</td>
-                            <td><button type="button" class="add" onclick="addRow(this)">+ Add</button></td>
+                            <td><button type="button" class="add" ng-click="otherDepositAddRow()">+ Add</button></td>
                             <td></td>
+                            <td></td>
+                        </tr>
+                        <tr ng-repeat="row in otherDepositRows track by $index">
+                            <td class="sub-item">
+                                <input type="text" class="form-control" ng-model="row.OtherName" placeholder="Enter Other Details" />
+                            </td>
+                            <td>
+                                <button type="button" class="add" ng-click="otherDepositAddRow()" title="Add Row"> + </button>
+                                <button type="button" class="remove" ng-click="otherDepositRemoveRow($index)" title="Remove Row"> −  </button>
+                            </td>
+                            <td>
+                                <input type="number" min="0" class="form-control" ng-model="row.TotalAmt" placeholder="Sum" />
+                            </td>
                             <td></td>
                         </tr>
                         <tr class="custom-row" data-group-row="deposits">
@@ -227,31 +311,96 @@
                         </tr>
                         <tr data-group-row="borrowings">
                             <td class=" sub-item">केंद्रीय सहकारी बैंक / अन्य सहकारी बैंक / राष्ट्रीयकृत बैंक से सीसी ऋण (CC Loan from Central/Other Co-op Banks/Nationalized Banks)</td>
-                            <td><button type="button" class="add" onclick="addRow(this)">+ Add</button></td>
+                            <td><button type="button" class="add" ng-click="borrowingsAddRow()">+ Add</button></td>
                             <td></td>
+                            <td></td>
+                        </tr>
+                        <tr ng-repeat="row in borrowingsRows track by $index">
+                            <td class="sub-item">
+                                <input type="text" class="form-control" ng-model="row.OtherName" placeholder="Enter Other Details" />
+                            </td>
+                            <td>
+                                <button type="button" class="add" ng-click="borrowingsAddRow()" title="Add Row"> + </button>
+                                <button type="button" class="remove" ng-click="borrowingsRemoveRow($index)" title="Remove Row"> −  </button>
+                            </td>
+                            <td>
+                                <input type="number" min="0" class="form-control" ng-model="row.TotalAmt" placeholder="Sum" />
+                            </td>
                             <td></td>
                         </tr>
                         <tr data-group-row="borrowings">
                             <td class=" sub-item">केंद्रीय सहकारी बैंक / अन्य सहकारी बैंक / राष्ट्रीयकृत बैंक से अन्य ऋण (Other Loans from Central/Other Co-op Banks/Nationalized Banks)</td>
-                            <td><button type="button" class="add" onclick="addRow(this)">+ Add</button></td>
+                            <td><button type="button" class="add" ng-click="borrowingsAddRow()">+ Add</button></td>
+                            <td></td>
+                        </tr>
+                        <tr ng-repeat="row in borrowingsRows track by $index">
+                            <td class="sub-item">
+                                <input type="text" class="form-control" ng-model="row.OtherName" placeholder="Enter Other Details" />
+                            </td>
+                            <td>
+                                <button type="button" class="add" ng-click="borrowingsAddRow()" title="Add Row"> + </button>
+                                <button type="button" class="remove" ng-click="borrowingsRemoveRow($index)" title="Remove Row"> −  </button>
+                            </td>
+                            <td>
+                                <input type="number" min="0" class="form-control" ng-model="row.TotalAmt" placeholder="Sum" />
+                            </td>
                             <td></td>
                         </tr>
                         <tr data-group-row="borrowings">
                             <td class=" sub-item">राज्य सरकार से ऋण (Loan from State Government)</td>
-                            <td><button type="button" class="add" onclick="addRow(this)">+ Add</button></td>
+                            <td><button type="button" class="add" ng-click="borrowingsAddRow()">+ Add</button></td>
                             <td></td>
+                            <td></td>
+                        </tr>
+                        <tr ng-repeat="row in borrowingsRows track by $index">
+                            <td class="sub-item">
+                                <input type="text" class="form-control" ng-model="row.OtherName" placeholder="Enter Other Details" />
+                            </td>
+                            <td>
+                                <button type="button" class="add" ng-click="borrowingsAddRow()" title="Add Row"> + </button>
+                                <button type="button" class="remove" ng-click="borrowingsRemoveRow($index)" title="Remove Row"> −  </button>
+                            </td>
+                            <td>
+                                <input type="number" min="0" class="form-control" ng-model="row.TotalAmt" placeholder="Sum" />
+                            </td>
                             <td></td>
                         </tr>
                         <tr data-group-row="borrowings">
                             <td class=" sub-item">आईसीडीपी से ऋण (Loan from ICDP)</td>
-                            <td><button type="button" class="add" onclick="addRow(this)">+ Add</button></td>
+                            <td><button type="button" class="add" ng-click="borrowingsAddRow()">+ Add</button></td>
                             <td></td>
+                            <td></td>
+                        </tr>
+                        <tr ng-repeat="row in borrowingsRows track by $index">
+                            <td class="sub-item">
+                                <input type="text" class="form-control" ng-model="row.OtherName" placeholder="Enter Other Details" />
+                            </td>
+                            <td>
+                                <button type="button" class="add" ng-click="borrowingsAddRow()" title="Add Row"> + </button>
+                                <button type="button" class="remove" ng-click="borrowingsRemoveRow($index)" title="Remove Row"> −  </button>
+                            </td>
+                            <td>
+                                <input type="number" min="0" class="form-control" ng-model="row.TotalAmt" placeholder="Sum" />
+                            </td>
                             <td></td>
                         </tr>
                         <tr data-group-row="borrowings">
                             <td class=" sub-item">अन्य संस्थाओं से ऋण (Loans from Other Institutions)</td>
-                            <td><button type="button" class="add" onclick="addRow(this)">+ Add</button></td>
+                            <td><button type="button" class="add" ng-click="borrowingsAddRow()">+ Add</button></td>
                             <td></td>
+                            <td></td>
+                        </tr>
+                        <tr ng-repeat="row in borrowingsRows track by $index">
+                            <td class="sub-item">
+                                <input type="text" class="form-control" ng-model="row.OtherName" placeholder="Enter Other Details" />
+                            </td>
+                            <td>
+                                <button type="button" class="add" ng-click="borrowingsAddRow()" title="Add Row"> + </button>
+                                <button type="button" class="remove" ng-click="borrowingsRemoveRow($index)" title="Remove Row"> −  </button>
+                            </td>
+                            <td>
+                                <input type="number" min="0" class="form-control" ng-model="row.TotalAmt" placeholder="Sum" />
+                            </td>
                             <td></td>
                         </tr>
                         <tr class="section-row">
@@ -298,8 +447,21 @@
                         </tr>
                         <tr data-group-row="provisions">
                             <td class=" sub-item">अन्य प्रावधान (Other Provisions)</td>
-                            <td><button type="button" class="add" onclick="addRow(this)">+ Add</button></td>
+                            <td><button type="button" class="add" ng-click="borrowingsAddRow()">+ Add</button></td>
                             <td></td>
+                            <td></td>
+                        </tr>
+                        <tr ng-repeat="row in borrowingsRows track by $index">
+                            <td class="sub-item">
+                                <input type="text" class="form-control" ng-model="row.OtherName" placeholder="Enter Other Details" />
+                            </td>
+                            <td>
+                                <button type="button" class="add" ng-click="borrowingsAddRow()" title="Add Row"> + </button>
+                                <button type="button" class="remove" ng-click="borrowingsRemoveRow($index)" title="Remove Row"> −  </button>
+                            </td>
+                            <td>
+                                <input type="number" min="0" class="form-control" ng-model="row.TotalAmt" placeholder="Sum" />
+                            </td>
                             <td></td>
                         </tr>
                         <tr class="section-row">
@@ -310,55 +472,55 @@
                         </tr>
                         <tr>
                             <td class=" sub-item">व्यापारिक लेनदार - सप्लायर (Sundry Creditors for Goods) </td>
-                            <td><button type="button" class="add" onclick="addRow(this)">+ Add</button></td>
+                            <td><button type="button" class="add" ng-click="borrowingsAddRow()">+ Add</button></td>
                             <td></td>
                             <td></td>
                         </tr>
                         <tr>
                             <td class=" sub-item">व्यक्तिगत लेनदार (Personal Creditors) </td>
-                            <td><button type="button" class="add" onclick="addRow(this)">+ Add</button></td>
+                            <td><button type="button" class="add" ng-click="borrowingsAddRow()">+ Add</button></td>
                             <td></td>
                             <td></td>
                         </tr>
                         <tr>
                             <td class=" sub-item">उच्चतर सहकारी संस्थाएं (Higher Co-operative Institutions) </td>
-                            <td><button type="button" class="add" onclick="addRow(this)">+ Add</button></td>
+                            <td><button type="button" class="add" ng-click="borrowingsAddRow()">+ Add</button></td>
                             <td></td>
                             <td></td>
                         </tr>
                         <tr>
                             <td class=" sub-item">प्राथमिक सहकारी समितियां (Primary Co-operative Societies) </td>
-                            <td><button type="button" class="add" onclick="addRow(this)">+ Add</button></td>
+                            <td><button type="button" class="add" ng-click="borrowingsAddRow()">+ Add</button></td>
                             <td></td>
                             <td></td>
                         </tr>
                         <tr>
                             <td class=" sub-item">राजकीय विभाग (Government Departments) </td>
-                            <td><button type="button" class="add" onclick="addRow(this)">+ Add</button></td>
+                            <td><button type="button" class="add" ng-click="borrowingsAddRow()">+ Add</button></td>
                             <td></td>
                             <td></td>
                         </tr>
                         <tr>
                             <td class=" sub-item">ड्यूटी एवं टैक्सेज (Duties &amp; Taxes) </td>
-                            <td><button type="button" class="add" onclick="addRow(this)">+ Add</button></td>
+                            <td><button type="button" class="add" ng-click="borrowingsAddRow()">+ Add</button></td>
                             <td></td>
                             <td></td>
                         </tr>
                         <tr>
                             <td class=" sub-item">अन्य देनदारियां (Other Liabilities) </td>
-                            <td><button type="button" class="add" onclick="addRow(this)">+ Add</button></td>
+                            <td><button type="button" class="add" ng-click="borrowingsAddRow()">+ Add</button></td>
                             <td></td>
                             <td></td>
                         </tr>
                         <tr>
                             <td class=" sub-item">अदत्त व्यय (Outstanding Expenses) </td>
-                            <td><button type="button" class="add" onclick="addRow(this)">+ Add</button></td>
+                            <td><button type="button" class="add" ng-click="borrowingsAddRow()">+ Add</button></td>
                             <td></td>
                             <td></td>
                         </tr>
                         <tr>
                             <td class=" sub-item">उधारों पर देय ब्याज (Interest Payable on Borrowings)</td>
-                            <td><button type="button" class="add" onclick="addRow(this)">+ Add</button></td>
+                            <td><button type="button" class="add" ng-click="borrowingsAddRow()">+ Add</button></td>
                             <td></td>
                             <td></td>
                         </tr>
@@ -400,7 +562,7 @@
                         </tr>
                         <tr>
                             <td class=" sub-item">शाखाओं की रोकड़ का नकद शेष (Cash Balance of Branches)</td>
-                            <td><button type="button" class="add" onclick="addRow(this)">+ Add</button></td>
+                            <td><button type="button" class="add" ng-click="borrowingsAddRow()">+ Add</button></td>
                             <td></td>
                             <td></td>
                         </tr>
@@ -412,19 +574,19 @@
                         </tr>
                         <tr>
                             <td class=" sub-item">सहकारी बैंकों में जमा (Deposits in Co-operative Banks)</td>
-                            <td><button type="button" class="add" onclick="addRow(this)">+ Add</button></td>
+                            <td><button type="button" class="add" ng-click="borrowingsAddRow()">+ Add</button></td>
                             <td></td>
                             <td></td>
                         </tr>
                         <tr>
                             <td class=" sub-item">राष्ट्रीयकृत बैंकों में जमा (Deposits in Nationalized Banks)</td>
-                            <td><button type="button" class="add" onclick="addRow(this)">+ Add</button></td>
+                            <td><button type="button" class="add" ng-click="borrowingsAddRow()">+ Add</button></td>
                             <td></td>
                             <td></td>
                         </tr>
                         <tr>
                             <td class=" sub-item">निजी बैंकों में जमा (Deposits in Private Banks)</td>
-                            <td><button type="button" class="add" onclick="addRow(this)">+ Add</button></td>
+                            <td><button type="button" class="add" ng-click="borrowingsAddRow()">+ Add</button></td>
                             <td></td>
                             <td></td>
                         </tr>
@@ -436,13 +598,13 @@
                         </tr>
                         <tr>
                             <td class=" sub-item">राष्ट्रीय स्तर की सहकारी संस्थाओं में विनियोजित शेयर राशि (Share Capital in National Level Co-op Inst.)</td>
-                            <td><button type="button" class="add" onclick="addRow(this)">+ Add</button></td>
+                            <td><button type="button" class="add" ng-click="borrowingsAddRow()">+ Add</button></td>
                             <td></td>
                             <td></td>
                         </tr>
                         <tr>
                             <td class=" sub-item">राज्य स्तरीय अपैक्स सहकारी संस्थाओं में विनियोजित शेयर राशि (Share Capital in Apex Co-op Inst.)</td>
-                            <td><button type="button" class="add" onclick="addRow(this)">+ Add</button></td>
+                            <td><button type="button" class="add" ng-click="borrowingsAddRow()">+ Add</button></td>
                             <td></td>
                             <td></td>
                         </tr>
@@ -454,31 +616,31 @@
                         </tr>
                         <tr>
                             <td class=" sub-item">अन्य सहकारी संस्थाओं में विनियोजित शेयर राशि (Share Capital Invested in Other Co-op Institutions)</td>
-                            <td><button type="button" class="add" onclick="addRow(this)">+ Add</button></td>
+                            <td><button type="button" class="add" ng-click="borrowingsAddRow()">+ Add</button></td>
                             <td></td>
                             <td></td>
                         </tr>
                         <tr>
                             <td class=" sub-item">सहकारी बैंक में फिक्स्ड डिपॉजिट (Fixed Deposits in Co-operative Banks)</td>
-                            <td><button type="button" class="add" onclick="addRow(this)">+ Add</button></td>
+                            <td><button type="button" class="add" ng-click="borrowingsAddRow()">+ Add</button></td>
                             <td></td>
                             <td></td>
                         </tr>
                         <tr>
                             <td class=" sub-item">राष्ट्रीयकृत बैंकों में फिक्स्ड डिपॉजिट (Fixed Deposits in Nationalized Banks)</td>
-                            <td><button type="button" class="add" onclick="addRow(this)">+ Add</button></td>
+                            <td><button type="button" class="add" ng-click="borrowingsAddRow()">+ Add</button></td>
                             <td></td>
                             <td></td>
                         </tr>
                         <tr>
                             <td class=" sub-item">निजी बैंकों में फिक्स्ड डिपॉजिट (Fixed Deposits in Private Banks)</td>
-                            <td><button type="button" class="add" onclick="addRow(this)">+ Add</button></td>
+                            <td><button type="button" class="add" ng-click="borrowingsAddRow()">+ Add</button></td>
                             <td></td>
                             <td></td>
                         </tr>
                         <tr>
                             <td class=" sub-item">अन्य निवेश (Other Investments)</td>
-                            <td><button type="button" class="add" onclick="addRow(this)">+ Add</button></td>
+                            <td><button type="button" class="add" ng-click="borrowingsAddRow()">+ Add</button></td>
                             <td></td>
                             <td></td>
                         </tr>
@@ -490,19 +652,19 @@
                         </tr>
                         <tr>
                             <td class=" sub-item">कर्मचारियों को अग्रिम (Advances to Staff)</td>
-                            <td><button type="button" class="add" onclick="addRow(this)">+ Add</button></td>
+                            <td><button type="button" class="add" ng-click="borrowingsAddRow()">+ Add</button></td>
                             <td></td>
                             <td></td>
                         </tr>
                         <tr>
                             <td class=" sub-item">सदस्यों को ऋण एवं अग्रिम (Loans & Advances to Members)</td>
-                            <td><button type="button" class="add" onclick="addRow(this)">+ Add</button></td>
+                            <td><button type="button" class="add" ng-click="borrowingsAddRow()">+ Add</button></td>
                             <td></td>
                             <td></td>
                         </tr>
                         <tr>
                             <td class=" sub-item">अन्य ऋण एवं अग्रिम (Other Loans & Advances)</td>
-                            <td><button type="button" class="add" onclick="addRow(this)">+ Add</button></td>
+                            <td><button type="button" class="add" ng-click="borrowingsAddRow()">+ Add</button></td>
                             <td></td>
                             <td></td>
                         </tr>
@@ -610,61 +772,61 @@
                         </tr>
                         <tr>
                             <td class=" sub-item">व्यापारिक देनदार (Sundry Debtors)</td>
-                            <td><button type="button" class="add" onclick="addRow(this)">+ Add</button></td>
+                            <td><button type="button" class="add" ng-click="borrowingsAddRow()">+ Add</button></td>
                             <td></td>
                             <td></td>
                         </tr>
                         <tr>
                             <td class=" sub-item">व्यक्तिगत देनदार (Personal Debtors)</td>
-                            <td><button type="button" class="add" onclick="addRow(this)">+ Add</button></td>
+                            <td><button type="button" class="add" ng-click="borrowingsAddRow()">+ Add</button></td>
                             <td></td>
                             <td></td>
                         </tr>
                         <tr>
                             <td class=" sub-item">उच्चतर सहकारी संस्थाएं (Higher Co-operative Institutions)</td>
-                            <td><button type="button" class="add" onclick="addRow(this)">+ Add</button></td>
+                            <td><button type="button" class="add" ng-click="borrowingsAddRow()">+ Add</button></td>
                             <td></td>
                             <td></td>
                         </tr>
                         <tr>
                             <td class=" sub-item">प्राथमिक सहकारी समितियां (Primary Co-operative Societies)</td>
-                            <td><button type="button" class="add" onclick="addRow(this)">+ Add</button></td>
+                            <td><button type="button" class="add" ng-click="borrowingsAddRow()">+ Add</button></td>
                             <td></td>
                             <td></td>
                         </tr>
                         <tr>
                             <td class=" sub-item">राजकीय विभाग (Government Departments)</td>
-                            <td><button type="button" class="add" onclick="addRow(this)">+ Add</button></td>
+                            <td><button type="button" class="add" ng-click="borrowingsAddRow()">+ Add</button></td>
                             <td></td>
                             <td></td>
                         </tr>
                         <tr>
                             <td class=" sub-item">शाखाओं से लेनदारी (Receivables from Branches)</td>
-                            <td><button type="button" class="add" onclick="addRow(this)">+ Add</button></td>
+                            <td><button type="button" class="add" ng-click="borrowingsAddRow()">+ Add</button></td>
                             <td></td>
                             <td></td>
                         </tr>
                         <tr>
                             <td class=" sub-item">ड्यूटी एवं टैक्सेज (Duties & Taxes)</td>
-                            <td><button type="button" class="add" onclick="addRow(this)">+ Add</button></td>
+                            <td><button type="button" class="add" ng-click="borrowingsAddRow()">+ Add</button></td>
                             <td></td>
                             <td></td>
                         </tr>
                         <tr>
                             <td class=" sub-item">अन्य लेनदारियां (Other Creditors)</td>
-                            <td><button type="button" class="add" onclick="addRow(this)">+ Add</button></td>
+                            <td><button type="button" class="add" ng-click="borrowingsAddRow()">+ Add</button></td>
                             <td></td>
                             <td></td>
                         </tr>
                         <tr>
                             <td class=" sub-item">ऋणों पर प्राप्ति योग्य ब्याज (Interest Receivable on Loans)</td>
-                            <td><button type="button" class="add" onclick="addRow(this)">+ Add</button></td>
+                            <td><button type="button" class="add" ng-click="borrowingsAddRow()">+ Add</button></td>
                             <td></td>
                             <td></td>
                         </tr>
                         <tr>
                             <td class=" sub-item">पूर्वदत्त व्यय एवं अन्य प्राप्य (Prepaid Expenses & Receivables)</td>
-                            <td><button type="button" class="add" onclick="addRow(this)">+ Add</button></td>
+                            <td><button type="button" class="add" ng-click="borrowingsAddRow()">+ Add</button></td>
                             <td></td>
                             <td></td>
                         </tr>
@@ -694,7 +856,6 @@
                     <button class="btn btn-primary dev-btn text-center" ng-click="NextStep()">Click To Next Steup</button>
                     <button class="btn btn-primary dev-btn text-center">Submit</button>
                     <button class="btn btn-primary dev-btn text-center">Clear</button>
-                    <button class="btn btn-primary dev-btn text-center" ng-click="BackTo()">Back To</button>
                 </div>
             </div>
         </div>

@@ -69,7 +69,7 @@ namespace Cooperative.Controllers
             return View();
         }
 
-        //old
+        ////old
         [HttpPost]
         public int SaveKPIResult(List<KPIResultModel> model)
         {
@@ -91,11 +91,12 @@ namespace Cooperative.Controllers
 
         [HttpGet]
         [ActionName("GetPacsKPIDetails")]
-        public string GetPacsKPIDetails()
+        public string GetPacsKPIDetails(string financialYear)
         {
-            DataTable dt = new KPIModel().GetPacsKPIDetails();
+            DataTable dt = new KPIModel().GetPacsKPIDetails(financialYear);
             return COMMON_FUNCTION.DataTableToJSONString(dt);
         }
+
 
         [HttpGet]
         [ActionName("GetBhandarKPIDetails")]
