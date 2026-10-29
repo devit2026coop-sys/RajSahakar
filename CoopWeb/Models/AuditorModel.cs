@@ -2057,5 +2057,116 @@ namespace Cooperative.Models
             }
             return null;
         }
+
+
+
+
+        public int AuditMprCommitteeCurrentYearInsert(
+            AuditMprCommitteeCurrentYear obj)
+        {
+            int Result = -1;
+
+            try
+            {
+                objDBAccess.OpenConnection();
+
+                SqlCommand cmd = objDBAccess.CreateCommand(
+                    "USP_Insert_AuditMprCommitteeCurrentYear",
+                    DBFactoryCommandType.PROCEDURE_COMMAND);
+
+                objDBAccess.AddParameterToCommand(
+                    "@FinancialYear",
+                    DBFactoryParameterType.NVarchar,
+                    obj.FinancialYear);
+
+                objDBAccess.AddParameterToCommand(
+                    "@Month",
+                    DBFactoryParameterType.Int,
+                    obj.Month);
+
+                objDBAccess.AddParameterToCommand(
+                    "@DistrictId",
+                    DBFactoryParameterType.Int,
+                    obj.DistrictId);
+
+                objDBAccess.AddParameterToCommand(
+                    "@CommitteeTypeId",
+                    DBFactoryParameterType.Int,
+                    obj.CommitteeTypeId);
+
+                objDBAccess.AddParameterToCommand(
+                    "@TotalCommitteesCurrentYear",
+                    DBFactoryParameterType.Int,
+                    (object)obj.TotalCommitteesCurrentYear ?? DBNull.Value);
+
+                objDBAccess.AddParameterToCommand(
+                    "@ProposalDepartment",
+                    DBFactoryParameterType.Int,
+                    (object)obj.ProposalDepartment ?? DBNull.Value);
+
+                objDBAccess.AddParameterToCommand(
+                    "@ProposalCA",
+                    DBFactoryParameterType.Int,
+                    (object)obj.ProposalCA ?? DBNull.Value);
+
+                objDBAccess.AddParameterToCommand(
+                    "@AllocationDepartment",
+                    DBFactoryParameterType.Int,
+                    (object)obj.AllocationDepartment ?? DBNull.Value);
+
+                objDBAccess.AddParameterToCommand(
+                    "@AllocationCA",
+                    DBFactoryParameterType.Int,
+                    (object)obj.AllocationCA ?? DBNull.Value);
+
+                objDBAccess.AddParameterToCommand(
+                    "@AuditedProposalDepartment",
+                    DBFactoryParameterType.Int,
+                    (object)obj.AuditedProposalDepartment ?? DBNull.Value);
+
+                objDBAccess.AddParameterToCommand(
+                    "@AuditedProposalCA",
+                    DBFactoryParameterType.Int,
+                    (object)obj.AuditedProposalCA ?? DBNull.Value);
+
+                objDBAccess.AddParameterToCommand(
+                    "@AuditedAllocationDepartment",
+                    DBFactoryParameterType.Int,
+                    (object)obj.AuditedAllocationDepartment ?? DBNull.Value);
+
+                objDBAccess.AddParameterToCommand(
+                    "@AuditedAllocationCA",
+                    DBFactoryParameterType.Int,
+                    (object)obj.AuditedAllocationCA ?? DBNull.Value);
+
+                objDBAccess.AddParameterToCommand(
+                    "@CreatedBy",
+                    DBFactoryParameterType.Int,
+                    obj.CreatedBy);
+
+                Result = Convert.ToInt32(
+                    objDBAccess.ExecuteScalarCommand());
+            }
+            catch (Exception ex)
+            {
+                Result = -1;
+
+                objILogger.ErrorHandle(
+                    new ErrorLogEntity()
+                    {
+                        PageName = "Cooperative.Models.SocietyModel",
+                        FunctionName = "AuditMprCommitteeCurrentYearInsert"
+                    },
+                    ex);
+            }
+            finally
+            {
+                objDBAccess.CloseConnection();
+            }
+
+            return Result;
+        }
+
+
     }
 }

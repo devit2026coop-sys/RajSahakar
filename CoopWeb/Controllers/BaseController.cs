@@ -16,7 +16,11 @@ namespace Cooperative.Controllers
         //    {
         //        System.Web.HttpContext.Current.Session[SessionIdentity.Admin] = new UserEntity();
         //    }
+        
+        
         //}
+
+
 
         protected override IAsyncResult BeginExecuteCore(AsyncCallback callback, object state)
         {

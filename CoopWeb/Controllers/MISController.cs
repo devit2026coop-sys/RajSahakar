@@ -7127,9 +7127,9 @@ namespace Cooperative.Controllers
 
         [HttpPost]
         [ActionName("GetKPIReport")]
-        public string GetKPIReport(string KPIFor, int Month, string FY, int OfficeId, int DistrictId , int ResionId = 0)
+        public string GetKPIReport(string KPIFor, int Month, string FY, int OfficeId, int DistrictId, int ResionId = 0, int DivisionId = 0)
         {
-            DataTable dt = new MISModel().GetKPIReport(KPIFor, Month, FY, OfficeId, DistrictId , ResionId);
+            DataTable dt = new MISModel().GetKPIReport(KPIFor, Month, FY, OfficeId, DistrictId, ResionId, DivisionId);
 
             return COMMON_FUNCTION.DataTableToJSONString(dt);
         }
