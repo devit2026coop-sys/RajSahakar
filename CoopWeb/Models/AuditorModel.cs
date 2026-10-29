@@ -2057,5 +2057,56 @@ namespace Cooperative.Models
             }
             return null;
         }
+
+
+
+        #region GetAuditMPRCommiteeData On 27-10-2026
+        public DataTable GetCurrentFinancialYearName()
+        {
+            DataTable dt = new DataTable();
+            dt.Clear();
+            try
+            {
+                objDBAccess.OpenConnection();
+                SqlCommand cmd = objDBAccess.CreateCommand("GetCurrentFinancialYearName", DBFactoryCommandType.PROCEDURE_COMMAND);
+                dt = objDBAccess.GetTable();
+            }
+            catch (Exception ex)
+            {
+                objILogger.ErrorHandle(new ErrorLogEntity() { PageName = "Cooperative.Models.AuditorModel", FunctionName = "DataTable GetCurrentFinancialYear(int Ids)" }, ex);
+            }
+            finally
+            {
+                objDBAccess.CloseConnection();
+            }
+            return dt;
+        }
+
+        public DataSet GetAuditMPRMasterData()
+        {
+            try
+            {
+                objDBAccess.OpenConnection();
+                SqlCommand cmd = objDBAccess.CreateCommand("USP_AuditMPRMaster", DBFactoryCommandType.PROCEDURE_COMMAND);
+                objDBAccess.AddParameterToCommand("@Action", DBFactoryParameterType.NVarchar, "GetMPRData");
+                return objDBAccess.GetDataSet();
+            }
+            catch (Exception ex)
+            {
+                objILogger.ErrorHandle(new ErrorLogEntity()
+                {
+                    PageName = "Cooperative.Models.AuditorModel",
+                    FunctionName = "GetAuditMPRMasterData()"
+                }, ex);
+            }
+            finally
+            {
+                objDBAccess.CloseConnection();
+            }
+            return null;
+        }
+
+
+        #endregion
     }
 }
