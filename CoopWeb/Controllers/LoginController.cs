@@ -135,6 +135,7 @@ namespace Cooperative.Controllers
             _User.UserType = "D";
             if (_User != null && _User.UserId > 0)
             {
+                
                 Session[SessionIdentity.Admin] = _User;
                 regenerateId();
                 return RedirectToAction("DashBoard", "User");

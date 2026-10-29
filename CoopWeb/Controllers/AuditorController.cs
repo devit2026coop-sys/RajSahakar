@@ -2,9 +2,12 @@
 using Cooperative.DBConnector;
 using Cooperative.Filters;
 using Cooperative.Models;
+using FactoryAndBoiler.Payment;
+using iTextSharp.tool.xml.html;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
 using System.IO;
@@ -12,6 +15,7 @@ using System.Linq;
 using System.Text;
 using System.Web;
 using System.Web.Mvc;
+using static System.Web.Razor.Parser.SyntaxConstants;
 
 namespace Cooperative.Controllers
 {
@@ -938,8 +942,149 @@ namespace Cooperative.Controllers
 
         public ActionResult AuditorCurrentYearForm()
         {
+            UserEntity _LoggedInUser = (UserEntity)System.Web.HttpContext.Current.Session[SessionIdentity.Admin];
+            ViewBag.DistrictName = _LoggedInUser.DisplayNameEn;
+            DateTime today = DateTime.Today;
+            string financialYear = today.Month >= 4 ? $"{today.Year}-{(today.Year + 1) % 100:D2}" : $"{today.Year - 1}-{today.Year % 100:D2}";
+            ViewBag.FinacialYear = financialYear;
             return View();
         }
+
+
+        [HttpGet]
+        public JsonResult GetCurrentYearMPR(
+            int districtId = 1,
+            string financialYear = "2026-27",
+            byte month = 7)
+        {
+            var records = new List<object>();
+            UserEntity _LoggedInUser = (UserEntity)System.Web.HttpContext.Current.Session[SessionIdentity.Admin];
+
+            districtId = _LoggedInUser.DistrictId; 
+            
+
+            DateTime today = DateTime.Today;
+
+            financialYear = today.Month >= 4 ? $"{today.Year}-{(today.Year + 1) % 100:D2}" : $"{today.Year - 1}-{today.Year % 100:D2}";
+
+            month = (byte)DateTime.Today.Month;
+
+            ViewBag.DistrictName = _LoggedInUser.DisplayNameEn;
+            ViewBag.FinacialYear = financialYear;
+
+            try
+            {
+                string connectionString =
+                    System.Configuration.ConfigurationManager
+                        .ConnectionStrings["RajeevikaConStr"]
+                        .ConnectionString;
+
+                using (SqlConnection con = new SqlConnection(connectionString))
+                using (SqlCommand cmd = new SqlCommand(
+                    "dbo.USP_Get_AuditMprCommitteeCurrentYear", con))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    cmd.Parameters.Add("@DistrictId", SqlDbType.Int).Value =
+                        districtId;
+
+                    cmd.Parameters.Add("@FinancialYear", SqlDbType.VarChar, 9).Value =
+                        financialYear;
+
+                    cmd.Parameters.Add("@Month", SqlDbType.TinyInt).Value =
+                        month;
+
+                    cmd.Parameters.Add("@UserId", SqlDbType.Int).Value =
+                        _LoggedInUser.UserId;
+
+                    cmd.Parameters.Add("@RoleId", SqlDbType.Int).Value =
+                        _LoggedInUser.RoleId;
+
+                    con.Open();
+
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            records.Add(new
+                            {
+                                CommitteeTypeId =
+                                    Convert.ToInt32(reader["CommitteeTypeId"]),
+
+                                CommitteeTypeName_En =
+                                    Convert.ToString(reader["CommitteeTypeName_En"]),
+
+                                CommitteeTypeName_Hin =
+                                    Convert.ToString(reader["CommitteeTypeName_Hin"]),
+
+                                TotalCommitteesCurrentYear =
+                                    Convert.ToInt32(reader["TotalCommitteesCurrentYear"]),
+
+                                ProposalDepartment =
+                                    Convert.ToInt32(reader["ProposalDepartment"]),
+
+                                ProposalCA =
+                                    Convert.ToInt32(reader["ProposalCA"]),
+
+                                ProposalAllocationRemaining = Convert.ToInt32(reader["ProposalRemaining"]),
+
+                                AllocationDepartment =
+                                    Convert.ToInt32(reader["AllocationDepartment"]),
+
+                                AllocationCA =
+                                    Convert.ToInt32(reader["AllocationCA"]),
+
+                                CurrentAuditedProposalDepartment =
+                                    Convert.ToInt32(reader["AuditedProposalDepartment"]),
+
+                                CurrentAuditedProposalCA =
+                                    Convert.ToInt32(reader["AuditedProposalCA"]),
+
+                                CurrentAuditedAllocationDepartment =
+                                    Convert.ToInt32(reader["AuditedAllocationDepartment"]),
+
+                                CurrentAuditedAllocationCA =
+                                    Convert.ToInt32(reader["AuditedAllocationCA"]),
+
+                                // Previous month's audited values
+                                PreviousAuditedProposalDepartment =
+                                    Convert.ToInt32(reader["PreviousAuditedProposalDepartment"]),
+
+                                PreviousAuditedProposalCA =
+                                    Convert.ToInt32(reader["PreviousAuditedProposalCA"]),
+
+                                PreviousAuditedAllocationDepartment =
+                                    Convert.ToInt32(reader["PreviousAuditedAllocationDepartment"]),
+
+                                PreviousAuditedAllocationCA =
+                                    Convert.ToInt32(reader["PreviousAuditedAllocationCA"])
+                            });
+                        }
+                    }
+                }
+
+                return Json(new
+                {
+                    Success = true,
+                    Records = records
+                }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception using your existing logging framework.
+                System.Diagnostics.Trace.TraceError(
+                    "GetCurrentYearMPR failed: " + ex);
+
+                Response.StatusCode = 500;
+
+                return Json(new
+                {
+                    Success = false,
+                    Message = "Unable to retrieve MPR records."
+                }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
 
 
         public ActionResult AuditorEquityLiabilities()
@@ -955,52 +1100,169 @@ namespace Cooperative.Controllers
 
 
 
-        #region GetAuditMPRCommiteeData On 27-10-2026
-        [HttpGet]
-        [ActionName("GetCurrentFinancialYearName")]
-        public string GetCurrentFinancialYearName()
+        [HttpPost]
+        public JsonResult SaveCurrentYearMPR(AuditMprCurrentYearRequest request)
         {
-            DataTable dt = new AuditorModel().GetCurrentFinancialYearName();
-            return COMMON_FUNCTION.DataTableToJSONString(dt);
-        }
-
-        [HttpGet]
-        public JsonResult GetAuditMPRMasterData()
-        {
-            AuditorModel objModal = new AuditorModel(new FileLogger());
-            var responce = new APIResponce();
             try
             {
-                var ds = objModal.GetAuditMPRMasterData();
-                if (ds != null)
+                DateTime today = DateTime.Today;
+                UserEntity _LoggedInUser = (UserEntity)System.Web.HttpContext.Current.Session[SessionIdentity.Admin]; 
+                request.DistrictId = _LoggedInUser.DistrictId;
+                request.Month  = (byte)DateTime.Today.Month;
+                request.Office= 1;
+                request.FinancialYear= today.Month >= 4 ? $"{today.Year}-{(today.Year + 1) % 100:D2}" : $"{today.Year - 1}-{today.Year % 100:D2}";
+                request.UserRoleMappingId = _LoggedInUser.UserRoleDeptMappingId;
+                request.RoleId = _LoggedInUser.RoleId;
+                request.UpdatedBy = _LoggedInUser.UserId;
+                if (request == null ||
+                    request.DistrictId <= 0 ||
+                    string.IsNullOrWhiteSpace(request.FinancialYear) ||
+                    request.Month < 1 ||
+                    request.Month > 12 ||
+                    request.Records == null ||
+                    request.Records.Count == 0)
                 {
-                    responce.Data = new
+                    return Json(new
                     {
-                        MPRData = ds.Tables.Count > 0 ? COMMON_FUNCTION.DataTableToJSONString(ds.Tables[0]) : null,
-                    };
-                    responce.Status = "200";
-                    responce.Message = "Success";
+                        Success = false,
+                        Message = "Invalid MPR form data."
+                    });
                 }
-                else
+
+                // TODO:
+              
+                   DataTable table = new DataTable();
+
+                table.Columns.Add("CommitteeTypeId", typeof(int));
+                table.Columns.Add("TotalCommitteesCurrentYear", typeof(int));
+                table.Columns.Add("ProposalDepartment", typeof(int));
+                table.Columns.Add("ProposalCA", typeof(int));
+                table.Columns.Add("AllocationDepartment", typeof(int));
+                table.Columns.Add("AllocationCA", typeof(int));
+                table.Columns.Add("ProposalAllocationRemaining", typeof(int));
+
+                table.Columns.Add("CurrentAuditedProposalDepartment", typeof(int));
+                table.Columns.Add("CurrentAuditedProposalCA", typeof(int));
+                table.Columns.Add("CurrentAuditedAllocationDepartment", typeof(int));
+                table.Columns.Add("CurrentAuditedAllocationCA", typeof(int));
+
+                table.Columns.Add("PreviousAuditedProposalDepartment", typeof(int));
+                table.Columns.Add("PreviousAuditedProposalCA", typeof(int));
+                table.Columns.Add("PreviousAuditedAllocationDepartment", typeof(int));
+                table.Columns.Add("PreviousAuditedAllocationCA", typeof(int));
+ 
+
+                foreach (var item in request.Records)
                 {
-                    responce.Status = "404";
-                    responce.Message = "Record not founds.";
+                    table.Rows.Add(
+                        item.CommitteeTypeId,
+                        item.TotalCommitteesCurrentYear,
+                        item.ProposalDepartment,
+                        item.ProposalCA,
+                        item.AllocationDepartment,
+                        item.AllocationCA,
+                        item.ProposalAllocationRemaining,
+                        item.CurrentAuditedProposalDepartment,
+                        item.CurrentAuditedProposalCA,
+                        item.CurrentAuditedAllocationDepartment,
+                        item.CurrentAuditedAllocationCA,
+                        item.PreviousAuditedProposalDepartment ,
+                        item.PreviousAuditedProposalCA,
+                        item.PreviousAuditedAllocationDepartment,
+                        item.PreviousAuditedAllocationCA
+                    );
                 }
+
+                string connectionString =
+                     System.Configuration.ConfigurationManager
+                         .ConnectionStrings["RajeevikaConStr"]
+                         .ConnectionString;
+
+                using (SqlConnection con = new SqlConnection(connectionString))
+                using (SqlCommand cmd = new SqlCommand(
+    "dbo.USP_Save_AuditMprCommitteeCurrentYear", con))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    cmd.Parameters.Add("@DistrictId", SqlDbType.Int)
+                        .Value = request.DistrictId;
+
+                    cmd.Parameters.Add("@FinancialYear", SqlDbType.VarChar, 9)
+                        .Value = request.FinancialYear;
+
+                    cmd.Parameters.Add("@Month", SqlDbType.TinyInt)
+                        .Value = request.Month;
+
+                    cmd.Parameters.Add("@Office", SqlDbType.Int)
+                       .Value = request.Office;
+
+                    cmd.Parameters.Add("@RoleId", SqlDbType.Int)
+                      .Value = request.RoleId;
+
+
+                    cmd.Parameters.Add("@CreatedBy", SqlDbType.Int)
+                     .Value = request.UpdatedBy;
+
+
+                    SqlParameter tvp = cmd.Parameters.Add(
+                        "@Records", SqlDbType.Structured);
+
+                    
+
+                    tvp.TypeName = "dbo.AuditMprCurrentYearTableType";
+                    tvp.Value = table;
+                    con.Open();
+                    // Open connection before executing if it is not already open.
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            bool success = Convert.ToBoolean(reader["Success"]);
+                            string message = Convert.ToString(reader["Message"]);
+
+                            // Return success and message from your data access method.
+                        }
+                    }
+                }
+
+                return Json(new
+                {
+                    Success = true,
+                    Message = "MPR form received successfully."
+                });
             }
             catch (Exception ex)
             {
-                responce.Status = "500";
-                responce.Message = "Internal Server Error.";
+                // Log the exception using your application's logger.
+                return Json(new
+                {
+                    Success = false,
+                    Message = "An error occurred while saving the MPR form."
+                });
             }
-
-            return Json(new { Result = responce }, JsonRequestBehavior.AllowGet);
         }
 
 
-        #endregion
+        //public int SaveAuditMprCommitteeCurrentYear( AuditMprCommitteeCurrentYear entity)
+        //{
+        //    try
+        //    {
+        //        // Set the logged-in user ID
+        //        // entity.CreatedBy = _LoggedInUser.UserId;
 
+        //        // Call the database/business model method 
+        //        AuditorModel obj = new AuditorModel(); 
+               
 
+        //        return obj.AuditMprCommitteeCurrentYearInsert(entity);
+        //    }
+        //    catch (Exception ex)
+        //    {
 
-
+        //        return 0;
+        //        // Log the exception as per your existing logging mechanism
+        //        // throw;
+        //    }
+        //}
     }
 }
