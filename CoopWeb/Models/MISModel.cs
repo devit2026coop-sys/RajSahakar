@@ -9384,8 +9384,100 @@ namespace Cooperative.Models
             return dt;
         }
 
+        public DataTable GetAuditMPRVIAReport(int districtId, int commiteeType)
+        {
+            DataTable dt = new DataTable();
 
+            UserEntity _LoggedInUser = (UserEntity)System.Web.HttpContext.Current.Session[SessionIdentity.Admin];
 
+            try
+            {
+                //string DistrictId = "0";
+                //string CommiteeType = "0";
+                //if (Details.SearchParameter.Where(x => x.Key == "DISTRICT_ID").Any())
+                //{
+                //    DistrictId = Details.SearchParameter.Where(x => x.Key == "DISTRICT_ID").Select(x => x.Value).FirstOrDefault();
+                //}
+                //if (Details.SearchParameter.Where(x => x.Key == "CommiteeType").Any())
+                //{
+                //    CommiteeType = Details.SearchParameter.Where(x => x.Key == "CommiteeType").Select(x => x.Value).FirstOrDefault();
+                //}
+                objDBAccess.OpenConnection(); 
+                SqlCommand cmd = objDBAccess.CreateCommand("USP_GetAuditMPRVIAReport", DBFactoryCommandType.PROCEDURE_COMMAND);
+                objDBAccess.AddParameterToCommand("@LevelId", DBFactoryParameterType.Int, _LoggedInUser.LevelId);
+                objDBAccess.AddParameterToCommand("@DistrictId", DBFactoryParameterType.Int, districtId);
+                objDBAccess.AddParameterToCommand("@CommiteeType", DBFactoryParameterType.Int, commiteeType);
+                objDBAccess.AddParameterToCommand("@UserRoleMappingId", DBFactoryParameterType.Int, _LoggedInUser.UserRoleDeptMappingId);
+
+                dt = objDBAccess.GetTable();
+            }
+            catch (Exception ex)
+            {
+                objILogger.ErrorHandle(new ErrorLogEntity() { PageName = "Cooperative.Models.MISModel", FunctionName = "GetAuditMPRVIAReport()" }, ex);
+            }
+            finally
+            {
+                objDBAccess.CloseConnection();
+            }
+
+            return dt;
+        }
+
+        public DataTable GetAuditMPRVIIReport()
+        {
+            DataTable dt = new DataTable();
+
+            UserEntity _LoggedInUser = (UserEntity)System.Web.HttpContext.Current.Session[SessionIdentity.Admin];
+
+            try
+            { 
+                objDBAccess.OpenConnection();
+
+                SqlCommand cmd = objDBAccess.CreateCommand("USP_GetAuditMPRVIIReport", DBFactoryCommandType.PROCEDURE_COMMAND);
+                objDBAccess.AddParameterToCommand("@LevelId", DBFactoryParameterType.Int, _LoggedInUser.LevelId);
+                objDBAccess.AddParameterToCommand("@UserRoleMappingId", DBFactoryParameterType.Int, _LoggedInUser.UserRoleDeptMappingId);
+
+                dt = objDBAccess.GetTable();
+            }
+            catch (Exception ex)
+            {
+                objILogger.ErrorHandle(new ErrorLogEntity() { PageName = "Cooperative.Models.MISModel", FunctionName = "GetAuditMPRVIIReport()" }, ex);
+            }
+            finally
+            {
+                objDBAccess.CloseConnection();
+            }
+
+            return dt;
+        }
+
+        public DataTable GetAuditMPRVIIIReport()
+        {
+            DataTable dt = new DataTable();
+
+            UserEntity _LoggedInUser = (UserEntity)System.Web.HttpContext.Current.Session[SessionIdentity.Admin];
+
+            try
+            {
+                objDBAccess.OpenConnection();
+
+                SqlCommand cmd = objDBAccess.CreateCommand("USP_GetAuditMPRVIIIReport", DBFactoryCommandType.PROCEDURE_COMMAND);
+                objDBAccess.AddParameterToCommand("@LevelId", DBFactoryParameterType.Int, _LoggedInUser.LevelId);
+                objDBAccess.AddParameterToCommand("@UserRoleMappingId", DBFactoryParameterType.Int, _LoggedInUser.UserRoleDeptMappingId);
+
+                dt = objDBAccess.GetTable();
+            }
+            catch (Exception ex)
+            {
+                objILogger.ErrorHandle(new ErrorLogEntity() { PageName = "Cooperative.Models.MISModel", FunctionName = "GetAuditMPRVIIIReport()" }, ex);
+            }
+            finally
+            {
+                objDBAccess.CloseConnection();
+            }
+
+            return dt;
+        }
     }
 }
 

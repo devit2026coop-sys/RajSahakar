@@ -13804,6 +13804,14 @@ namespace Cooperative.Controllers
             return Json(new { Result = responce }, JsonRequestBehavior.AllowGet);
         }
 
+        [HttpGet]
+        [ActionName("GetCurrentFinancialYear")]
+        public string GetCurrentFinancialYear()
+        {
+            DataTable dt = new SocietyModel().GetCurrentFinancialYear();
+            return COMMON_FUNCTION.DataTableToJSONString(dt);
+        }
+
     }
 }
 public class objecedSocietyEntity

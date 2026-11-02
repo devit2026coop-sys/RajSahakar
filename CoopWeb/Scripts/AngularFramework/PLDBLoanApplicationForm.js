@@ -770,7 +770,7 @@ CommityRegistrtionModule.controller('PLDBLoanApplicationCnt', function ($scope, 
     //Save PLDB Loan Application Form
 
     $scope.Save_PLDBForm = function (StatusId) {
-        debugger;
+        //debugger;
 
         if (!$scope.PLDB.ApplicantName || !$scope.PLDB.FatherHusbandName || !$scope.PLDB.Gender) {
             alert("Please fill all required fields before submitting.");
@@ -1009,7 +1009,7 @@ CommityRegistrtionModule.controller('PLDBLoanApplicationCnt', function ($scope, 
 
 
     $scope.Save_PLDBFormUploadDoc = function (StatusId) {
-        debugger;
+        //debugger;
 
         $(".se-pre-con").fadeIn("slow");
 

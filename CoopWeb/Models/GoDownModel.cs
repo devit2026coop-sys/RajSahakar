@@ -1605,6 +1605,53 @@ namespace Cooperative.Models
             }
         }
 
+
+
+        public DataSet GetEmailListByUser()
+        {
+            DataSet ds = new DataSet();
+            try
+            {
+                UserEntity _LoggedInUser = (UserEntity)System.Web.HttpContext.Current.Session[SessionIdentity.Admin];
+                objDBAccess.OpenConnection();
+                SqlCommand cmd = objDBAccess.CreateCommand("USP_GodownFsEmailFormat", DBFactoryCommandType.PROCEDURE_COMMAND);
+                objDBAccess.AddParameterToCommand("@Action ", DBFactoryParameterType.NVarchar, "GET");
+                ds = objDBAccess.GetDataSet();
+            }
+            catch (Exception ex)
+            {
+                objILogger.ErrorHandle(new ErrorLogEntity() { PageName = "Cooperative.Models.GodownModel", FunctionName = "GetEmailListByUser()" }, ex);
+            }
+            finally
+            {
+                objDBAccess.CloseConnection();
+                dt.Dispose();
+            }
+            return ds;
+        }
+
         #endregion
+
+
+
+    }
+
+
+    public class SendFsEmailModel
+    {
+
+        public string ApplicationId { get; set; }
+        public string ToEmail { get; set; }
+        public string CC { get; set; }
+        public string BCC { get; set; }
+        public string Subject { get; set; }
+        public string Body { get; set; }
+        public string DocumentFormat { get; set; }
+        public string DocumentName { get; set; }
+        public string FSFileName { get; set; }
+        public string DocumentUrl { get; set; }
+        public string FSFilePath { get; set; }
+        public HttpPostedFileBase selectedDocument { get; set; }
+        public string documentPreviewUrl { get; set; }
     }
 }
