@@ -1,6 +1,9 @@
 ﻿var CooperativeSocietyFormModule = angular.module("ApplicationRAOKPIModule", ['angularUtils.directives.dirPagination']);
 
 CooperativeSocietyFormModule.controller("CooperativeRAOKPIFormCont", function ($rootScope, $scope, $http) {
+    $scope.requestData = {};
+    $scope.IsKPIExpired = false;
+    $scope.IsExpiryAlertShown = false;
 
     $scope.OnPageLoad = function () {
         $scope._language = _language;
@@ -31,7 +34,7 @@ CooperativeSocietyFormModule.controller("CooperativeRAOKPIFormCont", function ($
         $scope.GetSAKPIRAODetails();
         $scope.GetUserDetailsBySSO();
         $scope.SetPreviousMonth();
-
+        $scope.KpiExpiredDetails();
     }
     $scope.IsUpdate = false;
     $scope.IsDivisionKPIDisabled = false;
@@ -619,6 +622,47 @@ CooperativeSocietyFormModule.controller("CooperativeRAOKPIFormCont", function ($
             $(".blockUI").fadeOut("slow");
         });
     }
+
+    $scope.KpiExpiredDetails = function () {
+        $scope.requestData = {
+            SiteUrl: SiteUrl,
+            RequireFor: "RAO"
+        };
+        KPIValidateData.GetKPIFormExpiryDetails($http, $scope.requestData, function (data) {
+            let validData = JSON.parse(data.validData);
+            if (validData && validData.length > 0) {
+                $scope.$applyAsync(function () {
+                    $scope.KPIExpiryConfig = validData[0];
+                    $scope.CheckKPIExpiry();
+                });
+            }
+        });
+    };
+    $scope.CheckKPIExpiry = function () {
+        // District 3: expiry not applicable
+        //if (Number($scope.PldbDistrictID) === 3) {
+        //    $scope.IsKPIExpired = false;
+        //    return;
+        //}
+
+        let config = $scope.KPIExpiryConfig;
+        if (!config || config.Status !== "Active") {
+            $scope.IsKPIExpired = false;
+            return;
+        }
+
+        let validateDate = parseInt(config.ValidateEntryDate, 10);
+        let validateTime = parseInt(config.ValidateEntryTime, 10);
+        let now = new Date();
+        //Configured cutoff: current month, configured day and hour
+        let cutoffDate = new Date(now.getFullYear(), now.getMonth(), validateDate, validateTime, 0, 0);
+        $scope.IsKPIExpired = now >= cutoffDate;
+        if ($scope.IsKPIExpired && !$scope.IsExpiryAlertShown) {
+            $scope.IsExpiryAlertShown = true;
+            alert("Time is over. You cannot save or update KPI.");
+        }
+    };
+
 
     $scope.OnPageLoad();
 
