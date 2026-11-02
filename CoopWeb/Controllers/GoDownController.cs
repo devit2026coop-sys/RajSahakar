@@ -30,7 +30,6 @@ namespace Cooperative.Controllers
         public string GodownLists(int Status = 0)
         {
             GodownModel objSocietyModel = new GodownModel(new DBLogger());
-
             DataPagingModel Details = new DataPagingModel();
             Details.IsAllRecords = true;
             Details.PageNumber = 1;
@@ -255,12 +254,39 @@ namespace Cooperative.Controllers
         }
 
         [HttpPost]
-        [ActionName("GETGodownFormationList")]
-        public string GETGodownFormationList(string SearchText = "")
+        [ActionName("GetGodownFsEmailList")]
+        public string GetGodownFsEmailList(string SearchText = "")
         {
             GodownModel objGoDownModel = new GodownModel(new DBLogger());
             return COMMON_FUNCTION.DataTableToJSONWithJSONNet(objGoDownModel.GETGodownFormationList(SearchText));
         }
+
+        [HttpPost]
+        [ActionName("GetEmailListByUser")]
+        public JsonResult GetEmailListByUser()
+        {
+            GodownModel objGoDownModel = new GodownModel(new DBLogger());
+            var responce = new APIResponce();
+            var ds = objGoDownModel.GetEmailListByUser();
+            if (ds != null)
+            {
+                responce.Data = new
+                {
+                    emailData = ds.Tables.Count > 0 ? COMMON_FUNCTION.DataTableToJSONString(ds.Tables[0]) : null,
+                };
+                responce.Status = "200";
+                responce.Message = "Success";
+            }
+            else
+            {
+                responce.Status = "500";
+                responce.Message = "Internal Server Error.";
+            }
+            return Json(new { Result = responce }, JsonRequestBehavior.AllowGet);
+
+        }
+
+
 
         [HttpPost]
         [ActionName("GETActionsList")]
@@ -516,6 +542,54 @@ namespace Cooperative.Controllers
             }, JsonRequestBehavior.AllowGet);
         }
         #endregion
+
+
+        [HttpPost]
+        public JsonResult SendFsEmailFromGodown(SendFsEmailModel _entityModel)
+        {
+            bool isSent = false;
+            try
+            {
+                if (_entityModel == null || string.IsNullOrWhiteSpace(_entityModel.ToEmail))
+                {
+                    return Json(new { Success = false, Message = "Please enter recipient email." });
+                }
+
+                //if (string.IsNullOrWhiteSpace(_entityModel.DocumentUrl))
+                //{
+                //    return Json(new { Success = false, Message = "Document is not available." });
+                //}
+                // COMMON_FUNCTION.SendFSEmail(requestModel);
+                isSent = COMMON_FUNCTION.SendFSEmail(_entityModel);
+
+                return Json(new
+                {
+                    Success = true,
+                    Message = "Email sent successfully."
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    Success = false,
+                    Message = "Unable to send email."
+                });
+            }
+        }
+
+
+
+        [HttpGet]
+        public ActionResult GodownEmailFormation()
+        {
+            return View();
+        }
+
+
+
+
+
     }
 
 

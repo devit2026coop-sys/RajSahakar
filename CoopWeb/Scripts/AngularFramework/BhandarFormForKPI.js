@@ -1,6 +1,9 @@
 var CooperativeSocietyFormModule = angular.module("ApplicationBhandarKPIModule", ['angularUtils.directives.dirPagination']);
 
 CooperativeSocietyFormModule.controller("CooperativeBhandarKPIFormCont", function ($rootScope, $scope, $http) {
+    $scope.requestData = {};
+    $scope.IsKPIExpired = false;
+    $scope.IsExpiryAlertShown = false;
     $scope.OnPageLoad = function () {
         $scope._language = _language;
         if (_language == 'en-us') {
@@ -60,6 +63,7 @@ CooperativeSocietyFormModule.controller("CooperativeBhandarKPIFormCont", functio
         //$scope.GetKPIValidationDate();
         $scope.GetUserDetailsBySSO();
         $scope.SetPreviousMonth();
+        $scope.KpiExpiredDetails();
         //$scope.SetCurrentFY();
         //$scope.GetSocietyBySSO();
         //$scope.DepartmentList();
@@ -1284,39 +1288,47 @@ CooperativeSocietyFormModule.controller("CooperativeBhandarKPIFormCont", functio
             });
     };
 
+    
 
-    //$scope.IsKPIExpired = false;
-    //$scope.IsExpiryAlertShown = false;
+    $scope.KpiExpiredDetails = function () {
+        $scope.requestData = {
+            SiteUrl: SiteUrl,
+            RequireFor: "UpbhoktaBhandars"
+        };
+        KPIValidateData.GetKPIFormExpiryDetails($http, $scope.requestData, function (data) {
+            let validData = JSON.parse(data.validData);
+            if (validData && validData.length > 0) {
+                $scope.$applyAsync(function () {
+                    $scope.KPIExpiryConfig = validData[0];
+                    $scope.CheckKPIExpiry();
+                });
+            }
+        });
+    };
+    $scope.CheckKPIExpiry = function () {
+        // District 3: expiry not applicable
+        //if (Number($scope.PldbDistrictID) === 3) {
+        //    $scope.IsKPIExpired = false;
+        //    return;
+        //}
 
-    //$scope.CheckKPIExpiry = function () {
-    //    var currentDate = new Date();
-    //    var cutoffDate = new Date("2026-10-03T16:58:55+05:30");
-    //    if (currentDate >= cutoffDate) {
-    //        $scope.IsKPIExpired = true;
+        let config = $scope.KPIExpiryConfig;
+        if (!config || config.Status !== "Active") {
+            $scope.IsKPIExpired = false;
+            return;
+        }
 
-    //        if (!$scope.IsExpiryAlertShown) {
-    //            $scope.IsExpiryAlertShown = true;
-    //            alert("Time is over. You cannot save or update KPI.");
-    //        }
-
-    //    } else {
-    //        $scope.IsKPIExpired = false;
-    //        var remainingTime = cutoffDate.getTime() - currentDate.getTime();
-    //        setTimeout(function () {
-    //            $scope.$apply(function () {
-    //                $scope.IsKPIExpired = true;
-    //                if (!$scope.IsExpiryAlertShown) {
-    //                    $scope.IsExpiryAlertShown = true;
-    //                    alert("Time is over. You cannot save or update KPI.");
-    //                }
-
-    //            });
-
-    //        }, remainingTime);
-    //    }
-    //};
-    //$scope.CheckKPIExpiry();
-
+        let validateDate = parseInt(config.ValidateEntryDate, 10);
+        let validateTime = parseInt(config.ValidateEntryTime, 10);
+        let now = new Date();
+        //Configured cutoff: current month, configured day and hour
+        let cutoffDate = new Date(now.getFullYear(), now.getMonth(), validateDate, validateTime, 0, 0);
+        $scope.IsKPIExpired = now >= cutoffDate;
+        if ($scope.IsKPIExpired && !$scope.IsExpiryAlertShown) {
+            $scope.IsExpiryAlertShown = true;
+            alert("Time is over. You cannot save or update KPI.");
+        }
+    };
     $scope.OnPageLoad();
 
 });
