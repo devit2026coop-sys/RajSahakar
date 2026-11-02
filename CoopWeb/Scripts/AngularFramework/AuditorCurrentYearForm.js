@@ -199,6 +199,8 @@ MasterMod.controller(
 
                 if (result && result.Success) {
                     alert(result.Message || "MPR form saved successfully.");
+                    // Redirect after successful save
+                    window.location.href = SiteUrl + "/Auditor/AuditorCurrentYearFormNew";
                 } else {
                     alert(
                         (result && result.Message) ||

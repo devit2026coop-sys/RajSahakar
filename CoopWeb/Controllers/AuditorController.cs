@@ -1100,6 +1100,76 @@ namespace Cooperative.Controllers
 
 
 
+
+
+        public ActionResult AuditorStockList()
+        {
+            return View();
+        }
+
+
+        public ActionResult AuditorliabilityAndIncome()
+        {
+            return View();
+        }
+
+        public ActionResult AuditorAssestAndExpences()
+        {
+            return View();
+        }
+
+        public ActionResult AuditorBankReconciliotion()
+        {
+            return View();
+        }
+
+        public ActionResult AuditorDepreciationSchedule()
+        {
+            return View();
+        }
+
+        public ActionResult AuditorDetailedAssetClassification()
+        {
+            return View();
+        }
+
+        public ActionResult Auditorotherprovision()
+        {
+            return View();
+        }
+
+        public ActionResult AuditorBudget()
+        {
+            return View();
+        }
+
+        public ActionResult AuditorotherAnx()
+        {
+            return View();
+        }
+
+        public ActionResult AuditorTradeAccount()
+        {
+            return View();
+        }
+
+        public ActionResult AuditorProfitAndLossAc()
+        {
+            return View();
+        }
+
+        public ActionResult AuditorAppropriation()
+        {
+            return View();
+        }
+
+
+        public ActionResult AuditorBalanceSheet()
+        {
+            return View();
+        }
+
+
         [HttpPost]
         public JsonResult SaveCurrentYearMPR(AuditMprCurrentYearRequest request)
         {
