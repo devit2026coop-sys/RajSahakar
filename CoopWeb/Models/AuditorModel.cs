@@ -2057,9 +2057,32 @@ namespace Cooperative.Models
             }
             return null;
         }
+         
+        public DataTable GetUserDetailsAuditBySSO()
+        {
+            DataTable dt = new DataTable();
+            UserEntity _LoggedInUser = (UserEntity)System.Web.HttpContext.Current.Session[SessionIdentity.Admin];
 
+            try
+            {
+                objDBAccess.OpenConnection();
 
+                SqlCommand cmd = objDBAccess.CreateCommand("USP_GetUserDetailsAuditBySSO", DBFactoryCommandType.PROCEDURE_COMMAND);
+                objDBAccess.AddParameterToCommand("@SSO_ID", DBFactoryParameterType.VARCHAR, _LoggedInUser.SSOID);
+                objDBAccess.AddParameterToCommand("@RoleId", DBFactoryParameterType.Int, _LoggedInUser.RoleId);
+                dt = objDBAccess.GetTable();
+            }
+            catch (Exception ex)
+            {
+                objILogger.ErrorHandle(new ErrorLogEntity() { PageName = "Cooperative.Models.KPIModel", FunctionName = "GetUserDetailsBySSO(string SSOID)" }, ex);
+            }
+            finally
+            {
+                objDBAccess.CloseConnection();
+            }
 
+            return dt;
+        }
 
         public int AuditMprCommitteeCurrentYearInsert(
             AuditMprCommitteeCurrentYear obj)

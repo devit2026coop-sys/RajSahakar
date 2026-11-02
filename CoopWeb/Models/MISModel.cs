@@ -9384,7 +9384,7 @@ namespace Cooperative.Models
             return dt;
         }
 
-        public DataTable GetAuditMPRVIAReport()
+        public DataTable GetAuditMPRVIAReport(int districtId, int commiteeType)
         {
             DataTable dt = new DataTable();
 
@@ -9392,11 +9392,21 @@ namespace Cooperative.Models
 
             try
             {
-
-                objDBAccess.OpenConnection();
-
+                //string DistrictId = "0";
+                //string CommiteeType = "0";
+                //if (Details.SearchParameter.Where(x => x.Key == "DISTRICT_ID").Any())
+                //{
+                //    DistrictId = Details.SearchParameter.Where(x => x.Key == "DISTRICT_ID").Select(x => x.Value).FirstOrDefault();
+                //}
+                //if (Details.SearchParameter.Where(x => x.Key == "CommiteeType").Any())
+                //{
+                //    CommiteeType = Details.SearchParameter.Where(x => x.Key == "CommiteeType").Select(x => x.Value).FirstOrDefault();
+                //}
+                objDBAccess.OpenConnection(); 
                 SqlCommand cmd = objDBAccess.CreateCommand("USP_GetAuditMPRVIAReport", DBFactoryCommandType.PROCEDURE_COMMAND);
                 objDBAccess.AddParameterToCommand("@LevelId", DBFactoryParameterType.Int, _LoggedInUser.LevelId);
+                objDBAccess.AddParameterToCommand("@DistrictId", DBFactoryParameterType.Int, districtId);
+                objDBAccess.AddParameterToCommand("@CommiteeType", DBFactoryParameterType.Int, commiteeType);
                 objDBAccess.AddParameterToCommand("@UserRoleMappingId", DBFactoryParameterType.Int, _LoggedInUser.UserRoleDeptMappingId);
 
                 dt = objDBAccess.GetTable();

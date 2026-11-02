@@ -103,6 +103,7 @@ MasterMod.controller("AuditReportVIACont", function ($scope, $rootScope, $http) 
     $scope.Filter = [];
     $scope.ClearSearch = function () {
         $scope.DISTRICT_ID = "";
+        $scope.CommiteeType = "";
         $scope.PLDB_ID = "0";
         $scope.PLDB_Branch_ID = "0";
         $scope.q = "";
@@ -118,31 +119,38 @@ MasterMod.controller("AuditReportVIACont", function ($scope, $rootScope, $http) 
     $scope.currentPage = 1;
     $scope.pageSize = 50;
 
-    //$scope.GetDistrictList = function () {
-    //    $http.get(SiteUrl + "/Master/GetMasterData/?MasterType=DISTRICT&MasterCode=" + $("#DivisionId").val()).
-    //        success(function (data, status) {
-    //            $scope.DistrictList = data;
-    //            if ($("#hdnDistrictId").val() != "0") {
-    //                $scope.DISTRICT_ID = $("#hdnDistrictId").val()
-    //                $("#ddrDistrictId").attr("disabled", "disabled");
-    //            }
-    //            // $scope.BindFY();
+    $scope.GetDistrictList = function () {
+        $http.get(SiteUrl + "/Master/GetMasterData/?MasterType=DISTRICT&MasterCode=" + $("#DivisionId").val()).
+            success(function (data, status) {
+                $scope.DistrictList = data;
+                //if ($("#hdnDistrictId").val() != "0") {
+                //    $scope.DISTRICT_ID = $("#hdnDistrictId").val()
+                //    $("#ddrDistrictId").attr("disabled", "disabled");
+                //}
+                // $scope.BindFY();
 
-    //        }).
-    //        error(function (data, status) {
-    //            $scope.DistrictList = [];
-    //            alert('Error while fetching district list data.');
-    //        });
-    //};
+            }).
+            error(function (data, status) {
+                $scope.DistrictList = [];
+                alert('Error while fetching district list data.');
+            });
+    };
 
-    //$scope.GetDistrictList();
+    $scope.GetDistrictList();
 
 
     $scope.GetAuditMPRVIAReport = function () {
         $(".se-pre-con").fadeIn("slow");
+        var jsonParameters = {
+            "SearchParameter": $scope.DataPaging.searchParameters
+        };
+        return $http.get(SiteUrl + "/MIS/GetAuditMPRVIAReport", {
+            params: { 
+                commiteeType: $scope.CommiteeType,
+                districtId: $scope.DISTRICT_ID
+            }
 
-        return $http.get(SiteUrl + "/MIS/GetAuditMPRVIAReport")
-            .then(function (response) {
+        }).then(function (response) {
 
                 // Assign the actual records array
                 $scope.AuditMPRVIAList = response.data || [];
