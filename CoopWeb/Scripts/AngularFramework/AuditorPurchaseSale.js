@@ -125,6 +125,10 @@ MasterMod.controller("auditorPurchaseSaleCtrl", function ($scope, $http) {
         console.table($scope.supportPriceRows);
     };
 
+    $scope.NextStep = function () {
+        window.location.href = '/Auditor/AuditorStockList';
+    };
+
     $scope.removeRow = function (index) {
         $scope.supportPriceRows.splice(index, 1);
     };

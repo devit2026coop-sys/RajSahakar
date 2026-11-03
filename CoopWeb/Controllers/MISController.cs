@@ -7391,9 +7391,9 @@ namespace Cooperative.Controllers
 
         [HttpGet]
         [ActionName("GetAuditMPRVIAReport")]
-        public string GetAuditMPRVIAReport()
+        public string GetAuditMPRVIAReport(int districtId = 0, int commiteeType = 0)
         {
-            DataTable dt = new MISModel().GetAuditMPRVIAReport();
+            DataTable dt = new MISModel().GetAuditMPRVIAReport(districtId, commiteeType);
 
             return COMMON_FUNCTION.DataTableToJSONString(dt);
         }
