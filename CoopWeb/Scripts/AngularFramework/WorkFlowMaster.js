@@ -2,7 +2,7 @@
 WorkFlowMasterModule.controller("WorkFlowMasterCnt", function ($scope, $http) {
     $scope._language = 'en-us';
     $scope.currentPage = 1;
-    $scope.pageSize = 12;
+    $scope.pageSize = 20;
     $scope.rows = [1];
     $scope.counter = 0;
     $scope.lstWorkFlowScope = [];
@@ -598,7 +598,7 @@ WorkFlowMasterModule.controller("WorkFlowMasterCnt", function ($scope, $http) {
                 else {
                     message = _language == 'en-us' ? 'Some Error  is Occured \n' : 'कुछ त्रुटि हुई है\n';
                 }
-                bootbox.alert(message, function () {
+                alert(message, function () {
                     location.reload();
                 })
             }).
