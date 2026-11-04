@@ -1031,7 +1031,12 @@ namespace Cooperative.Controllers
         {
             return View();
         }
-         
+
+        public ActionResult AuditorAuditFees()
+        {
+            return View();
+        }
+
         [HttpPost]
         public JsonResult SaveCurrentYearMPR(AuditMprCurrentYearRequest request)
         {
