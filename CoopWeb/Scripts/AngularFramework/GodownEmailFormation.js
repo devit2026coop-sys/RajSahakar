@@ -105,15 +105,15 @@ godownEmailFormationMod.controller("GodownEmailFormationCtrl", function ($scope,
             });
     };
     $scope.OpenSendEmailPopup = function (item) {
-        if (!$scope.SelectedApplicationId) {
-            ShowOkMessage("Warning", "Please select an application first.", function () { });
-            return;
-        }
+        //if (!$scope.SelectedApplicationId) {
+        //    ShowOkMessage("Warning", "Please select an application first.", function () { });
+        //    return;
+        //}
 
-        if ($scope.SelectedApplicationId != item.Applicationid) {
-            ShowOkMessage("Warning", "Please select this application first.", function () { });
-            return;
-        }
+        //if ($scope.SelectedApplicationId != item.Applicationid) {
+        //    ShowOkMessage("Warning", "Please select this application first.", function () { });
+        //    return;
+        //}
 
         if ($scope.searchParams.mappingId != null && $scope.searchParams.mappingId != 0) {
             $scope.GetEmailListByUser();
@@ -290,11 +290,11 @@ godownEmailFormationMod.controller("GodownEmailFormationCtrl", function ($scope,
         });
     };
 
-    $scope.CheckSelection = function (item) {
-        if (item != null) {
-            $scope.selectedParams = item;
-        }
-    };
+    //$scope.CheckSelection = function (item) {
+    //    if (item != null) {
+    //        $scope.selectedParams = item;
+    //    }
+    //};
     $scope.viewDocument = function () {
         if ($scope.EmailData.documentPreviewUrl) {
             window.open($scope.EmailData.documentPreviewUrl, "_blank");
