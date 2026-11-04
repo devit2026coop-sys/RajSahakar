@@ -9,6 +9,7 @@ GodownFormationActionMod.controller("GodownFormationActionCont", function ($scop
     $scope.IsPartialPayment = false;
     $scope.selectedParams = {};
     $scope.ApplicationId = "0";
+    $scope.revertStatusId = 0;
 
     $scope.OnPageLoad = function () {
         $scope.IsProposalSubmission = false;
@@ -510,13 +511,50 @@ GodownFormationActionMod.controller("GodownFormationActionCont", function ($scop
         });
     };
     $scope.GenerateFS = function (applicationId, nextStatus, type) {
-        debugger;
         return $http.get(SiteUrl + "/Godown/GenerateFSPdfByTemplate?ApplicationId=" + applicationId + "&nextStatusId=" + nextStatus + "&fsType=" + type).success(function (data, status) {
             console.log("Generate FS", data);
         }).error(function () {
             alert("Something went wrong.");
         });
     };
+
+
+    $scope.RevertProcess = function (revertStatus) {
+        $scope.ApplicationId = $("input[name='SelectedApplication']:checked").val() ?? 0;
+        $scope.revertStatusId = revertStatus;
+        if (!$scope.ApplicationId || !$scope.revertStatusId) {
+            toastr.warning("Please select an application and revert status.");
+            return;
+        }
+
+        $scope.RevertData = {
+            Remark: ''
+        };
+        $('#RevertApplicationModal').modal('show');
+    };
+
+
+    $scope.Clear = function () {
+        $('#RevertApplicationModal').modal('hide');
+        $scope.RevertData.Remark = "";
+    };
+
+    $scope.RevertApplication = function () {
+
+        if (!$scope.RevertData.Remark || !$scope.RevertData.Remark.trim()) {
+            toastr.warning("Please enter remark.");
+            return;
+        }
+
+        var model = {
+            ApplicationId: $scope.ApplicationId,
+            StatusId: $scope.revertStatusId,
+            Remark: $scope.RevertData.Remark
+        };
+
+        // Call your Revert Application API/service here.
+    };
+
 
     $scope.OnPageLoad();
 });
