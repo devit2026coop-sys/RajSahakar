@@ -60,54 +60,53 @@ MasterMod.controller("CooperativeAuditorCurrentYearFormCont", function ($scope, 
             $scope.Department = [];
         }).finally(function () {
             $(".se-pre-con").fadeOut("slow");
-        });
-        $scope.SetCurrentFY();
+        }); 
+        //$scope.SetCurrentFY();
         $scope.GetUserDetailsBySSO();
-        $scope.SetPreviousMonth();
+        //$scope.SetPreviousMonth();
         // Call MPR data loader after the page is initialized.
         $scope.LoadAuditMprForm();
     };
 
-    $scope.SetCurrentFY = function () {
-        $http.get(SiteUrl + "/Society/GetCurrentFinancialYear")
-            .success(function (data) {
-                $scope.FY = data[0].CurrentFY;
-                console.log('$scope.FY', $scope.FY);
-                $scope.GetFinancialYear();
-            })
-            .error(function () {
-                alert("Unable to load Current Financial Year.");
-            });
-    };
+    //$scope.SetCurrentFY = function () {
+    //    $http.get(SiteUrl + "/Society/GetCurrentFinancialYear")
+    //        .success(function (data) {
+    //            $scope.FY = data[0].CurrentFY;
+    //            console.log('$scope.FY', $scope.FY);
+    //            $scope.GetFinancialYear();
+    //        })
+    //        .error(function () {
+    //            alert("Unable to load Current Financial Year.");
+    //        });
+    //};
 
-    $scope.GetFinancialYear = function () {
+    //$scope.GetFinancialYear = function () {
         
-        $(".se-pre-con").fadeIn("slow");
-        $scope.FinancialYearList = [];
+    //    $(".se-pre-con").fadeIn("slow");
+    //    $scope.FinancialYearList = [];
 
-        $http.get(SiteUrl + "/Master/GetMasterData/?MasterType=FINANCIALYEAR&MasterCode=-1")
-            .success(function (data, status) {
-                $scope.FinancialYearList = data;
-                console.log('$scope.FinancialYearList', $scope.FinancialYearList);
+    //    $http.get(SiteUrl + "/Master/GetMasterData/?MasterType=FINANCIALYEAR&MasterCode=-1")
+    //        .success(function (data, status) {
+    //            $scope.FinancialYearList = data;
+    //            console.log('$scope.FinancialYearList', $scope.FinancialYearList);
+                 
+    //            var selectedFY = $scope.FinancialYearList.filter(function (x) {
+    //                return x.FIN_YEAR_MASTR_ID == $scope.FY;
+    //            });
 
-                // Get Financial Year Name using FY ID
-                var selectedFY = $scope.FinancialYearList.filter(function (x) {
-                    return x.FIN_YEAR_MASTR_ID == $scope.FY;
-                });
+    //            if (selectedFY.length > 0) {
+    //                $scope.FinancialYearName = selectedFY[0].FIN_YEAR_NAME;
+    //                console.log('$scope.FinancialYearName', $scope.FinancialYearName);
+    //            }
 
-                if (selectedFY.length > 0) {
-                    $scope.FinancialYearName = selectedFY[0].FIN_YEAR_NAME;
-                    console.log('$scope.FinancialYearName', $scope.FinancialYearName);
-                }
+    //            $(".se-pre-con").fadeOut("slow");
 
-                $(".se-pre-con").fadeOut("slow");
-
-            })
-            .error(function (data, status) {
-                $scope.FinancialYearList = [];
-                $(".se-pre-con").fadeOut("slow");
-            });
-    };
+    //        })
+    //        .error(function (data, status) {
+    //            $scope.FinancialYearList = [];
+    //            $(".se-pre-con").fadeOut("slow");
+    //        });
+    //};
 
     $scope.GetUserDetailsBySSO = function () {
         $(".se-pre-con").fadeIn("slow");
@@ -128,7 +127,7 @@ MasterMod.controller("CooperativeAuditorCurrentYearFormCont", function ($scope, 
             });
     };
 
-    $scope.SetPreviousMonth = function () {
+    $scope.SetPreviousMonth = function (month = 0) {
 
         var months = [
             { Id: 1, Name: "January" },
@@ -145,8 +144,9 @@ MasterMod.controller("CooperativeAuditorCurrentYearFormCont", function ($scope, 
             { Id: 12, Name: "December" }
         ];
 
-        var currentMonth = new Date().getMonth(); // 0-11
-
+        //var currentMonth = new Date().getMonth(); // 0-11
+        var currentMonth = month;
+         
         if (currentMonth == 0) {
             $scope.PreviousMonthId = 12;
             $scope.PreviousMonth = "December";
@@ -163,7 +163,7 @@ MasterMod.controller("CooperativeAuditorCurrentYearFormCont", function ($scope, 
         $(".se-pre-con").fadeIn("slow");
 
         if (!$scope.SelectedDate) {
-            alert("Please select date.");
+            //alert("Please select date.");
             $scope.auditMprList = []; 
             return;
         }
@@ -172,20 +172,21 @@ MasterMod.controller("CooperativeAuditorCurrentYearFormCont", function ($scope, 
 
         var year = date.getFullYear();
         var month = date.getMonth();
-
+        $scope.SetPreviousMonth(month);
         // Financial year April to March
         var currentFYStartYear = month >= 4 ? year : year - 1;
 
         // Previous Financial Year
-        var nextFYStartYear = currentFYStartYear + 1;
+        var previousFYStartYear = currentFYStartYear - 1;
+        var previousFinancialYear = previousFYStartYear + '-' + String(previousFYStartYear + 1).slice(-2);
 
-        var nextFinancialYear = currentFYStartYear + '-' + String(nextFYStartYear).slice(-2);
-
-        console.log("Previous Financial Year:", nextFinancialYear);
+        //var nextFYStartYear = currentFYStartYear + 1;
+        //var nextFinancialYear = currentFYStartYear + '-' + String(nextFYStartYear).slice(-2);
+        //console.log("Previous Financial Year:", previousFinancialYear);
 
         var distId = $scope.UserDetails.DISTRICT_ID;
-        var finYear = nextFinancialYear;
-
+        var finYear = previousFinancialYear;
+        $scope.FinancialYearName = finYear; 
         // Replace with your actual MVC/API GET action.
         $http.get(SiteUrl + "/Auditor/GetCurrentYearMPR", {
             params: {
@@ -200,14 +201,12 @@ MasterMod.controller("CooperativeAuditorCurrentYearFormCont", function ($scope, 
                 var data = response.data || {};
                 console.log('data', data);
 
-                $scope.auditMprList =
-                    angular.isArray(data) ? data : (data.Records || []);
+                $scope.auditMprList = angular.isArray(data) ? data : (data.Records || []);
 
-                $scope.DistrictId = data.DistrictId || null;
-                $scope.DistrictName = data.DistrictName || '';
+                //$scope.DistrictId = data.DistrictId || null;
+                //$scope.DistrictName = data.DistrictName || '';
 
-                $scope.FinancialYearList =
-                    data.FinancialYearList || [];
+                //$scope.FinancialYearList = data.FinancialYearList || [];
 
             }, function (error) {
                 $scope.auditMprList = [];
@@ -234,16 +233,196 @@ MasterMod.controller("CooperativeAuditorCurrentYearFormCont", function ($scope, 
         return total;
     };
 
-    $scope.calculateProposalAllocationRemaining = function (item) {
+    //$scope.calculateProposalAllocationRemaining = function (item) {
 
-        item.ProposalAllocationRemaining =
-            (Number(item.TotalCommitteesCurrentYear) || 0) -
-            (
-                (Number(item.ProposalDepartment) || 0) +
-                (Number(item.ProposalCA) || 0) +
-                (Number(item.AllocationDepartment) || 0) +
-                (Number(item.AllocationCA) || 0)
-            );
+    //    item.ProposalAllocationRemaining =
+    //        (Number(item.TotalCommitteesCurrentYear) || 0) -
+    //        (
+    //            (Number(item.ProposalDepartment) || 0) +
+    //            (Number(item.ProposalCA) || 0) +
+    //            (Number(item.AllocationDepartment) || 0) +
+    //            (Number(item.AllocationCA) || 0)
+    //        );
+    //};
+
+    $scope.calculateProposalAllocationRemaining = function (item, field) {
+
+        var total = Number(item.TotalCommitteesCurrentYear) || 0;
+        var proposalDepartment = Number(item.ProposalDepartment) || 0;
+        var proposalCA = Number(item.ProposalCA) || 0;
+        var allocationDepartment = Number(item.AllocationDepartment) || 0;
+        var allocationCA = Number(item.AllocationCA) || 0;
+
+        // Negative values not allowed
+        if (total < 0 || proposalDepartment < 0 || proposalCA < 0 || allocationDepartment < 0 || allocationCA < 0) {
+            alert("Negative value allowed nahi hai.");
+            item[field] = 0;
+            $scope.calculateProposalAllocationRemaining(item);
+            return;
+        }
+
+        // Allotment cannot exceed total committees
+        if ((proposalDepartment + proposalCA + allocationDepartment + allocationCA) > total) {
+
+            alert("कुल आवंटित समितियां(प्रस्ताव विभाग + चार्टर्ड अकाउंटेंट + आवंटन विभाग + चार्टर्ड अकाउंटेंट) का योग कुल समितियों से अधिक नहीं हो सकता।");
+
+            if (field === "ProposalDepartment") {
+                item.ProposalDepartment = 0;
+            }
+            else if (field === "ProposalCA") {
+                item.ProposalCA = 0;
+            }
+            else if (field === "AllocationDepartment") {
+                item.AllocationDepartment = 0;
+            }
+            else if (field === "AllocationCA") {
+                item.AllocationCA = 0;
+            }
+            else if (field === "TotalCommitteesCurrentYear") {
+                item.TotalCommittees = proposalDepartment + proposalCA + allocationDepartment + allocationCA;
+            }
+
+            total = Number(item.TotalCommitteesCurrentYear) || 0;
+            proposalDepartment = Number(item.ProposalDepartment) || 0;
+            proposalCA = Number(item.ProposalCA) || 0;
+            allocationDepartment = Number(item.AllocationDepartment) || 0;
+            allocationCA = Number(item.AllocationCA) || 0;
+        }
+
+        // Calculate remaining allocation
+        item.ProposalAllocationRemaining = total - (proposalDepartment + proposalCA + allocationDepartment + allocationCA);
+    };
+
+    $scope.ValidateProposalDepartment = function (item, field) {
+
+        var total = Number(item.ProposalDepartment) || 0;
+        var department = Number(item.PreviousAuditedProposalDepartment) || 0;
+        var ca = Number(item.CurrentAuditedProposalDepartment) || 0;
+         
+        if (total < 0 || department < 0 || ca < 0) {
+            alert("Negative value allowed nahi hai.");
+            item[field] = 0;
+            $scope.ValidateProposalDepartment(item);
+            return;
+        }
+         
+        if ((department + ca) > total) {
+
+            alert("गत माह के प्रस्ताव विभाग + माह के प्रस्ताव विभाग का योग कुल आवंटित समितियां के प्रस्ताव विभाग से अधिक नहीं हो सकता।");
+
+            if (field === "PreviousAuditedProposalDepartment") {
+                item.PreviousAuditedProposalDepartment = 0;
+            }
+            else if (field === "CurrentAuditedProposalDepartment") {
+                item.CurrentAuditedProposalDepartment = 0;
+            }
+            else if (field === "ProposalDepartment") {
+                item.ProposalDepartment = department + ca;
+            }
+
+            total = Number(item.ProposalDepartment) || 0;
+            department = Number(item.PreviousAuditedProposalDepartment) || 0;
+            ca = Number(item.CurrentAuditedProposalDepartment) || 0;
+        } 
+    };
+
+    $scope.ValidateProposalCA = function (item, field) {
+
+        var total = Number(item.ProposalCA) || 0;
+        var department = Number(item.PreviousAuditedProposalCA) || 0;
+        var ca = Number(item.CurrentAuditedProposalCA) || 0;
+
+        if (total < 0 || department < 0 || ca < 0) {
+            alert("Negative value allowed nahi hai.");
+            item[field] = 0;
+            $scope.ValidateProposalCA(item);
+            return;
+        }
+
+        if ((department + ca) > total) {
+
+            alert("गत माह के प्रस्ताव चार्टर्ड अकाउंटेंट + माह के प्रस्ताव चार्टर्ड अकाउंटेंट का योग कुल आवंटित समितियां के प्रस्ताव चार्टर्ड अकाउंटेंट से अधिक नहीं हो सकता।");
+
+            if (field === "PreviousAuditedProposalCA") {
+                item.PreviousAuditedProposalCA = 0;
+            }
+            else if (field === "CurrentAuditedProposalCA") {
+                item.CurrentAuditedProposalCA = 0;
+            }
+            else if (field === "ProposalCA") {
+                item.ProposalCA = department + ca;
+            }
+
+            total = Number(item.ProposalCA) || 0;
+            department = Number(item.PreviousAuditedProposalCA) || 0;
+            ca = Number(item.CurrentAuditedProposalCA) || 0;
+        }
+    };
+
+    $scope.ValidateAllocationDepartment = function (item, field) {
+
+        var total = Number(item.AllocationDepartment) || 0;
+        var department = Number(item.PreviousAuditedAllocationDepartment) || 0;
+        var ca = Number(item.CurrentAuditedAllocationDepartment) || 0;
+
+        if (total < 0 || department < 0 || ca < 0) {
+            alert("Negative value allowed nahi hai.");
+            item[field] = 0;
+            $scope.ValidateAllocationDepartment(item);
+            return;
+        }
+
+        if ((department + ca) > total) {
+
+            alert("गत माह के आवंटन विभाग + माह के आवंटन विभाग का योग कुल आवंटित समितियां के आवंटन विभाग से अधिक नहीं हो सकता।");
+
+            if (field === "PreviousAuditedAllocationDepartment") {
+                item.PreviousAuditedAllocationDepartment = 0;
+            }
+            else if (field === "CurrentAuditedAllocationDepartment") {
+                item.CurrentAuditedAllocationDepartment = 0;
+            }
+            else if (field === "AllocationDepartment") {
+                item.AllocationDepartment = department + ca;
+            }
+
+            total = Number(item.AllocationDepartment) || 0;
+            department = Number(item.PreviousAuditedAllocationDepartment) || 0;
+            ca = Number(item.CurrentAuditedAllocationDepartment) || 0;
+        }
+    };
+
+    $scope.ValidateAllocationCA = function (item, field) {
+
+        var total = Number(item.AllocationCA) || 0;
+        var department = Number(item.PreviousAuditedAllocationCA) || 0;
+        var ca = Number(item.CurrentAuditedAllocationCA) || 0;
+
+        if (total < 0 || department < 0 || ca < 0) {
+            alert("Negative value allowed nahi hai.");
+            item[field] = 0;
+            $scope.ValidateAllocationCA(item);
+            return;
+        }
+
+        if ((department + ca) > total) {
+
+            alert("गत माह के आवंटन चार्टर्ड अकाउंटेंट + माह के आवंटन चार्टर्ड अकाउंटेंट का योग कुल आवंटित समितियां के आवंटन चार्टर्ड अकाउंटेंट से अधिक नहीं हो सकता।");
+
+            if (field === "PreviousAuditedAllocationCA") {
+                item.PreviousAuditedAllocationCA = 0;
+            }
+            else if (field === "CurrentAuditedAllocationCA") {
+                item.CurrentAuditedAllocationCA = 0;
+            }
+            else if (field === "AllocationCA") {
+                item.AllocationCA = department + ca;
+            }
+
+            total = Number(item.AllocationCA) || 0;
+            department = Number(item.PreviousAuditedAllocationCA) || 0;
+            ca = Number(item.CurrentAuditedAllocationCA) || 0;
+        }
     };
 
     // SAVE MPR DATA
@@ -291,12 +470,14 @@ MasterMod.controller("CooperativeAuditorCurrentYearFormCont", function ($scope, 
         var currentFYStartYear = month >= 4 ? year : year - 1;
 
         // Previous Financial Year
-        var nextFYStartYear = currentFYStartYear + 1;
+        var previousFYStartYear = currentFYStartYear - 1;
+        var previousFinancialYear = previousFYStartYear + '-' + String(previousFYStartYear + 1).slice(-2);
 
-        var nextFinancialYear = currentFYStartYear + '-' + String(nextFYStartYear).slice(-2);
+        //var nextFYStartYear = currentFYStartYear + 1;
+        //var nextFinancialYear = currentFYStartYear + '-' + String(nextFYStartYear).slice(-2);
         
         var distId = $scope.UserDetails.DISTRICT_ID;
-        var finYear = nextFinancialYear;
+        var finYear = previousFinancialYear;
 
         var payload = {
             //FinancialYear: $scope.auditMprHeader.FinancialYear,
@@ -390,6 +571,9 @@ MasterMod.controller("CooperativeAuditorCurrentYearFormCont", function ($scope, 
         });
     };
 
+    $scope.NextStep = function () {
+        window.location.href = '/Auditornew/AuditorCurrentyearFormNew';
+    };
 
     // CLEAR FORM VALUES
     $scope.ClearAuditMprForm = function () {
