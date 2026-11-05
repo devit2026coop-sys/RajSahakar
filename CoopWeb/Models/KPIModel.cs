@@ -1,6 +1,7 @@
 ﻿using Cooperative.Controllers;
 using Cooperative.DBConnector;
 using Newtonsoft.Json;
+using PdfSharp.Pdf.Content.Objects;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -8,10 +9,10 @@ using System.Data;
 using System.Data.OleDb;
 using System.Data.SqlClient;
 using System.Globalization;
-using System.Web;
 using System.Linq;
+using System.Web;
 using System.Web.Mvc;
-using PdfSharp.Pdf.Content.Objects;
+using static iTextSharp.text.pdf.AcroFields;
 namespace Cooperative.Models
 {
     public class KPIModel
@@ -35,7 +36,7 @@ namespace Cooperative.Models
 
         UserEntity _LoggedInUser = (UserEntity)System.Web.HttpContext.Current.Session[SessionIdentity.Admin];
 
-        //old
+        //old (Running Live)
         public int SaveKPIResult(List<KPIResultModel> model)
         {
             int Result = 0;
@@ -51,6 +52,7 @@ namespace Cooperative.Models
                     objDBAccess.AddParameterToCommand("@KPIFor", DBFactoryParameterType.VARCHAR, item.KPIFor);
                     //objDBAccess.AddParameterToCommand("@FY", DBFactoryParameterType.VARCHAR, item.FY);
                     objDBAccess.AddParameterToCommand("@Month", DBFactoryParameterType.Int, item.Month);
+                    objDBAccess.AddParameterToCommand("@ResionId", DBFactoryParameterType.Int, item.ResionId);
                     //old
                     //objDBAccess.AddParameterToCommand("@OfficeId", DBFactoryParameterType.Int, item.OfficeId);
                     objDBAccess.AddParameterToCommand("@OfficeId", DBFactoryParameterType.Int, item.KPIFor == "PACS" ? _LoggedInUser.GccId : item.OfficeId);
@@ -102,9 +104,10 @@ namespace Cooperative.Models
         //            objDBAccess.AddParameterToCommand("@KPIFor", DBFactoryParameterType.VARCHAR, item.KPIFor);
         //            //objDBAccess.AddParameterToCommand("@FY", DBFactoryParameterType.VARCHAR, item.FY);
         //            objDBAccess.AddParameterToCommand("@Month", DBFactoryParameterType.Int, item.Month);
+        //            objDBAccess.AddParameterToCommand("@ResionId", DBFactoryParameterType.Int, item.ResionId);
         //            //old
         //            //objDBAccess.AddParameterToCommand("@OfficeId", DBFactoryParameterType.Int, item.OfficeId);
-        //            objDBAccess.AddParameterToCommand("@OfficeId", DBFactoryParameterType.Int, item.KPIFor == "PACS" ? _LoggedInUser.GccId : item.OfficeId);
+        //            objDBAccess.AddParameterToCommand("@OfficeId", DBFactoryParameterType.Int, item.OfficeId);
         //            objDBAccess.AddParameterToCommand("@KPIIndicatorsId", DBFactoryParameterType.Int, item.KPIIndicatorsId);
         //            objDBAccess.AddParameterToCommand("@Target", DBFactoryParameterType.Float, item.KPIIndicatorsTarget);
         //            objDBAccess.AddParameterToCommand("@CCBId", DBFactoryParameterType.Int, item.CCBId);
@@ -138,6 +141,30 @@ namespace Cooperative.Models
         //                objDBAccess.AddParameterToCommand("@selectOptionAnyOther1", DBFactoryParameterType.Bit, item.selectOptionAnyOther1);
         //                objDBAccess.AddParameterToCommand("@selectOptionAnyOther2", DBFactoryParameterType.Bit, item.selectOptionAnyOther2);
 
+        //                if (item.KPIIndicatorsId == 86)
+        //                {
+        //                    string dyanamicDateFormat = "";
+        //                    dyanamicDateFormat = item.DynamicDate.HasValue ? item.DynamicDate.Value.ToString("yyyy-MM-dd") : null;
+        //                    objDBAccess.AddParameterToCommand("@DynamicDate", DBFactoryParameterType.VARCHAR, dyanamicDateFormat);
+        //                }
+        //                if (item.KPIIndicatorsId == 57)
+        //                {
+        //                    objDBAccess.AddParameterToCommand("@ProfitFinancialid", DBFactoryParameterType.Int, item.ProfitFinancialid ?? 0);
+        //                }
+        //                if (item.KPIIndicatorsId == 68)
+        //                {
+        //                    objDBAccess.AddParameterToCommand("@AGMFinancialId", DBFactoryParameterType.Int, item.AGMFinancialId ?? 0);
+        //                }
+        //                objDBAccess.AddParameterToCommand("@PacsBranchId", DBFactoryParameterType.Int, item.PacsBranchId ?? 0);
+        //                objDBAccess.AddParameterToCommand("@PacsId", DBFactoryParameterType.Int, item.PacsId ?? 0);
+        //                objDBAccess.AddParameterToCommand("@DepositAmount", DBFactoryParameterType.Float, item.DepositAmount);
+        //                objDBAccess.AddParameterToCommand("@KCCRecoveryAmount", DBFactoryParameterType.Float, item.KCCRecoveryAmount);
+        //                objDBAccess.AddParameterToCommand("@GCCRecoveryAmount", DBFactoryParameterType.Float, item.GCCRecoveryAmount);
+        //                objDBAccess.AddParameterToCommand("@LoanRecoveryAmount", DBFactoryParameterType.Float, item.LoanRecoveryAmount);
+        //                objDBAccess.AddParameterToCommand("@NoGodown", DBFactoryParameterType.Int, item.NoGodown);
+        //                objDBAccess.AddParameterToCommand("@ProfitLastYearAmount", DBFactoryParameterType.Float, item.ProfitLastYearAmount);
+        //                objDBAccess.AddParameterToCommand("@OtherThanKccLoanDisAmount", DBFactoryParameterType.Float, item.OtherThanKccLoanDisAmount);
+
         //            }
 
         //            objDBAccess.ExecuteCommand();
@@ -158,13 +185,17 @@ namespace Cooperative.Models
         //}
 
 
-        public DataTable GetPacsKPIDetails()
+
+        public DataTable GetPacsKPIDetails(string financialYear)
         {
             DataTable dt = new DataTable();
+
             try
             {
                 objDBAccess.OpenConnection();
                 SqlCommand cmd = objDBAccess.CreateCommand("USP_GetPacsTable", DBFactoryCommandType.PROCEDURE_COMMAND);
+                objDBAccess.AddParameterToCommand("@FinancialYear", DBFactoryParameterType.VARCHAR, financialYear);
+
                 dt = objDBAccess.GetTable();
             }
             catch (Exception ex)
@@ -178,6 +209,7 @@ namespace Cooperative.Models
 
             return dt;
         }
+
 
 
         public DataTable GetBhandarKPIDetails()
@@ -265,7 +297,7 @@ namespace Cooperative.Models
 
         }
 
-        public DataTable GetKPIAllDetails(int officeId, int? pldbId, int month, string kpiFor, int DistrictId, bool isDevelopment = false, int resionId = 0, int DivisionId = 0)
+        public DataTable GetKPIAllDetails(int officeId, int? pldbId, int month, string kpiFor, int DistrictId, bool isDevelopment = false, int resionId = 0)
         {
             DataTable dt = new DataTable();
             UserEntity _LoggedInUser = (UserEntity)System.Web.HttpContext.Current.Session[SessionIdentity.Admin];
@@ -283,7 +315,6 @@ namespace Cooperative.Models
                 objDBAccess.AddParameterToCommand("@KPIFor", DBFactoryParameterType.NVarchar, kpiFor);
                 objDBAccess.AddParameterToCommand("@DistrictId", DBFactoryParameterType.NVarchar, DistrictId);
                 objDBAccess.AddParameterToCommand("@ResionId", DBFactoryParameterType.NVarchar, resionId);
-                objDBAccess.AddParameterToCommand("@DivisionId", DBFactoryParameterType.NVarchar, DivisionId);
 
                 dt = objDBAccess.GetTable();
             }
@@ -611,7 +642,64 @@ namespace Cooperative.Models
             return dt;
         }
 
+        public DataSet GetKPIFormExpiryDetails(string requireFor = "")
+        {
+            try
+            {
+                objDBAccess.OpenConnection();
+                SqlCommand cmd = objDBAccess.CreateCommand("USP_GetKPIName", DBFactoryCommandType.PROCEDURE_COMMAND);
+                objDBAccess.AddParameterToCommand("@Action", DBFactoryParameterType.NVarchar, "Validate");
+                objDBAccess.AddParameterToCommand("@RequireFor", DBFactoryParameterType.NVarchar, requireFor);
+                return objDBAccess.GetDataSet();
+            }
+            catch (Exception ex)
+            {
+                objILogger.ErrorHandle(new ErrorLogEntity()
+                {
+                    PageName = "Cooperative.Models.KPIModel",
+                    FunctionName = "GetKPIFormExpiryDetails()"
+                }, ex);
+            }
+            finally
+            {
+                objDBAccess.CloseConnection();
+            }
+            return null;
+        }
 
 
+        public DataSet InsertUpdateKpiValidate(KPIMasterModel model)
+        {
+            DataSet ds = new DataSet();
+            UserEntity _LoggedInUser = (UserEntity)System.Web.HttpContext.Current.Session[SessionIdentity.Admin];
+
+            try
+            {
+                objDBAccess.OpenConnection();
+                SqlCommand cmd = objDBAccess.CreateCommand("USP_KPIMasterValidate", DBFactoryCommandType.PROCEDURE_COMMAND);
+                objDBAccess.AddParameterToCommand("@Action", DBFactoryParameterType.VARCHAR, model.Id > 0 ? "Update" : "Save");
+                objDBAccess.AddParameterToCommand("@Id", DBFactoryParameterType.Int, model.Id);
+                objDBAccess.AddParameterToCommand("@KPIRequireFor", DBFactoryParameterType.NVarchar, model.KPIRequireFor);
+                objDBAccess.AddParameterToCommand("@ValidateEntryDate", DBFactoryParameterType.Int, model.ValidateEntryDate);
+                objDBAccess.AddParameterToCommand("@ValidateEntryTime", DBFactoryParameterType.Int, model.ValidateEntryTime);
+                objDBAccess.ExecuteCommand();
+                ds = objDBAccess.GetDataSet();
+                return ds;
+            }
+            catch (Exception ex)
+            {
+                objILogger.ErrorHandle(new ErrorLogEntity()
+                {
+                    PageName = "KPIModel",
+                    FunctionName = "InsertUpdateKpiValidate"
+                }, ex);
+
+                return ds;
+            }
+            finally
+            {
+                objDBAccess.CloseConnection();
+            }
+        }
     }
 }

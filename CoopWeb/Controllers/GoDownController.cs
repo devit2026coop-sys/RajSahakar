@@ -2,15 +2,18 @@
 using Cooperative.Filters;
 using Cooperative.Models;
 using Newtonsoft.Json;
+using Org.BouncyCastle.Asn1.Ocsp;
 using System;
 using System.Data;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using System.Web;
 using System.Web.Hosting;
 using System.Web.Mvc;
 using static Cooperative.Models.CoopModel;
+using static Cooperative.Models.NCDServiceModel;
 
 
 namespace Cooperative.Controllers
@@ -18,6 +21,7 @@ namespace Cooperative.Controllers
     [Error]
     public class GodownController : BaseController
     {
+        GodownModel objGodownModel = new GodownModel(new DBLogger());
         UserEntity _LoggedInUser = (UserEntity)System.Web.HttpContext.Current.Session[SessionIdentity.Admin];
 
         [HttpGet]
@@ -30,7 +34,6 @@ namespace Cooperative.Controllers
         public string GodownLists(int Status = 0)
         {
             GodownModel objSocietyModel = new GodownModel(new DBLogger());
-
             DataPagingModel Details = new DataPagingModel();
             Details.IsAllRecords = true;
             Details.PageNumber = 1;
@@ -63,7 +66,6 @@ namespace Cooperative.Controllers
         [HttpPost]
         public string CitizenDashboardDataWithDepartmentUser(SocietyRegistrationEntity objSocietyRegistrationEntity)
         {
-
             GodownModel objMenuActionModel = new GodownModel(new FileLogger());
             DataTable DT = null;
             if (Request.Cookies["RAJSSO"] != null && Request.Cookies["SSOROLE"].Value == "KIOSK" && Request.Cookies["SSO_ID"] != null && System.Web.HttpContext.Current.Session[SessionIdentity.SocietyIDEnc] != null)
@@ -255,12 +257,39 @@ namespace Cooperative.Controllers
         }
 
         [HttpPost]
-        [ActionName("GETGodownFormationList")]
-        public string GETGodownFormationList(string SearchText = "")
+        [ActionName("GetGodownFsEmailList")]
+        public string GetGodownFsEmailList(string SearchText = "")
         {
             GodownModel objGoDownModel = new GodownModel(new DBLogger());
             return COMMON_FUNCTION.DataTableToJSONWithJSONNet(objGoDownModel.GETGodownFormationList(SearchText));
         }
+
+        [HttpPost]
+        [ActionName("GetEmailListByUser")]
+        public JsonResult GetEmailListByUser()
+        {
+            GodownModel objGoDownModel = new GodownModel(new DBLogger());
+            var responce = new APIResponce();
+            var ds = objGoDownModel.GetEmailListByUser();
+            if (ds != null)
+            {
+                responce.Data = new
+                {
+                    emailData = ds.Tables.Count > 0 ? COMMON_FUNCTION.DataTableToJSONString(ds.Tables[0]) : null,
+                };
+                responce.Status = "200";
+                responce.Message = "Success";
+            }
+            else
+            {
+                responce.Status = "500";
+                responce.Message = "Internal Server Error.";
+            }
+            return Json(new { Result = responce }, JsonRequestBehavior.AllowGet);
+
+        }
+
+
 
         [HttpPost]
         [ActionName("GETActionsList")]
@@ -277,17 +306,12 @@ namespace Cooperative.Controllers
             try
             {
                 string Ids = "";
-
                 if (!String.IsNullOrEmpty(GodownApplicationEncId))
                 {
                     CoopEntities DB = new CoopEntities();
-
                     Ids = DB.GetDecrypt(GodownApplicationEncId).FirstOrDefault().ToString();
-
                     GodownModel objLoan = new GodownModel(new DBLogger());
-
                     DataSet ds = objLoan.GetGodownListApplicationFormViewData(Ids, "GodownData");
-
                     return Json(new { DataList = COMMON_FUNCTION.DataTableToJSONWithJSONNet(ds.Tables[0]), DocumentList = COMMON_FUNCTION.DataTableToJSONWithJSONNet(ds.Tables[1]), GodownTimeBoundList = COMMON_FUNCTION.DataTableToJSONWithJSONNet(ds.Tables[2]) }, JsonRequestBehavior.AllowGet);
                 }
 
@@ -359,62 +383,6 @@ namespace Cooperative.Controllers
             return Json(objNew.UpdateAction(selectedApplications, Status));
         }
 
-
-
-        [HttpGet]
-        public string GenerateASPDFOld(int ApplicationId)
-        {
-            try
-            {
-                if (System.Web.HttpContext.Current.Session[SessionIdentity.Admin] == null)
-                {
-                    return "Fail";
-                }
-
-                GodownModel objGodownModel = new GodownModel(new DBLogger());
-                string file = HostingEnvironment.MapPath("~/Template/Godown/GodownASGenerate.html");
-                StringBuilder strbld = new StringBuilder();
-                strbld.Append(System.IO.File.ReadAllText(file));
-                DataTable dt = objGodownModel.GetGodownDetailsById(ApplicationId);
-                if (dt.Rows.Count > 0)
-                {
-                    DataRow dr = dt.Rows[0];
-                    strbld.Replace("##Address##", Convert.ToString(dr["Address"]));
-                    strbld.Replace("##District##", Convert.ToString(dr["DISTRICT_ENG"]));
-                    strbld.Replace("##Village##", Convert.ToString(dr["VILLAGE_ENG"]));
-                    strbld.Replace("##SanctionAmt##", Convert.ToString(dr["SanctionAmt"]));
-                    strbld.Replace("##PresidentName##", Convert.ToString(dr["PresidentName"]));
-                    strbld.Replace("##SecretaryName##", Convert.ToString(dr["SecretaryName"]));
-                    strbld.Replace("##CCBName##", Convert.ToString(dr["CCBName"]));
-                    strbld.Replace("##LandSize1##", Convert.ToString(dr["LandSize1"]));
-                    strbld.Replace("##LandSize2##", Convert.ToString(dr["LandSize2"]));
-                    strbld.Replace("##TotalLandSize1##", Convert.ToString(dr["TotalLandSize1"]));
-                    strbld.Replace("##TotalLandSize2##", Convert.ToString(dr["TotalLandSize2"]));
-                    strbld.Replace("##CurrentDate##", DateTime.Now.ToString("dd/MM/yyyy"));
-                    strbld.Replace("##SocietyName##", Convert.ToString(dr["SocietyName"]));
-                    strbld.Replace("##GP_ENG##", Convert.ToString(dr["GP_ENG"]));
-                    strbld.Replace("##BLOCK_ENG##", Convert.ToString(dr["BLOCK_ENG"]));
-                    strbld.Replace("##MTCapacityName##", Convert.ToString(dr["MTCapacityName"]));
-                    strbld.Replace("##AvailabilityOfSocietyName##", Convert.ToString(dr["AvailabilityOfSocietyName"]));
-                    strbld.Replace("##ApplicationNo##", Convert.ToString(dr["ApplicationNo"]));
-                }
-
-                string pdfPath = objGodownModel.CommonASGenerate(strbld);
-                pdfPath = Path.GetFileName(pdfPath);
-                objGodownModel.UpdateASGeneratePath(ApplicationId, pdfPath);
-
-                return pdfPath;
-            }
-            catch (Exception ex)
-            {
-                ILogger objILogger = new DBLogger();
-                objILogger.ErrorHandle(new ErrorLogEntity() { PageName = "GodownController", FunctionName = "GenerateASPDF" }, ex);
-                return "Fail";
-            }
-        }
-
-
-
         [HttpGet]
         [ActionName("GetNewLovValuesForVacantPostListId")]
         public string GetNewLovValuesForVacantDetailsByListId(string ListCode)
@@ -427,7 +395,7 @@ namespace Cooperative.Controllers
         [HttpGet]
         public JsonResult GenerateASPDF(int ApplicationId, int NextStatusId)
         {
-            GodownModel objGodownModel = new GodownModel(new DBLogger());
+
             var responseModel = new PacsResponseModel();
             var resultData = objGodownModel.GenerateASPdf(ApplicationId, NextStatusId);
             if (!string.IsNullOrWhiteSpace(resultData))
@@ -474,7 +442,6 @@ namespace Cooperative.Controllers
         [HttpGet]
         public JsonResult GenerateFSPdfByTemplate(int ApplicationId, int NextStatusId, string fsType)
         {
-            GodownModel objGodownModel = new GodownModel(new DBLogger());
             var responseModel = new PacsResponseModel();
             var resultData = objGodownModel.GenerateCommonFSPdf(ApplicationId, NextStatusId, fsType);
             if (!string.IsNullOrWhiteSpace(resultData))
@@ -516,7 +483,74 @@ namespace Cooperative.Controllers
             }, JsonRequestBehavior.AllowGet);
         }
         #endregion
+
+
+        [HttpPost]
+        public JsonResult SendFsEmailFromGodown(SendFsEmailModel _entityModel)
+        {
+            bool isSent = false;
+            try
+            {
+                if (_entityModel == null || string.IsNullOrWhiteSpace(_entityModel.ToEmail))
+                {
+                    return Json(new { Success = false, Message = "Please enter recipient email." });
+                }
+
+                //if (string.IsNullOrWhiteSpace(_entityModel.DocumentUrl))
+                //{
+                //    return Json(new { Success = false, Message = "Document is not available." });
+                //}
+                // COMMON_FUNCTION.SendFSEmail(requestModel);
+                isSent = COMMON_FUNCTION.SendFSEmail(_entityModel);
+                return Json(new
+                {
+                    Success = true,
+                    Message = "Email sent successfully."
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    Success = false,
+                    Message = "Unable to send email."
+                });
+            }
+        }
+
+
+
+        [HttpGet]
+        public ActionResult GodownEmailFormation()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public JsonResult ApplicationRevertProcess(GodownProposalModel _entityModel)
+        {
+            var responseData = new APIResponce();
+            try
+            {
+                var resultData = objGodownModel.GodownRevertApplication(_entityModel);
+                if (resultData != null)
+                {
+                    responseData.Message = Convert.ToString(resultData.Tables[0].Rows[0]["message"]);
+                    responseData.Status = Convert.ToString(resultData.Tables[0].Rows[0]["status"]);
+                }
+                return Json(new
+                {
+                    data = responseData
+                }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    status = responseData.Status,
+                    Message = responseData.Message
+                }, JsonRequestBehavior.AllowGet);
+            }
+        }
     }
-
-
 }

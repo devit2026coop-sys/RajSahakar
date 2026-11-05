@@ -3736,6 +3736,40 @@ namespace Cooperative.Controllers
             return false;
         }
 
+        public static bool SendFSEmail(SendFsEmailModel _entityModel)
+        {
+            try
+            {
+                System.Net.Mail.MailMessage message = new System.Net.Mail.MailMessage();
+                message.To.Add(new System.Net.Mail.MailAddress(_entityModel.ToEmail.ToString()));
+                message.Body = _entityModel.Body;
+                message.IsBodyHtml = true;
+                message.From = new System.Net.Mail.MailAddress("donotreply.rajsahakar@raj.gov.in");
+                message.Subject = _entityModel.Subject;
+                message.BodyEncoding = System.Text.Encoding.ASCII;
+                message.Priority = System.Net.Mail.MailPriority.High;
+                System.Net.Mail.SmtpClient Smtp = new System.Net.Mail.SmtpClient();
+                //Smtp.Host = "mail.raj.gov.in";
+                //Smtp.Port = 25;
+                Smtp.Host = "smtp.gmail.com";
+                Smtp.Port = 587;
+                Smtp.UseDefaultCredentials = true;
+                //Smtp.Credentials = new System.Net.NetworkCredential("donotreply.rajsahakar@raj.gov.in", "Rajasthan@1027");
+                Smtp.Credentials = new System.Net.NetworkCredential("narpatkumawat.it@gmail.com", "Narpat@#2023");
+                Smtp.EnableSsl = false;
+                Smtp.Send(message);
+                return true;                
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(
+                    "Email sending failed: " + ex.ToString());
+
+                throw;
+            }
+        }
+
+
         public class DecryptedAadhaarResponse
         {
             public string RequestId { get; set; }

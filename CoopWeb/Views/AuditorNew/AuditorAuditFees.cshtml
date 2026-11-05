@@ -1,0 +1,291 @@
+﻿<script src="~/Scripts/AngularFramework/AuditorCurrentYearFormNew.js?v=@DateTime.Now.Ticks"></script>
+<link href="~/Content/Stylesheets/toastr.min.css" rel="stylesheet" />
+<script src="~/Scripts/toastr.min.js"></script>
+<style>
+    .section-head {
+        font-weight: 600;
+        font-size: 16px;
+        margin: 20px 0 10px 0;
+        border-bottom: 1px solid #ddd;
+        padding-bottom: 5px;
+    }
+
+    .field-label {
+        font-weight: 500;
+    }
+
+    .db-value {
+        color: #555;
+        font-style: italic;
+    }
+
+    table.devtable tbody tr th.row-name {
+        color: #fff !important;
+        background-color: #1899a0;
+    }
+
+    table.devtable thead tr th {
+        background: #1899a0;
+        text-align: center;
+    }
+
+    table.devtable tfoot tr th, table.devtable tfoot td {
+        background: #1899a0;
+    }
+
+    table.devtable tbody td.drkBg, table.devtable thead th.drkBg2 {
+        background: #79c8cd;
+    }
+
+    table.devtable thead th.lgtBg {
+        background: #fff;
+        color: #000;
+    }
+
+    table.devtable tbody td input, table.devtable tfoot td input {
+        text-align: right;
+    }
+</style>
+<div ng-app="ApplicationPLDBKPIModule">
+    <div ng-controller="CooperativePLDBKPIFormCont">
+        <div class="col-md-12">
+            <h3 class="citizen-dash-head ng-binding" style="margin-top:0px;">Auditor {{UserDetails.DistrictName}} {{PreviousMonth}} 2026 तक प्रगति रिपोर्ट</h3>
+        </div>
+
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#">  {{translation.Home}}</a>
+                        <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;"> {{translation.New}} </span>
+                        <i class="fa fa-angle-right"> </i>
+                        <span style="margin: 0 5px;">Auditor {{UserDetails.DistrictName}} {{PreviousMonth}} 2026 तक प्रगति रिपोर्ट</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div style="margin-top:30px;padding-top:30px">
+            <div class="col-md-12">
+                <div class="citizen-dash-head" style="overflow: hidden;">
+
+                    <div class="form-group col-md-2 pull-left">
+                        <label>Select Date</label>
+                        @*<input type="date" class="form-control" ng-model="SelectedDate"  ng-change="GetAuditorCurrentYearFormNew()" />*@
+                        <input type="date" class="form-control" ng-model="SelectedDate" ng-change="GetKPIResult()" />
+                    </div>
+
+                    <h2 style=" font-weight: bold; text-align: center; "> Auditor {{UserDetails.DISTRICT_ENG}} {{PreviousMonth}} ({{ FinancialYearName }})</h2>
+                    @*<h3 style=" font-weight: bold; text-align: center; margin: 30px 0;">कार्य प्रदर्शन के आधार पर (केपीआई)</h3>*@
+                    <div class="col-md-12">
+
+                        <input type="hidden" id="hdnDistrictId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DistrictId)" />
+
+                        @*PLDB*@
+                        @*<div class="form-group col-md-3" ng-if="UserDetails.RoleId != 10188 && UserDetails.RoleId !== undefined && UserDetails.RoleId !== null">
+                                <label for="">District</label>
+                                <select name="PLDB_ID" ng-model="PLDB.PldbId" id="Pldb_Id" class="form-control" ng-init="PLDB.PldbId='0'" ng-change="PLDBChanged()">
+                                    <option value="0" disabled>--चुनें--</option>
+                                    <option ng-repeat="itemPLDB in PLDBList | orderBy:'PLDBName' track by itemPLDB.PLDBName " value="{{itemPLDB.PldbId}}">
+                                        {{itemPLDB.PLDBName}}
+                                    </option>
+                                </select>
+                            </div>*@
+                    </div>
+
+                    <div class="citizen-dash-head" ng-show="ShowTable">
+
+
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped devtable bank-table">
+
+                                <colgroup>
+                                    <col style="width:5.5%" />
+                                    <col style="width:12%" />
+                                    <col style="width:12%" />
+                                    <col style="width:12%" />
+                                    <col style="width:12%" />
+                                    <col style="width:12%" />
+                                    <col style="width:12%" />
+                                    <col style="width:11.25%" />
+                                    <col style="width:11.25%" />
+                                </colgroup>
+
+                                <thead>
+                                    <!-- Row 1: Main Header -->
+                                    <tr class="year-heading">
+                                        <th colspan="8" class="main-title">
+                                            बैंक वार
+                                        </th>
+                                        <th>
+                                        </th>
+                                    </tr>
+
+                                    <!-- Row 2: Main Groups -->
+                                    <tr>
+                                        <th rowspan="2" class="type-head">
+                                            प्रकार
+                                        </th>
+
+                                        <th rowspan="2" class="total-head lgtBg">
+                                            कुल समितियां
+                                        </th>
+
+                                        <th colspan="2" class="drkBg2">
+                                            कुल आवंटित समितियां
+                                        </th>
+
+                                        <th rowspan="2" class="total-head lgtBg">
+                                            आवंटन से शेष
+                                        </th>
+
+                                        <th colspan="2" class="drkBg2">
+                                            गत माह तक ऑडिटेड
+                                        </th>
+
+                                        <th colspan="2" class="lgtBg">
+                                            माह में ऑडिटेड
+                                        </th>
+                                    </tr>
+
+                                    <!-- Row 3: Department / CA -->
+                                    <tr>
+                                        <!-- Total Allotted -->
+                                        <th class="drkBg2">
+                                            विभाग
+                                        </th>
+                                        <th class="drkBg2">
+                                            चार्टर्ड<br />अकाउंटेंट
+                                        </th>
+
+                                        <!-- Previous Month Audited -->
+                                        <th class="drkBg2">
+                                            विभाग
+                                        </th>
+                                        <th class="drkBg2">
+                                            चार्टर्ड<br />अकाउंटेंट
+                                        </th>
+
+                                        <!-- Current Month Audited -->
+                                        <th class="lgtBg">
+                                            विभाग
+                                        </th>
+                                        <th class="lgtBg">
+                                            चार्टर्ड<br />अकाउंटेंट
+                                        </th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    <tr ng-repeat="item in KPIData track by $index">
+
+                                        <!-- 1. Committee Type -->
+                                        <td class="type-cell">
+                                            {{item.CommiteeTypeName_Hin}}
+                                        </td>
+
+                                        <!-- 2. Total Committees -->
+                                        <td>
+                                            <input type="number"
+                                                   class="form-control"
+                                                   ng-model="item.TotalCommittees"
+                                                   ng-disabled="item.InitialEnable != 1"
+                                                   min="0"
+                                                   ng-change="CalculateBalanceAllocation(item, 'TotalCommittees')" />
+                                        </td>
+
+                                        <!-- 3. Total Allotted - Department -->
+                                        <td class="allotted-cell">
+                                            <input type="number"
+                                                   class="form-control"
+                                                   ng-model="item.TotalAllotmentDepartment"
+                                                   ng-change="CalculateBalanceAllocation(item, 'TotalAllotmentDepartment'); ValidateDepartmentAudit(item)" min="0" />
+
+                                        </td>
+
+                                        <!-- 4. Total Allotted - CA -->
+                                        <td class="allotted-cell">
+                                            <input type="number"
+                                                   class="form-control"
+                                                   ng-model="item.TotalAllotmentCA"
+                                                   ng-change="CalculateBalanceAllocation(item, 'TotalAllotmentCA')"
+                                                   min="0" />
+                                        </td>
+
+                                        <!-- 5. Remaining Allotment -->
+                                        <td>
+                                            <input type="number"
+                                                   class="form-control"
+                                                   ng-model="item.balanceAllocation"
+                                                   readonly />
+                                        </td>
+
+                                        <!-- 6. Previous Month - Department -->
+                                        <td class="previous-cell">
+                                            <input type="number"
+                                                   class="form-control"
+                                                   ng-model="item.AllotmentDepartmentLastMonth"
+                                                   ng-change="ValidateDepartmentAudit(item, 'previous')"
+                                                   ng-disabled="item.InitialEnable != 1"
+                                                   min="0" />
+                                        </td>
+
+                                        <!-- 7. Previous Month - CA -->
+                                        <td class="previous-cell">
+                                            <input type="number"
+                                                   class="form-control"
+                                                   ng-model="item.AllotmentCALastMonth"
+                                                   ng-change="ValidateCAAudit(item , 'previous')"
+                                                   ng-disabled="item.InitialEnable != 1"
+                                                   min="0" />
+                                        </td>
+
+                                        <!-- 8. Current Month - Department -->
+                                        <td>
+                                            <input type="number"
+                                                   class="form-control"
+                                                   ng-model="item.AllotmentDepartmentInMonth"
+                                                   ng-change="ValidateDepartmentAudit(item , 'current')"
+                                                   min="0" />
+                                        </td>
+
+                                        <!-- 9. Current Month - CA -->
+                                        <td>
+                                            <input type="number"
+                                                   class="form-control"
+                                                   ng-model="item.AllotmentCAInMonth"
+                                                   ng-change="ValidateCAAudit(item , 'current')"
+                                                   min="0" />
+                                        </td>
+
+                                    </tr>
+
+                                    <tr ng-if="!KPIData || KPIData.length == 0">
+                                        <td colspan="9" class="text-center">
+                                            No Data Found
+                                        </td>
+                                    </tr>
+                                </tbody>
+
+                            </table>
+                        </div>
+
+                    </div>
+                    <div class="text-center" style="margin-top:20px;" ng-show="ShowTable" ng-if="!IsKPIExpired">
+                        @*<div class="text-center" style="margin-top:20px;" ng-show="ShowTable">*@
+                        <button type="button" class="btn btn-primary dev-btn" ng-click="IsUpdate ? UpdateAuditResult() : SaveAuditResult()">
+                            {{ isBtn }}
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="se-pre-con"></div>
+        </div>
+    </div>
+</div>

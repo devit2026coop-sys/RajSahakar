@@ -47,101 +47,6 @@ namespace Cooperative.Models
         public string CreatedIP { get; set; }
         public string UpdatedIP { get; set; }
 
-
-        //
-        public long Id { get; set; }
-
-        // 2. Financial Year
-        public string FinancialYear { get; set; }
-
-        // 3. Month
-        public int Month { get; set; }
-
-        // 4. District
-        public int DistrictId { get; set; }
-
-        // 5. Office
-        public int? OfficeId { get; set; }
-
-        // 6. Committee Type
-        public int CommiteeTypeId { get; set; }
-
-        public int CommitteeTypeId { get; set; }
-
-        public string CommiteeTypeName_En { get; set; }
-
-        public string CommiteeTypeName_Hin { get; set; }
-
-        // 7. Total Committees
-        public int? TotalCommitteesCurrentYear { get; set; }
-
-        // 8. Proposal Details
-        public int? ProposalDepartment { get; set; }
-
-        public int? ProposalCA { get; set; }
-
-        // 9. Allocation Details
-        public int? AllocationDepartment { get; set; }
-
-        public int? AllocationCA { get; set; }
-
-        // 10. Allotment Details (HTML)
-        public int? AllotmentDepartment { get; set; }
-
-        public int? AllotmentCA { get; set; }
-
-        // 11. Remaining Allotment
-        public int? RemainingAllotment { get; set; }
-
-        // 12. Audited Proposal
-        public int? AuditedProposalDepartment { get; set; }
-
-        public int? AuditedProposalCA { get; set; }
-
-        // 13. Audited Allocation
-        public int? AuditedAllocationDepartment { get; set; }
-
-        public int? AuditedAllocationCA { get; set; }
-
-        // 14. Previous Month Audited
-        public int? PreviousAllotmentDepartment { get; set; }
-
-        public int? PreviousAllotmentCA { get; set; }
-
-        // 15. Current Month Audited
-        public int? MonthAllotmentDepartment { get; set; }
-
-        public int? MonthAllotmentCA { get; set; }
-
-        // 16. Created Details
-        
-
-        public DateTime? CreatedDate { get; set; }
-
-        public DateTime? CreatedDate1 { get; set; }
-
-        // 17. Updated Details
-        
-        public DateTime? UpdatedDate { get; set; }
-
-        // 18. User Role
-        public int? UserRoleDeptMappingId { get; set; }
-
-        public int? RoleId { get; set; }
-
-        // 19. Active Status
-       
-
-       
-
-        // 20. Display Order
-        public int? IsDisplayOrder { get; set; }
-
-        // 21. KPI Indicators
-        
-
-
-        //
         public AuditorModel(ILogger objErrorLogger)
         {
             objILogger = objErrorLogger;
@@ -154,8 +59,6 @@ namespace Cooperative.Models
             objDBAccess = new DBFactoryMSSQL();
 
         }
-
-
 
         public int AddSmsFormat()
         {
@@ -2154,272 +2057,7 @@ namespace Cooperative.Models
             }
             return null;
         }
-
-        public DataTable GetAuditCommiteeDetails()
-        {
-            DataTable dt = new DataTable();
-
-            try
-            {
-                objDBAccess.OpenConnection();
-
-                SqlCommand cmd = objDBAccess.CreateCommand("USP_AuditMprCommitteeBackYear", DBFactoryCommandType.PROCEDURE_COMMAND);
-                dt = objDBAccess.GetTable();
-            }
-            catch (Exception ex)
-            {
-                objILogger.ErrorHandle(new ErrorLogEntity() { PageName = "Cooperative.Models.KPIModel", FunctionName = "GetPLDBKPIDetails()" }, ex);
-            }
-            finally
-            {
-                objDBAccess.CloseConnection();
-            }
-
-            return dt;
-        }
-
-
-
-        public int SaveAuditResult(List<AuditorModel> model)
-        {
-            int Result = 0;
-
-            UserEntity _LoggedInUser =
-                (UserEntity)System.Web.HttpContext.Current
-                .Session[SessionIdentity.Admin];
-
-            if (_LoggedInUser == null ||
-                model == null ||
-                model.Count == 0)
-            {
-                return 0;
-            }
-
-            try
-            {
-                objDBAccess.OpenConnection();
-
-                foreach (var item in model)
-                {
-                    SqlCommand cmd = objDBAccess.CreateCommand(
-                        "USP_SaveAuditMprCommitteeBackYear",
-                        DBFactoryCommandType.PROCEDURE_COMMAND
-                    );
-
-                    // Financial Year
-                    string financialYear = item.FinancialYear;
-                        
-
-                    if (string.IsNullOrWhiteSpace(financialYear))
-                        throw new Exception("Financial Year is required.");
-
-                    // Total Committees
-                    int totalCommittees = item.TotalCommitteesCurrentYear ?? 0;
-
-                    // Committee Type
-                    int committeeTypeId =
-                        item.CommitteeTypeId > 0
-                        ? item.CommitteeTypeId
-                        : item.CommiteeTypeId;
-
-                    if (committeeTypeId <= 0)
-                        throw new Exception("Committee Type is required.");
-
-                    // Remaining Allotment
-                    int allotmentDepartment =
-                        item.AllotmentDepartment ?? 0;
-
-                    int allotmentCA =
-                        item.AllotmentCA ?? 0;
-
-                    int remainingAllotment = Math.Max(
-                        0,
-                        totalCommittees -
-                        (allotmentDepartment + allotmentCA)
-                    );
-
-                    // Financial Details
-                    objDBAccess.AddParameterToCommand(
-                        "@FinancialYear",
-                        DBFactoryParameterType.VARCHAR,
-                        financialYear
-                    );
-
-                    objDBAccess.AddParameterToCommand(
-                        "@Month",
-                        DBFactoryParameterType.Int,
-                        item.Month
-                    );
-
-                    objDBAccess.AddParameterToCommand(
-                        "@DistrictId",
-                        DBFactoryParameterType.Int,
-                        item.DistrictId
-                    );
-
-                    objDBAccess.AddParameterToCommand(
-                        "@OfficeId",
-                        DBFactoryParameterType.Int,
-                        (object)item.OfficeId ?? DBNull.Value
-                    );
-
-                    objDBAccess.AddParameterToCommand(
-                        "@CommitteeTypeId",
-                        DBFactoryParameterType.Int,
-                        committeeTypeId
-                    );
-
-                    // Total Committees
-                    objDBAccess.AddParameterToCommand(
-                        "@TotalCommitteesCurrentYear",
-                        DBFactoryParameterType.Int,
-                        totalCommittees
-                    );
-
-                    // Existing Proposal
-                    objDBAccess.AddParameterToCommand(
-                        "@ProposalDepartment",
-                        DBFactoryParameterType.Int,
-                        (object)item.ProposalDepartment ?? DBNull.Value
-                    );
-
-                    objDBAccess.AddParameterToCommand(
-                        "@ProposalCA",
-                        DBFactoryParameterType.Int,
-                        (object)item.ProposalCA ?? DBNull.Value
-                    );
-
-                    // Existing Allocation
-                    objDBAccess.AddParameterToCommand(
-                        "@AllocationDepartment",
-                        DBFactoryParameterType.Int,
-                        (object)item.AllocationDepartment ?? DBNull.Value
-                    );
-
-                    objDBAccess.AddParameterToCommand(
-                        "@AllocationCA",
-                        DBFactoryParameterType.Int,
-                        (object)item.AllocationCA ?? DBNull.Value
-                    );
-
-                    // Existing Audited Proposal
-                    objDBAccess.AddParameterToCommand(
-                        "@AuditedProposalDepartment",
-                        DBFactoryParameterType.Int,
-                        (object)item.AuditedProposalDepartment ?? DBNull.Value
-                    );
-
-                    objDBAccess.AddParameterToCommand(
-                        "@AuditedProposalCA",
-                        DBFactoryParameterType.Int,
-                        (object)item.AuditedProposalCA ?? DBNull.Value
-                    );
-
-                    // Existing Audited Allocation
-                    objDBAccess.AddParameterToCommand(
-                        "@AuditedAllocationDepartment",
-                        DBFactoryParameterType.Int,
-                        (object)item.AuditedAllocationDepartment ?? DBNull.Value
-                    );
-
-                    objDBAccess.AddParameterToCommand(
-                        "@AuditedAllocationCA",
-                        DBFactoryParameterType.Int,
-                        (object)item.AuditedAllocationCA ?? DBNull.Value
-                    );
-
-                    // New HTML - Allotment
-                    objDBAccess.AddParameterToCommand(
-                        "@AllotmentDepartment",
-                        DBFactoryParameterType.Int,
-                        allotmentDepartment
-                    );
-
-                    objDBAccess.AddParameterToCommand(
-                        "@AllotmentCA",
-                        DBFactoryParameterType.Int,
-                        allotmentCA
-                    );
-
-                    // Remaining
-                    objDBAccess.AddParameterToCommand(
-                        "@RemainingAllotment",
-                        DBFactoryParameterType.Int,
-                        remainingAllotment
-                    );
-
-                    // Previous Month
-                    objDBAccess.AddParameterToCommand(
-                        "@PreviousAllotmentDepartment",
-                        DBFactoryParameterType.Int,
-                        item.PreviousAllotmentDepartment ?? 0
-                    );
-
-                    objDBAccess.AddParameterToCommand(
-                        "@PreviousAllotmentCA",
-                        DBFactoryParameterType.Int,
-                        item.PreviousAllotmentCA ?? 0
-                    );
-
-                    // Current Month
-                    objDBAccess.AddParameterToCommand(
-                        "@MonthAllotmentDepartment",
-                        DBFactoryParameterType.Int,
-                        item.MonthAllotmentDepartment ?? 0
-                    );
-
-                    objDBAccess.AddParameterToCommand(
-                        "@MonthAllotmentCA",
-                        DBFactoryParameterType.Int,
-                        item.MonthAllotmentCA ?? 0
-                    );
-
-                    // Logged-in User
-                    objDBAccess.AddParameterToCommand(
-                        "@CreatedBy",
-                        DBFactoryParameterType.Int,
-                        _LoggedInUser.UserId
-                    );
-
-                    objDBAccess.AddParameterToCommand(
-                        "@UserRoleDeptMappingId",
-                        DBFactoryParameterType.Int,
-                        _LoggedInUser.UserRoleDeptMappingId
-                    );
-
-                    objDBAccess.AddParameterToCommand(
-                        "@RoleId",
-                        DBFactoryParameterType.Int,
-                        _LoggedInUser.RoleId
-                    );
-
-                    // Execute Stored Procedure
-                    objDBAccess.ExecuteCommand();
-
-                    Result++;
-                }
-            }
-            catch (Exception ex)
-            {
-                objILogger.ErrorHandle(
-                    new ErrorLogEntity()
-                    {
-                        PageName = "KPIModel",
-                        FunctionName = "SaveAuditResult"
-                    },
-                    ex
-                );
-
-                Result = 0;
-            }
-            finally
-            {
-                objDBAccess.CloseConnection();
-            }
-
-            return Result;
-        }
-
+         
         public DataTable GetUserDetailsAuditBySSO()
         {
             DataTable dt = new DataTable();
@@ -2436,7 +2074,7 @@ namespace Cooperative.Models
             }
             catch (Exception ex)
             {
-                objILogger.ErrorHandle(new ErrorLogEntity() { PageName = "Cooperative.Models.AuditorNewModel", FunctionName = "GetUserDetailsBySSO(string SSOID)" }, ex);
+                objILogger.ErrorHandle(new ErrorLogEntity() { PageName = "Cooperative.Models.KPIModel", FunctionName = "GetUserDetailsBySSO(string SSOID)" }, ex);
             }
             finally
             {
@@ -2446,32 +2084,112 @@ namespace Cooperative.Models
             return dt;
         }
 
-
-        public DataTable GetAuditorCurrentYearFormNew(string selectedDate, string financialYear, int districtId)
+        public int AuditMprCommitteeCurrentYearInsert(
+            AuditMprCommitteeCurrentYear obj)
         {
-            DataTable dt = new DataTable();
+            int Result = -1;
 
             try
             {
                 objDBAccess.OpenConnection();
 
-                SqlCommand cmd = objDBAccess.CreateCommand("USP_GetDataAuditorCurrentYearFormNew", DBFactoryCommandType.PROCEDURE_COMMAND);
-                cmd.Parameters.AddWithValue("@SelectedDate", selectedDate);
-                cmd.Parameters.AddWithValue("@FinancialYear", financialYear);
-                cmd.Parameters.AddWithValue("@DistrictId", districtId);
-                dt = objDBAccess.GetTable();
+                SqlCommand cmd = objDBAccess.CreateCommand(
+                    "USP_Insert_AuditMprCommitteeCurrentYear",
+                    DBFactoryCommandType.PROCEDURE_COMMAND);
+
+                objDBAccess.AddParameterToCommand(
+                    "@FinancialYear",
+                    DBFactoryParameterType.NVarchar,
+                    obj.FinancialYear);
+
+                objDBAccess.AddParameterToCommand(
+                    "@Month",
+                    DBFactoryParameterType.Int,
+                    obj.Month);
+
+                objDBAccess.AddParameterToCommand(
+                    "@DistrictId",
+                    DBFactoryParameterType.Int,
+                    obj.DistrictId);
+
+                objDBAccess.AddParameterToCommand(
+                    "@CommitteeTypeId",
+                    DBFactoryParameterType.Int,
+                    obj.CommitteeTypeId);
+
+                objDBAccess.AddParameterToCommand(
+                    "@TotalCommitteesCurrentYear",
+                    DBFactoryParameterType.Int,
+                    (object)obj.TotalCommitteesCurrentYear ?? DBNull.Value);
+
+                objDBAccess.AddParameterToCommand(
+                    "@ProposalDepartment",
+                    DBFactoryParameterType.Int,
+                    (object)obj.ProposalDepartment ?? DBNull.Value);
+
+                objDBAccess.AddParameterToCommand(
+                    "@ProposalCA",
+                    DBFactoryParameterType.Int,
+                    (object)obj.ProposalCA ?? DBNull.Value);
+
+                objDBAccess.AddParameterToCommand(
+                    "@AllocationDepartment",
+                    DBFactoryParameterType.Int,
+                    (object)obj.AllocationDepartment ?? DBNull.Value);
+
+                objDBAccess.AddParameterToCommand(
+                    "@AllocationCA",
+                    DBFactoryParameterType.Int,
+                    (object)obj.AllocationCA ?? DBNull.Value);
+
+                objDBAccess.AddParameterToCommand(
+                    "@AuditedProposalDepartment",
+                    DBFactoryParameterType.Int,
+                    (object)obj.AuditedProposalDepartment ?? DBNull.Value);
+
+                objDBAccess.AddParameterToCommand(
+                    "@AuditedProposalCA",
+                    DBFactoryParameterType.Int,
+                    (object)obj.AuditedProposalCA ?? DBNull.Value);
+
+                objDBAccess.AddParameterToCommand(
+                    "@AuditedAllocationDepartment",
+                    DBFactoryParameterType.Int,
+                    (object)obj.AuditedAllocationDepartment ?? DBNull.Value);
+
+                objDBAccess.AddParameterToCommand(
+                    "@AuditedAllocationCA",
+                    DBFactoryParameterType.Int,
+                    (object)obj.AuditedAllocationCA ?? DBNull.Value);
+
+                objDBAccess.AddParameterToCommand(
+                    "@CreatedBy",
+                    DBFactoryParameterType.Int,
+                    obj.CreatedBy);
+
+                Result = Convert.ToInt32(
+                    objDBAccess.ExecuteScalarCommand());
             }
             catch (Exception ex)
             {
-                objILogger.ErrorHandle(new ErrorLogEntity() { PageName = "AuditorModel", FunctionName = "GetAuditorCurrentYearFormNew" }, ex);
+                Result = -1;
+
+                objILogger.ErrorHandle(
+                    new ErrorLogEntity()
+                    {
+                        PageName = "Cooperative.Models.SocietyModel",
+                        FunctionName = "AuditMprCommitteeCurrentYearInsert"
+                    },
+                    ex);
             }
             finally
             {
                 objDBAccess.CloseConnection();
             }
 
-            return dt;
+            return Result;
         }
+
 
     }
 }

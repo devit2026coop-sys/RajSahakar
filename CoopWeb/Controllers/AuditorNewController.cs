@@ -54,93 +54,11 @@ namespace Cooperative.Controllers
 
         [HttpGet]
         [ActionName("GetAuditCommiteeDetails")]
-        public string GetAuditCommiteeDetails()
+        public string GetAuditCommiteeDetails(string selectedDate, string financialYear, int districtId)
         {
-            DataTable dt = new AuditorNewModel().GetAuditCommiteeDetails();
+            DataTable dt = new AuditorNewModel().GetAuditCommiteeDetails(selectedDate , financialYear,  districtId);
             return COMMON_FUNCTION.DataTableToJSONString(dt);
         }
-
-
-
-        //[HttpPost]
-        //public JsonResult SaveAuditResult(List<AuditorNewModel> model)
-        //{
-        //    // BREAKPOINT 1 - Yahan F9 lagayein
-
-        //    try
-        //    {
-        //        if (model == null)
-        //        {
-        //            return Json(new
-        //            {
-        //                Success = false,
-        //                Result = 0,
-        //                Message = "Controller called but model is NULL."
-        //            });
-        //        }
-
-        //        if (model.Count == 0)
-        //        {
-        //            return Json(new
-        //            {
-        //                Success = false,
-        //                Result = 0,
-        //                Message = "Controller called but list is EMPTY."
-        //            });
-        //        }
-
-        //        if (!ModelState.IsValid)
-        //        {
-        //            var errors = ModelState
-        //                .Where(x => x.Value.Errors.Count > 0)
-        //                .Select(x => new
-        //                {
-        //                    Field = x.Key,
-        //                    Errors = x.Value.Errors.Select(e => e.ErrorMessage)
-        //                })
-        //                .ToList();
-
-        //            System.Diagnostics.Debug.WriteLine(
-        //                Newtonsoft.Json.JsonConvert.SerializeObject(errors)
-        //            );
-
-        //            return Json(new
-        //            {
-        //                Success = false,
-        //                Result = 0,
-        //                Message = "Model binding validation failed."
-        //            });
-        //        }
-
-        //        // BREAKPOINT 2
-        //        int result = new AuditorNewModel()
-        //            .SaveAuditResult(model);
-
-        //        // BREAKPOINT 3
-        //        return Json(new
-        //        {
-        //            Success = result > 0,
-        //            Result = result,
-        //            Message = result > 0
-        //                ? "Audit data saved successfully."
-        //                : "Database method returned 0."
-        //        });
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        System.Diagnostics.Trace.TraceError(ex.ToString());
-
-        //        Response.StatusCode = 500;
-
-        //        return Json(new
-        //        {
-        //            Success = false,
-        //            Result = 0,
-        //            Message = "Server error during save."
-        //        });
-        //    }
-        //}
-
 
         [HttpPost]
         public int SaveAuditResult(List<AuditorNewModel> model)
@@ -160,19 +78,25 @@ namespace Cooperative.Controllers
             return COMMON_FUNCTION.DataTableToJSONString(dt);
         }
 
-        
 
 
-        //[HttpPost]
-        //[ActionName("SaveSmsFormat")]
-        //public JsonResult MenuSmsActionInsert(AuditorModel _Model)
-        //{
-        //    ModelState.Remove("UpdationDate"); ModelState.Remove("Createdate");
-        //    if (!ModelState.IsValid)
-        //        return Json(JsonModelError.Get(ModelState.Values));
+        [HttpGet]
+        [ActionName("GetUserDetailsAuditBySSO")]
+        public string GetUserDetailsAuditBySSO()
+        {
+            DataTable dt = new AuditorNewModel().GetUserDetailsAuditBySSO();
 
-        //    return Json(_Model.AddSmsFormat());
-        //}
+            return COMMON_FUNCTION.DataTableToJSONString(dt);
+        }
+
+        [HttpGet]
+        [ActionName("GetAuditorCurrentYearFormNew")]
+        public string GetAuditorCurrentYearFormNew(string selectedDate, string financialYear, int districtId)
+        {
+            DataTable dt = new AuditorNewModel().GetAuditorCurrentYearFormNew(selectedDate, financialYear, districtId);
+
+            return COMMON_FUNCTION.DataTableToJSONString(dt);
+        }
 
 
     }

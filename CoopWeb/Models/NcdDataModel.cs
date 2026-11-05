@@ -1753,7 +1753,7 @@ namespace Cooperative.Models
             return null;
         }
 
-        public DataSet GetDistrictWiseNCDRegistrationCount(int type = 0, string actionType = "")
+        public DataSet GetDistrictWiseNCDRegistrationCount(ref DataPagingModel Details, bool isExport = false, int type = 0, string actionType = "", int districtId = 0)
         {
             try
             {
@@ -1762,6 +1762,10 @@ namespace Cooperative.Models
                 cmd = objDBAccess.CreateCommand("GetDistrictWiseNCDRegistration", DBFactoryCommandType.PROCEDURE_COMMAND);
                 objDBAccess.AddParameterToCommand("@Action", DBFactoryParameterType.NVarchar, actionType);
                 objDBAccess.AddParameterToCommand("@Type", DBFactoryParameterType.Int, type);
+                objDBAccess.AddParameterToCommand("@PageSize", DBFactoryParameterType.Int, isExport == true ? 5000000 : Details.PageSize);
+                objDBAccess.AddParameterToCommand("@PageNumber", DBFactoryParameterType.Int, isExport == true ? 1 : Details.PageNumber);
+                objDBAccess.AddParameterToCommand("@IsRowCount", DBFactoryParameterType.Int, true);
+                objDBAccess.AddParameterToCommand("@DistrictId", DBFactoryParameterType.Int, districtId);
                 return objDBAccess.GetDataSet();
             }
             catch (Exception ex)

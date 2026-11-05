@@ -110,6 +110,30 @@ namespace Cooperative.Controllers
         }
 
         [HttpGet]
+        public ActionResult AuditForm1()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        public ActionResult AuditForm2()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        public ActionResult AuditFormIII()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        public ActionResult AuditFormIV()
+        {
+            return View();
+        }
+
+        [HttpGet]
         public ActionResult GccBankWiseSummaryList() { return View(); }
 
         [HttpGet]
@@ -7273,8 +7297,14 @@ namespace Cooperative.Controllers
 
         }
 
+
+       
+
+
         public ActionResult TaggedItemDetailsReport()
         {
+            //string encAadhaarNo = COMMON_FUNCTION.Encrypt("200902504760");
+            //Ea5mTAPB9rlxfUe6TPKknA==
             return View();
         }
 
@@ -7297,6 +7327,10 @@ namespace Cooperative.Controllers
             return COMMON_FUNCTION.DataTableToJSONString(ds.Tables[0]);
 
         }
+
+       
+
+
 
         #endregion
 
@@ -7371,6 +7405,87 @@ namespace Cooperative.Controllers
         public ActionResult KPIUnitOfficeReports()
         {
             return View();
+        }
+
+        [HttpGet]
+        public ActionResult AuditReportVIA()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        [ActionName("GetAuditMPRVIAReport")]
+        public string GetAuditMPRVIAReport(int districtId = 0, int commiteeType = 0)
+        {
+            DataTable dt = new MISModel().GetAuditMPRVIAReport(districtId, commiteeType);
+
+            return COMMON_FUNCTION.DataTableToJSONString(dt);
+        }
+
+        [HttpGet]
+        public ActionResult AuditReportVII()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        [ActionName("GetAuditMPRVIIReport")]
+        public string GetAuditMPRVIIReport()
+        {
+            DataTable dt = new MISModel().GetAuditMPRVIIReport();
+
+            return COMMON_FUNCTION.DataTableToJSONString(dt);
+        }
+
+        [HttpGet]
+        public ActionResult AuditReportVIII()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        [ActionName("GetAuditMPRVIIIReport")]
+        public string GetAuditMPRVIIIReport()
+        {
+            DataTable dt = new MISModel().GetAuditMPRVIIIReport();
+
+            return COMMON_FUNCTION.DataTableToJSONString(dt);
+        }
+
+        [HttpGet]
+        [ActionName("GetAuditMPRCurrentYearReport")]
+        public string GetAuditMPRReport(string FinancialYearId, int Month = 0)
+        {
+            DataTable dt = new MISModel().GetAuditMPRReport(FinancialYearId, Month);
+
+            return COMMON_FUNCTION.DataTableToJSONString(dt);
+        }
+
+        [HttpGet]
+        [ActionName("GetAuditMPRCurrentYearBackLogReport")]
+        public string GetAuditMPRBackLogReport(string FinancialYearId, int Month = 0)
+        {
+            DataTable dt = new MISModel().GetAuditMPRBackLogReport(FinancialYearId, Month);
+
+            return COMMON_FUNCTION.DataTableToJSONString(dt);
+        }
+
+        [HttpGet]
+        [ActionName("GetAuditMPRCurrentYearFormIIIReport")]
+        public string GetAuditMPRCurrentYearFormIIIReport(string FinancialYearId, int Month = 0)
+        {
+            DataTable dt = new MISModel().GetAuditMPRCurrentYearFormIIIReport(FinancialYearId, Month);
+
+            return COMMON_FUNCTION.DataTableToJSONString(dt);
+        }
+
+        [HttpGet]
+        [ActionName("GetAuditMPRBackYearFormIVReport")]
+        public string GetAuditMPRBackYearFormIVReport(string FinancialYearId, int Month = 0)
+        {
+            DataTable dt = new MISModel().GetAuditMPRBackYearFormIVReport(FinancialYearId, Month);
+
+            return COMMON_FUNCTION.DataTableToJSONString(dt);
         }
 
     }

@@ -1,5 +1,8 @@
 ﻿var CooperativeSocietyFormModule = angular.module("ApplicationSAOKPIModule", ['angularUtils.directives.dirPagination']);
 CooperativeSocietyFormModule.controller("CooperativeSAOKPIFormCont", function ($rootScope, $scope, $http) {
+    $scope.requestData = {};
+    $scope.IsKPIExpired = false;
+    $scope.IsExpiryAlertShown = false;
 
     $scope.OnPageLoad = function () {
         $scope._language = _language;
@@ -26,6 +29,7 @@ CooperativeSocietyFormModule.controller("CooperativeSAOKPIFormCont", function ($
         $scope.GetSAKPISAODetails();
         $scope.GetUserDetailsBySSO();
         $scope.SetPreviousMonth();
+        $scope.KpiExpiredDetails();
     }
     $scope.IsUpdate = false;
 
@@ -116,7 +120,7 @@ CooperativeSocietyFormModule.controller("CooperativeSAOKPIFormCont", function ($
 
     $scope.GetKPIResult = function () {
         $http.get(SiteUrl + "/KPI/GetKPIDetails", {
-            params: { officeId: $scope.OfficeId, month: $scope.PreviousMonthId, kpiFor: "SA", DistrictId: $scope.DistrictId }
+            params: { officeId: $scope.OfficeId, month: $scope.PreviousMonthId, kpiFor: "SA", DistrictId: $scope.DistrictId, resionId: $scope.ResionId }
         }).success(function (data) {
 
             if (data && data.length > 0) {
@@ -387,6 +391,7 @@ CooperativeSocietyFormModule.controller("CooperativeSAOKPIFormCont", function ($
                     Month: $scope.PreviousMonthId,
                     KPIFor: "SA",
                     OfficeId: $scope.OfficeId,
+                    ResionId: $scope.ResionId,
                     KPIIndicatorsId: item.KPIIndicatorsId,
                     KPIIndicatorsTarget: item.Target || 0,
                     KPIIndicatorsAchievement: item.Achievement || 0,
@@ -404,7 +409,7 @@ CooperativeSocietyFormModule.controller("CooperativeSAOKPIFormCont", function ($
             return;
 
         $(".se-pre-con").fadeIn("slow");
-        $http.post(SiteUrl + "/Society/SaveKPIResult", SaveData).success(function (data) {
+        $http.post(SiteUrl + "/KPI/SaveKPIResult", SaveData).success(function (data) {
             $(".se-pre-con").fadeOut("slow");
             if (data > 0) {
                 alert("Record Saved Successfully.");
@@ -445,6 +450,7 @@ CooperativeSocietyFormModule.controller("CooperativeSAOKPIFormCont", function ($
                     Month: $scope.PreviousMonthId,
                     KPIFor: "SA",
                     OfficeId: $scope.OfficeId,
+                    ResionId: $scope.ResionId,
                     KPIIndicatorsId: item.KPIIndicatorsId,
                     KPIIndicatorsTarget: item.Target || 0,
                     KPIIndicatorsAchievement: item.Achievement || 0,
@@ -461,7 +467,7 @@ CooperativeSocietyFormModule.controller("CooperativeSAOKPIFormCont", function ($
         if (!isValid)
             return;
         $(".se-pre-con").fadeIn("slow");
-        $http.post(SiteUrl + "/Society/SaveKPIResult", SaveData)
+        $http.post(SiteUrl + "/KPI/SaveKPIResult", SaveData)
             .success(function (data) {
                 $(".se-pre-con").fadeOut("slow");
                 if (data > 0) {
@@ -485,11 +491,53 @@ CooperativeSocietyFormModule.controller("CooperativeSAOKPIFormCont", function ($
             $scope.UserDetails = data[0];
             $scope.OfficeId = data[0].OfficeId;
             $scope.DistrictId = data[0].DISTRICT_ID;
+            $scope.ResionId = data[0].ResionId;
+            $scope.ResionName = data[0].ResionName;
             $(".se-pre-con").fadeOut("slow");
         })
             .error(function () {
                 $(".se-pre-con").fadeOut("slow");
             });
+    };
+
+    $scope.KpiExpiredDetails = function () {
+        $scope.requestData = {
+            SiteUrl: SiteUrl,
+            RequireFor: "SA"
+        };
+        KPIValidateData.GetKPIFormExpiryDetails($http, $scope.requestData, function (data) {
+            let validData = JSON.parse(data.validData);
+            if (validData && validData.length > 0) {
+                $scope.$applyAsync(function () {
+                    $scope.KPIExpiryConfig = validData[0];
+                    $scope.CheckKPIExpiry();
+                });
+            }
+        });
+    };
+    $scope.CheckKPIExpiry = function () {
+        // District 3: expiry not applicable
+        //if (Number($scope.PldbDistrictID) === 3) {
+        //    $scope.IsKPIExpired = false;
+        //    return;
+        //}
+
+        let config = $scope.KPIExpiryConfig;
+        if (!config || config.Status !== "Active") {
+            $scope.IsKPIExpired = false;
+            return;
+        }
+
+        let validateDate = parseInt(config.ValidateEntryDate, 10);
+        let validateTime = parseInt(config.ValidateEntryTime, 10);
+        let now = new Date();
+        //Configured cutoff: current month, configured day and hour
+        let cutoffDate = new Date(now.getFullYear(), now.getMonth(), validateDate, validateTime, 0, 0);
+        $scope.IsKPIExpired = now >= cutoffDate;
+        if ($scope.IsKPIExpired && !$scope.IsExpiryAlertShown) {
+            $scope.IsExpiryAlertShown = true;
+            alert("Time is over. You cannot save or update KPI.");
+        }
     };
 
     $scope.OnPageLoad();

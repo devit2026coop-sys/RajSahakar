@@ -1,14 +1,13 @@
 ﻿var CooperativeSocietyFormModule = angular.module("ApplicationPLDBKPIModule", ['angularUtils.directives.dirPagination']);
 
 CooperativeSocietyFormModule.controller("CooperativePLDBKPIFormCont", function ($rootScope, $scope, $http) {
-
     var PldbId = $('#hdnPldbId').val();
-
-
     $scope.PLDB = {
         PldbId: PldbId || 0
     };
-
+    $scope.requestData = {};
+    $scope.IsKPIExpired = false;
+    $scope.IsExpiryAlertShown = false;
     //console.log('$scope.PLDB.PldbId', $scope.PLDB.PldbId);
 
     $scope.OnPageLoad = function () {
@@ -79,6 +78,9 @@ CooperativeSocietyFormModule.controller("CooperativePLDBKPIFormCont", function (
         $scope.GetSocietyTypeList();
         $scope.PostByDesignation();
         $scope.GetAllSubUnitList();
+
+        //$scope.CheckKPIExpiry();
+        $scope.KpiExpiredDetails();
     }
 
     $scope.GetSocietyByPacsSSO = function (ActId, SocietyTypeId, ClassId) {
@@ -183,9 +185,7 @@ CooperativeSocietyFormModule.controller("CooperativePLDBKPIFormCont", function (
     };
 
     $scope.GetKPIResult = function () {
-        debugger;
         $scope.PldbDistrictID = $('#hdnDistrictId').val();
-        console.log($scope.PldbDistrictID);
         $http.get(SiteUrl + "/KPI/GetKPIDetails", {
             params: { officeId: 0, pldbId: $scope.PLDB.PldbId, month: $scope.PreviousMonthId, kpiFor: "PLDB", DistrictId: $scope.PldbDistrictID }
         }).success(function (data) {
@@ -1311,86 +1311,125 @@ CooperativeSocietyFormModule.controller("CooperativePLDBKPIFormCont", function (
     }
 
     // Check For Time to Form Disable Added By Narpat
-    $scope.IsKPIExpired = false;
-    $scope.IsExpiryAlertShown = false;
 
+
+    //$scope.CheckKPIExpiryStatic = function () {
+
+    //    // District 3 ke liye expiry nahi lagegi
+    //    if (Number($scope.PldbDistrictID) === 3) {
+    //        $scope.IsKPIExpired = false;
+    //        return;
+    //    }
+
+    //    var currentDate = new Date();
+    //    var cutoffDate = new Date("2026-10-03T16:58:55+05:30");
+
+    //    if (currentDate >= cutoffDate) {
+
+    //        $scope.IsKPIExpired = true;
+
+    //        if (!$scope.IsExpiryAlertShown) {
+    //            $scope.IsExpiryAlertShown = true;
+    //            alert("Time is over. You cannot save or update KPI.");
+    //        }
+
+    //    } else {
+
+    //        $scope.IsKPIExpired = false;
+
+    //        var remainingTime = cutoffDate.getTime() - currentDate.getTime();
+
+    //        setTimeout(function () {
+
+    //            $scope.$apply(function () {
+
+    //                // Timeout hone ke baad bhi District 3 ko allow rakho
+    //                if (Number($scope.PldbDistrictID) === 3) {
+    //                    $scope.IsKPIExpired = false;
+    //                    return;
+    //                }
+
+    //                $scope.IsKPIExpired = true;
+
+    //                if (!$scope.IsExpiryAlertShown) {
+    //                    $scope.IsExpiryAlertShown = true;
+    //                    alert("Time is over. You cannot save or update KPI.");
+    //                }
+
+    //            });
+
+    //        }, remainingTime);
+    //    }
+    //};
+    //$scope.CheckKPIExpiryOld = function () {
+    //    var currentDate = new Date();
+    //    var cutoffDate = new Date("2026-10-03T16:58:55+05:30");
+    //    if (currentDate >= cutoffDate) {
+    //        $scope.IsKPIExpired = true;
+
+    //        if (!$scope.IsExpiryAlertShown) {
+    //            $scope.IsExpiryAlertShown = true;
+    //            alert("Time is over. You cannot save or update KPI.");
+    //        }
+
+    //    } else {
+    //        $scope.IsKPIExpired = false;
+    //        var remainingTime = cutoffDate.getTime() - currentDate.getTime();
+    //        setTimeout(function () {
+    //            $scope.$apply(function () {
+    //                $scope.IsKPIExpired = true;
+    //                if (!$scope.IsExpiryAlertShown) {
+    //                    $scope.IsExpiryAlertShown = true;
+    //                    alert("Time is over. You cannot save or update KPI.");
+    //                }
+
+    //            });
+
+    //        }, remainingTime);
+    //    }
+    //};
+
+  
+
+    $scope.KpiExpiredDetails = function () {
+        $scope.requestData = {
+            SiteUrl: SiteUrl,
+            RequireFor: "PLDB"
+        };
+        KPIValidateData.GetKPIFormExpiryDetails($http, $scope.requestData, function (data) {
+            let validData = JSON.parse(data.validData);
+            if (validData && validData.length > 0) {
+                $scope.$applyAsync(function () {
+                    $scope.KPIExpiryConfig = validData[0];
+                    $scope.CheckKPIExpiry();
+                });
+            }
+        });
+    };
     $scope.CheckKPIExpiry = function () {
+        // District 3: expiry not applicable
+        //if (Number($scope.PldbDistrictID) === 3) {
+        //    $scope.IsKPIExpired = false;
+        //    return;
+        //}
 
-        // District 3 ke liye expiry nahi lagegi
-        if (Number($scope.PldbDistrictID) === 3) {
+        let config = $scope.KPIExpiryConfig;
+        if (!config || config.Status !== "Active") {
             $scope.IsKPIExpired = false;
             return;
         }
 
-        var currentDate = new Date();
-        var cutoffDate = new Date("2026-10-03T16:58:55+05:30");
-
-        if (currentDate >= cutoffDate) {
-
-            $scope.IsKPIExpired = true;
-
-            if (!$scope.IsExpiryAlertShown) {
-                $scope.IsExpiryAlertShown = true;
-                alert("Time is over. You cannot save or update KPI.");
-            }
-
-        } else {
-
-            $scope.IsKPIExpired = false;
-
-            var remainingTime =
-                cutoffDate.getTime() - currentDate.getTime();
-
-            setTimeout(function () {
-
-                $scope.$apply(function () {
-
-                    // Timeout hone ke baad bhi District 3 ko allow rakho
-                    if (Number($scope.PldbDistrictID) === 3) {
-                        $scope.IsKPIExpired = false;
-                        return;
-                    }
-
-                    $scope.IsKPIExpired = true;
-
-                    if (!$scope.IsExpiryAlertShown) {
-                        $scope.IsExpiryAlertShown = true;
-                        alert("Time is over. You cannot save or update KPI.");
-                    }
-
-                });
-
-            }, remainingTime);
+        let validateDate = parseInt(config.ValidateEntryDate, 10);
+        let validateTime = parseInt(config.ValidateEntryTime, 10);
+        let now = new Date();
+        //Configured cutoff: current month, configured day and hour
+        let cutoffDate = new Date(now.getFullYear(), now.getMonth(), validateDate, validateTime, 0, 0);
+        $scope.IsKPIExpired = now >= cutoffDate;
+        if ($scope.IsKPIExpired && !$scope.IsExpiryAlertShown) {
+            $scope.IsExpiryAlertShown = true;
+            alert("Time is over. You cannot save or update KPI.");
         }
     };
-    $scope.CheckKPIExpiryOld = function () {
-        var currentDate = new Date();
-        var cutoffDate = new Date("2026-10-03T16:58:55+05:30");
-        if (currentDate >= cutoffDate) {
-            $scope.IsKPIExpired = true;
-
-            if (!$scope.IsExpiryAlertShown) {
-                $scope.IsExpiryAlertShown = true;
-                alert("Time is over. You cannot save or update KPI.");
-            }
-
-        } else {
-            $scope.IsKPIExpired = false;
-            var remainingTime = cutoffDate.getTime() - currentDate.getTime();
-            setTimeout(function () {
-                $scope.$apply(function () {
-                    $scope.IsKPIExpired = true;
-                    if (!$scope.IsExpiryAlertShown) {
-                        $scope.IsExpiryAlertShown = true;
-                        alert("Time is over. You cannot save or update KPI.");
-                    }
-
-                });
-
-            }, remainingTime);
-        }
-    };
-    $scope.CheckKPIExpiry();
 
     $scope.OnPageLoad();
 

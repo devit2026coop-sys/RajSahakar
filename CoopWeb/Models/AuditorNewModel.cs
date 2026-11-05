@@ -19,7 +19,7 @@ namespace Cooperative.Models
         private DBFactoryMSSQL objDBAccess;
         private DataTable dt;
         [Key]
-        
+
         public long Id { get; set; }
 
         // Financial Year
@@ -77,7 +77,7 @@ namespace Cooperative.Models
         }
 
 
-        public DataTable GetAuditCommiteeDetails()
+        public DataTable GetAuditCommiteeDetails(string selectedDate, string financialYear, int districtId)
         {
             DataTable dt = new DataTable();
 
@@ -86,9 +86,9 @@ namespace Cooperative.Models
                 objDBAccess.OpenConnection();
 
                 SqlCommand cmd = objDBAccess.CreateCommand("USP_AuditMprCommitteeBackYear", DBFactoryCommandType.PROCEDURE_COMMAND);
-                objDBAccess.AddParameterToCommand("@DistrictId", DBFactoryParameterType.VARCHAR, _LoggedInUser.DistrictId);
-
-
+                cmd.Parameters.AddWithValue("@SelectedDate", selectedDate);
+                cmd.Parameters.AddWithValue("@FinancialYear", financialYear);
+                cmd.Parameters.AddWithValue("@DistrictId", districtId);
                 dt = objDBAccess.GetTable();
             }
             catch (Exception ex)
@@ -111,13 +111,9 @@ namespace Cooperative.Models
         {
             int Result = 0;
 
-            UserEntity _LoggedInUser =
-                (UserEntity)System.Web.HttpContext.Current
-                .Session[SessionIdentity.Admin];
+            UserEntity _LoggedInUser = (UserEntity)System.Web.HttpContext.Current.Session[SessionIdentity.Admin];
 
-            if (_LoggedInUser == null ||
-                model == null ||
-                model.Count == 0)
+            if (_LoggedInUser == null || model == null ||  model.Count == 0)
             {
                 return 0;
             }
@@ -140,121 +136,54 @@ namespace Cooperative.Models
                     if (item.CommitteeTypeId <= 0)
                         throw new Exception("Committee Type is required.");
 
-                    SqlCommand cmd = objDBAccess.CreateCommand(
-                        "USP_SaveAuditMprCommitteeBackYear",
-                        DBFactoryCommandType.PROCEDURE_COMMAND
-                    );
+                    SqlCommand cmd = objDBAccess.CreateCommand("USP_SaveAuditMprCommitteeBackYear", DBFactoryCommandType.PROCEDURE_COMMAND);
 
                     // 1. Financial Year
-                    objDBAccess.AddParameterToCommand(
-                        "@FinancialYear",
-                        DBFactoryParameterType.VARCHAR,
-                        item.FY
-                    );
+                    objDBAccess.AddParameterToCommand("@FinancialYear", DBFactoryParameterType.VARCHAR, item.FY);
 
                     // 2. Month
-                    objDBAccess.AddParameterToCommand(
-                        "@Month",
-                        DBFactoryParameterType.Int,
-                        item.Month
-                    );
+                    objDBAccess.AddParameterToCommand("@Month", DBFactoryParameterType.Int, item.Month);
 
-                    objDBAccess.AddParameterToCommand(
-                        "@DistrictId",
-                        DBFactoryParameterType.Int,
-                       _LoggedInUser.DistrictId
-                    );
+                    objDBAccess.AddParameterToCommand("@DistrictId", DBFactoryParameterType.Int, _LoggedInUser.DistrictId);
 
                     // 3. Office
-                    objDBAccess.AddParameterToCommand(
-                        "@OfficeId",
-                        DBFactoryParameterType.Int,
-                        0
-                    );
+                    objDBAccess.AddParameterToCommand("@OfficeId", DBFactoryParameterType.Int, 0);
 
                     // 4. Committee Type
-                    objDBAccess.AddParameterToCommand(
-                        "@CommitteeTypeId",
-                        DBFactoryParameterType.Int,
-                        item.CommitteeTypeId
-                    );
+                    objDBAccess.AddParameterToCommand("@CommitteeTypeId", DBFactoryParameterType.Int, item.CommitteeTypeId);
 
                     // 5. Total Committees
-                    objDBAccess.AddParameterToCommand(
-                        "@TotalCommittees",
-                        DBFactoryParameterType.Int,
-                        (object)item.TotalCommittees ?? DBNull.Value
-                    );
+                    objDBAccess.AddParameterToCommand("@TotalCommittees", DBFactoryParameterType.Int, (object)item.TotalCommittees ?? DBNull.Value);
 
                     // 6. Total Allotment Department
-                    objDBAccess.AddParameterToCommand(
-                        "@TotalAllotmentDepartment",
-                        DBFactoryParameterType.Int,
-                        (object)item.TotalAllotmentDepartment ?? DBNull.Value
-                    );
+                    objDBAccess.AddParameterToCommand("@TotalAllotmentDepartment", DBFactoryParameterType.Int, (object)item.TotalAllotmentDepartment ?? DBNull.Value);
 
                     // 7. Total Allotment CA
-                    objDBAccess.AddParameterToCommand(
-                        "@TotalAllotmentCA",
-                        DBFactoryParameterType.Int,
-                        (object)item.TotalAllotmentCA ?? DBNull.Value
-                    );
+                    objDBAccess.AddParameterToCommand("@TotalAllotmentCA", DBFactoryParameterType.Int, (object)item.TotalAllotmentCA ?? DBNull.Value);
 
                     // 8. Balance Allocation
-                    objDBAccess.AddParameterToCommand(
-                        "@balanceAllocation",
-                        DBFactoryParameterType.Int,
-                        (object)item.balanceAllocation ?? DBNull.Value
-                    );
+                    objDBAccess.AddParameterToCommand("@balanceAllocation", DBFactoryParameterType.Int, (object)item.balanceAllocation ?? DBNull.Value);
 
                     // 9. Last Month Department
-                    objDBAccess.AddParameterToCommand(
-                        "@AllotmentDepartmentLastMonth",
-                        DBFactoryParameterType.Int,
-                        (object)item.AllotmentDepartmentLastMonth ?? DBNull.Value
-                    );
+                    objDBAccess.AddParameterToCommand("@AllotmentDepartmentLastMonth", DBFactoryParameterType.Int, (object)item.AllotmentDepartmentLastMonth ?? DBNull.Value);
 
                     // 10. Last Month CA
-                    objDBAccess.AddParameterToCommand(
-                        "@AllotmentCALastMonth",
-                        DBFactoryParameterType.Int,
-                        (object)item.AllotmentCALastMonth ?? DBNull.Value
-                    );
+                    objDBAccess.AddParameterToCommand("@AllotmentCALastMonth", DBFactoryParameterType.Int, (object)item.AllotmentCALastMonth ?? DBNull.Value);
 
                     // 11. Current Month Department
-                    objDBAccess.AddParameterToCommand(
-                        "@AllotmentDepartmentInMonth",
-                        DBFactoryParameterType.Int,
-                        (object)item.AllotmentDepartmentInMonth ?? DBNull.Value
-                    );
+                    objDBAccess.AddParameterToCommand("@AllotmentDepartmentInMonth", DBFactoryParameterType.Int, (object)item.AllotmentDepartmentInMonth ?? DBNull.Value);
 
                     // 12. Current Month CA
-                    objDBAccess.AddParameterToCommand(
-                        "@AllotmentCAInMonth",
-                        DBFactoryParameterType.Int,
-                        (object)item.AllotmentCAInMonth ?? DBNull.Value
-                    );
+                    objDBAccess.AddParameterToCommand("@AllotmentCAInMonth", DBFactoryParameterType.Int, (object)item.AllotmentCAInMonth ?? DBNull.Value);
 
                     // 13. Created By
-                    objDBAccess.AddParameterToCommand(
-                        "@CreatedBy",
-                        DBFactoryParameterType.Int,
-                        _LoggedInUser.UserId
-                    );
+                    objDBAccess.AddParameterToCommand("@CreatedBy", DBFactoryParameterType.Int, _LoggedInUser.UserId);
 
                     // 14. User Role Department Mapping
-                    objDBAccess.AddParameterToCommand(
-                        "@UserRoleDeptMappingId",
-                        DBFactoryParameterType.Int,
-                        _LoggedInUser.UserRoleDeptMappingId
-                    );
+                    objDBAccess.AddParameterToCommand("@UserRoleDeptMappingId", DBFactoryParameterType.Int, _LoggedInUser.UserRoleDeptMappingId);
 
                     // 15. Role ID
-                    objDBAccess.AddParameterToCommand(
-                        "@RoleId",
-                        DBFactoryParameterType.Int,
-                        _LoggedInUser.RoleId
-                    );
+                    objDBAccess.AddParameterToCommand("@RoleId", DBFactoryParameterType.Int, _LoggedInUser.RoleId);
 
                     // Execute Stored Procedure
                     objDBAccess.ExecuteCommand();
@@ -264,14 +193,7 @@ namespace Cooperative.Models
             }
             catch (Exception ex)
             {
-                objILogger.ErrorHandle(
-                    new ErrorLogEntity()
-                    {
-                        PageName = "AuditorNewModel",
-                        FunctionName = "SaveAuditResult"
-                    },
-                    ex
-                );
+                objILogger.ErrorHandle(new ErrorLogEntity() { PageName = "AuditorNewModel", FunctionName = "SaveAuditResult" }, ex);
 
                 Result = 0;
             }
@@ -283,7 +205,7 @@ namespace Cooperative.Models
             return Result;
         }
 
-        public DataTable GetAuditAllDetails(int officeId,  int month, int DistrictId, bool isDevelopment = false, int resionId = 0, int DivisionId = 0)
+        public DataTable GetAuditAllDetails(int officeId, int month, int DistrictId, bool isDevelopment = false, int resionId = 0, int DivisionId = 0)
         {
             DataTable dt = new DataTable();
             UserEntity _LoggedInUser = (UserEntity)System.Web.HttpContext.Current.Session[SessionIdentity.Admin];
@@ -308,6 +230,60 @@ namespace Cooperative.Models
             catch (Exception ex)
             {
                 objILogger.ErrorHandle(new ErrorLogEntity() { PageName = "Cooperative.Models.KPIModel", FunctionName = "GetKPIDetails(int officeId, int month, string kpiFor)" }, ex);
+            }
+            finally
+            {
+                objDBAccess.CloseConnection();
+            }
+
+            return dt;
+        }
+
+
+        public DataTable GetUserDetailsAuditBySSO()
+        {
+            DataTable dt = new DataTable();
+            UserEntity _LoggedInUser = (UserEntity)System.Web.HttpContext.Current.Session[SessionIdentity.Admin];
+
+            try
+            {
+                objDBAccess.OpenConnection();
+
+                SqlCommand cmd = objDBAccess.CreateCommand("USP_GetUserDetailsAuditBySSO", DBFactoryCommandType.PROCEDURE_COMMAND);
+                objDBAccess.AddParameterToCommand("@SSO_ID", DBFactoryParameterType.VARCHAR, _LoggedInUser.SSOID);
+                objDBAccess.AddParameterToCommand("@RoleId", DBFactoryParameterType.Int, _LoggedInUser.RoleId);
+                dt = objDBAccess.GetTable();
+            }
+            catch (Exception ex)
+            {
+                objILogger.ErrorHandle(new ErrorLogEntity() { PageName = "Cooperative.Models.AuditorNewModel", FunctionName = "GetUserDetailsBySSO(string SSOID)" }, ex);
+            }
+            finally
+            {
+                objDBAccess.CloseConnection();
+            }
+
+            return dt;
+        }
+
+
+        public DataTable GetAuditorCurrentYearFormNew(string selectedDate, string financialYear, int districtId)
+        {
+            DataTable dt = new DataTable();
+
+            try
+            {
+                objDBAccess.OpenConnection();
+
+                SqlCommand cmd = objDBAccess.CreateCommand("USP_GetDataAuditorCurrentYearFormNew", DBFactoryCommandType.PROCEDURE_COMMAND);
+                cmd.Parameters.AddWithValue("@SelectedDate", selectedDate);
+                cmd.Parameters.AddWithValue("@FinancialYear", financialYear);
+                cmd.Parameters.AddWithValue("@DistrictId", districtId);
+                dt = objDBAccess.GetTable();
+            }
+            catch (Exception ex)
+            {
+                objILogger.ErrorHandle(new ErrorLogEntity() { PageName = "AuditorModel", FunctionName = "GetAuditorCurrentYearFormNew" }, ex);
             }
             finally
             {

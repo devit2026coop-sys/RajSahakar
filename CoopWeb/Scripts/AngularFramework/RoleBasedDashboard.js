@@ -2119,6 +2119,7 @@ MasterMod.controller("DashboardCtrl", function ($scope, $http) {
     $scope.OnPageLoad = function () {
         $(".se-pre-con").fadeIn("slow");
         $scope.GetAlldeshdata();
+        $scope.GetSTLoanDetails();
         //$scope.GetBRAP_DashboardData();
         $scope.GetGCC_DashboardData();
         //$scope.GetAlldeshdata();
@@ -2186,6 +2187,20 @@ MasterMod.controller("DashboardCtrl", function ($scope, $http) {
             };
         }
         $(".se-pre-con").fadeOut("slow");
+    };
+
+    $scope.GetSTLoanDetails = function () {
+
+        $http.get("https://stdbr.rscb.bank.in/API/STLoanDetails")
+            .then(function (response) {
+
+                $scope.STLoanDetails = response.data;
+
+            }, function (error) {
+
+                console.log("Error while getting ST Loan Details:", error);
+
+            });
     };
 
     $scope.GetDepartment = function () {

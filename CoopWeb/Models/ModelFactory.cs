@@ -4704,7 +4704,8 @@ namespace Cooperative.Models
         public decimal TotalPrice { get; set; } 
         public string CompanyName { get; set; }
         public string CreatedBy { get; set; }
-        public int SocietyID { get; set; } 
+
+        public int SocietyID { get; set; }
         public string RegistrationNo { get; set; }
         public string DistrictName { get; set; }
         public int DistrictId { get; set; }
@@ -4777,6 +4778,8 @@ namespace Cooperative.Models
         public bool IsActive { get; set; } = true;
     }
 
+
+
     public class KPIForPacsSaveModel
     {
         public int SocietyId { get; set; }
@@ -4819,6 +4822,98 @@ namespace Cooperative.Models
         public int? Dynamic { get; set; }
         public int? Migration { get; set; }
         public int? CCBID { get; set; }
+    }
+
+
+    // current year 
+    public class AuditMprCommitteeCurrentYear
+    {
+        public long Id { get; set; }
+
+        [Required]
+        [StringLength(9)]
+        public string FinancialYear { get; set; } = string.Empty;
+
+        [Range(1, 12)]
+        public byte Month { get; set; }
+
+        [Required]
+        public int DistrictId { get; set; }
+
+        [Required]
+        public int CommitteeTypeId { get; set; }
+
+        // Current-year committee details
+        public int? TotalCommitteesCurrentYear { get; set; }
+
+        // Proposals
+        public int? ProposalDepartment { get; set; }
+        public int? ProposalCA { get; set; }
+
+        // Allocations
+        public int? AllocationDepartment { get; set; }
+        public int? AllocationCA { get; set; }
+
+        // Monthly audited proposals
+        public int? AuditedProposalDepartment { get; set; }
+        public int? AuditedProposalCA { get; set; }
+
+        // Monthly audited allocations
+        public int? AuditedAllocationDepartment { get; set; }
+        public int? AuditedAllocationCA { get; set; }
+
+        // Audit fields
+        [Required]
+        public int CreatedBy { get; set; }
+
+        public DateTime CreatedDate { get; set; }
+
+        public int? UpdatedBy { get; set; }
+
+        public DateTime? UpdatedDate { get; set; }
+
+        public bool IsActive { get; set; } = true;
+    }
+
+
+
+    public class AuditMprCurrentYearRequest
+    {
+        public string FinancialYear { get; set; }
+        public int Month { get; set; }
+        public int DistrictId { get; set; } 
+        public int Office { get; set; } 
+        public int RoleId { get; set; } 
+        public int UserRoleMappingId { get; set; } 
+        public long UpdatedBy { get; set; }
+        public List<AuditMprCurrentYearRecord> Records { get; set; }
+    }
+
+    public class AuditMprCurrentYearRecord
+    {
+        public int CommitteeTypeId { get; set; }
+
+        public int TotalCommitteesCurrentYear { get; set; }
+
+        public int ProposalDepartment { get; set; }
+        public int ProposalCA { get; set; }
+
+        public int AllocationDepartment { get; set; }
+        public int AllocationCA { get; set; }
+
+        public int ProposalAllocationRemaining { get; set; }
+
+        public int PreviousAuditedProposalDepartment { get; set; }
+        public int PreviousAuditedProposalCA { get; set; }
+
+        public int PreviousAuditedAllocationDepartment { get; set; }
+        public int PreviousAuditedAllocationCA { get; set; }
+
+        public int CurrentAuditedProposalDepartment { get; set; }
+        public int CurrentAuditedProposalCA { get; set; }
+
+        public int CurrentAuditedAllocationDepartment { get; set; }
+        public int CurrentAuditedAllocationCA { get; set; }
     }
 
 

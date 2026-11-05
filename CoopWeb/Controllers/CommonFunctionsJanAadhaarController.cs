@@ -173,7 +173,7 @@ namespace Cooperative.Controllers
                     DecResponseString = await _service.getResponseData(SchemeName, "ValidateOTP_FetchRequestedData", "", memberId, tid, otp);
                 }
 
-
+               
                 OTPResponse parsedResponse = JsonConvert.DeserializeObject<OTPResponse>(DecResponseString);
                 if (parsedResponse != null && parsedResponse.response.status && parsedResponse.response.data?.Count > 0)
                 {

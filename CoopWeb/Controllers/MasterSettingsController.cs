@@ -2,7 +2,6 @@
 using Cooperative.Models;
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Web.Mvc;
 
 namespace Cooperative.Controllers
@@ -101,19 +100,79 @@ namespace Cooperative.Controllers
         // End DesignationLevelMappings
 
 
+
         [HttpGet]
-        public ActionResult KPIEntrySetting()
+        public ActionResult KPIMaster()
         {
             return View();
         }
 
-        //[HttpPost]
-        //public string GetAllKPIList()
-        //{
-        //    SocietyModel objMenuActionModel = new SocietyModel(new FileLogger());
-        //    DataTable DT = objMenuActionModel.KVSSGSSbyDRorMDCCB(); 
-        //    return COMMON_FUNCTION.DataTableToJSONWithJSONNet(DT);
-        //} 
+        [HttpGet]
+        public JsonResult GetKpiMasterNameBy(string actionName = "")
+        {
+            DesignationLevelMappingModel objModal = new DesignationLevelMappingModel(new FileLogger());
+            var responce = new APIResponce();
+            try
+            {
+                var ds = objModal.GetKPIMasterName(actionName);
 
+                if (ds != null)
+                {
+                    responce.Data = new
+                    {
+                        kpiData = ds.Tables.Count > 0
+                            ? COMMON_FUNCTION.DataTableToJSONString(ds.Tables[0])
+                            : null,
+                    };
+                    responce.Status = "200";
+                    responce.Message = "Success";
+                }
+                else
+                {
+                    responce.Status = "404";
+                    responce.Message = "Record not founds.";
+                }
+            }
+            catch (Exception ex)
+            {
+                responce.Status = "500";
+                responce.Message = "Internal Server Error.";
+            }
+
+            return Json(new { Result = responce }, JsonRequestBehavior.AllowGet);
+        }
+
+
+        [HttpGet]
+        public JsonResult GetKpiMasterDetails(string actionName = "")
+        {
+            DesignationLevelMappingModel objModal = new DesignationLevelMappingModel(new FileLogger());
+            var responce = new APIResponce();
+            try
+            {
+                var ds = objModal.GetKPIMasterDetails(actionName);
+                if (ds != null)
+                {
+                    responce.Data = new
+                    {
+                        kpiDetails = ds.Tables.Count > 0 ? COMMON_FUNCTION.DataTableToJSONString(ds.Tables[0]) : null,
+                    };
+                    responce.Status = "200";
+                    responce.Message = "Success";
+                }
+                else
+                {
+                    responce.Status = "404";
+                    responce.Message = "Record not founds.";
+                }
+            }
+            catch (Exception ex)
+            {
+                responce.Status = "500";
+                responce.Message = "Internal Server Error.";
+            }
+
+            return Json(new { Result = responce }, JsonRequestBehavior.AllowGet);
+        }
     }
 }

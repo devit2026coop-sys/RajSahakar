@@ -7,7 +7,7 @@ TaggedItemController.controller("TaggedItemMod", function ($scope, $http, $windo
     $scope.pageSize = 50;
     $scope.translation = [];
     $scope.IsFreeze = true;
-    $scope.IsCompanyName = false;
+    //$scope.IsCompanyName = false;
     $scope.ProductTypeDataList = [];
     $scope.ProductDataList = [];
     $scope.CompanyDataList = [];
@@ -67,11 +67,10 @@ TaggedItemController.controller("TaggedItemMod", function ($scope, $http, $windo
             formData.append("ItemQuantity", $scope.TagData.ItemQuantity);
             formData.append("ItemPrice", $scope.TagData.ItemPrice);
             formData.append("TotalPrice", $scope.TagData.TotalPrice);
-            formData.append("CompanyName", $scope.TagData.CompanyName);
+            formData.append("CompanyName", "");
             //formData.append("IFMSPOSId", $scope.TagData.IFMSPOSId);
             //formData.append("IsCreditFacility", $scope.TagData.IsCreditFacility);
 
-            //change
             $(".se-pre-con").fadeIn("slow");
             $http.post(SiteUrl + "/Society/SaveTaggingItemForm", formData, { withCredentials: true, headers: { 'Content-Type': undefined }, transformRequest: angular.identity }).success(function (data, status) {
                 $(".se-pre-con").fadeOut("slow");
@@ -90,7 +89,7 @@ TaggedItemController.controller("TaggedItemMod", function ($scope, $http, $windo
                     window.location.reload();
                 }
                 else if (parseInt(data, 10) == -2) {
-                    var Msg = (_language == 'en-us' ? 'Record already exists for the Selected Society, Product Type, Product Name, Company Name and Purchase Date. Duplicate entries are not allowed.' : 'डुप्लिकेट डेटा।');
+                    var Msg = (_language == 'en-us' ? 'Record already exists for the selected Society Name, Product Type, Product, Company Name and Purchase Date. Duplicate tagged item are not allowed.' : 'डुप्लिकेट डेटा।');
                     alert(Msg);
                 }
                 else if (parseInt(data, 10) == -1 || parseInt(data, 10) == 0) {
@@ -129,27 +128,28 @@ TaggedItemController.controller("TaggedItemMod", function ($scope, $http, $windo
         if ($scope.TagData.ProductId == '0' || $scope.TagData.ProductId == undefined) {
             message += $scope._language == 'en-us' ? '\n <br /> Select Product Name' : '\n <br /> Select Product Name';
         }
-        if ($scope.IsCompanyName == false) {
-            if ($scope.TagData.CompanyId == '0' || $scope.TagData.CompanyId == undefined) {
-                message += $scope._language == 'en-us' ? '\n <br /> Select Company Name' : '\n <br /> Select Company Name';
-            }
+        //if ($scope.IsCompanyName == false) {
+        if ($scope.TagData.CompanyId == '0' || $scope.TagData.CompanyId == undefined) {
+            message += $scope._language == 'en-us' ? '\n <br /> Select Company Name' : '\n <br /> Select Company Name';
         }
-        if ($scope.IsCompanyName == true) {
-            if ($scope.TagData.CompanyName == '' || $scope.TagData.CompanyName == undefined || $scope.TagData.CompanyName == null) {
-                message += $scope._language == 'en-us' ? '\n <br /> Enter Company Name' : '\n <br /> Enter Company Name';
-            }
-        }
+        //}
+        //if ($scope.IsCompanyName == true) {
+        //    if ($scope.TagData.CompanyName == '' || $scope.TagData.CompanyName == undefined || $scope.TagData.CompanyName == null) {
+        //        message += $scope._language == 'en-us' ? '\n <br /> Enter Company Name' : '\n <br /> Enter Company Name';
+        //    }
+        //}
         //if ($scope.TagData.PurchaseDate == undefined || $scope.TagData.PurchaseDate == '' || $scope.TagData.PurchaseDate == null) {
         //    message += $scope._language == 'en-us' ? '\n <br /> Enter Date of Purchase/Tagging' : '\n <br />  Enter Date of Purchase/Tagging';
         //}
+
         if ($scope.TagData.PurchaseDate == undefined || $scope.TagData.PurchaseDate == '' || $scope.TagData.PurchaseDate == null) {
             message += '\n <br /> Enter Date of Purchase/Tagging';
         } else {
             var purchaseDate = new Date($scope.TagData.PurchaseDate);
-            var today = new Date(); 
+            var today = new Date();
             // Ignore current time; compare only dates
             today.setHours(0, 0, 0, 0);
-            purchaseDate.setHours(0, 0, 0, 0); 
+            purchaseDate.setHours(0, 0, 0, 0);
             if (purchaseDate > today) {
                 message += '\n <br /> Date of Purchase/Tagging cannot be a future date';
             }
@@ -241,13 +241,13 @@ TaggedItemController.controller("TaggedItemMod", function ($scope, $http, $windo
         $(".se-pre-con").fadeIn("slow");
         return $http.get(SiteUrl + "/Master/GetMasterData/?MasterType=PRODUCT&MasterCode=" + productTypeId).success(function (data, status) {
             $scope.ProductDataList = data;
-            if (productTypeId === "9") {
-                $scope.IsCompanyName = true;
-                $scope.TagData.CompanyId = "0";
-            } else {
-                $scope.IsCompanyName = false;
-                $scope.TagData.CompanyName = "";
-            }
+            //if (productTypeId === "9") {
+            //    $scope.IsCompanyName = true;
+            //    $scope.TagData.CompanyId = "0";
+            //} else {
+            //    $scope.IsCompanyName = false;
+            //    $scope.TagData.CompanyName = "";
+            //}
             $(".se-pre-con").fadeOut("slow");
         }).
             error(function (data, status) {
@@ -271,30 +271,30 @@ TaggedItemController.controller("TaggedItemMod", function ($scope, $http, $windo
             });
 
     };
-     
+
     $scope.updateTaggedItem = function (tagId) {
         $scope.GetTaggedItemDetailById(tagId).then(function (res) {
-            if (res != null && res.length > 0) { 
+            if (res != null && res.length > 0) {
                 $scope.TagData.TagId = res[0].TagId;
                 $scope.TagData.ProductTypeId = res[0].ProductTypeId.toString();
                 $scope.GetProduct($scope.TagData.ProductTypeId);
                 $scope.TagData.ProductId = res[0].ProductId.toString();
-                if (res[0].CompanyId.toString() == "0") {
-                    $scope.IsCompanyName = true;
-                    $scope.TagData.CompanyName = res[0].CompanyNameV + '';
-                } else {
-                    $scope.IsCompanyName = false;
-                    $scope.TagData.CompanyId = res[0].CompanyId.toString();
-                }
+                //if (res[0].CompanyId.toString() == "0") {
+                //    $scope.IsCompanyName = true;
+                //    $scope.TagData.CompanyName = res[0].CompanyNameV + '';
+                //} else {
+                //    $scope.IsCompanyName = false;
+                $scope.TagData.CompanyId = res[0].CompanyId.toString();
+                //}
                 $scope.TagData.PurchaseDate = res[0].PurchaseDate ? new Date(res[0].PurchaseDate) : null;
                 $scope.TagData.ExpirationDate = res[0].ExpirationDate ? new Date(res[0].ExpirationDate) : null;
                 $scope.TagData.PackagingType = res[0].PackagingType + '';
                 //$scope.TagData.MeasurementUnit = res[0].MeasurementUnit + '';
-                $scope.TagData.ItemQuantity = Number(res[0].ItemQuantity); 
+                $scope.TagData.ItemQuantity = Number(res[0].ItemQuantity);
                 $scope.TagData.ItemPrice = Number(res[0].ItemPrice);
                 $scope.TagData.TotalPrice = res[0].TotalPrice;
             }
-        }); 
+        });
     };
 
     $scope.GetTaggedItemDetailById = function (tagId) {
@@ -306,7 +306,7 @@ TaggedItemController.controller("TaggedItemMod", function ($scope, $http, $windo
             }
             return [];
         }, function (error) {
-            console.error("Error loading data:", error); 
+            console.error("Error loading data:", error);
             return [];
         }).finally(function () {
             $(".se-pre-con").fadeOut("slow");
@@ -326,7 +326,7 @@ TaggedItemController.controller("TaggedItemMod", function ($scope, $http, $windo
             }
             return [];
         }, function (error) {
-            console.error("Error loading data:", error); 
+            console.error("Error loading data:", error);
             alert("Failed to delete tagged item. Please try again.");
             return [];
         }).finally(function () {

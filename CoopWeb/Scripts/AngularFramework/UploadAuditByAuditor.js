@@ -970,7 +970,7 @@ AssignAuditorModule.controller("UploadAuditByAuditorCont", function ($scope, $ht
                     //    message += $scope._language == 'en-us' ? '\n Please fill proper fee date for this financial year' : '\n कृपया इस वित्तीय वर्ष के लिए सही फीस तिथि भरें |';
                     //    message += '<br />';
                     //}
-                    else if (!($("#FeeDateFirmCurrentYear").val().indexOf('2023') > -1 || $("#FeeDateFirmCurrentYear").val().indexOf('2024') > -1)) {
+                    else if (!($("#FeeDateFirmCurrentYear").val().indexOf('2023') > -1 || $("#FeeDateFirmCurrentYear").val().indexOf('2024') > -1 || $("#FeeDateFirmCurrentYear").val().indexOf('2025') > -1 || $("#FeeDateFirmCurrentYear").val().indexOf('2026') > -1)) {
                         message += $scope._language == 'en-us' ? '\n Please fill proper fee date for this financial year' : '\n कृपया इस वित्तीय वर्ष के लिए सही फीस तिथि भरें |';
                         message += '<br />';
                     }

@@ -31,7 +31,7 @@ namespace Cooperative.Models
         private ILogger objILogger;
         private DBFactoryMSSQL objDBAccess;
         private DataTable dt;
-
+        UserEntity _LoggedInUser = (UserEntity)System.Web.HttpContext.Current.Session[SessionIdentity.Admin];
 
         public GodownModel(ILogger objErrorLogger)
         {
@@ -1604,7 +1604,110 @@ namespace Cooperative.Models
                 });
             }
         }
-
+        public DataSet GetEmailListByUser()
+        {
+            DataSet ds = new DataSet();
+            try
+            {
+                UserEntity _LoggedInUser = (UserEntity)System.Web.HttpContext.Current.Session[SessionIdentity.Admin];
+                objDBAccess.OpenConnection();
+                SqlCommand cmd = objDBAccess.CreateCommand("USP_GodownFsEmailFormat", DBFactoryCommandType.PROCEDURE_COMMAND);
+                objDBAccess.AddParameterToCommand("@Action ", DBFactoryParameterType.NVarchar, "GET");
+                ds = objDBAccess.GetDataSet();
+            }
+            catch (Exception ex)
+            {
+                objILogger.ErrorHandle(new ErrorLogEntity() { PageName = "Cooperative.Models.GodownModel", FunctionName = "GetEmailListByUser()" }, ex);
+            }
+            finally
+            {
+                objDBAccess.CloseConnection();
+                dt.Dispose();
+            }
+            return ds;
+        }
         #endregion
+
+        #region Revert Process on 04-11-2026
+
+        public DataSet GodownRevertApplication(GodownProposalModel pursosalModel)
+        {
+            DataSet ds = new DataSet();
+            try
+            {
+                objDBAccess.OpenConnection();
+                SqlCommand cmd = objDBAccess.CreateCommand("UpdateGodownAction", DBFactoryCommandType.PROCEDURE_COMMAND);
+                objDBAccess.AddParameterToCommand("@Applications", DBFactoryParameterType.NVarchar, pursosalModel.ApplicationId);
+                objDBAccess.AddParameterToCommand("@Status", DBFactoryParameterType.NVarchar, pursosalModel.StatusId);
+                objDBAccess.AddParameterToCommand("@UserId", DBFactoryParameterType.BigInt, _LoggedInUser.UserId);
+                objDBAccess.AddParameterToCommand("@RoleId", DBFactoryParameterType.NVarchar, _LoggedInUser.RoleId);
+                objDBAccess.AddParameterToCommand("@UserRoleDeptMappingId", DBFactoryParameterType.NVarchar, _LoggedInUser.UserRoleDeptMappingId);
+                objDBAccess.AddParameterToCommand("@Remark", DBFactoryParameterType.NVarchar, pursosalModel.Remark);
+                ds = objDBAccess.GetDataSet();
+            }
+            catch (Exception ex)
+            {
+                objILogger.ErrorHandle(new ErrorLogEntity() { PageName = "Cooperative.Models.GodownModel", FunctionName = "GodownRevertApplication()" }, ex);
+            }
+            finally
+            {
+                objDBAccess.CloseConnection();
+            }
+
+            return ds;
+        }
+        #endregion
+
+    }
+
+
+    public class SendFsEmailModel
+    {
+        public string ApplicationId { get; set; }
+        public string ToEmail { get; set; }
+        public string CC { get; set; }
+        public string BCC { get; set; }
+        public string Subject { get; set; }
+        public string Body { get; set; }
+        public string DocumentFormat { get; set; }
+        public string DocumentName { get; set; }
+        public string FSFileName { get; set; }
+        public string DocumentUrl { get; set; }
+        public string FSFilePath { get; set; }
+        public HttpPostedFileBase selectedDocument { get; set; }
+        public string documentPreviewUrl { get; set; }
+    }
+
+    public class GodownProposalModel
+    {
+        public bool ASGenerate { get; set; }
+        public string ASGeneratePath { get; set; }
+        public string ApplicationNo { get; set; }
+        public int ApplicationId { get; set; }
+        public string Block { get; set; }
+        public string BranchName { get; set; }
+        public string CCBName { get; set; }
+        public string District { get; set; }
+        public string DocName { get; set; }
+        public string EncProposalId { get; set; }
+        public bool FSGenerate { get; set; }
+        public string FSGeneratePath { get; set; }
+        public string FormationPath { get; set; }
+        public string GramPanchayat { get; set; }
+        public int IsEsignStage { get; set; }
+        public int MTCapacityId { get; set; }
+        public string MTType { get; set; }
+        public int NextRoleId { get; set; }
+        public string NextStatus { get; set; }
+        public int NextStatusId { get; set; }
+        public int NextUserId { get; set; }
+        public string PacsManagerName { get; set; }
+        public string PresidentName { get; set; }
+        public string SocietyName { get; set; }
+        public string Status { get; set; }
+        public int StatusId { get; set; }
+        public string ViewFormation { get; set; }
+        public string Remark { get; set; }
+
     }
 }
