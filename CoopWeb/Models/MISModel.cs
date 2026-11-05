@@ -6825,6 +6825,10 @@ namespace Cooperative.Models
                 {
                     whereCase += " and a.BranchId = " + Details.SearchParameter.Where(x => x.Key == "BRANCH_ID").Select(x => x.Value).FirstOrDefault();
                 }
+                if (Details.SearchParameter.Where(x => x.Key == "IsAvadhipaar").Any())
+                {
+                    whereCase += " and a.IsAvadhipaar = " + Details.SearchParameter.Where(x => x.Key == "IsAvadhipaar").Select(x => x.Value).FirstOrDefault();
+                }
 
                 UserEntity _LoggedInUser = (UserEntity)System.Web.HttpContext.Current.Session[SessionIdentity.Admin];
 
@@ -8953,6 +8957,7 @@ namespace Cooperative.Models
         public DataTable GetKPIOffices(string KPIFor, string Month, string FinancialYearId)
         {
             DataTable dt = new DataTable();
+            UserEntity _LoggedInUser = (UserEntity)System.Web.HttpContext.Current.Session[SessionIdentity.Admin];
 
             try
             {
@@ -8962,6 +8967,8 @@ namespace Cooperative.Models
                 objDBAccess.AddParameterToCommand("@KPIFor", DBFactoryParameterType.VARCHAR, KPIFor);
                 objDBAccess.AddParameterToCommand("@Month", DBFactoryParameterType.VARCHAR, Month);
                 objDBAccess.AddParameterToCommand("@FinancialYearId", DBFactoryParameterType.VARCHAR, FinancialYearId);
+                objDBAccess.AddParameterToCommand("@RoleId", DBFactoryParameterType.Int, _LoggedInUser.RoleId);
+                objDBAccess.AddParameterToCommand("@DivisionId", DBFactoryParameterType.Int, _LoggedInUser.DivisionId);
 
 
                 dt = objDBAccess.GetTable();
