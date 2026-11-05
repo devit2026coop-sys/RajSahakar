@@ -36,7 +36,7 @@ namespace Cooperative.Models
 
         UserEntity _LoggedInUser = (UserEntity)System.Web.HttpContext.Current.Session[SessionIdentity.Admin];
 
-        //old
+        //old (Running Live)
         public int SaveKPIResult(List<KPIResultModel> model)
         {
             int Result = 0;
@@ -107,7 +107,7 @@ namespace Cooperative.Models
         //            objDBAccess.AddParameterToCommand("@ResionId", DBFactoryParameterType.Int, item.ResionId);
         //            //old
         //            //objDBAccess.AddParameterToCommand("@OfficeId", DBFactoryParameterType.Int, item.OfficeId);
-        //            objDBAccess.AddParameterToCommand("@OfficeId", DBFactoryParameterType.Int, item.KPIFor == "PACS" ? _LoggedInUser.GccId : item.OfficeId);
+        //            objDBAccess.AddParameterToCommand("@OfficeId", DBFactoryParameterType.Int, item.OfficeId);
         //            objDBAccess.AddParameterToCommand("@KPIIndicatorsId", DBFactoryParameterType.Int, item.KPIIndicatorsId);
         //            objDBAccess.AddParameterToCommand("@Target", DBFactoryParameterType.Float, item.KPIIndicatorsTarget);
         //            objDBAccess.AddParameterToCommand("@CCBId", DBFactoryParameterType.Int, item.CCBId);
@@ -155,12 +155,15 @@ namespace Cooperative.Models
         //                {
         //                    objDBAccess.AddParameterToCommand("@AGMFinancialId", DBFactoryParameterType.Int, item.AGMFinancialId ?? 0);
         //                }
-        //                objDBAccess.AddParameterToCommand("@PacsBranchId", DBFactoryParameterType.Int, item.PacsBranchId ?? 0); 
+        //                objDBAccess.AddParameterToCommand("@PacsBranchId", DBFactoryParameterType.Int, item.PacsBranchId ?? 0);
         //                objDBAccess.AddParameterToCommand("@PacsId", DBFactoryParameterType.Int, item.PacsId ?? 0);
         //                objDBAccess.AddParameterToCommand("@DepositAmount", DBFactoryParameterType.Float, item.DepositAmount);
         //                objDBAccess.AddParameterToCommand("@KCCRecoveryAmount", DBFactoryParameterType.Float, item.KCCRecoveryAmount);
         //                objDBAccess.AddParameterToCommand("@GCCRecoveryAmount", DBFactoryParameterType.Float, item.GCCRecoveryAmount);
         //                objDBAccess.AddParameterToCommand("@LoanRecoveryAmount", DBFactoryParameterType.Float, item.LoanRecoveryAmount);
+        //                objDBAccess.AddParameterToCommand("@NoGodown", DBFactoryParameterType.Int, item.NoGodown);
+        //                objDBAccess.AddParameterToCommand("@ProfitLastYearAmount", DBFactoryParameterType.Float, item.ProfitLastYearAmount);
+        //                objDBAccess.AddParameterToCommand("@OtherThanKccLoanDisAmount", DBFactoryParameterType.Float, item.OtherThanKccLoanDisAmount);
 
         //            }
 
