@@ -10,7 +10,8 @@ GodownFormationActionMod.controller("GodownFormationActionCont", function ($scop
     $scope.selectedParams = {};
     $scope.ApplicationId = "0";
     $scope.revertStatusId = 0;
-
+    $scope.revertDataList = [];
+    $scope.requestData = {};
     $scope.OnPageLoad = function () {
         $scope.IsProposalSubmission = false;
         $scope.IsEsignbyPacsManager = false;
@@ -517,45 +518,103 @@ GodownFormationActionMod.controller("GodownFormationActionCont", function ($scop
             alert("Something went wrong.");
         });
     };
-
-
-    $scope.RevertProcess = function (revertStatus) {
-        $scope.ApplicationId = $("input[name='SelectedApplication']:checked").val() ?? 0;
-        $scope.revertStatusId = revertStatus;
-        if (!$scope.ApplicationId || !$scope.revertStatusId) {
-            toastr.warning("Please select an application and revert status.");
-            return;
-        }
-
-        $scope.RevertData = {
-            Remark: ''
-        };
-        $('#RevertApplicationModal').modal('show');
-    };
-
-
     $scope.Clear = function () {
         $('#RevertApplicationModal').modal('hide');
         $scope.RevertData.Remark = "";
     };
 
-    $scope.RevertApplication = function () {
+    //$scope.RevertApplication = function () {
+    //    if (!$scope.RevertData.Remark || !$scope.RevertData.Remark.trim()) {
+    //        toastr.warning("Please enter remark.");
+    //        return;
+    //    }
 
+    //    $scope.revertDataList = $scope.GETGodownFormationListData.find(x => x.Applicationid == $scope.ApplicationId);
+    //    $scope.requestData = {
+    //        ApplicationId: $scope.ApplicationId,
+    //        StatusId: $scope.revertStatusId,
+    //        Remark: $scope.RevertData.Remark,
+    //        ApplicationNo: $scope.revertDataList[0].ApplicationNo,
+    //    };
+    //    console.log('revert', $scope.requestData);
+    //    console.log('$scope.revertDataList', $scope.revertDataList);
+    //    return;
+    //    $http.post(SiteUrl + "Godown/UpdateAction", { selectedApplications: selectedApplicationId, Status: Status })
+    //        .success(function (data, status) {
+    //            alert(_language == 'en-us' ? 'Application status has been Updated.\n' : 'आवेदन की स्थिति अपडेट की गई है\n');
+    //            window.location.reload();
+    //        }).error(function (data, status) {
+    //            alert(_language == 'en-us' ? 'Some Error is Occured.\n' : 'कुछ त्रुटि हुई है\n');
+    //        });
+    //};
+
+    $scope.RevertApplication = function () {
         if (!$scope.RevertData.Remark || !$scope.RevertData.Remark.trim()) {
-            toastr.warning("Please enter remark.");
+            ShowModelAlert("Please enter remark.");
             return;
         }
 
-        var model = {
+        $scope.revertDataList = $scope.GETGodownFormationListData.find(x => x.Applicationid == $scope.ApplicationId);
+
+        if (!$scope.revertDataList) {
+            ShowModelAlert("Application details not found.");
+            return;
+        }
+
+        $scope.requestData = {
             ApplicationId: $scope.ApplicationId,
             StatusId: $scope.revertStatusId,
-            Remark: $scope.RevertData.Remark
+            Remark: $scope.RevertData.Remark,
+            ApplicationNo: $scope.revertDataList.ApplicationNo
         };
 
-        // Call your Revert Application API/service here.
+        console.log('Revert Request:', $scope.requestData);
+
+        $http.post(SiteUrl + "Godown/RevertApplication", $scope.requestData).success(function (data, status) {
+            console.log('api data', data);
+            if (data && data.Success) {
+                ShowModelAlert(data.Message || "Application reverted successfully.");
+                $('#RevertFileModal').modal('hide');
+                window.location.reload();
+            }
+            else {
+                ShowModelAlert(data.Message || "Unable to revert application.");
+            }
+        }).error(function (data, status) {
+            ShowModelAlert("Some error occurred while reverting the application.");
+        });
     };
+    $scope.ConfirmRevertApplication = function (revertStatus) {
+        bootbox.confirm({
+            title: "Confirm Revert Application",
+            message: "Are you sure you want to revert this application?",
+            buttons: {
+                confirm: {
+                    label: 'Yes',
+                    className: 'btn-primary'
+                },
+                cancel: {
+                    label: 'No',
+                    className: 'btn-secondary'
+                }
+            },
+            callback: function (result) {
+                if (result) {
+                    $scope.ApplicationId = $("input[name='SelectedApplication']:checked").val() ?? 0;
+                    $scope.revertStatusId = revertStatus;
+                    if (!$scope.ApplicationId || !$scope.revertStatusId) {
+                        toastr.warning("Please select an application and revert status.");
+                        return;
+                    }
 
-
+                    $scope.RevertData = {
+                        Remark: ''
+                    };
+                    $('#RevertApplicationModal').modal('show');
+                }
+            }
+        });
+    };
     $scope.OnPageLoad();
 });
 
