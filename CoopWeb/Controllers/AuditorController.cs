@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -40,6 +41,82 @@ namespace Cooperative.Controllers
             }
             return View();
         }
+
+        public ActionResult AuditorCurrentYearForm()
+        {
+            return View();
+        }
+
+        public ActionResult AuditorCurrentYearFormNew()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        [ActionName("GetAuditCommiteeDetails")]
+        public string GetAuditCommiteeDetails()
+        {
+            DataTable dt = new AuditorModel().GetAuditCommiteeDetails();
+            return COMMON_FUNCTION.DataTableToJSONString(dt);
+        }
+
+
+        [HttpPost]
+        public JsonResult SaveAuditResult(List<AuditorModel> model)
+        {
+            try
+            {
+                if (model == null || model.Count == 0)
+                {
+                    return Json(new
+                    {
+                        Success = false,
+                        Result = 0,
+                        Message = "No data received from JavaScript."
+                    });
+                }
+
+                if (!ModelState.IsValid)
+                {
+                    Response.StatusCode = 400;
+
+                    return Json(new
+                    {
+                        Success = false,
+                        Result = 0,
+                        Message = "Invalid audit data."
+                    });
+                }
+
+                int result = new AuditorModel()
+                    .SaveAuditResult(model);
+
+                return Json(new
+                {
+                    Success = result > 0,
+                    Result = result,
+                    Message = result > 0
+                        ? "Audit data saved successfully."
+                        : "Audit data not saved."
+                });
+            }
+            catch (Exception ex)
+            {
+                Trace.TraceError(
+                    "SaveAuditResult Error: " + ex.ToString()
+                );
+
+                Response.StatusCode = 500;
+
+                return Json(new
+                {
+                    Success = false,
+                    Result = 0,
+                    Message = "Internal server error."
+                });
+            }
+        }
+
 
 
         //[HttpPost]
@@ -927,5 +1004,23 @@ namespace Cooperative.Controllers
         }
 
         #endregion
+
+        [HttpGet]
+        [ActionName("GetUserDetailsAuditBySSO")]
+        public string GetUserDetailsAuditBySSO()
+        {
+            DataTable dt = new AuditorModel().GetUserDetailsAuditBySSO();
+
+            return COMMON_FUNCTION.DataTableToJSONString(dt);
+        }
+
+        [HttpGet]
+        [ActionName("GetAuditorCurrentYearFormNew")]
+        public string GetAuditorCurrentYearFormNew(string selectedDate, string financialYear, int districtId)
+        {
+            DataTable dt = new AuditorModel().GetAuditorCurrentYearFormNew(selectedDate, financialYear, districtId);
+
+            return COMMON_FUNCTION.DataTableToJSONString(dt);
+        }
     }
 }

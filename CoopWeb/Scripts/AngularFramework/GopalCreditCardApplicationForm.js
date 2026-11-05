@@ -427,12 +427,14 @@ AppTrainning.controller("GopalCreditCard", function ($scope, $http) {
                 }
                 else {
                     // Districts to remove
-                    var removeDistricts = ["Ajmer", "Sawai Madhopur", "Sirohi", "Udaipur"];
+                    //var removeDistricts = [
+                    //"Ajmer", "Sawai Madhopur", "Sirohi", "Udaipur"];
 
-                    // Filter data
-                    $scope.DistrictList = data.filter(function (item) {
-                        return removeDistricts.indexOf(item.DISTRICT_ENG) === -1;
-                    });
+                    //Filter data
+                    // $scope.DistrictList = data.filter(function (item) {
+                    //    return removeDistricts.indexOf(item.DISTRICT_ENG) === -1;
+                    // });
+                    $scope.DistrictList = data;
                 }
 
             })
@@ -1835,28 +1837,31 @@ AppTrainning.controller("GopalCreditCard", function ($scope, $http) {
             }
         }
 
-        //if ($scope.GopalCreditCardModel.IsPACSBankAccountAvailable == null) {
+        //if ($scope.GopalCreditCardModel.IsPACSBankAccountAvailable == true) {
         //    message += $scope._language == 'en-us' ? '\n <br /> Please open your account in the branch of Central Cooperative Bank after loan is approved.' : '\n <br /> कृपया ऋण स्वीकृति होने पर केंद्रीय सहकारी बैंक की शाखा में अपना खाता खुलवाये।';
         //    message += '<br />';
-        //}
-        //else {
-        if ($scope.GopalCreditCardModel.BankAccountNo == "" || $scope.GopalCreditCardModel.BankAccountNo == null || $scope.GopalCreditCardModel.BankAccountNo.length == 0) {
-            message += $scope._language == 'en-us' ? '\nPlease Enter Account Number' : '\nकृपया खाता संख्या दर्ज करें|';
-            message += '<br />';
+            //}
+        if ($scope.GopalCreditCardModel.DoesTheMilkSaleToDCS == false) {
+          
         }
-        if ($scope.GopalCreditCardModel.BankIFSCCode == "" || $scope.GopalCreditCardModel.BankIFSCCode == null || $scope.GopalCreditCardModel.BankIFSCCode.length == 0) {
-            message += $scope._language == 'en-us' ? '\nPlease Enter Bank IFSC Code' : '\nकृपया बैंक IFSC कोड दर्ज करें|';
-            message += '<br />';
+        else {
+            if ($scope.GopalCreditCardModel.BankAccountNo == "" || $scope.GopalCreditCardModel.BankAccountNo == null || $scope.GopalCreditCardModel.BankAccountNo.length == 0) {
+                message += $scope._language == 'en-us' ? '\nPlease Enter Account Number' : '\nकृपया खाता संख्या दर्ज करें|';
+                message += '<br />';
+            }
+            if ($scope.GopalCreditCardModel.BankIFSCCode == "" || $scope.GopalCreditCardModel.BankIFSCCode == null || $scope.GopalCreditCardModel.BankIFSCCode.length == 0) {
+                message += $scope._language == 'en-us' ? '\nPlease Enter Bank IFSC Code' : '\nकृपया बैंक IFSC कोड दर्ज करें|';
+                message += '<br />';
+            }
+            if ($scope.GopalCreditCardModel.BankName == "" || $scope.GopalCreditCardModel.BankName == null || $scope.GopalCreditCardModel.BankName.length == 0) {
+                message += $scope._language == 'en-us' ? '\nPlease Enter Bank Name' : '\nकृपया बैंक का नाम दर्ज करें|';
+                message += '<br />';
+            }
+            if ($scope.GopalCreditCardModel.BankBranchName == "" || $scope.GopalCreditCardModel.BankBranchName == null || $scope.GopalCreditCardModel.BankBranchName.length == 0) {
+                message += $scope._language == 'en-us' ? '\nPlease Enter Bank Branch Name' : '\nकृपया बैंक शाखा का नाम दर्ज करें|';
+                message += '<br />';
+            }
         }
-        if ($scope.GopalCreditCardModel.BankName == "" || $scope.GopalCreditCardModel.BankName == null || $scope.GopalCreditCardModel.BankName.length == 0) {
-            message += $scope._language == 'en-us' ? '\nPlease Enter Bank Name' : '\nकृपया बैंक का नाम दर्ज करें|';
-            message += '<br />';
-        }
-        if ($scope.GopalCreditCardModel.BankBranchName == "" || $scope.GopalCreditCardModel.BankBranchName == null || $scope.GopalCreditCardModel.BankBranchName.length == 0) {
-            message += $scope._language == 'en-us' ? '\nPlease Enter Bank Branch Name' : '\nकृपया बैंक शाखा का नाम दर्ज करें|';
-            message += '<br />';
-        }
-        //}
         if ($scope.GopalCreditCardModel.LoanDistrictId == "" || $scope.GopalCreditCardModel.LoanDistrictId == null || $scope.GopalCreditCardModel.LoanDistrictId == "0") {
             message += $scope._language == 'en-us' ? '\nPlease Select District for Loan' : '\nकृपया ऋण के लिए जिला चुनें|';
             message += '<br />';
@@ -2111,6 +2116,11 @@ AppTrainning.controller("GopalCreditCard", function ($scope, $http) {
             ShowModelAlert($scope._language == 'en-us' ? 'Gopal Credit Card Registration :: ' : 'गोपाल क्रेडिट कार्ड पंजीकरण ::', message);
             return false;
         } else {
+
+            if (($scope.GopalCreditCardModel.DoesTheMilkSaleToDCS??false) == false) {
+                message = $scope._language == 'en-us' ? '\n <br /> Please open your account in the branch of Central Cooperative Bank after loan is approved.' : '\n <br /> कृपया ऋण स्वीकृति होने पर केंद्रीय सहकारी बैंक की शाखा में अपना खाता खुलवाये।';
+                ShowModelAlert($scope._language == 'en-us' ? 'Gopal Credit Card Registration :: ' : 'गोपाल क्रेडिट कार्ड पंजीकरण ::', message);
+            }
             return true;
         }
     }

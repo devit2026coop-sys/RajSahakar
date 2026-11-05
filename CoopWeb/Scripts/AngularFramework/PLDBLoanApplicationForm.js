@@ -25,6 +25,7 @@ CommityRegistrtionModule.controller('PLDBLoanApplicationCnt', function ($scope, 
             }, 600);
         }
 
+        //$scope.PLDB.IsAvadhipaar = 0;
         // Initialize default values
         $scope.IsEditable = !$scope.isViewMode;
 
@@ -55,6 +56,8 @@ CommityRegistrtionModule.controller('PLDBLoanApplicationCnt', function ($scope, 
 
         $scope.IsShowPLDB = true;
         $scope.IsShowBranch = true;
+
+        //$scope.BindFinancialYears(false);
 
         $scope.maxCertDate = new Date();
         $scope.maxCertDate.setDate($scope.maxCertDate.getDate() - 1);
@@ -190,6 +193,8 @@ CommityRegistrtionModule.controller('PLDBLoanApplicationCnt', function ($scope, 
 
     $scope.PLDBList = [];
     $scope.CategoryList = [];
+
+    
 
 
     $scope.LoadMaster = function () {
@@ -750,6 +755,7 @@ CommityRegistrtionModule.controller('PLDBLoanApplicationCnt', function ($scope, 
     };
     //End
 
+    //old
     $scope.DateFormat = function (date) {
 
         if (date) {
@@ -761,6 +767,18 @@ CommityRegistrtionModule.controller('PLDBLoanApplicationCnt', function ($scope, 
         }
     }
 
+    //new
+
+    //$scope.DateFormat = function (date) {
+    //    if (!date) return null;
+
+    //    var d = new Date(date);
+
+    //    return d.getFullYear() + '-' +
+    //        String(d.getMonth() + 1).padStart(2, '0') + '-' +
+    //        String(d.getDate()).padStart(2, '0');
+    //}
+
     $scope.toOneZero = function (val) {
         return (val === true || val === "1" || val === 1) ? 1 : 0;
     }
@@ -768,46 +786,57 @@ CommityRegistrtionModule.controller('PLDBLoanApplicationCnt', function ($scope, 
     //Save PLDB Loan Application Form
 
     $scope.Save_PLDBForm = function (StatusId) {
-        debugger;
+        debugger;      
+
+
+        if ($scope.PLDB.FinancialYearId === "0") {
+            alert("कृपया वित्तीय वर्ष का चयन करें।.");
+            return;
+        }
 
         if (!$scope.PLDB.ApplicantName || !$scope.PLDB.FatherHusbandName || !$scope.PLDB.Gender) {
-            alert("Please fill all required fields before submitting.");
+            alert("कृपया आवेदक का नाम, पिता/पति का नाम तथा लिंग की जानकारी भरें।");
+            return;
+        }
+
+        if (!$scope.PLDB.LoanneAge) {
+            alert("कृपया ऋणी की आयु दर्ज करें।");
             return;
         }
 
         if (!$scope.PLDB.FarmerType) {
-            alert("Please select Farmer Type");
+            alert("कृपया कृषक की श्रेणी का चयन करें।");
             return;
         }
 
         if ($scope.PLDB.CategoryName === null || $scope.PLDB.CategoryName === undefined || $scope.PLDB.CategoryName === 0 || $scope.PLDB.CategoryName === "0") {
-            alert("Please Select Category.");
+            alert("कृपया श्रेणी का चयन करें।.");
             return;
         }
 
         if (!$scope.PLDB.LoanAcceptDate) {
-            alert("Please Fill the Loan Accept Date");
+            alert("कृपया ऋण स्वीकृति विवरण दिनांक का चयन करें।");
             return;
         }
 
         if (!$scope.PLDB.SubsidyLoanAmount) {
-            alert("Please Fill the Subsidy Loan Amount");
+            alert("कृपया ऋणी का अंशदान राशि का चयन करें।");
             return;
         }
 
         if (!$scope.PLDB.LoanAcceptPay) {
-            alert("Please Fill the Loan Accept Amount");
+            alert("कृपया ऋण स्वीकृति विवरण राशि का चयन करें।");
             return;
         }
 
         if (!$scope.PLDB.Interestrate) {
-            alert("Please Fill the Interest Rate Amount");
+            alert("कृपया ब्याज दर का चयन करें।");
             return;
         }
 
 
         if (!$scope.PLDB.AreaType) {
-            alert("Please Select Urban / Rural");
+            alert("कृपया शहरी/ग्रामीण का चयन करें।");
             return;
         }
 
@@ -815,7 +844,7 @@ CommityRegistrtionModule.controller('PLDBLoanApplicationCnt', function ($scope, 
         if ($scope.PLDB.AreaType == 'Rural') {
 
             if ($scope.PLDB.BlockId === "0") {
-                alert("Please Select Block");
+                alert("कृपया ब्लॉक का चयन करें");
                 return;
             }
 
@@ -830,7 +859,7 @@ CommityRegistrtionModule.controller('PLDBLoanApplicationCnt', function ($scope, 
             //}
 
             if ($scope.PLDB.TehsilId === "0") {
-                alert("Please Select Tehsil")
+                alert("कृपया तहसील का चयन करें")
                 return;
             }
         }
@@ -838,65 +867,60 @@ CommityRegistrtionModule.controller('PLDBLoanApplicationCnt', function ($scope, 
         if ($scope.PLDB.AreaType == 'Urban') {
 
             if ($scope.PLDB.CityId === "0") {
-                alert("Please Select City");
+                alert("कृपया शहर का चयन करें");
                 return;
             }
 
             if ($scope.PLDB.WardId === "0") {
-                alert("Please Select Ward");
+                alert("कृपया वार्ड का चयन करें");
                 return;
             }
         }
 
         if (StatusId === true) {
             if (!$scope.PLDB.LoanDisbursement.LoanDocument) {
-                alert("Please Upload the Document");
+                alert("कृपया ऋण पत्रावली अपलोड करें");
                 return;
             }
         }
 
         if (!$scope.PLDB.MobileNo) {
-            alert("Please Enter Mobile No");
+            alert("कृपया मोबाइल नंबर दर्ज करें।");
             return;
         }
 
         if (!$scope.PLDB.LoanAccNo) {
-            alert("Please enter loan account no.");
+            alert("कृपया ऋण खाता संख्या दर्ज करें।");
             return;
         }
 
         if ($scope.PLDB.SectorId === null || $scope.PLDB.SectorId === undefined || $scope.PLDB.SectorId === 0 || $scope.PLDB.SectorId === "0") {
-            alert("Please Select Sector.");
+            alert("कृपया सेक्टर 1 का चयन करें।");
             return;
         }
 
         if ($scope.PLDB.PurposeId === null || $scope.PLDB.PurposeId === undefined || $scope.PLDB.PurposeId === 0 || $scope.PLDB.PurposeId === "0") {
-            alert("Please Select Purpose.");
+            alert("कृपया ऋण उद्देश्य 1 का चयन करें।");
             return;
         }
 
         if ($scope.PLDB.PldbId === "0") {
-            alert("Please Select PLDB.");
+            alert("कृपया पीएलडीबी का चयन करें।.");
             return;
-        }
-
-        if ($scope.PLDB.FinancialYearId === "0") {
-            alert("Please Select Financial Year.");
-            return;
-        }
+        }       
 
         if ($scope.PLDB.BranchId === "0") {
-            alert("Please Select PLDB Branch");
+            alert("कृपया शाखा का चयन करें");
             return;
         }
 
         if ($scope.PLDB.DistrictId === "0") {
-            alert("Please Select District")
+            alert("कृपया ज़िला का चयन करें")
             return;
         }
 
         if ($scope.PLDB.AssemblyId === "0") {
-            alert("Please Select Assembly")
+            alert("कृपया विधानसभा क्षेत्र का चयन करें")
             return;
         }
 
@@ -972,6 +996,10 @@ CommityRegistrtionModule.controller('PLDBLoanApplicationCnt', function ($scope, 
 
         /*     add By Bhavesh*/
         $scope.PLDB.LoanDisbursement.IsIssueofPassbook = $scope.toOneZero($scope.PLDB.LoanDisbursement.IsIssueofPassbook);
+
+        $scope.PLDB.ODDate = $scope.DateFormat($scope.PLDB.ODDate);
+
+        $scope.PLDB.IsAvadhipaar = $scope.toOneZero($scope.PLDB.IsAvadhipaar);
 
 
         $http.post(SiteUrl + "/PLDB/Save_PldbLoanApplicationDetails", $scope.PLDB).
@@ -1095,20 +1123,20 @@ CommityRegistrtionModule.controller('PLDBLoanApplicationCnt', function ($scope, 
                     if (StatusId === false) {
                         alert('Document Saved Successfully');
                         $scope.PLDB.IsFinalSubmit = false;
-                        $scope.PLDB = {};                     
+                        //$scope.PLDB = {};                     
                         window.location = SiteUrl + "PLDB/PLDBLoanApplicationForm?eId=" + encodeURIComponent(data.encGccid) + "&mode=e";
                        
                     }
                     else {
                         alert('Document Saved Successfully');
-                        window.location.reload();                       
+                        //window.location.reload();                       
                         window.location = SiteUrl + "PLDB/PLDBLoanApplicationForm?eId=" + encodeURIComponent(data.encGccid) + "&mode=e";                       
                     }
                 }
                 else {
                     alert('Document Saved Successfully');
-                    $scope.PLDB = {};
-                    window.location.reload();               
+                    //$scope.PLDB = {};
+                    //window.location.reload();               
                 }
 
             }).
@@ -1126,30 +1154,59 @@ CommityRegistrtionModule.controller('PLDBLoanApplicationCnt', function ($scope, 
         }
     };
 
+    //$scope.PLDB.IsAvadhipaar = 0;
+    $scope.AllFinancialYears = [];
+
+    $scope.BindFinancialYears = function () {
+
+        if ($scope.PLDB.IsAvadhipaar == 0) {
+            $scope.FinancialYearList = $scope.AllFinancialYears.filter(function (item) {
+                return item.FIN_YEAR_NAME == "2025-26" || item.FIN_YEAR_NAME == "2026-27";
+            });
+
+        }
+        else {
+            $scope.FinancialYearList = $scope.AllFinancialYears.filter(function (item) {
+                return parseInt(item.FIN_YEAR_START) >= 1970 && parseInt(item.FIN_YEAR_START) <= 2024;
+            });
+        }       
+    };
 
     $scope.FinancialYearList = function () {
-        $http.get(SiteUrl + "/Master/GetMasterData/?MasterType=FINANCIALYEAR&MasterCode=-1")
-            .success(function (data, status) {
 
-                $scope.FinancialYearList = data.filter(function (item) {
-                    return item.FIN_YEAR_NAME == "2025-26" || item.FIN_YEAR_NAME == "2026-27";
-                });                
+        $http.get(SiteUrl + "/Master/GetMasterData/?MasterType=FINANCIALYEAR&MasterCode=-1")
+            .success(function (data) {
+                $scope.AllFinancialYears = data;
+                console.log('$scope.AllFinancialYears', $scope.AllFinancialYears);
+                $scope.BindFinancialYears();
 
             })
-            .error(function (data, status) {
+            .error(function () {
 
+                $scope.AllFinancialYears = [];
                 $scope.FinancialYearList = [];
+
             });
-    }
+
+    };
+
+
+    $scope.$watchGroup(['PLDB.ODPrincipalAmount','PLDB.InsurancePremium','PLDB.ODInterestAmount','PLDB.PenaltyInterestOtherCharges'], function () {
+        $scope.PLDB.TotalODAmount = (parseFloat($scope.PLDB.ODPrincipalAmount) || 0) +  (parseFloat($scope.PLDB.InsurancePremium) || 0) + (parseFloat($scope.PLDB.ODInterestAmount) || 0) +
+            (parseFloat($scope.PLDB.PenaltyInterestOtherCharges) || 0);
+    });
 
     $scope.GetFormEditData = function (PldbOtsId) {
+        debugger;
 
         $http.post(SiteUrl + "/PLDB/GetPLDBLoanApplicationListFormViewData/?PldbOtsSchemeId=" + PldbOtsId).
             success(function (data, status) {
 
                 $scope.PLDB = $scope.PLDB_OTSSchemeData;
+               
 
                 $scope.PLDB = JSON.parse(data.Main)[0];
+                console.log('$scope.PLDB ', $scope.PLDB);
                 $scope.GuarantorList = JSON.parse(data.Guarantor); // List of guarantors
                 $scope.Disbursement = JSON.parse(data.Disbursement); // Loan disbursement              
 
@@ -1157,8 +1214,7 @@ CommityRegistrtionModule.controller('PLDBLoanApplicationCnt', function ($scope, 
 
                 $scope.PLDB.PANNumber = $scope.PLDB.PANNumber;
                 $scope.PLDB.GP_Other = $scope.PLDB.GP_Other;
-                $scope.PLDB.Village_Other = $scope.PLDB.Village_Other;
-                $scope.PLDB.FinancialYearId = ($scope.PLDB.FinancialYearId || '0').toString();;
+                $scope.PLDB.Village_Other = $scope.PLDB.Village_Other;                
                 $scope.PLDB.AIsJamabandiAttached = $scope.PLDB.AIsJamabandiAttached ? 1 : 0;
                 $scope.PLDB.IsRegistrationCertificateReceived = $scope.PLDB.IsRegistrationCertificateReceived ? 1 : 0;
                 $scope.PLDB.IsEstimateQuotationAttached = $scope.PLDB.IsEstimateQuotationAttached ? 1 : 0;
@@ -1169,6 +1225,11 @@ CommityRegistrtionModule.controller('PLDBLoanApplicationCnt', function ($scope, 
                 $scope.PLDB.BApplicantregistrationAttact = $scope.PLDB.BApplicantregistrationAttact ? 1 : 0;
                 $scope.PLDB.BAIsLandMapAttached = $scope.PLDB.BAIsLandMapAttached ? 1 : 0;
                 $scope.PLDB.IsOtherGramPanchayat = $scope.PLDB.IsOtherGramPanchayat ? 1 : 0;
+                $scope.PLDB.IsAvadhipaar = $scope.PLDB.IsAvadhipaar ? 1 : 0;
+                $scope.BindFinancialYears();
+                $scope.PLDB.FinancialYearId = ($scope.PLDB.FinancialYearId || '0').toString();
+
+             
 
                 $scope.PLDB.SectorId = ($scope.PLDB.SectorId || '0').toString();
                 $scope.PLDB.SectorId2 = ($scope.PLDB.SectorId2 || '0').toString();
@@ -1244,6 +1305,9 @@ CommityRegistrtionModule.controller('PLDBLoanApplicationCnt', function ($scope, 
 
                 if ($scope.PLDB.LoanAcceptDate != null)
                     $scope.PLDB.LoanAcceptDate = new Date($scope.PLDB.LoanAcceptDate);
+
+                if ($scope.PLDB.ODDate != null)
+                    $scope.PLDB.ODDate = new Date($scope.PLDB.ODDate);
 
                 if ($scope.PLDB.LoanApplicationDate != null)
                     $scope.PLDB.LoanApplicationDate = new Date($scope.PLDB.LoanApplicationDate);
