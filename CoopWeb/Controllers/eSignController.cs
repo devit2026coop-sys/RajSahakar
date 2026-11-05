@@ -1198,7 +1198,7 @@ namespace Cooperative.Controllers
             var gccModel = new GopalCreditCardDBModel(new DBLogger());
             GopalCreditCardFormModel creditCardFormModel = new GopalCreditCardFormModel();
             GccApplicationFlowModel _AppFlowModel = new GccApplicationFlowModel();
-            if (responseModel.StatusId != 4 && responseModel.DocType != "Citizen Certificate")
+            if (responseModel.StatusId != 4 && responseModel.DocType != "Citizen Certificate" && responseModel.DocType != "GCCPACS Certificate" && responseModel.DocType != "Guarantor Certificate" && responseModel.DocType != "Guarantor1 Certificate")
             {
                 data = gccModel.GetApplicationFlowByGCCId(Convert.ToInt32(responseModel.DocId), Convert.ToInt32(responseModel.UserId));
                 gccFlow = data.Rows[0]["GccApplicationFlow"].ToString();
@@ -1232,6 +1232,14 @@ namespace Cooperative.Controllers
                     creditCardFormModel.IsGurantor2Signed = Convert.ToBoolean(dt.Rows[0]["IsGurantor2Signed"]);
                     if (creditCardFormModel.IsApplicantSigned == true && creditCardFormModel.IsPacsManagerSigned == true && creditCardFormModel.IsGurantor1Signed == true && creditCardFormModel.IsGurantor2Signed == true)
                     {
+                        data = gccModel.GetApplicationFlowByGCCId(Convert.ToInt32(responseModel.DocId), Convert.ToInt32(responseModel.UserId));
+                        gccFlow = data.Rows[0]["GccApplicationFlow"].ToString();
+                        gccFormData = data.Rows[0]["GopalCreditCardForm"].ToString();
+
+                        _AppFlowModel = JsonConvert.DeserializeObject<GccApplicationFlowModel>(gccFlow);
+                        _AppFlowModel.StatusId = 11;
+                        _AppFlowModel.UserId = 0;
+
                         result = gccModel.AddApplicationFlow_V1(_AppFlowModel);
                     }
                     if (_AppFlowModel.StatusId == 19)
