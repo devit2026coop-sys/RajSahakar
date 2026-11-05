@@ -1121,8 +1121,10 @@ namespace Cooperative.Controllers
             SocietyModel objSocietyModel = new SocietyModel(new DBLogger());
             string result = "";
             string saveIDs = "";
-            if (model.DocIds.Length > 0)
-                saveIDs = saveIDs.Substring(0, saveIDs.Length - 1);
+            //if (model.DocIds.Length > 0)
+            //    saveIDs = saveIDs.Substring(0, saveIDs.Length - 1);
+            if (!string.IsNullOrEmpty(model.DocIds))
+                saveIDs = model.DocIds.TrimEnd(',');
 
             string fullPath = "../Content/AuditReport/" + model.FileName;
             objDBLogger.ErrorHandle(new ErrorLogEntity()
@@ -1130,7 +1132,7 @@ namespace Cooperative.Controllers
                 PageName = "eSign Controller start setup : 2,saveIDs" + saveIDs,
                 FunctionName = "AuditAssignByDepartmentNotRequest(EsignTransactionResponseModel " + JsonConvert.SerializeObject(model) + ")"
             }, new System.Exception(model.DocIds));
-            result = objSocietyModel.saveAuditAssignbydeprtNotRequest(model.Remark, model.AuditBy, model.DocId, Convert.ToString(model.StatusId), model.IsFirm, model.UserId, fullPath, Convert.ToInt32(model.UserRoleDeptMappingId), model.AuditTillDate, model.IsForced, model.SSOID, Convert.ToInt32(model.FinancialYearId), model.ReceiptNumber).ToString();
+            result = objSocietyModel.saveAuditAssignbydeprtNotRequest(model.Remark, model.AuditBy, model.DocIds, Convert.ToString(model.StatusId), model.IsFirm, model.UserId, fullPath, Convert.ToInt32(model.UserRoleDeptMappingId), model.AuditTillDate, model.IsForced, model.SSOID, Convert.ToInt32(model.FinancialYearId), model.ReceiptNumber).ToString();
             objDBLogger.ErrorHandle(new ErrorLogEntity()
             {
                 PageName = "eSign Controller start setup : 3,Return Result" + result,
