@@ -257,6 +257,14 @@ namespace Cooperative.Controllers
         }
 
         [HttpPost]
+        [ActionName("GETGodownFormationList")]
+        public string GETGodownFormationList(string SearchText = "")
+        {
+            GodownModel objGoDownModel = new GodownModel(new DBLogger());
+            return COMMON_FUNCTION.DataTableToJSONWithJSONNet(objGoDownModel.GETGodownFormationList(SearchText));
+        }
+
+        [HttpPost]
         [ActionName("GetGodownFsEmailList")]
         public string GetGodownFsEmailList(string SearchText = "")
         {
