@@ -110,6 +110,30 @@ namespace Cooperative.Controllers
         }
 
         [HttpGet]
+        public ActionResult AuditForm1()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        public ActionResult AuditForm2()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        public ActionResult AuditFormIII()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        public ActionResult AuditFormIV()
+        {
+            return View();
+        }
+
+        [HttpGet]
         public ActionResult GccBankWiseSummaryList() { return View(); }
 
         [HttpGet]
@@ -7424,6 +7448,42 @@ namespace Cooperative.Controllers
         public string GetAuditMPRVIIIReport()
         {
             DataTable dt = new MISModel().GetAuditMPRVIIIReport();
+
+            return COMMON_FUNCTION.DataTableToJSONString(dt);
+        }
+
+        [HttpGet]
+        [ActionName("GetAuditMPRCurrentYearReport")]
+        public string GetAuditMPRReport(string FinancialYearId, int Month = 0)
+        {
+            DataTable dt = new MISModel().GetAuditMPRReport(FinancialYearId, Month);
+
+            return COMMON_FUNCTION.DataTableToJSONString(dt);
+        }
+
+        [HttpGet]
+        [ActionName("GetAuditMPRCurrentYearBackLogReport")]
+        public string GetAuditMPRBackLogReport(string FinancialYearId, int Month = 0)
+        {
+            DataTable dt = new MISModel().GetAuditMPRBackLogReport(FinancialYearId, Month);
+
+            return COMMON_FUNCTION.DataTableToJSONString(dt);
+        }
+
+        [HttpGet]
+        [ActionName("GetAuditMPRCurrentYearFormIIIReport")]
+        public string GetAuditMPRCurrentYearFormIIIReport(string FinancialYearId, int Month = 0)
+        {
+            DataTable dt = new MISModel().GetAuditMPRCurrentYearFormIIIReport(FinancialYearId, Month);
+
+            return COMMON_FUNCTION.DataTableToJSONString(dt);
+        }
+
+        [HttpGet]
+        [ActionName("GetAuditMPRBackYearFormIVReport")]
+        public string GetAuditMPRBackYearFormIVReport(string FinancialYearId, int Month = 0)
+        {
+            DataTable dt = new MISModel().GetAuditMPRBackYearFormIVReport(FinancialYearId, Month);
 
             return COMMON_FUNCTION.DataTableToJSONString(dt);
         }
