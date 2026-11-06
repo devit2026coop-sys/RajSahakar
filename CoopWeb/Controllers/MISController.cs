@@ -6380,13 +6380,13 @@ namespace Cooperative.Controllers
 
         [HttpPost]
         [ActionName("GetLoanApplicationPLDBCountDetail")]
-        public JsonResult GetLoanApplicationPLDBCountDetail(DataPagingModel Details, int pldbId, int branchId, int financialYearId)
+        public JsonResult GetLoanApplicationPLDBCountDetail(DataPagingModel Details, int pldbId, int branchId, int financialYearId, bool IsAvadhipaar)
         {
             try
             {
                 MISModel objMisModel = new MISModel(new DBLogger());
 
-                DataTable DT = objMisModel.GetLoanApplicationPLDBCountDetail(Details, pldbId, branchId, financialYearId);
+                DataTable DT = objMisModel.GetLoanApplicationPLDBCountDetail(Details, pldbId, branchId, financialYearId, IsAvadhipaar);
 
                 return Json(new { DataList = COMMON_FUNCTION.DataTableToJSONWithJSONNet(DT), DataPaging = Details }, JsonRequestBehavior.AllowGet);
 
