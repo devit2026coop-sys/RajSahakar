@@ -7300,6 +7300,7 @@ namespace Cooperative.Models
             objDBAccess.AddParameterToCommand("@IsRowCount", DBFactoryParameterType.Int, false);
             objDBAccess.AddParameterToCommand("@LevelId", DBFactoryParameterType.NVarchar, user.LevelId);
             objDBAccess.AddParameterToCommand("@RoleId", DBFactoryParameterType.NVarchar, user.RoleId);
+            objDBAccess.AddParameterToCommand("@IsAvadhipaar", DBFactoryParameterType.Bit, IsAvadhipaar);
 
             ds = objDBAccess.GetTable();
 
