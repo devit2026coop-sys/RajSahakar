@@ -6826,10 +6826,22 @@ namespace Cooperative.Models
                 {
                     whereCase += " and a.BranchId = " + Details.SearchParameter.Where(x => x.Key == "BRANCH_ID").Select(x => x.Value).FirstOrDefault();
                 }
-                if (Details.SearchParameter.Where(x => x.Key == "IsAvadhipaar").Any())
+                //if (Details.SearchParameter.Where(x => x.Key == "IsAvadhipaar").Any())
+                //{
+                //    whereCase += " and a.IsAvadhipaar = " + Details.SearchParameter.Where(x => x.Key == "IsAvadhipaar").Select(x => x.Value).FirstOrDefault();
+                //}
+
+                var isAvadhipaar = Details.SearchParameter.Where(x => x.Key == "IsAvadhipaar").Select(x => x.Value).FirstOrDefault();
+
+                if (isAvadhipaar == null || string.IsNullOrWhiteSpace(isAvadhipaar.ToString()))
                 {
-                    whereCase += " and a.IsAvadhipaar = " + Details.SearchParameter.Where(x => x.Key == "IsAvadhipaar").Select(x => x.Value).FirstOrDefault();
+                    whereCase += " AND ISNULL(a.IsAvadhipaar, 0) = 0";
                 }
+                else
+                {
+                    whereCase += " AND a.IsAvadhipaar = " + Convert.ToInt32(isAvadhipaar);
+                }
+
 
                 UserEntity _LoggedInUser = (UserEntity)System.Web.HttpContext.Current.Session[SessionIdentity.Admin];
 
