@@ -315,6 +315,7 @@ namespace Cooperative.Models
                 objDBAccess.AddParameterToCommand("@KPIFor", DBFactoryParameterType.NVarchar, kpiFor);
                 objDBAccess.AddParameterToCommand("@DistrictId", DBFactoryParameterType.NVarchar, DistrictId);
                 objDBAccess.AddParameterToCommand("@ResionId", DBFactoryParameterType.NVarchar, resionId);
+                objDBAccess.AddParameterToCommand("@DivisionId", DBFactoryParameterType.NVarchar, _LoggedInUser.DivisionId);
 
                 dt = objDBAccess.GetTable();
             }
