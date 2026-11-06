@@ -6796,6 +6796,7 @@ namespace Cooperative.Models
 
         #region GetPLBDLoanApplicationPldbWiseList
         public List<Dictionary<string, object>> GetPLBDLoanApplicationPldbWiseList(ref DataPagingModel Details)
+        
         {
 
             DataTable dt = new DataTable();
@@ -7261,7 +7262,7 @@ namespace Cooperative.Models
 
 
         #region GetLoanApplicationPLDBCountDetail
-        public DataTable GetLoanApplicationPLDBCountDetail(DataPagingModel Details, int pldbId = 0, int branchId = 0, int FinancialYearId = 0)
+        public DataTable GetLoanApplicationPLDBCountDetail(DataPagingModel Details, int pldbId = 0, int branchId = 0, int FinancialYearId = 0,bool IsAvadhipaar = false)
         {
             DataTable ds = new DataTable();
             UserEntity user = (UserEntity)HttpContext.Current.Session[SessionIdentity.Admin];
@@ -7281,6 +7282,7 @@ namespace Cooperative.Models
                 objDBAccess.AddParameterToCommand("@IsRowCount", DBFactoryParameterType.Int, true);
                 objDBAccess.AddParameterToCommand("@LevelId", DBFactoryParameterType.NVarchar, user.LevelId);
                 objDBAccess.AddParameterToCommand("@RoleId", DBFactoryParameterType.NVarchar, user.RoleId);
+                objDBAccess.AddParameterToCommand("@IsAvadhipaar", DBFactoryParameterType.Bit, IsAvadhipaar);
                 Details.TotalRecords = Convert.ToInt32(objDBAccess.ExecuteScalarCommand());
             }
             if (Details.IsAllRecords)
