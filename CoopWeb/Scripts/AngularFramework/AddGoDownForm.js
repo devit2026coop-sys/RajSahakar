@@ -25,7 +25,7 @@ Role.controller("Godown", function ($scope, $http, $window) {
     var Mdata = [];
     $scope.TblGodownTimeBoundDetails = [];
     $scope.TblDetails = [];
-    $scope.godown = { isGSSKVSS: "1" };
+    $scope.godown = { isGSSKVSS: "1", SocietyType: 'GSS' };
     $scope.IsVisible = false;
     $scope.assemblyId = "0";
     //Insert user role details in db
@@ -836,24 +836,19 @@ Role.controller("Godown", function ($scope, $http, $window) {
                 if ($scope.district_MemberAdd != "" && $scope.district_MemberAdd != 0) {
                     $scope.getAssemblyByDistrict($scope.district_MemberAdd);
                 }
-                $http.get(SiteUrl + "/Master/GetMasterData/?MasterType=GRAMPANCHAYAT&MasterCode=" + row.BLOCK_ID)
-                    .success(function (gpData) {
-                        $scope.GramPancyatList = gpData;
-                        $scope.ddlGP_MemberAdd = row.GP_ID.toString();
-                        $http.get(SiteUrl + "/Master/GetMasterData/?MasterType=Village&MasterCode=" + row.GP_ID)
-                            .success(function (villageData) {
-                                $scope.VillageList = villageData;
-                                $scope.ddlVillage_MemberAdd = row.VILLAGE_ID.toString();
-                            })
-                            .error(function () {
-                                $scope.VillageList = [];
-                            });
-                    })
-                    .error(function () {
-                        $scope.GramPancyatList = [];
+                $http.get(SiteUrl + "/Master/GetMasterData/?MasterType=GRAMPANCHAYAT&MasterCode=" + row.BLOCK_ID).success(function (gpData) {
+                    $scope.GramPancyatList = gpData;
+                    $scope.ddlGP_MemberAdd = row.GP_ID.toString();
+                    $http.get(SiteUrl + "/Master/GetMasterData/?MasterType=Village&MasterCode=" + row.GP_ID).success(function (villageData) {
+                        $scope.VillageList = villageData;
+                        $scope.ddlVillage_MemberAdd = row.VILLAGE_ID.toString();
+                    }).error(function () {
+                        $scope.VillageList = [];
                     });
-            })
-            .error(function () {
+                }).error(function () {
+                    $scope.GramPancyatList = [];
+                });
+            }).error(function () {
                 $scope.BlockDataList = [];
             });
     };
@@ -891,20 +886,18 @@ Role.controller("Godown", function ($scope, $http, $window) {
         $http.post(SiteUrl + "/Godown/UploadPWDDocument", fd, {
             transformRequest: angular.identity,
             headers: { 'Content-Type': undefined }
-        })
-            .then(function (response) {
-                let r = response.data;
-                if (r && r.success) {
-                    $scope.godown.PWDCertificateFilePath = r.fileName;
-                    alert("Document Uploaded Successfully");
-                }
-                else {
-                    alert(r.message || "Upload Failed");
-                }
-            })
-            .catch(function (error) {
-                alert("Error uploading document");
-            });
+        }).then(function (response) {
+            let r = response.data;
+            if (r && r.success) {
+                $scope.godown.PWDCertificateFilePath = r.fileName;
+                alert("Document Uploaded Successfully");
+            }
+            else {
+                alert(r.message || "Upload Failed");
+            }
+        }).catch(function (error) {
+            alert("Error uploading document");
+        });
     };
 
     // Related to Godown Document Upload
@@ -939,17 +932,16 @@ Role.controller("Godown", function ($scope, $http, $window) {
         $http.post(SiteUrl + "/Godown/UploadRelatedGodownDocument", fd, {
             transformRequest: angular.identity,
             headers: { 'Content-Type': undefined }
+        }).then(function (response) {
+            let r = response.data;
+            if (r && r.success) {
+                $scope.godown.RelatedGodownDocumentFilePath = r.fileName;
+                alert("Document Uploaded Successfully");
+            }
+            else {
+                alert(r.message || "Upload Failed");
+            }
         })
-            .then(function (response) {
-                let r = response.data;
-                if (r && r.success) {
-                    $scope.godown.RelatedGodownDocumentFilePath = r.fileName;
-                    alert("Document Uploaded Successfully");
-                }
-                else {
-                    alert(r.message || "Upload Failed");
-                }
-            })
             .catch(function (error) {
                 alert("Error uploading document");
             });
