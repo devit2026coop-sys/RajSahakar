@@ -110,6 +110,30 @@ namespace Cooperative.Controllers
         }
 
         [HttpGet]
+        public ActionResult AuditForm1()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        public ActionResult AuditForm2()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        public ActionResult AuditFormIII()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        public ActionResult AuditFormIV()
+        {
+            return View();
+        }
+
+        [HttpGet]
         public ActionResult GccBankWiseSummaryList() { return View(); }
 
         [HttpGet]
@@ -6356,13 +6380,13 @@ namespace Cooperative.Controllers
 
         [HttpPost]
         [ActionName("GetLoanApplicationPLDBCountDetail")]
-        public JsonResult GetLoanApplicationPLDBCountDetail(DataPagingModel Details, int pldbId, int branchId, int financialYearId)
+        public JsonResult GetLoanApplicationPLDBCountDetail(DataPagingModel Details, int pldbId, int branchId, int financialYearId, bool IsAvadhipaar)
         {
             try
             {
                 MISModel objMisModel = new MISModel(new DBLogger());
 
-                DataTable DT = objMisModel.GetLoanApplicationPLDBCountDetail(Details, pldbId, branchId, financialYearId);
+                DataTable DT = objMisModel.GetLoanApplicationPLDBCountDetail(Details, pldbId, branchId, financialYearId, IsAvadhipaar);
 
                 return Json(new { DataList = COMMON_FUNCTION.DataTableToJSONWithJSONNet(DT), DataPaging = Details }, JsonRequestBehavior.AllowGet);
 
@@ -7145,9 +7169,9 @@ namespace Cooperative.Controllers
 
         [HttpGet]
         [ActionName("GetKPIOverallRating")]
-        public string GetKPIOverallRating(string KPIFor, int Month, string FY, int OfficeId = 0, int DistrictId = 0)
+        public string GetKPIOverallRating(string KPIFor, int Month, string FY, int OfficeId = 0, int DistrictId = 0, int DivisionId = 0, int ResionId = 0)
         {
-            DataTable dt = new MISModel().GetKPIOverallRating(KPIFor, Month, FY, OfficeId, DistrictId);
+            DataTable dt = new MISModel().GetKPIOverallRating(KPIFor, Month, FY, OfficeId, DistrictId, DivisionId, ResionId);
 
             return COMMON_FUNCTION.DataTableToJSONString(dt);
         }
@@ -7424,6 +7448,42 @@ namespace Cooperative.Controllers
         public string GetAuditMPRVIIIReport()
         {
             DataTable dt = new MISModel().GetAuditMPRVIIIReport();
+
+            return COMMON_FUNCTION.DataTableToJSONString(dt);
+        }
+
+        [HttpGet]
+        [ActionName("GetAuditMPRCurrentYearReport")]
+        public string GetAuditMPRReport(string FinancialYearId, int Month = 0)
+        {
+            DataTable dt = new MISModel().GetAuditMPRReport(FinancialYearId, Month);
+
+            return COMMON_FUNCTION.DataTableToJSONString(dt);
+        }
+
+        [HttpGet]
+        [ActionName("GetAuditMPRCurrentYearBackLogReport")]
+        public string GetAuditMPRBackLogReport(string FinancialYearId, int Month = 0)
+        {
+            DataTable dt = new MISModel().GetAuditMPRBackLogReport(FinancialYearId, Month);
+
+            return COMMON_FUNCTION.DataTableToJSONString(dt);
+        }
+
+        [HttpGet]
+        [ActionName("GetAuditMPRCurrentYearFormIIIReport")]
+        public string GetAuditMPRCurrentYearFormIIIReport(string FinancialYearId, int Month = 0)
+        {
+            DataTable dt = new MISModel().GetAuditMPRCurrentYearFormIIIReport(FinancialYearId, Month);
+
+            return COMMON_FUNCTION.DataTableToJSONString(dt);
+        }
+
+        [HttpGet]
+        [ActionName("GetAuditMPRBackYearFormIVReport")]
+        public string GetAuditMPRBackYearFormIVReport(string FinancialYearId, int Month = 0)
+        {
+            DataTable dt = new MISModel().GetAuditMPRBackYearFormIVReport(FinancialYearId, Month);
 
             return COMMON_FUNCTION.DataTableToJSONString(dt);
         }

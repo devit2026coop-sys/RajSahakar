@@ -69,7 +69,7 @@ namespace Cooperative.Controllers
             return View();
         }
 
-        ////old
+        //old (running Live)
         [HttpPost]
         public int SaveKPIResult(List<KPIResultModel> model)
         {
@@ -79,7 +79,7 @@ namespace Cooperative.Controllers
             return result;
         }
 
-        //new
+        //new (running Local)
         //[HttpPost]
         //public int SaveKPIResult(List<KPIResultModel> model)
         //{

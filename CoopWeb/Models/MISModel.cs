@@ -6796,6 +6796,7 @@ namespace Cooperative.Models
 
         #region GetPLBDLoanApplicationPldbWiseList
         public List<Dictionary<string, object>> GetPLBDLoanApplicationPldbWiseList(ref DataPagingModel Details)
+        
         {
 
             DataTable dt = new DataTable();
@@ -6825,6 +6826,22 @@ namespace Cooperative.Models
                 {
                     whereCase += " and a.BranchId = " + Details.SearchParameter.Where(x => x.Key == "BRANCH_ID").Select(x => x.Value).FirstOrDefault();
                 }
+                //if (Details.SearchParameter.Where(x => x.Key == "IsAvadhipaar").Any())
+                //{
+                //    whereCase += " and a.IsAvadhipaar = " + Details.SearchParameter.Where(x => x.Key == "IsAvadhipaar").Select(x => x.Value).FirstOrDefault();
+                //}
+
+                var isAvadhipaar = Details.SearchParameter.Where(x => x.Key == "IsAvadhipaar").Select(x => x.Value).FirstOrDefault();
+
+                if (isAvadhipaar == null || string.IsNullOrWhiteSpace(isAvadhipaar.ToString()))
+                {
+                    whereCase += " AND ISNULL(a.IsAvadhipaar, 0) = 0";
+                }
+                else
+                {
+                    whereCase += " AND a.IsAvadhipaar = " + Convert.ToInt32(isAvadhipaar);
+                }
+
 
                 UserEntity _LoggedInUser = (UserEntity)System.Web.HttpContext.Current.Session[SessionIdentity.Admin];
 
@@ -7257,7 +7274,7 @@ namespace Cooperative.Models
 
 
         #region GetLoanApplicationPLDBCountDetail
-        public DataTable GetLoanApplicationPLDBCountDetail(DataPagingModel Details, int pldbId = 0, int branchId = 0, int FinancialYearId = 0)
+        public DataTable GetLoanApplicationPLDBCountDetail(DataPagingModel Details, int pldbId = 0, int branchId = 0, int FinancialYearId = 0,bool IsAvadhipaar = false)
         {
             DataTable ds = new DataTable();
             UserEntity user = (UserEntity)HttpContext.Current.Session[SessionIdentity.Admin];
@@ -7277,6 +7294,7 @@ namespace Cooperative.Models
                 objDBAccess.AddParameterToCommand("@IsRowCount", DBFactoryParameterType.Int, true);
                 objDBAccess.AddParameterToCommand("@LevelId", DBFactoryParameterType.NVarchar, user.LevelId);
                 objDBAccess.AddParameterToCommand("@RoleId", DBFactoryParameterType.NVarchar, user.RoleId);
+                objDBAccess.AddParameterToCommand("@IsAvadhipaar", DBFactoryParameterType.Bit, IsAvadhipaar);
                 Details.TotalRecords = Convert.ToInt32(objDBAccess.ExecuteScalarCommand());
             }
             if (Details.IsAllRecords)
@@ -7294,6 +7312,7 @@ namespace Cooperative.Models
             objDBAccess.AddParameterToCommand("@IsRowCount", DBFactoryParameterType.Int, false);
             objDBAccess.AddParameterToCommand("@LevelId", DBFactoryParameterType.NVarchar, user.LevelId);
             objDBAccess.AddParameterToCommand("@RoleId", DBFactoryParameterType.NVarchar, user.RoleId);
+            objDBAccess.AddParameterToCommand("@IsAvadhipaar", DBFactoryParameterType.Bit, IsAvadhipaar);
 
             ds = objDBAccess.GetTable();
 
@@ -8953,6 +8972,7 @@ namespace Cooperative.Models
         public DataTable GetKPIOffices(string KPIFor, string Month, string FinancialYearId)
         {
             DataTable dt = new DataTable();
+            UserEntity _LoggedInUser = (UserEntity)System.Web.HttpContext.Current.Session[SessionIdentity.Admin];
 
             try
             {
@@ -8962,6 +8982,8 @@ namespace Cooperative.Models
                 objDBAccess.AddParameterToCommand("@KPIFor", DBFactoryParameterType.VARCHAR, KPIFor);
                 objDBAccess.AddParameterToCommand("@Month", DBFactoryParameterType.VARCHAR, Month);
                 objDBAccess.AddParameterToCommand("@FinancialYearId", DBFactoryParameterType.VARCHAR, FinancialYearId);
+                objDBAccess.AddParameterToCommand("@RoleId", DBFactoryParameterType.Int, _LoggedInUser.RoleId);
+                objDBAccess.AddParameterToCommand("@DivisionId", DBFactoryParameterType.Int, _LoggedInUser.DivisionId);
 
 
                 dt = objDBAccess.GetTable();
@@ -9470,6 +9492,128 @@ namespace Cooperative.Models
             catch (Exception ex)
             {
                 objILogger.ErrorHandle(new ErrorLogEntity() { PageName = "Cooperative.Models.MISModel", FunctionName = "GetAuditMPRVIIIReport()" }, ex);
+            }
+            finally
+            {
+                objDBAccess.CloseConnection();
+            }
+
+            return dt;
+        }
+
+
+        public DataTable GetAuditMPRReport(string FinancialYearId, int Month = 0)
+        {
+            DataTable dt = new DataTable();
+
+            UserEntity _LoggedInUser = (UserEntity)System.Web.HttpContext.Current.Session[SessionIdentity.Admin];
+
+            try
+            {
+
+                objDBAccess.OpenConnection();
+
+                SqlCommand cmd = objDBAccess.CreateCommand("USP_GetAuditMPRReport", DBFactoryCommandType.PROCEDURE_COMMAND);
+                objDBAccess.AddParameterToCommand("@LevelId", DBFactoryParameterType.Int, _LoggedInUser.LevelId);
+                objDBAccess.AddParameterToCommand("@UserRoleMappingId", DBFactoryParameterType.Int, _LoggedInUser.UserRoleDeptMappingId);
+                objDBAccess.AddParameterToCommand("@FinancialYearId", DBFactoryParameterType.VARCHAR, FinancialYearId);
+                objDBAccess.AddParameterToCommand("@Month", DBFactoryParameterType.Int, Month);
+
+                dt = objDBAccess.GetTable();
+            }
+            catch (Exception ex)
+            {
+                objILogger.ErrorHandle(new ErrorLogEntity() { PageName = "Cooperative.Models.MISModel", FunctionName = "GetAuditMPRReport()" }, ex);
+            }
+            finally
+            {
+                objDBAccess.CloseConnection();
+            }
+
+            return dt;
+        }
+
+        public DataTable GetAuditMPRBackLogReport(string FinancialYearId, int Month = 0)
+        {
+            DataTable dt = new DataTable();
+
+            UserEntity _LoggedInUser = (UserEntity)System.Web.HttpContext.Current.Session[SessionIdentity.Admin];
+
+            try
+            {
+                objDBAccess.OpenConnection();
+
+                SqlCommand cmd = objDBAccess.CreateCommand("USP_GetAuditMPRBacklogReport", DBFactoryCommandType.PROCEDURE_COMMAND);
+                objDBAccess.AddParameterToCommand("@LevelId", DBFactoryParameterType.Int, _LoggedInUser.LevelId);
+                objDBAccess.AddParameterToCommand("@UserRoleMappingId", DBFactoryParameterType.Int, _LoggedInUser.UserRoleDeptMappingId);
+                objDBAccess.AddParameterToCommand("@FinancialYearId", DBFactoryParameterType.VARCHAR, FinancialYearId);
+                objDBAccess.AddParameterToCommand("@Month", DBFactoryParameterType.Int, Month);
+
+                dt = objDBAccess.GetTable();
+            }
+            catch (Exception ex)
+            {
+                objILogger.ErrorHandle(new ErrorLogEntity() { PageName = "Cooperative.Models.MISModel", FunctionName = "GetAuditMPRBackLogReport()" }, ex);
+            }
+            finally
+            {
+                objDBAccess.CloseConnection();
+            }
+
+            return dt;
+        }
+
+        public DataTable GetAuditMPRCurrentYearFormIIIReport(string FinancialYearId, int Month = 0)
+        {
+            DataTable dt = new DataTable();
+
+            UserEntity _LoggedInUser = (UserEntity)System.Web.HttpContext.Current.Session[SessionIdentity.Admin];
+
+            try
+            {
+                objDBAccess.OpenConnection();
+
+                SqlCommand cmd = objDBAccess.CreateCommand("USP_GetAuditMPRCurrentYearFormIIIReport", DBFactoryCommandType.PROCEDURE_COMMAND);
+                objDBAccess.AddParameterToCommand("@LevelId", DBFactoryParameterType.Int, _LoggedInUser.LevelId);
+                objDBAccess.AddParameterToCommand("@UserRoleMappingId", DBFactoryParameterType.Int, _LoggedInUser.UserRoleDeptMappingId);
+                objDBAccess.AddParameterToCommand("@FinancialYearId", DBFactoryParameterType.VARCHAR, FinancialYearId);
+                objDBAccess.AddParameterToCommand("@Month", DBFactoryParameterType.Int, Month);
+
+                dt = objDBAccess.GetTable();
+            }
+            catch (Exception ex)
+            {
+                objILogger.ErrorHandle(new ErrorLogEntity() { PageName = "Cooperative.Models.MISModel", FunctionName = "GetAuditMPRCurrentYearFormIIIReport()" }, ex);
+            }
+            finally
+            {
+                objDBAccess.CloseConnection();
+            }
+
+            return dt;
+        }
+
+        public DataTable GetAuditMPRBackYearFormIVReport(string FinancialYearId, int Month = 0)
+        {
+            DataTable dt = new DataTable();
+
+            UserEntity _LoggedInUser = (UserEntity)System.Web.HttpContext.Current.Session[SessionIdentity.Admin];
+
+            try
+            {
+                objDBAccess.OpenConnection();
+
+                SqlCommand cmd = objDBAccess.CreateCommand("USP_GetAuditMPRCurrentYearFormIVReport", DBFactoryCommandType.PROCEDURE_COMMAND);
+                objDBAccess.AddParameterToCommand("@LevelId", DBFactoryParameterType.Int, _LoggedInUser.LevelId);
+                objDBAccess.AddParameterToCommand("@UserRoleMappingId", DBFactoryParameterType.Int, _LoggedInUser.UserRoleDeptMappingId);
+                objDBAccess.AddParameterToCommand("@FinancialYearId", DBFactoryParameterType.VARCHAR, FinancialYearId);
+                objDBAccess.AddParameterToCommand("@Month", DBFactoryParameterType.Int, Month);
+
+                dt = objDBAccess.GetTable();
+            }
+            catch (Exception ex)
+            {
+                objILogger.ErrorHandle(new ErrorLogEntity() { PageName = "Cooperative.Models.MISModel", FunctionName = "GetAuditMPRBackYearFormIVReport()" }, ex);
             }
             finally
             {

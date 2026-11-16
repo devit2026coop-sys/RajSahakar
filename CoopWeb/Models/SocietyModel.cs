@@ -2746,6 +2746,11 @@ namespace Cooperative.Models
             int Result = -1;
             string qry = "";
             qry += "AuditerId=" + AuditerId + " AuditBy=" + AuditBy + " Ids=" + Ids + " Status=" + Status + " IsFirm=" + IsFirm + " UserId=" + UserId + " FileName=" + FileName + " UserRoleDepartmentId=" + UserRoleDepartmentId + " AuditTillDate=" + AuditTillDate + " IsForced=" + IsForced + " SSOID=" + SSOID + " FinancialYearId=" + FinancialYearId + " OrderNo=" + OrderNo;
+            objDBLogger.ErrorHandle(new ErrorLogEntity()
+            {
+                PageName = "Society Model setup : 1,qry" + qry,
+                FunctionName = "saveAuditAssignbydeprtNotRequest(string AuditerId = \"\", string AuditBy = \"\", string Ids = \"\", string Status = \"\", string IsFirm = \"\", long UserId = 0, string FileName = \"\", int UserRoleDepartmentId = 0, string AuditTillDate = \"\", string IsForced = \"False\", string SSOID = \"\", int FinancialYearId = 0, string OrderNo = \"\")"
+            }, new System.Exception());
 
             try
             {

@@ -13873,8 +13873,11 @@ public class KPIResultModel
     public int OfficeId { get; set; }
     public int KPIIndicatorsId { get; set; }
     public int CCBId { get; set; }
+    public int NoGodown { get; set; }
     public int KPI_MarksId { get; set; }
     public decimal KPIIndicatorsTarget { get; set; }
+    public decimal OtherThanKccLoanDisAmount { get; set; }
+    public decimal ProfitLastYearAmount { get; set; }
     public decimal KPIIndicatorsAchievement { get; set; }
     public decimal DepositAmount { get; set; }
     public decimal KCCRecoveryAmount { get; set; }
@@ -13905,10 +13908,7 @@ public class KPIResultModel
     public bool? selectOptionAnyOther1 { get; set; }
     public bool? selectOptionAnyOther2 { get; set; }
     public DateTime? DynamicDate { get; set; }
-
-
 }
-
 
 public class KPIMasterModel
 {

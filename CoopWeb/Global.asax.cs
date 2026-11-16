@@ -29,40 +29,18 @@ namespace Cooperative
         }
         protected void Application_Error(object sender, EventArgs e)
         {
-            Exception exception = Server.GetLastError();
+            Exception ex = Server.GetLastError();
+
+            Server.ClearError();
+
             Response.Clear();
+            Response.StatusCode = 500;
+            Response.TrySkipIisCustomErrors = true;
+            Response.ContentType = "text/plain";
 
-            HttpException httpException = exception as HttpException;
-
-            if (httpException != null)
-            {
-                string action;
-
-                switch (httpException.GetHttpCode())
-                {
-                    case 404:
-                        // page not found
-                        action = "HttpError404";
-                        break;
-                    case 400:
-                        action = "HttpError400";
-                        break;
-                    case 500:
-                        // server error
-                        action = "HttpError404";
-                        break;
-                    default:
-                        action = "General";
-                        break;
-                }
-
-                //clear error on server
-                Server.ClearError();
-                ILogger objILogger = new DBLogger();
-                objILogger.ErrorHandle(new ErrorLogEntity() { PageName = "Cooperative.MvcApplication", FunctionName = "Application_Error(object sender, EventArgs e)" }, httpException);
-                Response.Redirect(String.Format("/Error/{0}", action), true);
-            }
+            Response.Write(ex?.ToString() ?? "Unknown application error");
         }
+        
         void Application_BeginRequest(object sender, EventArgs e)
         
         {
@@ -111,7 +89,7 @@ namespace Cooperative
             {
                 foreach (string s in Response.Cookies.AllKeys)
                 {
-                    if (Request.Url.Host.Contains("10.70.234.208")|| Request.Url.Host.Contains("devitsandbox"))
+                    if (Request.Url.Host.Contains("10.70.234.208")|| Request.Url.Host.Contains("devitsandbox") || Request.Url.Host.Contains("164.100.222.195"))
                     {
                         //Response.Cookies[s].Secure = true;
                         //Response.Cookies[s].HttpOnly = true;
