@@ -9,13 +9,6 @@ CooperativeSocietyFormModule.controller("CooperativePLDBKPIFormCont", function (
         PldbId: PldbId || 0
     };
 
-    $scope.GotoCurrent = function () {
-        window.location.href = '/Auditor/AuditorCurrentYearForm';
-    };
-
-    $scope.GotoFees = function () {
-        window.location.href = '/Auditor/AuditorAuditFees';
-    };
 
     $scope.OnPageLoad = function () {
         $scope._language = _language;
@@ -166,7 +159,8 @@ CooperativeSocietyFormModule.controller("CooperativePLDBKPIFormCont", function (
         });
     };
 
-    $scope.GetKPIResult = function () { 
+    $scope.GetKPIResult = function () {
+        debugger;
 
         if (!$scope.SelectedDate) {
             alert("Please select date first.");
@@ -679,7 +673,8 @@ CooperativeSocietyFormModule.controller("CooperativePLDBKPIFormCont", function (
     $scope.IsExpiryAlertShown = false;
 
     $scope.GetFinancialYear = function () {
-         
+        debugger;
+
         $(".se-pre-con").fadeIn("slow");
         $scope.FinancialYearList = [];
 

@@ -1023,8 +1023,11 @@ MasterMod.controller("UnitMasterCont", function ($scope, $http, $rootScope) {
             message += $scope._language == 'en-us' ? '<br />Please Select Village.' : '<br />कृपया गाँव चुनें।';
             //$("#txtAccountName_" + index).addClass("notValid");            
         }
-        if ($scope.NonTspAreaType == "3" && ($scope.ProposedNameMPACS == "" || $scope.ProposedNameMPACS == null || $scope.ProposedNameMPACS == undefined)) {
-            message += $scope._language == 'en-us' ? '<br />Please Enter Name of Proposed MPACS.' : '<br />Please Enter Name of Proposed MPACS.।';
+        //if ($scope.NonTspAreaType == "3" && ($scope.ProposedNameMPACS == "" || $scope.ProposedNameMPACS == null || $scope.ProposedNameMPACS == undefined)) {
+        //    message += $scope._language == 'en-us' ? '<br />Please Enter Name of Proposed MPACS.' : '<br />Please Enter Name of Proposed MPACS.।';
+        //}
+        if ($scope.NonTspAreaType == "3" && ($scope.ProposedNameMPACS == "" || $scope.ProposedNameMPACS == null || $scope.ProposedNameMPACS == undefined || $scope.ProposedNameMPACS.trim() == "")) {
+            message += $scope._language == 'en-us' ? '<br />Please Enter Name of Proposed MPACS.' : '<br />कृपया प्रस्तावित एमपैक्स का नाम दर्ज करें।';
         }
         if ($scope.AllotmentLetter == '' || $scope.AllotmentLetter == undefined) {
             message += $scope._language == 'en-us' ? '<br />Please upload Allotment Letter .' : '<br />कृपया आवंटन पत्र अपलोड करें।';

@@ -499,7 +499,7 @@ WorkFlowMasterModule.controller("WorkFlowMasterCnt", function ($scope, $http) {
                         else {
                             message = _language == 'en-us' ? 'Some Error  is Occured \n' : 'कुछ त्रुटि हुई है\n';
                         }
-                        bootbox.alert(message, function () {
+                        alert(message, function () {
                             location.reload();
                         })
 

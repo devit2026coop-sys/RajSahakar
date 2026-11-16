@@ -218,20 +218,53 @@ MasterMod.controller("ApplicationPLDBLoanWiseFlowCont", function ($scope, $rootS
             });
     };
 
-    $scope.FinancialYearList = function () {
-        $http.get(SiteUrl + "/Master/GetMasterData/?MasterType=FINANCIALYEAR&MasterCode=-1")
-            .success(function (data, status) {
+    //$scope.FinancialYearList = function () {
+    //    $http.get(SiteUrl + "/Master/GetMasterData/?MasterType=FINANCIALYEAR&MasterCode=-1")
+    //        .success(function (data, status) {
 
-                $scope.FinancialYearList = data.filter(function (item) {
-                    return item.FIN_YEAR_NAME == "2025-26" || item.FIN_YEAR_NAME == "2026-27";
-                });
+    //            $scope.FinancialYearList = data.filter(function (item) {
+    //                return item.FIN_YEAR_NAME == "2025-26" || item.FIN_YEAR_NAME == "2026-27";
+    //            });
+
+    //        })
+    //        .error(function (data, status) {
+
+    //            $scope.FinancialYearList = [];
+    //        });
+    //}
+
+    $scope.BindFinancialYears = function () {
+
+        if ($scope.PLDB.IsAvadhipaar == 0) {
+            $scope.FinancialYearList = $scope.AllFinancialYears.filter(function (item) {
+                return item.FIN_YEAR_NAME == "2025-26" || item.FIN_YEAR_NAME == "2026-27";
+            });
+
+        }
+        else {
+            $scope.FinancialYearList = $scope.AllFinancialYears.filter(function (item) {
+                return parseInt(item.FIN_YEAR_START) >= 1970 && parseInt(item.FIN_YEAR_START) <= 2024;
+            });
+        }
+    };
+
+    $scope.FinancialYearList = function () {
+
+        $http.get(SiteUrl + "/Master/GetMasterData/?MasterType=FINANCIALYEAR&MasterCode=-1")
+            .success(function (data) {
+                $scope.AllFinancialYears = data;
+                console.log('$scope.AllFinancialYears', $scope.AllFinancialYears);
+                $scope.BindFinancialYears();
 
             })
-            .error(function (data, status) {
+            .error(function () {
 
+                $scope.AllFinancialYears = [];
                 $scope.FinancialYearList = [];
+
             });
-    }
+
+    };
 
     $scope.openPldbCountDetails = function (item) {
 
@@ -240,7 +273,8 @@ MasterMod.controller("ApplicationPLDBLoanWiseFlowCont", function ($scope, $rootS
         var params = {
             PldbId: item.PldbId || 0,
             BranchId: ($scope.PLDB && $scope.PLDB.BranchId && $scope.PLDB.BranchId != '0') ? $scope.PLDB.BranchId : 0,
-            FinancialYearId: item.FinancialYearId || 0
+            FinancialYearId: item.FinancialYearId || 0,
+            IsAvadhipaar: item.IsAvadhipaar || 0
         };
         sessionStorage.setItem("LoanDetailParams", JSON.stringify(params));
 
