@@ -1032,12 +1032,59 @@ namespace Cooperative.Controllers
             return View();
         }
 
-        public ActionResult AuditorAuditFees()
+        //public ActionResult AuditorAuditFees()
+        //{
+        //    return View();
+        //}
+
+        public ActionResult AuditorliabilityAndIncome()
         {
             return View();
         }
 
-        public ActionResult AuditorliabilityAndIncome()
+        public ActionResult AuditorAssestAndExpences()
+        {
+            return View();
+        }
+
+        public ActionResult AuditorBankReconciliotion()
+        {
+            return View();
+        }
+
+        public ActionResult AuditorDepreciationSchedule()
+        {
+            return View();
+        }
+        public ActionResult AuditorDetailedAssetClassification()
+        {
+            return View();
+        }
+        public ActionResult Auditorotherprovision()
+        {
+            return View();
+        }
+        public ActionResult AuditorBudget()
+        {
+            return View();
+        }
+        public ActionResult AuditorotherAnx()
+        {
+            return View();
+        }
+        public ActionResult AuditorTradeAccount()
+        {
+            return View();
+        }
+        public ActionResult AuditorProfitAndLossAc()
+        {
+            return View();
+        }
+        public ActionResult AuditorAppropriation()
+        {
+            return View();
+        }
+        public ActionResult AuditorBalanceSheet()
         {
             return View();
         }
@@ -1149,6 +1196,29 @@ namespace Cooperative.Controllers
                     Message = "An error occurred while saving the MPR form."
                 });
             }
+        }
+
+
+        public ActionResult AuditorAuditFees()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        [ActionName("GetAuditFeesDetails")]
+        public string GetAuditFeesDetails(int month, string financialYear, int districtId)
+        {
+            //DataTable dt = new AuditorModel().GetAuditFeesDetails(month, financialYear, districtId);
+            //return COMMON_FUNCTION.DataTableToJSONString(dt);
+            AuditorModel auditorModel = new AuditorModel();
+            return COMMON_FUNCTION.DataTableToJSONWithJSONNet(auditorModel.GetAuditFeesDetails(month, financialYear, districtId));
+        }
+
+        [HttpPost]
+        public int SaveAuditFees(List<AuditMprFeesModel> model)
+        {
+            int result = new AuditorModel().SaveAuditResult(model);
+            return result;
         }
 
 

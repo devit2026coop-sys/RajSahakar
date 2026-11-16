@@ -2191,5 +2191,99 @@ namespace Cooperative.Models
         }
 
 
+        public DataTable GetAuditFeesDetails(int month, string financialYear, int districtId)
+        {
+            DataTable dt = new DataTable();
+            UserEntity _LoggedInUser = (UserEntity)System.Web.HttpContext.Current.Session[SessionIdentity.Admin];
+            try
+            {
+                objDBAccess.OpenConnection();
+
+                SqlCommand cmd = objDBAccess.CreateCommand("USP_Get_AuditMPRFees_v1", DBFactoryCommandType.PROCEDURE_COMMAND);
+                objDBAccess.AddParameterToCommand("@Month", DBFactoryParameterType.Int, month);
+                objDBAccess.AddParameterToCommand("@FinancialYear", DBFactoryParameterType.VARCHAR, financialYear);
+                objDBAccess.AddParameterToCommand("@DistrictId", DBFactoryParameterType.Int, districtId);
+                objDBAccess.AddParameterToCommand("@UserId", DBFactoryParameterType.VARCHAR, _LoggedInUser.UserId);
+                objDBAccess.AddParameterToCommand("@RoleId", DBFactoryParameterType.Int, _LoggedInUser.RoleId);
+                dt = objDBAccess.GetTable();
+            }
+            catch (Exception ex)
+            {
+                objILogger.ErrorHandle(new ErrorLogEntity() { PageName = "Cooperative.Models.AuditorModel", FunctionName = "GetAuditFeesDetails()" }, ex);
+            }
+            finally
+            {
+                objDBAccess.CloseConnection();
+            }
+            return dt;
+        }
+
+        public int SaveAuditResult(List<AuditMprFeesModel> model)
+        {
+            int Result = 0;
+            UserEntity _LoggedInUser = (UserEntity)System.Web.HttpContext.Current.Session[SessionIdentity.Admin];
+
+            if (_LoggedInUser == null || model == null || model.Count == 0)
+            {
+                return 0;
+            }
+            try
+            {
+                var firstRecord = model.FirstOrDefault();
+                string financialYear = firstRecord?.FinancialYear;
+                int month = firstRecord?.Month ?? 0;
+                // TODO: 
+                DataTable table = new DataTable();
+                table.Columns.Add("CommitteeTypeId", typeof(int));
+                table.Columns.Add("PreviousOutstanding", typeof(decimal));
+                table.Columns.Add("PreviousMonthCurrentYearAssessment", typeof(decimal));
+                table.Columns.Add("PreviousMonthBacklogRecovery", typeof(decimal));
+                table.Columns.Add("PreviousMonthCurrentYearRecovery", typeof(decimal));
+                table.Columns.Add("CurrentMonthCurrentYearAssessment", typeof(decimal));
+                table.Columns.Add("CurrentMonthBacklogRecovery", typeof(decimal));
+                table.Columns.Add("CurrentMonthCurrentYearRecovery", typeof(decimal));
+
+                foreach (var item in model)
+                {
+                    table.Rows.Add(
+                        item.CommitteeTypeId,
+                        item.PreviousOutstanding,
+                        item.PreviousMonthCurrentYearAssessment,
+                        item.PreviousMonthBacklogRecovery,
+                        item.PreviousMonthCurrentYearRecovery,
+                        item.CurrentMonthCurrentYearAssessment,
+                        item.CurrentMonthBacklogRecovery,
+                        item.CurrentMonthCurrentYearRecovery
+                    );
+                }
+                objDBAccess.OpenConnection();
+                SqlCommand cmd = objDBAccess.CreateCommand("USP_Save_AuditMprFees", DBFactoryCommandType.PROCEDURE_COMMAND);
+                objDBAccess.AddParameterToCommand("@DistrictId", DBFactoryParameterType.Int, _LoggedInUser.DistrictId);
+                objDBAccess.AddParameterToCommand("@CreatedBy", DBFactoryParameterType.Int, _LoggedInUser.UserId);
+                objDBAccess.AddParameterToCommand("@UserRoleMappingId", DBFactoryParameterType.Int, _LoggedInUser.UserRoleDeptMappingId);
+                objDBAccess.AddParameterToCommand("@RoleId", DBFactoryParameterType.Int, _LoggedInUser.RoleId);
+                objDBAccess.AddParameterToCommand("@FinancialYear", DBFactoryParameterType.VARCHAR, financialYear);
+                objDBAccess.AddParameterToCommand("@Month", DBFactoryParameterType.Int, month);
+
+                SqlParameter parameter = cmd.Parameters.Add("@Records", SqlDbType.Structured);
+                parameter.TypeName = "dbo.AuditMprFeesTableType";
+                parameter.Value = table;
+
+                Result = Convert.ToInt32(objDBAccess.ExecuteScalarCommand());
+            }
+            catch (Exception ex)
+            {
+                objILogger.ErrorHandle(new ErrorLogEntity() { PageName = "AuditMprFeesModel", FunctionName = "SaveAuditResult" }, ex);
+
+                Result = 0;
+            }
+            finally
+            {
+                objDBAccess.CloseConnection();
+            }
+            return Result;
+        }
+
+
     }
 }
