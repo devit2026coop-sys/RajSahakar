@@ -4916,6 +4916,21 @@ namespace Cooperative.Models
         public int CurrentAuditedAllocationCA { get; set; }
     }
 
+    public class AuditMprFeesModel
+    {
+        public string FinancialYear { get; set; }
+        public int Month { get; set; }
+        public int CommitteeTypeId { get; set; }
+
+        public decimal PreviousOutstanding { get; set; }
+        public decimal PreviousMonthCurrentYearAssessment { get; set; }
+        public decimal PreviousMonthBacklogRecovery { get; set; }
+        public decimal PreviousMonthCurrentYearRecovery { get; set; }
+        public decimal CurrentMonthCurrentYearAssessment { get; set; }
+        public decimal CurrentMonthBacklogRecovery { get; set; }
+        public decimal CurrentMonthCurrentYearRecovery { get; set; }
+    }
+
 
 }
 

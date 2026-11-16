@@ -132,7 +132,7 @@ namespace Cooperative
         }
         protected void Application_PreSendRequestHeaders(object sender, EventArgs e)
         {
-            if (Request.Url.Host.Contains("10.70.234.208"))
+            if (Request.Url.Host.Contains("10.70.234.208") || Request.Url.Host.Contains("164.100.222.195") )
             {
                 HttpContext.Current.Response.Headers.Remove("X-AspNetMvc-Version");
                 HttpContext.Current.Response.Headers.Remove("X-AspNet-Version");
