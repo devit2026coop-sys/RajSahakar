@@ -1,5 +1,4 @@
-﻿
-var KPIForPacsMod = angular.module("KPIForPacsMod", ['angularUtils.directives.dirPagination']);
+﻿var KPIForPacsMod = angular.module("KPIForPacsMod", ['angularUtils.directives.dirPagination']);
 KPIForPacsMod.controller("KPIForPacsCtrl", function ($rootScope, $scope, $http) {
     $scope.IsUpdate = false;
     $scope.FY = "";
@@ -38,17 +37,13 @@ KPIForPacsMod.controller("KPIForPacsCtrl", function ($rootScope, $scope, $http) 
 
         $scope.ProfitFinancialYearList = [];
         $http.get(SiteUrl + "/Master/GetMasterData/?MasterType=FINANCIALYEAR&MasterCode=-1").
-            success(function (data, status) {
-                //alert(JSON.stringify(data));
-                $scope.ProfitFinancialYearList = data.filter(function (x) { return x.FIN_YEAR_END != data[0].FIN_YEAR_END });
-                console.log('$scope.ProfitFinancialYearList', $scope.ProfitFinancialYearList);
+            success(function (data, status) {              
+                $scope.ProfitFinancialYearList = data.filter(function (x) { return x.FIN_YEAR_END != data[0].FIN_YEAR_END });               
             }).
             error(function (data, status) {
                 $scope.ProfitFinancialYearList = [];
 
             });
-
-
 
         $scope.AGMFinancialYearList = [];
 
@@ -70,10 +65,7 @@ KPIForPacsMod.controller("KPIForPacsCtrl", function ($rootScope, $scope, $http) 
                 });
                 $scope.AGMFinancialYearList.sort(function (a, b) {
                     return Number(b.FIN_YEAR_START) - Number(a.FIN_YEAR_START);
-                });
-
-                console.log("AGMFinancialYearList", $scope.AGMFinancialYearList);
-
+                });             
             })
             .catch(function (error) {
                 console.error(error);
@@ -81,7 +73,6 @@ KPIForPacsMod.controller("KPIForPacsCtrl", function ($rootScope, $scope, $http) 
             });
 
         $scope.SetPreviousMonth();
-        //$scope.GetSocietyBySSO();
         if ($scope.pacsDetail.GCCLoginId != null && $scope.pacsDetail.GCCLoginId > 0) {
             $scope.GetDetailsByPacs();
             $scope.IsFormDisabled = false;
@@ -90,7 +81,6 @@ KPIForPacsMod.controller("KPIForPacsCtrl", function ($rootScope, $scope, $http) 
             toastr.warning("You cannot fill this form.", "", {
                 timeOut: 10000
             });
-            //alert("You cannot fill this form.");
         }
     }
 
@@ -115,38 +105,6 @@ KPIForPacsMod.controller("KPIForPacsCtrl", function ($rootScope, $scope, $http) 
                 $scope.BankMasterList = [];
             });
     };
-
-    //$scope.SocietyDataList = function (ActId, SocietyTypeId, ClassId) {
-    //    $(".se-pre-con").fadeIn("slow");
-    //    $http.post(SiteUrl + "/KPI/CitizenDashboardDataWithDepartmentUser", {
-    //        "ActId": ActId == undefined ? 0 : parseInt(ActId),
-    //        "SocietyTypeId": SocietyTypeId == undefined ? 0 : parseInt(SocietyTypeId),
-    //        "ClassId": ClassId == undefined ? 0 : parseInt(ClassId)
-    //    }).success(function (data, status) {
-    //        $scope.TableData = data.filter(x => x.IsObjection == false);
-    //        $scope.SocietyDataList = $scope.TableData;
-    //        $scope.SocietyList = $scope.SocietyDataList;
-    //        $(".se-pre-con").fadeOut("slow");
-    //        if ($scope.SocietyDataList.length == 1) {
-    //            $scope.godown.SocietyID = $scope.SocietyDataList[0].SocietyID.toString();
-    //            $scope.OnSocietyChange();
-    //            $scope.IsSocietyDisabled = true;
-    //        } else {
-    //            $scope.godown.SocietyID = "";
-    //            $scope.IsSocietyDisabled = false;
-    //            $scope.godown.ApplicantName = "";
-    //            $scope.district_MemberAdd = "";
-    //            $scope.ddlblocki_MemberAdd = "";
-    //            $scope.ddlGP_MemberAdd = "";
-    //            $scope.ddlVillage_MemberAdd = "";
-    //        }
-
-    //    }).error(function (data, status) {
-    //        $(".se-pre-con").fadeOut("slow");
-    //        $scope.TableData = [];
-    //        $scope.SocietyList = [];
-    //    });
-    //};
 
     $scope.Calculate = function (indicator) {
 
@@ -204,7 +162,6 @@ KPIForPacsMod.controller("KPIForPacsCtrl", function ($rootScope, $scope, $http) 
         return selected && selected.InputType == "Yes";
     };
 
-
     // ==========================================
     // KPI 83 - Second Yes
     // ==========================================
@@ -220,7 +177,6 @@ KPIForPacsMod.controller("KPIForPacsCtrl", function ($rootScope, $scope, $http) 
 
         return selected && selected.InputType == "Yes";
     };
-
 
     // ==========================================
     // KPI 83 - Third Yes
@@ -238,105 +194,6 @@ KPIForPacsMod.controller("KPIForPacsCtrl", function ($rootScope, $scope, $http) 
         return selected && selected.InputType === "Yes";
     };
 
-    //$scope.Calculates = function (item) {
-    //    var target = parseFloat(item.Target) || 0;
-    //    var achievement = parseFloat(item.Achievement) || 0;
-    //    var weightedMarks = parseFloat(item.WeightedMarks) || 0;
-
-    //    // KPI 36
-    //    if (item.KPIIndicatorsId == 36) {
-    //        var totalTarget = 0;
-    //        angular.forEach($scope.KPIAreas, function (area) {
-    //            if (area.KPIAreaId == 11) {
-    //                angular.forEach(area.Indicators, function (ind) {
-    //                    if (ind.KPIIndicatorsId == 23 || ind.KPIIndicatorsId == 24 || ind.KPIIndicatorsId == 25) {
-    //                        totalTarget += parseFloat(ind.Target) || 0;
-    //                    }
-    //                });
-    //            }
-    //        });
-
-    //        if (totalTarget == 0) {
-    //            item.Progress = "100.00";
-    //            item.MarksObtained = weightedMarks.toFixed(2);
-    //        }
-    //        else if (target == 0) {
-    //            item.Progress = "0.00";
-    //            item.MarksObtained = "0.00";
-    //        }
-    //        else {
-    //            var progress = Math.min((achievement / target) * 100, 100);
-
-    //            item.Progress = progress.toFixed(2);
-    //            item.MarksObtained = ((progress * weightedMarks) / 100).toFixed(2);
-    //            //item.Progress = ((achievement / target) * 100).toFixed(2);
-    //            //item.MarksObtained = ((parseFloat(item.Progress) * weightedMarks) / 100).toFixed(2);
-    //        }
-
-    //        return;
-    //    }
-    //    //if (item.KPIIndicatorsId == 39) {
-
-    //    //    if (target <= 5) {
-    //    //        item.Progress = "100.00";
-    //    //        item.MarksObtained = weightedMarks.toFixed(2);
-    //    //    }
-    //    //    else {
-    //    //        item.Progress = "0.00";
-    //    //        item.MarksObtained = "0.00";
-    //    //    }
-    //    //    return;
-    //    //}
-
-    //    if (item.KPIIndicatorsId == 39) {
-
-    //        switch (parseInt(item.Achievement)) {
-
-    //            case 1:
-    //                item.Progress = "100.00";
-    //                break;
-
-    //            case 2:
-    //                item.Progress = "80.00";
-    //                break;
-
-    //            case 3:
-    //                item.Progress = "60.00";
-    //                break;
-
-    //            case 4:
-    //                item.Progress = "40.00";
-    //                break;
-
-    //            case 5:
-    //                item.Progress = "20.00";
-    //                break;
-
-    //            case 6:
-    //                item.Progress = "0.00";
-    //                break;
-
-    //            default:
-    //                item.Progress = "0.00";
-    //                break;
-    //        }
-
-    //        item.MarksObtained = ((parseFloat(item.Progress) * weightedMarks) / 100).toFixed(2);
-
-    //        return;
-    //    }
-
-    //    if (target == 0) {
-    //        item.Progress = "100.00";
-    //        item.MarksObtained = weightedMarks.toFixed(2);
-    //        return;
-    //    }
-
-    //    var progress = Math.min((achievement / target) * 100, 100);
-
-    //    item.Progress = progress.toFixed(2);
-    //    item.MarksObtained = ((progress * weightedMarks) / 100).toFixed(2);
-    //};
     $scope.GetSocietyBySSO = function (ActId, SocietyTypeId, ClassId) {
         $(".se-pre-con").fadeIn("slow");
         $http.post(SiteUrl + "/KPI/CitizenDashboardDataWithDepartmentUser", {
@@ -363,11 +220,7 @@ KPIForPacsMod.controller("KPIForPacsCtrl", function ($rootScope, $scope, $http) 
                 financialYear: financialYear
             }
         }).success(function (data) {
-
             $scope.KPIData = data;
-
-            console.log('$scope.KPIData', $scope.KPIData);
-
             $scope.KPIAreas = [];
 
             if ($scope.KPIData != null && $scope.KPIData.length > 0) {
@@ -436,7 +289,6 @@ KPIForPacsMod.controller("KPIForPacsCtrl", function ($rootScope, $scope, $http) 
             $scope.KPIAreas = [];
         });
     };
-
 
     $scope.GetKPIResult = function () {
 
@@ -555,6 +407,18 @@ KPIForPacsMod.controller("KPIForPacsCtrl", function ($rootScope, $scope, $http) 
                             indicator.KCCLoanDisbursedAmt = Number(dbItem.KCCLoanDisbursedAmt);
                         }
 
+                        if (dbItem.KPIIndicatorsId == 57) {
+                            indicator.ProfitLastYearAmount = Number(dbItem.ProfitLastYearAmount);
+                        }
+
+                        if (dbItem.KPIIndicatorsId == 62) {
+                            indicator.OtherThanKccLoanDisAmount = Number(dbItem.OtherThanKccLoanDisAmount);
+                        }
+
+                        if (dbItem.KPIIndicatorsId == 204) {
+                            indicator.NoGodown = dbItem.NoGodown != null ? Number(dbItem.NoGodown) : "";
+                        }
+
                         if (dbItem.KPIIndicatorsId == 55) {
                             indicator.MembershipPrevious = Number(dbItem.MembershipPreviousInd);
                             indicator.MembershipCurrent = Number(dbItem.MembershipCurrentInd);
@@ -581,11 +445,12 @@ KPIForPacsMod.controller("KPIForPacsCtrl", function ($rootScope, $scope, $http) 
         });
 
     };
+
     $scope.GetKPIResultold = function () {
         $http.get(SiteUrl + "/KPI/GetKPIDetails", {
             params: { officeId: $scope.pacsDetail.GCCLoginId, month: $scope.PreviousMonthId, kpiFor: "PACS", DistrictId: "0" }
         }).success(function (data) {
-            console.log(data);
+
             angular.forEach($scope.KPIAreas, function (area) {
                 angular.forEach(area.Indicators, function (indicator) {
                     $scope.CCBId = "0";
@@ -598,7 +463,6 @@ KPIForPacsMod.controller("KPIForPacsCtrl", function ($rootScope, $scope, $http) 
             });
 
             if (data && data.length > 0) {
-                //$scope.CCBId = data[0].Packs_CCBId.toString(); 
                 if (data[0].Packs_CCBId != null && data[0].Packs_CCBId > 0) { $scope.CCBId = data[0].Packs_CCBId.toString(); }
                 $scope.IsUpdate = true;
             } else {
@@ -611,8 +475,7 @@ KPIForPacsMod.controller("KPIForPacsCtrl", function ($rootScope, $scope, $http) 
                     var dbItem = data.find(function (x) {
                         return x.KPIIndicatorsId == indicator.KPIIndicatorsId;
                     });
-                    console.log('Indicator', indicator);
-                    console.log('dbItem', dbItem);
+
                     if (dbItem) {
                         indicator.Target = dbItem.KPIIndicatorsTarget;
                         indicator.Achievement = dbItem.KPIIndicatorsAchievement;
@@ -639,7 +502,7 @@ KPIForPacsMod.controller("KPIForPacsCtrl", function ($rootScope, $scope, $http) 
                 });
 
             });
-
+            $scope.setAgricultureDependent();
             $scope.$applyAsync();
 
         }).error(function (err) {
@@ -647,6 +510,7 @@ KPIForPacsMod.controller("KPIForPacsCtrl", function ($rootScope, $scope, $http) 
         });
 
     };
+
     $scope.isTextInput = function (indicator) {
         if (!indicator || !indicator.Options || indicator.Options.length === 0) {
             return false;
@@ -662,6 +526,38 @@ KPIForPacsMod.controller("KPIForPacsCtrl", function ($rootScope, $scope, $http) 
 
         return indicator.Options[0].InputType === "Loan";
     };
+
+    $scope.isNoGodownInput = function (indicator) {
+        if (!indicator || !indicator.Options || indicator.Options.length === 0) {
+            return false;
+        }
+
+        return indicator.Options[0].InputType === "NoGodown";
+    };
+
+    $scope.isLandAvailableYes = function () {
+
+        var land = null;
+
+        angular.forEach($scope.KPIAreas || [], function (area) {
+            angular.forEach(area.Indicators || [], function (item) {
+                if (parseInt(item.KPIIndicatorsId, 10) === 51) {
+                    land = item;
+                }
+            });
+        });
+
+        if (!land || !land.SelectedOption) {
+            return false;
+        }
+
+        var selected = (land.Options || []).find(function (option) {
+            return String(option.KPI_KEYId) === String(land.SelectedOption);
+        });
+
+        return selected && String(selected.InputType).trim().toLowerCase() === "yes";
+    };
+
     $scope.SetPreviousMonth = function () {
 
         var months = [
@@ -747,7 +643,8 @@ KPIForPacsMod.controller("KPIForPacsCtrl", function ($rootScope, $scope, $http) 
 
                 }
                 else {
-                    if (!item.SelectedOption && kpiId != 59 && kpiId != 63 && kpiId != 64 && kpiId != 65 ) {
+                    if (!item.SelectedOption && kpiId != 59 && kpiId != 63 && kpiId != 64 && kpiId != 65 && kpiId != 204 && kpiId != 62 && kpiId != 71 &&
+                        kpiId != 72 && kpiId != 73 && kpiId != 74 && kpiId != 57) {
                         toastr.error("Please select option");
                         isValid = false;
                         return;
@@ -787,7 +684,10 @@ KPIForPacsMod.controller("KPIForPacsCtrl", function ($rootScope, $scope, $http) 
                     DepositAmount: parseInt(item.KPIIndicatorsId) === 59 ? item.DepositAmount : null,
                     KCCRecoveryAmount: parseInt(item.KPIIndicatorsId) === 63 ? item.KCCRecoveryAmount : null,
                     GCCRecoveryAmount: parseInt(item.KPIIndicatorsId) === 64 ? item.GCCRecoveryAmount : null,
-                    LoanRecoveryAmount: parseInt(item.KPIIndicatorsId) === 65 ? item.LoanRecoveryAmount : null
+                    LoanRecoveryAmount: parseInt(item.KPIIndicatorsId) === 65 ? item.LoanRecoveryAmount : null,
+                    NoGodown: parseInt(item.KPIIndicatorsId) === 204 ? item.NoGodown : null,
+                    ProfitLastYearAmount: parseInt(item.KPIIndicatorsId) === 57 ? item.ProfitLastYearAmount : null,
+                    OtherThanKccLoanDisAmount: parseInt(item.KPIIndicatorsId) === 62 ? item.OtherThanKccLoanDisAmount : null
                 });
             });
 
@@ -821,19 +721,15 @@ KPIForPacsMod.controller("KPIForPacsCtrl", function ($rootScope, $scope, $http) 
             });
     };
 
-
     $scope.UpdateKPIResult = function () {
-        debugger;
+
         $scope.SaveData = [];
         var isValid = true;
         var rowNo = 0;
         var errorMessage = "";
 
         angular.forEach($scope.KPIAreas, function (area) {
-            console.log($scope.KPIAreas);
             angular.forEach(area.Indicators, function (item) {
-
-                console.log(item);
                 $scope.SaveData.push({
                     Month: $scope.PreviousMonthId,
                     KPIFor: "PACS",
@@ -870,7 +766,10 @@ KPIForPacsMod.controller("KPIForPacsCtrl", function ($rootScope, $scope, $http) 
                     DepositAmount: parseInt(item.KPIIndicatorsId) === 59 ? item.DepositAmount : null,
                     KCCRecoveryAmount: parseInt(item.KPIIndicatorsId) === 63 ? item.KCCRecoveryAmount : null,
                     GCCRecoveryAmount: parseInt(item.KPIIndicatorsId) === 64 ? item.GCCRecoveryAmount : null,
-                    LoanRecoveryAmount: parseInt(item.KPIIndicatorsId) === 65 ? item.LoanRecoveryAmount : null
+                    LoanRecoveryAmount: parseInt(item.KPIIndicatorsId) === 65 ? item.LoanRecoveryAmount : null,
+                    NoGodown: parseInt(item.KPIIndicatorsId) === 204 ? item.NoGodown : null,
+                    ProfitLastYearAmount: parseInt(item.KPIIndicatorsId) === 57 ? item.ProfitLastYearAmount : null,
+                    OtherThanKccLoanDisAmount: parseInt(item.KPIIndicatorsId) === 62 ? item.OtherThanKccLoanDisAmount : null
                 });
             });
         });
@@ -899,6 +798,20 @@ KPIForPacsMod.controller("KPIForPacsCtrl", function ($rootScope, $scope, $http) 
     };
 
     $scope.CalculateDepositWeight = function (item) {
+
+        if (item.DepositAmount !== null && item.DepositAmount !== undefined && item.DepositAmount !== "") {
+
+            var value = item.DepositAmount.toString();
+
+            if (value.includes('.')) {
+                var parts = value.split('.');
+
+                if (parts[1].length > 2) {
+                    item.DepositAmount = parseFloat(parseFloat(value).toFixed(2));
+                }
+            }
+        }
+
         var amount = parseFloat(item.DepositAmount);
 
         if (item.DepositAmount === "" || item.DepositAmount === null || item.DepositAmount === undefined || isNaN(amount) || amount == 0) {
@@ -916,6 +829,7 @@ KPIForPacsMod.controller("KPIForPacsCtrl", function ($rootScope, $scope, $http) 
     };
 
     $scope.CalculateKCCRecoveryMarks = function (item) {
+
         var percentage = parseFloat(item.KCCRecoveryAmount);
 
         if (item.KCCRecoveryAmount === "" || item.KCCRecoveryAmount === null || item.KCCRecoveryAmount === undefined || isNaN(percentage) || percentage < 0 || percentage > 100 || item.KCCRecoveryAmount == 0) {
@@ -988,6 +902,7 @@ KPIForPacsMod.controller("KPIForPacsCtrl", function ($rootScope, $scope, $http) 
                 alert("Unable to load Current Financial Year.");
             });
     };
+
     $scope.GetUserDetailsBySSO = function () {
         $(".se-pre-con").fadeIn("slow");
         $http.get(SiteUrl + "/Society/GetUserDetailsBySSO")
@@ -1011,7 +926,7 @@ KPIForPacsMod.controller("KPIForPacsCtrl", function ($rootScope, $scope, $http) 
                 $(".se-pre-con").fadeOut("slow");
             });
     };
-    //Added new function for pacs details 18-09-2026 
+
     $scope.GetDistricts = function () {
         $(".se-pre-con").fadeIn("slow");
         $scope.Districts = [];
@@ -1025,6 +940,7 @@ KPIForPacsMod.controller("KPIForPacsCtrl", function ($rootScope, $scope, $http) 
                 $scope.Districts = [];
             });
     };
+
     $scope.GetDetailsByPacs = function () {
         $(".se-pre-con").fadeIn("slow");
         return $http.post(SiteUrl + "/KPI/PacsManagerDetails?ActionType=" + "GetDetail").then(function (response) {
@@ -1047,6 +963,7 @@ KPIForPacsMod.controller("KPIForPacsCtrl", function ($rootScope, $scope, $http) 
             $(".se-pre-con").fadeOut("slow");
         });
     };
+
     $scope.commonCalculate = function (indicator) {
         $scope.Calculate(indicator);
     };
@@ -1083,6 +1000,7 @@ KPIForPacsMod.controller("KPIForPacsCtrl", function ($rootScope, $scope, $http) 
         }
         return false;
     };
+
     $scope.setEPACSDependent = function () {
         let epacs = null;
         let selectedInputType = "";
@@ -1119,7 +1037,9 @@ KPIForPacsMod.controller("KPIForPacsCtrl", function ($rootScope, $scope, $http) 
             });
         });
     };
+
     $scope.isYesOption = function (indicator) {
+
         if (!indicator || !indicator.Options || indicator.Options.length === 0 || !indicator.SelectedOption) {
             return false;
         }
@@ -1133,6 +1053,7 @@ KPIForPacsMod.controller("KPIForPacsCtrl", function ($rootScope, $scope, $http) 
         }
         return false;
     };
+
     $scope.isAgricultureColumnVisible = function () {
 
         if (!$scope.KPIAreas || $scope.KPIAreas.length === 0) {
@@ -1143,17 +1064,91 @@ KPIForPacsMod.controller("KPIForPacsCtrl", function ($rootScope, $scope, $http) 
 
             var area = $scope.KPIAreas[i];
 
-            if (area.KPIAreaId == 34 &&
-                area.Indicators &&
-                area.Indicators.length > 0 &&
-                $scope.isYesOption(area.Indicators[0])) {
-
+            if (area.KPIAreaId == 34 && area.Indicators && area.Indicators.length > 0 && $scope.isYesOption(area.Indicators[0])) {
                 return true;
             }
         }
 
         return false;
     };
+
+    $scope.isAgricultureInputEnabled = function () {
+
+        var fertilizer = null;
+
+        angular.forEach($scope.KPIAreas || [], function (area) {
+
+            angular.forEach(area.Indicators || [], function (item) {
+
+                if (parseInt(item.KPIIndicatorsId) === 71) {
+                    fertilizer = item;
+                }
+
+            });
+
+        });
+
+        if (!fertilizer || !fertilizer.SelectedOption) {
+            return false;
+        }
+
+        var selected = (fertilizer.Options || []).find(function (option) {
+            return String(option.KPI_KEYId) === String(fertilizer.SelectedOption);
+        });
+
+        return selected && String(selected.InputType).trim().toLowerCase() === "yes";
+    };
+
+    $scope.setAgricultureDependent = function () {
+
+        var fertilizer = null;
+
+        angular.forEach($scope.KPIAreas || [], function (area) {
+            angular.forEach(area.Indicators || [], function (item) {
+                if (parseInt(item.KPIIndicatorsId) === 71) {
+                    fertilizer = item;
+                }
+            });
+        });
+
+        if (!fertilizer || !fertilizer.SelectedOption) {
+            return;
+        }
+
+        var selected = (fertilizer.Options || []).find(function (option) {
+            return String(option.KPI_KEYId) === String(fertilizer.SelectedOption);
+        });
+
+        if (!selected) return;
+
+        var selectedType = String(selected.InputType).trim().toLowerCase();
+
+        if (selectedType === "no") {
+
+            angular.forEach($scope.KPIAreas || [], function (area) {
+
+                angular.forEach(area.Indicators || [], function (item) {
+
+                    var id = parseInt(item.KPIIndicatorsId);
+
+                    if (id === 72 || id === 73 || id === 74) {
+
+                        var noOption = (item.Options || []).find(function (option) {
+                            return String(option.InputType).trim().toLowerCase() === "no";
+                        });
+
+                        if (noOption) {
+                            item.SelectedOption = String(noOption.KPI_KEYId);
+                            item.MarksObtained = noOption.Marks;
+                        }
+                    }
+
+                });
+
+            });
+        }
+    };
+
     $scope.isMembershipCalculate = function (item) {
 
         let previous = parseFloat(item.MembershipPrevious) || 0;
@@ -1188,6 +1183,7 @@ KPIForPacsMod.controller("KPIForPacsCtrl", function ($rootScope, $scope, $http) 
 
         return item.MarksObtained;
     };
+
     $scope.isShareCapitalCalculate = function (item) {
 
         let previous = parseFloat(item.ShareCapitalPrevious) || 0;
@@ -1221,6 +1217,121 @@ KPIForPacsMod.controller("KPIForPacsCtrl", function ($rootScope, $scope, $http) 
         item.MarksObtained = result.toFixed(2);
 
         return item.MarksObtained;
+    };
+
+    $scope.isLandAvailableYes = function () {
+        var land = null;
+
+        angular.forEach($scope.KPIAreas || [], function (area) {
+            angular.forEach(area.Indicators || [], function (item) {
+                if (parseInt(item.KPIIndicatorsId, 10) === 51) {
+                    land = item;
+                }
+            });
+        });
+
+        if (!land || !land.SelectedOption) {
+            return false;
+        }
+
+        var selected = (land.Options || []).find(function (option) {
+            return String(option.KPI_KEYId) === String(land.SelectedOption);
+        });
+
+        return selected && String(selected.InputType).trim().toLowerCase() === "yes";
+    };
+
+    $scope.isGodownIndicator = function (indicator) {
+        return String(indicator.KPIIndicators || "").trim().toLowerCase() === "godown available in mt";
+    };
+
+    $scope.isGodownSelected = function () {
+        var godown = null;
+
+        angular.forEach($scope.KPIAreas || [], function (area) {
+            angular.forEach(area.Indicators || [], function (item) {
+                if ($scope.isGodownIndicator(item)) {
+                    godown = item;
+                }
+            });
+        });
+
+        return !!(godown && godown.SelectedOption);
+    };
+
+    $scope.LimitRecoveryPercentage = function (item, property) {
+        var value = item[property];
+
+        if (value === null || value === undefined || value === "") {
+            item.MarksObtained = "0.00";
+            return;
+        }
+
+        var percentage = parseFloat(value);
+
+        if (isNaN(percentage) || percentage < 0) {
+            item[property] = 0;
+        }
+        else if (percentage > 100) {
+            item[property] = 100;
+        }
+
+        if (item.KPIIndicatorsId == 63) {
+            $scope.CalculateKCCRecoveryMarks(item);
+        }
+        else if (item.KPIIndicatorsId == 64) {
+            $scope.CalculateGCCRecoveryMarks(item);
+        }
+        else if (item.KPIIndicatorsId == 65) {
+            $scope.CalculateLoanRecoveryMarks(item);
+        }
+    };
+
+    $scope.CalculateProfitLastYearMarks = function (indicator) {
+
+        if (!indicator) return;
+
+        var amount = parseFloat(indicator.ProfitLastYearAmount) || 0;
+
+        if (amount <= 0) {
+            indicator.MarksObtained = "0.00";
+        }
+        else if (amount <= 100000) {
+            indicator.MarksObtained = "1.00";
+        }
+        else if (amount <= 250000) {
+            indicator.MarksObtained = "2.00";
+        }
+        else {
+            indicator.MarksObtained = "3.00";
+        }
+    };
+
+    $scope.CalculateOtherThanKccLoanMarks = function (indicator) {
+
+        var amount = Number(indicator.OtherThanKccLoanDisAmount) || 0;
+
+        if (amount <= 0) {
+            indicator.MarksObtained = "0.00";
+        }
+        else if (amount <= 10) {
+            indicator.MarksObtained = "1.00";
+        }
+        else {
+            indicator.MarksObtained = "2.00";
+        }
+    };
+
+    $scope.LimitNoOfGodown = function (indicator) {
+
+        var value = Number(indicator.NoGodown);
+
+        if (value > 5) {
+            indicator.NoGodown = 5;
+        }
+        else if (value < 0) {
+            indicator.NoGodown = 0;
+        }
     };
 
     $scope.OnPageLoad();
