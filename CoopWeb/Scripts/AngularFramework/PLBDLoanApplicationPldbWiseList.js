@@ -273,7 +273,8 @@ MasterMod.controller("ApplicationPLDBLoanWiseFlowCont", function ($scope, $rootS
         var params = {
             PldbId: item.PldbId || 0,
             BranchId: ($scope.PLDB && $scope.PLDB.BranchId && $scope.PLDB.BranchId != '0') ? $scope.PLDB.BranchId : 0,
-            FinancialYearId: item.FinancialYearId || 0
+            FinancialYearId: item.FinancialYearId || 0,
+            IsAvadhipaar: item.IsAvadhipaar || 0
         };
         sessionStorage.setItem("LoanDetailParams", JSON.stringify(params));
 

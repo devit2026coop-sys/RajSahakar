@@ -196,7 +196,7 @@ MasterMod.controller("ApplicationPLDBLoanWiseDetailsFlowCont", function ($scope,
 
     $scope.LoadLoanApplicationDetailBySector = function () {
         $(".se-pre-con").fadeIn("slow");
-        var postData = { pldbId: $scope.header.PldbId, branchId: $scope.header.BranchId, financialYearId: $scope.header.FinancialYearId , TotalRecords: $scope.DataPaging.TotalRecords,  PageNumber: $scope.DataPaging.currentPageID,  PageSize: $scope.pageSize, SortingColumn: $scope.DataPaging.sortExpression, SortingOrder: $scope.DataPaging.sortDirection, SearchParameter: $scope.DataPaging.searchParameters  };
+        var postData = { pldbId: $scope.header.PldbId, branchId: $scope.header.BranchId, financialYearId: $scope.header.FinancialYearId, IsAvadhipaar : $scope.header.IsAvadhipaar, TotalRecords: $scope.DataPaging.TotalRecords, PageNumber: $scope.DataPaging.currentPageID, PageSize: $scope.pageSize, SortingColumn: $scope.DataPaging.sortExpression, SortingOrder: $scope.DataPaging.sortDirection, SearchParameter: $scope.DataPaging.searchParameters };
 
         $http.post(SiteUrl + "/MIS/GetLoanApplicationPLDBCountDetail",postData).then(function (response) {                     
             $scope.GridData = JSON.parse(response.data.DataList);           

@@ -6796,6 +6796,7 @@ namespace Cooperative.Models
 
         #region GetPLBDLoanApplicationPldbWiseList
         public List<Dictionary<string, object>> GetPLBDLoanApplicationPldbWiseList(ref DataPagingModel Details)
+        
         {
 
             DataTable dt = new DataTable();
@@ -6825,10 +6826,22 @@ namespace Cooperative.Models
                 {
                     whereCase += " and a.BranchId = " + Details.SearchParameter.Where(x => x.Key == "BRANCH_ID").Select(x => x.Value).FirstOrDefault();
                 }
-                if (Details.SearchParameter.Where(x => x.Key == "IsAvadhipaar").Any())
+                //if (Details.SearchParameter.Where(x => x.Key == "IsAvadhipaar").Any())
+                //{
+                //    whereCase += " and a.IsAvadhipaar = " + Details.SearchParameter.Where(x => x.Key == "IsAvadhipaar").Select(x => x.Value).FirstOrDefault();
+                //}
+
+                var isAvadhipaar = Details.SearchParameter.Where(x => x.Key == "IsAvadhipaar").Select(x => x.Value).FirstOrDefault();
+
+                if (isAvadhipaar == null || string.IsNullOrWhiteSpace(isAvadhipaar.ToString()))
                 {
-                    whereCase += " and a.IsAvadhipaar = " + Details.SearchParameter.Where(x => x.Key == "IsAvadhipaar").Select(x => x.Value).FirstOrDefault();
+                    whereCase += " AND ISNULL(a.IsAvadhipaar, 0) = 0";
                 }
+                else
+                {
+                    whereCase += " AND a.IsAvadhipaar = " + Convert.ToInt32(isAvadhipaar);
+                }
+
 
                 UserEntity _LoggedInUser = (UserEntity)System.Web.HttpContext.Current.Session[SessionIdentity.Admin];
 
@@ -7261,7 +7274,7 @@ namespace Cooperative.Models
 
 
         #region GetLoanApplicationPLDBCountDetail
-        public DataTable GetLoanApplicationPLDBCountDetail(DataPagingModel Details, int pldbId = 0, int branchId = 0, int FinancialYearId = 0)
+        public DataTable GetLoanApplicationPLDBCountDetail(DataPagingModel Details, int pldbId = 0, int branchId = 0, int FinancialYearId = 0,bool IsAvadhipaar = false)
         {
             DataTable ds = new DataTable();
             UserEntity user = (UserEntity)HttpContext.Current.Session[SessionIdentity.Admin];
@@ -7281,6 +7294,7 @@ namespace Cooperative.Models
                 objDBAccess.AddParameterToCommand("@IsRowCount", DBFactoryParameterType.Int, true);
                 objDBAccess.AddParameterToCommand("@LevelId", DBFactoryParameterType.NVarchar, user.LevelId);
                 objDBAccess.AddParameterToCommand("@RoleId", DBFactoryParameterType.NVarchar, user.RoleId);
+                objDBAccess.AddParameterToCommand("@IsAvadhipaar", DBFactoryParameterType.Bit, IsAvadhipaar);
                 Details.TotalRecords = Convert.ToInt32(objDBAccess.ExecuteScalarCommand());
             }
             if (Details.IsAllRecords)
@@ -7298,6 +7312,7 @@ namespace Cooperative.Models
             objDBAccess.AddParameterToCommand("@IsRowCount", DBFactoryParameterType.Int, false);
             objDBAccess.AddParameterToCommand("@LevelId", DBFactoryParameterType.NVarchar, user.LevelId);
             objDBAccess.AddParameterToCommand("@RoleId", DBFactoryParameterType.NVarchar, user.RoleId);
+            objDBAccess.AddParameterToCommand("@IsAvadhipaar", DBFactoryParameterType.Bit, IsAvadhipaar);
 
             ds = objDBAccess.GetTable();
 
