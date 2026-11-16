@@ -390,7 +390,6 @@ GodownFormationActionMod.controller("GodownFormationActionCont", function ($scop
                 AmendmendAmount: "",
                 ReceiptNumber: nextStatus,
             };
-            console.log($scope.esignData);
             if (!$scope.esignData.DocumentPath || !$scope.esignData.DocumentPath) {
                 alert("Not valid document");
                 return;
@@ -401,9 +400,7 @@ GodownFormationActionMod.controller("GodownFormationActionCont", function ($scop
                     EsignCommonData.redirectToESP(xml);
                 });
             });
-
         }).catch(function (err) {
-
             console.error(err);
             alert("Error generating eSign certificate");
 
@@ -419,11 +416,8 @@ GodownFormationActionMod.controller("GodownFormationActionCont", function ($scop
     };
 
     $scope.GenerateASViewPath = function (applicationId, nextStatus) {
-        debugger;
         return $http.get(SiteUrl + "/Godown/GenerateASPDF?ApplicationId=" + applicationId + "&nextStatusId=" + nextStatus).success(function (data, status) {
-            if (data.Success) {
-                //window.open(data.ViewPath, '_blank');
-                //window.location.reload();             
+            if (data.Success) {                       
                 ShowOkMessage("", "AS generated successfully.", function () {
                     window.location.reload();
                 });
@@ -443,11 +437,8 @@ GodownFormationActionMod.controller("GodownFormationActionCont", function ($scop
 
     // Fs eSign process on 06-10-2026
     $scope.GenerateFsViewPath = function (applicationId, nextStatus, type) {
-        debugger;
         return $http.get(SiteUrl + "/Godown/GenerateFSPdfByTemplate?ApplicationId=" + applicationId + "&nextStatusId=" + nextStatus + "&fsType=" + type).success(function (data, status) {
             if (data.Success) {
-                //window.open(data.ViewPath, '_blank');
-                //window.location.reload();              
                 ShowOkMessage("", "FS generated successfully.", function () {
                     window.location.reload();
                 });
@@ -461,16 +452,13 @@ GodownFormationActionMod.controller("GodownFormationActionCont", function ($scop
         });
     };
     $scope.FSGenerateEsign = function (applicationId, nextStatus, fsType) {
-        debugger;
         $scope.GenerateFS(applicationId, nextStatus, fsType).then(function (response) {
-            console.log(response)
             $scope.dataPayload = response.data;
             if (!$scope.dataPayload.Success) {
                 ShowOkMessage("", "Document generation failed", function () {
                     window.location.reload();
                 });
                 return;
-                // alert("Document generation failed");               
             }
 
             $scope.esignData = {
@@ -489,14 +477,11 @@ GodownFormationActionMod.controller("GodownFormationActionCont", function ($scop
                 AmendmendAmount: "",
                 ReceiptNumber: nextStatus,
             };
-            console.log($scope.esignData);
             if (!$scope.esignData.DocumentPath || !$scope.esignData.DocumentName) {
                 ShowOkMessage("", "Not valid document", function () {
                     window.location.reload();
                 });
                 return;
-                //alert("Not valid document");
-                //return;
             }
 
             EsignCommonData.validateEsign($http, $scope.esignData, function () {
@@ -523,31 +508,6 @@ GodownFormationActionMod.controller("GodownFormationActionCont", function ($scop
         $scope.RevertData.Remark = "";
     };
 
-    //$scope.RevertApplication = function () {
-    //    if (!$scope.RevertData.Remark || !$scope.RevertData.Remark.trim()) {
-    //        toastr.warning("Please enter remark.");
-    //        return;
-    //    }
-
-    //    $scope.revertDataList = $scope.GETGodownFormationListData.find(x => x.Applicationid == $scope.ApplicationId);
-    //    $scope.requestData = {
-    //        ApplicationId: $scope.ApplicationId,
-    //        StatusId: $scope.revertStatusId,
-    //        Remark: $scope.RevertData.Remark,
-    //        ApplicationNo: $scope.revertDataList[0].ApplicationNo,
-    //    };
-    //    console.log('revert', $scope.requestData);
-    //    console.log('$scope.revertDataList', $scope.revertDataList);
-    //    return;
-    //    $http.post(SiteUrl + "Godown/UpdateAction", { selectedApplications: selectedApplicationId, Status: Status })
-    //        .success(function (data, status) {
-    //            alert(_language == 'en-us' ? 'Application status has been Updated.\n' : 'आवेदन की स्थिति अपडेट की गई है\n');
-    //            window.location.reload();
-    //        }).error(function (data, status) {
-    //            alert(_language == 'en-us' ? 'Some Error is Occured.\n' : 'कुछ त्रुटि हुई है\n');
-    //        });
-    //};
-
     $scope.RevertApplication = function () {
         if (!$scope.RevertData.Remark || !$scope.RevertData.Remark.trim()) {
             ShowModelAlert("Please enter remark.");
@@ -567,18 +527,14 @@ GodownFormationActionMod.controller("GodownFormationActionCont", function ($scop
             Remark: $scope.RevertData.Remark,
             ApplicationNo: $scope.revertDataList.ApplicationNo
         };
-
-        console.log('Revert Request:', $scope.requestData);
-
-        $http.post(SiteUrl + "Godown/RevertApplication", $scope.requestData).success(function (data, status) {
-            console.log('api data', data);
-            if (data && data.Success) {
-                ShowModelAlert(data.Message || "Application reverted successfully.");
+        $http.post(SiteUrl + "Godown/ApplicationRevertProcess", $scope.requestData).success(function (data, status) {
+            if (data.data.Status == 200) {
+                ShowModelAlert("Application reverted. " + (data.data.Message || ""));
                 $('#RevertFileModal').modal('hide');
                 window.location.reload();
             }
             else {
-                ShowModelAlert(data.Message || "Unable to revert application.");
+                ShowModelAlert("Unable to revert application.");
             }
         }).error(function (data, status) {
             ShowModelAlert("Some error occurred while reverting the application.");
