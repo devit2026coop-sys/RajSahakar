@@ -9,6 +9,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Cooperative.Controllers;
 using Newtonsoft.Json;
+using sun.security.util;
 
 namespace Cooperative.Models
 {
@@ -2057,7 +2058,7 @@ namespace Cooperative.Models
             }
             return null;
         }
-         
+
         public DataTable GetUserDetailsAuditBySSO()
         {
             DataTable dt = new DataTable();
@@ -2284,6 +2285,236 @@ namespace Cooperative.Models
             return Result;
         }
 
+
+
+        /*  Auditor flow */
+        public DataSet GetAuditAccountHeaderMasterData( 
+     int? tabId,
+     int? kvssId,
+     string financialYear)
+        {
+            DataSet ds = new DataSet();
+
+            try
+            {
+                objDBAccess.OpenConnection();
+
+                SqlCommand cmd = objDBAccess.CreateCommand(
+                    "USP_GetAuditAccountHeaderMaster",
+                    DBFactoryCommandType.PROCEDURE_COMMAND);
+
+                
+
+                objDBAccess.AddParameterToCommand(
+                    "@TabId",
+                    DBFactoryParameterType.Int,
+                    tabId.HasValue ? (object)tabId.Value : DBNull.Value);
+
+                objDBAccess.AddParameterToCommand(
+                    "@KVSSId",
+                    DBFactoryParameterType.Int,
+                    kvssId.HasValue ? (object)kvssId.Value : DBNull.Value);
+
+                objDBAccess.AddParameterToCommand(
+                    "@FinancialYear",
+                    DBFactoryParameterType.VARCHAR,
+                    string.IsNullOrEmpty(financialYear)
+                        ? (object)DBNull.Value
+                        : financialYear);
+
+                ds = objDBAccess.GetDataSet();
+            }
+            catch (Exception ex)
+            {
+                objILogger.ErrorHandle(
+                    new ErrorLogEntity()
+                    {
+                        PageName = "Cooperative.Models.AuditorModel",
+                        FunctionName = "GetAuditAccountHeaderMasterData()"
+                    }, ex);
+            }
+            finally
+            {
+                objDBAccess.CloseConnection();
+            }
+
+            return ds;
+        }
+
+
+
+        public DataTable SaveAuditAccountOpeningBalance(
+    int kvssId,
+    int tabId,
+    string financialYear,
+    long userId,
+    DataTable details)
+        {
+            DataTable dt = new DataTable();
+
+            try
+            {
+                objDBAccess.OpenConnection();
+
+                SqlCommand cmd = objDBAccess.CreateCommand(
+                    "USP_Save_AuditAccountOpeningBalance",
+                    DBFactoryCommandType.PROCEDURE_COMMAND
+                );
+
+                objDBAccess.AddParameterToCommand(
+                    "@KVSSId", DBFactoryParameterType.Int, kvssId);
+
+                objDBAccess.AddParameterToCommand(
+                    "@TabId", DBFactoryParameterType.Int, tabId);
+
+                objDBAccess.AddParameterToCommand(
+                    "@FinancialYear", DBFactoryParameterType.VARCHAR, financialYear);
+
+                objDBAccess.AddParameterToCommand(
+                    "@UserId", DBFactoryParameterType.BigInt, userId);
+
+                // Table-Valued Parameter
+                SqlParameter tvpParameter = cmd.Parameters.Add(
+                    "@OpeningBalanceDetails",
+                    SqlDbType.Structured
+                );
+
+                tvpParameter.TypeName = "dbo.AuditAccountOpeningBalanceType";
+                tvpParameter.Value = details;
+
+                dt = objDBAccess.GetTable();
+            }
+            catch (Exception ex)
+            {
+                objILogger.ErrorHandle(
+                    new ErrorLogEntity()
+                    {
+                        PageName = "Cooperative.Models.AuditorModel",
+                        FunctionName = "SaveAuditAccountOpeningBalance"
+                    },
+                    ex
+                );
+            }
+            finally
+            {
+                objDBAccess.CloseConnection();
+            }
+
+            return dt;
+        }
+
+
+
+        public DataTable SaveAuditAccountCustomHeader(
+    AuditAccountCustomHeaderRequest request, long userId)
+        { 
+
+            DataTable dt = new DataTable();
+
+            try
+            {
+                objDBAccess.OpenConnection();
+
+                SqlCommand cmd = objDBAccess.CreateCommand(
+                    "USP_Save_AuditAccountCustomHeader",
+                    DBFactoryCommandType.PROCEDURE_COMMAND);
+
+                objDBAccess.AddParameterToCommand(
+                    "@HeaderId", DBFactoryParameterType.Int, request.HeaderId);
+
+                objDBAccess.AddParameterToCommand(
+                    "@ParentHeaderId", DBFactoryParameterType.Int, request.ParentHeaderId);
+
+                objDBAccess.AddParameterToCommand(
+                    "@TabId", DBFactoryParameterType.Int, request.TabId);
+
+                objDBAccess.AddParameterToCommand(
+                    "@SocietyTypeId", DBFactoryParameterType.Int, request.SocietyTypeId);
+
+                // Use NVARCHAR parameters because the heading fields are Unicode.
+                cmd.Parameters.Add("@HeaderNameEnglish", SqlDbType.NVarChar, 250).Value =
+                    request.HeaderNameEnglish ?? "";
+
+                cmd.Parameters.Add("@HeaderNameHindi", SqlDbType.NVarChar, 250).Value =
+                    request.HeaderNameHindi ?? "";
+
+                objDBAccess.AddParameterToCommand(
+                    "@KVSSId", DBFactoryParameterType.Int, request.KVSSId);
+
+                objDBAccess.AddParameterToCommand(
+                    "@FinancialYear", DBFactoryParameterType.VARCHAR, request.FinancialYear);
+
+                objDBAccess.AddParameterToCommand(
+                    "@OpeningBalance", DBFactoryParameterType.Double, request.OpeningBalance);
+
+                objDBAccess.AddParameterToCommand(
+                    "@UserId", DBFactoryParameterType.BigInt, userId);
+
+                dt = objDBAccess.GetTable();
+            }
+            catch (Exception ex)
+            {
+                objILogger.ErrorHandle(
+                    new ErrorLogEntity()
+                    {
+                        PageName = "Cooperative.Models.AuditorModel",
+                        FunctionName = "SaveAuditAccountCustomHeader()"
+                    }, ex);
+            }
+            finally
+            {
+                objDBAccess.CloseConnection();
+            }
+
+            return dt;
+        }
+
+
+        public DataTable DeleteAuditAccountCustomHeader( int headerId, int kvssSocietyId, long userId)
+        {
+            DataTable dt = new DataTable();
+
+            try
+            {
+                objDBAccess.OpenConnection();
+
+                SqlCommand cmd = objDBAccess.CreateCommand(
+                    "USP_Delete_AuditAccountCustomHeader",
+                    DBFactoryCommandType.PROCEDURE_COMMAND);
+
+                objDBAccess.AddParameterToCommand(
+                    "@HeaderId",
+                    DBFactoryParameterType.Int,
+                    headerId);
+
+                objDBAccess.AddParameterToCommand(
+                    "@KVSSSocietyId",
+                    DBFactoryParameterType.Int,
+                    kvssSocietyId);
+
+                objDBAccess.AddParameterToCommand(
+                    "@UserId",
+                    DBFactoryParameterType.BigInt,
+                    userId);
+
+                dt = objDBAccess.GetTable();
+            }
+            catch (Exception ex)
+            {
+                objILogger.ErrorHandle(
+                    new ErrorLogEntity()
+                    {
+                        PageName = "Cooperative.Models.AuditorModel",
+                        FunctionName = "DeleteAuditAccountCustomHeader()"
+                    }, ex);
+            }
+            finally
+            {
+                objDBAccess.CloseConnection();
+            }
+
+            return dt;
+        }
 
     }
 }

@@ -11417,6 +11417,30 @@ namespace Cooperative.Models
         }
 
 
+        public DataTable KVSSGSSbySSOIDService(string SSOID)
+        {
+            dt.Clear();
+            try
+            {
+
+                objDBAccess.OpenConnection();
+                SqlCommand cmd = objDBAccess.CreateCommand("USP_GetKVSSSocietyBySSOID", DBFactoryCommandType.PROCEDURE_COMMAND); 
+                objDBAccess.AddParameterToCommand("@SSOID", DBFactoryParameterType.NVarchar, SSOID);  
+                dt = objDBAccess.GetTable();
+            }
+            catch (Exception ex)
+            {
+                objILogger.ErrorHandle(new ErrorLogEntity() { PageName = "Cooperative.Models.SocietyModel", FunctionName = "KVSSGSSbyDRorMDCCB(SocietyRegistrationEntity Obj)" }, ex);
+            }
+            finally
+            {
+                objDBAccess.CloseConnection();
+            }
+            return dt;
+
+        }
+
+
         public DataTable GetReasonForVacancyDetailByListId(string ListCode)
         {
             dt.Clear();

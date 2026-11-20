@@ -612,6 +612,31 @@ namespace Cooperative.Models
         }
         #endregion
 
+
+        // added 18-11-2026
+        public DataSet GetAuditUplodedDocumentList(string Id)
+        {
+            DataSet ds = new DataSet();
+            ds.Clear();
+            try
+            {
+                objDBAccess.OpenConnection();
+                SqlCommand cmd = objDBAccess.CreateCommand("AuditDocumentList", DBFactoryCommandType.PROCEDURE_COMMAND);
+                objDBAccess.AddParameterToCommand("@Id", DBFactoryParameterType.Int, int.Parse(Id));
+                ds = objDBAccess.GetDataSet();
+            }
+            catch (Exception ex)
+            {
+                objILogger.ErrorHandle(new ErrorLogEntity() { PageName = "Cooperative.Models.Auditor", FunctionName = "AuditDocumentList(string Id = '')" }, ex);
+            }
+            finally
+            {
+                objDBAccess.CloseConnection();
+                ds.Dispose();
+            }
+            return ds;
+        }
+
     }
 
     public class CMK_DBT_ResponseModel

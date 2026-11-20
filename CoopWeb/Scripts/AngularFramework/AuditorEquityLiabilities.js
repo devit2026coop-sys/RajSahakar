@@ -14,10 +14,17 @@ MasterMod.controller("auditorEquityLiabilitiesCtrl", function ($scope, $http) {
     $scope.otherDepositRows = [];
     $scope.borrowingsRows = [];
     $scope.amt = { memberDepsoitAmt: "0" }
+    $scope.TabList = [];
+    $scope.HeaderList = []; 
 
+    $scope.KVSSSocietyID = '0';
+    $scope.SelectedTabId = 1;
+    $scope.SocietyList = [];
+    $scope.FinancialYearList = [];
 
     // on page load
     $scope.OnPageLoad = function () {
+       // alert("hello");
         $scope._language = 'en-us';
         $(".se-pre-con").fadeIn("slow");
         if (_language == 'en-us') {
@@ -36,17 +43,27 @@ MasterMod.controller("auditorEquityLiabilitiesCtrl", function ($scope, $http) {
                 }).
                 error(function (data, status) {
                     alert("Error while translation");
-                });
-
-            $scope.GetAllAuditorList();
+                }); 
+           
             $scope.ClearAuditorForm = function () {
                 $scope.AuditorMaster = null;
                 $(".se-pre-con").fadeOut("slow");
 
             };
+
+            
+
         }
 
 
+        $scope.KVSSSocietyID = 0;
+
+         
+
+        $scope.GetAuditAccountHeaderMaster(1); 
+        $scope.GetSocietyBySSO();
+        $scope.GetSelectedSocietyName();
+        $scope.SetFinancialYears(); 
 
         $scope.Department = [];
         $http.get(SiteUrl + "/Master/GetMasterData/?MasterType=Department&MasterCode=-1").
@@ -60,6 +77,522 @@ MasterMod.controller("auditorEquityLiabilitiesCtrl", function ($scope, $http) {
             });
 
     };
+
+
+
+    $scope.OnSocietyChange = function () {
+
+        if (!$scope.KVSSSocietyID || $scope.KVSSSocietyID == 0) {
+            $scope.HeaderList = [];
+            $scope.TabList = [];
+            return;
+        }
+
+        // Call GetAuditAccountHeaderMaster on dropdown change
+        $scope.GetAuditAccountHeaderMaster($scope.SelectedTabId || 1 );
+    };
+ 
+    // Load tabs and parent/child headings from database
+    $scope.GetAuditAccountHeaderMaster = function (tabId) {
+
+        $http.get(SiteUrl + "/Auditor/GetAuditAccountHeaderMaster", {
+            params: {
+                tabId: tabId,
+                kvssId: $scope.KVSSSocietyID,
+                financialYear: $scope.FinancialYear
+            }
+        })
+            .success(function (data) {
+
+                $scope.TabList = data.TabList || [];
+                $scope.HeaderList = data.HeaderList || [];
+
+                // Set selected tab
+                if ( $scope.TabList.length > 0) {
+                    $scope.SelectedTabId = tabId;
+                }
+
+            })
+            .error(function (error) {
+                alert("Error while loading account headings.");
+            });
+    };
+
+    // Get parent headings for selected tab
+    $scope.GetParentHeadersByTab = function (tabId) {
+
+        return $scope.HeaderList.filter(function (item) {
+
+            return item.TabId == tabId &&
+                (item.ParentHeaderId == null ||
+                    item.ParentHeaderId == undefined);
+        });
+    };
+
+
+    // Get child headings for selected parent
+    $scope.GetChildHeaders = function (parentHeaderId) {
+
+        return $scope.HeaderList.filter(function (item) {
+
+            return item.ParentHeaderId == parentHeaderId;
+        });
+    };
+
+
+
+
+    $scope.GetAllDescendants = function (parentHeaderId) {
+
+        var result = [];
+
+        function GetChildren(parentId, level) {
+
+            var children = $scope.GetChildHeaders(parentId) || [];
+
+            angular.forEach(children, function (child) {
+
+                child.Level = level;
+
+                result.push(child);
+
+                GetChildren(child.HeaderId, level + 1);
+            });
+        }
+
+        GetChildren(parentHeaderId, 1);
+
+        return result;
+    };
+
+
+    // Change selected tab
+    $scope.SelectAccountTab = function (tabId) {
+        $scope.SelectedTabId = tabId;
+        $scope.GetAuditAccountHeaderMaster(tabId);
+    };
+
+
+    $scope.AdditionalRows = {};
+
+    $scope.AddMainHeaderRow = function (parent) {
+
+        if (!parent || !parent.HeaderId) {
+            alert("Parent heading not found.");
+            return;
+        }
+
+        if (!$scope.AdditionalRows) {
+            $scope.AdditionalRows = {};
+        }
+
+        if (!$scope.AdditionalRows[parent.HeaderId]) {
+            $scope.AdditionalRows[parent.HeaderId] = [];
+        }
+
+        $scope.AdditionalRows[parent.HeaderId].push({
+            HeaderId: 0,
+            ParentHeaderId: parent.HeaderId,
+            HeaderName: '',
+            OpeningBalance: 0,
+            KVSSSocietyId: parent.KVSSSocietyId || 0,
+            FinalSubmit: 0,
+            IsDeleted: 0
+        });
+    };
+
+    $scope.GetAdditionalRowsByHeader = function (headerId) {
+
+        return $scope.AdditionalRows[headerId] || [];
+
+    };
+
+
+    $scope.RemoveAdditionalRowExist = function (parentHeaderId, child) {
+
+        if (!child || !child.HeaderId) {
+            alert("Invalid heading.");
+            return;
+        }
+
+        if (child.KVSSSocietyId <= 0 || child.FinalSubmit != 0) {
+            alert("This heading cannot be deleted.");
+            return;
+        }
+
+        if (!confirm("Are you sure you want to delete this heading?")) {
+            return;
+        }
+
+        $http.post('/Auditor/DeleteAuditAccountCustomHeader', {
+            HeaderId: child.HeaderId,
+            KVSSSocietyId: child.KVSSSocietyId
+        }).then(function (response) {
+
+            if (response.data.Status == 1) {
+
+                // Mark deleted in AngularJS object
+                child.IsDeleted = 1;
+
+                // Remove from displayed database child list
+                var childList = $scope.GetChildHeaders(parentHeaderId);
+
+                var index = childList.findIndex(function (x) {
+                    return x.HeaderId == child.HeaderId;
+                });
+
+                if (index !== -1) {
+                    childList.splice(index, 1);
+                }
+
+                alert(response.data.Message);
+                $scope.GetAuditAccountHeaderMaster($scope.SelectedTabId);
+            }
+            else {
+                alert(response.data.Message);
+            }
+
+        }, function (error) {
+            alert("Unable to delete heading.");
+        });
+    };
+
+
+
+
+    $scope.RemoveAdditionalRow = function (headerId, index) {
+
+        if ($scope.AdditionalRows[headerId]) {
+
+            $scope.AdditionalRows[headerId].splice(index, 1);
+
+        }
+
+    };
+
+
+
+    // Prepare rows for saving
+    $scope.GetOpeningBalanceSaveDetails = function () {
+
+        var details = [];
+        var parents = $scope.GetParentHeadersByTab($scope.SelectedTabId) || [];
+
+        angular.forEach(parents, function (parent) {
+
+            var children = $scope.GetChildHeaders(parent.HeaderId) || [];
+
+            angular.forEach(children, function (child) {
+
+                details.push({
+                    HeaderId: child.HeaderId,
+                    OpeningBalance: parseFloat(child.OpeningBalance) || 0
+                });
+
+            });
+
+        });
+
+        return details;
+    };
+
+
+    // Common save function
+    $scope.SaveOpeningBalanceRows = function (details, moveNext) {
+
+        if (!details || details.length === 0) {
+            alert("No entries found to save.");
+            return;
+        }
+
+        var request = {
+            KVSSId: $scope.KVSSSocietyID,
+            TabId: $scope.SelectedTabId,
+            FinancialYear: $scope.FinancialYear,
+            Details: details
+        };
+
+        $(".se-pre-con").fadeIn("slow");
+
+        $http.post(
+            SiteUrl + "Auditor/SaveAuditAccountOpeningBalance",
+            request
+        ).success(function (response) {
+
+            $(".se-pre-con").fadeOut("slow");
+
+            if (response.Status === 1) {
+
+                alert(response.Message);
+
+                if (moveNext) {
+                    // $scope.NextStep();
+
+                    // Find the next tab
+                    var currentIndex = $scope.TabList.findIndex(function (tab) {
+                        return tab.TabId == $scope.SelectedTabId;
+                    });
+
+                    if (currentIndex !== -1 &&
+                        currentIndex < $scope.TabList.length - 1) {
+
+                        var nextTab = $scope.TabList[currentIndex + 1];
+
+                        $scope.SelectAccountTab(nextTab.TabId);
+                    }
+                    else {
+                        alert("All tabs completed.");
+                    }
+                }
+
+            }
+            else {
+                alert(response.Message);
+            }
+
+        }).error(function () {
+
+            $(".se-pre-con").fadeOut("slow");
+            alert("Error while saving opening balance.");
+
+        });
+    };
+
+
+    // Save & Next button
+    $scope.SaveAndNext = function () {
+
+
+        if (!$scope.KVSSSocietyID || $scope.KVSSSocietyID == 0) {
+            alert("Please select society.");
+            return;
+        }
+        var details = $scope.GetOpeningBalanceSaveDetails();
+
+        $scope.SaveOpeningBalanceRows(details, true);
+
+    };
+
+
+
+
+    $scope.GetParentHeaderTotal = function (parentHeaderId) {
+
+        var total = 0;
+
+        // 1. Include custom entries directly under parent
+        var parentRows = $scope.GetAdditionalRowsByHeader(parentHeaderId) || [];
+
+        angular.forEach(parentRows, function (row) {
+            total += parseFloat(row.OpeningBalance) || 0;
+        });
+
+        // 2. Get all children, grandchildren and further-level headings
+        var descendants = $scope.GetAllDescendants(parentHeaderId) || [];
+
+        angular.forEach(descendants, function (node) {
+
+            // Include this heading's opening balance
+            total += parseFloat(node.OpeningBalance) || 0;
+
+            // 3. Include custom entries under this heading
+            var customRows = $scope.GetAdditionalRowsByHeader(node.HeaderId) || [];
+
+            angular.forEach(customRows, function (row) {
+                total += parseFloat(row.OpeningBalance) || 0;
+            });
+
+        });
+
+        return total;
+    };
+
+
+    $scope.UpdateParentTotal = function (parentHeaderId) {
+        var total = 0;
+
+        var children = $scope.GetChildHeaders(parentHeaderId) || [];
+
+        angular.forEach(children, function (child) {
+            total += parseFloat(child.OpeningBalance) || 0;
+        });
+
+        var additionalRows = $scope.GetAdditionalRowsByHeader(parentHeaderId) || [];
+
+        angular.forEach(additionalRows, function (row) {
+            total += parseFloat(row.OpeningBalance) || 0;
+        });
+
+        var parent = $scope.HeaderList.find(function (item) {
+            return item.HeaderId == parentHeaderId;
+        });
+
+        if (parent) {
+            parent.TotalOpeningBalance = total;
+        }
+    };
+
+
+    $scope.SaveAdditionalRow = function (parentHeaderId, row) {
+
+        if (!row.HeaderName || row.HeaderName.trim() === '') {
+            alert("Please enter particulars.");
+            return;
+        }
+
+        var request = {
+            HeaderId: row.HeaderId || 0,
+            ParentHeaderId: parentHeaderId,
+            TabId: $scope.SelectedTabId,
+            SocietyTypeId: $scope.SocietyTypeId,
+            HeaderNameEnglish: row.HeaderName,
+            HeaderNameHindi: row.HeaderName,
+            KVSSId: $scope.KVSSSocietyID,
+            FinancialYear: $scope.FinancialYear,
+            OpeningBalance: parseFloat(row.OpeningBalance) || 0
+        };
+
+        console.log("ParentHeaderId:", request.ParentHeaderId);
+        console.log("Save Request:", request);
+
+        $(".se-pre-con").fadeIn("slow");
+
+        $http.post(
+            SiteUrl + "/Auditor/SaveAuditAccountCustomHeader",
+            request
+        ).success(function (response) {
+
+            $(".se-pre-con").fadeOut("slow");
+
+            if (response.Status === 1) {
+
+                alert(response.Message);
+
+                // Remove temporary input row
+                if ($scope.AdditionalRows[parentHeaderId]) {
+
+                    var index = $scope.AdditionalRows[parentHeaderId].indexOf(row);
+
+                    if (index !== -1) {
+                        $scope.AdditionalRows[parentHeaderId].splice(index, 1);
+                    }
+                }
+
+                // Refresh selected tab from database
+                $scope.GetAuditAccountHeaderMaster($scope.SelectedTabId);
+
+            }
+            else {
+                alert(response.Message);
+            }
+
+        }).error(function () {
+
+            $(".se-pre-con").fadeOut("slow");
+            alert("Error while saving subheading.");
+
+        });
+    };
+
+
+
+    $scope.GetGrandTotal = function () {
+
+        var grandTotal = 0;
+
+        var parents = $scope.GetParentHeadersByTab($scope.SelectedTabId) || [];
+
+        angular.forEach(parents, function (parent) {
+            grandTotal += $scope.GetParentHeaderTotal(parent.HeaderId);
+        });
+
+        return grandTotal;
+    };
+
+    $scope.GetSocietyBySSO = function (ActId, SocietyTypeId, ClassId) {
+
+        $(".se-pre-con").fadeIn("slow");
+
+        $http.post(SiteUrl + "/Society/KVSSGSSbySSOD", {})
+            .success(function (data, status) {
+
+                $scope.TableData = data;
+                $scope.SocietyList = $scope.TableData;
+
+                // Select society from Session if available
+                if ($scope.SessionKVSSId != null &&
+                    $scope.SessionKVSSId != '' &&
+                    $scope.SessionKVSSId != 0) {
+
+                    $scope.KVSSSocietyID = $scope.SessionKVSSId;
+                }
+
+                $(".se-pre-con").fadeOut("slow");
+
+            })
+            .error(function (data, status) {
+
+                $(".se-pre-con").fadeOut("slow");
+                $scope.TableData = [];
+                $scope.SocietyList = [];
+
+            });
+    };
+
+
+
+    $scope.GetSelectedSocietyName = function () {
+        var selectedSociety = $scope.SocietyList.find(function (item) {
+            return item.SocietyID == $scope.KVSSSocietyID;
+        });
+
+        return selectedSociety ? selectedSociety.SocietyName : '';
+    };
+
+
+    $scope.SetFinancialYears = function () {
+
+        var today = new Date();
+
+        var currentFYStartYear = today.getMonth() >= 3
+            ? today.getFullYear()
+            : today.getFullYear() - 1;
+
+        // Previous financial year
+        var previousFYStartYear = currentFYStartYear - 1;
+
+        $scope.FinancialYear = previousFYStartYear + "-" +
+            (previousFYStartYear + 1).toString().substring(2);
+
+        // Generate last 10 financial years
+        $scope.FinancialYearList = [];
+
+        for (var i = 0; i < 10; i++) {
+
+            var startYear = previousFYStartYear - i;
+
+            var financialYear = startYear + "-" +
+                (startYear + 1).toString().substring(2);
+
+            $scope.FinancialYearList.push(financialYear);
+        }
+    };
+
+
+
+    $scope.OnFinancialYearChange = function () {
+
+        if (!$scope.FinancialYear) {
+            return;
+        }
+
+        // Reload account headers for selected Financial Year
+        $scope.GetAuditAccountHeaderMaster(
+            $scope.SelectedTabId || 1
+        );
+    };
+
+    // end new js
 
     $scope.SetStatus = function (UnitId, ActionId) {
         if (ActionId == 2)

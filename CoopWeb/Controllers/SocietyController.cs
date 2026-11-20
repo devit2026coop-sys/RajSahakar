@@ -10966,6 +10966,21 @@ namespace Cooperative.Controllers
             return COMMON_FUNCTION.DataTableToJSONWithJSONNet(DT);
         }
 
+
+        public string KVSSGSSbySSOD()
+        {
+
+            SocietyModel objMenuActionModel = new SocietyModel(new FileLogger());
+            DataTable DT = null;
+            if ( Request.Cookies["SSO_ID"] != null)
+            {
+                 
+              DT = objMenuActionModel.KVSSGSSbySSOIDService(_loggedInUSerDetails.SSOID); 
+            }
+
+            return COMMON_FUNCTION.DataTableToJSONWithJSONNet(DT);
+        }
+
         [HttpGet]
         [ActionName("GetReasonForVacancyByListId")]
         public string GetReasonForVacancyDetailsByListId(string ListCode)
@@ -12868,189 +12883,377 @@ namespace Cooperative.Controllers
         }
 
         [HttpGet]
+
         public string GSSGenerateSanctionLetter(List<InspactorStatusDetails> InspactorStatusDetails = null)
+
         {
+
             string PdfPath = string.Empty;
+
             string InspactorTargetsId = "";
+
             try
+
             {
+
                 if (InspactorStatusDetails != null && InspactorStatusDetails.Any())
+
                 {
+
                     InspactorTargetsId = string.Join(",", InspactorStatusDetails.Select(x => x.InspactorTargetsId));
+
                 }
+
                 if (System.Web.HttpContext.Current.Session[SessionIdentity.Admin] != null)
+
                 {
+
                     GopalCreditCardDBModel _Modal = new GopalCreditCardDBModel();
+
                     var Details = new DataPagingModel { PageNumber = 10, PageSize = 100000 };
+
                     SocietyModel objSocietyModel = new SocietyModel(new DBLogger());
+
                     DataTable Dt = objSocietyModel.GetInspactorTargetsDetails(Details, "0", "13", InspactorTargetsId, 0, -1);
 
+                    DBLogger objDBLogger = new DBLogger();
+
+                    objDBLogger.ErrorHandle(new ErrorLogEntity()
+
+                    {
+
+                        PageName = "Society Controller start setup : 1",
+
+                        FunctionName = "GSSGenerateSanctionLetter(data table  " + JsonConvert.SerializeObject(Dt) + ")"
+
+                    }, new System.Exception(JsonConvert.SerializeObject(Dt)));
+
+
                     bool isMahila = Convert.ToBoolean(Dt.Rows[0]["IsMahilaMpacs"]);
+
                     bool isTsp = Convert.ToBoolean(Dt.Rows[0]["IsTspArea"]);
+
                     int isAreaType = Convert.ToInt16(Dt.Rows[0]["AreaType"]);
 
                     var templatename = "";
+
                     if (isMahila)
+
                     {
+
                         templatename = System.IO.Path.Combine(Server.MapPath("~/Template"), "gss_target_mahila_sanction_letter.html");
+
                     }
+
                     else if (isTsp)
+
                     {
+
                         templatename = System.IO.Path.Combine(Server.MapPath("~/Template"), "gss_target_sanction_letter.html");
+
                     }
+
                     else
+
                     {
+
                         if (isAreaType == 3)
+
                         {
+
                             templatename = System.IO.Path.Combine(Server.MapPath("~/Template"), "gss_target_cad_sanction_letter.html");
+
                         }
+
                         else
+
                         {
+
                             templatename = System.IO.Path.Combine(Server.MapPath("~/Template"), "gss_target_sanction_letter.html");
+
                         }
 
                     }
 
                     StringBuilder strbld = new StringBuilder();
+
                     var file = System.IO.Path.Combine(Server.MapPath("~/Template"), templatename);
+
                     StringBuilder rowBuilder = new StringBuilder();
+
                     int i = 0;
+
                     string DR2JrPlanForwardedDate = "";
+
                     strbld.Append(System.IO.File.ReadAllText(file));
+
                     {
 
                         foreach (DataRow row in Dt.Rows)
+
                         {
+
                             if (isAreaType == 3 && !string.IsNullOrWhiteSpace(row["ProposedNameMPACS"].ToString()) && !string.IsNullOrWhiteSpace(row["GP_ENG"].ToString()) && !string.IsNullOrWhiteSpace(row["BLOCK_ENG"].ToString()))
+
                             {
+
                                 rowBuilder.AppendFormat("<tr>" +
+
                              "<td>{0}</td>" +
+
                              "<td>{1}</td>" +
+
                              "<td>{2}</td>" +
+
                              "<td>{3}</td>" +
+
                              "</tr>",
+
                              i + 1,
+
                              row["ProposedNameMPACS"].ToString(),
+
                              //row["GP_ENG"]?.ToString() ?? "",
+
                              row["GP_ENG"].ToString(),
+
                              row["BLOCK_ENG"].ToString());
+
                             }
+
                             else
+
                             {
+
                                 rowBuilder.AppendFormat("<tr>" +
+
                            "<td>{0}</td>" +
+
                            "<td>{1}</td>" +
+
                            "<td>{2}</td>" +
+
                            "<td>{3}</td>" +
+
                            "</tr>",
+
                            i + 1,
+
                            //isAreaType == 3 ? row["ProposedNameMPACS"]?.ToString() ?? "" : row["GP_ENG"]?.ToString() ?? "",
+
                            row["GP_ENG"]?.ToString() ?? "",
+
                            row["GP_ENG"]?.ToString() ?? "",
+
                            row["BLOCK_ENG"]?.ToString() ?? "");
+
                             }
 
                             DR2JrPlanForwardedDate += Convert.ToDateTime(row["DR2JrPlanForwardedDate"]).ToString("dd-MM-yyyy") + ", ";
+
                             i++;
 
                             DR2JrPlanForwardedDate = DR2JrPlanForwardedDate.TrimEnd(',', ' ');
+
                             if (i > 0)
+
                             {
+
                                 strbld.Replace("##ActionFlowId##", row["CurrentAppFlowId"]?.ToString() ?? "");
+
                                 strbld.Replace("##SenctionNo##", row["SenctionNo"]?.ToString() ?? "");
+
                                 strbld.Replace("##DistrictName##", row["DISTRICT_MANGAL"]?.ToString() ?? "");
+
                                 strbld.Replace("##DivisionName##", row["DIVISION_MANGAL"]?.ToString() ?? "");
+
                                 strbld.Replace("##BankName##", row["BankName"]?.ToString() ?? "");
+
                                 strbld.Replace("##SanctionNo##", row["SenctionNo"]?.ToString() ?? "");
+
                                 strbld.Replace("##SanctionDate##", DateTime.Now.ToString("dd-MM-yyyy"));
-                                strbld.Replace("##CommitteeApprovalDate##", row["DateOfApproval"] != DBNull.Value
-                                   ? Convert.ToDateTime(row["DateOfApproval"]).ToString("dd-MM-yyyy")
-                                   : "");
+
+                                strbld.Replace("##CommitteeApprovalDate##", row["DateOfApproval"].ToString());
+
+                                //strbld.Replace("##CommitteeApprovalDate##", row["DateOfApproval"] != DBNull.Value
+
+                                //   ? Convert.ToDateTime(row["DateOfApproval"]).ToString("dd-MM-yyyy")
+
+                                //   : "");
+
                                 strbld.Replace("##DR2JrPlanForwardedDate##", DR2JrPlanForwardedDate);
+
                             }
+
                             i++;
+
                         }
+
                     }
+
                     strbld.Replace("##SocietyData##", rowBuilder.ToString());
+
+                    objDBLogger.ErrorHandle(new ErrorLogEntity()
+
+                    {
+
+                        PageName = "Society Controller start setup : 2",
+
+                        FunctionName = "GSSGenerateSanctionLetter(str builder  " + strbld.ToString() + ")"
+
+                    }, new System.Exception(strbld.ToString()));
 
 
                     var gccRegNo = Server.MapPath("~/Content/InspactorDocument/");
+
                     string devFontSize = "17px";
 
                     if (!System.IO.Directory.Exists(gccRegNo))
+
                     {
+
                         System.IO.Directory.CreateDirectory(gccRegNo);
+
                     }
+
                     string fileName = "GSSTargetSanction_" + Guid.NewGuid().ToString("N").ToUpper() + ".pdf";
+
                     var filePath = gccRegNo + "/" + fileName;
 
                     System.Text.StringBuilder sb1 = new System.Text.StringBuilder();
+
                     sb1.Append(strbld.ToString());
+
                     string QRCoder = COMMON_FUNCTION.GenerateQRCode("https://rajsahakarapp.rajasthan.gov.in/Content/InspactorDocument/" + fileName);
+
                     sb1.Replace("#QRCoder#", QRCoder);
+
                     GopalCreditCardController gopalCreditCardController = new GopalCreditCardController();
+
                     PdfPath = gopalCreditCardController.CommonPdfGenerate(sb1, filePath);
+
                     if (PdfPath != "PdfPath")
+
                     {
+
                         PdfPath = "~/Content/InspactorDocument/";
+
                         return JsonConvert.SerializeObject(new
+
                         {
+
                             Success = true,
+
                             DocPath = PdfPath + fileName,
+
                             DocType = "MPacs",
+
                             DocName = fileName,
+
                             ReturnPath = Url.Action("InspactorTargetsAction", "Society"),
+
                             Location = "",
+
                             Designation = ""
+
                         });
+
                     }
+
                     else
+
                     {
+
                         return JsonConvert.SerializeObject(new
+
                         {
+
                             Success = false,
+
                             Message = "PDF generation failed.",
+
                             DocPath = "",
+
                             DocType = "",
+
                             DocName = "",
+
                             ReturnPath = "",
+
                             Location = "",
+
                             Designation = ""
+
                         });
+
                     }
+
                 }
+
                 else
+
                 {
+
                     return JsonConvert.SerializeObject(new
+
                     {
+
                         Success = false,
+
                         Message = "Session expired.",
+
                         DocPath = "",
+
                         DocType = "",
+
                         DocName = "",
+
                         ReturnPath = "",
+
                         Location = "",
+
                         Designation = ""
+
                     });
+
                 }
+
             }
+
             catch (Exception ex)
+
             {
+
                 DBLogger objDBLogger = new DBLogger();
+
                 objDBLogger.ErrorHandle(new ErrorLogEntity() { PageName = "Cooperative.Controller.Society", FunctionName = "GSSGenerateSanctionLetter(string fileName, List<InspactorStatusDetails> InspactorStatusDetails = null)" }, ex);
+
                 return JsonConvert.SerializeObject(new
+
                 {
+
                     Success = false,
+
                     Message = ex.Message,
+
                     DocPath = "",
+
                     DocType = "",
+
                     DocName = "",
+
                     ReturnPath = "",
+
                     Location = "",
+
                     Designation = ""
+
                 });
+
             }
+
         }
+
 
 
         [HttpPost]
