@@ -4931,6 +4931,47 @@ namespace Cooperative.Models
         public decimal CurrentMonthCurrentYearRecovery { get; set; }
     }
 
+    public class AuditSPModel
+    {
+        public long StockRegisterId { get; set; }
+
+        public int ItemId { get; set; }
+        public int? ParentItemId { get; set; }
+        public string ItemName_Hi { get; set; }
+        public string ItemName_En { get; set; }
+
+        public string FinancialYear { get; set; }
+        public int KVSSId { get; set; }
+
+        // Opening Stock
+        public decimal OpeningQty { get; set; }
+        public decimal OpeningRate { get; set; }
+        public decimal OpeningAmount { get; set; }
+
+        // Receipts / Purchase
+        public decimal ReceiptQty { get; set; }
+        public decimal ReceiptRate { get; set; }
+        public decimal ReceiptAmount { get; set; }
+
+        // Sales / Issued
+        public decimal SalesQty { get; set; }
+        public decimal SalesRate { get; set; }
+        public decimal SalesAmount { get; set; }
+
+        // Closing Stock
+        public decimal ClosingQty { get; set; }
+        public decimal ClosingRate { get; set; }
+        public decimal ClosingAmount { get; set; }
+         
+    }
+
+    public class AuditSPRequest
+    {
+        public string FinancialYear { get; set; }
+        public int KVSSId { get; set; }
+         
+        public List<AuditSPModel> StockDetails { get; set; }
+    }
 
     public class AccountTabMaster
     {

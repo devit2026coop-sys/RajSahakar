@@ -341,7 +341,7 @@ MasterMod.controller("auditorEquityLiabilitiesCtrl", function ($scope, $http) {
                         $scope.SelectAccountTab(nextTab.TabId);
                     }
                     else {
-                        alert("All tabs completed.");
+                        window.location.href = "/KVSSAuditAccount/KVSSAuditAccount";
                     }
                 }
 

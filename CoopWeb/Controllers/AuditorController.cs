@@ -1544,5 +1544,56 @@ namespace Cooperative.Controllers
         //        // throw;
         //    }
         //}
+
+        [HttpGet]
+        [ActionName("GetAllAuditorSalePurchaseList")]
+        public string GetAllAuditorSalePurchaseList(int? KVSSId, string financialYear)
+        {
+            // If Session is null, assign the selected KVSS ID
+            if (Session["KVSSId"] == null && KVSSId > 0)
+            {
+                Session["KVSSId"] = KVSSId;
+            }
+            else
+            {
+                // Otherwise, use the existing Session value
+                KVSSId = Convert.ToInt32(Session["KVSSId"]);
+            }
+             
+            // Financial Year Session
+            if (Session["FinancialYear"] == null && !string.IsNullOrEmpty(financialYear))
+            {
+                Session["FinancialYear"] = financialYear;
+            }
+            else if (Session["FinancialYear"] != null)
+            {
+                financialYear = Convert.ToString(Session["FinancialYear"]);
+            }
+             
+            // Pass KVSS ID to View
+            ViewBag.KVSSId = Convert.ToInt32(Session["KVSSId"]);
+
+            ViewBag.FinancialYear = Session["FinancialYear"];
+
+            AuditorModel auditorModel = new AuditorModel();
+            return COMMON_FUNCTION.DataTableToJSONWithJSONNet(auditorModel.GetAllAuditorSalePurchaseList(KVSSId, financialYear));
+        }
+
+        [HttpPost]
+        public int SaveAuditorSalePurchase(AuditSPRequest request)
+        {
+            if (Session["FinancialYear"] != null)
+            {
+                request.FinancialYear = Convert.ToString(Session["FinancialYear"]);
+            }
+            if (Session["KVSSId"] != null && Convert.ToInt32(Session["KVSSId"]) > 0)
+            {
+                request.KVSSId = Convert.ToInt32(Session["KVSSId"]);
+            }
+             
+            int result = new AuditorModel().SaveAuditorSalePurchase(request);
+            return result;
+        }
+
     }
 }

@@ -2285,6 +2285,113 @@ namespace Cooperative.Models
             return Result;
         }
 
+        public DataTable GetAllAuditorSalePurchaseList(int? KVSSId, string financialYear)
+        {
+            DataTable dt = new DataTable();
+            UserEntity _LoggedInUser = (UserEntity)System.Web.HttpContext.Current.Session[SessionIdentity.Admin];
+            try
+            {
+                objDBAccess.OpenConnection();
+
+                SqlCommand cmd = objDBAccess.CreateCommand("USP_Get_AuditPurchaseSaleDetails", DBFactoryCommandType.PROCEDURE_COMMAND);
+                objDBAccess.AddParameterToCommand("@KVSSId", DBFactoryParameterType.Int, KVSSId);
+                objDBAccess.AddParameterToCommand("@FinancialYear", DBFactoryParameterType.VARCHAR, financialYear);
+                objDBAccess.AddParameterToCommand("@UserId", DBFactoryParameterType.VARCHAR, _LoggedInUser.UserId);
+                objDBAccess.AddParameterToCommand("@RoleId", DBFactoryParameterType.Int, _LoggedInUser.RoleId);
+                dt = objDBAccess.GetTable();
+            }
+            catch (Exception ex)
+            {
+                objILogger.ErrorHandle(new ErrorLogEntity() { PageName = "Cooperative.Models.AuditorModel", FunctionName = "GetAllAuditorSalePurchaseList()" }, ex);
+            }
+            finally
+            {
+                objDBAccess.CloseConnection();
+            }
+            return dt;
+        }
+
+        public int SaveAuditorSalePurchase(AuditSPRequest request)
+        {
+            int Result = 0;
+            UserEntity _LoggedInUser = (UserEntity)System.Web.HttpContext.Current.Session[SessionIdentity.Admin];
+
+            if (_LoggedInUser == null || request == null || request.KVSSId == 0)
+            {
+                return 0;
+            }
+            try
+            { 
+                string financialYear = request.FinancialYear;
+                int KVSSId = request.KVSSId;
+                // TODO: 
+                DataTable table = new DataTable();
+                table.Columns.Add("ItemId", typeof(int));
+                table.Columns.Add("ParentItemId", typeof(int));
+                table.Columns.Add("ItemName_Hi", typeof(string));
+                table.Columns.Add("ItemName_En", typeof(string));
+                table.Columns.Add("OpeningQty", typeof(decimal));
+                table.Columns.Add("OpeningRate", typeof(decimal));
+                table.Columns.Add("OpeningAmount", typeof(decimal));
+                table.Columns.Add("ReceiptQty", typeof(decimal));
+                table.Columns.Add("ReceiptRate", typeof(decimal));
+                table.Columns.Add("ReceiptAmount", typeof(decimal));
+                table.Columns.Add("SalesQty", typeof(decimal));
+                table.Columns.Add("SalesRate", typeof(decimal));
+                table.Columns.Add("SalesAmount", typeof(decimal));
+                table.Columns.Add("ClosingQty", typeof(decimal));
+                table.Columns.Add("ClosingRate", typeof(decimal));
+                table.Columns.Add("ClosingAmount", typeof(decimal));
+
+                foreach (var item in request.StockDetails)
+                {
+                    table.Rows.Add(
+                        item.ItemId,
+                        item.ParentItemId,
+                        item.ItemName_Hi,
+                        item.ItemName_En,
+                        item.OpeningQty,
+                        item.OpeningRate,
+                        item.OpeningAmount,
+                        item.ReceiptQty,
+                        item.ReceiptRate,
+                        item.ReceiptAmount,
+                        item.SalesQty,
+                        item.SalesRate,
+                        item.SalesAmount,
+                        item.ClosingQty,
+                        item.ClosingRate,
+                        item.ClosingAmount
+                    );
+                }
+
+                //var tbl = table;
+                objDBAccess.OpenConnection();
+                SqlCommand cmd = objDBAccess.CreateCommand("USP_Save_AuditSPDetails", DBFactoryCommandType.PROCEDURE_COMMAND);
+                objDBAccess.AddParameterToCommand("@CreatedBy", DBFactoryParameterType.Int, _LoggedInUser.UserId);
+                objDBAccess.AddParameterToCommand("@UserRoleMappingId", DBFactoryParameterType.Int, _LoggedInUser.UserRoleDeptMappingId);
+                objDBAccess.AddParameterToCommand("@RoleId", DBFactoryParameterType.Int, _LoggedInUser.RoleId);
+                objDBAccess.AddParameterToCommand("@FinancialYear", DBFactoryParameterType.VARCHAR, financialYear);
+                objDBAccess.AddParameterToCommand("@KVSSId", DBFactoryParameterType.Int, KVSSId);
+
+                SqlParameter parameter = cmd.Parameters.Add("@Records", SqlDbType.Structured);
+                parameter.TypeName = "dbo.AuditSPTableType";
+                parameter.Value = table;
+
+                Result = Convert.ToInt32(objDBAccess.ExecuteScalarCommand());
+            }
+            catch (Exception ex)
+            {
+                objILogger.ErrorHandle(new ErrorLogEntity() { PageName = "AuditorPurchaseSale", FunctionName = "SaveAuditorSalePurchase" }, ex);
+
+                Result = 0;
+            }
+            finally
+            {
+                objDBAccess.CloseConnection();
+            }
+            return Result;
+        }
 
 
         /*  Auditor flow */

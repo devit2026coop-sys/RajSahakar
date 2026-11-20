@@ -14073,6 +14073,7 @@ public class KPIResultModel
     public int Month { get; set; }
     public int ResionId { get; set; }
     public string KPIFor { get; set; }
+    public string ProfitLossType { get; set; }
     public int OfficeId { get; set; }
     public int KPIIndicatorsId { get; set; }
     public int CCBId { get; set; }
@@ -14083,6 +14084,7 @@ public class KPIResultModel
     public decimal ProfitLastYearAmount { get; set; }
     public decimal KPIIndicatorsAchievement { get; set; }
     public decimal DepositAmount { get; set; }
+    public decimal IncrementPercentage { get; set; }
     public decimal KCCRecoveryAmount { get; set; }
     public decimal GCCRecoveryAmount { get; set; }
     public decimal LoanRecoveryAmount { get; set; }
@@ -14098,6 +14100,7 @@ public class KPIResultModel
     public string PacsManagerName { get; set; }
     public string PacsName { get; set; }
     public string PacsRegistrationNo { get; set; }
+    public string OtherText { get; set; }
     public decimal? KCCLoanDisbursedAmt { get; set; }
     public decimal? AgricultureTrunOver { get; set; }
     public int? MembershipPrevious { get; set; }

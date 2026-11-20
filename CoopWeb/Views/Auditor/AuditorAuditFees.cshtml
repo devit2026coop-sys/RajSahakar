@@ -1,6 +1,4 @@
-﻿<script src="~/Scripts/AngularFramework/AuditorCurrentYearFormNew.js?v=@DateTime.Now.Ticks"></script>
-<link href="~/Content/Stylesheets/toastr.min.css" rel="stylesheet" />
-<script src="~/Scripts/toastr.min.js"></script>
+﻿<script src="~/Scripts/AngularFramework/AuditorAuditFees.js?v=@DateTime.Now.Ticks"></script>
 <style>
     .section-head {
         font-weight: 600;
@@ -46,29 +44,52 @@
         text-align: right;
     }
 
-    .TbsBtn {
-        line-height: 30px;
-        margin-right: 10px;
-        border-width: medium;
-        border-style: none;
-        border-color: rgb(255, 255, 255);
-        border-image: none;
-        padding: 2px 15px;
-        outline: none;
-        background: #e3e3e3;
-        color: #444;
-        font-weight: 600;
+    .custom-tbls-tabs {
+        margin-bottom: 0;
+        border-bottom: 1px solid #9f9f9f;
+        display: flex;
     }
 
-        .TbsBtn.Active {
-            background: #1899a0;
-            color: #fff;
+        .custom-tbls-tabs > li {
+            margin-bottom: -2px;
         }
+
+            .custom-tbls-tabs > li > button {
+                color: #444;
+                font-weight: 600;
+                border: 1px solid transparent !important;
+                border-bottom: 2px solid transparent !important;
+                margin-right: 0;
+                background: transparent;
+                transition: all 0.3s ease;
+                border-radius: 4px 4px 0 0;
+                padding: 8px 20px;
+                line-height: 24px;
+                outline: none;
+            }
+
+                /* Hover */
+                .custom-tbls-tabs > li > button:hover {
+                    background: #e3e3e3;
+                    color: #168f98;
+                    border: 1px solid transparent !important;
+                }
+
+            /* Active Tab */
+            .custom-tbls-tabs > li.active > button,
+            .custom-tbls-tabs > li.active > button:hover,
+            .custom-tbls-tabs > li.active > button:focus {
+                color: #168f98;
+                background: #fff;
+                border: 1px solid #9f9f9f !important;
+                border-bottom: 2px solid #fff !important;
+                font-weight: 700;
+            }
 </style>
-<div ng-app="ApplicationPLDBKPIModule">
-    <div ng-controller="CooperativePLDBKPIFormCont">
+<div ng-app="AuditorAuditFeesModule">
+    <div ng-controller="AuditorAuditFeesCont">
         <div class="col-md-12">
-            <h3 class="citizen-dash-head ng-binding" style="margin-top:0px;">Audit Fees </h3>
+            <h3 class="citizen-dash-head ng-binding" style="margin-top:0px;">Audit Fees</h3>
         </div>
 
         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
@@ -89,43 +110,31 @@
         </div>
         <div class="col-md-12">
             <div class="citizen-dash-head">
-                <div>
-                    <button class="btn btn-light TbsBtn">Current Year</button>
-                    <button class="btn btn-light TbsBtn">Back Log</button>
-                    <button class="btn btn-primary TbsBtn Active">Audit Fees</button>
-                </div>
-                <div>
 
+                <ul class="nav nav-tabs custom-tbls-tabs" role="tablist">
+                    <li>
+                        <button class="btn btn-light " ng-click="GotoCurrent()">Current Year</button>
+                    </li>
+                    <li>
+                        <button class="btn btn-light " ng-click="GotoBackLog()">Back Log</button>
+                    </li>
+                    <li class="active">
+                        <button class="btn btn-primary ">Audit Fees</button>
+                    </li>
+                </ul>
+
+                <div>
                     <div class="form-group  pull-left">
                         <label>Select Date</label>
-                        @*<input type="date" class="form-control" ng-model="SelectedDate"  ng-change="GetAuditorCurrentYearFormNew()" />*@
-                        <input type="date" class="form-control" ng-model="SelectedDate" ng-change="GetKPIResult()" />
+                        <input type="date" class="form-control" ng-model="SelectedDate" ng-change="LoadAuditFeesForm()" />
                     </div>
-
-                    <h2 style=" font-weight: bold; text-align: center; "> Audit Fees</h2>
-                    @*<h3 style=" font-weight: bold; text-align: center; margin: 30px 0;">कार्य प्रदर्शन के आधार पर (केपीआई)</h3>*@
+                    <h2 style=" font-weight: bold; text-align: center; "> Audit Fees {{ DISTRICT_ENG }} {{ PreviousMonth }} ({{ FinancialYearName }}) </h2>
                     <div class="col-md-12">
-
                         <input type="hidden" id="hdnDistrictId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DistrictId)" />
-
-                        @*PLDB*@
-                        @*<div class="form-group col-md-3" ng-if="UserDetails.RoleId != 10188 && UserDetails.RoleId !== undefined && UserDetails.RoleId !== null">
-                                <label for="">District</label>
-                                <select name="PLDB_ID" ng-model="PLDB.PldbId" id="Pldb_Id" class="form-control" ng-init="PLDB.PldbId='0'" ng-change="PLDBChanged()">
-                                    <option value="0" disabled>--चुनें--</option>
-                                    <option ng-repeat="itemPLDB in PLDBList | orderBy:'PLDBName' track by itemPLDB.PLDBName " value="{{itemPLDB.PldbId}}">
-                                        {{itemPLDB.PLDBName}}
-                                    </option>
-                                </select>
-                            </div>*@
                     </div>
-
-                    <div class="citizen-dash-head" ng-show="ShowTable">
-
-
+                    <div class="citizen-dash-head">
                         <div class="table-responsive">
                             <table class="table table-bordered table-striped devtable bank-table">
-
                                 <colgroup>
                                     <col style="width:5.5%" />
                                     <col style="width:12%" />
@@ -136,74 +145,31 @@
                                     <col style="width:12%" />
                                     <col style="width:11.25%" />
                                 </colgroup>
-
                                 <thead>
-                                    <!-- Row 1: Main Heading -->
                                     <tr class="year-heading">
-                                        <th colspan="8" class="main-title">
-                                            ऑडिट फीस (राशी लाखो में)
-                                        </th>
+                                        <th colspan="8" class="main-title"> ऑडिट फीस (राशी लाखो में) </th>
                                     </tr>
-
-                                    <!-- Row 2: Main Groups -->
                                     <tr>
-                                        <th rowspan="3" class="type-head">
-                                            प्रकार
-                                        </th>
-
-                                        <th rowspan="3" class="total-head lgtBg">
-                                            गत बकाया<br />(बैकलॉग)
-                                        </th>
-
-                                        <th colspan="3" class="drkBg2">
-                                            गत माह तक
-                                        </th>
-
-                                        <th colspan="3" class="lgtBg">
-                                            माह में
-                                        </th>
+                                        <th rowspan="3" class="type-head">प्रकार</th>
+                                        <th rowspan="3" class="total-head lgtBg">गत बकाया<br />(बैकलॉग)</th>
+                                        <th colspan="3" class="drkBg2">गत माह तक</th>
+                                        <th colspan="3" class="lgtBg">माह में</th>
                                     </tr>
-
-                                    <!-- Row 3: Sub Groups -->
                                     <tr>
-                                        <th rowspan="2" class="drkBg2">
-                                            चालू वर्ष में<br />निर्धारण
-                                        </th>
-
-                                        <th colspan="2" class="drkBg2">
-                                            ऑडिट फीस वसूली
-                                        </th>
-
-                                        <th rowspan="2" class="lgtBg">
-                                            चालू वर्ष में<br />निर्धारण
-                                        </th>
-
-                                        <th colspan="2" class="lgtBg">
-                                            ऑडिट फीस वसूली
-                                        </th>
+                                        <th rowspan="2" class="drkBg2">चालू वर्ष में<br />निर्धारण</th>
+                                        <th colspan="2" class="drkBg2">ऑडिट फीस वसूली</th>
+                                        <th rowspan="2" class="lgtBg">चालू वर्ष में<br />निर्धारण</th>
+                                        <th colspan="2" class="lgtBg">ऑडिट फीस वसूली</th>
                                     </tr>
-
-                                    <!-- Row 4: Final Headers -->
                                     <tr>
-                                        <th class="drkBg2">
-                                            बैकलॉग<br />की वसूली
-                                        </th>
-
-                                        <th class="drkBg2">
-                                            चालू वर्ष<br />की वसूली
-                                        </th>
-
-                                        <th class="lgtBg">
-                                            बैकलॉग<br />की वसूली
-                                        </th>
-
-                                        <th class="lgtBg">
-                                            चालू वर्ष<br />की वसूली
-                                        </th>
+                                        <th class="drkBg2">बैकलॉग<br />की वसूली</th>
+                                        <th class="drkBg2">चालू वर्ष<br />की वसूली</th>
+                                        <th class="lgtBg">बैकलॉग<br />की वसूली</th>
+                                        <th class="lgtBg">चालू वर्ष<br />की वसूली</th>
                                     </tr>
                                 </thead>
-
                                 <tbody>
+                                    @*
                                     <tr>
                                         <th>ग्राम सेवा</th>
                                         <td><input type="text" class="form-control" /></td>
@@ -243,28 +209,32 @@
                                         <td><input type="text" class="form-control" /></td>
                                         <td><input type="text" class="form-control" /></td>
                                         <td><input type="text" class="form-control" /></td>
+                                    </tr>*@
+                                    <tr ng-repeat="item in AuditFeesList track by item.CommitteeTypeId">
+                                        <td class="type-cell"> {{item.CommitteeTypeName_Hin}} </td>
+                                        <td> <input type="number" class="form-control" ng-model="item.PreviousOutstanding" min="0" ng-change="ValidateBackLog(item, 'PreviousOutstanding')" /> </td>
+                                        <td> <input type="number" class="form-control" ng-model="item.PreviousMonthCurrentYearAssessment" min="0" ng-change="ValidateAssessmentRecovery(item, 'PreviousMonthCurrentYearAssessment')" /> </td>
+                                        <td> <input type="number" class="form-control" ng-model="item.PreviousMonthBacklogRecovery" min="0" ng-change="ValidateBackLog(item, 'PreviousMonthBacklogRecovery')" /> </td>
+                                        <td> <input type="number" class="form-control" ng-model="item.PreviousMonthCurrentYearRecovery" min="0" ng-change="ValidateAssessmentRecovery(item, 'PreviousMonthCurrentYearRecovery')" /> </td>
+                                        <td> <input type="number" class="form-control" ng-model="item.CurrentMonthCurrentYearAssessment" min="0" ng-change="ValidateAssessmentRecovery(item, 'CurrentMonthCurrentYearAssessment')" /> </td>
+                                        <td> <input type="number" class="form-control" ng-model="item.CurrentMonthBacklogRecovery" min="0" ng-change="ValidateBackLog(item, 'CurrentMonthBacklogRecovery')" /> </td>
+                                        <td> <input type="number" class="form-control" ng-model="item.CurrentMonthCurrentYearRecovery" min="0" ng-change="ValidateAssessmentRecovery(item, 'CurrentMonthCurrentYearRecovery')" /> </td>
                                     </tr>
-
-                                    <tr ng-if="!KPIData || KPIData.length == 0">
+                                    <tr ng-if="!AuditFeesList || AuditFeesList.length == 0">
                                         <td colspan="8" class="text-center">
                                             No Data Found
                                         </td>
                                     </tr>
                                 </tbody>
-
                             </table>
                         </div>
-
                     </div>
-                    <div class="text-center" style="margin-top:20px;" ng-show="ShowTable" ng-if="!IsKPIExpired">
-                        @*<div class="text-center" style="margin-top:20px;" ng-show="ShowTable">*@
-                        <button type="button" class="btn btn-primary dev-btn" ng-click="IsUpdate ? UpdateAuditResult() : SaveAuditResult()">
-                            {{ isBtn }}
+                    <div class="text-center" style="margin-top:20px;">
+                        <button type="button" class="btn btn-primary dev-btn" ng-click="SaveAuditFeesForm()">
+                            Submit
                         </button>
                     </div>
-
                 </div>
-
                 <div class="se-pre-con"></div>
             </div>
         </div>
