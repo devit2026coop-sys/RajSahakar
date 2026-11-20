@@ -23,7 +23,7 @@ CooperativeSocietyFormModule.controller("CooperativeUnitOfficeKPIFormCont", func
                 });
         };
         $scope.GetUserDetailsBySSO();
-        $scope.GetUnitOfficeDetail();
+        //$scope.GetUnitOfficeDetail();
         $scope.SetPreviousMonth();
 
     }
@@ -310,9 +310,14 @@ CooperativeSocietyFormModule.controller("CooperativeUnitOfficeKPIFormCont", func
         $(".se-pre-con").fadeIn("slow");
         $http.get(SiteUrl + "/Society/GetUserDetailsBySSO")
             .success(function (data) {
-                $scope.UserDetails = data[0];
-                $scope.OfficeId = data[0].OfficeId;
-                $scope.DistrictId = data[0].DISTRICT_ID;
+                if (data && data.length > 0 && data[0]) {
+                    $scope.UserDetails = data[0];
+                    $scope.OfficeId = data[0].OfficeId;
+                    $scope.DistrictId = data[0].DISTRICT_ID;
+
+                    // Call function only when data is available
+                    $scope.GetUnitOfficeDetail();
+                }
                 $(".se-pre-con").fadeOut("slow");
             })
             .error(function () {

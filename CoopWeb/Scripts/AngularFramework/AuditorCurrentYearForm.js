@@ -201,8 +201,8 @@ MasterMod.controller("CooperativeAuditorCurrentYearFormCont", function ($scope, 
                 var data = response.data || {};
                 console.log('data', data);
 
+                //$scope.auditMprList = angular.isArray(data) ? data : (data || []);
                 $scope.auditMprList = angular.isArray(data) ? data : (data.Records || []);
-
                 //$scope.DistrictId = data.DistrictId || null;
                 //$scope.DistrictName = data.DistrictName || '';
 
@@ -540,10 +540,7 @@ MasterMod.controller("CooperativeAuditorCurrentYearFormCont", function ($scope, 
 
         $(".se-pre-con").fadeIn("slow");
 
-        $http.post(
-            SiteUrl + "/Auditor/SaveCurrentYearMPR",
-            payload
-        ).then(function (response) {
+        $http.post(SiteUrl + "/Auditor/SaveCurrentYearMPR", payload).then(function (response) {
 
             var result = response.data;
 
@@ -571,8 +568,12 @@ MasterMod.controller("CooperativeAuditorCurrentYearFormCont", function ($scope, 
         });
     };
 
-    $scope.NextStep = function () {
+    $scope.GotoBackLog = function () {
         window.location.href = '/Auditornew/AuditorCurrentyearFormNew';
+    };
+
+    $scope.GotoFees = function () {
+        window.location.href = '/Auditor/AuditorAuditFees';
     };
 
     // CLEAR FORM VALUES

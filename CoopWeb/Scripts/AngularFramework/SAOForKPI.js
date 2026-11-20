@@ -25,8 +25,6 @@ CooperativeSocietyFormModule.controller("CooperativeSAOKPIFormCont", function ($
                 });
         };
 
-        //$scope.LoanBankList();
-        $scope.GetSAKPISAODetails();
         $scope.GetUserDetailsBySSO();
         $scope.SetPreviousMonth();
         $scope.KpiExpiredDetails();
@@ -74,6 +72,7 @@ CooperativeSocietyFormModule.controller("CooperativeSAOKPIFormCont", function ($
 
 
     $scope.GetSAKPISAODetails = function () {
+        debugger;
         $(".se-pre-con").fadeIn("slow");
         $http.get(SiteUrl + "/Society/GetSAKPIDetails")
             .success(function (data) {
@@ -119,9 +118,11 @@ CooperativeSocietyFormModule.controller("CooperativeSAOKPIFormCont", function ($
 
 
     $scope.GetKPIResult = function () {
+        debugger;
         $http.get(SiteUrl + "/KPI/GetKPIDetails", {
             params: { officeId: $scope.OfficeId, month: $scope.PreviousMonthId, kpiFor: "SA", DistrictId: $scope.DistrictId, resionId: $scope.ResionId }
         }).success(function (data) {
+            console.table('GetKPIResult', data);
 
             if (data && data.length > 0) {
                 $scope.IsUpdate = true;
@@ -486,13 +487,28 @@ CooperativeSocietyFormModule.controller("CooperativeSAOKPIFormCont", function ($
     };
 
     $scope.GetUserDetailsBySSO = function () {
+        debugger;
         $(".se-pre-con").fadeIn("slow");
         $http.get(SiteUrl + "/Society/GetUserDetailsBySSO").success(function (data) {
-            $scope.UserDetails = data[0];
-            $scope.OfficeId = data[0].OfficeId;
-            $scope.DistrictId = data[0].DISTRICT_ID;
-            $scope.ResionId = data[0].ResionId;
-            $scope.ResionName = data[0].ResionName;
+            console.table('GetUserDetailsBySSO', data);
+            if (data && data.length > 0 && data[0]) {
+                $scope.UserDetails = data[0];
+                $scope.OfficeId = data[0].OfficeId;
+                $scope.DistrictId = data[0].DISTRICT_ID;
+                $scope.ResionId = data[0].ResionId;
+                $scope.ResionName = data[0].ResionName;
+                $scope.GetSAKPISAODetails();               
+
+            } else {
+
+                // Data not available
+                $scope.UserDetails = null;
+                // Data available
+                alert('Kindly Refresh the page');
+                
+            }
+
+
             $(".se-pre-con").fadeOut("slow");
         })
             .error(function () {

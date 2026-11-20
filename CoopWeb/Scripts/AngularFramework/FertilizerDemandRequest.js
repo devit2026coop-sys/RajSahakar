@@ -47,7 +47,7 @@ FertilizerDemandController.controller("FertilizerDemandMod", function ($scope, $
             YearId: ""
         });
     };
-
+    console.table($scope.DemandList)
     $scope.FDRData = {
         IsCreditFacility: true,
         IsLicense: true,
@@ -346,22 +346,103 @@ FertilizerDemandController.controller("FertilizerDemandMod", function ($scope, $
             });
     };
 
-    $scope.GetMonths = function () {
-        return $http.get(SiteUrl + "/Master/GetMasterData/?MasterType=MONTH&MasterCode=-1").success(function (data) {
+    $scope.GetMonths = function (YrId, demandLst) {
 
-            var currentMonth = new Date().getMonth() + 1; // January = 1
+        return $http.get(
+            SiteUrl + "/Master/GetMasterData/?MasterType=MONTH&MasterCode=-1"
+        ).success(function (data) {
 
-            $scope.MonthList = data.filter(function (item) {
-                return Number(item.Month_Id) >= currentMonth;
-            });
-            //$scope.MonthList = data;
-            //console.log('item', currentMonth);
+            var currentMonth = new Date().getMonth() + 1;
+            var yearId = Number(YrId);
+
+            if (yearId === 1086) {
+
+                demandLst.MonthList = data.filter(function (item) {
+                    return Number(item.Month_Id) >= currentMonth;
+                });
+
+            }
+            else if (yearId === 1087) {
+
+                demandLst.MonthList = data;
+
+            }
+            else {
+                demandLst.MonthList = [];
+            }
 
         }).error(function () {
-            $scope.MonthList = [];
+            demandLst.MonthList = [];
         });
     };
 
+    $scope.ChangeDemandYear = function (demandLst) {
+        if (!demandLst || !demandLst.YearId) {
+            return;
+        }
+
+        demandLst.MonthId = '';
+
+        $scope.GetMonths(demandLst.YearId, demandLst);
+    };
+
+    $scope.GetCAMonths = function (YrrId, creditFacilityLst) {
+
+        return $http.get(
+            SiteUrl + "/Master/GetMasterData/?MasterType=MONTH&MasterCode=-1"
+        ).success(function (data) {
+
+            var currentMonth = new Date().getMonth() + 1;
+            var yearId = Number(YrrId);
+
+            if (yearId === 1086) {
+
+                creditFacilityLst.MonthList = data.filter(function (item) {
+                    return Number(item.Month_Id) >= currentMonth;
+                });
+
+            }
+            else if (yearId === 1087) {
+
+                creditFacilityLst.MonthList = data;
+
+            }
+            else {
+                creditFacilityLst.MonthList = [];
+            }
+
+        }).error(function () {
+            creditFacilityLst.MonthList = [];
+        });
+    };
+
+    $scope.ChangeCAYear = function (creditFacilityLst) {
+        if (!creditFacilityLst || !creditFacilityLst.YearId) {
+            return;
+        }
+
+        creditFacilityLst.MonthId = '';
+
+        $scope.GetCAMonths(creditFacilityLst.YearId, creditFacilityLst);
+    };
+
+    //$scope.GetMonths = function () {
+    //    return $http.get(SiteUrl + "/Master/GetMasterData/?MasterType=MONTH&MasterCode=-1").success(function (data) {
+
+    //        var currentMonth = new Date().getMonth() + 1; // January = 1
+     
+    //            $scope.MonthList = data.filter(function (item) {
+    //                return Number(item.Month_Id) >= currentMonth;
+    //            });
+     
+    //        //$scope.MonthList = data;
+    //        //console.log('item', currentMonth);
+
+    //    }).error(function () {
+    //        $scope.MonthList = [];
+    //    });
+    //};
+     
     $scope.GetFinancialYear = function () {
         return $http.get(SiteUrl + "/Master/GetMasterData/?MasterType=FINANCIALYEAR&MasterCode=-1")
             .success(function (data) {
@@ -374,7 +455,8 @@ FertilizerDemandController.controller("FertilizerDemandMod", function ($scope, $
                             };
                         })
                         .filter(function (item) {
-                            return item.FinYearId == '1086';
+                            return ['1086', '1087'].includes(item.FinYearId.toString());
+                            //return item.FinYearId == '1086';
                         });
 
                     if ($scope.FinancialYearList.length > 0) {
@@ -842,7 +924,7 @@ FertilizerDemandController.controller("FertilizerDemandMod", function ($scope, $
     $scope.OnPageLoad = function () {
         $(".se-pre-con").fadeIn("slow");
         $scope.GetSocietyBySSO();
-        $scope.GetMonths();
+        //$scope.GetMonths();
         $scope.GetFinancialYear();
         $scope.GetFertilizerList();
         $scope.GetFertilizerDetailByUser();
@@ -850,4 +932,4 @@ FertilizerDemandController.controller("FertilizerDemandMod", function ($scope, $
 
     //$scope.getTranslation();
     $scope.OnPageLoad();
-});;
+});
