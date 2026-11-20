@@ -55,7 +55,7 @@ MasterMod.controller("auditorPurchaseSaleCtrl", function ($scope, $http) {
     //}
 
     $scope.GetAllAuditorSalePurchaseList = function () {
-        $(".se-pre-con").fadeIn("slow");
+        //$(".se-pre-con").fadeIn("slow");
 
         //var date = new Date();
         //var month = date.getMonth() + 1;
