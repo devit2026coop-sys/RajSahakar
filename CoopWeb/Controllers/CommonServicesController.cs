@@ -4754,6 +4754,53 @@ namespace Cooperative.Controllers
         }
 
         #endregion
+
+
+        // added new 18-11-2026
+        [HttpPost]
+
+        public JsonResult GetSocietyAuditDocument(string Id = "")
+
+        {
+
+            var responce = new APIResponce();
+
+            var apiService = new ApiServiceModel(new FileLogger());
+
+            var ds = apiService.GetAuditUplodedDocumentList(Id);
+
+            if (ds != null)
+
+            {
+
+                responce.Data = new
+
+                {
+
+                    docList = ds.Tables.Count > 0 ? COMMON_FUNCTION.DataTableToJSONString(ds.Tables[0]) : null,
+
+                };
+
+                responce.Status = "200";
+
+                responce.Message = "Success";
+
+            }
+
+            else
+
+            {
+
+                responce.Status = "500";
+
+                responce.Message = "Internal Server Error.";
+
+            }
+
+            return Json(new { Result = responce }, JsonRequestBehavior.AllowGet);
+
+        }
+
     }
 }
 public class UnicodeFontProvider : XMLWorkerFontProvider
