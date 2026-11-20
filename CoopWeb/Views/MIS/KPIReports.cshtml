@@ -513,6 +513,10 @@
         }
     }
     //For All KPI'S Expect PLDB KPI (PDFNEw)
+
+
+
+
     async function ExportKPIReportToPDF() {
 
         var report = document.getElementById("KPIReportExport");
@@ -527,10 +531,13 @@
             return;
         }
 
-        if (typeof window.jspdf === "undefined") {
+        if (!window.jspdf || !window.jspdf.jsPDF) {
             alert("jsPDF library is not loaded.");
             return;
         }
+
+        var container = null;
+        var canvas = null;
 
         try {
 
@@ -538,243 +545,475 @@
                 await document.fonts.ready;
             }
 
-            var reportWidth = report.clientWidth;
-            var reportHeight = report.scrollHeight;
-            var scale = 2;
+            var reportWidth = Math.max(
+                report.clientWidth,
+                report.scrollWidth
+            );
 
-            // Row boundaries captured from the cloned HTML.
-            var rowBoundaries = [];
+            
 
-            var canvas = await html2canvas(report, {
-                scale: scale,
-                useCORS: true,
-                allowTaint: false,
-                backgroundColor: "#ffffff",
-                logging: false,
-                width: reportWidth,
-                height: reportHeight,
-                windowWidth: reportWidth,
-                windowHeight: reportHeight,
-                scrollX: 0,
-                scrollY: 0,
+            container = document.createElement("div");
 
-                onclone: function (clonedDocument) {
+            container.style.position = "fixed";
+            container.style.left = "-100000px";
+            container.style.top = "0";
+            container.style.width = reportWidth + "px";
+            container.style.backgroundColor = "#ffffff";
+            container.style.overflow = "visible";
+            container.style.zIndex = "-1";
 
-                    var clonedReport =
-                        clonedDocument.getElementById("KPIReportExport");
+            var clonedReport = report.cloneNode(true);
 
-                    if (!clonedReport) {
-                        return;
+            clonedReport.id = "KPIReportPDFTemp";
+            clonedReport.style.position = "relative";
+            clonedReport.style.width = reportWidth + "px";
+            clonedReport.style.maxWidth = "none";
+            clonedReport.style.minWidth = reportWidth + "px";
+            clonedReport.style.height = "auto";
+            clonedReport.style.maxHeight = "none";
+            clonedReport.style.overflow = "visible";
+            clonedReport.style.margin = "0";
+            clonedReport.style.padding = "0";
+            clonedReport.style.backgroundColor = "#ffffff";
+
+            container.appendChild(clonedReport);
+            document.body.appendChild(container);
+
+          
+            clonedReport.querySelectorAll("button").forEach(
+                function (button) {
+                    button.style.display = "none";
+                }
+            );
+
+            
+            clonedReport.querySelectorAll(
+                ".table-responsive, .row, .container, .container-fluid"
+            ).forEach(function (element) {
+
+                element.style.height = "auto";
+                element.style.maxHeight = "none";
+                element.style.overflow = "visible";
+            });
+
+            var table = clonedReport.querySelector(
+                "#KPIDetailTable"
+            );
+
+            if (!table) {
+                throw new Error("KPI detail table not found.");
+            }
+
+            table.style.width = "100%";
+            table.style.maxWidth = "100%";
+            table.style.minWidth = "100%";
+            table.style.borderCollapse = "collapse";
+            table.style.borderSpacing = "0";
+            table.style.tableLayout = "fixed";
+
+           
+
+            var oldColgroup = table.querySelector("colgroup");
+
+            if (oldColgroup) {
+                oldColgroup.remove();
+            }
+
+            var colgroup = document.createElement("colgroup");
+
+            var columnWidths = [
+                "3%",   
+                "29%",  
+                "43%",  
+                "11%",  
+                "7%",   
+                "7%"    
+            ];
+
+            columnWidths.forEach(function (width) {
+
+                var col = document.createElement("col");
+                col.style.width = width;
+                colgroup.appendChild(col);
+            });
+
+            table.insertBefore(colgroup, table.firstChild);
+
+            var tbody = table.querySelector("tbody");
+
+            if (!tbody) {
+                throw new Error("KPI table body not found.");
+            }
+
+            var rows = Array.from(tbody.rows);
+            var mergedGroups = [];
+
+           
+
+            for (var rowIndex = 0; rowIndex < rows.length;) {
+
+                var currentRow = rows[rowIndex];
+
+                if (currentRow.classList.contains("bg-info")) {
+                    rowIndex++;
+                    continue;
+                }
+
+                var cells = Array.from(currentRow.cells);
+
+                if (cells.length < 2) {
+                    rowIndex++;
+                    continue;
+                }
+
+                var srNoCell = cells[0];
+                var kpiAreaCell = cells[1];
+
+                var rowspan = parseInt(
+                    kpiAreaCell.getAttribute("rowspan"),
+                    10
+                ) || 1;
+
+                if (rowspan <= 1) {
+                    rowIndex++;
+                    continue;
+                }
+
+                var srNoHTML = srNoCell.innerHTML;
+                var kpiAreaHTML = kpiAreaCell.innerHTML;
+
+                srNoCell.removeAttribute("rowspan");
+                kpiAreaCell.removeAttribute("rowspan");
+
+                srNoCell.innerHTML = "";
+                kpiAreaCell.innerHTML = "";
+
+                srNoCell.style.backgroundColor = "#FFD966";
+                kpiAreaCell.style.backgroundColor = "#FFD966";
+
+                srNoCell.style.borderTop = "none";
+                srNoCell.style.borderBottom = "none";
+
+                kpiAreaCell.style.borderTop = "none";
+                kpiAreaCell.style.borderBottom = "none";
+
+                for (var i = 1; i < rowspan; i++) {
+
+                    var nextRow = rows[rowIndex + i];
+
+                    if (!nextRow) {
+                        break;
                     }
 
-                    clonedReport.style.width = reportWidth + "px";
-                    clonedReport.style.maxWidth = "none";
-                    clonedReport.style.minWidth = reportWidth + "px";
-                    clonedReport.style.margin = "0";
-                    clonedReport.style.padding = "0";
-                    clonedReport.style.boxSizing = "border-box";
+                    var blankSrNo = document.createElement("td");
+                    var blankKpiArea = document.createElement("td");
 
-                    clonedReport.querySelectorAll(
-                        "table, .table-responsive, .container, .container-fluid"
-                    ).forEach(function (element) {
+                    [blankSrNo, blankKpiArea].forEach(
+                        function (cell) {
 
-                        element.style.width = "100%";
-                        element.style.maxWidth = "100%";
-                        element.style.minWidth = "100%";
-                        element.style.marginLeft = "0";
-                        element.style.marginRight = "0";
-                        element.style.boxSizing = "border-box";
-                    });
-
-                    clonedReport.querySelectorAll(".row").forEach(function (row) {
-
-                        row.style.width = "100%";
-                        row.style.maxWidth = "100%";
-                        row.style.marginLeft = "0";
-                        row.style.marginRight = "0";
-                        row.style.boxSizing = "border-box";
-                    });
-
-                    clonedReport.querySelectorAll("button").forEach(function (button) {
-                        button.style.display = "none";
-                    });
-
-                    var table =
-                        clonedReport.querySelector("#KPIDetailTable");
-
-                    if (table) {
-
-                        table.style.width = "100%";
-                        table.style.maxWidth = "100%";
-                        table.style.minWidth = "100%";
-                        table.style.marginLeft = "0";
-                        table.style.marginRight = "0";
-                        table.style.boxSizing = "border-box";
-
-                        var tbody = table.querySelector("tbody");
-
-                        if (tbody) {
-
-                            var rows = Array.from(
-                                tbody.querySelectorAll("tr")
-                            );
-
-                            var rowIndex = 0;
-
-                            while (rowIndex < rows.length) {
-
-                                var currentRow = rows[rowIndex];
-
-                                if (currentRow.classList.contains("bg-info")) {
-                                    rowIndex++;
-                                    continue;
-                                }
-
-                                var cells = Array.from(
-                                    currentRow.children
-                                );
-
-                                if (cells.length < 2) {
-                                    rowIndex++;
-                                    continue;
-                                }
-
-                                var srNoCell = cells[0];
-                                var kpiAreaCell = cells[1];
-
-                                srNoCell.style.textAlign = "right";
-                                srNoCell.style.paddingRight = "5px";
-
-                                if (!kpiAreaCell.hasAttribute("rowspan")) {
-                                    rowIndex++;
-                                    continue;
-                                }
-
-                                var rowspan =
-                                    parseInt(
-                                        kpiAreaCell.getAttribute("rowspan"),
-                                        10
-                                    ) || 1;
-
-                                srNoCell.removeAttribute("rowspan");
-                                kpiAreaCell.removeAttribute("rowspan");
-
-                                kpiAreaCell.style.backgroundColor = "#FFD966";
-                                kpiAreaCell.style.background = "#FFD966";
-                                kpiAreaCell.style.verticalAlign = "middle";
-                                kpiAreaCell.style.border =
-                                    "1px solid #1F4E78";
-
-                                srNoCell.style.backgroundColor = "#FFD966";
-                                srNoCell.style.background = "#FFD966";
-                                srNoCell.style.verticalAlign = "middle";
-                                srNoCell.style.textAlign = "right";
-                                srNoCell.style.paddingRight = "5px";
-                                srNoCell.style.border =
-                                    "1px solid #1F4E78";
-
-                                for (var i = 1; i < rowspan; i++) {
-
-                                    var nextRow = rows[rowIndex + i];
-
-                                    if (!nextRow) {
-                                        break;
-                                    }
-
-                                    var blankSrNo =
-                                        clonedDocument.createElement("td");
-
-                                    blankSrNo.innerHTML = "";
-                                    blankSrNo.style.backgroundColor = "#FFD966";
-                                    blankSrNo.style.background = "#FFD966";
-                                    blankSrNo.style.textAlign = "right";
-                                    blankSrNo.style.paddingRight = "5px";
-                                    blankSrNo.style.borderLeft =
-                                        "1px solid #1F4E78";
-                                    blankSrNo.style.borderRight =
-                                        "1px solid #1F4E78";
-                                    blankSrNo.style.borderTop = "none";
-                                    blankSrNo.style.borderBottom = "none";
-
-                                    var blankKpiArea =
-                                        clonedDocument.createElement("td");
-
-                                    blankKpiArea.innerHTML = "";
-                                    blankKpiArea.style.backgroundColor = "#FFD966";
-                                    blankKpiArea.style.background = "#FFD966";
-                                    blankKpiArea.style.borderLeft =
-                                        "1px solid #1F4E78";
-                                    blankKpiArea.style.borderRight =
-                                        "1px solid #1F4E78";
-                                    blankKpiArea.style.borderTop = "none";
-                                    blankKpiArea.style.borderBottom = "none";
-
-                                    nextRow.insertBefore(
-                                        blankSrNo,
-                                        nextRow.firstChild
-                                    );
-
-                                    nextRow.insertBefore(
-                                        blankKpiArea,
-                                        nextRow.children[1]
-                                    );
-                                }
-
-                                var lastRow = rows[
-                                    Math.min(
-                                        rowIndex + rowspan - 1,
-                                        rows.length - 1
-                                    )
-                                ];
-
-                                if (lastRow) {
-
-                                    var lastCells =
-                                        Array.from(lastRow.children);
-
-                                    if (lastCells.length >= 2) {
-                                        lastCells[0].style.borderBottom =
-                                            "1px solid #1F4E78";
-
-                                        lastCells[1].style.borderBottom =
-                                            "1px solid #1F4E78";
-                                    }
-                                }
-
-                                rowIndex += rowspan;
-                            }
+                            cell.style.backgroundColor = "#FFD966";
+                            cell.style.borderLeft =
+                                "1px solid #1F4E78";
+                            cell.style.borderRight =
+                                "1px solid #1F4E78";
+                            cell.style.borderTop = "none";
+                            cell.style.borderBottom = "none";
                         }
+                    );
+
+                    nextRow.insertBefore(
+                        blankSrNo,
+                        nextRow.firstChild
+                    );
+
+                    nextRow.insertBefore(
+                        blankKpiArea,
+                        nextRow.children[1]
+                    );
+                }
+
+                mergedGroups.push({
+                    startIndex: rowIndex,
+                    endIndex: Math.min(
+                        rowIndex + rowspan - 1,
+                        rows.length - 1
+                    ),
+                    srNoHTML: srNoHTML,
+                    kpiAreaHTML: kpiAreaHTML
+                });
+
+                rowIndex += rowspan;
+            }
+
+          
+
+            rows.forEach(function (row) {
+
+                if (row.classList.contains("bg-info")) {
+                    return;
+                }
+
+                row.style.backgroundColor = "#FFD966";
+
+                Array.from(row.cells).forEach(
+                    function (cell) {
+
+                        cell.style.backgroundColor = "#FFD966";
+                        cell.style.whiteSpace = "normal";
+                        cell.style.overflowWrap = "break-word";
+                        cell.style.wordBreak = "normal";
+                        cell.style.height = "auto";
+                        cell.style.boxSizing = "border-box";
                     }
+                );
 
-                    // Capture actual row boundaries AFTER formatting.
-                    var reportRect =
-                        clonedReport.getBoundingClientRect();
+                
+                var firstCell = row.cells[0];
 
-                    var reportTop = reportRect.top;
-
-                    rowBoundaries = Array.from(
-                        clonedReport.querySelectorAll("#KPIDetailTable tr")
-                    ).map(function (row) {
-
-                        var rect = row.getBoundingClientRect();
-
-                        return {
-                            top: Math.round(
-                                (rect.top - reportTop) * scale
-                            ),
-                            bottom: Math.round(
-                                (rect.bottom - reportTop) * scale
-                            )
-                        };
-
-                    }).filter(function (boundary) {
-                        return boundary.bottom > boundary.top;
-                    });
-
+                if (firstCell) {
+                    firstCell.style.textAlign = "center";
+                    firstCell.style.verticalAlign = "middle";
+                    firstCell.style.paddingLeft = "2px";
+                    firstCell.style.paddingRight = "2px";
                 }
             });
 
-            var { jsPDF } = window.jspdf;
+           
+            await new Promise(function (resolve) {
+                requestAnimationFrame(function () {
+                    requestAnimationFrame(resolve);
+                });
+            });
+
+            
+
+            var reportRect =
+                clonedReport.getBoundingClientRect();
+
+            var overlayLayer = document.createElement("div");
+
+            overlayLayer.style.position = "absolute";
+            overlayLayer.style.left = "0";
+            overlayLayer.style.top = "0";
+            overlayLayer.style.width = "100%";
+            overlayLayer.style.height = "100%";
+            overlayLayer.style.pointerEvents = "none";
+            overlayLayer.style.zIndex = "10";
+
+            clonedReport.appendChild(overlayLayer);
+
+            mergedGroups.forEach(function (group) {
+
+                var firstRow = rows[group.startIndex];
+                var lastRow = rows[group.endIndex];
+
+                if (!firstRow || !lastRow) {
+                    return;
+                }
+
+                var firstCells = firstRow.cells;
+
+                if (firstCells.length < 2) {
+                    return;
+                }
+
+                var firstRect =
+                    firstRow.getBoundingClientRect();
+
+                var lastRect =
+                    lastRow.getBoundingClientRect();
+
+                var srRect =
+                    firstCells[0].getBoundingClientRect();
+
+                var areaRect =
+                    firstCells[1].getBoundingClientRect();
+
+                var groupTop =
+                    firstRect.top - reportRect.top;
+
+                var groupHeight =
+                    lastRect.bottom - firstRect.top;
+
+                function addOverlay(rect, html, textAlign, sourceCell) {
+
+                    var overlay = document.createElement("div");
+
+                    overlay.style.position = "absolute";
+
+                    overlay.style.left =
+                        (rect.left - reportRect.left) + "px";
+
+                    overlay.style.top = groupTop + "px";
+
+                    overlay.style.width = rect.width + "px";
+                    overlay.style.height = groupHeight + "px";
+
+                    overlay.style.backgroundColor = "#FFD966";
+                    overlay.style.border = "1px solid #1F4E78";
+                    overlay.style.boxSizing = "border-box";
+
+                    overlay.style.display = "flex";
+                    overlay.style.alignItems = "center";
+
+                   
+                    overlay.style.justifyContent =
+                        textAlign === "center"
+                            ? "center"
+                            : "flex-start";
+
+                    overlay.style.textAlign = textAlign;
+
+                    overlay.style.padding =
+                        textAlign === "center" ? "2px" : "4px";
+
+                    overlay.style.whiteSpace = "normal";
+                    overlay.style.overflowWrap = "break-word";
+                    overlay.style.overflow = "hidden";
+
+                    var computed =
+                        window.getComputedStyle(sourceCell);
+
+                    overlay.style.fontFamily = computed.fontFamily;
+                    overlay.style.fontSize = computed.fontSize;
+                    overlay.style.fontWeight = computed.fontWeight;
+                    overlay.style.lineHeight = computed.lineHeight;
+
+                    overlay.innerHTML = html;
+
+                    overlayLayer.appendChild(overlay);
+                }
+
+                
+                addOverlay(
+                    srRect,
+                    group.srNoHTML,
+                    "center",
+                    firstCells[0]
+                );
+
+               
+                addOverlay(
+                    areaRect,
+                    group.kpiAreaHTML,
+                    "left",
+                    firstCells[1]
+                );
+            });
+
+            
+
+            await new Promise(function (resolve) {
+                requestAnimationFrame(function () {
+                    requestAnimationFrame(resolve);
+                });
+            });
+
+            var scale = 2;
+
+            reportRect = clonedReport.getBoundingClientRect();
+
+            var rowBoundaries = [];
+            var groupBoundaries = [];
+
+            rows.forEach(function (row) {
+
+                var rect = row.getBoundingClientRect();
+
+                rowBoundaries.push({
+                    top: Math.round(
+                        (rect.top - reportRect.top) * scale
+                    ),
+                    bottom: Math.round(
+                        (rect.bottom - reportRect.top) * scale
+                    )
+                });
+            });
+
+            mergedGroups.forEach(function (group) {
+
+                var firstRect =
+                    rows[group.startIndex].getBoundingClientRect();
+
+                var lastRect =
+                    rows[group.endIndex].getBoundingClientRect();
+
+                groupBoundaries.push({
+                    top: Math.round(
+                        (firstRect.top - reportRect.top) * scale
+                    ),
+                    bottom: Math.round(
+                        (lastRect.bottom - reportRect.top) * scale
+                    )
+                });
+            });
+
+            
+            var reportBottom = reportRect.bottom;
+
+            clonedReport.querySelectorAll("*").forEach(
+                function (element) {
+
+                    var style = window.getComputedStyle(element);
+
+                    if (
+                        style.display === "none" ||
+                        style.visibility === "hidden" ||
+                        style.position === "fixed"
+                    ) {
+                        return;
+                    }
+
+                    var rect = element.getBoundingClientRect();
+
+                    if (rect.width > 0 && rect.height > 0) {
+                        reportBottom = Math.max(
+                            reportBottom,
+                            rect.bottom
+                        );
+                    }
+                }
+            );
+
+            var captureWidth = Math.ceil(
+                Math.max(
+                    clonedReport.scrollWidth,
+                    reportRect.width
+                )
+            );
+
+            var captureHeight = Math.ceil(
+                Math.max(
+                    clonedReport.scrollHeight,
+                    reportRect.height,
+                    reportBottom - reportRect.top
+                )
+            ) + 10;
+
+            
+
+            canvas = await html2canvas(clonedReport, {
+
+                scale: scale,
+                useCORS: true,
+                allowTaint: false,
+
+                backgroundColor: "#ffffff",
+                logging: false,
+
+                width: captureWidth,
+                height: captureHeight,
+
+                windowWidth: captureWidth,
+                windowHeight: captureHeight,
+
+                scrollX: 0,
+                scrollY: 0
+            });
+
+            
+
+            var jsPDF = window.jspdf.jsPDF;
 
             var pdf = new jsPDF({
                 orientation: "landscape",
@@ -783,64 +1022,62 @@
                 compress: true
             });
 
-            var pageWidth = 297;
-            var pageHeight = 210;
+            var pageWidth = pdf.internal.pageSize.getWidth();
+            var pageHeight = pdf.internal.pageSize.getHeight();
+
             var margin = 5;
 
-            var availableWidth = pageWidth - (margin * 2);
-            var availableHeight = pageHeight - (margin * 2);
+            var availableWidth = pageWidth - margin * 2;
+            var availableHeight = pageHeight - margin * 2;
 
             var imageWidth = canvas.width;
             var imageHeight = canvas.height;
 
             var widthRatio = availableWidth / imageWidth;
 
-            // Maximum image height that fits on one PDF page.
             var maxSliceHeight = Math.floor(
                 availableHeight / widthRatio
             );
 
-            // If the complete report fits, export a single page.
-            if (imageHeight <= maxSliceHeight) {
+            
 
-                var fitRatio = Math.min(
-                    availableWidth / imageWidth,
-                    availableHeight / imageHeight
+            var currentY = 0;
+            var pageNumber = 0;
+
+            while (currentY < imageHeight) {
+
+                var targetY = Math.min(
+                    currentY + maxSliceHeight,
+                    imageHeight
                 );
 
-                var pdfImageWidth = imageWidth * fitRatio;
-                var pdfImageHeight = imageHeight * fitRatio;
+                var sliceEnd = targetY;
 
-                var x = (pageWidth - pdfImageWidth) / 2;
-                var y = (pageHeight - pdfImageHeight) / 2;
+                if (targetY < imageHeight) {
 
-                pdf.addImage(
-                    canvas.toDataURL("image/jpeg", 0.95),
-                    "JPEG",
-                    x,
-                    y,
-                    pdfImageWidth,
-                    pdfImageHeight
-                );
-
-            } else {
-
-                var currentY = 0;
-                var pageNumber = 0;
-
-                // Avoid cutting a table row across page boundaries.
-                while (currentY < imageHeight) {
-
-                    var targetY = Math.min(
-                        currentY + maxSliceHeight,
-                        imageHeight
+                    var crossingGroups = groupBoundaries.filter(
+                        function (boundary) {
+                            return boundary.top < targetY &&
+                                boundary.bottom > targetY;
+                        }
                     );
 
-                    var sliceEnd = targetY;
+                    if (crossingGroups.length > 0) {
 
-                    if (targetY < imageHeight) {
+                        var groupStart = Math.min.apply(
+                            null,
+                            crossingGroups.map(function (boundary) {
+                                return boundary.top;
+                            })
+                        );
 
-                        // Find rows that cross the proposed page boundary.
+                        if (groupStart > currentY) {
+                            sliceEnd = groupStart;
+                        }
+                    }
+
+                    if (sliceEnd === targetY) {
+
                         var crossingRows = rowBoundaries.filter(
                             function (boundary) {
                                 return boundary.top < targetY &&
@@ -850,106 +1087,103 @@
 
                         if (crossingRows.length > 0) {
 
-                            // Move the boundary to the start of the
-                            // first row crossing the proposed boundary.
-                            var safeBoundary = Math.min.apply(
+                            var rowStart = Math.min.apply(
                                 null,
                                 crossingRows.map(function (boundary) {
                                     return boundary.top;
                                 })
                             );
 
-                            if (safeBoundary > currentY) {
-                                sliceEnd = safeBoundary;
-                            } else {
-
-                                // A single row is taller than the page.
-                                // It cannot fit intact on a normal page.
-                                sliceEnd = targetY;
+                            if (rowStart > currentY) {
+                                sliceEnd = rowStart;
                             }
                         }
                     }
-
-                    // Ensure forward progress.
-                    if (sliceEnd <= currentY) {
-                        sliceEnd = Math.min(
-                            currentY + maxSliceHeight,
-                            imageHeight
-                        );
-                    }
-
-                    var sliceHeight = sliceEnd - currentY;
-
-                    var pageCanvas =
-                        document.createElement("canvas");
-
-                    pageCanvas.width = imageWidth;
-                    pageCanvas.height = sliceHeight;
-
-                    var ctx = pageCanvas.getContext("2d");
-
-                    if (!ctx) {
-                        throw new Error(
-                            "Unable to create page canvas."
-                        );
-                    }
-
-                    ctx.fillStyle = "#ffffff";
-                    ctx.fillRect(
-                        0,
-                        0,
-                        pageCanvas.width,
-                        pageCanvas.height
-                    );
-
-                    ctx.drawImage(
-                        canvas,
-                        0,
-                        currentY,
-                        imageWidth,
-                        sliceHeight,
-                        0,
-                        0,
-                        imageWidth,
-                        sliceHeight
-                    );
-
-                    if (pageNumber > 0) {
-                        pdf.addPage("a4", "landscape");
-                    }
-
-                    var pageImage =
-                        pageCanvas.toDataURL("image/jpeg", 0.95);
-
-                    pdf.addImage(
-                        pageImage,
-                        "JPEG",
-                        margin,
-                        margin,
-                        availableWidth,
-                        sliceHeight * widthRatio
-                    );
-
-                    currentY = sliceEnd;
-                    pageNumber++;
-
-                    pageCanvas.width = 0;
-                    pageCanvas.height = 0;
                 }
+
+                if (sliceEnd <= currentY) {
+                    sliceEnd = targetY;
+                }
+
+                var sliceHeight = sliceEnd - currentY;
+
+                var pageCanvas = document.createElement("canvas");
+
+                pageCanvas.width = imageWidth;
+                pageCanvas.height = sliceHeight;
+
+                var ctx = pageCanvas.getContext("2d");
+
+                if (!ctx) {
+                    throw new Error("Unable to create PDF page canvas.");
+                }
+
+                ctx.fillStyle = "#ffffff";
+                ctx.fillRect(
+                    0,
+                    0,
+                    imageWidth,
+                    sliceHeight
+                );
+
+                ctx.drawImage(
+                    canvas,
+                    0,
+                    currentY,
+                    imageWidth,
+                    sliceHeight,
+                    0,
+                    0,
+                    imageWidth,
+                    sliceHeight
+                );
+
+                if (pageNumber > 0) {
+                    pdf.addPage("a4", "landscape");
+                }
+
+                pdf.addImage(
+                    pageCanvas.toDataURL("image/jpeg", 0.95),
+                    "JPEG",
+                    margin,
+                    margin,
+                    availableWidth,
+                    sliceHeight * widthRatio
+                );
+
+                currentY = sliceEnd;
+                pageNumber++;
+
+                pageCanvas.width = 0;
+                pageCanvas.height = 0;
             }
 
             pdf.save("KPI_Report.pdf");
 
-            canvas.width = 0;
-            canvas.height = 0;
-
-        }
-        catch (error) {
+        } catch (error) {
 
             console.error("PDF Export Error:", error);
-            alert("Unable to generate PDF.");
+
+            alert(
+                "Unable to generate PDF. Please check console."
+            );
+
+        } finally {
+
+            if (container && container.parentNode) {
+                container.parentNode.removeChild(container);
+            }
+
+            if (canvas) {
+                canvas.width = 0;
+                canvas.height = 0;
+            }
         }
     }
+
+
+
+
     //For PLDB KPI (Excel)
     async function ExportKPIPLDBReportToExcel() {
 
