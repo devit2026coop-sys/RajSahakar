@@ -2285,7 +2285,7 @@ namespace Cooperative.Models
             return Result;
         }
 
-        public DataTable GetAllAuditorSalePurchaseList(int KVSSId, string financialYear)
+        public DataTable GetAllAuditorSalePurchaseList(int? KVSSId, string financialYear)
         {
             DataTable dt = new DataTable();
             UserEntity _LoggedInUser = (UserEntity)System.Web.HttpContext.Current.Session[SessionIdentity.Admin];

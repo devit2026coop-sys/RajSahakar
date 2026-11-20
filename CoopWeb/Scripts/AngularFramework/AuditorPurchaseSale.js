@@ -75,6 +75,9 @@ MasterMod.controller("auditorPurchaseSaleCtrl", function ($scope, $http) {
         var finYear = '@Session["FinancialYear"]';
         var kvssId = '@Session["KVSSId"]';
 
+        var finYear = '';
+        var kvssId = 0;
+
         $http.get(SiteUrl + "/Auditor/GetAllAuditorSalePurchaseList", {
             params: { KVSSId: kvssId, financialYear: finYear }
         }).success(function (data) {
@@ -178,21 +181,25 @@ MasterMod.controller("auditorPurchaseSaleCtrl", function ($scope, $http) {
 
         });
 
-        var date = new Date();
-        var month = date.getMonth() + 1;
-        var year = date.getFullYear();
+        //var date = new Date();
+        //var month = date.getMonth() + 1;
+        //var year = date.getFullYear();
 
-        // Previous Financial Year
-        var currentFYStartYear = month >= 4 ? year : year - 1;
-        var previousFYStartYear = currentFYStartYear - 1;
+        //// Previous Financial Year
+        //var currentFYStartYear = month >= 4 ? year : year - 1;
+        //var previousFYStartYear = currentFYStartYear - 1;
 
-        var previousFinancialYear =
-            previousFYStartYear + '-' +
-            String(previousFYStartYear + 1).slice(-2);
+        //var previousFinancialYear = previousFYStartYear + '-' + String(previousFYStartYear + 1).slice(-2);
+
+        //var request = {
+        //    FinancialYear: previousFinancialYear,
+        //    KVSSId: $scope.KVSSSocietyID,
+        //    StockDetails: saveData
+        //};
 
         var request = {
-            FinancialYear: previousFinancialYear,
-            KVSSId: $scope.KVSSSocietyID,
+            FinancialYear: '',
+            KVSSId: 0,
             StockDetails: saveData
         };
 

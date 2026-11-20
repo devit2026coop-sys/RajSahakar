@@ -304,7 +304,7 @@ KVSSAuditAccountModule.controller("KVSSAuditAccountCont", ["$scope", "$http", fu
             KVSSAuditAccountId: $scope.AccountId, SaveMode: mode, Details: details, Breakups: breakups
         };
     };
-    $scope.SaveAccount = function (mode) {
+    $scope.SaveAccount = function (mode) { 
         if ($scope.IsSaving || $scope.IsLoading || $scope.EntryStatus === "Final") return;
         $scope.CalculateAll();
         var error = validate(); if (error) { notify(error, true); return; }
@@ -329,6 +329,7 @@ KVSSAuditAccountModule.controller("KVSSAuditAccountCont", ["$scope", "$http", fu
             } else {
                 // Reload persisted rows and fresh BreakupId values.
                 $scope.GetAccount();
+                window.location.href = '/Auditor/AuditorPurchaseSale';
             }
         }, function (error) { notify((error.data && error.data.Message) || "Error saving account.", true); })
             .finally(function () { $scope.IsSaving = false; });

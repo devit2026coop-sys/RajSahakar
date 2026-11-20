@@ -37,15 +37,25 @@ namespace Cooperative.Controllers
         [HttpGet]
         public ActionResult KVSSAuditAccount()
         {
+            int? KVSSId = 0;
+            string finYear = "";
+            if (Session["FinancialYear"] != null)
+            {
+                finYear = Convert.ToString(Session["FinancialYear"]);
+            }
+            if (Session["KVSSId"] != null && Convert.ToInt32(Session["KVSSId"]) > 0)
+            {
+                KVSSId = Convert.ToInt32(Session["KVSSId"]);
+            }
             // IMPORTANT: This value MUST be populated by your authenticated society-selection flow.
             // Never trust a SocietyId supplied only by JavaScript.
-            Session["KVSSAuthorizedSocietyId"] = "1";
+            Session["KVSSAuthorizedSocietyId"] = KVSSId;
             var authorizedSocietyId = Session["KVSSAuthorizedSocietyId"];
             if (authorizedSocietyId == null || Convert.ToInt32(authorizedSocietyId) <= 0)
                 return new HttpStatusCodeResult(403, "Authorized society not selected.");
 
             ViewBag.SocietyId = Convert.ToInt32(authorizedSocietyId);
-            ViewBag.FinancialYear = "2026-27"; // Replace with your reporting-FY selection.
+            ViewBag.FinancialYear = finYear; // Replace with your reporting-FY selection.
             return View();
         }
 
@@ -75,8 +85,7 @@ namespace Cooperative.Controllers
                 var authorized = Session["KVSSAuthorizedSocietyId"];
                 int allowedSocietyId;
                 if (authorized == null ||
-                    !int.TryParse(Convert.ToString(authorized), out allowedSocietyId) ||
-                    allowedSocietyId != societyId)
+                    !int.TryParse(Convert.ToString(authorized), out allowedSocietyId))
                 {
                     Response.StatusCode = 403;
                     return Json(new { Success = false, Message = "Society access denied." },
@@ -104,7 +113,7 @@ namespace Cooperative.Controllers
 
                     cmd.Parameters.Add(
                         "@SocietyId", SqlDbType.Int
-                    ).Value = societyId;
+                    ).Value = authorized;
 
                     cmd.Parameters.Add(
                         "@FinancialYear", SqlDbType.VarChar, 10
