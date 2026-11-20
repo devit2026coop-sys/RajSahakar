@@ -1243,5 +1243,21 @@ namespace Cooperative.Controllers
         //        // throw;
         //    }
         //}
+
+        [HttpGet]
+        [ActionName("GetAllAuditorSalePurchaseList")]
+        public string GetAllAuditorSalePurchaseList(int KVSSId, string financialYear)
+        { 
+            AuditorModel auditorModel = new AuditorModel();
+            return COMMON_FUNCTION.DataTableToJSONWithJSONNet(auditorModel.GetAllAuditorSalePurchaseList(KVSSId, financialYear));
+        }
+
+        [HttpPost]
+        public int SaveAuditorSalePurchase(AuditSPRequest request)
+        {
+            int result = new AuditorModel().SaveAuditorSalePurchase(request);
+            return result;
+        }
+
     }
 }

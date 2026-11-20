@@ -137,27 +137,57 @@ MasterMod.controller("AuditReportVIIICont", function ($scope, $rootScope, $http)
 
     //$scope.GetDistrictList();
 
+    $scope.GetFinancialYear = function () {
+        return $http.get(SiteUrl + "/Master/GetMasterData/?MasterType=FINANCIALYEAR&MasterCode=-1")
+            .success(function (data) {
+                if (data != null) {
+                    $scope.FinancialYearList = data
+                        .map(function (item) {
+                            return {
+                                FinYearId: item.FIN_YEAR_MASTR_ID,
+                                FinYearName: item.FIN_YEAR_START + '-' + item.FIN_YEAR_END
+                            };
+                        })
+                        .filter(function (item) {
+                            return item.FinYearId == '1086' || item.FinYearId == '1085';
+                        });
 
+                    if ($scope.FinancialYearList.length > 0) {
+                        $scope.FinYear = '1086';
+                    }
+                }
+                else {
+                    $scope.FinancialYearList = [];
+                }
+                $(".se-pre-con").fadeOut("slow");
+
+            }).error(function () {
+                $scope.FinancialYearList = [];
+            });
+    };
+     
     $scope.GetAuditMPRVIIIReport = function () {
+        if (!$scope.FinYear || !$scope.Month) {
+            return;
+        }
+        $scope.ShowSummary = true;
+
         $(".se-pre-con").fadeIn("slow");
 
-        return $http.get(SiteUrl + "/MIS/GetAuditMPRVIIIReport")
-            .then(function (response) {
-                 
-                $scope.AuditMPRVIIIList = response.data || []; 
+        return $http.get(SiteUrl + "/MIS/GetAuditMPRVIIIReport", {
+            params: {
+                FinancialYearId: $scope.FinYear,
+                Month: $scope.Month
+            }
+        }).then(function (response) {
+
+                $scope.AuditMPRVIIIList = response.data || [];
+
+                //console.log("Audit MPR Report:", $scope.AuditMPRVIIIList);
+
                 $scope.colsort = "";
-                $scope.reverseSort = false; 
-                $scope.sortData = function (column) {
-                    $scope.reverseSort =
-                        ($scope.colsort == column) ? !$scope.reverseSort : false;
-                    $scope.colsort = column;
-                }; 
-                $scope.getSortClass = function (column) {
-                    if ($scope.colsort == column) {
-                        return $scope.reverseSort ? 'arrow-down' : 'arrow-up';
-                    }
-                    return '';
-                };
+                $scope.reverseSort = false;
+
             })
             .catch(function (error) {
                 console.error("Error loading Audit MPR Report:", error);
@@ -166,6 +196,36 @@ MasterMod.controller("AuditReportVIIICont", function ($scope, $rootScope, $http)
                 $(".se-pre-con").fadeOut("slow");
             });
     };
+
+
+    //$scope.GetAuditMPRVIIIReport = function () {
+    //    $(".se-pre-con").fadeIn("slow");
+
+    //    return $http.get(SiteUrl + "/MIS/GetAuditMPRVIIIReport")
+    //        .then(function (response) {
+                 
+    //            $scope.AuditMPRVIIIList = response.data || []; 
+    //            $scope.colsort = "";
+    //            $scope.reverseSort = false; 
+    //            $scope.sortData = function (column) {
+    //                $scope.reverseSort =
+    //                    ($scope.colsort == column) ? !$scope.reverseSort : false;
+    //                $scope.colsort = column;
+    //            }; 
+    //            $scope.getSortClass = function (column) {
+    //                if ($scope.colsort == column) {
+    //                    return $scope.reverseSort ? 'arrow-down' : 'arrow-up';
+    //                }
+    //                return '';
+    //            };
+    //        })
+    //        .catch(function (error) {
+    //            console.error("Error loading Audit MPR Report:", error);
+    //        })
+    //        .finally(function () {
+    //            $(".se-pre-con").fadeOut("slow");
+    //        });
+    //};
       
     $scope.OnPageLoad = function () {
         $(".se-pre-con").fadeIn("slow");
@@ -188,7 +248,8 @@ MasterMod.controller("AuditReportVIIICont", function ($scope, $rootScope, $http)
                     alert("Error while translation");
                 }); 
         }
-        $scope.GetAuditMPRVIIIReport();
+        $scope.ShowSummary = false;
+        $scope.GetFinancialYear();
     };
 
     $scope.OnPageLoad(); 

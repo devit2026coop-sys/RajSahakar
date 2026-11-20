@@ -9445,7 +9445,7 @@ namespace Cooperative.Models
             return dt;
         }
 
-        public DataTable GetAuditMPRVIIReport()
+        public DataTable GetAuditMPRVIIReport(string FinancialYearId, int Month = 0)
         {
             DataTable dt = new DataTable();
 
@@ -9458,6 +9458,8 @@ namespace Cooperative.Models
                 SqlCommand cmd = objDBAccess.CreateCommand("USP_GetAuditMPRVIIReport", DBFactoryCommandType.PROCEDURE_COMMAND);
                 objDBAccess.AddParameterToCommand("@LevelId", DBFactoryParameterType.Int, _LoggedInUser.LevelId);
                 objDBAccess.AddParameterToCommand("@UserRoleMappingId", DBFactoryParameterType.Int, _LoggedInUser.UserRoleDeptMappingId);
+                objDBAccess.AddParameterToCommand("@FinancialYearId", DBFactoryParameterType.VARCHAR, FinancialYearId);
+                objDBAccess.AddParameterToCommand("@Month", DBFactoryParameterType.Int, Month);
 
                 dt = objDBAccess.GetTable();
             }
@@ -9473,7 +9475,7 @@ namespace Cooperative.Models
             return dt;
         }
 
-        public DataTable GetAuditMPRVIIIReport()
+        public DataTable GetAuditMPRVIIIReport(string FinancialYearId, int Month = 0)
         {
             DataTable dt = new DataTable();
 
@@ -9486,6 +9488,8 @@ namespace Cooperative.Models
                 SqlCommand cmd = objDBAccess.CreateCommand("USP_GetAuditMPRVIIIReport", DBFactoryCommandType.PROCEDURE_COMMAND);
                 objDBAccess.AddParameterToCommand("@LevelId", DBFactoryParameterType.Int, _LoggedInUser.LevelId);
                 objDBAccess.AddParameterToCommand("@UserRoleMappingId", DBFactoryParameterType.Int, _LoggedInUser.UserRoleDeptMappingId);
+                objDBAccess.AddParameterToCommand("@FinancialYearId", DBFactoryParameterType.VARCHAR, FinancialYearId);
+                objDBAccess.AddParameterToCommand("@Month", DBFactoryParameterType.Int, Month);
 
                 dt = objDBAccess.GetTable();
             }
