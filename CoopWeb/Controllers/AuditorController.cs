@@ -1222,6 +1222,307 @@ namespace Cooperative.Controllers
         }
 
 
+        public JsonResult GetAuditAccountHeaderMaster(
+      
+     int? tabId,
+     int? kvssId ,
+     string financialYear
+     )
+        {
+            try
+            {  
+
+
+
+
+                // If Session is null, assign the selected KVSS ID
+                if (Session["KVSSId"] == null && kvssId > 0)
+                {
+                    Session["KVSSId"] = kvssId;
+                }
+                else
+                {
+                    // Otherwise, use the existing Session value
+                    kvssId = Convert.ToInt32(Session["KVSSId"]);
+                }
+
+
+                // Financial Year Session
+                if (Session["FinancialYear"] == null && !string.IsNullOrEmpty(financialYear))
+                {
+                    Session["FinancialYear"] = financialYear;
+                }
+                else if (Session["FinancialYear"] != null)
+                {
+                    financialYear = Convert.ToString(Session["FinancialYear"]);
+                }
+
+                
+
+                // Pass KVSS ID to View
+                ViewBag.KVSSId = Convert.ToInt32(Session["KVSSId"]);
+
+                ViewBag.FinancialYear = Session["FinancialYear"];
+
+
+
+
+
+
+
+                DataSet ds = new AuditorModel()
+                    .GetAuditAccountHeaderMasterData( 
+                        tabId,
+                        kvssId,
+                        financialYear
+                    );
+
+                var result = new
+                {
+                    TabList = ds.Tables.Count > 0
+                        ? csCommon.ConvertDataTableToDynamic(ds.Tables[0])
+                        : new List<Dictionary<string, object>>(),
+
+                    HeaderList = ds.Tables.Count > 1
+                        ? csCommon.ConvertDataTableToDynamic(ds.Tables[1])
+                        : new List<Dictionary<string, object>>()
+                };
+
+                return Json(result, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    TabList = new List<Dictionary<string, object>>(),
+                    HeaderList = new List<Dictionary<string, object>>(),
+                    Message = ex.Message
+                }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+
+        [HttpPost]
+        public JsonResult SaveAuditAccountOpeningBalance( AuditAccountOpeningBalanceRequest request)
+        {
+            try
+            {
+                if (request == null ||
+                    request.Details == null ||
+                    request.Details.Count == 0)
+                {
+                    return Json(new
+                    {
+                        Status = 0,
+                        Message = "No opening balance entries found."
+                    });
+                }
+
+                // Get logged-in user from session
+                UserEntity loggedInUser =
+                    (UserEntity)Session[SessionIdentity.Admin];
+
+                if (loggedInUser == null)
+                {
+                    return Json(new
+                    {
+                        Status = 0,
+                        Message = "Session expired. Please login again."
+                    });
+                }
+
+                DataTable dtDetails = new DataTable();
+
+                dtDetails.Columns.Add("HeaderId", typeof(int));
+                dtDetails.Columns.Add("OpeningBalance", typeof(decimal));
+
+                foreach (var item in request.Details)
+                {
+                    dtDetails.Rows.Add(
+                        item.HeaderId,
+                        item.OpeningBalance
+                    );
+                }
+
+
+                DateTime today = DateTime.Today;
+                UserEntity _LoggedInUser = (UserEntity)System.Web.HttpContext.Current.Session[SessionIdentity.Admin];
+                //request.DistrictId = _LoggedInUser.DistrictId;
+                //request.Month = (byte)DateTime.Today.Month;
+                //request.FinancialYear = today.Month >= 4 ? $"{today.Year}-{(today.Year + 1) % 100:D2}" : $"{today.Year - 1}-{today.Year % 100:D2}";
+               
+                // Replace UserId below with your actual logged-in user ID property
+                // if it has a different name in UserEntity.
+                long userId = _LoggedInUser.UserId;
+
+
+                //int currentYear = DateTime.Now.Year;
+                //int startYear = DateTime.Now.Month >= 4 ? currentYear : currentYear - 1;
+
+                //string financialYear = $"{startYear}-{(startYear + 1) % 100:D2}";
+
+                 
+
+                DataTable result = new AuditorModel()
+                    .SaveAuditAccountOpeningBalance(
+                        request.KVSSId,
+                        request.TabId,
+                        request.FinancialYear,
+                        userId,
+                        dtDetails
+                    );
+
+                if (result != null && result.Rows.Count > 0)
+                {
+                    return Json(new
+                    {
+                        Status = Convert.ToInt32(result.Rows[0]["Status"]),
+                        Message = Convert.ToString(result.Rows[0]["Message"])
+                    });
+                }
+
+                return Json(new
+                {
+                    Status = 0,
+                    Message = "Unable to save opening balance."
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    Status = 0,
+                    Message = ex.Message
+                });
+            }
+        }
+
+
+
+        [HttpPost]
+        public JsonResult SaveAuditAccountCustomHeader(AuditAccountCustomHeaderRequest request)
+        {
+            try
+            {
+                if (request == null)
+                {
+                    return Json(new { Status = 0, HeaderId = 0, Message = "Invalid request." });
+                }
+
+                if (string.IsNullOrWhiteSpace(request.HeaderNameEnglish))
+                {
+                    return Json(new { Status = 0, HeaderId = 0, Message = "Please enter subheading name." });
+                }
+
+                UserEntity _LoggedInUser = (UserEntity)System.Web.HttpContext.Current.Session[SessionIdentity.Admin];
+                // Replace UserId with the actual user ID property in your UserEntity, if different.
+                
+
+                if (_LoggedInUser == null)
+                {
+                    return Json(new
+                    {
+                        Status = 0,
+                        HeaderId = 0,
+                        Message = "Session expired. Please login again."
+                    });
+                }
+
+                long userId = _LoggedInUser.UserId;
+
+                DataTable dt = new AuditorModel()
+                    .SaveAuditAccountCustomHeader(request, userId);
+
+                if (dt != null && dt.Rows.Count > 0)
+                {
+                    return Json(new
+                    {
+                        Status = Convert.ToInt32(dt.Rows[0]["Status"]),
+                        HeaderId = Convert.ToInt32(dt.Rows[0]["HeaderId"]),
+                        Message = Convert.ToString(dt.Rows[0]["Message"])
+                    });
+                }
+
+                return Json(new
+                {
+                    Status = 0,
+                    HeaderId = 0,
+                    Message = "Unable to save subheading."
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    Status = 0,
+                    HeaderId = 0,
+                    Message = ex.Message
+                });
+            }
+        }
+
+
+        [HttpPost]
+        public JsonResult DeleteAuditAccountCustomHeader(AuditAccountCustomHeaderDeleteRequest request)
+        {
+            try
+            {
+                if (request == null || request.HeaderId <= 0 || request.KVSSSocietyId <= 0)
+                {
+                    return Json(new
+                    {
+                        Status = 0,
+                        Message = "Invalid request."
+                    });
+                }
+
+                UserEntity _LoggedInUser =
+                    (UserEntity)System.Web.HttpContext.Current.Session[SessionIdentity.Admin];
+
+                if (_LoggedInUser == null)
+                {
+                    return Json(new
+                    {
+                        Status = 0,
+                        Message = "Session expired. Please login again."
+                    });
+                }
+
+                long userId = _LoggedInUser.UserId;
+
+                DataTable dt = new AuditorModel()
+                    .DeleteAuditAccountCustomHeader(
+                        request.HeaderId,
+                        request.KVSSSocietyId,
+                        userId);
+
+                if (dt != null && dt.Rows.Count > 0)
+                {
+                    return Json(new
+                    {
+                        Status = Convert.ToInt32(dt.Rows[0]["Status"]),
+                        Message = Convert.ToString(dt.Rows[0]["Message"])
+                    });
+                }
+
+                return Json(new
+                {
+                    Status = 0,
+                    Message = "Unable to delete heading."
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    Status = 0,
+                    Message = ex.Message
+                });
+            }
+        }
+
+
+
         //public int SaveAuditMprCommitteeCurrentYear( AuditMprCommitteeCurrentYear entity)
         //{
         //    try
@@ -1243,5 +1544,21 @@ namespace Cooperative.Controllers
         //        // throw;
         //    }
         //}
+
+        [HttpGet]
+        [ActionName("GetAllAuditorSalePurchaseList")]
+        public string GetAllAuditorSalePurchaseList(int KVSSId, string financialYear)
+        { 
+            AuditorModel auditorModel = new AuditorModel();
+            return COMMON_FUNCTION.DataTableToJSONWithJSONNet(auditorModel.GetAllAuditorSalePurchaseList(KVSSId, financialYear));
+        }
+
+        [HttpPost]
+        public int SaveAuditorSalePurchase(AuditSPRequest request)
+        {
+            int result = new AuditorModel().SaveAuditorSalePurchase(request);
+            return result;
+        }
+
     }
 }

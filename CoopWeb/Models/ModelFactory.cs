@@ -4931,6 +4931,108 @@ namespace Cooperative.Models
         public decimal CurrentMonthCurrentYearRecovery { get; set; }
     }
 
+    public class AuditSPModel
+    {
+        public long StockRegisterId { get; set; }
+
+        public int ItemId { get; set; }
+        public int? ParentItemId { get; set; }
+        public string ItemName_Hi { get; set; }
+        public string ItemName_En { get; set; }
+
+        public string FinancialYear { get; set; }
+        public int KVSSId { get; set; }
+
+        // Opening Stock
+        public decimal OpeningQty { get; set; }
+        public decimal OpeningRate { get; set; }
+        public decimal OpeningAmount { get; set; }
+
+        // Receipts / Purchase
+        public decimal ReceiptQty { get; set; }
+        public decimal ReceiptRate { get; set; }
+        public decimal ReceiptAmount { get; set; }
+
+        // Sales / Issued
+        public decimal SalesQty { get; set; }
+        public decimal SalesRate { get; set; }
+        public decimal SalesAmount { get; set; }
+
+        // Closing Stock
+        public decimal ClosingQty { get; set; }
+        public decimal ClosingRate { get; set; }
+        public decimal ClosingAmount { get; set; }
+         
+    }
+
+    public class AuditSPRequest
+    {
+        public string FinancialYear { get; set; }
+        public int KVSSId { get; set; }
+         
+        public List<AuditSPModel> StockDetails { get; set; }
+    }
+
+    public class AccountTabMaster
+    {
+        public int TabId { get; set; }
+        public string TabCode { get; set; }
+        public string TabNameEnglish { get; set; }
+        public string TabNameHindi { get; set; }
+        public int DisplayOrder { get; set; }
+    }
+
+    public class AuditAccountHeaderMaster
+    {
+        public int HeaderId { get; set; }
+        public int? ParentHeaderId { get; set; }
+        public string HeaderCode { get; set; }
+        public string HeaderNameHindi { get; set; }
+        public string HeaderNameEnglish { get; set; }
+        public int TabId { get; set; }
+        public int? SocietyTypeId { get; set; }
+        public int DisplayOrder { get; set; }
+        public bool IsActive { get; set; }
+    }
+
+
+    public class AuditAccountOpeningBalanceRequest
+    {
+        public int KVSSId { get; set; }
+        public int TabId { get; set; }
+        public string FinancialYear { get; set; }
+
+        public List<AuditAccountOpeningBalanceItem> Details { get; set; }
+    }
+
+    public class AuditAccountOpeningBalanceItem
+    {
+        public int HeaderId { get; set; }
+        public decimal OpeningBalance { get; set; }
+    }
+
+
+
+    public class AuditAccountCustomHeaderRequest
+    {
+        public int HeaderId { get; set; }
+        public int ParentHeaderId { get; set; }
+        public int TabId { get; set; }
+        public int SocietyTypeId { get; set; }
+        public string HeaderNameEnglish { get; set; }
+        public string HeaderNameHindi { get; set; }
+        public int KVSSId { get; set; }
+        public string FinancialYear { get; set; }
+        public decimal OpeningBalance { get; set; }
+    }
+
+
+    public class AuditAccountCustomHeaderDeleteRequest
+    {
+        public int HeaderId { get; set; }
+        public int KVSSSocietyId { get; set; }
+    }
+
 
 }
 

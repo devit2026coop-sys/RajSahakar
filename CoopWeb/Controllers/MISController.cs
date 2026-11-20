@@ -7430,9 +7430,9 @@ namespace Cooperative.Controllers
 
         [HttpGet]
         [ActionName("GetAuditMPRVIIReport")]
-        public string GetAuditMPRVIIReport()
+        public string GetAuditMPRVIIReport(string FinancialYearId, int Month = 0)
         {
-            DataTable dt = new MISModel().GetAuditMPRVIIReport();
+            DataTable dt = new MISModel().GetAuditMPRVIIReport(FinancialYearId, Month);
 
             return COMMON_FUNCTION.DataTableToJSONString(dt);
         }
@@ -7445,9 +7445,9 @@ namespace Cooperative.Controllers
 
         [HttpGet]
         [ActionName("GetAuditMPRVIIIReport")]
-        public string GetAuditMPRVIIIReport()
+        public string GetAuditMPRVIIIReport(string FinancialYearId, int Month = 0)
         {
-            DataTable dt = new MISModel().GetAuditMPRVIIIReport();
+            DataTable dt = new MISModel().GetAuditMPRVIIIReport(FinancialYearId, Month);
 
             return COMMON_FUNCTION.DataTableToJSONString(dt);
         }
