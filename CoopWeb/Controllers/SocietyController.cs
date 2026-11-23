@@ -10978,6 +10978,25 @@ namespace Cooperative.Controllers
             return COMMON_FUNCTION.DataTableToJSONWithJSONNet(DT);
         }
 
+
+        public string GetSocietyNameById(int? socetyId)
+        {
+
+            SocietyModel objMenuActionModel = new SocietyModel(new FileLogger());
+            DataTable DT = null;
+
+            DT = objMenuActionModel.ServiceGetSocietyNameById(socetyId);
+
+            string societyName = string.Empty;
+
+            if (DT != null && DT.Rows.Count > 0)
+            {
+                societyName = Convert.ToString(DT.Rows[0]["SocietyName"]);
+            }
+            return societyName;
+        }
+
+
         [HttpGet]
         [ActionName("GetReasonForVacancyByListId")]
         public string GetReasonForVacancyDetailsByListId(string ListCode)

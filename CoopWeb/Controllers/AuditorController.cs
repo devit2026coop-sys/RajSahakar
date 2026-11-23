@@ -1222,18 +1222,10 @@ namespace Cooperative.Controllers
         }
 
 
-        public JsonResult GetAuditAccountHeaderMaster(
-      
-     int? tabId,
-     int? kvssId ,
-     string financialYear
-     )
+        public JsonResult GetAuditAccountHeaderMaster(int? tabId, int? kvssId, string financialYear)
         {
             try
-            {  
-
-
-
+            {   
 
                 // If Session is null, assign the selected KVSS ID
                 if (Session["KVSSId"] == null && kvssId > 0)
@@ -1245,8 +1237,7 @@ namespace Cooperative.Controllers
                     // Otherwise, use the existing Session value
                     kvssId = Convert.ToInt32(Session["KVSSId"]);
                 }
-
-
+                 
                 // Financial Year Session
                 if (Session["FinancialYear"] == null && !string.IsNullOrEmpty(financialYear))
                 {
@@ -1256,20 +1247,12 @@ namespace Cooperative.Controllers
                 {
                     financialYear = Convert.ToString(Session["FinancialYear"]);
                 }
-
-                
-
+                 
                 // Pass KVSS ID to View
                 ViewBag.KVSSId = Convert.ToInt32(Session["KVSSId"]);
 
                 ViewBag.FinancialYear = Session["FinancialYear"];
-
-
-
-
-
-
-
+                 
                 DataSet ds = new AuditorModel()
                     .GetAuditAccountHeaderMasterData( 
                         tabId,
@@ -1586,6 +1569,7 @@ namespace Cooperative.Controllers
         [ActionName("GetAllAuditorSalePurchaseList")]
         public string GetAllAuditorSalePurchaseList(int? KVSSId, string financialYear)
         {
+            string auditKVSSName = "";
             // If Session is null, assign the selected KVSS ID
             if (Session["KVSSId"] == null && KVSSId > 0)
             {
@@ -1595,8 +1579,16 @@ namespace Cooperative.Controllers
             {
                 // Otherwise, use the existing Session value
                 KVSSId = Convert.ToInt32(Session["KVSSId"]);
+                SocietyModel objMenuActionModel = new SocietyModel(new FileLogger());
+                DataTable DT = null; 
+                DT = objMenuActionModel.ServiceGetSocietyNameById(KVSSId);
+                if (DT != null && DT.Rows.Count > 0)
+                {
+                    auditKVSSName = Convert.ToString(DT.Rows[0]["SocietyName"]);
+                }
+                Session["AuditKVSSName"] = auditKVSSName;
             }
-             
+
             // Financial Year Session
             if (Session["FinancialYear"] == null && !string.IsNullOrEmpty(financialYear))
             {
@@ -1606,11 +1598,14 @@ namespace Cooperative.Controllers
             {
                 financialYear = Convert.ToString(Session["FinancialYear"]);
             }
-             
+           
+
             // Pass KVSS ID to View
             ViewBag.KVSSId = Convert.ToInt32(Session["KVSSId"]);
 
             ViewBag.FinancialYear = Session["FinancialYear"];
+
+            ViewBag.AuditKVSSName = Session["AuditKVSSName"];
 
             AuditorModel auditorModel = new AuditorModel();
             return COMMON_FUNCTION.DataTableToJSONWithJSONNet(auditorModel.GetAllAuditorSalePurchaseList(KVSSId, financialYear));

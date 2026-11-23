@@ -6,7 +6,9 @@ MasterMod.controller("auditorPurchaseSaleCtrl", function ($scope, $http) {
     $scope.pageSize = 12; 
     $scope.AuditSPData = [];
     $scope.supportPriceRows = [];
-
+    //$scope.FinancialYearList = [];
+    //$scope.SocietyList = [];
+    //$scope.KVSSSocietyID = '0';
     // on page load
     $scope.OnPageLoad = function () {
         $scope._language = 'en-us';
@@ -30,6 +32,68 @@ MasterMod.controller("auditorPurchaseSaleCtrl", function ($scope, $http) {
                 }); 
         } 
     };
+
+    //$scope.SetFinancialYears = function () {
+
+    //    var today = new Date();
+
+    //    var currentFYStartYear = today.getMonth() >= 3
+    //        ? today.getFullYear()
+    //        : today.getFullYear() - 1;
+
+    //    // Previous financial year
+    //    var previousFYStartYear = currentFYStartYear - 1;
+
+    //    $scope.FinancialYear = previousFYStartYear + "-" +
+    //        (previousFYStartYear + 1).toString().substring(2);
+
+    //    // Generate last 10 financial years
+    //    $scope.FinancialYearList = [];
+
+    //    for (var i = 0; i < 10; i++) {
+
+    //        var startYear = previousFYStartYear - i;
+
+    //        var financialYear = startYear + "-" +
+    //            (startYear + 1).toString().substring(2);
+
+    //        $scope.FinancialYearList.push(financialYear);
+    //    }
+    //};
+
+    //$scope.GetSocietyBySSO = function (ActId, SocietyTypeId, ClassId) {
+
+    //    $(".se-pre-con").fadeIn("slow");
+
+    //    $http.post(SiteUrl + "/Society/KVSSGSSbySSOD", {})
+    //        .success(function (data, status) {
+    //            debugger;
+    //            $scope.TableData = data;
+    //            $scope.SocietyList = $scope.TableData;
+    //            //var selectedSociety = $scope.SocietyList.find(function (item) {
+    //            //    return item.SocietyID == $scope.KVSSSocietyID;
+    //            //});
+    //            //var sname = selectedSociety ? selectedSociety.SocietyName : '';
+    //            $(".se-pre-con").fadeOut("slow");
+
+    //        })
+    //        .error(function (data, status) {
+
+    //            $(".se-pre-con").fadeOut("slow");
+    //            $scope.TableData = [];
+    //            $scope.SocietyList = [];
+
+    //        });
+    //};
+     
+    //$scope.GetSelectedSocietyName = function () {
+        
+    //    var selectedSociety = $scope.SocietyList.find(function (item) {
+    //        return item.SocietyID == $scope.KVSSSocietyID;
+    //    });
+
+    //    return selectedSociety ? selectedSociety.SocietyName : '';
+    //};
 
     //$scope.GetSocietyBySSO = function (ActId, SocietyTypeId, ClassId) {
     //    $(".se-pre-con").fadeIn("slow");
@@ -269,8 +333,8 @@ MasterMod.controller("auditorPurchaseSaleCtrl", function ($scope, $http) {
 
     };
      
-    $scope.BackTo = function () {
-        window.location.href = '/Auditor/AuditorSaleLiabilities';
+    $scope.GoBack = function () {
+        window.location.href = '/KVSSAuditAccount/KVSSAuditAccount';
 
     };
 
@@ -280,6 +344,8 @@ MasterMod.controller("auditorPurchaseSaleCtrl", function ($scope, $http) {
 
     $scope.OnPageLoad();
     //$scope.GetSocietyBySSO();
+    //$scope.GetSelectedSocietyName();
+    //$scope.SetFinancialYears();
     $scope.GetAllAuditorSalePurchaseList();
 
 });

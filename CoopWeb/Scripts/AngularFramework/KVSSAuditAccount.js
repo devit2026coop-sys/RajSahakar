@@ -346,6 +346,9 @@ KVSSAuditAccountModule.controller("KVSSAuditAccountCont", ["$scope", "$http", fu
         if (fy === $scope.FinancialYear) return;
         $scope.FinancialYear = fy; $scope.GetAccount();
     };
-    $scope.GoBack = function () { window.history.back(); };
+    $scope.GoBack = function () {
+        //window.history.back();
+        window.location.href = '/Auditor/AuditorEquityLiabilities';
+    };
     $scope.GetAccount();
 }]);
