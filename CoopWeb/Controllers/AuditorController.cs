@@ -1532,6 +1532,7 @@ namespace Cooperative.Controllers
         [ActionName("GetAllAuditorSalePurchaseList")]
         public string GetAllAuditorSalePurchaseList(int? KVSSId, string financialYear)
         {
+            string auditKVSSName = "";
             // If Session is null, assign the selected KVSS ID
             if (Session["KVSSId"] == null && KVSSId > 0)
             {
@@ -1544,7 +1545,11 @@ namespace Cooperative.Controllers
                 SocietyModel objMenuActionModel = new SocietyModel(new FileLogger());
                 DataTable DT = null; 
                 DT = objMenuActionModel.ServiceGetSocietyNameById(KVSSId);
-
+                if (DT != null && DT.Rows.Count > 0)
+                {
+                    auditKVSSName = Convert.ToString(DT.Rows[0]["SocietyName"]);
+                }
+                Session["AuditKVSSName"] = auditKVSSName;
             }
 
             // Financial Year Session
@@ -1556,11 +1561,14 @@ namespace Cooperative.Controllers
             {
                 financialYear = Convert.ToString(Session["FinancialYear"]);
             }
-             
+           
+
             // Pass KVSS ID to View
             ViewBag.KVSSId = Convert.ToInt32(Session["KVSSId"]);
 
             ViewBag.FinancialYear = Session["FinancialYear"];
+
+            ViewBag.AuditKVSSName = Session["AuditKVSSName"];
 
             AuditorModel auditorModel = new AuditorModel();
             return COMMON_FUNCTION.DataTableToJSONWithJSONNet(auditorModel.GetAllAuditorSalePurchaseList(KVSSId, financialYear));
