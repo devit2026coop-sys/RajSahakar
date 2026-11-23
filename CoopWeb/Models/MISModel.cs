@@ -9406,7 +9406,7 @@ namespace Cooperative.Models
             return dt;
         }
 
-        public DataTable GetAuditMPRVIAReport(int districtId, int commiteeType)
+        public DataTable GetAuditMPRVIAReport(int commiteeType = 0, string FinancialYearId="", int Month = 0)
         {
             DataTable dt = new DataTable();
 
@@ -9427,7 +9427,8 @@ namespace Cooperative.Models
                 objDBAccess.OpenConnection(); 
                 SqlCommand cmd = objDBAccess.CreateCommand("USP_GetAuditMPRVIAReport", DBFactoryCommandType.PROCEDURE_COMMAND);
                 objDBAccess.AddParameterToCommand("@LevelId", DBFactoryParameterType.Int, _LoggedInUser.LevelId);
-                objDBAccess.AddParameterToCommand("@DistrictId", DBFactoryParameterType.Int, districtId);
+                objDBAccess.AddParameterToCommand("@Month", DBFactoryParameterType.Int, Month);
+                objDBAccess.AddParameterToCommand("@FinancialYearId", DBFactoryParameterType.VARCHAR, FinancialYearId);
                 objDBAccess.AddParameterToCommand("@CommiteeType", DBFactoryParameterType.Int, commiteeType);
                 objDBAccess.AddParameterToCommand("@UserRoleMappingId", DBFactoryParameterType.Int, _LoggedInUser.UserRoleDeptMappingId);
 

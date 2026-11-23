@@ -119,35 +119,70 @@ MasterMod.controller("AuditReportVIACont", function ($scope, $rootScope, $http) 
     $scope.currentPage = 1;
     $scope.pageSize = 50;
 
-    $scope.GetDistrictList = function () {
-        $http.get(SiteUrl + "/Master/GetMasterData/?MasterType=DISTRICT&MasterCode=" + $("#DivisionId").val()).
-            success(function (data, status) {
-                $scope.DistrictList = data;
-                //if ($("#hdnDistrictId").val() != "0") {
-                //    $scope.DISTRICT_ID = $("#hdnDistrictId").val()
-                //    $("#ddrDistrictId").attr("disabled", "disabled");
-                //}
-                // $scope.BindFY();
+    //$scope.GetDistrictList = function () {
+    //    $http.get(SiteUrl + "/Master/GetMasterData/?MasterType=DISTRICT&MasterCode=" + $("#DivisionId").val()).
+    //        success(function (data, status) {
+    //            $scope.DistrictList = data;
+    //            //if ($("#hdnDistrictId").val() != "0") {
+    //            //    $scope.DISTRICT_ID = $("#hdnDistrictId").val()
+    //            //    $("#ddrDistrictId").attr("disabled", "disabled");
+    //            //}
+    //            // $scope.BindFY();
 
-            }).
-            error(function (data, status) {
-                $scope.DistrictList = [];
-                alert('Error while fetching district list data.');
+    //        }).
+    //        error(function (data, status) {
+    //            $scope.DistrictList = [];
+    //            alert('Error while fetching district list data.');
+    //        });
+    //};
+
+    //$scope.GetDistrictList();
+
+    $scope.GetFinancialYear = function () {
+        return $http.get(SiteUrl + "/Master/GetMasterData/?MasterType=FINANCIALYEAR&MasterCode=-1")
+            .success(function (data) {
+                if (data != null) {
+                    $scope.FinancialYearList = data
+                        .map(function (item) {
+                            return {
+                                FinYearId: item.FIN_YEAR_MASTR_ID,
+                                FinYearName: item.FIN_YEAR_START + '-' + item.FIN_YEAR_END
+                            };
+                        })
+                        .filter(function (item) {
+                            return item.FinYearId == '1086' || item.FinYearId == '1085';
+                        });
+
+                    if ($scope.FinancialYearList.length > 0) {
+                        $scope.FinYear = '1086';
+                    }
+                }
+                else {
+                    $scope.FinancialYearList = [];
+                }
+                $(".se-pre-con").fadeOut("slow");
+
+            }).error(function () {
+                $scope.FinancialYearList = [];
             });
     };
 
-    $scope.GetDistrictList();
-
 
     $scope.GetAuditMPRVIAReport = function () {
+        if (!$scope.FinYear || !$scope.Month) {
+            return;
+        }
+        $scope.ShowSummary = true;
+
         $(".se-pre-con").fadeIn("slow");
-        var jsonParameters = {
-            "SearchParameter": $scope.DataPaging.searchParameters
-        };
+        //var jsonParameters = {
+        //    "SearchParameter": $scope.DataPaging.searchParameters
+        //};
         return $http.get(SiteUrl + "/MIS/GetAuditMPRVIAReport", {
             params: { 
                 commiteeType: $scope.CommiteeType,
-                districtId: $scope.DISTRICT_ID
+                FinancialYearId: $scope.FinYear,
+                Month: $scope.Month
             }
 
         }).then(function (response) {
@@ -202,7 +237,9 @@ MasterMod.controller("AuditReportVIACont", function ($scope, $rootScope, $http) 
                     alert("Error while translation");
                 }); 
         }
-        $scope.GetAuditMPRVIAReport();
+        $scope.ShowSummary = false;
+        $scope.GetFinancialYear();
+        //$scope.GetAuditMPRVIAReport();
     };
 
     $scope.OnPageLoad(); 

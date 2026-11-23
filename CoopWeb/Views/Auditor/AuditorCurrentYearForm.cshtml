@@ -27,24 +27,48 @@
         text-align: right;
     }
 
-    .TbsBtn {
-        line-height: 30px;
-        margin-right: 10px;
-        border-width: medium;
-        border-style: none;
-        border-color: rgb(255, 255, 255);
-        border-image: none;
-        padding: 2px 15px;
-        outline: none;
-        background: #e3e3e3;
-        color: #444;
-        font-weight: 600;
+    .custom-tbls-tabs {
+        margin-bottom: 0;
+        border-bottom: 1px solid #9f9f9f;
+        display: flex;
     }
 
-        .TbsBtn.Active {
-            background: #1899a0;
-            color: #fff;
+        .custom-tbls-tabs > li {
+            margin-bottom: -2px;
         }
+
+            .custom-tbls-tabs > li > button {
+                color: #444;
+                font-size: 16px;
+                font-weight: bold;
+                border: 1px solid transparent !important;
+                border-bottom: 2px solid transparent !important;
+                margin-right: 0;
+                background: transparent;
+                transition: all 0.3s ease;
+                border-radius: 4px 4px 0 0;
+                padding: 8px 20px;
+                line-height: 24px;
+                outline: none;
+            }
+
+                /* Hover */
+                .custom-tbls-tabs > li > button:hover {
+                    background: #e3e3e3;
+                    color: #168f98;
+                    border: 1px solid transparent !important;
+                }
+
+            /* Active Tab */
+            .custom-tbls-tabs > li.active > button,
+            .custom-tbls-tabs > li.active > button:hover,
+            .custom-tbls-tabs > li.active > button:focus {
+                color: #168f98;
+                background: #fff;
+                border: 1px solid #9f9f9f !important;
+                border-bottom: 2px solid #fff !important;
+                font-weight: 700;
+            }
 </style>
 
 
@@ -69,17 +93,24 @@
             </ul>
         </div>
     </div>
+
     <div class="col-md-12">
         <div class="citizen-dash-head">
 
-            <div style="margin-bottom:20px;">
-                <button class="btn btn-light TbsBtn Active">Current Year</button>
-                <button class="btn btn-light TbsBtn">Back Log</button>
-                <button class="btn btn-primary TbsBtn ">Audit Fees</button>
-            </div>
+            <ul class="nav nav-tabs custom-tbls-tabs" role="tablist" style="margin-bottom:15px;">
+                <li class="active">
+                    <button class="btn btn-light">Current Year</button>
+                </li>
+                <li>
+                    <button class="btn btn-light" ng-click="GotoBackLog()">Back Log</button>
+                </li>
+                <li>
+                    <button class="btn btn-primary" ng-click="GotoFees()">Audit Fees</button>
+                </li>
+            </ul>
+
             <div class="form-group pull-left">
                 <label>Select Date</label>
-                @*<input type="date" class="form-control" ng-model="SelectedDate" ng-change="GetKPIResult()" />*@
                 <input type="date" class="form-control" ng-model="SelectedDate" ng-change="LoadAuditMprForm()" />
             </div>
             <table class="table table-bordered table-striped devtable">
@@ -105,7 +136,7 @@
                         <th class="drkBg2" colspan="2">आवंटन</th>
                     </tr>
                     <tr>
-                        <th class="drkBg2">विभागीय ऑडिटर</th>
+                        <th class="drkBg2">विभाग</th>
                         <th class="drkBg2">चार्टर्ड<br>अकाउंटेंट</th>
                         <th class="drkBg2">विभाग</th>
                         <th class="drkBg2">चार्टर्ड<br>अकाउंटेंट</th>
@@ -124,7 +155,7 @@
                         <th scope="row" class="row-name">{{item.CommitteeTypeName_Hin}}</th>
                         <td class="total-count">
                             <input class="form-control" type="number" min="0"
-                                   ng-model="item.TotalCommitteesCurrentYear" ng-change="calculateProposalAllocationRemaining(item, 'TotalCommitteesCurrentYear')"/>
+                                   ng-model="item.TotalCommitteesCurrentYear" ng-change="calculateProposalAllocationRemaining(item, 'TotalCommitteesCurrentYear')" />
                         </td>
                         <td class="drkBg"><input class="form-control" type="number" min="0" ng-model="item.ProposalDepartment" ng-change="calculateProposalAllocationRemaining(item, 'ProposalDepartment')" /></td>
                         <td class="drkBg"><input class="form-control" type="number" min="0" ng-model="item.ProposalCA" ng-change="calculateProposalAllocationRemaining(item, 'ProposalCA')" /></td>
@@ -166,11 +197,104 @@
             </table>
         </div>
         <div style="display: flex; gap: 10px; justify-content: center;">
-            <button type="button" class="btn btn-primary dev-btn text-center" ng-click="SaveAuditMprForm()">Submit</button>
+            <button type="button" class="btn btn-primary dev-btn text-center" ng-click="SaveAuditMprForm()">Submit & Next</button>
             <button type="button" class="btn btn-primary dev-btn text-center" ng-click="ClearAuditMprForm()">Clear</button>
         </div>
     </div>
 
-
-
+    @*<div class="col-md-12">
+            <div class="citizen-dash-head">
+                <div class="form-group col-md-2 pull-left">
+                    <label>Select Date</label>
+                    <input type="date" class="form-control" ng-model="SelectedDate" ng-change="LoadAuditMprForm()" />
+                </div>
+                <table class="table table-bordered table-striped devtable">
+                    <thead>
+                        <tr class="year-heading">
+                            <th colspan="14"> <b> चालू वर्ष  {{ PreviousMonth }} </b>  <span>({{ FinancialYearName }})</span></th>
+                            <th style="text-align: left; min-width: 220px;"><b>District : </b>  <span>{{ DISTRICT_ENG }} </span></th>
+                        </tr>
+                        <tr>
+                            <th rowspan="3" class="type-head">प्रकार</th>
+                            <th rowspan="3" class="total-head lgtBg">कुल समितियां</th>
+                            <th class="drkBg2" colspan="4">कुल आवंटित समितियां</th>
+                            <th class="drkBg2" rowspan="3">प्रस्ताव आवंटन<br>से शेष</th>
+                            <th class="lgtBg" colspan="4">गत माह तक ऑडिटेड</th>
+                            <th class="drkBg2" colspan="4">माह में ऑडिटेड</th>
+                        </tr>
+                        <tr>
+                            <th class="drkBg2" colspan="2">प्रस्ताव</th>
+                            <th class="drkBg2" colspan="2">आवंटन</th>
+                            <th class="lgtBg" colspan="2">प्रस्ताव</th>
+                            <th class="lgtBg" colspan="2">आवंटन</th>
+                            <th class="drkBg2" colspan="2">प्रस्ताव</th>
+                            <th class="drkBg2" colspan="2">आवंटन</th>
+                        </tr>
+                        <tr>
+                            <th class="drkBg2">विभागीय ऑडिटर</th>
+                            <th class="drkBg2">चार्टर्ड<br>अकाउंटेंट</th>
+                            <th class="drkBg2">विभाग</th>
+                            <th class="drkBg2">चार्टर्ड<br>अकाउंटेंट</th>
+                            <th class="lgtBg">विभाग</th>
+                            <th class="lgtBg">चार्टर्ड<br>अकाउंटेंट</th>
+                            <th class="lgtBg">विभाग</th>
+                            <th class="lgtBg">चार्टर्ड<br>अकाउंटेंट</th>
+                            <th class="drkBg2">विभाग</th>
+                            <th class="drkBg2">चार्टर्ड<br>अकाउंटेंट</th>
+                            <th class="drkBg2">विभाग</th>
+                            <th class="drkBg2">चार्टर्ड<br>अकाउंटेंट</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="item in auditMprList track by item.CommitteeTypeId">
+                            <th scope="row" class="row-name">{{item.CommitteeTypeName_Hin}}</th>
+                            <td class="total-count">
+                                <input class="form-control" type="number" min="0"
+                                       ng-model="item.TotalCommitteesCurrentYear" ng-change="calculateProposalAllocationRemaining(item, 'TotalCommitteesCurrentYear')"/>
+                            </td>
+                            <td class="drkBg"><input class="form-control" type="number" min="0" ng-model="item.ProposalDepartment" ng-change="calculateProposalAllocationRemaining(item, 'ProposalDepartment')" /></td>
+                            <td class="drkBg"><input class="form-control" type="number" min="0" ng-model="item.ProposalCA" ng-change="calculateProposalAllocationRemaining(item, 'ProposalCA')" /></td>
+                            <td class="drkBg"><input class="form-control" type="number" min="0" ng-model="item.AllocationDepartment" ng-change="calculateProposalAllocationRemaining(item, 'AllocationDepartment')" /></td>
+                            <td class="drkBg"><input class="form-control" type="number" min="0" ng-model="item.AllocationCA" ng-change="calculateProposalAllocationRemaining(item, 'AllocationCA')" /></td>
+                            <td class="drkBg"><input class="form-control" type="number" min="0" ng-model="item.ProposalAllocationRemaining" readonly /></td>
+                            <td><input class="form-control" type="number" min="0" ng-model="item.PreviousAuditedProposalDepartment" ng-change="ValidateProposalDepartment(item, 'PreviousAuditedProposalDepartment')" /></td>
+                            <td><input class="form-control" type="number" min="0" ng-model="item.PreviousAuditedProposalCA" ng-change="ValidateProposalCA(item, 'PreviousAuditedProposalCA')" /></td>
+                            <td><input class="form-control" type="number" min="0" ng-model="item.PreviousAuditedAllocationDepartment" ng-change="ValidateAllocationDepartment(item, 'PreviousAuditedAllocationDepartment')" /></td>
+                            <td><input class="form-control" type="number" min="0" ng-model="item.PreviousAuditedAllocationCA" ng-change="ValidateAllocationCA(item, 'PreviousAuditedAllocationCA')" /></td>
+                            <td class="drkBg"><input class="form-control" type="number" min="0" ng-model="item.CurrentAuditedProposalDepartment" ng-change="ValidateProposalDepartment(item, 'CurrentAuditedProposalDepartment')" /></td>
+                            <td class="drkBg"><input class="form-control" type="number" min="0" ng-model="item.CurrentAuditedProposalCA" ng-change="ValidateProposalCA(item, 'CurrentAuditedProposalCA')" /></td>
+                            <td class="drkBg"><input class="form-control" type="number" min="0" ng-model="item.CurrentAuditedAllocationDepartment" ng-change="ValidateAllocationDepartment(item, 'CurrentAuditedAllocationDepartment')" /></td>
+                            <td class="drkBg"><input class="form-control" type="number" min="0" ng-model="item.CurrentAuditedAllocationCA" ng-change="ValidateAllocationCA(item, 'CurrentAuditedAllocationCA')" /></td>
+                        </tr>
+                        <tr ng-if="!auditMprList || auditMprList.length === 0">
+                            <td colspan="15" class="text-center">No committee records found.</td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th style="color:#fff;" scope="row">कुल योग</th>
+                            <td><input class="form-control" type="number" readonly ng-value="getColumnTotal('TotalCommitteesCurrentYear')" /></td>
+                            <td><input class="form-control" type="number" readonly ng-value="getColumnTotal('ProposalDepartment')" /></td>
+                            <td><input class="form-control" type="number" readonly ng-value="getColumnTotal('ProposalCA')" /></td>
+                            <td><input class="form-control" type="number" readonly ng-value="getColumnTotal('AllocationDepartment')" /></td>
+                            <td><input class="form-control" type="number" readonly ng-value="getColumnTotal('AllocationCA')" /></td>
+                            <td><input class="form-control" type="number" readonly ng-value="getColumnTotal('ProposalAllocationRemaining')" /></td>
+                            <td><input class="form-control" type="numbe r" readonly ng-value="getColumnTotal('PreviousAuditedProposalDepartment')" /></td>
+                            <td><input class="form-control" type="number" readonly ng-value="getColumnTotal('PreviousAuditedProposalCA')" /></td>
+                            <td><input class="form-control" type="number" readonly ng-value="getColumnTotal('PreviousAuditedAllocationDepartment')" /></td>
+                            <td><input class="form-control" type="number" readonly ng-value="getColumnTotal('PreviousAuditedAllocationCA')" /></td>
+                            <td><input class="form-control" type="number" readonly ng-value="getColumnTotal('CurrentAuditedProposalDepartment')" /></td>
+                            <td><input class="form-control" type="number" readonly ng-value="getColumnTotal('CurrentAuditedProposalCA')" /></td>
+                            <td><input class="form-control" type="number" readonly ng-value="getColumnTotal('CurrentAuditedAllocationDepartment')" /></td>
+                            <td><input class="form-control" type="number" readonly ng-value="getColumnTotal('CurrentAuditedAllocationCA')" /></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: center;">
+                <button type="button" class="btn btn-primary dev-btn text-center" ng-click="SaveAuditMprForm()">Submit</button>
+                <button type="button" class="btn btn-primary dev-btn text-center" ng-click="ClearAuditMprForm()">Clear</button>
+            </div>
+        </div>*@
+     
 </div>
