@@ -1318,6 +1318,49 @@ namespace Cooperative.Controllers
                     });
                 }
 
+                // testing 
+
+
+                if (request == null)
+                {
+                    return Json(new
+                    {
+                        Status = 0,
+                        Message = "Invalid request."
+                    });
+                }
+
+                if (request.Details == null || request.Details.Count == 0)
+                {
+                    return Json(new
+                    {
+                        Status = 0,
+                        Message = "No opening balance entries found."
+                    });
+                }
+
+                if (string.IsNullOrWhiteSpace(request.FinancialYear))
+                {
+                    return Json(new
+                    {
+                        Status = 0,
+                        Message = "Financial year is required."
+                    });
+                }
+
+                if (request.KVSSId <= 0 || request.TabId <= 0)
+                {
+                    return Json(new
+                    {
+                        Status = 0,
+                        Message = "Invalid society or tab selection."
+                    });
+                }
+
+                // end testing 
+
+
+
                 // Get logged-in user from session
                 UserEntity loggedInUser =
                     (UserEntity)Session[SessionIdentity.Admin];
@@ -1347,30 +1390,23 @@ namespace Cooperative.Controllers
 
                 DateTime today = DateTime.Today;
                 UserEntity _LoggedInUser = (UserEntity)System.Web.HttpContext.Current.Session[SessionIdentity.Admin];
-                //request.DistrictId = _LoggedInUser.DistrictId;
-                //request.Month = (byte)DateTime.Today.Month;
-                //request.FinancialYear = today.Month >= 4 ? $"{today.Year}-{(today.Year + 1) % 100:D2}" : $"{today.Year - 1}-{today.Year % 100:D2}";
+                
                
                 // Replace UserId below with your actual logged-in user ID property
                 // if it has a different name in UserEntity.
                 long userId = _LoggedInUser.UserId;
 
 
-                //int currentYear = DateTime.Now.Year;
-                //int startYear = DateTime.Now.Month >= 4 ? currentYear : currentYear - 1;
 
-                //string financialYear = $"{startYear}-{(startYear + 1) % 100:D2}";
-
-                 
 
                 DataTable result = new AuditorModel()
-                    .SaveAuditAccountOpeningBalance(
-                        request.KVSSId,
-                        request.TabId,
-                        request.FinancialYear,
-                        userId,
-                        dtDetails
-                    );
+                        .SaveAuditAccountOpeningBalance(
+                            request.KVSSId,
+                            request.TabId,
+                            request.FinancialYear,
+                            userId,
+                            dtDetails
+                        );
 
                 if (result != null && result.Rows.Count > 0)
                 {
@@ -1389,10 +1425,11 @@ namespace Cooperative.Controllers
             }
             catch (Exception ex)
             {
+
                 return Json(new
                 {
                     Status = 0,
-                    Message = ex.Message
+                    Message = "administrator." + ex.Message.ToString()
                 });
             }
         }

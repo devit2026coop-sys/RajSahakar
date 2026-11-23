@@ -10971,12 +10971,9 @@ namespace Cooperative.Controllers
         {
 
             SocietyModel objMenuActionModel = new SocietyModel(new FileLogger());
-            DataTable DT = null;
-            if ( Request.Cookies["SSO_ID"] != null)
-            {
+            DataTable DT = null; 
                  
               DT = objMenuActionModel.KVSSGSSbySSOIDService(_loggedInUSerDetails.SSOID); 
-            }
 
             return COMMON_FUNCTION.DataTableToJSONWithJSONNet(DT);
         }
