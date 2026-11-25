@@ -136,8 +136,8 @@ MasterMod.controller("auditorPurchaseSaleCtrl", function ($scope, $http) {
         //$scope.FinancialYearName = finYear;
         //var kvssId = $scope.KVSSSocietyID;
 
-        var finYear = '@Session["FinancialYear"]';
-        var kvssId = '@Session["KVSSId"]';
+        //var finYear = '@Session["FinancialYear"]';
+        //var kvssId = '@Session["KVSSId"]';
 
         var finYear = '';
         var kvssId = 0;
