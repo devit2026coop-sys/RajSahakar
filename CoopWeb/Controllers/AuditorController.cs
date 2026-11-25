@@ -1221,20 +1221,20 @@ namespace Cooperative.Controllers
             return result;
         }
 
-        [HttpPost]
-        public int SaveIssuedCheques(List<IssuedChequeModel> model)
-        {
-            int result = new AuditorModel().SaveIssuedCheques(model);
-            return result;
-        }
+        //[HttpPost]
+        //public int SaveIssuedCheques(List<IssuedChequeModel> model)
+        //{
+        //    int result = new AuditorModel().SaveIssuedCheques(model);
+        //    return result;
+        //}
 
-        [HttpGet]
-        public string GetIssuedCheques()
-        {
-            DataTable dt = new AuditorModel().GetIssuedCheques();
+        //[HttpGet]
+        //public string GetIssuedCheques()
+        //{
+        //    DataTable dt = new AuditorModel().GetIssuedCheques();
 
-            return COMMON_FUNCTION.DataTableToJSONString(dt);
-        }
+        //    return COMMON_FUNCTION.DataTableToJSONString(dt);
+        //}
 
 
         public JsonResult GetAuditAccountHeaderMaster(int? tabId, int? kvssId, string financialYear)

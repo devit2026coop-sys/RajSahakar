@@ -212,7 +212,43 @@ MasterMod.controller("auditorPurchaseSaleCtrl", function ($scope, $http) {
             };
         });
     };
-     
+
+    // CALCULATE COLUMN TOTAL
+    $scope.getColumnTotal = function (columnName) {
+
+        var total = 0;
+
+        if (!$scope.AuditSPGroups || !$scope.AuditSPGroups.length) {
+            return 0;
+        }
+
+        angular.forEach($scope.AuditSPGroups, function (parent) {
+
+            // Parent row
+            total += Number(parent[columnName]) || 0;
+
+            if (parent.ChildItems && parent.ChildItems.length > 0) {
+
+                angular.forEach(parent.ChildItems, function (item) {
+
+                    // Child row
+                    total += Number(item[columnName]) || 0;
+
+                    // Dynamic rows
+                    if (item.AdditionalRows && item.AdditionalRows.length > 0) {
+
+                        angular.forEach(item.AdditionalRows, function (row) {
+                            total += Number(row[columnName]) || 0;
+                        });
+
+                    }
+                });
+            }
+        });
+
+        return total;
+    };
+
     $scope.SaveAuditSPData = function () {
 
         var saveData = [];

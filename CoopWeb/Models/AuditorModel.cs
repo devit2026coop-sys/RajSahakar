@@ -13,6 +13,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using Cooperative.Controllers;
 using Newtonsoft.Json;
 using sun.security.util;
+using System.Linq;
 
 namespace Cooperative.Models
 {
