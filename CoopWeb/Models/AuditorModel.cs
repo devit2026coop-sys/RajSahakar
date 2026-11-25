@@ -1,8 +1,11 @@
-﻿using Cooperative.DBConnector;
+﻿using CoopDAL;
+using Cooperative.Controllers;
+using Cooperative.DBConnector;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Data;
 using System.Data.SqlClient;
 using System.ComponentModel.DataAnnotations;
