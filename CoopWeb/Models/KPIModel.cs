@@ -36,7 +36,7 @@ namespace Cooperative.Models
 
         UserEntity _LoggedInUser = (UserEntity)System.Web.HttpContext.Current.Session[SessionIdentity.Admin];
 
-        ////old (Running Live)
+        //old (Running Live)
         //public int SaveKPIResult(List<KPIResultModel> model)
         //{
         //    int Result = 0;
@@ -120,7 +120,7 @@ namespace Cooperative.Models
                     objDBAccess.AddParameterToCommand("@CreatedBy", DBFactoryParameterType.Int, _LoggedInUser.UserId);
                     objDBAccess.AddParameterToCommand("@UserRoleMappingDepId", DBFactoryParameterType.Int, _LoggedInUser.UserRoleDeptMappingId);
                     objDBAccess.AddParameterToCommand("@OtherText", DBFactoryParameterType.NVarchar, item.OtherText);
-                    objDBAccess.AddParameterToCommand("@ProfitLossType", DBFactoryParameterType.NVarchar, item.ProfitLossType);
+                    objDBAccess.AddParameterToCommand("@ProfitLossType", DBFactoryParameterType.NVarchar, item.ProfitLossType);                 
                     //local
                     if (isDevelopment) { objDBAccess.AddParameterToCommand("@PLDBId", DBFactoryParameterType.Int, (_LoggedInUser.RoleId == 1 || _LoggedInUser.RoleId == 10235) ? item.PLDBId : _LoggedInUser.PLDBId); }
                     else
@@ -137,6 +137,7 @@ namespace Cooperative.Models
                         objDBAccess.AddParameterToCommand("@PacsRegistrationNo", DBFactoryParameterType.NVarchar, item.PacsRegistrationNo);
                         objDBAccess.AddParameterToCommand("@KCCLoanDisbursedAmt", DBFactoryParameterType.VARCHAR, item.KCCLoanDisbursedAmt);
                         objDBAccess.AddParameterToCommand("@AgricultureTrunOver", DBFactoryParameterType.VARCHAR, item.AgricultureTrunOver);
+                        objDBAccess.AddParameterToCommand("@OtherActivitiesTurnOver", DBFactoryParameterType.VARCHAR, item.OtherActivitiesTurnOver);
                         objDBAccess.AddParameterToCommand("@MembershipPreviousInd", DBFactoryParameterType.Int, item.MembershipPrevious);
                         objDBAccess.AddParameterToCommand("@MembershipCurrentInd", DBFactoryParameterType.Int, item.MembershipCurrent);
                         objDBAccess.AddParameterToCommand("@SharePreviousInd", DBFactoryParameterType.Int, item.ShareCapitalPrevious);
@@ -168,7 +169,26 @@ namespace Cooperative.Models
                         objDBAccess.AddParameterToCommand("@ProfitLastYearAmount", DBFactoryParameterType.Float, item.ProfitLastYearAmount);
                         objDBAccess.AddParameterToCommand("@OtherThanKccLoanDisAmount", DBFactoryParameterType.Float, item.OtherThanKccLoanDisAmount);
 
+                        if (item.KPIIndicatorsId == 66)
+                        {
+                            string auditcompletedateformat = "";
+                            auditcompletedateformat = item.AuditCompleteDate.HasValue ? item.AuditCompleteDate.Value.ToString("yyyy-MM-dd") : null;
+                            objDBAccess.AddParameterToCommand("@AuditCompleteDate", DBFactoryParameterType.VARCHAR, auditcompletedateformat);
+                        }
+
+                        if (item.KPIIndicatorsId == 69)
+                        {
+                            string BODMeetingdateformat = "";
+                            BODMeetingdateformat = item.BODMeetingDate.HasValue ? item.BODMeetingDate.Value.ToString("yyyy-MM-dd") : null;
+                            objDBAccess.AddParameterToCommand("@BODMeetingDate", DBFactoryParameterType.VARCHAR, BODMeetingdateformat);
+                        }
+
                     }
+
+                    objDBAccess.AddParameterToCommand("@UnitResionId", DBFactoryParameterType.NVarchar, item.UnitResionId);
+                    objDBAccess.AddParameterToCommand("@ActId", DBFactoryParameterType.NVarchar, item.ActId);
+                    objDBAccess.AddParameterToCommand("@MembershipDifference", DBFactoryParameterType.Float, item.MembershipDifference);
+                    objDBAccess.AddParameterToCommand("@ShareCapitalDifference", DBFactoryParameterType.Float, item.ShareCapitalDifference);
 
                     objDBAccess.ExecuteCommand();
                     Result++;
@@ -186,8 +206,6 @@ namespace Cooperative.Models
             }
             return Result;
         }
-
-
 
         public DataTable GetPacsKPIDetails(string financialYear)
         {
@@ -300,7 +318,7 @@ namespace Cooperative.Models
 
         }
 
-        public DataTable GetKPIAllDetails(int officeId, int? pldbId, int month, string kpiFor, int DistrictId, bool isDevelopment = false, int resionId = 0)
+        public DataTable GetKPIAllDetails(int officeId, int? pldbId, int month, string kpiFor, int DistrictId, bool isDevelopment = false, int resionId = 0 , string UnitResionId = "")
         {
             DataTable dt = new DataTable();
             UserEntity _LoggedInUser = (UserEntity)System.Web.HttpContext.Current.Session[SessionIdentity.Admin];
@@ -318,7 +336,9 @@ namespace Cooperative.Models
                 objDBAccess.AddParameterToCommand("@KPIFor", DBFactoryParameterType.NVarchar, kpiFor);
                 objDBAccess.AddParameterToCommand("@DistrictId", DBFactoryParameterType.NVarchar, DistrictId);
                 objDBAccess.AddParameterToCommand("@ResionId", DBFactoryParameterType.NVarchar, resionId);
+                objDBAccess.AddParameterToCommand("@UnitResionId", DBFactoryParameterType.NVarchar, UnitResionId);
                 objDBAccess.AddParameterToCommand("@DivisionId", DBFactoryParameterType.NVarchar, _LoggedInUser.DivisionId);
+                objDBAccess.AddParameterToCommand("@UserId", DBFactoryParameterType.NVarchar, _LoggedInUser.UserId);
 
                 dt = objDBAccess.GetTable();
             }

@@ -118,192 +118,405 @@ MasterMod.controller("SocietKPIUnitOfficeReportECont", function ($scope, $rootSc
     $scope.ShowSummary = true;
     $scope.ShowDetails = false;
 
-    $scope.SearchPLDBReportold = function () {
-        debugger;
-        if (!$scope.Month || $scope.Month == "0") {
-            toastr.warning("Please select Month.");
-            return;
-        }
 
-        if (!$scope.FinYear || $scope.FinYear == "0") {
-            toastr.warning("Please select Financial Year.");
-            return;
-        }
+    //$scope.SearchPLDBReport = function () {
+    //    debugger;
 
-        if (!$scope.SelectedKPIAreaId ||
-            $scope.SelectedKPIAreaId == "0") {
-            toastr.warning("Please select KPI Area.");
-            return;
-        }
+    //    if (!$scope.Month || $scope.Month == "0") {
+    //        toastr.warning("Please select Month.");
+    //        return;
+    //    }
 
-        var selectedArea = ($scope.KPIAreaList || []).find(function (item) {
-            return String(item.KPIAreaId) === String($scope.SelectedKPIAreaId);
-        });
+    //    if (!$scope.FinYear || $scope.FinYear == "0") {
+    //        toastr.warning("Please select Financial Year.");
+    //        return;
+    //    }
 
-        $scope.SelectedKPIAreaName = selectedArea ? selectedArea.KPIArea : "";
+    //    if (!$scope.SelectedKPIAreaId || $scope.SelectedKPIAreaId == "0") {
+    //        toastr.warning("Please select KPI Area.");
+    //        return;
+    //    }
 
-        $scope.ShowPLDBReport = false;
-        $(".se-pre-con").fadeIn("slow");
+    //    var selectedArea = ($scope.KPIAreaList || []).find(function (item) {
+    //        return String(item.KPIAreaId) === String($scope.SelectedKPIAreaId);
+    //    });
 
-        $http.get(SiteUrl + "/KPI/GetUnitOfficeKPIReport", {
-            params: { month: $scope.Month, fy: $scope.FinYear, kpiAreaId: $scope.SelectedKPIAreaId }
-        }).then(function (response) {
+    //    $scope.SelectedKPIAreaName = selectedArea ? selectedArea.KPIArea : "";
 
-            var rawData = response.data || [];
+    //    $scope.ShowPLDBReport = false;
+    //    $(".se-pre-con").fadeIn("slow");
 
-            console.log('rawData', rawData);
+    //    function normalizeRegionId(value) {
+    //        return value == null ? "" : String(value).trim();
+    //    }
 
-            if (typeof rawData === "string") {
-                rawData = JSON.parse(rawData);
-            }
+    //    $http.get(SiteUrl + "/KPI/GetUnitOfficeKPIReport", {
+    //        params: { month: $scope.Month, fy: $scope.FinYear, kpiAreaId: $scope.SelectedKPIAreaId }
+    //    }).then(function (response) {
 
-            $scope.KPIIndicators = [];
-            $scope.PLDBReportData = [];
+    //        var rawData = response.data || [];
+
+    //        if (typeof rawData === "string") {
+    //            rawData = JSON.parse(rawData);
+    //        }
+
+    //        $scope.KPIIndicators = [];
+    //        $scope.PLDBReportData = [];
+
+    //        angular.forEach(rawData, function (item) {
+
+    //            var exists = $scope.KPIIndicators.some(function (kpi) {
+    //                return String(kpi.KPIIndicatorsId) === String(item.KPIIndicatorsId);
+    //            });
+
+    //            if (!exists) {
+    //                $scope.KPIIndicators.push({ KPIIndicatorsId: item.KPIIndicatorsId, KPIIndicators: item.KPIIndicators});
+    //            }
+    //        });
+
+    //        var districts = [];
+    //        var districtKeys = {};
+
+    //        angular.forEach(rawData, function (item) {
+
+    //            if (item.DISTRICT_ID == null) {
+    //                return;
+    //            }
+
+    //            var regionId = normalizeRegionId(item.UnitResionId);
+    //            var uniqueKey = JSON.stringify([ item.DIVISION_ID, item.DISTRICT_ID,  regionId ]);
+
+    //            if (!districtKeys[uniqueKey]) {
+    //                districtKeys[uniqueKey] = true;
+    //                districts.push({
+    //                    DivisionId: item.DIVISION_ID,
+    //                    Zone: item.Zone,
+    //                    DistrictId: item.DISTRICT_ID,
+    //                    District: item.District,
+    //                    UnitResionId: item.UnitResionId
+    //                });
+    //            }
+    //        });
+
+    //        districts.sort(function (a, b) {
+
+    //            var zoneCompare = (a.Zone || "").localeCompare(b.Zone || "");
+
+    //            if (zoneCompare !== 0) {
+    //                return zoneCompare;
+    //            }
+
+    //            var districtCompare = (a.District || "").localeCompare( b.District || "" );
+
+    //            if (districtCompare !== 0) {
+    //                return districtCompare;
+    //            }
+
+    //            return normalizeRegionId(a.UnitResionId).localeCompare(normalizeRegionId(b.UnitResionId) );
+    //        });
+
+    //        angular.forEach(districts, function (district) {
+
+    //            var records = rawData.filter(function (item) {
+    //                return String(item.DISTRICT_ID) === String(district.DistrictId) && String(item.DIVISION_ID) === String(district.DivisionId) && normalizeRegionId(item.UnitResionId) === normalizeRegionId(district.UnitResionId);
+    //            });
+
+    //            var districtRecord = records.find(function (item) {
+    //                return String(item.DISTRICT_ID) ===  String(district.DistrictId) && normalizeRegionId(item.UnitResionId) ===  normalizeRegionId(district.UnitResionId) &&  Number(item.KPIResultId) > 0;
+    //            });
+
+    //            districtRecord = districtRecord || {};
+    //            var row = {
+    //                DivisionId: district.DivisionId,
+    //                Zone: district.Zone,
+    //                DistrictId: district.DistrictId,
+    //                District: district.District,
+    //                UnitResionId: district.UnitResionId,
+    //                OfficeId: districtRecord.OfficeId || 0,
+    //                OfficeNameEn: districtRecord.OfficeNameEn || "",
+    //                OfficeEntryStatus: districtRecord.OfficeEntryStatus || "",
+    //                TotalMarksObtained: Number(districtRecord.TotalMarksObtained) || 0,
+    //                TotalWeightedMarks: Number(districtRecord.TotalWeightedMarks) || 0,
+    //                PercentageObtained: Number(districtRecord.PercentageObtained) || 0,
+    //                Performance: districtRecord.Performance || "",
+    //                Category: districtRecord.Category || "",
+    //                Rank: Number(districtRecord.Rank) || 0,
+    //                KPIData: [],
+    //                SubTotalWeightedMarks: 0,
+    //                SubTotalMarksObtained: 0,
+    //                ShowZone: false,
+    //                ZoneRowSpan: 1
+    //            };
+
+    //            angular.forEach($scope.KPIIndicators, function (indicator) {
+
+    //                var item = records.find(function (x) {
+    //                    return String(x.KPIIndicatorsId) === String(indicator.KPIIndicatorsId) && normalizeRegionId(x.UnitResionId) === normalizeRegionId(district.UnitResionId);
+    //                });
+
+    //                var kpi = {
+    //                    KPIIndicatorsId: indicator.KPIIndicatorsId,
+    //                    KPIIndicators: indicator.KPIIndicators,
+    //                    Target: item ? item.Target : 0,
+    //                    Achievement: item ? item.Achievement : 0,
+    //                    Progress: item ? item.Progress : 0,
+    //                    WeightedMarks: item ? item.WeightedMarks : 0,
+    //                    MarksObtained: item ? item.MarksObtained : 0
+    //                };
+
+    //                row.KPIData.push(kpi);
+    //                row.SubTotalWeightedMarks += Number(kpi.WeightedMarks) || 0;
+    //                row.SubTotalMarksObtained += Number(kpi.MarksObtained) || 0;
+    //            });
+
+    //            $scope.PLDBReportData.push(row);
+    //        });
+
+    //        var i = 0;
+
+    //        while (i < $scope.PLDBReportData.length) {
+
+    //            var start = i;
+    //            var zone = $scope.PLDBReportData[i].Zone;
+
+    //            while (i < $scope.PLDBReportData.length && $scope.PLDBReportData[i].Zone === zone) {
+    //                i++;
+    //            }
+
+    //            $scope.PLDBReportData[start].ShowZone = true;
+    //            $scope.PLDBReportData[start].ZoneRowSpan = i - start;
+    //        }
+
+    //        $scope.ShowPLDBReport = true;
+
+    //    }).catch(function (error) {
+    //        $scope.PLDBReportData = [];
+    //        $scope.KPIIndicators = [];
+    //        $scope.ShowPLDBReport = false;
+    //        toastr.error("Error while getting Unit Office KPI report.");
+
+    //    }).finally(function () {
+    //        $(".se-pre-con").fadeOut("slow");
+    //    });
+    //};
+
+    //$scope.SearchPLDBReport = function () {
+    //    debugger;
+
+    //    if (!$scope.Month || $scope.Month == "0") {
+    //        toastr.warning("Please select Month.");
+    //        return;
+    //    }
+
+    //    if (!$scope.FinYear || $scope.FinYear == "0") {
+    //        toastr.warning("Please select Financial Year.");
+    //        return;
+    //    }
+
+    //    if (!$scope.SelectedKPIAreaId ||
+    //        $scope.SelectedKPIAreaId == "0") {
+    //        toastr.warning("Please select KPI Area.");
+    //        return;
+    //    }
+
+    //    var selectedArea = ($scope.KPIAreaList || []).find(function (item) {
+    //        return String(item.KPIAreaId) === String($scope.SelectedKPIAreaId);
+    //    });
+
+    //    $scope.SelectedKPIAreaName = selectedArea
+    //        ? selectedArea.KPIArea
+    //        : "";
+
+    //    $scope.ShowPLDBReport = false;
+    //    $(".se-pre-con").fadeIn("slow");
+
+    //    $http.get(SiteUrl + "/KPI/GetUnitOfficeKPIReport", {
+    //        params: {
+    //            month: $scope.Month,
+    //            fy: $scope.FinYear,
+    //            kpiAreaId: $scope.SelectedKPIAreaId
+    //        }
+    //    }).then(function (response) {
+
+    //        var rawData = response.data || [];
+
+    //        console.log("rawData", rawData);
+
+    //        if (typeof rawData === "string") {
+    //            rawData = JSON.parse(rawData);
+    //        }
+
+    //        $scope.KPIIndicators = [];
+    //        $scope.PLDBReportData = [];
+
+    //        // 1. Get unique KPI indicators
+    //        angular.forEach(rawData, function (item) {
+    //            var exists = $scope.KPIIndicators.some(function (kpi) {
+    //                return String(kpi.KPIIndicatorsId) ===
+    //                    String(item.KPIIndicatorsId);
+    //            });
+
+    //            if (!exists) {
+    //                $scope.KPIIndicators.push({
+    //                    KPIIndicatorsId: item.KPIIndicatorsId,
+    //                    KPIIndicators: item.KPIIndicators
+    //                });
+    //            }
+    //        });
+
+    //        // 2. Create unique District + Unit Office combinations
+
+    //        // 2. Get unique District + Office + Region + Act combinations
+    //        var districts = [];
+
+    //        rawData.forEach(function (item) {
+
+    //            var districtId = item.DISTRICT_ID;
+    //            var districtName = item.District;
+    //            var divisionId = item.DIVISION_ID;
+    //            var zoneName = item.Zone;
+    //            var officeId = item.OfficeId;
+    //            var officeName = item.OfficeNameEn;
+
+    //            var unitResionId = item.UnitResionId || '';
+    //            var actId = item.ActId || '';
+
+    //            var exists = districts.some(function (d) {
+    //                return String(d.DistrictId) === String(districtId) &&
+    //                    String(d.DivisionId) === String(divisionId) &&
+    //                    String(d.OfficeId) === String(officeId) &&
+    //                    String(d.UnitResionId) === String(unitResionId) &&
+    //                    String(d.ActId) === String(actId);
+    //            });
+
+    //            if (districtId != null && !exists) {
+    //                districts.push({
+    //                    DivisionId: divisionId,
+    //                    Zone: zoneName,
+    //                    DistrictId: districtId,
+    //                    District: districtName,
+    //                    OfficeId: officeId,
+    //                    OfficeNameEn: officeName,
+    //                    UnitResionId: unitResionId,
+    //                    ActId: actId
+    //                });
+    //            }
+    //        });
 
 
-            var officeId = item.OfficeId;
-            var officeName = item.OfficeNameEn;
+    //        // 3. Sort by Zone, District, and Unit Office
+    //        districts.sort(function (a, b) {
 
-            var exists = districts.some(function (d) {
-                return String(d.DistrictId) === String(districtId) &&
-                    String(d.OfficeId) === String(officeId);
-            });
+    //            var zoneCompare = (a.Zone || "").localeCompare(b.Zone || "");
 
-            if (districtId != null && !exists) {
-                districts.push({
-                    DivisionId: divisionId,
-                    Zone: zoneName,
-                    DistrictId: districtId,
-                    District: districtName,
-                    OfficeId: officeId,
-                    officeName: officeName
-                });
-            }
+    //            if (zoneCompare !== 0) {
+    //                return zoneCompare;
+    //            }
+
+    //            var districtCompare = (a.District || "").localeCompare(b.District || "");
+
+    //            if (districtCompare !== 0) {
+    //                return districtCompare;
+    //            }
+
+    //            return (a.OfficeNameEn || "").localeCompare(
+    //                b.OfficeNameEn || ""
+    //            );
+    //        });
+
+    //        // 4. Build report rows for each Unit Office
+    //        angular.forEach(districts, function (district) {
+
+    //            var records = rawData.filter(function (item) {
+    //                return String(item.DISTRICT_ID) === String(district.DistrictId) && String(item.DIVISION_ID) === String(district.DivisionId) && String(item.OfficeId) === String(district.OfficeId);
+    //            });
+
+    //            var districtRecord = records.length > 0 ? records[0] : {};
+
+    //            console.log('districtRecord', districtRecord);
+
+    //            var row = {
+    //                DivisionId: district.DivisionId,
+    //                Zone: district.Zone,
+    //                DistrictId: district.DistrictId,
+    //                District: district.District,
+    //                OfficeId: district.OfficeId,
+    //                OfficeNameEn: districtRecord.OfficeNameEn,
+    //                OfficeEntryStatus: districtRecord.OfficeEntryStatus,
+    //                TotalMarksObtained: Number(districtRecord.TotalMarksObtained) || 0,
+    //                TotalWeightedMarks: Number(districtRecord.TotalWeightedMarks) || 0,
+    //                PercentageObtained: Number(districtRecord.PercentageObtained) || 0,
+    //                Performance: districtRecord.Performance || "",
+    //                Category: districtRecord.Category || "",
+    //                Rank: Number(districtRecord.Rank) || 0,
+    //                KPIData: [],
+    //                SubTotalWeightedMarks: 0,
+    //                SubTotalMarksObtained: 0,
+    //                ShowZone: false,
+    //                ZoneRowSpan: 1
+    //            };
+
+    //            // 5. Add KPI data for this specific Unit Office
+    //            angular.forEach($scope.KPIIndicators, function (indicator) {
+
+    //                var item = records.find(function (x) {
+    //                    return String(x.KPIIndicatorsId) === String(indicator.KPIIndicatorsId);
+    //                });
+
+    //                var kpi = {
+    //                    KPIIndicatorsId: indicator.KPIIndicatorsId,
+    //                    KPIIndicators: indicator.KPIIndicators,
+    //                    Target: item ? item.Target : 0,
+    //                    Achievement: item ? item.Achievement : 0,
+    //                    Progress: item ? item.Progress : 0,
+    //                    WeightedMarks: item ? item.WeightedMarks : 0,
+    //                    MarksObtained: item ? item.MarksObtained : 0
+    //                };
+
+    //                row.KPIData.push(kpi);
+    //                row.SubTotalWeightedMarks += Number(kpi.WeightedMarks) || 0;
+    //                row.SubTotalMarksObtained += Number(kpi.MarksObtained) || 0;
+    //            });
+
+    //            $scope.PLDBReportData.push(row);
+    //        });
+
+    //        // 6. Merge Zone cells using rowspan
+    //        var i = 0;
+
+    //        while (i < $scope.PLDBReportData.length) {
+
+    //            var start = i;
+    //            var zone = $scope.PLDBReportData[i].Zone;
+
+    //            while (i < $scope.PLDBReportData.length && $scope.PLDBReportData[i].Zone === zone) {
+    //                i++;
+    //            }
+
+    //            $scope.PLDBReportData[start].ShowZone = true;
+    //            $scope.PLDBReportData[start].ZoneRowSpan = i - start;
+    //        }
+
+    //        $scope.ShowPLDBReport = true;
+
+    //    }).catch(function (error) {
+
+    //        console.error("Error loading Unit Office KPI report:", error);
+
+    //        $scope.PLDBReportData = [];
+    //        $scope.KPIIndicators = [];
+    //        $scope.ShowPLDBReport = false;
+
+    //        toastr.error("Error while getting Unit Office KPI report.");
+
+    //    }).finally(function () {
+    //        $(".se-pre-con").fadeOut("slow");
+    //    });
+    //};
 
 
-            var districts = [];
 
-            rawData.forEach(function (item) {
-
-                var districtId = item.DISTRICT_ID;
-                var districtName = item.District;
-                var divisionId = item.DIVISION_ID;
-                var zoneName = item.Zone;
-
-                var exists = districts.some(function (d) {
-                    return String(d.DistrictId) === String(districtId);
-                });
-
-                if (districtId != null && !exists) {
-                    districts.push({ DivisionId: divisionId, Zone: zoneName, DistrictId: districtId, District: districtName });
-                }
-            });
-
-            districts.sort(function (a, b) {
-                var zoneCompare = (a.Zone || "").localeCompare(b.Zone || "");
-
-                if (zoneCompare !== 0) {
-                    return zoneCompare;
-                }
-
-                return (a.District || "").localeCompare(b.District || "");
-            });
-
-            var uniqueZones = [];
-
-            districts.forEach(function (district) {
-                if (uniqueZones.indexOf(district.Zone) === -1) {
-                    uniqueZones.push(district.Zone);
-                }
-            });
-
-            angular.forEach(districts, function (district) {
-
-
-                var records = rawData.filter(function (item) {
-                    return String(item.DISTRICT_ID) === String(district.DistrictId) &&
-                        String(item.DIVISION_ID) === String(district.DivisionId) &&
-                        String(item.OfficeId) === String(district.OfficeId);
-                });
-
-
-                var districtRecord = records.length > 0 ? records[0] : {};
-
-                var row = {
-                    DivisionId: district.DivisionId,
-                    Zone: district.Zone,
-                    DistrictId: district.DistrictId,
-                    District: district.District,
-                    OfficeId: district.OfficeId,
-                    OfficeNameEn: district.OfficeNameEn,
-                    TotalMarksObtained: Number(districtRecord.TotalMarksObtained) || 0,
-                    TotalWeightedMarks: Number(districtRecord.TotalWeightedMarks) || 0,
-                    PercentageObtained: Number(districtRecord.PercentageObtained) || 0,
-                    Performance: districtRecord.Performance || '',
-                    Category: districtRecord.Category || '',
-                    Rank: Number(districtRecord.Rank) || 0,
-                    KPIData: [],
-                    SubTotalWeightedMarks: 0,
-                    SubTotalMarksObtained: 0,
-                    ShowZone: false,
-                    ZoneRowSpan: 1
-                };
-
-                angular.forEach($scope.KPIIndicators, function (indicator) {
-
-                    var item = records.find(function (x) {
-                        return String(x.KPIIndicatorsId) === String(indicator.KPIIndicatorsId);
-                    });
-
-                    var kpi = {
-                        KPIIndicatorsId: indicator.KPIIndicatorsId,
-                        KPIIndicators: indicator.KPIIndicators,
-                        Target: item ? item.Target : 0,
-                        Achievement: item ? item.Achievement : 0,
-                        Progress: item ? item.Progress : 0,
-                        WeightedMarks: item ? item.WeightedMarks : 0,
-                        MarksObtained: item ? item.MarksObtained : 0
-                    };
-
-                    row.KPIData.push(kpi);
-                    row.SubTotalWeightedMarks += Number(kpi.WeightedMarks) || 0;
-                    row.SubTotalMarksObtained += Number(kpi.MarksObtained) || 0;
-                }
-                );
-
-                $scope.PLDBReportData.push(row);
-            });
-
-            var i = 0;
-
-            while (i < $scope.PLDBReportData.length) {
-
-                var start = i;
-                var zone = $scope.PLDBReportData[i].Zone;
-
-                while (i < $scope.PLDBReportData.length && $scope.PLDBReportData[i].Zone === zone) {
-                    i++;
-                }
-
-                $scope.PLDBReportData[start].ShowZone = true;
-                $scope.PLDBReportData[start].ZoneRowSpan = i - start;
-            }
-
-            $scope.ShowPLDBReport = true;
-
-        }).catch(function (error) {
-
-            $scope.PLDBReportData = [];
-            $scope.KPIIndicators = [];
-            $scope.ShowPLDBReport = false;
-
-            toastr.error("Error while getting Unit Office KPI report.");
-
-        }).finally(function () {
-            $(".se-pre-con").fadeOut("slow");
-        });
-    };
-
+    // Get a KPI's values for a district row
 
     $scope.SearchPLDBReport = function () {
         debugger;
@@ -335,6 +548,12 @@ MasterMod.controller("SocietKPIUnitOfficeReportECont", function ($scope, $rootSc
         $scope.ShowPLDBReport = false;
         $(".se-pre-con").fadeIn("slow");
 
+        function normalizeRegionId(value) {
+            return value == null || String(value).trim() === ""
+                ? ""
+                : String(value).trim();
+        }
+
         $http.get(SiteUrl + "/KPI/GetUnitOfficeKPIReport", {
             params: {
                 month: $scope.Month,
@@ -345,17 +564,18 @@ MasterMod.controller("SocietKPIUnitOfficeReportECont", function ($scope, $rootSc
 
             var rawData = response.data || [];
 
-            console.log("rawData", rawData);
-
             if (typeof rawData === "string") {
                 rawData = JSON.parse(rawData);
             }
 
+            console.log("API Raw Data:", rawData);
+
             $scope.KPIIndicators = [];
             $scope.PLDBReportData = [];
 
-            // 1. Get unique KPI indicators
+            // 1. Unique KPI Indicators
             angular.forEach(rawData, function (item) {
+
                 var exists = $scope.KPIIndicators.some(function (kpi) {
                     return String(kpi.KPIIndicatorsId) ===
                         String(item.KPIIndicatorsId);
@@ -369,35 +589,44 @@ MasterMod.controller("SocietKPIUnitOfficeReportECont", function ($scope, $rootSc
                 }
             });
 
-            // 2. Create unique District + Unit Office combinations
+            // 2. Group only by District + UnitResionId
             var districts = [];
+            var districtKeys = {};
 
-            rawData.forEach(function (item) {
+            angular.forEach(rawData, function (item) {
 
-                var districtId = item.DISTRICT_ID;
-                var districtName = item.District;
-                var divisionId = item.DIVISION_ID;
-                var zoneName = item.Zone;
-                var officeId = item.OfficeId;
-                var officeName = item.OfficeNameEn;
+                if (item.DISTRICT_ID == null) {
+                    return;
+                }
 
-                var exists = districts.some(function (d) {
-                    return String(d.DistrictId) === String(districtId) && String(d.DivisionId) === String(divisionId) && String(d.OfficeId) === String(officeId);
-                });
+                var regionId = normalizeRegionId(item.UnitResionId);
 
-                if (districtId != null && !exists) {
+                var uniqueKey = JSON.stringify([
+                    item.DIVISION_ID,
+                    item.DISTRICT_ID,
+                    regionId
+                ]);
+
+                if (!districtKeys[uniqueKey]) {
+
+                    districtKeys[uniqueKey] = true;
+
                     districts.push({
-                        DivisionId: divisionId,
-                        Zone: zoneName,
-                        DistrictId: districtId,
-                        District: districtName,
-                        OfficeId: officeId,
-                        OfficeNameEn: officeName
+                        DivisionId: item.DIVISION_ID,
+                        Zone: item.Zone,
+                        DistrictId: item.DISTRICT_ID,
+                        District: item.District,
+                        UnitResionId: item.UnitResionId,
+                        OfficeId: item.OfficeId,
+                        OfficeNameEn: item.OfficeNameEn,
+                        OfficeEntryStatus: item.OfficeEntryStatus
                     });
                 }
             });
 
-            // 3. Sort by Zone, District, and Unit Office
+            console.log("Unique District + Region Rows:", districts);
+
+            // 3. Sort
             districts.sort(function (a, b) {
 
                 var zoneCompare = (a.Zone || "").localeCompare(b.Zone || "");
@@ -406,59 +635,84 @@ MasterMod.controller("SocietKPIUnitOfficeReportECont", function ($scope, $rootSc
                     return zoneCompare;
                 }
 
-                var districtCompare = (a.District || "").localeCompare(b.District || "");
+                var districtCompare = (a.District || "").localeCompare(
+                    b.District || ""
+                );
 
                 if (districtCompare !== 0) {
                     return districtCompare;
                 }
 
-                return (a.OfficeNameEn || "").localeCompare(
-                    b.OfficeNameEn || ""
+                return normalizeRegionId(a.UnitResionId).localeCompare(
+                    normalizeRegionId(b.UnitResionId)
                 );
             });
 
-            // 4. Build report rows for each Unit Office
+            // 4. Create report rows using UnitResionId
             angular.forEach(districts, function (district) {
 
                 var records = rawData.filter(function (item) {
-                    return String(item.DISTRICT_ID) === String(district.DistrictId) && String(item.DIVISION_ID) === String(district.DivisionId) && String(item.OfficeId) === String(district.OfficeId);
+
+                    return String(item.DIVISION_ID) ===
+                        String(district.DivisionId) &&
+
+                        String(item.DISTRICT_ID) ===
+                        String(district.DistrictId) &&
+
+                        normalizeRegionId(item.UnitResionId) ===
+                        normalizeRegionId(district.UnitResionId);
                 });
 
-                var districtRecord = records.length > 0 ? records[0] : {};
+                var districtRecord = records.length > 0
+                    ? records[0]
+                    : {};
 
-                console.log('districtRecord', districtRecord);
-
+                // 5. Create row
                 var row = {
                     DivisionId: district.DivisionId,
                     Zone: district.Zone,
                     DistrictId: district.DistrictId,
                     District: district.District,
-                    OfficeId: district.OfficeId,
-                    OfficeNameEn: districtRecord.OfficeNameEn,
-                    OfficeEntryStatus: districtRecord.OfficeEntryStatus,
-                    TotalMarksObtained: Number(districtRecord.TotalMarksObtained) || 0,
-                    TotalWeightedMarks: Number(districtRecord.TotalWeightedMarks) || 0,
-                    PercentageObtained: Number(districtRecord.PercentageObtained) || 0,
+
+                    UnitResionId: district.UnitResionId,
+
+                    OfficeId: districtRecord.OfficeId || 0,
+                    OfficeNameEn: districtRecord.OfficeNameEn || "",
+                    OfficeEntryStatus: districtRecord.OfficeEntryStatus || "",
+
+                    TotalMarksObtained:
+                        Number(districtRecord.TotalMarksObtained) || 0,
+
+                    TotalWeightedMarks:
+                        Number(districtRecord.TotalWeightedMarks) || 0,
+
+                    PercentageObtained:
+                        Number(districtRecord.PercentageObtained) || 0,
+
                     Performance: districtRecord.Performance || "",
                     Category: districtRecord.Category || "",
                     Rank: Number(districtRecord.Rank) || 0,
+
                     KPIData: [],
                     SubTotalWeightedMarks: 0,
                     SubTotalMarksObtained: 0,
+
                     ShowZone: false,
                     ZoneRowSpan: 1
                 };
 
-                // 5. Add KPI data for this specific Unit Office
+                // 6. KPI details for the same District + UnitResionId
                 angular.forEach($scope.KPIIndicators, function (indicator) {
 
                     var item = records.find(function (x) {
-                        return String(x.KPIIndicatorsId) === String(indicator.KPIIndicatorsId);
+                        return String(x.KPIIndicatorsId) ===
+                            String(indicator.KPIIndicatorsId);
                     });
 
                     var kpi = {
                         KPIIndicatorsId: indicator.KPIIndicatorsId,
                         KPIIndicators: indicator.KPIIndicators,
+
                         Target: item ? item.Target : 0,
                         Achievement: item ? item.Achievement : 0,
                         Progress: item ? item.Progress : 0,
@@ -467,14 +721,18 @@ MasterMod.controller("SocietKPIUnitOfficeReportECont", function ($scope, $rootSc
                     };
 
                     row.KPIData.push(kpi);
-                    row.SubTotalWeightedMarks += Number(kpi.WeightedMarks) || 0;
-                    row.SubTotalMarksObtained += Number(kpi.MarksObtained) || 0;
+
+                    row.SubTotalWeightedMarks +=
+                        Number(kpi.WeightedMarks) || 0;
+
+                    row.SubTotalMarksObtained +=
+                        Number(kpi.MarksObtained) || 0;
                 });
 
                 $scope.PLDBReportData.push(row);
             });
 
-            // 6. Merge Zone cells using rowspan
+            // 7. Zone rowspan
             var i = 0;
 
             while (i < $scope.PLDBReportData.length) {
@@ -482,13 +740,25 @@ MasterMod.controller("SocietKPIUnitOfficeReportECont", function ($scope, $rootSc
                 var start = i;
                 var zone = $scope.PLDBReportData[i].Zone;
 
-                while (i < $scope.PLDBReportData.length && $scope.PLDBReportData[i].Zone === zone) {
+                while (
+                    i < $scope.PLDBReportData.length &&
+                    $scope.PLDBReportData[i].Zone === zone
+                ) {
                     i++;
                 }
 
                 $scope.PLDBReportData[start].ShowZone = true;
                 $scope.PLDBReportData[start].ZoneRowSpan = i - start;
             }
+
+            console.log("FINAL REPORT:", $scope.PLDBReportData);
+
+            console.log(
+                "Jaipur Report Rows:",
+                $scope.PLDBReportData.filter(function (x) {
+                    return String(x.DistrictId) === "12";
+                })
+            );
 
             $scope.ShowPLDBReport = true;
 
@@ -509,7 +779,7 @@ MasterMod.controller("SocietKPIUnitOfficeReportECont", function ($scope, $rootSc
 
 
 
-    // Get a KPI's values for a district row
+
     $scope.getKPIData = function (row, kpiId) {
 
         var item = (row && row.KPIData || []).find(function (x) {
