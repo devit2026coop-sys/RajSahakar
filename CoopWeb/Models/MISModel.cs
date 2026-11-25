@@ -8939,7 +8939,7 @@ namespace Cooperative.Models
             return Result;
         }
 
-        public DataTable GetKPIReport(string KPIFor, int Month, string FY, int OfficeId, int DistrictId, int ResionId = 0, int DivisionId = 0)
+        public DataTable GetKPIReport(string KPIFor, int Month, string FY, int OfficeId, int DistrictId, int ResionId = 0, int DivisionId = 0, string UnitResionId = "" , string ActId = "")
         {
             DataTable dt = new DataTable();
             UserEntity _LoggedInUser = (UserEntity)System.Web.HttpContext.Current.Session[SessionIdentity.Admin];
@@ -8954,6 +8954,8 @@ namespace Cooperative.Models
                 objDBAccess.AddParameterToCommand("@DistrictId", DBFactoryParameterType.Int, DistrictId);
                 objDBAccess.AddParameterToCommand("@ResionId", DBFactoryParameterType.Int, ResionId);
                 objDBAccess.AddParameterToCommand("@DivisionId", DBFactoryParameterType.Int, DivisionId);
+                objDBAccess.AddParameterToCommand("@UnitResionId", DBFactoryParameterType.NVarchar, UnitResionId);
+                objDBAccess.AddParameterToCommand("@ActId", DBFactoryParameterType.NVarchar, ActId);
 
                 dt = objDBAccess.GetTable();
             }
@@ -9000,7 +9002,7 @@ namespace Cooperative.Models
             return dt;
         }
 
-        public DataTable GetKPIOverallRating(string KPIFor, int Month, string FY, int OfficeId, int DistrictId = 0, int DivisionId = 0, int ResionId = 0)
+        public DataTable GetKPIOverallRating(string KPIFor, int Month, string FY, int OfficeId, int DistrictId = 0, int DivisionId = 0, int ResionId = 0 , string UnitResionId = "" , string ActId = "")
         {
             DataTable dt = new DataTable();
 
@@ -9016,6 +9018,8 @@ namespace Cooperative.Models
                 objDBAccess.AddParameterToCommand("@DistrictId", DBFactoryParameterType.Int, DistrictId);
                 objDBAccess.AddParameterToCommand("@DivisionId", DBFactoryParameterType.Int, DivisionId);
                 objDBAccess.AddParameterToCommand("@ResionId", DBFactoryParameterType.Int, ResionId);
+                objDBAccess.AddParameterToCommand("@UnitResionId", DBFactoryParameterType.NVarchar, UnitResionId);
+                objDBAccess.AddParameterToCommand("@ActId", DBFactoryParameterType.NVarchar, ActId);
 
                 dt = objDBAccess.GetTable();
 

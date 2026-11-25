@@ -57,15 +57,6 @@
                             कार्य प्रदर्शन के आधार पर (KPI)
                         </h4>
                     </div>
-                    @*<div class="col-md-3 form-group MarginTop20">
-                            <label for="ddlGSS"><b> Society Name </b></label>
-                            <select class="form-control" id="ddlGSS" ng-model="FormData.SocietyID" ng-init="FormData.SocietyID ='0'" ng-change="GetKPIResult()">
-                                <option value="0" selected="selected" disabled>--चुनें--</option>
-                                <option ng-repeat="item in SocietyList" value="{{item.SocietyID}}">
-                                    {{_language =='en-us' ?  item.SocietyName : item.SocietyName}}
-                                </option>
-                            </select>
-                        </div>*@
                     <div class="col-md-3 form-group">
                         <label class="field-label"><b>{{ translation.District}}</b> </label>
                         <select ng-model="pacsDetail.DistrictId" class="form-control" ng-disabled="pacsDetail.DistrictId > 0 || IsFormDisabled">
@@ -117,19 +108,19 @@
                                 <th style="width:15%;" ng-if="isAgricultureColumnVisible()">
                                     Agriculture Distribution
                                 </th>
-                                <th style="width:6%;">Weight Marks</th>
-                                <th style="width:8%;">Obtained</th>
-
-                                @*display:none
-                                    display:none*@
+                                <th style="width:15%;" ng-if="isOtherActivitiesColumnVisible()">
+                                    Other Activities
+                                </th>
+                                <th style="width:6%;" ng-if="RoleId != 102278">Weight Marks</th>
+                                <th style="width:8%;" ng-if="RoleId != 102278">Obtained</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr ng-repeat-start="area in KPIAreas track by $index">
-                                <td rowspan="{{area.Indicators.length}}">
+                                <td rowspan="{{getVisibleIndicatorCount(area)}}">
                                     {{$index+1}}
                                 </td>
-                                <td rowspan="{{area.Indicators.length}}">
+                                <td rowspan="{{getVisibleIndicatorCount(area)}}">
                                     {{area.KPIArea}}
                                 </td>
                                 <!-- First Indicator -->
@@ -153,6 +144,13 @@
                                                 Decimal values are not allowed.
                                             </span>
                                         </div>
+
+                                        <!-- Membership Difference -->
+                                        <div class="col-lg-6">
+                                            <span>Difference between PY and CY Membership Count </span>
+                                            <input type="text" class="form-control" ng-value="area.Indicators[0].MembershipDifference" readonly />
+                                        </div>
+
                                     </div>
 
                                     <!-- Loan = Single Textbox -->
@@ -161,11 +159,11 @@
                                     </div>
 
                                     <!-- All other KPIs: Keep existing dropdown -->
-                                    <div style="display:flex; gap:10px;" ng-if="area.Indicators[0].KPIIndicatorsId != 59 && !isTextInput(area.Indicators[0])  && !isLoanInput(area.Indicators[0])">
+                                    <div style="" ng-if="area.Indicators[0].KPIIndicatorsId != 59 && !isTextInput(area.Indicators[0])  && !isLoanInput(area.Indicators[0])">
 
                                         <div style="width:100%;" ng-if="area.Indicators[0].KPIIndicatorsId != 57">
                                             <!-- Keep your existing select and its options here unchanged -->
-                                            <select class="form-control" ng-model="area.Indicators[0].SelectedOption" ng-change="Calculate(area.Indicators[0]);setEPACSDependent();setAgricultureDependent();" ng-disabled="IsFormDisabled">
+                                            <select class="form-control" ng-model="area.Indicators[0].SelectedOption" ng-change="Calculate(area.Indicators[0]);setEPACSDependent();setAgricultureDependent();LandAvailabilityChanged();" ng-disabled="IsFormDisabled">
                                                 <option value="">--Select--</option>
                                                 <option ng-repeat="item in area.Indicators[0].Options"
                                                         value="{{item.KPI_KEYId}}">
@@ -173,13 +171,21 @@
                                                 </option>
                                             </select>
                                         </div>
-                                        <div style="display:flex; gap:10px;">
-                                            <div ng-if="area.Indicators[0].KPIIndicatorsId == 57" style="display: flex; gap: 8px; align-items: center; ">
-                                                <input type="number" class="form-control" style="max-width:96%" ng-model="area.Indicators[0].ProfitLastYearAmount" step="0.01" ng-change="CalculateProfitLastYearMarks(area.Indicators[0]);" min="0" placeholder="Enter Profit & Loss for last year" ng-disabled="IsFormDisabled" />
+
+                                      
+                                            <div ng-if="area.Indicators[0].KPIIndicatorsId == 57">
+                                                    <select class="form-control"  ng-model="area.Indicators[0].ProfitLossType" ng-disabled="IsFormDisabled" ng-change="CalculateProfitLastYearMarks(area.Indicators[0])">
+                                                    <option value="">-- Select --</option>
+                                                    <option value="Profit">Profit</option>
+                                                    <option value="Loss">Loss</option>
+                                                    </select>
+
+                                                
                                             </div>
-                                            <div ng-if="area.Indicators[0].KPIAreaId == 31 &&  area.Indicators[0].KPIIndicatorsId == 57">
+                                            <div ng-if="area.Indicators[0].KPIAreaId == 31 &&  area.Indicators[0].KPIIndicatorsId == 57"  style="display:flex; margin-top:8px; gap:10px;">
+                                               <input type="number" class="form-control" style="width: 48%;" ng-model="area.Indicators[0].ProfitLastYearAmount" step="0.01" ng-change="CalculateProfitLastYearMarks(area.Indicators[0]);" min="0" placeholder="Enter Profit & Loss for last year" ng-disabled="IsFormDisabled" />
                                                 <!-- Financial Year dropdown for first indicator: KPI 57 -->
-                                                <select class="form-control" style="flex-shrink: 0;" ng-model="area.Indicators[0].ProfitFinancialid" ng-disabled="IsFormDisabled">
+                                                <select class="form-control" style="width: 48%;" ng-model="area.Indicators[0].ProfitFinancialid" ng-disabled="IsFormDisabled">
                                                     <option value=""> Select FY </option>
                                                     <option ng-repeat="fy in ProfitFinancialYearList" value="{{fy.FIN_YEAR_MASTR_ID}}">
                                                         {{fy.FIN_YEAR_NAME}}
@@ -187,7 +193,11 @@
                                                 </select>
                                             </div>
 
-                                        </div>
+                                           <!-- Audit Completed for Last Year - KPI 66 -->
+                                          <div ng-if=" area.Indicators[0].KPIAreaId == 33 && area.Indicators[0].KPIIndicatorsId == 66 && isAuditCompletedYes(area.Indicators[0])"" style="display:flex; margin-top:8px; gap:10px;">
+                                             <input type="date" class="form-control"  style="width:170px;" ng-model="area.Indicators[0].AuditCompleteDate"  ng-disabled="IsFormDisabled || isEPACSDependent(indicator)" />        
+                                          </div>
+                                        
                                     </div>
 
                                     <!-- Keep your existing ProfitFinancialid dropdown here unchanged -->
@@ -211,21 +221,29 @@
                                 </td>
                                 <td ng-if="isAgricultureColumnVisible()">
                                     <div ng-if="area.KPIAreaId == 34 && isYesOption(area.Indicators[0])">
-                                        <input type="number" min="0" class="form-control" style="max-width: 96%" ng-model="area.Indicators[0].AgricultureTrunOver" placeholder="Enter Turnover" ng-disabled="IsFormDisabled" />
+                                        <input type="number" min="0" class="form-control" style="max-width: 96%" ng-model="area.Indicators[0].AgricultureTrunOver" placeholder="Enter Turnover" ng-disabled="IsFormDisabled" oninput="if(this.value.includes('.')) this.value=this.value.slice(0,this.value.indexOf('.')+3);" />
                                     </div>
                                 </td>
+
+                                 <!-- OTHER ACTIVITIES TURNOVER -->
+                                <td ng-if="isOtherActivitiesColumnVisible()">
+                                    <div ng-if="area.KPIAreaId == 35 && isYesOption(area.Indicators[0])">
+                                        <input type="number"  min="0" step="0.01"  class="form-control" style="max-width:96%" ng-model="area.Indicators[0].OtherActivitiesTurnOver"  placeholder="Enter Turnover" ng-disabled="IsFormDisabled"/>
+                                    </div>
+                                </td>
+
                                 @*display: none*@
-                                <td class="text-center" style=" vertical-align: middle;" ng-hide="isLoanInput(area.Indicators[0])">
+                                <td class="text-center" style=" vertical-align: middle;" ng-if="RoleId != 102278" ng-hide="isLoanInput(area.Indicators[0])">
                                     {{area.Indicators[0].WeightedMarks || 0}}
                                 </td>
-                                <td ng-hide="isLoanInput(area.Indicators[0])">
+                                <td ng-hide="isLoanInput(area.Indicators[0])" ng-if="RoleId != 102278">
                                     @*style="display: none"*@
                                     <input type="text" class="form-control" ng-model="area.Indicators[0].MarksObtained" readonly />
                                 </td>
                             </tr>
 
                             <!-- Remaining Indicators -->
-                            <tr ng-repeat="indicator in area.Indicators.slice(1)" ng-repeat-end>
+                            <tr ng-repeat="indicator in area.Indicators.slice(1)" ng-if="(indicator.KPIIndicatorsId != 204 && !isGodownIndicator(indicator)) || isLandAvailableYes()" ng-repeat-end>
                                 <td>
                                     {{indicator.KPIIndicators}}
                                 </td>
@@ -240,6 +258,13 @@
                                             <span>Current</span>
                                             <input type="number" min="0" class="form-control" ng-model="indicator.ShareCapitalCurrent" placeholder="Please enter.." ng-change="isShareCapitalCalculate(indicator)" ng-disabled="IsFormDisabled" />
                                         </div>
+
+                                        <!-- Difference -->
+                                        <div class="col-lg-4">
+                                            <span>Difference between PY and CY </span>
+                                            <input type="number" class="form-control" ng-value="indicator.ShareCapitalDifference" readonly />
+                                        </div>
+
                                     </div>
                                     <div ng-if="isLoanInput(indicator)">
                                         <input type="number" min="0" class="form-control" style="max-width: 96%" ng-model="indicator.KCCLoanDisbursedAmt" placeholder="Enter Loan Amount" ng-change="Calculate(indicator)" ng-disabled="IsFormDisabled" />
@@ -249,8 +274,7 @@
                                     </div>
 
                                     <div ng-if="indicator.KPIIndicatorsId == 62" style="display: flex; gap: 8px; align-items: center; ">
-                                        <input type="number" class="form-control" style="max-width: 96%" ng-model="indicator.OtherThanKccLoanDisAmount" step="0.01" ng-change="CalculateOtherThanKccLoanMarks(indicator);" min="0" placeholder="Enter Other Than KCC Recovery amount in lakh" oninput="if(this.value > 100) this.value = 100; if(this.value.includes('.')) this.value = this.value.slice(0, this.value.indexOf('.') + 3);" ng-disabled="IsFormDisabled" />
-                                        %
+                                        <input type="number" class="form-control" style="max-width: 96%" ng-model="indicator.OtherThanKccLoanDisAmount" step="0.01" ng-change="CalculateOtherThanKccLoanMarks(indicator);" min="0" placeholder="Enter Other Than KCC Recovery amount in lakh" oninput="if(this.value > 100) this.value = 100; if(this.value.includes('.')) this.value = this.value.slice(0, this.value.indexOf('.') + 3);" ng-disabled="IsFormDisabled" />           
                                     </div>
 
                                     <div ng-if="indicator.KPIIndicatorsId == 63" style="display: flex; gap: 8px; align-items: center; ">
@@ -273,7 +297,12 @@
                                         <input type="number" min="0" class="form-control" style="max-width: 96%" ng-model="indicator.NoGodown" placeholder="Enter No of Godown" ng-change="LimitNoOfGodown(indicator)" ng-disabled="IsFormDisabled" />
                                     </div>
 
-                                    <div ng-if="indicator.KPIIndicatorsId != 59 && indicator.KPIIndicatorsId != 63 && indicator.KPIIndicatorsId != 62 && indicator.KPIIndicatorsId != 64 && indicator.KPIIndicatorsId != 65 && indicator.KPIIndicatorsId != 204 && !isTextInput(indicator) && !isLoanInput(indicator)" style="display:flex; align-items:center; gap:8px;">
+                                    <!-- KPI 56 - Total Loanee Number -->
+                                    <div ng-if="indicator.KPIIndicatorsId == 56">
+                                        <input type="text"  class="form-control" ng-value="(indicator.IncrementPercentage || '0.00') + '%'" readonly />
+                                    </div>
+
+                                    <div ng-if="indicator.KPIIndicatorsId != 59 && indicator.KPIIndicatorsId != 63 && indicator.KPIIndicatorsId != 62 && indicator.KPIIndicatorsId != 64 && indicator.KPIIndicatorsId != 65 && indicator.KPIIndicatorsId != 204 && indicator.KPIIndicatorsId != 56 && !isTextInput(indicator) && !isLoanInput(indicator)" style="display:flex; align-items:center; gap:8px;">
                                         <select class="form-control" style="max-width: 96%;" ng-model="indicator.SelectedOption" ng-disabled="IsFormDisabled || isEPACSDependent(indicator) || ((indicator.KPIIndicatorsId == 72 || indicator.KPIIndicatorsId == 73 || indicator.KPIIndicatorsId == 74) && !isAgricultureInputEnabled())" ng-change="Calculate(indicator);setAgricultureDependent();">
                                             <option value="">--Select--</option>
                                             <option ng-repeat="item in indicator.Options" value="{{item.KPI_KEYId}}">
@@ -294,7 +323,11 @@
                                         </select>
 
                                         <input type="date" class="form-control" style="width:170px;" ng-if="area.KPIAreaId == 36 && indicator.KPIIndicatorsId == 86" ng-model="indicator.DynamicDate" ng-disabled="IsFormDisabled || isEPACSDependent(indicator)" />
-                                    </div>
+
+                                        <div ng-if="area.KPIAreaId == 33 && indicator.KPIIndicatorsId == 69 && isBODMeetingDate(indicator);">
+                                           <input type="date" class="form-control" style="width:170px;" ng-model="indicator.BODMeetingDate" ng-disabled="IsFormDisabled || isEPACSDependent(indicator)" />
+                                         </div>
+                                    </div>                          
 
                                     <!-- ==========================================
                                     KPI 83 - Any Other - Option 2
@@ -325,18 +358,24 @@
                                 </td>
                                 <td ng-if="isAgricultureColumnVisible()">
                                     <div ng-if="indicator.KPIAreaId == 34 && isYesOption(indicator)">
-                                        <input type="number" min="0" class="form-control" style="max-width: 96%" ng-model="indicator.AgricultureTrunOver" placeholder="Enter Turnover" ng-disabled="IsFormDisabled" />
+                                        <input type="number" min="0" step="0.01" class="form-control" style="max-width: 96%" ng-model="indicator.AgricultureTrunOver" placeholder="Enter Turnover" ng-disabled="IsFormDisabled" oninput="if(this.value.includes('.')) this.value=this.value.slice(0,this.value.indexOf('.')+3);" />
                                     </div>
                                 </td>
 
-                                <td class="text-center" style=" vertical-align: middle;" ng-hide="isLoanInput(indicator) || isNoGodownInput(indicator)">
+                                  <td ng-if="isOtherActivitiesColumnVisible()">
+                                      <div ng-if="indicator.KPIAreaId == 35 && isYesOption(indicator)">
+                                          <input type="number" min="0" step="0.01" class="form-control" style="max-width: 96%" ng-model="indicator.OtherActivitiesTurnOver" placeholder="Enter Turnover" ng-disabled="IsFormDisabled" oninput="if(this.value.includes('.')) this.value=this.value.slice(0,this.value.indexOf('.')+3);" />
+                                      </div>
+                                  </td>
+
+                                <td class="text-center" style=" vertical-align: middle;" ng-if="RoleId != 102278" ng-hide="isLoanInput(indicator) || isNoGodownInput(indicator)">
                                     {{indicator.WeightedMarks || 0}}
                                 </td>
 
-                                <td ng-hide="isLoanInput(indicator) || isNoGodownInput(indicator)">
+                                <td ng-hide="isLoanInput(indicator) || isNoGodownInput(indicator)" ng-if="RoleId != 102278">
 
                                     <!-- Normal KPI -->
-                                    <input type="text" class="form-control" ng-if="indicator.KPIIndicatorsId != 83" ng-model="indicator.MarksObtained" readonly />
+                                    <input type="text"  class="form-control" ng-if="indicator.KPIIndicatorsId != 83" ng-model="indicator.MarksObtained" readonly />
 
                                     <!-- KPI 83 - Any Other -->
                                     <div ng-if="indicator.KPIIndicatorsId == 83">

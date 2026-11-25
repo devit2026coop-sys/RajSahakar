@@ -1,5 +1,5 @@
 ﻿var MasterMod = angular.module('SocietyKPIReportModule', ['angularUtils.directives.dirPagination']);
-MasterMod.controller("SocietKPIReportECont", function ($scope, $rootScope, $http) {
+MasterMod.controller("SocietKPIReportECont", function ($scope, $rootScope, $http, $timeout) {
     /*------------Paging and Filter-----------------*/
     $scope.DataPaging = {
         searchBoxDivId: 'search-filter',
@@ -149,6 +149,7 @@ MasterMod.controller("SocietKPIReportECont", function ($scope, $rootScope, $http
     };
 
     $scope.GetKPIOffices = function (kpiFor, Month, FinYear) {
+        debugger;
         $http.get('/MIS/GetKPIOffices', {
             params: { KPIFor: kpiFor, Month: Month, FinancialYearId: FinYear }
         }).then(function (response) {
@@ -196,14 +197,14 @@ MasterMod.controller("SocietKPIReportECont", function ($scope, $rootScope, $http
         $scope.GetKPIReport();
     };
 
-    $scope.GetKPIReport = function (officeId, financialYearId, month, kpiFor, DistrictId) {
-        var formData = { OfficeId: officeId, FY: financialYearId, Month: month, KPIFor: kpiFor, DistrictId: DistrictId };
+    $scope.GetKPIReport = function (officeId, financialYearId, month, kpiFor, DistrictId, UnitResionId, ActId) {
+        var formData = { OfficeId: officeId, FY: financialYearId, Month: month, KPIFor: kpiFor, DistrictId: DistrictId, UnitResionId: UnitResionId, ActId: ActId };
         $http({ method: "POST", url: '/MIS/GetKPIReport', data: JSON.stringify(formData) }).then(function (response) {
             $scope.ReportData = response.data;
 
             if ($scope.ReportData.length > 0) {
 
-                var first = $scope.ReportData[0];               
+                var first = $scope.ReportData[0];
 
                 $scope.OfficeName = first.OfficeNameEn;
                 $scope.MonthName = first.MonthName;
@@ -225,7 +226,18 @@ MasterMod.controller("SocietKPIReportECont", function ($scope, $rootScope, $http
                         break;
 
                     case "UnitOffice":
-                        $scope.ReportHeading = $scope.OfficeName + " (" + $scope.DISTRICT_ENG + ") KPI For Unit Office " + $scope.MonthName + " (" + $scope.FY + ") तक प्रगति रिपोर्ट";
+                        // UnitOffice Report Heading
+                        if (first.KPIFor == "UnitOffice") {
+
+                            $scope.UnitOfficeReportHeading = {
+                                Department: "Government of Rajasthan",
+                                SubDepartment: "Cooperative Department",
+                                ReportTitle: "MONTHLY PROGRESS REPORT CARD",
+                                ReportSubTitle: "Based on Work Performance (KPI)",
+                                District: first.DISTRICT_ENG,
+                                MonthYear: first.MonthName + ", " + (parseInt($scope.Month) >= 4 ? $scope.FY.split('-')[0] : $scope.FY.split('-')[1])
+                            };
+                        }
                         break;
 
                     default:
@@ -325,8 +337,38 @@ MasterMod.controller("SocietKPIReportECont", function ($scope, $rootScope, $http
     };
 
     $scope.BackToSummary = function () {
+
         $scope.ShowSummary = true;
         $scope.ShowDetails = false;
+
+        $timeout(function () {
+
+            // Scroll the browser window to top
+            window.scrollTo(0, 0);
+
+            // Scroll the document
+            var scrollingElement = document.scrollingElement ||
+                document.documentElement;
+
+            scrollingElement.scrollTop = 0;
+
+            // Find scrollable parent containers
+            var element = document.getElementById("KPIReportExport");
+
+            while (element && element !== document.body) {
+
+                if (element.scrollHeight > element.clientHeight) {
+                    element.scrollTop = 0;
+                }
+
+                element = element.parentElement;
+            }
+
+            // Reset body scroll
+            document.body.scrollTop = 0;
+
+        }, 300);
+
     };
 
     $scope.GetAllSubUnitList = function () {
@@ -446,9 +488,9 @@ MasterMod.controller("SocietKPIReportECont", function ($scope, $rootScope, $http
         return number;
     };
 
-    $scope.GetKPIOverallRating = function (officeId, districtid , divisionId , resionId) {
+    $scope.GetKPIOverallRating = function (officeId, districtid, divisionId, resionId, unitresionid, actid) {
         $http.get(SiteUrl + "/MIS/GetKPIOverallRating", {
-            params: { KPIFor: $scope.KPIFor, OfficeId: officeId, FY: $scope.FinYear || "", Month: $scope.Month || 0, DistrictId: districtid || 0, DivisionId: divisionId || 0, ResionId: resionId || 0 }
+            params: { KPIFor: $scope.KPIFor, OfficeId: officeId, FY: $scope.FinYear || "", Month: $scope.Month || 0, DistrictId: districtid || 0, DivisionId: divisionId || 0, ResionId: resionId || 0, UnitResionId: unitresionid || "", ActId: actid || "" }
         }).then(function (response) {
             $scope.OverallRating = response.data[0];
         }, function (error) {
@@ -495,10 +537,11 @@ MasterMod.controller("SocietKPIReportECont", function ($scope, $rootScope, $http
 
 
     $scope.ViewReport = function (item) {
+        debugger;
         $scope.ShowSummary = false;
         $scope.ShowDetails = true;
-        $scope.GetKPIReport(item.OfficeId, $scope.FinYear, $scope.Month, $scope.KPIFor, item.districtId);
-        $scope.GetKPIOverallRating(item.OfficeId, item.districtId);
+        $scope.GetKPIReport(item.OfficeId, $scope.FinYear, $scope.Month, $scope.KPIFor, item.districtId, item.UnitResionId, item.ActId);
+        $scope.GetKPIOverallRating(item.OfficeId, item.districtId, item.DivisionId, item.ResionId, item.UnitResionId, item.ActId);
         $scope.GetKPI_PerformanceCriteria($scope.KPIFor);
     };
 
