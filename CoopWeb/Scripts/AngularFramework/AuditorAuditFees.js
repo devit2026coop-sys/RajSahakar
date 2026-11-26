@@ -89,14 +89,14 @@ CooperativeSocietyFormModule.controller("AuditorAuditFeesCont", function ($rootS
         $http.get(SiteUrl + "Auditor/GetAuditFeesDetails", {
             params: { month: month, financialYear: finYear, districtId: distId }
         }).success(function (response) {
-
+             
             //var data = response || {};
             $scope.AuditFeesList = response;
             //console.log("API Response:", data);
             //console.log('data', data);
             //console.log('AuditFeesList', $scope.AuditFeesList);
             //$scope.AuditFeesList = angular.isArray(data) ? data : (data.Records || []);
-
+             
             $(".se-pre-con").fadeOut("slow");
         }, function (error) {
 

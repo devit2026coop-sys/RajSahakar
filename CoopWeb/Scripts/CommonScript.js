@@ -319,3 +319,129 @@ function decryptData(encryptedData) {
     var plaintext = decrypted.toString(CryptoJS.enc.Utf8);
     return plaintext;
 }
+
+
+
+
+//document.querySelectorAll('#menuList > li.sub-dropdown').forEach(function (li) {
+
+//    li.addEventListener('mouseenter', function () {
+
+//        let submenu = li.querySelector(':scope > ul.sub-dropdown-content');
+
+//        if (submenu) {
+//            let rect = li.getBoundingClientRect();
+
+//            submenu.style.position = 'fixed';
+//            submenu.style.left = rect.right + 'px';
+//            submenu.style.top = rect.top + 'px';
+//            submenu.style.zIndex = '9999';
+//        }
+
+//    });
+
+//});
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    const menuList = document.getElementById("menuList");
+
+    let activeLi = null;
+    let activeSubmenu = null;
+    let hideTimer = null;
+
+    // Submenu ki position set karna
+    function positionSubmenu() {
+
+        if (!activeLi || !activeSubmenu) return;
+
+        const rect = activeLi.getBoundingClientRect();
+
+        activeSubmenu.style.left = rect.right + "px";
+        activeSubmenu.style.top = rect.top + "px";
+    }
+
+    // Submenu close karna
+    function closeSubmenu() {
+
+        if (!activeLi || !activeSubmenu) return;
+
+        activeSubmenu.style.display = "none";
+
+        // Submenu ko wapas original LI mein bhejna
+        activeLi.appendChild(activeSubmenu);
+
+        // Inline positioning remove karna
+        activeSubmenu.style.position = "";
+        activeSubmenu.style.left = "";
+        activeSubmenu.style.top = "";
+        activeSubmenu.style.zIndex = "";
+
+        activeLi = null;
+        activeSubmenu = null;
+    }
+
+    // Sabhi main menu LI select karna
+    document.querySelectorAll(
+        "#menuList > li.sub-dropdown"
+    ).forEach(function (li) {
+
+        const submenu = li.querySelector(
+            ":scope > ul.sub-dropdown-content"
+        );
+
+        if (!submenu) return;
+
+        // LI par mouse hover
+        li.addEventListener("mouseenter", function () {
+
+            clearTimeout(hideTimer);
+
+            closeSubmenu();
+
+            activeLi = li;
+            activeSubmenu = submenu;
+
+            // Submenu ko body mein move karna
+            document.body.appendChild(submenu);
+
+            submenu.style.position = "fixed";
+            submenu.style.display = "block";
+            submenu.style.zIndex = "99999";
+
+            positionSubmenu();
+        });
+
+        // LI se mouse bahar jane par
+        li.addEventListener("mouseleave", function (e) {
+
+            if (submenu.contains(e.relatedTarget)) return;
+
+            hideTimer = setTimeout(closeSubmenu, 150);
+        });
+
+        // Submenu par mouse aane par
+        submenu.addEventListener("mouseenter", function () {
+            clearTimeout(hideTimer);
+        });
+
+        // Submenu se mouse bahar jane par
+        submenu.addEventListener("mouseleave", function (e) {
+
+            if (li.contains(e.relatedTarget)) return;
+
+            hideTimer = setTimeout(closeSubmenu, 150);
+        });
+
+    });
+
+    // Sidebar scroll hone par submenu ki position update
+    menuList.addEventListener("scroll", positionSubmenu);
+
+    // Window resize hone par position update
+    window.addEventListener("resize", positionSubmenu);
+
+});
+
+
+

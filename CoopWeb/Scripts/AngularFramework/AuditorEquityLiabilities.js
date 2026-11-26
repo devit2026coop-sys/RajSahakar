@@ -592,6 +592,15 @@ MasterMod.controller("auditorEquityLiabilitiesCtrl", function ($scope, $http) {
         );
     };
 
+
+
+    $scope.GoToPreviousTab = function () {
+
+        $scope.SelectedTabId = 1;
+
+        $scope.GetAuditAccountHeaderMaster(1);
+    };
+
     // end new js
 
     $scope.SetStatus = function (UnitId, ActionId) {

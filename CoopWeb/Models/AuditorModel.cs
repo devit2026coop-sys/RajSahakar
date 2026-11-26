@@ -1,8 +1,11 @@
-﻿using Cooperative.DBConnector;
+﻿using CoopDAL;
+using Cooperative.Controllers;
+using Cooperative.DBConnector;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Data;
 using System.Data.SqlClient;
 using System.ComponentModel.DataAnnotations;
@@ -10,6 +13,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using Cooperative.Controllers;
 using Newtonsoft.Json;
 using sun.security.util;
+using System.Linq;
 
 namespace Cooperative.Models
 {
@@ -2285,7 +2289,7 @@ namespace Cooperative.Models
             return Result;
         }
 
-        public DataTable GetAllAuditorSalePurchaseList(int KVSSId, string financialYear)
+        public DataTable GetAllAuditorSalePurchaseList(int? KVSSId, string financialYear)
         {
             DataTable dt = new DataTable();
             UserEntity _LoggedInUser = (UserEntity)System.Web.HttpContext.Current.Session[SessionIdentity.Admin];
@@ -2458,6 +2462,8 @@ namespace Cooperative.Models
     DataTable details)
         {
             DataTable dt = new DataTable();
+
+
 
             try
             {

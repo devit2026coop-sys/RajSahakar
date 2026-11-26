@@ -37,15 +37,35 @@ namespace Cooperative.Controllers
         [HttpGet]
         public ActionResult KVSSAuditAccount()
         {
+            int? KVSSId = 0;
+            string finYear = "";
+            string auditKVSSName = "";
+            if (Session["FinancialYear"] != null)
+            {
+                finYear = Convert.ToString(Session["FinancialYear"]);
+            }
+            if (Session["KVSSId"] != null && Convert.ToInt32(Session["KVSSId"]) > 0)
+            {
+                KVSSId = Convert.ToInt32(Session["KVSSId"]);
+                SocietyModel objMenuActionModel = new SocietyModel(new FileLogger());
+                DataTable DT = null;
+                DT = objMenuActionModel.ServiceGetSocietyNameById(KVSSId);
+                if (DT != null && DT.Rows.Count > 0)
+                {
+                    auditKVSSName = Convert.ToString(DT.Rows[0]["SocietyName"]);
+                }
+                Session["AuditKVSSName"] = auditKVSSName;
+            }
             // IMPORTANT: This value MUST be populated by your authenticated society-selection flow.
             // Never trust a SocietyId supplied only by JavaScript.
-            Session["KVSSAuthorizedSocietyId"] = "1";
+            Session["KVSSAuthorizedSocietyId"] = KVSSId;
             var authorizedSocietyId = Session["KVSSAuthorizedSocietyId"];
             if (authorizedSocietyId == null || Convert.ToInt32(authorizedSocietyId) <= 0)
                 return new HttpStatusCodeResult(403, "Authorized society not selected.");
 
             ViewBag.SocietyId = Convert.ToInt32(authorizedSocietyId);
-            ViewBag.FinancialYear = "2026-27"; // Replace with your reporting-FY selection.
+            ViewBag.FinancialYear = finYear; // Replace with your reporting-FY selection.
+            ViewBag.AuditKVSSName = Session["AuditKVSSName"];
             return View();
         }
 
@@ -75,8 +95,7 @@ namespace Cooperative.Controllers
                 var authorized = Session["KVSSAuthorizedSocietyId"];
                 int allowedSocietyId;
                 if (authorized == null ||
-                    !int.TryParse(Convert.ToString(authorized), out allowedSocietyId) ||
-                    allowedSocietyId != societyId)
+                    !int.TryParse(Convert.ToString(authorized), out allowedSocietyId))
                 {
                     Response.StatusCode = 403;
                     return Json(new { Success = false, Message = "Society access denied." },
@@ -104,7 +123,7 @@ namespace Cooperative.Controllers
 
                     cmd.Parameters.Add(
                         "@SocietyId", SqlDbType.Int
-                    ).Value = societyId;
+                    ).Value = authorized;
 
                     cmd.Parameters.Add(
                         "@FinancialYear", SqlDbType.VarChar, 10
@@ -297,8 +316,7 @@ namespace Cooperative.Controllers
                 var selectedSociety = Session["KVSSAuthorizedSocietyId"];
                 int societyId;
                 if (selectedSociety == null ||
-                    !int.TryParse(Convert.ToString(selectedSociety), out societyId) ||
-                    societyId <= 0 || model == null || model.SocietyId != societyId)
+                    !int.TryParse(Convert.ToString(selectedSociety), out societyId))
                 {
                     Response.StatusCode = 403;
                     return Json(new { Success = false, Message = "Society access denied." });

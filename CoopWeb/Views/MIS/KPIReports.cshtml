@@ -10,6 +10,7 @@
 
 <script>
     //For All KPI'S Expect PLDB KPI (Excel)
+
     async function ExportKPIReportToExcel() {
 
         var report = document.getElementById("KPIReportExport");
@@ -24,272 +25,539 @@
             return;
         }
 
-        var workbook = new ExcelJS.Workbook();
-        var worksheet = workbook.addWorksheet("KPI Report");
-        worksheet.views = [{ showGridLines: false }];
+        try {
 
-        var COLORS = {
-            BLUE: "FF0070C0",
-            YELLOW: "FFFFD966",
-            PURPLE: "FF6F31A1",
-            A_PLUS: "FF7D9631",
-            A: "FF92D051",
-            B: "FFFFFF01",
-            C: "FFFDC100",
-            D: "FFC11D1C",
-            WHITE: "FFFFFFFF",
-            BLACK: "FF000000",
-            BORDER: "FF1F4E78"
-        };
+            var workbook = new ExcelJS.Workbook();
+            var worksheet = workbook.addWorksheet("KPI Report");
 
-        function applyBorder(cell) {
-            cell.border = {
-                top: { style: "thin", color: { argb: COLORS.BORDER } },
-                bottom: { style: "thin", color: { argb: COLORS.BORDER } },
-                left: { style: "thin", color: { argb: COLORS.BORDER } },
-                right: { style: "thin", color: { argb: COLORS.BORDER } }
+            worksheet.views = [{ showGridLines: false }];
+
+            var COLORS = {
+                BLUE: "FF0070C0",
+                YELLOW: "FFFFD966",
+                PURPLE: "FF6F31A1",
+                A_PLUS: "FF7D9631",
+                A: "FF92D051",
+                B: "FFFFFF01",
+                C: "FFFDC100",
+                D: "FFC11D1C",
+                WHITE: "FFFFFFFF",
+                BLACK: "FF000000",
+                BORDER: "FF1F4E78"
             };
-        }
 
-        function applyCellStyle(cell, backgroundColor, fontColor, bold) {
+            var TOTAL_COLUMNS = 8;
 
-            cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: backgroundColor } };
+            function applyBorder(cell) {
 
-            cell.font = { name: "Calibri", size: 11, bold: bold === true, color: { argb: fontColor || COLORS.BLACK } };
-
-            cell.alignment = { horizontal: "left", vertical: "middle", wrapText: true };
-
-            applyBorder(cell);
-        }
-
-        function getCriteriaColor(category) {
-
-            category = (category || "").trim();
-
-            switch (category) {
-
-                case "A+":
-                    return COLORS.A_PLUS;
-
-                case "A":
-                    return COLORS.A;
-
-                case "B":
-                    return COLORS.B;
-
-                case "C":
-                    return COLORS.C;
-
-                case "D":
-                    return COLORS.D;
-
-                default:
-                    return COLORS.WHITE;
+                cell.border = {
+                    top: { style: "thin", color: { argb: COLORS.BORDER } },
+                    bottom: { style: "thin", color: { argb: COLORS.BORDER } },
+                    left: { style: "thin", color: { argb: COLORS.BORDER } },
+                    right: { style: "thin", color: { argb: COLORS.BORDER } }
+                };
             }
-        }
 
-        function addTableToExcel(table, startRow, tableType) {
+            function applyCellStyle(cell, backgroundColor, fontColor, bold) {
 
-            var rows = table.querySelectorAll("tr");
+                cell.fill = {
+                    type: "pattern",
+                    pattern: "solid",
+                    fgColor: { argb: backgroundColor }
+                };
 
-            var currentRow = startRow;
+                cell.font = {
+                    name: "Calibri",
+                    size: 11,
+                    bold: bold === true,
+                    color: { argb: fontColor || COLORS.BLACK }
+                };
 
-            var occupied = {};
+                cell.alignment = {
+                    horizontal: "left",
+                    vertical: "middle",
+                    wrapText: true
+                };
 
-            rows.forEach(function (htmlRow) {
+                applyBorder(cell);
+            }
 
-                var cells = htmlRow.querySelectorAll(":scope > th, :scope > td");
-                var currentColumn = 1;
+            function getCriteriaColor(category) {
 
-                cells.forEach(function (htmlCell) {
+                category = (category || "").trim();
 
-                    while (occupied[currentRow + "_" + currentColumn]) {
-                        currentColumn++;
-                    }
+                switch (category) {
 
-                    var rowspan = parseInt(htmlCell.getAttribute("rowspan") || "1", 10);
-                    var colspan = parseInt(htmlCell.getAttribute("colspan") || "1", 10);
-                    var startColumn = currentColumn;
-                    var endColumn = startColumn + colspan - 1;
-                    var startExcelRow = currentRow;
-                    var endExcelRow = startExcelRow + rowspan - 1;
-                    var excelCell = worksheet.getCell(startExcelRow, startColumn);
-                    excelCell.value = htmlCell.innerText.replace(/\s+/g, " ").trim();
-                    var isHeader = htmlCell.tagName.toLowerCase() === "th";
-                    var backgroundColor = COLORS.WHITE;
-                    var fontColor = COLORS.BLACK;
+                    case "A+":
+                        return COLORS.A_PLUS;
 
-                    if (tableType === "detail") {
+                    case "A":
+                        return COLORS.A;
 
-                        // Header
-                        if (isHeader) {
-                            backgroundColor = COLORS.BLUE;
-                            fontColor = COLORS.WHITE;
+                    case "B":
+                        return COLORS.B;
+
+                    case "C":
+                        return COLORS.C;
+
+                    case "D":
+                        return COLORS.D;
+
+                    default:
+                        return COLORS.WHITE;
+                }
+            }
+
+            // Add heading row in Excel
+            function addHeadingRow(value, fontSize, bold, alignment) {
+
+                var cell = worksheet.getCell(currentRow, 1);
+
+                cell.value = value || "";
+
+                cell.font = {
+                    name: "Calibri",
+                    size: fontSize,
+                    bold: bold,
+                    color: { argb: COLORS.BLACK }
+                };
+
+                cell.alignment = {
+                    horizontal: alignment || "center",
+                    vertical: "middle",
+                    wrapText: true
+                };
+
+                worksheet.mergeCells(
+                    currentRow, 1,
+                    currentRow, TOTAL_COLUMNS
+                );
+
+                worksheet.getRow(currentRow).height = 25;
+
+                currentRow++;
+            }
+
+            function addTableToExcel(table, startRow, tableType) {
+
+                var rows = table.querySelectorAll("tr");
+
+                var currentTableRow = startRow;
+                var occupied = {};
+
+                rows.forEach(function (htmlRow) {
+
+                    var cells = htmlRow.querySelectorAll(":scope > th, :scope > td");
+                    var currentColumn = 1;
+
+                    cells.forEach(function (htmlCell) {
+
+                        while (occupied[currentTableRow + "_" + currentColumn]) {
+                            currentColumn++;
                         }
 
-                        // Total row
-                        else if (htmlRow.classList.contains("bg-info")) {
-                            backgroundColor = COLORS.BLUE;
-                            fontColor = COLORS.WHITE;
-                        }
+                        var rowspan = parseInt(
+                            htmlCell.getAttribute("rowspan") || "1", 10
+                        );
 
-                        // Normal rows
-                        else {
-                            backgroundColor = COLORS.YELLOW;
-                            fontColor = COLORS.BLACK;
-                        }
-                    }
+                        var colspan = parseInt(
+                            htmlCell.getAttribute("colspan") || "1", 10
+                        );
 
-                    else if (tableType === "performance") {
+                        var startColumn = currentColumn;
+                        var endColumn = startColumn + colspan - 1;
 
-                        // Header
-                        if (isHeader) {
+                        var startExcelRow = currentTableRow;
+                        var endExcelRow = startExcelRow + rowspan - 1;
 
-                            backgroundColor = COLORS.PURPLE;
-                            fontColor = COLORS.WHITE;
-                        }
+                        var excelCell = worksheet.getCell(
+                            startExcelRow,
+                            startColumn
+                        );
 
-                        // Data row - Category Wise Color
-                        else {
+                        excelCell.value = htmlCell.innerText
+                            .replace(/\s+/g, " ")
+                            .trim();
 
-                            var performanceCells = htmlRow.querySelectorAll(":scope > td");
+                        var isHeader =
+                            htmlCell.tagName.toLowerCase() === "th";
 
-                            var performanceCategory = "";
+                        var backgroundColor = COLORS.WHITE;
+                        var fontColor = COLORS.BLACK;
 
-                            // Category is the 6th column
-                            if (performanceCells.length >= 6) {
-                                performanceCategory = performanceCells[5].innerText.trim();
-                            }
+                        if (tableType === "detail") {
 
-                            // Apply category-wise color
-                            if (performanceCategory === "A+") {
-                                backgroundColor = COLORS.A_PLUS;
+                            if (isHeader) {
+                                backgroundColor = COLORS.BLUE;
                                 fontColor = COLORS.WHITE;
-
                             }
-                            else if (performanceCategory === "A") {
-                                backgroundColor = COLORS.A;
-                                fontColor = COLORS.BLACK;
-
-                            }
-                            else if (performanceCategory === "B") {
-                                backgroundColor = COLORS.B;
-                                fontColor = COLORS.BLACK;
-                            }
-                            else if (performanceCategory === "C") {
-                                backgroundColor = COLORS.C;
-                                fontColor = COLORS.BLACK;
-                            }
-                            else if (performanceCategory === "D") {
-                                backgroundColor = COLORS.D;
+                            else if (htmlRow.classList.contains("bg-info")) {
+                                backgroundColor = COLORS.BLUE;
                                 fontColor = COLORS.WHITE;
                             }
                             else {
-                                backgroundColor = COLORS.WHITE;
+                                backgroundColor = COLORS.YELLOW;
                                 fontColor = COLORS.BLACK;
                             }
                         }
-                    }
 
-                    else if (tableType === "criteria") {
+                        else if (tableType === "performance") {
 
-                        // Header
-                        if (isHeader) {
-                            backgroundColor = COLORS.PURPLE;
-                            fontColor = COLORS.WHITE;
-                        }
-
-                        else {
-                            var rowCells = htmlRow.querySelectorAll(":scope > td");
-
-                            var category = "";
-
-                            if (rowCells.length >= 3) {
-                                category = rowCells[2].innerText.trim();
-                            }
-
-                            backgroundColor = getCriteriaColor(category);
-                            if (category === "D") {
+                            if (isHeader) {
+                                backgroundColor = COLORS.PURPLE;
                                 fontColor = COLORS.WHITE;
                             }
+                            else {
+
+                                var performanceCells =
+                                    htmlRow.querySelectorAll(":scope > td");
+
+                                var performanceCategory = "";
+
+                                if (performanceCells.length >= 6) {
+                                    performanceCategory =
+                                        performanceCells[5].innerText.trim();
+                                }
+
+                                if (performanceCategory === "A+") {
+                                    backgroundColor = COLORS.A_PLUS;
+                                    fontColor = COLORS.WHITE;
+                                }
+                                else if (performanceCategory === "A") {
+                                    backgroundColor = COLORS.A;
+                                    fontColor = COLORS.BLACK;
+                                }
+                                else if (performanceCategory === "B") {
+                                    backgroundColor = COLORS.B;
+                                    fontColor = COLORS.BLACK;
+                                }
+                                else if (performanceCategory === "C") {
+                                    backgroundColor = COLORS.C;
+                                    fontColor = COLORS.BLACK;
+                                }
+                                else if (performanceCategory === "D") {
+                                    backgroundColor = COLORS.D;
+                                    fontColor = COLORS.WHITE;
+                                }
+                                else {
+                                    backgroundColor = COLORS.WHITE;
+                                    fontColor = COLORS.BLACK;
+                                }
+                            }
                         }
-                    }
 
-                    applyCellStyle(excelCell, backgroundColor, fontColor, isHeader);
+                        else if (tableType === "criteria") {
 
-                    if (rowspan > 1 || colspan > 1) {
-                        worksheet.mergeCells(startExcelRow, startColumn, endExcelRow, endColumn);
-                    }
+                            if (isHeader) {
+                                backgroundColor = COLORS.PURPLE;
+                                fontColor = COLORS.WHITE;
+                            }
+                            else {
 
-                    for (var r = startExcelRow; r <= endExcelRow; r++) {
-                        for (var c = startColumn; c <= endColumn; c++) {
-                            occupied[r + "_" + c] = true;
+                                var rowCells =
+                                    htmlRow.querySelectorAll(":scope > td");
+
+                                var category = "";
+
+                                if (rowCells.length >= 3) {
+                                    category = rowCells[2].innerText.trim();
+                                }
+
+                                backgroundColor = getCriteriaColor(category);
+
+                                if (category === "D") {
+                                    fontColor = COLORS.WHITE;
+                                }
+                            }
                         }
-                    }
-                    currentColumn = endColumn + 1;
+
+                        applyCellStyle(
+                            excelCell,
+                            backgroundColor,
+                            fontColor,
+                            isHeader
+                        );
+
+                        if (rowspan > 1 || colspan > 1) {
+
+                            worksheet.mergeCells(
+                                startExcelRow,
+                                startColumn,
+                                endExcelRow,
+                                endColumn
+                            );
+                        }
+
+                        for (var r = startExcelRow; r <= endExcelRow; r++) {
+
+                            for (var c = startColumn; c <= endColumn; c++) {
+                                occupied[r + "_" + c] = true;
+                            }
+                        }
+
+                        currentColumn = endColumn + 1;
+                    });
+
+                    worksheet.getRow(currentTableRow).height = 32;
+
+                    currentTableRow++;
                 });
 
-                worksheet.getRow(currentRow).height = 32;
+                return currentTableRow;
+            }
+
+            var currentRow = 1;
+
+            // ==========================================
+            // UNIT OFFICE HEADING
+            // ==========================================
+
+            var unitHeading = report.querySelector(
+                ".unit-office-report-heading"
+            );
+
+            if (unitHeading) {
+
+                var headingH4 = unitHeading.querySelectorAll("h4");
+                var headingH3 = unitHeading.querySelector("h3");
+                var headingH5 = unitHeading.querySelector("h5");
+
+                // Government of Rajasthan
+                if (headingH4.length > 0) {
+                    addHeadingRow(
+                        headingH4[0].innerText.trim(),
+                        14,
+                        false,
+                        "center"
+                    );
+                }
+
+                // Cooperative Department
+                if (headingH4.length > 1) {
+                    addHeadingRow(
+                        headingH4[1].innerText.trim(),
+                        14,
+                        false,
+                        "center"
+                    );
+                }
+
+                // Monthly Progress Report Card
+                if (headingH3) {
+                    addHeadingRow(
+                        headingH3.innerText.trim(),
+                        16,
+                        true,
+                        "center"
+                    );
+                }
+
+                // Based on Work Performance (KPI)
+                if (headingH5) {
+                    addHeadingRow(
+                        headingH5.innerText.trim(),
+                        11,
+                        false,
+                        "center"
+                    );
+                }
+
                 currentRow++;
-            });
 
-            return currentRow;
+                // District and Month-Year
+                var headingColumns =
+                    unitHeading.querySelectorAll(".row .col-md-6");
+
+                worksheet.mergeCells(
+                    currentRow, 1,
+                    currentRow, 4
+                );
+
+                worksheet.mergeCells(
+                    currentRow, 5,
+                    currentRow, 8
+                );
+
+                var districtCell = worksheet.getCell(currentRow, 1);
+
+                districtCell.value =
+                    headingColumns.length > 0
+                        ? headingColumns[0].innerText.replace(/\s+/g, " ").trim()
+                        : "";
+
+                districtCell.font = {
+                    name: "Calibri",
+                    size: 12,
+                    bold: true,
+                    color: { argb: COLORS.BLACK }
+                };
+
+                districtCell.alignment = {
+                    horizontal: "left",
+                    vertical: "middle"
+                };
+
+                var monthCell = worksheet.getCell(currentRow, 5);
+
+                monthCell.value =
+                    headingColumns.length > 1
+                        ? headingColumns[1].innerText.replace(/\s+/g, " ").trim()
+                        : "";
+
+                monthCell.font = {
+                    name: "Calibri",
+                    size: 12,
+                    bold: true,
+                    color: { argb: COLORS.BLACK }
+                };
+
+                monthCell.alignment = {
+                    horizontal: "right",
+                    vertical: "middle"
+                };
+
+                worksheet.getRow(currentRow).height = 25;
+
+                currentRow += 2;
+            }
+
+            // ==========================================
+            // OTHER KPI HEADING (Existing Logic)
+            // ==========================================
+
+            else {
+
+                var heading = report.querySelector("h3");
+
+                if (heading) {
+
+                    var headingCell = worksheet.getCell(currentRow, 1);
+
+                    headingCell.value = heading.innerText.trim();
+
+                    headingCell.font = {
+                        name: "Calibri",
+                        size: 16,
+                        bold: true,
+                        color: { argb: COLORS.BLACK }
+                    };
+
+                    headingCell.alignment = {
+                        horizontal: "center",
+                        vertical: "middle"
+                    };
+
+                    worksheet.mergeCells(
+                        currentRow, 1,
+                        currentRow, TOTAL_COLUMNS
+                    );
+
+                    worksheet.getRow(currentRow).height = 30;
+
+                    currentRow += 2;
+                }
+            }
+
+            // ==========================================
+            // KPI DETAIL TABLE
+            // ==========================================
+
+            var detailTable = report.querySelector("#KPIDetailTable");
+
+            if (detailTable) {
+
+                currentRow = addTableToExcel(
+                    detailTable,
+                    currentRow,
+                    "detail"
+                );
+
+                currentRow += 1;
+            }
+
+            // ==========================================
+            // KPI PERFORMANCE TABLE
+            // ==========================================
+
+            var performanceTable =
+                report.querySelector("#KPIPerformanceTable");
+
+            if (performanceTable) {
+
+                currentRow = addTableToExcel(
+                    performanceTable,
+                    currentRow,
+                    "performance"
+                );
+
+                currentRow += 1;
+            }
+
+            // ==========================================
+            // KPI CRITERIA TABLE
+            // ==========================================
+
+            var criteriaTable =
+                report.querySelector("#KPICriteriaTable");
+
+            if (criteriaTable) {
+
+                currentRow = addTableToExcel(
+                    criteriaTable,
+                    currentRow,
+                    "criteria"
+                );
+            }
+
+            // Column widths
+            worksheet.getColumn(1).width = 10;
+            worksheet.getColumn(2).width = 38;
+            worksheet.getColumn(3).width = 48;
+            worksheet.getColumn(4).width = 28;
+            worksheet.getColumn(5).width = 20;
+            worksheet.getColumn(6).width = 20;
+            worksheet.getColumn(7).width = 20;
+            worksheet.getColumn(8).width = 20;
+
+            worksheet.views = [{
+                state: "frozen",
+                ySplit: unitHeading ? 7 : 3,
+                showGridLines: false
+            }];
+
+            // Download Excel
+            var buffer = await workbook.xlsx.writeBuffer();
+
+            var blob = new Blob(
+                [buffer],
+                {
+                    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                }
+            );
+
+            var url = window.URL.createObjectURL(blob);
+
+            var link = document.createElement("a");
+
+            link.href = url;
+            link.download = "KPI_Report.xlsx";
+
+            document.body.appendChild(link);
+            link.click();
+
+            document.body.removeChild(link);
+
+            window.URL.revokeObjectURL(url);
+
         }
+        catch (error) {
 
-        var heading = report.querySelector("h3");
-        var currentRow = 1;
+            console.error("Excel Export Error:", error);
 
-        if (heading) {
-            var headingCell = worksheet.getCell(currentRow, 1);
-            headingCell.value = heading.innerText.trim();
-            headingCell.font = { name: "Calibri", size: 16, bold: true, color: { argb: COLORS.BLACK } };
-            headingCell.alignment = { horizontal: "center", vertical: "middle" };
-            worksheet.mergeCells(currentRow, 1, currentRow, 8);
-            worksheet.getRow(currentRow).height = 30;
-            currentRow += 2;
+            alert("Unable to generate Excel report. Please check console.");
         }
-
-        var detailTable = report.querySelector("#KPIDetailTable");
-
-        if (detailTable) {
-            currentRow = addTableToExcel(detailTable, currentRow, "detail");
-            currentRow += 1;
-        }
-
-        var performanceTable = report.querySelector("#KPIPerformanceTable");
-
-        if (performanceTable) {
-            currentRow = addTableToExcel(performanceTable, currentRow, "performance");
-            currentRow += 1;
-        }
-
-        var criteriaTable = report.querySelector("#KPICriteriaTable");
-
-        if (criteriaTable) {
-            currentRow = addTableToExcel(criteriaTable, currentRow, "criteria");
-        }
-
-        worksheet.getColumn(1).width = 10;
-        worksheet.getColumn(2).width = 38;
-        worksheet.getColumn(3).width = 48;
-        worksheet.getColumn(4).width = 28;
-        worksheet.getColumn(5).width = 20;
-        worksheet.getColumn(6).width = 20;
-        worksheet.getColumn(7).width = 20;
-        worksheet.getColumn(8).width = 20;
-
-        worksheet.views = [{ state: "frozen", ySplit: 3, showGridLines: false }];
-        var buffer = await workbook.xlsx.writeBuffer();
-        var blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-        var url = window.URL.createObjectURL(blob);
-        var link = document.createElement("a");
-        link.href = url;
-        link.download = "KPI_Report.xlsx";
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(url);
     }
+
     //For All KPI'S Expect PLDB KPI (PDF)
     async function ExportKPIReportToPDFold() {
 
@@ -1180,10 +1448,6 @@
             }
         }
     }
-
-
-
-
     //For PLDB KPI (Excel)
     async function ExportKPIPLDBReportToExcel() {
 
@@ -2122,6 +2386,37 @@
             word-break: normal !important;
             overflow-wrap: break-word !important;
         }
+
+    .unit-office-report-heading {
+        width: 100%;
+        padding: 15px 10px 10px;
+        color: #000;
+        font-family: Arial, sans-serif;
+        background: #fff;
+    }
+
+        .unit-office-report-heading h4 {
+            font-size: 17px;
+            margin: 3px 0;
+            font-weight: 400;
+        }
+
+        .unit-office-report-heading h3 {
+            font-family: "Times New Roman", serif;
+            font-size: 20px;
+            margin: 5px 0 0;
+        }
+
+        .unit-office-report-heading h5 {
+            font-family: "Times New Roman", serif;
+            font-size: 14px;
+            margin: 0;
+        }
+
+        .unit-office-report-heading .row {
+            font-size: 16px;
+            font-weight: bold;
+        }
 </style>
 <div ng-app="SocietyKPIReportModule" ng-controller="SocietKPIReportECont" ng-cloak="">
     <div>
@@ -2198,7 +2493,7 @@
                                             <option value="UpbhoktaBhandars">Upbhokta Bhandars KPI</option>
                                             @*<option value="PACS">KPI For Pacs</option>*@
                                             <option value="PLDB">KPI For PLDB</option>
-                                            @*<option value="UnitOffice">KPI For Unit Office</option>*@
+                                            <option value="UnitOffice">KPI For Unit Office</option>
                                         }
                                     </select>
                                 </div>
@@ -2216,7 +2511,7 @@
                             </div>
                         </div>
                     </div>
-                    <div style="overflow-x:auto" ng-show="ShowSummary && Offices.length > 0">
+                    <div style="overflow-x:auto" id="KPIReportSummary" ng-show="ShowSummary && Offices.length > 0">
                         <table id="KPIReportListTable" class="table table-bordered table-striped devtable">
                             <thead>
                                 <tr>
@@ -2261,25 +2556,80 @@
 
                     <div ng-show="ShowDetails && KPIFor != 'PLDB'" id="KPIReportExport">
 
-                        <div class="row" ng-show="ShowDetails">
+                        @*<div class="row" ng-show="ShowDetails">
 
-                            <div class="col-md-10 text-center">
+            <div class="col-md-10 text-center">
+                <h3 style="font-weight:bold; margin-top:10px;">
+                    {{ReportHeading}}
+                </h3>
+            </div>
+
+            <div class="col-md-2 text-right">
+                <button type="button" class="btn btn-success" onclick="ExportKPIReportToExcel();">
+                    <i class="fa fa-file-excel-o"></i>
+                    Export Excel
+                </button>
+                <button type="button" class="btn btn-danger" onclick="ExportKPIReportToPDF();">
+                    <i class="fa fa-file-pdf-o"></i>  Export PDF
+                </button>
+            </div>
+
+        </div>*@
+
+
+                        <div class="row" ng-show="ShowDetails">
+                            <!-- Export Buttons -->
+                            <div class="col-md-12 text-right">
+
+                                <button type="button" class="btn btn-success"
+                                        onclick="ExportKPIReportToExcel();">
+                                    <i class="fa fa-file-excel-o"></i>
+                                    Export Excel
+                                </button>
+
+                                <button type="button" class="btn btn-danger"
+                                        onclick="ExportKPIReportToPDF();">
+                                    <i class="fa fa-file-pdf-o"></i>
+                                    Export PDF
+                                </button>
+
+                            </div>
+                            <!-- UnitOffice Heading -->
+                            <div class="col-md-12 text-center" ng-if="KPIFor == 'UnitOffice'">
+
+                                <div class="unit-office-report-heading">
+
+                                    <h4>Government of Rajasthan</h4>
+                                    <h4>Cooperative Department</h4>
+                                    <h3>
+                                        <b>MONTHLY PROGRESS REPORT CARD</b>
+                                    </h3>
+                                    <h5>Based on Work Performance (KPI)</h5>
+                                    <div class="row" style="margin-top:15px;">
+                                        <div class="col-md-6 text-left">
+                                            <b>District :</b>
+                                            {{UnitOfficeReportHeading.District | uppercase}}
+                                        </div>
+
+                                        <div class="col-md-6 text-right">
+                                            <b>{{UnitOfficeReportHeading.MonthYear | uppercase}}</b>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <!-- Other KPI Heading -->
+                            <div class="col-md-10 text-center" ng-if="KPIFor != 'UnitOffice'">
                                 <h3 style="font-weight:bold; margin-top:10px;">
                                     {{ReportHeading}}
                                 </h3>
                             </div>
 
-                            <div class="col-md-2 text-right">
-                                <button type="button" class="btn btn-success" onclick="ExportKPIReportToExcel();">
-                                    <i class="fa fa-file-excel-o"></i>
-                                    Export Excel
-                                </button>
-                                <button type="button" class="btn btn-danger" onclick="ExportKPIReportToPDF();">
-                                    <i class="fa fa-file-pdf-o"></i>  Export PDF
-                                </button>
-                            </div>
+
 
                         </div>
+
 
                         <table class="table devtable kpi-detail-table mt-4" id="KPIDetailTable">
                             <thead>

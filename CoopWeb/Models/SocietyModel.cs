@@ -11441,6 +11441,30 @@ namespace Cooperative.Models
         }
 
 
+        public DataTable ServiceGetSocietyNameById(int? sid)
+        {
+            dt.Clear();
+            try
+            {
+
+                objDBAccess.OpenConnection();
+                SqlCommand cmd = objDBAccess.CreateCommand("USP_GetSocietyNameById", DBFactoryCommandType.PROCEDURE_COMMAND);
+                objDBAccess.AddParameterToCommand("@SocietyId", DBFactoryParameterType.Int, sid);
+                dt = objDBAccess.GetTable();
+            }
+            catch (Exception ex)
+            {
+                objILogger.ErrorHandle(new ErrorLogEntity() { PageName = "Cooperative.Models.SocietyModel", FunctionName = "ServiceGetSocietyNameById(int? sid)" }, ex);
+            }
+            finally
+            {
+                objDBAccess.CloseConnection();
+            }
+            return dt;
+
+        }
+
+
         public DataTable GetReasonForVacancyDetailByListId(string ListCode)
         {
             dt.Clear();

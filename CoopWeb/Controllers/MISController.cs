@@ -7151,9 +7151,9 @@ namespace Cooperative.Controllers
 
         [HttpPost]
         [ActionName("GetKPIReport")]
-        public string GetKPIReport(string KPIFor, int Month, string FY, int OfficeId, int DistrictId, int ResionId = 0, int DivisionId = 0)
+        public string GetKPIReport(string KPIFor, int Month, string FY, int OfficeId, int DistrictId, int ResionId = 0, int DivisionId = 0 , string UnitResionId = "" , string ActId = "")
         {
-            DataTable dt = new MISModel().GetKPIReport(KPIFor, Month, FY, OfficeId, DistrictId, ResionId, DivisionId);
+            DataTable dt = new MISModel().GetKPIReport(KPIFor, Month, FY, OfficeId, DistrictId, ResionId, DivisionId, UnitResionId , ActId);
 
             return COMMON_FUNCTION.DataTableToJSONString(dt);
         }
@@ -7169,9 +7169,9 @@ namespace Cooperative.Controllers
 
         [HttpGet]
         [ActionName("GetKPIOverallRating")]
-        public string GetKPIOverallRating(string KPIFor, int Month, string FY, int OfficeId = 0, int DistrictId = 0, int DivisionId = 0, int ResionId = 0)
+        public string GetKPIOverallRating(string KPIFor, int Month, string FY, int OfficeId = 0, int DistrictId = 0, int DivisionId = 0, int ResionId = 0 , string UnitResionId = "" , string ActId = "")
         {
-            DataTable dt = new MISModel().GetKPIOverallRating(KPIFor, Month, FY, OfficeId, DistrictId, DivisionId, ResionId);
+            DataTable dt = new MISModel().GetKPIOverallRating(KPIFor, Month, FY, OfficeId, DistrictId, DivisionId, ResionId , UnitResionId , ActId);
 
             return COMMON_FUNCTION.DataTableToJSONString(dt);
         }
@@ -7415,9 +7415,9 @@ namespace Cooperative.Controllers
 
         [HttpGet]
         [ActionName("GetAuditMPRVIAReport")]
-        public string GetAuditMPRVIAReport(int districtId = 0, int commiteeType = 0)
+        public string GetAuditMPRVIAReport(int commiteeType = 0, string FinancialYearId = "", int Month = 0)
         {
-            DataTable dt = new MISModel().GetAuditMPRVIAReport(districtId, commiteeType);
+            DataTable dt = new MISModel().GetAuditMPRVIAReport(commiteeType, FinancialYearId, Month);
 
             return COMMON_FUNCTION.DataTableToJSONString(dt);
         }

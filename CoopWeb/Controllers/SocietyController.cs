@@ -10971,15 +10971,31 @@ namespace Cooperative.Controllers
         {
 
             SocietyModel objMenuActionModel = new SocietyModel(new FileLogger());
-            DataTable DT = null;
-            if ( Request.Cookies["SSO_ID"] != null)
-            {
+            DataTable DT = null; 
                  
               DT = objMenuActionModel.KVSSGSSbySSOIDService(_loggedInUSerDetails.SSOID); 
-            }
 
             return COMMON_FUNCTION.DataTableToJSONWithJSONNet(DT);
         }
+
+
+        public string GetSocietyNameById(int? socetyId)
+        {
+
+            SocietyModel objMenuActionModel = new SocietyModel(new FileLogger());
+            DataTable DT = null;
+
+            DT = objMenuActionModel.ServiceGetSocietyNameById(socetyId);
+
+            string societyName = string.Empty;
+
+            if (DT != null && DT.Rows.Count > 0)
+            {
+                societyName = Convert.ToString(DT.Rows[0]["SocietyName"]);
+            }
+            return societyName;
+        }
+
 
         [HttpGet]
         [ActionName("GetReasonForVacancyByListId")]
@@ -14088,6 +14104,8 @@ public class KPIResultModel
     public decimal KCCRecoveryAmount { get; set; }
     public decimal GCCRecoveryAmount { get; set; }
     public decimal LoanRecoveryAmount { get; set; }
+    public decimal MembershipDifference { get; set; }
+    public decimal ShareCapitalDifference { get; set; }
     public decimal ProgressPercentage { get; set; }
     public decimal WeightedMarks { get; set; }
     public decimal MarksObtained { get; set; }
@@ -14099,10 +14117,14 @@ public class KPIResultModel
     public string CCBBranchName { get; set; }
     public string PacsManagerName { get; set; }
     public string PacsName { get; set; }
+    public string UnitResionId { get; set; }
+    public string ActId { get; set; }
+    public string UnitResionName { get; set; }
     public string PacsRegistrationNo { get; set; }
     public string OtherText { get; set; }
     public decimal? KCCLoanDisbursedAmt { get; set; }
     public decimal? AgricultureTrunOver { get; set; }
+    public decimal? OtherActivitiesTurnOver { get; set; }
     public int? MembershipPrevious { get; set; }
     public int? MembershipCurrent { get; set; }
     public int? ProfitFinancialid { get; set; }
@@ -14114,6 +14136,8 @@ public class KPIResultModel
     public bool? selectOptionAnyOther1 { get; set; }
     public bool? selectOptionAnyOther2 { get; set; }
     public DateTime? DynamicDate { get; set; }
+    public DateTime? AuditCompleteDate { get; set; }
+    public DateTime? BODMeetingDate { get; set; }
 }
 
 public class KPIMasterModel

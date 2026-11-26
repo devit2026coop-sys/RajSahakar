@@ -1221,19 +1221,26 @@ namespace Cooperative.Controllers
             return result;
         }
 
+        //[HttpPost]
+        //public int SaveIssuedCheques(List<IssuedChequeModel> model)
+        //{
+        //    int result = new AuditorModel().SaveIssuedCheques(model);
+        //    return result;
+        //}
 
-        public JsonResult GetAuditAccountHeaderMaster(
-      
-     int? tabId,
-     int? kvssId ,
-     string financialYear
-     )
+        //[HttpGet]
+        //public string GetIssuedCheques()
+        //{
+        //    DataTable dt = new AuditorModel().GetIssuedCheques();
+
+        //    return COMMON_FUNCTION.DataTableToJSONString(dt);
+        //}
+
+
+        public JsonResult GetAuditAccountHeaderMaster(int? tabId, int? kvssId, string financialYear)
         {
             try
-            {  
-
-
-
+            {   
 
                 // If Session is null, assign the selected KVSS ID
                 if (Session["KVSSId"] == null && kvssId > 0)
@@ -1245,8 +1252,7 @@ namespace Cooperative.Controllers
                     // Otherwise, use the existing Session value
                     kvssId = Convert.ToInt32(Session["KVSSId"]);
                 }
-
-
+                 
                 // Financial Year Session
                 if (Session["FinancialYear"] == null && !string.IsNullOrEmpty(financialYear))
                 {
@@ -1256,20 +1262,12 @@ namespace Cooperative.Controllers
                 {
                     financialYear = Convert.ToString(Session["FinancialYear"]);
                 }
-
-                
-
+                 
                 // Pass KVSS ID to View
                 ViewBag.KVSSId = Convert.ToInt32(Session["KVSSId"]);
 
                 ViewBag.FinancialYear = Session["FinancialYear"];
-
-
-
-
-
-
-
+                 
                 DataSet ds = new AuditorModel()
                     .GetAuditAccountHeaderMasterData( 
                         tabId,
@@ -1318,6 +1316,49 @@ namespace Cooperative.Controllers
                     });
                 }
 
+                // testing 
+
+
+                if (request == null)
+                {
+                    return Json(new
+                    {
+                        Status = 0,
+                        Message = "Invalid request."
+                    });
+                }
+
+                if (request.Details == null || request.Details.Count == 0)
+                {
+                    return Json(new
+                    {
+                        Status = 0,
+                        Message = "No opening balance entries found."
+                    });
+                }
+
+                if (string.IsNullOrWhiteSpace(request.FinancialYear))
+                {
+                    return Json(new
+                    {
+                        Status = 0,
+                        Message = "Financial year is required."
+                    });
+                }
+
+                if (request.KVSSId <= 0 || request.TabId <= 0)
+                {
+                    return Json(new
+                    {
+                        Status = 0,
+                        Message = "Invalid society or tab selection."
+                    });
+                }
+
+                // end testing 
+
+
+
                 // Get logged-in user from session
                 UserEntity loggedInUser =
                     (UserEntity)Session[SessionIdentity.Admin];
@@ -1347,30 +1388,23 @@ namespace Cooperative.Controllers
 
                 DateTime today = DateTime.Today;
                 UserEntity _LoggedInUser = (UserEntity)System.Web.HttpContext.Current.Session[SessionIdentity.Admin];
-                //request.DistrictId = _LoggedInUser.DistrictId;
-                //request.Month = (byte)DateTime.Today.Month;
-                //request.FinancialYear = today.Month >= 4 ? $"{today.Year}-{(today.Year + 1) % 100:D2}" : $"{today.Year - 1}-{today.Year % 100:D2}";
+                
                
                 // Replace UserId below with your actual logged-in user ID property
                 // if it has a different name in UserEntity.
                 long userId = _LoggedInUser.UserId;
 
 
-                //int currentYear = DateTime.Now.Year;
-                //int startYear = DateTime.Now.Month >= 4 ? currentYear : currentYear - 1;
 
-                //string financialYear = $"{startYear}-{(startYear + 1) % 100:D2}";
-
-                 
 
                 DataTable result = new AuditorModel()
-                    .SaveAuditAccountOpeningBalance(
-                        request.KVSSId,
-                        request.TabId,
-                        request.FinancialYear,
-                        userId,
-                        dtDetails
-                    );
+                        .SaveAuditAccountOpeningBalance(
+                            request.KVSSId,
+                            request.TabId,
+                            request.FinancialYear,
+                            userId,
+                            dtDetails
+                        );
 
                 if (result != null && result.Rows.Count > 0)
                 {
@@ -1389,10 +1423,11 @@ namespace Cooperative.Controllers
             }
             catch (Exception ex)
             {
+
                 return Json(new
                 {
                     Status = 0,
-                    Message = ex.Message
+                    Message = "administrator." + ex.Message.ToString()
                 });
             }
         }
@@ -1547,8 +1582,46 @@ namespace Cooperative.Controllers
 
         [HttpGet]
         [ActionName("GetAllAuditorSalePurchaseList")]
-        public string GetAllAuditorSalePurchaseList(int KVSSId, string financialYear)
-        { 
+        public string GetAllAuditorSalePurchaseList(int? KVSSId, string financialYear)
+        {
+            string auditKVSSName = "";
+            // If Session is null, assign the selected KVSS ID
+            if (Session["KVSSId"] == null && KVSSId > 0)
+            {
+                Session["KVSSId"] = KVSSId;
+            }
+            else
+            {
+                // Otherwise, use the existing Session value
+                KVSSId = Convert.ToInt32(Session["KVSSId"]);
+                SocietyModel objMenuActionModel = new SocietyModel(new FileLogger());
+                DataTable DT = null; 
+                DT = objMenuActionModel.ServiceGetSocietyNameById(KVSSId);
+                if (DT != null && DT.Rows.Count > 0)
+                {
+                    auditKVSSName = Convert.ToString(DT.Rows[0]["SocietyName"]);
+                }
+                Session["AuditKVSSName"] = auditKVSSName;
+            }
+
+            // Financial Year Session
+            if (Session["FinancialYear"] == null && !string.IsNullOrEmpty(financialYear))
+            {
+                Session["FinancialYear"] = financialYear;
+            }
+            else if (Session["FinancialYear"] != null)
+            {
+                financialYear = Convert.ToString(Session["FinancialYear"]);
+            }
+           
+
+            // Pass KVSS ID to View
+            ViewBag.KVSSId = Convert.ToInt32(Session["KVSSId"]);
+
+            ViewBag.FinancialYear = Session["FinancialYear"];
+
+            ViewBag.AuditKVSSName = Session["AuditKVSSName"];
+
             AuditorModel auditorModel = new AuditorModel();
             return COMMON_FUNCTION.DataTableToJSONWithJSONNet(auditorModel.GetAllAuditorSalePurchaseList(KVSSId, financialYear));
         }
@@ -1556,6 +1629,15 @@ namespace Cooperative.Controllers
         [HttpPost]
         public int SaveAuditorSalePurchase(AuditSPRequest request)
         {
+            if (Session["FinancialYear"] != null)
+            {
+                request.FinancialYear = Convert.ToString(Session["FinancialYear"]);
+            }
+            if (Session["KVSSId"] != null && Convert.ToInt32(Session["KVSSId"]) > 0)
+            {
+                request.KVSSId = Convert.ToInt32(Session["KVSSId"]);
+            }
+             
             int result = new AuditorModel().SaveAuditorSalePurchase(request);
             return result;
         }

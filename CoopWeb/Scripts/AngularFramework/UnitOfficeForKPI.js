@@ -97,6 +97,7 @@ CooperativeSocietyFormModule.controller("CooperativeUnitOfficeKPIFormCont", func
                     area.Indicators.push({
                         KPIIndicatorsId: item.KPIIndicatorsId,
                         KPIIndicators: item.KPIIndicators,
+                        OtherText: item.OtherText || "",
                         WeightedMarks: item.WeightedMarks,
                         Target: item.KPIIndicatorsTarget,
                         Achievement: item.KPIIndicatorsAchievement || "",
@@ -115,9 +116,10 @@ CooperativeSocietyFormModule.controller("CooperativeUnitOfficeKPIFormCont", func
     };
 
     $scope.GetKPIResult = function () {
+        debugger;
 
         $http.get(SiteUrl + "/KPI/GetKPIDetails", {
-            params: { officeId: $scope.OfficeId, month: $scope.PreviousMonthId, kpiFor: "UnitOffice", DistrictId: $scope.DistrictId }
+            params: { officeId: $scope.OfficeId, month: $scope.PreviousMonthId, kpiFor: "UnitOffice", DistrictId: $scope.DistrictId, UnitResionId: $scope.ResionId }
         }).success(function (data) {
 
             if (data && data.length > 0) {
@@ -135,6 +137,7 @@ CooperativeSocietyFormModule.controller("CooperativeUnitOfficeKPIFormCont", func
                             item.Progress = Number(saved.ProgressPercentage);
                             item.MarksObtained = Number(saved.MarksObtained);
                             item.WeightedMarks = Number(saved.WeightedMarks);
+                            item.OtherText = saved.OtherText;
                         }
                     });
                 });
@@ -228,6 +231,8 @@ CooperativeSocietyFormModule.controller("CooperativeUnitOfficeKPIFormCont", func
                 SaveData.push({
                     FY: $scope.FY,
                     Month: $scope.PreviousMonthId,
+                    UnitResionId: $scope.ResionId,
+                    ActId: $scope.ActId,
                     KPIFor: "UnitOffice",
                     OfficeId: $scope.OfficeId,
                     KPIIndicatorsId: item.KPIIndicatorsId,
@@ -235,7 +240,8 @@ CooperativeSocietyFormModule.controller("CooperativeUnitOfficeKPIFormCont", func
                     KPIIndicatorsAchievement: item.Achievement || 0,
                     ProgressPercentage: item.Progress || 0,
                     WeightedMarks: item.WeightedMarks || 0,
-                    MarksObtained: item.MarksObtained || 0
+                    MarksObtained: item.MarksObtained || 0,
+                    OtherText: item.OtherText || ""
                 });
             });
 
@@ -272,6 +278,8 @@ CooperativeSocietyFormModule.controller("CooperativeUnitOfficeKPIFormCont", func
                 SaveData.push({
                     FY: $scope.FY,
                     Month: $scope.PreviousMonthId,
+                    UnitResionId: $scope.ResionId,
+                    ActId: $scope.ActId,
                     KPIFor: "UnitOffice",
                     OfficeId: $scope.OfficeId,
                     KPIIndicatorsId: item.KPIIndicatorsId,
@@ -279,7 +287,8 @@ CooperativeSocietyFormModule.controller("CooperativeUnitOfficeKPIFormCont", func
                     KPIIndicatorsAchievement: item.Achievement || 0,
                     ProgressPercentage: item.Progress || 0,
                     WeightedMarks: item.WeightedMarks || 0,
-                    MarksObtained: item.MarksObtained || 0
+                    MarksObtained: item.MarksObtained || 0,
+                    OtherText: item.OtherText || ""
                 });
             });
 
@@ -314,6 +323,13 @@ CooperativeSocietyFormModule.controller("CooperativeUnitOfficeKPIFormCont", func
                     $scope.UserDetails = data[0];
                     $scope.OfficeId = data[0].OfficeId;
                     $scope.DistrictId = data[0].DISTRICT_ID;
+                    $scope.ResionId = data[0].ResionId;
+                    $scope.ActId = data[0].ActId;
+                    $scope.ResionName = data[0].ResionName;
+                    console.table($scope.ResionId);
+                    console.table($scope.ActId);
+                    //// Multiple Region IDs
+                    //$scope.ResionId = String(data[0].ResionId || '');
 
                     // Call function only when data is available
                     $scope.GetUnitOfficeDetail();
