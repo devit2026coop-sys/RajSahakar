@@ -7,8 +7,6 @@
         text-align: center;
     }
 
-
-
     table.devtable tbody .add {
         display: inline-flex;
         border-radius: 50%;
@@ -41,9 +39,6 @@
         border: 0px;
         background-color: #dc3545;
     }
-
-
-
 
     .section-row th {
         background: #e7f2f1;
@@ -82,7 +77,6 @@
     .form-control.numeric {
         text-align: right;
     }
-
 
     .top-tbs-btn {
         display: flex;
@@ -137,6 +131,7 @@
         padding: 0px;
     }
 </style>
+
 <div ng-app="auditorAppropriationMod" ng-controller="auditorAppropriationCtrl" ng-cloak="">
     <div class="page">
         <div class="col-md-12">
@@ -181,90 +176,163 @@
                             <th style="background-color: #168178; color: #fff; text-align: center;">चालू वर्ष राशि (Amount ₹)</th>
                         </tr>
                     </thead>
-
                     <tbody>
-                        <tr>
-                            <td>सामान्य आरक्षित निधि (General Reserve Fund) (25% of Net profit of year)</td>
-                            <td>25%</td>
-                            <td style="text-align:right;">0.00</td>
-                            <td>शुद्ध लाभ (Net Profit from P&amp;L A/c)</td>
-                            <td style="text-align:right;">0.00</td>
+
+                        <tr ng-repeat="dr in DrList track by dr.ParticularId">
+
+                            <!-- Dr Particulars -->
+                            <td>
+                                {{dr.ParticularName_Hi}}
+                                ({{dr.ParticularName_En}})
+                            </td>
+
+                            <!-- Dr Percentage -->
+                            <td>
+                                <span ng-if="dr.Percentage != null">
+                                    {{dr.Percentage}}%
+                                </span>
+                            </td>
+
+                            <!-- Dr Amount -->
+                            @*<td style="text-align:right;">
+                                    {{dr.CurrentYearAmount | number:2}}
+                                </td>*@
+
+                            <td style="text-align:right;">
+                                <input type="number" class="form-control" ng-model="dr.CurrentYearAmount" min="0" />
+                            </td>
+
+                            <!-- Cr Particulars -->
+                            <td>
+                                <span ng-if="CrList[$index]">
+                                    {{CrList[$index].ParticularName_Hi}}
+                                    ({{CrList[$index].ParticularName_En}})
+                                </span>
+                            </td>
+
+                            <!-- Cr Amount -->
+                            @*<td style="text-align:right;">
+                                <span ng-if="CrList[$index]">
+                                    {{CrList[$index].CurrentYearAmount | number:2}}
+                                </span>
+                            </td>*@
+
+                            <td style="text-align:right;">
+                                <input type="number" class="form-control" ng-if="CrList[$index]" ng-model="CrList[$index].CurrentYearAmount" min="0" />
+                            </td>
+
                         </tr>
 
-                        <tr>
-                            <td>सहकारी शिक्षा एवं विकास निधि (Co-op Education Fund) (1% of Net profit of year)</td>
-                            <td>1%</td>
-                            <td style="text-align:right;">0.00</td>
-                            <td>पिछले वर्ष का शेष (Last Year Balance)</td>
-                            <td style="text-align:right;">0.00</td>
+                        <tr ng-if="DrList.length == 0 && CrList.length == 0">
+                            <td colspan="5" class="text-center">
+                                No Data Found
+                            </td>
                         </tr>
 
-                        <tr>
-                            <td>लाभांश कोष (Maximum 7% of Share Capital)</td>
-                            <td></td>
-                            <td style="text-align:right;">0.00</td>
-                            <td></td>
-                            <td></td>
-                        </tr>
-
-                        <tr>
-                            <td>उक्त प्रावधान के पश्चात् शेष लाभ (Remaining Profit)</td>
-                            <td></td>
-                            <td style="text-align:right;">0.00</td>
-                            <td></td>
-                            <td></td>
-                        </tr>
-
-                        <tr>
-                            <td>मूल्य घटत बढ़त कोष (20% of remaining Profit)</td>
-                            <td></td>
-                            <td style="text-align:right;">0.00</td>
-                            <td></td>
-                            <td></td>
-                        </tr>
-
-                        <tr>
-                            <td>भूमि एवं भवन कोष (15% of remaining Profit)</td>
-                            <td></td>
-                            <td style="text-align:right;">0.00</td>
-                            <td></td>
-                            <td></td>
-                        </tr>
-
-                        <tr>
-                            <td>जनहितकारी कोष (10% of remaining Profit)</td>
-                            <td></td>
-                            <td style="text-align:right;">0.00</td>
-                            <td></td>
-                            <td></td>
-                        </tr>
-
-                        <tr>
-                            <td>अन्य कोष</td>
-                            <td></td>
-                            <td style="text-align:right;">0.00</td>
-                            <td></td>
-                            <td></td>
-                        </tr>
-
-                        <tr>
-                            <td>आगामी वर्ष हेतु आधिक्य (Surplus carried to B/S)</td>
-                            <td></td>
-                            <td style="text-align:right;">0.00</td>
-                            <td></td>
-                            <td></td>
-                        </tr>
                     </tbody>
 
                     <tfoot>
                         <tr class="total-row">
+
                             <th>योग (Total)</th>
                             <th></th>
-                            <th style="text-align:right;">0.00</th>
+
+                            <th style="text-align:right;">
+                                {{getAppropriationTotal(DrList) | number:2}}
+                            </th>
+
                             <th>योग (Total)</th>
-                            <th style="text-align:right;">0.00</th>
+
+                            <th style="text-align:right;">
+                                {{getAppropriationTotal(CrList) | number:2}}
+                            </th>
+
                         </tr>
                     </tfoot>
+
+                    @*<tbody>
+                            <tr>
+                                <td>सामान्य आरक्षित निधि (General Reserve Fund) (25% of Net profit of year)</td>
+                                <td>25%</td>
+                                <td style="text-align:right;">0.00</td>
+                                <td>शुद्ध लाभ (Net Profit from P&amp;L A/c)</td>
+                                <td style="text-align:right;">0.00</td>
+                            </tr>
+
+                            <tr>
+                                <td>सहकारी शिक्षा एवं विकास निधि (Co-op Education Fund) (1% of Net profit of year)</td>
+                                <td>1%</td>
+                                <td style="text-align:right;">0.00</td>
+                                <td>पिछले वर्ष का शेष (Last Year Balance)</td>
+                                <td style="text-align:right;">0.00</td>
+                            </tr>
+
+                            <tr>
+                                <td>लाभांश कोष (Maximum 7% of Share Capital)</td>
+                                <td></td>
+                                <td style="text-align:right;">0.00</td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+
+                            <tr>
+                                <td>उक्त प्रावधान के पश्चात् शेष लाभ (Remaining Profit)</td>
+                                <td></td>
+                                <td style="text-align:right;">0.00</td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+
+                            <tr>
+                                <td>मूल्य घटत बढ़त कोष (20% of remaining Profit)</td>
+                                <td></td>
+                                <td style="text-align:right;">0.00</td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+
+                            <tr>
+                                <td>भूमि एवं भवन कोष (15% of remaining Profit)</td>
+                                <td></td>
+                                <td style="text-align:right;">0.00</td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+
+                            <tr>
+                                <td>जनहितकारी कोष (10% of remaining Profit)</td>
+                                <td></td>
+                                <td style="text-align:right;">0.00</td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+
+                            <tr>
+                                <td>अन्य कोष</td>
+                                <td></td>
+                                <td style="text-align:right;">0.00</td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+
+                            <tr>
+                                <td>आगामी वर्ष हेतु आधिक्य (Surplus carried to B/S)</td>
+                                <td></td>
+                                <td style="text-align:right;">0.00</td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                        </tbody>
+
+                        <tfoot>
+                            <tr class="total-row">
+                                <th>योग (Total)</th>
+                                <th></th>
+                                <th style="text-align:right;">0.00</th>
+                                <th>योग (Total)</th>
+                                <th style="text-align:right;">0.00</th>
+                            </tr>
+                        </tfoot>*@
 
                 </table>
 

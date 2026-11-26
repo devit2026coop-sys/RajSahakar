@@ -140,6 +140,44 @@ CooperativeSocietyFormModule.controller("AuditorAuditFeesCont", function ($rootS
         }
     };
 
+    //$scope.ValidateAssessmentRecovery = function (item, field) {
+
+    //    var PAssessment = Number(item.PreviousMonthCurrentYearAssessment) || 0;
+    //    var PRecovery = Number(item.PreviousMonthCurrentYearRecovery) || 0;
+    //    var CAssessment = Number(item.CurrentMonthCurrentYearAssessment) || 0;
+    //    var CRecovery = Number(item.CurrentMonthCurrentYearRecovery) || 0;
+
+    //    if (PAssessment < 0 || PRecovery < 0 || CAssessment < 0 || CRecovery < 0) {
+    //        alert("Negative value allowed nahi hai.");
+    //        item[field] = 0;
+    //        $scope.ValidateAssessmentRecovery(item);
+    //        return;
+    //    }
+
+    //    if ((PAssessment + CAssessment) <= (PRecovery + CRecovery)) {
+
+    //        alert("गत माह में निर्धारण + माह में निर्धारण का योग और गत माह की वसूली + माह की वसूली का योग से अधिक नहीं हो सकता।");
+
+    //        if (field === "PreviousMonthCurrentYearAssessment") {
+    //            item.PreviousMonthCurrentYearAssessment = 0;
+    //        }
+    //        else if (field === "PreviousMonthCurrentYearRecovery") {
+    //            item.PreviousMonthCurrentYearRecovery = 0;
+    //        }
+    //        else if (field === "CurrentMonthCurrentYearAssessment") {
+    //            item.CurrentMonthCurrentYearAssessment = 0;
+    //        }
+    //        else if (field === "CurrentMonthCurrentYearRecovery") {
+    //            item.CurrentMonthCurrentYearRecovery = 0;
+    //        }
+
+    //        PAssessment = Number(item.PreviousMonthCurrentYearAssessment) || 0;
+    //        PRecovery = Number(item.PreviousMonthCurrentYearRecovery) || 0;
+    //        CAssessment = Number(item.CurrentMonthCurrentYearAssessment) || 0;
+    //        CRecovery = Number(item.CurrentMonthCurrentYearRecovery) || 0;
+    //    }
+    //};
+
     $scope.ValidateAssessmentRecovery = function (item, field) {
 
         var PAssessment = Number(item.PreviousMonthCurrentYearAssessment) || 0;
@@ -147,34 +185,27 @@ CooperativeSocietyFormModule.controller("AuditorAuditFeesCont", function ($rootS
         var CAssessment = Number(item.CurrentMonthCurrentYearAssessment) || 0;
         var CRecovery = Number(item.CurrentMonthCurrentYearRecovery) || 0;
 
-        if (PAssessment < 0 || PRecovery < 0 || CAssessment < 0 || CRecovery < 0) {
+        // Negative value validation
+        if (PAssessment < 0 || PRecovery < 0 ||
+            CAssessment < 0 || CRecovery < 0) {
+
             alert("Negative value allowed nahi hai.");
+
             item[field] = 0;
-            $scope.ValidateAssessmentRecovery(item);
             return;
         }
 
-        if ((PAssessment + PRecovery) <= (CAssessment + CRecovery)) {
+        var TotalAssessment = PAssessment + CAssessment;
+        var TotalRecovery = PRecovery + CRecovery;
 
-            alert("गत माह में निर्धारण + माह में निर्धारण का योग और गत माह की वसूली + माह की वसूली का योग से अधिक नहीं हो सकता।");
+        // Assessment must be greater than Recovery
+        if (TotalAssessment < TotalRecovery) {
 
-            if (field === "PreviousMonthCurrentYearAssessment") {
-                item.PreviousMonthCurrentYearAssessment = 0;
-            }
-            else if (field === "PreviousMonthCurrentYearRecovery") {
-                item.PreviousMonthCurrentYearRecovery = 0;
-            }
-            else if (field === "CurrentMonthCurrentYearAssessment") {
-                item.CurrentMonthCurrentYearAssessment = 0;
-            }
-            else if (field === "CurrentMonthCurrentYearRecovery") {
-                item.CurrentMonthCurrentYearRecovery = 0;
-            }
+            alert("गत माह में निर्धारण + माह में निर्धारण का योग, गत माह की वसूली + माह की वसूली के योग से अधिक होना चाहिए।");
 
-            PAssessment = Number(item.PreviousMonthCurrentYearAssessment) || 0;
-            PRecovery = Number(item.PreviousMonthCurrentYearRecovery) || 0;
-            CAssessment = Number(item.CurrentMonthCurrentYearAssessment) || 0;
-            CRecovery = Number(item.CurrentMonthCurrentYearRecovery) || 0;
+            if (field) {
+                item[field] = 0;
+            }
         }
     };
 

@@ -2629,5 +2629,31 @@ namespace Cooperative.Models
             return dt;
         }
 
+        public DataTable GetAppropriationDetails(int KVSSId, string financialYear)
+        {
+            DataTable dt = new DataTable();
+            UserEntity _LoggedInUser = (UserEntity)System.Web.HttpContext.Current.Session[SessionIdentity.Admin];
+            try
+            {
+                objDBAccess.OpenConnection();
+
+                SqlCommand cmd = objDBAccess.CreateCommand("USP_Get_AuditorAppropriationDetails", DBFactoryCommandType.PROCEDURE_COMMAND);
+                objDBAccess.AddParameterToCommand("@KVSSId", DBFactoryParameterType.Int, KVSSId);
+                objDBAccess.AddParameterToCommand("@FinancialYear", DBFactoryParameterType.VARCHAR, financialYear); 
+                objDBAccess.AddParameterToCommand("@UserId", DBFactoryParameterType.VARCHAR, _LoggedInUser.UserId);
+                objDBAccess.AddParameterToCommand("@RoleId", DBFactoryParameterType.Int, _LoggedInUser.RoleId);
+                dt = objDBAccess.GetTable();
+            }
+            catch (Exception ex)
+            {
+                objILogger.ErrorHandle(new ErrorLogEntity() { PageName = "Cooperative.Models.AuditorModel", FunctionName = "GetAppropriationDetails(int KVSSId, string financialYear)" }, ex);
+            }
+            finally
+            {
+                objDBAccess.CloseConnection();
+            }
+            return dt;
+        }
+
     }
 }
