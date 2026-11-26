@@ -67,36 +67,94 @@ MasterMod.controller("ApplicationPLDBLoanWiseFlowCont", function ($scope, $rootS
         }
         return input;
     };
-    $scope.searchRequest = function (callback) {
-        //$scope.DataPaging.searchParameters = [];
-        $scope.DataPaging.searchParameters.splice(0, $scope.DataPaging.searchParameters.length);
-        var ln = $('#' + $scope.DataPaging.searchBoxDivId).find('input:text,select,input:checkbox,input:radio').length;
-        var indx = 1;
-        $('#' + $scope.DataPaging.searchBoxDivId).find('input:text,select,input:checkbox,input:radio').each(function () {
+    //$scope.searchRequest = function (callback) {
+    //    $("#divPLDBLoanApplication").show();
+    //    //$scope.DataPaging.searchParameters = [];
+    //    $scope.DataPaging.searchParameters.splice(0, $scope.DataPaging.searchParameters.length);
+    //    var ln = $('#' + $scope.DataPaging.searchBoxDivId).find('input:text,select,input:checkbox,input:radio').length;
+    //    var indx = 1;
+    //    $('#' + $scope.DataPaging.searchBoxDivId).find('input:text,select,input:checkbox,input:radio').each(function () {
 
-            if ($(this).attr("type") == "checkbox" && $(this).attr('type') != undefined) {
-                if ($(this).is(":checked")) {
-                    var parameter = { Key: $(this).attr('name'), Value: $(this).val() }
-                    $scope.DataPaging.searchParameters.push(parameter);
+    //        if ($(this).attr("type") == "checkbox" && $(this).attr('type') != undefined) {
+    //            if ($(this).is(":checked")) {
+    //                var parameter = { Key: $(this).attr('name'), Value: $(this).val() }
+    //                $scope.DataPaging.searchParameters.push(parameter);
+    //            }
+    //        } else if ($(this).attr("type") == "radio" && $(this).attr('type') != undefined) {
+    //            if ($(this).is(":checked")) {
+    //                var parameter = { Key: $(this).attr('name'), Value: $(this).val() }
+    //                $scope.DataPaging.searchParameters.push(parameter);
+    //            }
+    //        } else {
+    //            if ($(this).val() != '' && $(this).val() != null && $(this).attr('name') != undefined) {
+    //                var parameter = { Key: $(this).attr('name'), Value: $(this).val() }
+    //                $scope.DataPaging.searchParameters.push(parameter);
+    //            }
+    //        }
+    //        if (indx == ln) {
+    //            $scope.DataPaging.currentPageID = 1;
+    //            callback();
+    //        }
+    //        ++indx;
+    //    });
+    //}
+
+    $scope.searchRequest = function (callback) {
+
+        $("#divPLDBLoanApplication").show();
+
+        // Clear existing search parameters
+        $scope.DataPaging.searchParameters.splice(
+            0,
+            $scope.DataPaging.searchParameters.length
+        );
+
+        $('#' + $scope.DataPaging.searchBoxDivId)
+            .find('input:text,select,input:checkbox,input:radio')
+            .each(function () {
+
+                var name = $(this).attr('name');
+                var value = $(this).val();
+                var type = $(this).attr('type');
+
+                if (name == undefined) {
+                    return;
                 }
-            } else if ($(this).attr("type") == "radio" && $(this).attr('type') != undefined) {
-                if ($(this).is(":checked")) {
-                    var parameter = { Key: $(this).attr('name'), Value: $(this).val() }
-                    $scope.DataPaging.searchParameters.push(parameter);
+
+                if (type == "checkbox" || type == "radio") {
+
+                    if ($(this).is(":checked")) {
+
+                        $scope.DataPaging.searchParameters.push({
+                            Key: name,
+                            Value: value
+                        });
+                    }
+
+                } else {
+
+                    if (value != '' && value != null) {
+
+                        $scope.DataPaging.searchParameters.push({
+                            Key: name,
+                            Value: value
+                        });
+                    }
                 }
-            } else {
-                if ($(this).val() != '' && $(this).val() != null && $(this).attr('name') != undefined) {
-                    var parameter = { Key: $(this).attr('name'), Value: $(this).val() }
-                    $scope.DataPaging.searchParameters.push(parameter);
-                }
-            }
-            if (indx == ln) {
-                $scope.DataPaging.currentPageID = 1;
-                callback();
-            }
-            ++indx;
-        });
-    }
+            });
+
+        // Reset page number
+        $scope.DataPaging.currentPageID = 1;
+
+        // Show clear button
+        $scope.showClearButton = true;
+
+        // Call search function
+        if (angular.isFunction(callback)) {
+            callback();
+        }
+    };
+
     $scope.showSearchDate = false;
     $scope.showSearchText = true;
     $scope.SearchText = "";
@@ -246,6 +304,7 @@ MasterMod.controller("ApplicationPLDBLoanWiseFlowCont", function ($scope, $rootS
                 return parseInt(item.FIN_YEAR_START) >= 1970 && parseInt(item.FIN_YEAR_START) <= 2024;
             });
         }
+        $("#divPLDBLoanApplication").hide();
     };
 
     $scope.FinancialYearList = function () {
