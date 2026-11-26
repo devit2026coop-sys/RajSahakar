@@ -6806,6 +6806,7 @@ namespace Cooperative.Models
                 objDBAccess.OpenConnection();
 
                 string whereCase = "";
+                int AmountId = 0;
 
                 if (Details.SearchParameter.Where(x => x.Key == "FinancialYearId").Any())
                 {
@@ -6821,6 +6822,20 @@ namespace Cooperative.Models
                 {
                     whereCase += " and a.PldbId = " + Details.SearchParameter.Where(x => x.Key == "PLDB_ID").Select(x => x.Value).FirstOrDefault();
                 }
+                //
+                if (Details.SearchParameter.Where(x => x.Key == "sectorid").Any())
+                {
+                    whereCase += " and a.SectorId = " + Details.SearchParameter.Where(x => x.Key == "sectorid").Select(x => x.Value).FirstOrDefault();
+                }
+                if (Details.SearchParameter.Where(x => x.Key == "PurposeId").Any())
+                {
+                    whereCase += " and a.PurposeId = " + Details.SearchParameter.Where(x => x.Key == "PurposeId").Select(x => x.Value).FirstOrDefault();
+                }
+                if (Details.SearchParameter.Where(x => x.Key == "AmountId").Any())
+                {
+                    AmountId = Convert.ToInt32((Details.SearchParameter.Where(x => x.Key == "AmountId").Select(x => x.Value).FirstOrDefault()));
+                }
+                //
 
                 if (Details.SearchParameter.Where(x => x.Key == "BRANCH_ID").Any())
                 {
@@ -6854,6 +6869,7 @@ namespace Cooperative.Models
                 objDBAccess.AddParameterToCommand("@PldbId", DBFactoryParameterType.NVarchar, _LoggedInUser.PLDBId);
                 objDBAccess.AddParameterToCommand("@BranchId", DBFactoryParameterType.NVarchar, _LoggedInUser.PLDBBrancchId);
                 objDBAccess.AddParameterToCommand("@WhereCase", DBFactoryParameterType.NVarchar, whereCase);
+                objDBAccess.AddParameterToCommand("@AmountId", DBFactoryParameterType.Int, AmountId);
                 dt = objDBAccess.GetTable();
 
                 if (dt.Rows != null && dt.Rows.Count > 0)

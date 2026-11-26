@@ -199,6 +199,52 @@ MasterMod.controller("ApplicationPLDBLoanWiseFlowCont", function ($scope, $rootS
     $scope.currentPage = 1;
     $scope.pageSize = 50;
 
+    $scope.LoanSectorList = [];
+    $scope.LoadSector = function () {
+
+        return $http.post(SiteUrl + "/pldb/GetSectorMaster", { "WhereCase": "  and se.is_active=1 " }).
+            success(function (data, status) {
+                $scope.LoanSectorList = [];
+                $scope.LoanSectorList = data;
+                if ($scope.LoanSectorList && $scope.LoanSectorList.length > 0 && $scope.PLDB && $scope.PLDB.Sector != "" && $scope.IsEditable
+                    && ($scope.PLDB.SectorId == undefined || $scope.PLDB.SectorId == 0 || $scope.PLDB.SectorId == "0")
+                ) {
+                    var matchedVillage = $scope.LoanSectorList.find(function (x) {
+                        return x.sector_name_en.toLowerCase() == $scope.PLDB.Sector.toLowerCase();
+                    });
+
+                    if (matchedVillage) {
+                        $scope.PLDB.SectorId = matchedVillage.SectorId;
+                        $scope.PLDB.Sector = matchedVillage.Sector;
+                    }
+                }
+                else {
+                    $scope.PLDB.SectorId = $scope.PLDB ? $scope.PLDB.SectorId.toString() : "0";
+                  
+                }
+
+            }).
+            error(function (data, status) {
+                $scope.LoanSectorList = [];
+                $(".blockUI").fadeOut("slow");
+            });
+    };
+
+
+    $scope.LoadPurposeByShemeId = function (ShemeId, index) {
+
+        $(".blockUI").fadeIn("slow");
+        return $http.post(SiteUrl + "/pldb/GetPurposeMaster", { SchemeId: $scope.PLDB.SectorId }).
+            success(function (data, status) {
+                $(".blockUI").fadeOut("slow");
+                $scope.PurposeOfLoanList = [];
+                $scope.PurposeOfLoanList = data;
+            }).
+            error(function (data, status) {
+                $(".blockUI").fadeOut("slow");
+            });
+    };
+
 
     //Pldb Branch
     $scope.PLDBBranchList = function (branch_ID) {
@@ -385,7 +431,7 @@ MasterMod.controller("ApplicationPLDBLoanWiseFlowCont", function ($scope, $rootS
         $scope.showClearButton = (LevelId === 1);
 
         $scope.FinancialYearList();
-
+        $scope.LoadSector();
         $scope.showLoader = false;
         $scope.IsDistrictFreezed = false;
         $scope.PLDBLoanApplicationPldbWiseList();
