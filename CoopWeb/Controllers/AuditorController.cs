@@ -1642,5 +1642,13 @@ namespace Cooperative.Controllers
             return result;
         }
 
+        [HttpGet]
+        [ActionName("GetAppropriationDetails")]
+        public string GetAppropriationDetails(int KVSSId, string financialYear)
+        {
+            AuditorModel auditorModel = new AuditorModel();
+            return COMMON_FUNCTION.DataTableToJSONWithJSONNet(auditorModel.GetAppropriationDetails(KVSSId, financialYear));
+        }
+
     }
 }
