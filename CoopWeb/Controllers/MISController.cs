@@ -6406,13 +6406,13 @@ namespace Cooperative.Controllers
 
         [HttpPost]
         [ActionName("GetLoanApplicationPLDBCountDetail")]
-        public JsonResult GetLoanApplicationPLDBCountDetail(DataPagingModel Details, int pldbId, int branchId, int financialYearId, bool IsAvadhipaar)
+        public JsonResult GetLoanApplicationPLDBCountDetail(DataPagingModel Details, int pldbId, int branchId, int financialYearId, bool IsAvadhipaar, int Amount =0, int SectorId =0, int PurposeId =0)
         {
             try
             {
                 MISModel objMisModel = new MISModel(new DBLogger());
 
-                DataTable DT = objMisModel.GetLoanApplicationPLDBCountDetail(Details, pldbId, branchId, financialYearId, IsAvadhipaar);
+                DataTable DT = objMisModel.GetLoanApplicationPLDBCountDetail(Details, pldbId, branchId, financialYearId, IsAvadhipaar, Amount, SectorId, PurposeId);
 
                 return Json(new { DataList = COMMON_FUNCTION.DataTableToJSONWithJSONNet(DT), DataPaging = Details }, JsonRequestBehavior.AllowGet);
 
@@ -6802,13 +6802,13 @@ namespace Cooperative.Controllers
 
         [HttpPost]
         [ActionName("GetLoanApplicationStatusCountDetail")]
-        public JsonResult GetLoanApplicationStatusCountDetail(DataPagingModel Details, int pldbId, string statusType, int financialYearId, int branchId)
+        public JsonResult GetLoanApplicationStatusCountDetail(DataPagingModel Details, int pldbId, string statusType, int financialYearId, int branchId, int Amount = 0, int SectorId = 0, int PurposeId = 0,bool IsAvadhipaar =false)
         {
             try
             {
                 MISModel objMisModel = new MISModel(new DBLogger());
 
-                DataTable DT = objMisModel.GetLoanApplicationPLDBStatusCountDetail(Details, pldbId, statusType, financialYearId, branchId);
+                DataTable DT = objMisModel.GetLoanApplicationPLDBStatusCountDetail(Details, pldbId, statusType, financialYearId, branchId,Amount,SectorId,PurposeId, IsAvadhipaar);
 
                 return Json(new { DataList = COMMON_FUNCTION.DataTableToJSONWithJSONNet(DT), DataPaging = Details }, JsonRequestBehavior.AllowGet);
 

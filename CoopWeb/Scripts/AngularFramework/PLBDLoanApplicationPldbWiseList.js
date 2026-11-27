@@ -379,7 +379,10 @@ MasterMod.controller("ApplicationPLDBLoanWiseFlowCont", function ($scope, $rootS
             PldbId: item.PldbId || 0,
             BranchId: ($scope.PLDB && $scope.PLDB.BranchId && $scope.PLDB.BranchId != '0') ? $scope.PLDB.BranchId : 0,
             FinancialYearId: item.FinancialYearId || 0,
-            IsAvadhipaar: item.IsAvadhipaar || 0
+            IsAvadhipaar: item.IsAvadhipaar || 0,
+            Amount: ($scope.PLDB && $scope.PLDB.Amount && $scope.PLDB.Amount != '0') ? $scope.PLDB.Amount : 0,
+            SectorId: ($scope.PLDB && $scope.PLDB.SectorId && $scope.PLDB.SectorId != '0') ? $scope.PLDB.SectorId : 0,
+            PurposeId: ($scope.PLDB && $scope.PLDB.PurposeId && $scope.PLDB.PurposeId != '0') ? $scope.PLDB.PurposeId : 0
         };
         sessionStorage.setItem("LoanDetailParams", JSON.stringify(params));
 
@@ -394,7 +397,11 @@ MasterMod.controller("ApplicationPLDBLoanWiseFlowCont", function ($scope, $rootS
             PldbId: item.PldbId || 0,
             StatusType: statusType,
             financialYearId : $scope.PLDB.FinancialYearId || 0,
-            branchId : $scope.PLDB.BranchId || 0
+            branchId: $scope.PLDB.BranchId || 0,
+            IsAvadhipaar: item.IsAvadhipaar || 0,
+            Amount: ($scope.PLDB && $scope.PLDB.Amount && $scope.PLDB.Amount != '0') ? $scope.PLDB.Amount : 0,
+            SectorId: ($scope.PLDB && $scope.PLDB.SectorId && $scope.PLDB.SectorId != '0') ? $scope.PLDB.SectorId : 0,
+            PurposeId: ($scope.PLDB && $scope.PLDB.PurposeId && $scope.PLDB.PurposeId != '0') ? $scope.PLDB.PurposeId : 0
         };
 
         sessionStorage.setItem("LoanDetailParams", JSON.stringify(params));
