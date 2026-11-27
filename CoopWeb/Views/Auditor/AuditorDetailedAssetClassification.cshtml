@@ -1,57 +1,48 @@
 ﻿<script src="~/Scripts/AngularFramework/AuditorDetailedAssetClassification.js?v=@DateTime.Now.Ticks"></script>
 
 <style>
+    table.devtable {
+        min-width: 1600px;
+    }
 
     table.devtable thead tr th {
         background: #006159;
+        color: #fff;
         text-align: center;
+        vertical-align: middle;
     }
 
+    table.devtable tbody td {
+        vertical-align: middle;
+    }
 
+    table.devtable tbody .add,
+    table.devtable tbody .remove {
+        display: inline-flex;
+        border-radius: 50%;
+        color: #fff;
+        cursor: pointer;
+        width: 35px;
+        height: 35px;
+        justify-content: center;
+        align-items: center;
+        border: 0;
+    }
 
     table.devtable tbody .add {
-        display: inline-flex;
-        border-radius: 50%;
         background-color: #198754;
-        color: #fff;
-        cursor: pointer;
-        transition: background 0.2s ease;
-        width: 35px;
-        height: 35px;
-        justify-content: center;
-        align-items: center;
-        border: 0px;
     }
 
-        table.devtable tbody .add i, table.devtable tbody .remove i {
-            color: white;
-            font-size: 14px;
-            font-weight: normal;
-        }
-
-    .remove {
-        display: inline-flex;
-        border-radius: 50%;
-        color: #fff;
-        cursor: pointer;
-        width: 35px;
-        height: 35px;
-        justify-content: center;
-        align-items: center;
-        border: 0px;
+    table.devtable tbody .remove {
         background-color: #dc3545;
     }
-
-
-
 
     .section-row th {
         background: #e7f2f1;
         color: #075b55;
-        font-weight: 800 !important;
+        font-weight: 800;
         text-align: left;
         padding: 11px 14px;
-        border-top: 2px solid #b5d7d3;
     }
 
     .total-row th, .total-row td {
@@ -61,34 +52,22 @@
         padding: 13px 12px;
     }
 
-    .sub-item {
-        padding-left: 34px !important;
-    }
-
-        .sub-item.sub-item-btn {
-            display: flex;
-            justify-content: space-between;
-        }
-
-            .sub-item.sub-item-btn div {
-                display: flex;
-                gap: 10px;
-            }
-
-            .sub-item.sub-item-btn input {
-                max-width: 300px;
-            }
-
     .form-control.numeric {
         text-align: right;
+        min-width: 100px;
     }
 
+    .asset-input {
+        min-width: 125px;
+    }
 
     .top-tbs-btn {
         display: flex;
         align-items: center;
         justify-content: space-between;
         margin-bottom: 15px;
+        flex-wrap: wrap;
+        gap: 10px;
     }
 
     .custom-tbls-tabs {
@@ -97,105 +76,139 @@
         display: flex;
     }
 
-        .custom-tbls-tabs > li {
-            margin-bottom: -2px;
-        }
+    .custom-tbls-tabs > li {
+        margin-bottom: -2px;
+    }
 
-            .custom-tbls-tabs > li > a {
-                color: #444;
-                font-weight: 600;
-                border: 1px solid transparent !important;
-                border-bottom: 2px solid transparent !important;
-                margin-right: 0;
-                background: transparent;
-                transition: all 0.3s ease;
-                border-radius: 4px 4px 0 0;
-                padding: 8px 20px;
-                line-height: 24px;
-                outline: none;
-            }
+    .custom-tbls-tabs > li > a {
+        color: #444;
+        font-weight: 600;
+        border: 1px solid transparent !important;
+        border-bottom: 2px solid transparent !important;
+        margin-right: 0;
+        background: transparent;
+        border-radius: 4px 4px 0 0;
+        padding: 8px 20px;
+        line-height: 24px;
+        cursor: pointer;
+    }
 
-                /* Hover */
-                .custom-tbls-tabs > li > a:hover {
-                    background: #e3e3e3;
-                    color: #168f98;
-                    border: 1px solid transparent !important;
-                }
+    .custom-tbls-tabs > li.active > a,
+    .custom-tbls-tabs > li.active > a:hover {
+        color: #168f98;
+        background: #fff;
+        border: 1px solid #9f9f9f !important;
+        border-bottom: 2px solid #fff !important;
+        font-weight: 700;
+    }
 
-            /* Active Tab */
-            .custom-tbls-tabs > li.active > a,
-            .custom-tbls-tabs > li.active > a:hover,
-            .custom-tbls-tabs > li.active > a:focus {
-                color: #168f98;
-                background: #fff;
-                border: 1px solid #9f9f9f !important;
-                border-bottom: 2px solid #fff !important;
-                font-weight: 700;
-            }
+    .tab-content.custom-tbls-tab-content {
+        padding: 0;
+    }
 
-    .tab-content.custom-tbls-tab-content, .tab-content.custom-tbls-tab-content > .active {
-        padding: 0px;
+    .asset-section-title {
+        background: #e7f2f1;
+        color: #075b55;
+        font-weight: bold;
+    }
+
+    .asset-table-wrapper {
+        overflow-x: auto;
+        width: 100%;
+    }
+
+    .asset-actions {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        margin-top: 20px;
     }
 </style>
-<div ng-app="assetClassificationMod" ng-controller="assetClassificationCtrl" ng-cloak="">
+
+<div ng-app="assetClassificationMod"
+     ng-controller="assetClassificationCtrl"
+     ng-init="KVSSSocietyID = @Html.Raw(Json.Encode(ViewBag.KVSSId));
+              FinancialYear = @Html.Raw(Json.Encode(ViewBag.FinancialYear))"
+     ng-cloak>
+
     <div class="page">
         <div class="col-md-12">
-            <h4 class="citizen-dash-head ng-binding" style="font-weight:bold;">
+
+            <h4 class="citizen-dash-head" style="font-weight:bold;">
                 KRAY VIKRAY SAHAKARI SAMITI (KVSS) - क्रय-विक्रय सहकारी समिति
             </h4>
 
-        </div>
-        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
             <div class="devpage-breadcrumb">
                 <ul class="page-breadcrumb">
-                    <li class="dev-page-br">
-                        <i class="fa fa-home"> </i>
+                    <li>
+                        <i class="fa fa-home"></i>
                         <a href="#"> {{translation.Home}}</a>
-                        <i class="fa fa-angle-right"> </i>
+                        <i class="fa fa-angle-right"></i>
                     </li>
-                    <li style="float: left">
-                        <span style="margin: 0 5px;"> {{translation.New}} </span>
-                        <i class="fa fa-angle-right"> </i>
-                        <span style="margin: 0 5px;">Detailed Asset Classification</span>
+                    <li>
+                        <span>{{translation.New}}</span>
+                        <i class="fa fa-angle-right"></i>
+                        <span>Detailed Asset Classification</span>
                     </li>
                 </ul>
             </div>
-        </div>
-        <div class="col-md-12">
+
             <div class="citizen-dash-head">
 
                 <div class="top-tbs-btn">
-                    <ul class="nav nav-tabs custom-tbls-tabs" role="tablist">
-                        <li class="active">
-                            <a href="#tab1" data-toggle="tab">
+
+                    <ul class="nav nav-tabs custom-tbls-tabs">
+                        <li ng-class="{active: SelectedViewTab == 1}">
+                            <a ng-click="SelectViewTab(1)">
                                 Detailed Classification
                             </a>
                         </li>
-                        <li>
-                            <a href="#tab2" data-toggle="tab">
+
+                        <li ng-class="{active: SelectedViewTab == 2}">
+                            <a ng-click="SelectViewTab(2)">
                                 Classification Summary
                             </a>
                         </li>
                     </ul>
+
                     <div>
-                        <button class="btn btn-primary dev-btn text-center" ng-click="NextStep()">Save & Next</button>
-                        <button class="btn btn-primary dev-btn text-center">Save as Draft</button>
-                        <button class="btn btn-primary dev-btn text-center" ng-click="BackTo()">Back</button>
+                        <button class="btn btn-primary dev-btn"
+                                ng-click="SaveAndNext()">
+                            Save & Next
+                        </button>
+
+                        <button class="btn btn-primary dev-btn"
+                                ng-click="SaveAsDraft()">
+                            Save as Draft
+                        </button>
+
+                        <button class="btn btn-primary dev-btn"
+                                ng-click="BackTo()">
+                            Back
+                        </button>
                     </div>
                 </div>
 
-                <div class="tab-content custom-tbls-tab-content">
-                    <div class="tab-pane fade in active" id="tab1">
-                        <h4>Detailed Asset Classification & Provisioning (Including Loans, Advances & Other Assets) As on 31st March ---------</h4>
+                <!-- TAB 1: DETAILED CLASSIFICATION -->
+                <div class="tab-content custom-tbls-tab-content"
+                     ng-show="SelectedViewTab == 1">
+
+                    <h4>
+                        Detailed Asset Classification & Provisioning
+                        (Including Loans, Advances & Other Assets)
+                        As on 31st March {{FinancialYearEnd}}
+                    </h4>
+
+                    <div class="asset-table-wrapper">
+
                         <table class="table table-bordered table-striped devtable">
+
                             <thead>
                                 <tr>
                                     <th rowspan="2">S.No.<br />(क्र.सं.)</th>
 
                                     <th rowspan="2">
-                                        Name of Borrower / Party<br />
-                                        (ऋणी / पार्टी का नाम)/Asset Head<br />
-                                        (संपत्ति का मुख्य शीर्ष)
+                                        Name of Borrower / Party / Asset Head
                                     </th>
 
                                     <th rowspan="2">Asset Type</th>
@@ -206,205 +219,166 @@
                                     </th>
 
                                     <th rowspan="2">
-                                        Date of Advance/<br />Outstanding<br />
-                                        (दिनांक)
+                                        Date of Advance / Outstanding
                                     </th>
 
                                     <th colspan="2">
-                                        Total Outstanding (₹)<br />(कुल बकाया)
+                                        Total Outstanding (₹)
                                     </th>
 
                                     <th rowspan="2">
-                                        Total Overdue (₹)<br />
-                                        (कुल अवधिपार) ब्याज यदि कोई है तो
+                                        Total Overdue (₹)
                                     </th>
 
                                     <th rowspan="2">
-                                        Period of Outstanding<br />
-                                        (बकाया रहने का समय)
+                                        Period of Outstanding (Days)
                                     </th>
 
                                     <th colspan="6">
                                         Classification of Outstanding Amount
-                                        (बकाया राशि का वर्गीकरण)
                                     </th>
                                 </tr>
 
                                 <tr>
-                                    <th  style="background-color: #168178; color: #fff; text-align: center;">मूल राशि</th>
-                                    <th  style="background-color: #168178; color: #fff; text-align: center;">ब्याज यदि कोई है तो</th>
-                                    <th  style="background-color: #168178; color: #fff; text-align: center;">Standard<br />(मानक)</th>
-                                    <th  style="background-color: #168178; color: #fff; text-align: center;">Sub-Standard<br />(उप-मानक)</th>
-                                    <th  style="background-color: #168178; color: #fff; text-align: center;">Doubtful-I<br />(संदिग्ध-I)</th>
-                                    <th  style="background-color: #168178; color: #fff; text-align: center;">Doubtful-II<br />(संदिग्ध-II)</th>
-                                    <th  style="background-color: #168178; color: #fff; text-align: center;">Doubtful-III<br />(संदिग्ध-III)</th>
-                                    <th  style="background-color: #168178; color: #fff; text-align: center;">Loss Asset<br />(हानि)</th>
+                                    <th>Principal<br />(मूल राशि)</th>
+                                    <th>Interest<br />(ब्याज)</th>
+                                    <th style="display:none;"></th>
+
+                                    <th>Standard</th>
+                                    <th>Sub-Standard</th>
+                                    <th>Doubtful-I</th>
+                                    <th>Doubtful-II</th>
+                                    <th>Doubtful-III</th>
+                                    <th>Loss Asset</th>
                                 </tr>
                             </thead>
 
-                            <tbody>
-                                <!-- Loan & Advances -->
-                                <tr>
-                                    <td>1</td>
-                                    <td colspan="2">
-                                        4. ऋण एवं अग्रिम (Loan &amp; Advances)
+                            <tbody ng-repeat="parent in GetParentHeadersByTab(SelectedTabId) track by parent.HeaderId">
+
+                                <!-- Main section heading -->
+                                <tr class="section-row">
+                                    <th>{{$index + 1}}</th>
+                                    <th colspan="14">
+                                        {{parent.HeaderNameEnglish}}
+                                    </th>
+                                </tr>
+
+                                <!-- Dynamic leaf headings -->
+                                <tr ng-repeat="row in GetLeafHeadersByParent(parent.HeaderId) track by row.HeaderId">
+
+                                    <td>{{$parent.$index + 1}}.{{$index + 1}}</td>
+
+                                    <td>
+                                        {{row.HeaderNameEnglish}}
                                     </td>
-                                    <td colspan="12"></td>
-                                </tr>
 
-                                <tr>
-                                    <td>2</td>
-                                    <td>कर्मचारियों को अग्रिम (Advances to Staff)</td>
-                                    <td>Loans &amp; Advances</td>
-                                    <td></td>
-                                    <td>12-09-2025</td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td>199</td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td style="text-align:right;">0.00</td>
-                                </tr>
-
-                                <tr>
-                                    <td>3</td>
-                                    <td>सदस्यों को ऋण एवं अग्रिम (Loans &amp; Advances to Members)</td>
-                                    <td>Other Assets</td>
-                                    <td></td>
-                                    <td></td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td></td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td style="text-align:right;">0.00</td>
-                                </tr>
-
-                                <tr>
-                                    <td>4</td>
-                                    <td>अन्य ऋण एवं अग्रिम (Other Loans &amp; Advances)</td>
-                                    <td>Other Assets</td>
-                                    <td></td>
-                                    <td></td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td></td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td style="text-align:right;">0.00</td>
-                                </tr>
-
-                                <!-- Other Assets -->
-                                <tr>
-                                    <td>5</td>
-                                    <td colspan="2">
-                                        7. अन्य संपत्तियां तथा देनदार
-                                        (Other Assets including Sundry Debtors)
+                                    <td>
+                                        {{GetAssetType(parent)}}
                                     </td>
-                                    <td colspan="12"></td>
+
+                                    <td>
+                                        <input type="text"
+                                               class="form-control asset-input"
+                                               ng-model="row.AssetDetail.NatureOfFacility"
+                                               maxlength="250"
+                                               placeholder="Nature of Facility" />
+                                    </td>
+
+                                    <td>
+                                        <input type="date"
+                                               class="form-control asset-input"
+                                               ng-model="row.AssetDetail.DateOfAdvance" />
+                                    </td>
+
+                                    <td>
+                                        <input type="number"
+                                               class="form-control numeric"
+                                               min="0"
+                                               step="0.01"
+                                               ng-model="row.AssetDetail.Principal"
+                                               ng-change="CalculateRow(row)" />
+                                    </td>
+
+                                    <td>
+                                        <input type="number"
+                                               class="form-control numeric"
+                                               min="0"
+                                               step="0.01"
+                                               ng-model="row.AssetDetail.Interest"
+                                               ng-change="CalculateRow(row)" />
+                                    </td>
+
+                                    <td>
+                                        <input type="number"
+                                               class="form-control numeric"
+                                               min="0"
+                                               step="0.01"
+                                               ng-model="row.AssetDetail.TotalOverdue" />
+                                    </td>
+
+                                    <td>
+                                        <input type="number"
+                                               class="form-control numeric"
+                                               min="0"
+                                               step="1"
+                                               ng-model="row.AssetDetail.PeriodOfOutstanding" />
+                                    </td>
+
+                                    <td>
+                                        <input type="number"
+                                               class="form-control numeric"
+                                               min="0"
+                                               step="0.01"
+                                               ng-model="row.AssetDetail.StandardAmount" />
+                                    </td>
+
+                                    <td>
+                                        <input type="number"
+                                               class="form-control numeric"
+                                               min="0"
+                                               step="0.01"
+                                               ng-model="row.AssetDetail.SubStandardAmount" />
+                                    </td>
+
+                                    <td>
+                                        <input type="number"
+                                               class="form-control numeric"
+                                               min="0"
+                                               step="0.01"
+                                               ng-model="row.AssetDetail.DoubtfulIAmount" />
+                                    </td>
+
+                                    <td>
+                                        <input type="number"
+                                               class="form-control numeric"
+                                               min="0"
+                                               step="0.01"
+                                               ng-model="row.AssetDetail.DoubtfulIIAmount" />
+                                    </td>
+
+                                    <td>
+                                        <input type="number"
+                                               class="form-control numeric"
+                                               min="0"
+                                               step="0.01"
+                                               ng-model="row.AssetDetail.DoubtfulIIIAmount" />
+                                    </td>
+
+                                    <td>
+                                        <input type="number"
+                                               class="form-control numeric"
+                                               min="0"
+                                               step="0.01"
+                                               ng-model="row.AssetDetail.LossAssetAmount" />
+                                    </td>
                                 </tr>
 
-                                <tr>
-                                    <td>6</td>
-                                    <td>व्यापारिक देनदार (Sundry Debtors)</td>
-                                    <td>Other Assets</td>
-                                    <td></td>
-                                    <td></td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td></td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td style="text-align:right;">0.00</td>
+                                <tr ng-if="GetLeafHeadersByParent(parent.HeaderId).length == 0">
+                                    <td colspan="15" class="text-center">
+                                        No detail headings found.
+                                    </td>
                                 </tr>
 
-                                <tr>
-                                    <td>7</td>
-                                    <td>व्यक्तिगत देनदार (Personal Debtors)</td>
-                                    <td>Other Assets</td>
-                                    <td></td>
-                                    <td></td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td></td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td style="text-align:right;">0.00</td>
-                                </tr>
-
-                                <tr>
-                                    <td>8</td>
-                                    <td>उच्चतर सहकारी संस्थाएं (Higher Co-operative Institutions)</td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td></td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td style="text-align:right;">0.00</td>
-                                </tr>
-
-                                <tr>
-                                    <td>9</td>
-                                    <td>प्राथमिक सहकारी समितियां (Primary Co-operative Societies)</td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td></td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td style="text-align:right;">0.00</td>
-                                </tr>
-
-                                <tr>
-                                    <td>10</td>
-                                    <td>राजकीय विभाग (Government Departments)</td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td></td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td style="text-align:right;">0.00</td>
-                                </tr>
                             </tbody>
 
                             <tfoot>
@@ -413,179 +387,112 @@
                                         TOTAL (कुल योग)
                                     </th>
 
-                                    <th style="text-align:right;">0.00</th>
-                                    <th style="text-align:right;">0.00</th>
-                                    <th style="text-align:right;">0.00</th>
+                                    <th>{{GetGrandTotal('Principal') | number:2}}</th>
+                                    <th>{{GetGrandTotal('Interest') | number:2}}</th>
+                                    <th>{{GetGrandTotal('TotalOverdue') | number:2}}</th>
                                     <th></th>
 
-                                    <th style="text-align:right;">0.00</th>
-                                    <th style="text-align:right;">0.00</th>
-                                    <th style="text-align:right;">0.00</th>
-                                    <th style="text-align:right;">0.00</th>
-                                    <th style="text-align:right;">0.00</th>
-                                    <th style="text-align:right;">0.00</th>
+                                    <th>{{GetGrandTotal('StandardAmount') | number:2}}</th>
+                                    <th>{{GetGrandTotal('SubStandardAmount') | number:2}}</th>
+                                    <th>{{GetGrandTotal('DoubtfulIAmount') | number:2}}</th>
+                                    <th>{{GetGrandTotal('DoubtfulIIAmount') | number:2}}</th>
+                                    <th>{{GetGrandTotal('DoubtfulIIIAmount') | number:2}}</th>
+                                    <th>{{GetGrandTotal('LossAssetAmount') | number:2}}</th>
                                 </tr>
                             </tfoot>
+
                         </table>
                     </div>
-                    <div class="tab-pane fade" id="tab2">
-                        <h4>Abstract Of Asset Classification & Provisioning</h4>
+                </div>
+
+                <!-- TAB 2: CLASSIFICATION SUMMARY -->
+                <div class="tab-content custom-tbls-tab-content"
+                     ng-show="SelectedViewTab == 2">
+
+                    <h4>Abstract of Asset Classification & Provisioning</h4>
+
+                    <div class="asset-table-wrapper">
+
                         <table class="table table-bordered table-striped devtable">
+
                             <thead>
                                 <tr>
                                     <th>S.No.</th>
-                                    <th>
-                                        Category of Asset<br />
-                                        (संपत्ति की श्रेणी)
-                                    </th>
-                                    <th>
-                                        No. of Accounts<br />
-                                        (खातों की संख्या)
-                                    </th>
-                                    <th>
-                                        Total Outstanding (₹)<br />
-                                        (कुल बकाया राशि)
-                                    </th>
-                                    <th>
-                                        Provision Rate %<br />
-                                        (प्रावधान की दर)
-                                    </th>
-                                    <th>
-                                        Provision Required (₹)<br />
-                                        (आवश्यक प्रावधान राशि)
-                                    </th>
-                                    <th>
-                                        Old Provision<br />
-                                        (गत प्रावधान)
-                                    </th>
-                                    <th>
-                                        Required Provision in Year<br />
-                                        (वर्ष में वांछित प्रावधान)
-                                    </th>
+                                    <th>Category of Asset</th>
+                                    <th>No. of Accounts</th>
+                                    <th>Total Outstanding (₹)</th>
+                                    <th>Provision Rate %</th>
+                                    <th>Provision Required (₹)</th>
+                                    <th>Old Provision (₹)</th>
+                                    <th>Required Provision in Year (₹)</th>
                                 </tr>
                             </thead>
 
                             <tbody>
-                                <tr>
-                                    <td>1</td>
-                                    <td>Standard Assets (मानक संपत्तियां)</td>
-                                    <td></td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td>0.25%</td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td colspan="2" rowspan="7">No entry</td>
-
-                                </tr>
-
-                                <tr>
-                                    <td>2</td>
-                                    <td>
-                                        Sub-Standard Assets (उप-मानक)
-                                        [&lt;= 12 Months]
+                                <tr ng-repeat="item in SummaryList">
+                                    <td>{{$index + 1}}</td>
+                                    <td>{{item.Category}}</td>
+                                    <td>{{item.AccountCount}}</td>
+                                    <td class="text-right">
+                                        {{item.Outstanding | number:2}}
                                     </td>
-                                    <td></td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td>10.00%</td>
-                                    <td style="text-align:right;">0.00</td>
-
-                                </tr>
-
-                                <tr>
-                                    <td>3</td>
-                                    <td>Doubtful Assets (संदिग्ध संपत्तियां):</td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-
-                                </tr>
-
-                                <tr>
-                                    <td>3 a</td>
-                                    <td>&nbsp;&nbsp; Doubtful I (1 to 3 Years NPA)</td>
-                                    <td></td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td>20.00%</td>
-                                    <td style="text-align:right;">0.00</td>
-
-                                </tr>
-
-                                <tr>
-                                    <td>3 b</td>
-                                    <td>&nbsp;&nbsp; Doubtful II (3 to 5 Years NPA)</td>
-                                    <td></td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td>30.00%</td>
-                                    <td style="text-align:right;">0.00</td>
-
-                                </tr>
-
-                                <tr>
-                                    <td>3 c</td>
-                                    <td>&nbsp;&nbsp; Doubtful III (Above 5 Years NPA)</td>
-                                    <td></td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td>100.00%</td>
-                                    <td style="text-align:right;">0.00</td>
-
-                                </tr>
-
-                                <tr>
-                                    <td>4</td>
-                                    <td>Loss Assets (हानि संपत्तियां)</td>
-                                    <td></td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td>100.00%</td>
-                                    <td style="text-align:right;">0.00</td>
-
+                                    <td>{{item.Rate}}%</td>
+                                    <td class="text-right">
+                                        {{item.ProvisionRequired | number:2}}
+                                    </td>
+                                    <td class="text-right">
+                                        {{item.OldProvision | number:2}}
+                                    </td>
+                                    <td class="text-right">
+                                        {{item.RequiredProvision | number:2}}
+                                    </td>
                                 </tr>
                             </tbody>
 
                             <tfoot>
                                 <tr class="total-row">
-                                    <th colspan="2" style="text-align:center;">
-                                        GRAND TOTAL (कुल योग)
-                                    </th>
+                                    <th colspan="2">GRAND TOTAL</th>
+                                    <th>{{GetSummaryTotal('AccountCount')}}</th>
+                                    <th>{{GetSummaryTotal('Outstanding') | number:2}}</th>
                                     <th></th>
-                                    <th style="text-align:right;">0.00</th>
-                                    <th></th>
-                                    <th style="text-align:right;">0.00</th>
-                                    <th style="text-align:right;">0.00</th>
-                                    <th style="text-align:right;">0.00</th>
+                                    <th>{{GetSummaryTotal('ProvisionRequired') | number:2}}</th>
+                                    <th>{{GetSummaryTotal('OldProvision') | number:2}}</th>
+                                    <th>{{GetSummaryTotal('RequiredProvision') | number:2}}</th>
                                 </tr>
 
-                                <tr  style="background-color: #168178; color: #fff; text-align: center;">
-                                    <td colspan="2">
-                                        OD Interest Provision
-                                    </td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td>100.00%</td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td style="text-align:right;">0.00</td>
-                                    <td></td>
+                                <tr class="total-row">
+                                    <th colspan="2">OD Interest Provision</th>
+                                    <th></th>
+                                    <th>{{GetGrandTotal('TotalOverdue') | number:2}}</th>
+                                    <th>100%</th>
+                                    <th>{{GetGrandTotal('TotalOverdue') | number:2}}</th>
+                                    <th>0.00</th>
+                                    <th>{{GetGrandTotal('TotalOverdue') | number:2}}</th>
                                 </tr>
                             </tfoot>
+
                         </table>
                     </div>
                 </div>
 
-                
+                <div class="asset-actions">
+                    <button class="btn btn-primary dev-btn"
+                            ng-click="SaveAndNext()">
+                        Save & Next
+                    </button>
 
+                    <button class="btn btn-primary dev-btn"
+                            ng-click="SaveAsDraft()">
+                        Save as Draft
+                    </button>
 
-
-                
-
-
-                <div style="display: flex; gap: 10px; justify-content: center;">
-                    <button class="btn btn-primary dev-btn text-center" ng-click="NextStep()">Save & Next</button>
-                    <button class="btn btn-primary dev-btn text-center">Save as Draft</button>
-                    @*<button class="btn btn-primary dev-btn text-center">Clear</button>*@
-                    <button class="btn btn-primary dev-btn text-center" ng-click="BackTo()">Back</button>
+                    <button class="btn btn-primary dev-btn"
+                            ng-click="BackTo()">
+                        Back
+                    </button>
                 </div>
+
             </div>
         </div>
     </div>
 </div>
-
-

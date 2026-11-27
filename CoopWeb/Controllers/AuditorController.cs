@@ -1642,29 +1642,82 @@ namespace Cooperative.Controllers
             return result;
         }
 
-        [HttpGet]
-        [ActionName("GetAppropriationDetails")]
-        public string GetAppropriationDetails(int KVSSId, string financialYear)
-        {
-            AuditorModel auditorModel = new AuditorModel();
-            return COMMON_FUNCTION.DataTableToJSONWithJSONNet(auditorModel.GetAppropriationDetails(KVSSId, financialYear));
-        }
 
-        [HttpPost]
-        public int SaveAuditorAppropriation(AuditorAppropriationRequest request)
-        {
-            //if (Session["FinancialYear"] != null)
-            //{
-            //    request.FinancialYear = Convert.ToString(Session["FinancialYear"]);
-            //}
-            //if (Session["KVSSId"] != null && Convert.ToInt32(Session["KVSSId"]) > 0)
-            //{
-            //    request.KVSSId = Convert.ToInt32(Session["KVSSId"]);
-            //}
 
-            int result = new AuditorModel().SaveAuditorAppropriation(request);
-            return result;
-        }
+    //    public JsonResult GetAuditAccountHeaderMasterAssestClassification(
+    //int? tabId,
+    //int? kvssId,
+    //string financialYear)
+    //    {
+    //        try
+    //        {
+    //            // Society session
+    //            if (Session["KVSSId"] == null && kvssId.HasValue && kvssId > 0)
+    //            {
+    //                Session["KVSSId"] = kvssId.Value;
+    //            }
+
+    //            if (Session["KVSSId"] != null)
+    //            {
+    //                kvssId = Convert.ToInt32(Session["KVSSId"]);
+    //            }
+
+    //            // Financial year session
+    //            if (Session["FinancialYear"] == null &&
+    //                !string.IsNullOrEmpty(financialYear))
+    //            {
+    //                Session["FinancialYear"] = financialYear;
+    //            }
+
+    //            if (Session["FinancialYear"] != null)
+    //            {
+    //                financialYear = Convert.ToString(Session["FinancialYear"]);
+    //            }
+
+    //            if (!kvssId.HasValue || kvssId.Value <= 0 ||
+    //                string.IsNullOrEmpty(financialYear))
+    //            {
+    //                return Json(new
+    //                {
+    //                    TabList = new List<Dictionary<string, object>>(),
+    //                    HeaderList = new List<Dictionary<string, object>>(),
+    //                    Message = "Society or financial year not found."
+    //                }, JsonRequestBehavior.AllowGet);
+    //            }
+
+    //            ViewBag.KVSSId = kvssId.Value;
+    //            ViewBag.FinancialYear = financialYear;
+
+    //            DataSet ds = new AuditorModel()
+    //                .GetAuditAssetClassificationDetailsData(
+    //                    tabId,
+    //                    kvssId,
+    //                    financialYear
+    //                );
+
+    //            var result = new
+    //            {
+    //                TabList = ds != null && ds.Tables.Count > 0
+    //                    ? csCommon.ConvertDataTableToDynamic(ds.Tables[0])
+    //                    : new List<Dictionary<string, object>>(),
+
+    //                HeaderList = ds != null && ds.Tables.Count > 1
+    //                    ? csCommon.ConvertDataTableToDynamic(ds.Tables[1])
+    //                    : new List<Dictionary<string, object>>()
+    //            };
+
+    //            return Json(result, JsonRequestBehavior.AllowGet);
+    //        }
+    //        catch (Exception ex)
+    //        {
+    //            return Json(new
+    //            {
+    //                TabList = new List<Dictionary<string, object>>(),
+    //                HeaderList = new List<Dictionary<string, object>>(),
+    //                Message = ex.Message
+    //            }, JsonRequestBehavior.AllowGet);
+    //        }
+    //    }
 
     }
 }
