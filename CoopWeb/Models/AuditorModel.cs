@@ -2710,5 +2710,64 @@ namespace Cooperative.Models
             return dt;
         }
 
+
+
+        public DataSet GetAuditAssetClassificationDetailsData(
+    int kvssId,
+    string financialYear,
+    int? tabId)
+        {
+            DataSet ds = new DataSet();
+
+            try
+            {
+                objDBAccess.OpenConnection();
+
+                SqlCommand cmd = objDBAccess.CreateCommand(
+                    "USP_Get_AuditAssetClassificationDetails",
+                    DBFactoryCommandType.PROCEDURE_COMMAND
+                );
+
+                objDBAccess.AddParameterToCommand(
+                    "@KVSSId",
+                    DBFactoryParameterType.Int,
+                    kvssId
+                );
+
+                objDBAccess.AddParameterToCommand(
+                    "@FinancialYear",
+                    DBFactoryParameterType.VARCHAR,
+                    financialYear
+                );
+
+                objDBAccess.AddParameterToCommand(
+                    "@TabId",
+                    DBFactoryParameterType.Int,
+                    tabId.HasValue
+                        ? (object)tabId.Value
+                        : DBNull.Value
+                );
+
+                ds = objDBAccess.GetDataSet();
+            }
+            catch (Exception ex)
+            {
+                objILogger.ErrorHandle(
+                    new ErrorLogEntity()
+                    {
+                        PageName = "Cooperative.Models.AuditorModel",
+                        FunctionName = "GetAuditAssetClassificationDetailsData()"
+                    },
+                    ex
+                );
+            }
+            finally
+            {
+                objDBAccess.CloseConnection();
+            }
+
+            return ds;
+        }
+
     }
 }

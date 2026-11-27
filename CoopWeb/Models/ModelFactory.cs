@@ -5050,5 +5050,39 @@ namespace Cooperative.Models
     }
 
 
+    public class AssetClassificationSaveRequest
+    {
+        public int KVSSId { get; set; }
+        public int TabId { get; set; }
+        public string FinancialYear { get; set; }
+
+        public List<AssetClassificationDetailModel> Details { get; set; }
+    }
+
+    public class AssetClassificationDetailModel
+    {
+        public int HeaderId { get; set; }
+
+        public string NatureOfFacility { get; set; }
+
+        public DateTime? DateOfAdvance { get; set; }
+
+        public decimal Principal { get; set; }
+        public decimal Interest { get; set; }
+        public decimal TotalOverdue { get; set; }
+
+        public int? PeriodOfOutstanding { get; set; }
+
+        public decimal StandardAmount { get; set; }
+        public decimal SubStandardAmount { get; set; }
+
+        public decimal DoubtfulIAmount { get; set; }
+        public decimal DoubtfulIIAmount { get; set; }
+        public decimal DoubtfulIIIAmount { get; set; }
+
+        public decimal LossAssetAmount { get; set; }
+    }
+
+
 }
 

@@ -6910,6 +6910,100 @@ namespace Cooperative.Models
 
         #endregion GetPLBDLoanApplicationPldbWiseList
 
+        #region GetPLBDLoanApplicationAgeandAmountWise
+        public List<Dictionary<string, object>> GetPLBDLoanApplicationAgeandAmountWise(ref DataPagingModel Details)
+
+        {
+
+            DataTable dt = new DataTable();
+            List<Dictionary<string, object>> list = new List<Dictionary<string, object>>();
+            try
+            {
+                objDBAccess.OpenConnection();
+
+                string whereCase = "";
+                int IsAmountWise = 0;
+
+                if (Details.SearchParameter.Where(x => x.Key == "FinancialYearId").Any())
+                {
+                    var financialYearId = Details.SearchParameter.Where(x => x.Key == "FinancialYearId").Select(x => x.Value).FirstOrDefault();
+
+                    if (financialYearId != "0")
+                    {
+                        whereCase += " and a.FinancialYearId = " + financialYearId;
+                    }
+                }
+
+                if (Details.SearchParameter.Where(x => x.Key == "PLDB_ID").Any())
+                {
+                    whereCase += " and a.PldbId = " + Details.SearchParameter.Where(x => x.Key == "PLDB_ID").Select(x => x.Value).FirstOrDefault();
+                }
+                //
+                //
+
+                if (Details.SearchParameter.Where(x => x.Key == "BRANCH_ID").Any())
+                {
+                    whereCase += " and a.BranchId = " + Details.SearchParameter.Where(x => x.Key == "BRANCH_ID").Select(x => x.Value).FirstOrDefault();
+                }
+               
+                if (Details.SearchParameter.Where(x => x.Key == "IsAmount").Any())
+                {
+                    IsAmountWise = Convert.ToInt32((Details.SearchParameter.Where(x => x.Key == "IsAmount").Select(x => x.Value).FirstOrDefault()));
+                }
+
+
+                UserEntity _LoggedInUser = (UserEntity)System.Web.HttpContext.Current.Session[SessionIdentity.Admin];
+
+                SqlCommand cmd = objDBAccess.CreateCommand("sp_PLBDLoanApplicationAgeandAmountWise", DBFactoryCommandType.PROCEDURE_COMMAND);
+                objDBAccess.AddParameterToCommand("@IsRowCount", DBFactoryParameterType.Bit, false);
+                objDBAccess.AddParameterToCommand("@UserRoleDeptMappingId", DBFactoryParameterType.NVarchar, _LoggedInUser.UserRoleDeptMappingId);
+                objDBAccess.AddParameterToCommand("@UserId", DBFactoryParameterType.NVarchar, _LoggedInUser.UserId);
+                objDBAccess.AddParameterToCommand("@RoleId", DBFactoryParameterType.NVarchar, _LoggedInUser.RoleId);
+                objDBAccess.AddParameterToCommand("@LevelId", DBFactoryParameterType.NVarchar, _LoggedInUser.LevelId);
+                objDBAccess.AddParameterToCommand("@PldbId", DBFactoryParameterType.NVarchar, _LoggedInUser.PLDBId);
+                objDBAccess.AddParameterToCommand("@BranchId", DBFactoryParameterType.NVarchar, _LoggedInUser.PLDBBrancchId);
+                objDBAccess.AddParameterToCommand("@WhereCase", DBFactoryParameterType.NVarchar, whereCase);
+                objDBAccess.AddParameterToCommand("@IsAmountWise", DBFactoryParameterType.Int, IsAmountWise);
+                dt = objDBAccess.GetTable();
+
+                if (dt.Rows != null && dt.Rows.Count > 0)
+                {
+                    foreach (DataRow row in dt.Rows)
+                    {
+                        var dict = new Dictionary<string, object>();
+
+                        if (dt.Columns != null && dt.Columns.Count > 0)
+                        {
+                            foreach (DataColumn col in dt.Columns)
+                            {
+                                dict[col.ColumnName] = row[col];
+                            }
+                        }
+                        list.Add(dict);
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                objILogger.ErrorHandle(new ErrorLogEntity()
+                {
+                    PageName = "Cooperative.Models.MisModel",
+                    FunctionName = "GetPLBDLoanApplicationAgeandAmountWise"
+                }, ex);
+
+                throw;
+            }
+            finally
+            {
+                objDBAccess.CloseConnection();
+            }
+
+            return list;
+        }
+
+        #endregion GetPLBDLoanApplicationAgeandAmountWise
+
 
         #region GetPLBDLoanApplicationSectorWiseList
         public Dictionary<string, object> GetPLBDLoanApplicationSectorWiseList(ref DataPagingModel Details)

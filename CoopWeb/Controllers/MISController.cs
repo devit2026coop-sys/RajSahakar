@@ -218,6 +218,12 @@ namespace Cooperative.Controllers
         }
 
         [HttpGet]
+        public ActionResult PLBDLoanApplicationAgeandAmountWiseList()
+        {
+            return View();
+        }
+
+        [HttpGet]
         public ActionResult PLBDLoanApplicationSectorWiseList()
         {
             return View();
@@ -6161,6 +6167,26 @@ namespace Cooperative.Controllers
         }
 
         #endregion GetPLBDLoanApplicationPldbWiseList
+
+        #region GetPLBDLoanApplicationAgeandAmountWise
+
+        [HttpPost]
+        [ActionName("GetPLBDLoanApplicationAgeandAmountWise")]
+        public JsonResult GetPLBDLoanApplicationAgeandAmountWise(DataPagingModel Details)
+        {
+            try
+            {
+                MISModel objMisModel = new MISModel(new DBLogger());
+                var result = objMisModel.GetPLBDLoanApplicationAgeandAmountWise(ref Details);
+                return Json(new { status = true, data = result }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { status = false, message = ex.ToString() }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        #endregion GetPLBDLoanApplicationAgeandAmountWise
 
 
         #region GetPLBDLoanApplicationSectorWiseList
