@@ -6963,7 +6963,7 @@ namespace Cooperative.Models
                 objDBAccess.AddParameterToCommand("@PldbId", DBFactoryParameterType.NVarchar, _LoggedInUser.PLDBId);
                 objDBAccess.AddParameterToCommand("@BranchId", DBFactoryParameterType.NVarchar, _LoggedInUser.PLDBBrancchId);
                 objDBAccess.AddParameterToCommand("@WhereCase", DBFactoryParameterType.NVarchar, whereCase);
-                objDBAccess.AddParameterToCommand("@AmountId", DBFactoryParameterType.Int, IsAmountWise);
+                objDBAccess.AddParameterToCommand("@IsAmountWise", DBFactoryParameterType.Int, IsAmountWise);
                 dt = objDBAccess.GetTable();
 
                 if (dt.Rows != null && dt.Rows.Count > 0)
