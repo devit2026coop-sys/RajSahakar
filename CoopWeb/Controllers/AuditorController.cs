@@ -1650,5 +1650,21 @@ namespace Cooperative.Controllers
             return COMMON_FUNCTION.DataTableToJSONWithJSONNet(auditorModel.GetAppropriationDetails(KVSSId, financialYear));
         }
 
+        [HttpPost]
+        public int SaveAuditorAppropriation(AuditorAppropriationRequest request)
+        {
+            //if (Session["FinancialYear"] != null)
+            //{
+            //    request.FinancialYear = Convert.ToString(Session["FinancialYear"]);
+            //}
+            //if (Session["KVSSId"] != null && Convert.ToInt32(Session["KVSSId"]) > 0)
+            //{
+            //    request.KVSSId = Convert.ToInt32(Session["KVSSId"]);
+            //}
+
+            int result = new AuditorModel().SaveAuditorAppropriation(request);
+            return result;
+        }
+
     }
 }

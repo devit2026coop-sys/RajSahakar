@@ -99,7 +99,68 @@ MasterMod.controller("auditorAppropriationCtrl", function ($scope, $http) {
 
         return total;
     };
-     
+
+    $scope.SaveAppropriationDetails = function () {
+
+        var saveList = [];
+
+        // Add Dr. Records
+        angular.forEach($scope.DrList, function (item) {
+
+            saveList.push({
+                ParticularId: item.ParticularId,
+                CurrentYearAmount: parseFloat(item.CurrentYearAmount) || 0
+            });
+
+        });
+
+        // Add Cr. Records
+        angular.forEach($scope.CrList, function (item) {
+
+            saveList.push({
+                ParticularId: item.ParticularId,
+                CurrentYearAmount: parseFloat(item.CurrentYearAmount) || 0
+            });
+
+        });
+
+        var kvssId = 128090;
+        var finYear = '2025-26';
+
+        var request = {
+            FinancialYear: finYear,
+            KVSSId: kvssId, 
+            AppropriationList: saveList
+        };
+
+        console.log("Save Request:", request);
+
+        // Call Save API here
+
+        if (saveList.length === 0) {
+            alert("No records found.");
+            return;
+        }
+
+        $(".se-pre-con").fadeIn("slow");
+
+        $http.post(SiteUrl + "/Auditor/SaveAuditorAppropriation", request)
+            .success(function (data) {
+                $(".se-pre-con").fadeOut("slow");
+                if (data > 0) {
+                    alert("Record Saved Successfully.");
+                    location.reload();
+                }
+                else {
+                    alert("Unable to save.");
+                }
+            })
+            .error(function () {
+                $(".se-pre-con").fadeOut("slow");
+                alert("Error while saving.");
+            });
+    };
+
     $scope.BackTo = function () {
         window.location.href = '/Auditor/AuditorProfitAndLossAc';
     };
