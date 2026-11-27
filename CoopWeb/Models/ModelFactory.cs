@@ -4972,6 +4972,21 @@ namespace Cooperative.Models
          
         public List<AuditSPModel> StockDetails { get; set; }
     }
+    public class AuditorAppropriationRequest
+    {
+        public string FinancialYear { get; set; }
+
+        public int KVSSId { get; set; } 
+
+        public List<AuditorAppropriationItem> AppropriationList { get; set; }
+    }
+
+    public class AuditorAppropriationItem
+    {
+        public int ParticularId { get; set; }
+
+        public decimal CurrentYearAmount { get; set; }
+    }
 
     public class AccountTabMaster
     {
