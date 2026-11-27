@@ -74,7 +74,7 @@
                             <input type="hidden" id="hdnLevelId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).LevelId)" />
 
 
-                            <div class="form-group col-md-3" ng-init="PLDB.IsAvadhipaar = 0">
+                            <div class="form-group col-md-2" ng-init="PLDB.IsAvadhipaar = 0">
                                 <label>&nbsp;</label>
                                 <div>
                                     <label style="width: unset !important;">
@@ -88,10 +88,47 @@
                                     </label>
                                 </div>
                             </div>
+                            <div class="form-group col-md-1">
+                                <label for="">Amount</label>
+                                <select ng-model="PLDB.Amount" name="AmountId" class="form-control" ng-init="PLDB.Amount='0'">
+                                    <option value="0">ALL</option>
+                                    <option value="1">upto 25000</option>
+                                    <option value="2">25001-50000</option>
+                                    <option value="3">50001-100000</option>
+                                    <option value="4">100001-200000</option>
+                                    <option value="5">200001-400000</option>
+                                    <option value="6">400001-500000</option>
+                                    <option value="7">500001-700000</option>
+                                    <option value="8">700001-1000000</option>
+                                    <option value="9">Above 1000000</option>
+                                </select>
+                            </div>
+
+                            <div class="col-lg-2 form-group">
+                                <label for="Pldbsectornew">Sector</label>
+                                <select id="sector_id" name="sectorid" ng-model="PLDB.SectorId" class="form-control caste-category" ng-init="PLDB.SectorId='0'" ng-change="LoadPurposeByShemeId(PLDB.SectorId,$index)">
+                                    <option value="0" disabled>--Select--</option>
+                                    <option ng-repeat="itm in LoanSectorList" value="{{itm.sector_id}}">
+                                        {{_language =='en-us' ?  itm.sector_name_en : itm.sector_name_hi}}
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="form-group col-md-2">
+                                <label for="">Purpose</label>
+                                <select ng-model="PLDB.PurposeId" name="PurposeId" class="form-control caste-category" ng-init="PLDB.PurposeId='0'">
+                                    <option value="0" disabled>--Select--</option>
+                                    <option ng-repeat="itm in PurposeOfLoanList" value="{{itm.PLDB_OTS_LoanPurposeID}}">
+                                        {{_language =='en-us' ?  itm.PurposeNameEN : itm.PurposeNameHI}}
+                                    </option>
+                                </select>
+                            </div>
+
+
 
 
                             @*FinancialYear*@
-                            <div class="form-group col-md-3">
+                            <div class="form-group col-md-1">
                                 <label for="">Financial Year</label>
                                 <select ng-model="PLDB.FinancialYearId" name="FinancialYearId" class="form-control" ng-init="PLDB.FinancialYearId='0'">
                                     <option value="0">{{translation.All}}</option>
@@ -103,10 +140,10 @@
 
 
                             @*PLDB*@
-                            <div class="form-group col-md-3">
+                            <div class="form-group col-md-2">
                                 <label for="">PLDB Name</label>
                                 <select name="PLDB_ID" ng-model="PLDB.PldbId" id="Pldb_Id" class="form-control" ng-change="PLDBBranchList('0')" ng-init="PLDB.PldbId='0'" ng-disabled="IsPldbFreezed">
-                                    <option value="0" disabled>--चुनें--</option>
+                                    <option value="0" disabled>--Select--</option>
                                     <option ng-repeat="itemPLDB in PLDBList | orderBy:'PLDBName' track by itemPLDB.PLDBName " value="{{itemPLDB.PldbId}}">
                                         {{itemPLDB.PLDBName}}
                                     </option>
@@ -114,10 +151,10 @@
                             </div>
 
                             @*Branch*@
-                            <div class="form-group col-md-3">
+                            <div class="form-group col-md-2">
                                 <label for="">Branch Name</label>
                                 <select name="BRANCH_ID" ng-model="PLDB.BranchId" id="Branch_Id" class="form-control" ng-init="PLDB.BranchId='0'" ng-disabled="IsPldbBranchFreezed">
-                                    <option value="0" disabled>--चुनें--</option>
+                                    <option value="0" disabled>--Select--</option>
                                     <option ng-repeat="itemBlock in PLDBBranches | orderBy:'BLOCK_ENG'" value="{{itemBlock.BLOCK_ID}}">
                                         {{_language =='en-us' ?  itemBlock.BLOCK_ENG : itemBlock.BLOCK_MANGAL}}
                                     </option>
@@ -135,7 +172,7 @@
                         </div>
                     </div>
                     @*<div style="overflow-x: auto;">*@
-                    <div style="overflow-x: auto;" ng-if="pldbLoanApplicationList && !(pldbLoanApplicationList.length == 1 && pldbLoanApplicationList[0].PLDBName == 'TOTAL')">
+                    <div id="divPLDBLoanApplication" style="overflow-x: auto;" ng-if="pldbLoanApplicationList && !(pldbLoanApplicationList.length == 1 && pldbLoanApplicationList[0].PLDBName == 'TOTAL')">
                         <table id="PLDBLoanApplicationPldbWise" class="table table-responsive devtable" style="">
                             <thead>
                                 <tr>
@@ -163,7 +200,7 @@
                                     <td style="text-transform:uppercase;">
                                         {{item.PLDBName }}
                                     </td>
-                                    <td>
+                                    <td style="text-align: right;">
                                         <a href="javascript:void(0)"
                                            ng-if="item.PLDBName !== 'TOTAL'"
                                            ng-click="openPldbCountDetails(item)"
@@ -176,7 +213,7 @@
                                             {{ item.TotalCount }}
                                         </span>
                                     </td>
-                                    <td>
+                                    <td style="text-align: right;">
                                         <a href="javascript:void(0)"
                                            ng-if="item.PLDBName !== 'TOTAL'"
                                            ng-click="openPldbDetails(item,'Completed')"
@@ -189,7 +226,7 @@
                                         </span>
                                     </td>
 
-                                    <td>
+                                    <td style="text-align: right;">
                                         <a href="javascript:void(0)"
                                            ng-if="item.PLDBName !== 'TOTAL'"
                                            ng-click="openPldbDetails(item,'Partial')"
@@ -202,7 +239,7 @@
                                         </span>
                                     </td>
 
-                                    <td>
+                                    <td style="text-align: right;">
 
                                         <a href="javascript:void(0)"
                                            ng-if="item.PLDBName !== 'TOTAL'"
@@ -218,12 +255,12 @@
                                         </span>
 
                                     </td>
-                                    <td>{{item.TotalAmount}}</td>
-                                    <td ng-if="PLDB.IsAvadhipaar == 1">0</td>
-                                    <td ng-if="PLDB.IsAvadhipaar == 1">0</td>
-                                    <td ng-if="PLDB.IsAvadhipaar == 1">0</td>
-                                    <td ng-if="PLDB.IsAvadhipaar == 1">0</td>
-                                    <td ng-if="PLDB.IsAvadhipaar == 1">0</td>
+                                    <td style="text-align: right;">{{item.TotalAmount}}</td>
+                                    <td style="text-align: right;" ng-if="PLDB.IsAvadhipaar == 1">{{item.ODPrincipalAmount}}</td>
+                                    <td style="text-align: right;" ng-if="PLDB.IsAvadhipaar == 1">{{item.InsurancePremium}}</td>
+                                    <td style="text-align: right;" ng-if="PLDB.IsAvadhipaar == 1">{{item.ODInterestAmount}}</td>
+                                    <td style="text-align: right;" ng-if="PLDB.IsAvadhipaar == 1">{{item.PenaltyInterestOtherCharges}}</td>
+                                    <td style="text-align: right;" ng-if="PLDB.IsAvadhipaar == 1">{{item.TotalODAmount}}</td>
 
 
 

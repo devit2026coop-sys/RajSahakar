@@ -1,0 +1,520 @@
+﻿@{
+    ViewBag.Title = "PLDB Loan Application PLDB Age and Amount Wise List";
+}
+<script src="~/Scripts/AngularFramework/PLBDLoanApplicationAgeandAmountWiseList.js?v=1.1"></script>
+<link href="~/Scripts/google_hindi/google_transliteration.css" rel="stylesheet" />
+
+<style>
+    .inputapi-transliterate-indic-suggestion-menu {
+        z-index: 99999 !important;
+        display: block;
+    }
+
+    .table > tbody > tr > td, .table > tbody > tr > th, .table > tfoot > tr > td, .table > tfoot > tr > th, .table > thead > tr > td {
+        padding-right: 5px;
+        padding-left: 5px;
+    }
+
+    .freeze-select {
+        pointer-events: none; 
+        background-color: #ffffff !important; 
+        color: #000 !important; 
+        border: 1px solid #ced4da !important; 
+        cursor: default !important; 
+
+
+    }
+
+    #PLDBLoanApplicationPldbWise {
+        border-collapse: collapse;
+    }
+
+        #PLDBLoanApplicationPldbWise thead th {
+            text-align: center !important;
+            vertical-align: middle !important;
+            border: 1px solid #ddd;
+        }
+
+        #PLDBLoanApplicationPldbWise .od-no {
+            min-width: 60px;
+            text-align: center;
+        }
+
+        #PLDBLoanApplicationPldbWise .od-amount {
+            min-width: 110px;
+            text-align: center;
+        }
+
+        #PLDBLoanApplicationPldbWise .od-value {
+            text-align: right !important;
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+
+        #PLDBLoanApplicationPldbWise tbody td {
+            border: 1px solid #ddd;
+        }
+</style>
+
+
+
+<script type="text/javascript">
+    var tableToExcel = (function () {
+        var uri = 'data:application/vnd.ms-excel;base64,'
+            , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>'
+            , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) }
+            , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
+        return function (table, name) {
+            if (!table.nodeType) table = document.getElementById(table)
+            var ctx = { worksheet: name || 'Worksheet', table: table.innerHTML }
+            window.location.href = uri + base64(format(template, ctx))
+        }
+    })()
+</script>
+
+
+<div ng-app="ApplicationFlowPLDBAgeandAmountWiseModule" ng-controller="ApplicationPLDBLoanAgeandAmountFlowCont" ng-cloak="">
+    <div>
+        <div class="col-md-12">
+            <h3 class="citizen-dash-head ng-binding" style="margin-top:0px;">PLDB Loan Application Age and Amount Wise List</h3>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+            <div class="devpage-breadcrumb">
+                <ul class="page-breadcrumb">
+                    <li class="dev-page-br">
+                        <i class="fa fa-home"> </i>
+                        <a href="#"> {{translation.Home}}</a> <i class="fa fa-angle-right"> </i>
+                    </li>
+                    <li style="float: left">
+                        <span style="margin: 0 5px;"> {{translation.New}} </span>
+                        <i class="fa fa-angle-right"> </i>
+                        <span style="margin: 0 5px;"> PLDB Loan Application Age and Amount Wise List </span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div style="margin-top:30px;padding-top:30px">
+            <div class="col-md-12">
+                <div class="citizen-dash-head" style="overflow: hidden;">
+                    <div class="table-dropdown" id="search-filter" style="margin-bottom: 5px;">
+                        <div class="col-lg-12" style="margin-bottom: 5px; padding-left: 0;">
+                            <input type="hidden" id="hdnRoleId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).RoleId)" />
+                            <input type="hidden" id="hdnDistrictId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).DistrictId)" />
+                            <input type="hidden" id="hdnPldbId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).PLDBId)" />
+                            <input type="hidden" id="hdnPldbBranchId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).PLDBBrancchId)" />
+                            <input type="hidden" id="hdnUserId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).UserId)" />
+                            <input type="hidden" id="hdnLevelId" value="@(((Cooperative.Models.UserEntity)System.Web.HttpContext.Current.Session[Cooperative.Controllers.SessionIdentity.Admin]).LevelId)" />
+
+
+                            <div class="form-group col-md-3" ng-init="PLDB.IsAmount = 0">
+                                <label>&nbsp;</label>
+                                <div>
+                                    <label style="width: unset !important;">
+                                        <input type="radio" name="IsAmount" ng-model="PLDB.IsAmount" ng-value="0" ng-change="BindFinancialYears()" />
+                                        Age Wise
+                                    </label>
+
+                                    <label style="margin-left:30px; width: unset !important;">
+                                        <input type="radio" name="IsAmount" ng-model="PLDB.IsAmount" ng-value="1" ng-change="BindFinancialYears()" />
+                                        Amount Wise
+                                    </label>
+                                </div>
+                            </div>
+                            @*<div class="form-group col-md-1">
+                                <label for="">Amount</label>
+                                <select ng-model="PLDB.Amount" name="AmountId" class="form-control" ng-init="PLDB.Amount='0'">
+                                    <option value="0">ALL</option>
+                                    <option value="1">upto 25000</option>
+                                    <option value="2">25001-50000</option>
+                                    <option value="3">50001-100000</option>
+                                    <option value="4">100001-200000</option>
+                                    <option value="5">200001-400000</option>
+                                    <option value="6">400001-500000</option>
+                                    <option value="7">500001-700000</option>
+                                    <option value="8">700001-1000000</option>
+                                    <option value="9">Above 1000000</option>
+                                </select>
+                            </div>
+
+                            <div class="col-lg-2 form-group">
+                                <label for="Pldbsectornew">Sector</label>
+                                <select id="sector_id" name="sectorid" ng-model="PLDB.SectorId" class="form-control caste-category" ng-init="PLDB.SectorId='0'" ng-change="LoadPurposeByShemeId(PLDB.SectorId,$index)">
+                                    <option value="0" disabled>--Select--</option>
+                                    <option ng-repeat="itm in LoanSectorList" value="{{itm.sector_id}}">
+                                        {{_language =='en-us' ?  itm.sector_name_en : itm.sector_name_hi}}
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="form-group col-md-2">
+                                <label for="">Purpose</label>
+                                <select ng-model="PLDB.PurposeId" name="PurposeId" class="form-control caste-category" ng-init="PLDB.PurposeId='0'">
+                                    <option value="0" disabled>--Select--</option>
+                                    <option ng-repeat="itm in PurposeOfLoanList" value="{{itm.PLDB_OTS_LoanPurposeID}}">
+                                        {{_language =='en-us' ?  itm.PurposeNameEN : itm.PurposeNameHI}}
+                                    </option>
+                                </select>
+                            </div>*@
+
+
+
+
+                            @*FinancialYear*@
+                            <div class="form-group col-md-3">
+                                <label for="">Financial Year</label>
+                                <select ng-model="PLDB.FinancialYearId" name="FinancialYearId" class="form-control" ng-init="PLDB.FinancialYearId='0'">
+                                    <option value="0">{{translation.All}}</option>
+                                    <option ng-repeat="item in FinancialYearList" value="{{item.FIN_YEAR_MASTR_ID}}">
+                                        {{item.FIN_YEAR_NAME}}
+                                    </option>
+                                </select>
+                            </div>
+
+
+                            @*PLDB*@
+                            <div class="form-group col-md-3">
+                                <label for="">PLDB Name</label>
+                                <select name="PLDB_ID" ng-model="PLDB.PldbId" id="Pldb_Id" class="form-control" ng-change="PLDBBranchList('0')" ng-init="PLDB.PldbId='0'" ng-disabled="IsPldbFreezed">
+                                    <option value="0" disabled>--Select--</option>
+                                    <option ng-repeat="itemPLDB in PLDBList | orderBy:'PLDBName' track by itemPLDB.PLDBName " value="{{itemPLDB.PldbId}}">
+                                        {{itemPLDB.PLDBName}}
+                                    </option>
+                                </select>
+                            </div>
+
+                            @*Branch*@
+                            <div class="form-group col-md-3">
+                                <label for="">Branch Name</label>
+                                <select name="BRANCH_ID" ng-model="PLDB.BranchId" id="Branch_Id" class="form-control" ng-init="PLDB.BranchId='0'" ng-disabled="IsPldbBranchFreezed">
+                                    <option value="0" disabled>--Select--</option>
+                                    <option ng-repeat="itemBlock in PLDBBranches | orderBy:'BLOCK_ENG'" value="{{itemBlock.BLOCK_ID}}">
+                                        {{_language =='en-us' ?  itemBlock.BLOCK_ENG : itemBlock.BLOCK_MANGAL}}
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-4 ">
+                                <label>&nbsp;</label><br>
+                                <button type="button" ng-click="searchRequest(PLDBLoanApplicationPldbWiseList)" class="btn btn-primary dev-btn ng-binding">{{translation.Search}}</button>
+                                <button type="button" ng-show="showClearButton" ng-click="ClearSearch()" class="btn btn-primary dev-btn ng-binding">{{translation.Clear}}</button>
+                                <button type="button" onclick="tableToExcel('PLDBLoanApplicationPldbWise', 'PLDB Loan Pldb Wise List');" class="btn btn-success dev-btn">
+                                    <i class="fa fa-file-excel-o"></i> Export Excel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    @*<div style="overflow-x: auto;">*@
+                <div id="divPLDBLoanApplication" style="overflow-x: auto;" ng-if="pldbLoanApplicationList && !(pldbLoanApplicationList.length == 1 && pldbLoanApplicationList[0].PLDBName == 'TOTAL')">
+                    <table id="PLDBLoanApplicationPldbWise" class="table table-responsive devtable" style="width:100%;">
+
+                        <thead>
+
+                            <!-- Main Header -->
+                            <tr>
+                                <th rowspan="2"
+                                    style="min-width:80px; vertical-align:middle;">
+                                    {{translation.SRNO}}
+                                </th>
+
+                                <th rowspan="2"
+                                    style="min-width:125px; vertical-align:middle;">
+                                    PLDB Name
+                                </th>
+
+                                <th colspan="2" class="text-center">
+                                    {{PLDB.IsAmount == 1 ? 'Upto 25000 ' : 'Upto 1 Year OD'}}
+                                </th>
+
+                                <th colspan="2" class="text-center">
+                                    {{PLDB.IsAmount == 1 ? 'More than 25000 & upto 50000 ' : '1 to 2 Year OD'}}
+                                </th>
+
+                                <th colspan="2" class="text-center">
+                                    {{PLDB.IsAmount == 1 ? 'More than 50000 & upto 1 Lakh ' : '2 to 3 Year OD'}}
+                                </th>
+
+                                <th colspan="2" class="text-center">
+                                    {{PLDB.IsAmount == 1 ? 'More than 1 Lakh & upto 2 Lakh ' : '3 to 4 Year OD'}}
+                                </th>
+
+                                <th colspan="2" class="text-center">
+                                    {{PLDB.IsAmount == 1 ? 'More than 2 Lakh & upto 3 Lakh ' : '4 to 5 Year OD'}}
+                                </th>
+
+                                <th colspan="2" class="text-center">
+                                    {{PLDB.IsAmount == 1 ? 'More than 3 Lakh & upto 5 Lakh ' : '5 to 6 Year OD'}}
+                                </th>
+
+                                <th colspan="2" class="text-center">
+                                    {{PLDB.IsAmount == 1 ? 'More than 5 Lakh & upto 10 Lakh ' : '6 to 7 Year OD'}}
+                                </th>
+
+                                <th colspan="2" class="text-center">
+                                    {{PLDB.IsAmount == 1 ? 'More than 10 Lakh & upto 15 Lakh ' : '7 to 8 Year OD'}}
+                                </th>
+
+                                <th colspan="2" class="text-center">
+                                    {{PLDB.IsAmount == 1 ? 'More than 15 Lakh & upto 20 Lakh ' : '8 to 9 Year OD'}}
+                                </th>
+
+                                <th colspan="2" class="text-center">
+                                    {{PLDB.IsAmount == 1 ? 'More than 20 Lakh ' : '9 to 10 Year OD'}}
+                                </th>
+                                <th colspan="2" class="text-center" ng-if="PLDB.IsAmount == 0">
+                                    10 to 11 Year OD
+                                </th>
+                                <th colspan="2" class="text-center" ng-if="PLDB.IsAmount == 0">
+                                    11 to 12 Year OD
+                                </th>
+                                <th colspan="2" class="text-center" ng-if="PLDB.IsAmount == 0">
+                                    12 to 13 Year OD
+                                </th>
+                                <th colspan="2" class="text-center" ng-if="PLDB.IsAmount == 0">
+                                    13 to 14 Year OD
+                                </th>
+                                <th colspan="2" class="text-center" ng-if="PLDB.IsAmount == 0">
+                                    14 to 15 Year OD
+                                </th>
+                                <th colspan="2" class="text-center" ng-if="PLDB.IsAmount == 0">
+                                   More than 15 Years OD
+                                </th>
+
+                                <th colspan="2" class="text-center">
+                                    Total OD
+                                </th>
+                            </tr>
+
+                            <!-- Sub Header -->
+                            <tr>
+
+                                <!-- Upto 25000 -->
+                                <th class="od-no">No.</th>
+                                <th class="od-amount">Amount</th>
+
+                                <!-- 25000 to 50000 -->
+                                <th class="od-no">No.</th>
+                                <th class="od-amount">Amount</th>
+
+                                <!-- 50000 to 1 Lakh -->
+                                <th class="od-no">No.</th>
+                                <th class="od-amount">Amount</th>
+
+                                <!-- 1 Lakh to 2 Lakh -->
+                                <th class="od-no">No.</th>
+                                <th class="od-amount">Amount</th>
+
+                                <!-- 2 Lakh to 3 Lakh -->
+                                <th class="od-no">No.</th>
+                                <th class="od-amount">Amount</th>
+
+                                <!-- 3 Lakh to 5 Lakh -->
+                                <th class="od-no">No.</th>
+                                <th class="od-amount">Amount</th>
+
+                                <!-- 5 Lakh to 10 Lakh -->
+                                <th class="od-no">No.</th>
+                                <th class="od-amount">Amount</th>
+
+                                <!-- 10 Lakh to 15 Lakh -->
+                                <th class="od-no">No.</th>
+                                <th class="od-amount">Amount</th>
+
+                                <!-- 15 Lakh to 20 Lakh -->
+                                <th class="od-no">No.</th>
+                                <th class="od-amount">Amount</th>
+
+                                <!-- More than 20 Lakh -->
+                                <th class="od-no">No.</th>
+                                <th class="od-amount">Amount</th>
+
+                                <!-- Total OD -->
+                                <th class="od-no">No.</th>
+                                <th class="od-amount">Amount</th>
+
+                                <th ng-if="PLDB.IsAmount == 0" class="od-no">No.</th>
+                                <th ng-if="PLDB.IsAmount == 0" class="od-amount">Amount</th>
+
+                                <th ng-if="PLDB.IsAmount == 0" class="od-no">No.</th>
+                                <th ng-if="PLDB.IsAmount == 0" class="od-amount">Amount</th>
+
+                                <th ng-if="PLDB.IsAmount == 0" class="od-no">No.</th>
+                                <th ng-if="PLDB.IsAmount == 0" class="od-amount">Amount</th>
+
+                                <th ng-if="PLDB.IsAmount == 0" class="od-no">No.</th>
+                                <th ng-if="PLDB.IsAmount == 0" class="od-amount">Amount</th>
+
+                                <th ng-if="PLDB.IsAmount == 0" class="od-no">No.</th>
+                                <th ng-if="PLDB.IsAmount == 0" class="od-amount">Amount</th>
+
+                                <th ng-if="PLDB.IsAmount == 0" class="od-no">No.</th>
+                                <th ng-if="PLDB.IsAmount == 0" class="od-amount">Amount</th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            <tr ng-repeat="item in pldbLoanApplicationList"
+                                ng-if="!(item.PLDBName == 'TOTAL' && pldbLoanApplicationList.length == 1)"
+                                ng-style="(item.PLDBName == 'TOTAL') &&
+                                                                        {'font-weight':'bold',
+                                                                         'color':'#fdfdfd',
+                                                                         'background':'#466b6d'}">
+
+                                <th>
+                                    <div ng-hide="item.PLDBName == 'TOTAL'">
+                                        {{$index + 1}}
+                                    </div>
+                                </th>
+
+                                <td style="text-transform:uppercase;">
+                                    {{item.PLDBName}}
+                                </td>
+
+                                <!-- Upto 25000 -->
+                                <td class="od-value" >
+                                    {{item.Upto25000Count}}
+                                </td>
+                                <td class="od-value">
+                                    {{item.Upto25000Amount}}
+                                </td>
+
+                                <!-- 25000 to 50000 -->
+                                <td class="od-value">
+                                    {{item.Upto50000Count}}
+                                </td>
+                                <td class="od-value">
+                                    {{item.Upto50000Amount}}
+                                </td>
+
+                                <!-- 50000 to 1 Lakh -->
+                                <td class="od-value">
+                                    {{item.Upto1LakhCount}}
+                                </td>
+                                <td class="od-value">
+                                    {{item.Upto1LakhAmount}}
+                                </td>
+
+                                <!-- 1 Lakh to 2 Lakh -->
+                                <td class="od-value">
+                                    {{item.Upto2LakhCount}}
+                                </td>
+                                <td class="od-value">
+                                    {{item.Upto2LakhAmount}}
+                                </td>
+
+                                <!-- 2 Lakh to 3 Lakh -->
+                                <td class="od-value">
+                                    {{item.Upto3LakhCount}}
+                                </td>
+                                <td class="od-value">
+                                    {{item.Upto3LakhAmount}}
+                                </td>
+
+                                <!-- 3 Lakh to 5 Lakh -->
+                                <td class="od-value">
+                                    {{item.Upto5LakhCount}}
+                                </td>
+                                <td class="od-value">
+                                    {{item.Upto5LakhAmount}}
+                                </td>
+
+                                <!-- 5 Lakh to 10 Lakh -->
+                                <td class="od-value">
+                                    {{item.Upto10LakhCount}}
+                                </td>
+                                <td class="od-value">
+                                    {{item.Upto10LakhAmount}}
+                                </td>
+
+                                <!-- 10 Lakh to 15 Lakh -->
+                                <td class="od-value">
+                                    {{item.Upto15LakhCount}}
+                                </td>
+                                <td class="od-value">
+                                    {{item.Upto15LakhAmount}}
+                                </td>
+
+                                <!-- 15 Lakh to 20 Lakh -->
+                                <td class="od-value">
+                                    {{item.Upto20LakhCount}}
+                                </td>
+                                <td class="od-value">
+                                    {{item.Upto20LakhAmount}}
+                                </td>
+
+                                <!-- More than 20 Lakh -->
+                                <td class="od-value">
+                                    {{item.Above20LakhCount}}
+                                </td>
+                                <td class="od-value">
+                                    {{item.Above20LakhAmount}}
+                                </td>
+
+                                <!-- Total OD -->
+                                <td class="od-value">
+                                    {{item.TotalODCount}}
+                                </td>
+                                <td class="od-value">
+                                    {{item.TotalODAmount}}
+                                </td>
+
+                                <td class="od-value" ng-if="PLDB.IsAmount == 0">
+                                    {{item.TotalODCount}}
+                                </td>
+                                <td class="od-value" ng-if="PLDB.IsAmount == 0">
+                                    {{item.TotalODAmount}}
+                                </td>
+
+                                <td class="od-value" ng-if="PLDB.IsAmount == 0">
+                                    {{item.TotalODCount}}
+                                </td>
+                                <td class="od-value" ng-if="PLDB.IsAmount == 0">
+                                    {{item.TotalODAmount}}
+                                </td>
+
+
+                                <td class="od-value" ng-if="PLDB.IsAmount == 0">
+                                    {{item.TotalODCount}}
+                                </td>
+                                <td class="od-value" ng-if="PLDB.IsAmount == 0">
+                                    {{item.TotalODAmount}}
+                                </td>
+
+
+                                <td class="od-value" ng-if="PLDB.IsAmount == 0">
+                                    {{item.TotalODCount}}
+                                </td>
+                                <td class="od-value" ng-if="PLDB.IsAmount == 0">
+                                    {{item.TotalODAmount}}
+                                </td>
+
+                                <td class="od-value" ng-if="PLDB.IsAmount == 0">
+                                    {{item.TotalODCount}}
+                                </td>
+                                <td class="od-value" ng-if="PLDB.IsAmount == 0">
+                                    {{item.TotalODAmount}}
+                                </td>
+
+                                <td class="od-value" ng-if="PLDB.IsAmount == 0">
+                                    {{item.TotalODCount}}
+                                </td>
+                                <td class="od-value" ng-if="PLDB.IsAmount == 0">
+                                    {{item.TotalODAmount}}
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+                </div>
+            </div>
+        </div>
+        <div class="se-pre-con"></div>
+    </div>
+</div>
+

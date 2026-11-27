@@ -2398,6 +2398,59 @@ namespace Cooperative.Models
         }
 
 
+        public int SaveAuditorAppropriation(AuditorAppropriationRequest request)
+        {
+            int Result = 0;
+            UserEntity _LoggedInUser = (UserEntity)System.Web.HttpContext.Current.Session[SessionIdentity.Admin];
+
+            if (_LoggedInUser == null || request == null || request.KVSSId == 0)
+            {
+                return 0;
+            }
+            try
+            {
+                string financialYear = request.FinancialYear;
+                int KVSSId = request.KVSSId;
+                // TODO: 
+                DataTable table = new DataTable();
+                table.Columns.Add("ParticularId", typeof(int)); 
+                table.Columns.Add("CurrentYearAmount", typeof(decimal)); 
+
+                foreach (var item in request.AppropriationList)
+                {
+                    table.Rows.Add(
+                        item.ParticularId,
+                        item.CurrentYearAmount
+                    );
+                }
+                 
+                objDBAccess.OpenConnection();
+                SqlCommand cmd = objDBAccess.CreateCommand("USP_Save_AuditorAppropriationDetails", DBFactoryCommandType.PROCEDURE_COMMAND);
+                objDBAccess.AddParameterToCommand("@UserId", DBFactoryParameterType.Int, _LoggedInUser.UserId);
+                objDBAccess.AddParameterToCommand("@UserRoleMappingId", DBFactoryParameterType.Int, _LoggedInUser.UserRoleDeptMappingId);
+                objDBAccess.AddParameterToCommand("@RoleId", DBFactoryParameterType.Int, _LoggedInUser.RoleId);
+                objDBAccess.AddParameterToCommand("@FinancialYear", DBFactoryParameterType.VARCHAR, financialYear);
+                objDBAccess.AddParameterToCommand("@KVSSId", DBFactoryParameterType.Int, KVSSId);
+
+                SqlParameter parameter = cmd.Parameters.Add("@AppropriationList", SqlDbType.Structured);
+                parameter.TypeName = "dbo.AuditorAppropriationTableType";
+                parameter.Value = table;
+
+                Result = Convert.ToInt32(objDBAccess.ExecuteScalarCommand());
+            }
+            catch (Exception ex)
+            {
+                objILogger.ErrorHandle(new ErrorLogEntity() { PageName = "AuditorAppropriation", FunctionName = "SaveAuditorAppropriation" }, ex);
+
+                Result = 0;
+            }
+            finally
+            {
+                objDBAccess.CloseConnection();
+            }
+            return Result;
+        }
+
         /*  Auditor flow */
         public DataSet GetAuditAccountHeaderMasterData( 
      int? tabId,
@@ -2626,6 +2679,32 @@ namespace Cooperative.Models
                 objDBAccess.CloseConnection();
             }
 
+            return dt;
+        }
+
+        public DataTable GetAppropriationDetails(int KVSSId, string financialYear)
+        {
+            DataTable dt = new DataTable();
+            UserEntity _LoggedInUser = (UserEntity)System.Web.HttpContext.Current.Session[SessionIdentity.Admin];
+            try
+            {
+                objDBAccess.OpenConnection();
+
+                SqlCommand cmd = objDBAccess.CreateCommand("USP_Get_AuditorAppropriationDetails", DBFactoryCommandType.PROCEDURE_COMMAND);
+                objDBAccess.AddParameterToCommand("@KVSSId", DBFactoryParameterType.Int, KVSSId);
+                objDBAccess.AddParameterToCommand("@FinancialYear", DBFactoryParameterType.VARCHAR, financialYear); 
+                objDBAccess.AddParameterToCommand("@UserId", DBFactoryParameterType.VARCHAR, _LoggedInUser.UserId);
+                objDBAccess.AddParameterToCommand("@RoleId", DBFactoryParameterType.Int, _LoggedInUser.RoleId);
+                dt = objDBAccess.GetTable();
+            }
+            catch (Exception ex)
+            {
+                objILogger.ErrorHandle(new ErrorLogEntity() { PageName = "Cooperative.Models.AuditorModel", FunctionName = "GetAppropriationDetails(int KVSSId, string financialYear)" }, ex);
+            }
+            finally
+            {
+                objDBAccess.CloseConnection();
+            }
             return dt;
         }
 
