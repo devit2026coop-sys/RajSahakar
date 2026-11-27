@@ -4962,7 +4962,8 @@ namespace Cooperative.Models
         public decimal ClosingQty { get; set; }
         public decimal ClosingRate { get; set; }
         public decimal ClosingAmount { get; set; }
-         
+        public string ItemUnit { get; set; }
+
     }
 
     public class AuditSPRequest
