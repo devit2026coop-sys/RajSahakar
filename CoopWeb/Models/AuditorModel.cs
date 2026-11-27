@@ -2347,6 +2347,7 @@ namespace Cooperative.Models
                 table.Columns.Add("ClosingQty", typeof(decimal));
                 table.Columns.Add("ClosingRate", typeof(decimal));
                 table.Columns.Add("ClosingAmount", typeof(decimal));
+                table.Columns.Add("ItemUnit", typeof(string));
 
                 foreach (var item in request.StockDetails)
                 {
@@ -2366,7 +2367,8 @@ namespace Cooperative.Models
                         item.SalesAmount,
                         item.ClosingQty,
                         item.ClosingRate,
-                        item.ClosingAmount
+                        item.ClosingAmount,
+                        item.ItemUnit
                     );
                 }
 

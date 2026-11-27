@@ -7384,7 +7384,7 @@ namespace Cooperative.Models
 
 
         #region GetLoanApplicationPLDBCountDetail
-        public DataTable GetLoanApplicationPLDBCountDetail(DataPagingModel Details, int pldbId = 0, int branchId = 0, int FinancialYearId = 0,bool IsAvadhipaar = false)
+        public DataTable GetLoanApplicationPLDBCountDetail(DataPagingModel Details, int pldbId = 0, int branchId = 0, int FinancialYearId = 0,bool IsAvadhipaar = false, int Amount =0, int SectorId =0, int PurposeId =0)
         {
             DataTable ds = new DataTable();
             UserEntity user = (UserEntity)HttpContext.Current.Session[SessionIdentity.Admin];
@@ -7405,6 +7405,9 @@ namespace Cooperative.Models
                 objDBAccess.AddParameterToCommand("@LevelId", DBFactoryParameterType.NVarchar, user.LevelId);
                 objDBAccess.AddParameterToCommand("@RoleId", DBFactoryParameterType.NVarchar, user.RoleId);
                 objDBAccess.AddParameterToCommand("@IsAvadhipaar", DBFactoryParameterType.Bit, IsAvadhipaar);
+                objDBAccess.AddParameterToCommand("@Amount", DBFactoryParameterType.Int, Amount);
+                objDBAccess.AddParameterToCommand("@SectorId", DBFactoryParameterType.Int, SectorId);
+                objDBAccess.AddParameterToCommand("@PurposeId", DBFactoryParameterType.Int, PurposeId);
                 Details.TotalRecords = Convert.ToInt32(objDBAccess.ExecuteScalarCommand());
             }
             if (Details.IsAllRecords)
@@ -7423,6 +7426,9 @@ namespace Cooperative.Models
             objDBAccess.AddParameterToCommand("@LevelId", DBFactoryParameterType.NVarchar, user.LevelId);
             objDBAccess.AddParameterToCommand("@RoleId", DBFactoryParameterType.NVarchar, user.RoleId);
             objDBAccess.AddParameterToCommand("@IsAvadhipaar", DBFactoryParameterType.Bit, IsAvadhipaar);
+            objDBAccess.AddParameterToCommand("@Amount", DBFactoryParameterType.Int, Amount);
+            objDBAccess.AddParameterToCommand("@SectorId", DBFactoryParameterType.Int, SectorId);
+            objDBAccess.AddParameterToCommand("@PurposeId", DBFactoryParameterType.Int, PurposeId);
 
             ds = objDBAccess.GetTable();
 
@@ -8150,7 +8156,7 @@ namespace Cooperative.Models
         }
 
         #region GetLoanApplicationPLDBStatusCountDetail
-        public DataTable GetLoanApplicationPLDBStatusCountDetail(DataPagingModel Details, int pldbId = 0, string statusType = "", int financialYearId = 0, int branchId = 0)
+        public DataTable GetLoanApplicationPLDBStatusCountDetail(DataPagingModel Details, int pldbId = 0, string statusType = "", int financialYearId = 0, int branchId = 0, int Amount = 0, int SectorId = 0, int PurposeId = 0,bool IsAvadhipaar = false)
         {
             DataTable ds = new DataTable();
             UserEntity user = (UserEntity)HttpContext.Current.Session[SessionIdentity.Admin];
@@ -8171,6 +8177,10 @@ namespace Cooperative.Models
                 objDBAccess.AddParameterToCommand("@IsRowCount", DBFactoryParameterType.Int, true);
                 objDBAccess.AddParameterToCommand("@LevelId", DBFactoryParameterType.NVarchar, user.LevelId);
                 objDBAccess.AddParameterToCommand("@RoleId", DBFactoryParameterType.NVarchar, user.RoleId);
+                objDBAccess.AddParameterToCommand("@Amount", DBFactoryParameterType.Int, Amount);
+                objDBAccess.AddParameterToCommand("@SectorId", DBFactoryParameterType.Int, SectorId);
+                objDBAccess.AddParameterToCommand("@PurposeId", DBFactoryParameterType.Int, PurposeId);
+                objDBAccess.AddParameterToCommand("@IsAvadhipaar", DBFactoryParameterType.Bit, IsAvadhipaar);
                 Details.TotalRecords = Convert.ToInt32(objDBAccess.ExecuteScalarCommand());
             }
             if (Details.IsAllRecords)
@@ -8189,6 +8199,10 @@ namespace Cooperative.Models
             objDBAccess.AddParameterToCommand("@IsRowCount", DBFactoryParameterType.Int, false);
             objDBAccess.AddParameterToCommand("@LevelId", DBFactoryParameterType.NVarchar, user.LevelId);
             objDBAccess.AddParameterToCommand("@RoleId", DBFactoryParameterType.NVarchar, user.RoleId);
+            objDBAccess.AddParameterToCommand("@Amount", DBFactoryParameterType.Int, Amount);
+            objDBAccess.AddParameterToCommand("@SectorId", DBFactoryParameterType.Int, SectorId);
+            objDBAccess.AddParameterToCommand("@PurposeId", DBFactoryParameterType.Int, PurposeId);
+            objDBAccess.AddParameterToCommand("@IsAvadhipaar", DBFactoryParameterType.Bit, IsAvadhipaar);
 
             ds = objDBAccess.GetTable();
 

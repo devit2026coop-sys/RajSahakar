@@ -195,6 +195,8 @@ MasterMod.controller("auditorPurchaseSaleCtrl", function ($scope, $http) {
                 ClosingRate: parent.ClosingRate || 0,
                 ClosingAmount: parent.ClosingAmount || 0,
 
+                ItemUnit: parent.ItemUnit,
+
                 ChildItems: data.filter(function (child) {
                     return child.ParentItemId == parent.ItemId;
                 })
@@ -357,7 +359,9 @@ MasterMod.controller("auditorPurchaseSaleCtrl", function ($scope, $http) {
 
             ClosingQty: 0,
             ClosingRate: 0,
-            ClosingAmount: 0 
+            ClosingAmount: 0,
+
+            ItemUnit: '',
         });
     };
 
