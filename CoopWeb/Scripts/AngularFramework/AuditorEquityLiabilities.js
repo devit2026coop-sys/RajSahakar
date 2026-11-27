@@ -17,7 +17,7 @@ MasterMod.controller("auditorEquityLiabilitiesCtrl", function ($scope, $http) {
     $scope.TabList = [];
     $scope.HeaderList = []; 
 
-    $scope.KVSSSocietyID = '0';
+    //$scope.KVSSSocietyID = '128090';
     $scope.SelectedTabId = 1;
     $scope.SocietyList = [];
     $scope.FinancialYearList = [];
@@ -56,14 +56,18 @@ MasterMod.controller("auditorEquityLiabilitiesCtrl", function ($scope, $http) {
         }
 
 
-        $scope.KVSSSocietyID = 0;
+       // $scope.KVSSSocietyID = 0;
 
-         
 
-        $scope.GetAuditAccountHeaderMaster(1); 
+
+        //$scope.GetAuditAccountHeaderMaster(1);
+        //$scope.GetSocietyBySSO();
+        //$scope.GetSelectedSocietyName();
+        //$scope.SetFinancialYears();
+
+       
+        $scope.SetFinancialYears();
         $scope.GetSocietyBySSO();
-        $scope.GetSelectedSocietyName();
-        $scope.SetFinancialYears(); 
 
         $scope.Department = [];
         $http.get(SiteUrl + "/Master/GetMasterData/?MasterType=Department&MasterCode=-1").
@@ -514,27 +518,53 @@ MasterMod.controller("auditorEquityLiabilitiesCtrl", function ($scope, $http) {
         $(".se-pre-con").fadeIn("slow");
 
         $http.post(SiteUrl + "/Society/KVSSGSSbySSOD", {})
-            .success(function (data, status) {
+            .then(function (response) {
 
-                $scope.TableData = data;
-                $scope.SocietyList = $scope.TableData;
+                $scope.SocietyList = response.data || [];
 
-                // Select society from Session if available
-                if ($scope.SessionKVSSId != null &&
-                    $scope.SessionKVSSId != '' &&
-                    $scope.SessionKVSSId != 0) {
+                // Convert SocietyID to number
+                angular.forEach($scope.SocietyList, function (item) {
+                    item.SocietyID = parseInt(item.SocietyID, 10);
+                });
 
-                    $scope.KVSSSocietyID = $scope.SessionKVSSId;
+                // Read the session value already assigned through Razor ng-init
+                var sessionSocietyId = parseInt($scope.KVSSSocietyID, 10);
+
+                if (!isNaN(sessionSocietyId) && sessionSocietyId > 0) {
+
+                    // Check whether the session society exists in the dropdown list
+                    var societyExists = $scope.SocietyList.some(function (item) {
+                        return item.SocietyID === sessionSocietyId;
+                    });
+
+                    if (societyExists) {
+                        $scope.KVSSSocietyID = sessionSocietyId;
+                    }
+                    else {
+                        console.log("Session Society ID not found in SocietyList:", sessionSocietyId);
+                    }
+                }
+                else {
+                    $scope.KVSSSocietyID = null;
+                }
+
+                console.log("Session KVSS ID:", $scope.KVSSSocietyID);
+                console.log("Society List:", $scope.SocietyList);
+
+                // Load headers after society list and selected ID are ready
+                if ($scope.KVSSSocietyID) {
+                    $scope.GetAuditAccountHeaderMaster(1);
                 }
 
                 $(".se-pre-con").fadeOut("slow");
 
             })
-            .error(function (data, status) {
+            .catch(function (error) {
 
-                $(".se-pre-con").fadeOut("slow");
-                $scope.TableData = [];
+                console.log("GetSocietyBySSO Error:", error);
+
                 $scope.SocietyList = [];
+                $(".se-pre-con").fadeOut("slow");
 
             });
     };

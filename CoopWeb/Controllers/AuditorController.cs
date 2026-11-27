@@ -1221,20 +1221,20 @@ namespace Cooperative.Controllers
             return result;
         }
 
-        [HttpPost]
-        public int SaveIssuedCheques(List<IssuedChequeModel> model)
-        {
-            int result = new AuditorModel().SaveIssuedCheques(model);
-            return result;
-        }
+        //[HttpPost]
+        //public int SaveIssuedCheques(List<IssuedChequeModel> model)
+        //{
+        //    int result = new AuditorModel().SaveIssuedCheques(model);
+        //    return result;
+        //}
 
-        [HttpGet]
-        public string GetIssuedCheques()
-        {
-            DataTable dt = new AuditorModel().GetIssuedCheques();
+        //[HttpGet]
+        //public string GetIssuedCheques()
+        //{
+        //    DataTable dt = new AuditorModel().GetIssuedCheques();
 
-            return COMMON_FUNCTION.DataTableToJSONString(dt);
-        }
+        //    return COMMON_FUNCTION.DataTableToJSONString(dt);
+        //}
 
 
         public JsonResult GetAuditAccountHeaderMaster(int? tabId, int? kvssId, string financialYear)
@@ -1641,6 +1641,83 @@ namespace Cooperative.Controllers
             int result = new AuditorModel().SaveAuditorSalePurchase(request);
             return result;
         }
+
+
+
+    //    public JsonResult GetAuditAccountHeaderMasterAssestClassification(
+    //int? tabId,
+    //int? kvssId,
+    //string financialYear)
+    //    {
+    //        try
+    //        {
+    //            // Society session
+    //            if (Session["KVSSId"] == null && kvssId.HasValue && kvssId > 0)
+    //            {
+    //                Session["KVSSId"] = kvssId.Value;
+    //            }
+
+    //            if (Session["KVSSId"] != null)
+    //            {
+    //                kvssId = Convert.ToInt32(Session["KVSSId"]);
+    //            }
+
+    //            // Financial year session
+    //            if (Session["FinancialYear"] == null &&
+    //                !string.IsNullOrEmpty(financialYear))
+    //            {
+    //                Session["FinancialYear"] = financialYear;
+    //            }
+
+    //            if (Session["FinancialYear"] != null)
+    //            {
+    //                financialYear = Convert.ToString(Session["FinancialYear"]);
+    //            }
+
+    //            if (!kvssId.HasValue || kvssId.Value <= 0 ||
+    //                string.IsNullOrEmpty(financialYear))
+    //            {
+    //                return Json(new
+    //                {
+    //                    TabList = new List<Dictionary<string, object>>(),
+    //                    HeaderList = new List<Dictionary<string, object>>(),
+    //                    Message = "Society or financial year not found."
+    //                }, JsonRequestBehavior.AllowGet);
+    //            }
+
+    //            ViewBag.KVSSId = kvssId.Value;
+    //            ViewBag.FinancialYear = financialYear;
+
+    //            DataSet ds = new AuditorModel()
+    //                .GetAuditAssetClassificationDetailsData(
+    //                    tabId,
+    //                    kvssId,
+    //                    financialYear
+    //                );
+
+    //            var result = new
+    //            {
+    //                TabList = ds != null && ds.Tables.Count > 0
+    //                    ? csCommon.ConvertDataTableToDynamic(ds.Tables[0])
+    //                    : new List<Dictionary<string, object>>(),
+
+    //                HeaderList = ds != null && ds.Tables.Count > 1
+    //                    ? csCommon.ConvertDataTableToDynamic(ds.Tables[1])
+    //                    : new List<Dictionary<string, object>>()
+    //            };
+
+    //            return Json(result, JsonRequestBehavior.AllowGet);
+    //        }
+    //        catch (Exception ex)
+    //        {
+    //            return Json(new
+    //            {
+    //                TabList = new List<Dictionary<string, object>>(),
+    //                HeaderList = new List<Dictionary<string, object>>(),
+    //                Message = ex.Message
+    //            }, JsonRequestBehavior.AllowGet);
+    //        }
+    //    }
 
     }
 }
