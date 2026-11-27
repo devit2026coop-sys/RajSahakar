@@ -1,19 +1,20 @@
 ﻿using CoopDAL;
 using Cooperative.Controllers;
+using Cooperative.Controllers;
 using Cooperative.DBConnector;
 using Newtonsoft.Json;
+using Newtonsoft.Json;
+using sun.security.util;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Data;
 using System.Data.SqlClient;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using Cooperative.Controllers;
-using Newtonsoft.Json;
-using sun.security.util;
 using System.Linq;
+using System.Web.Mvc;
 
 namespace Cooperative.Models
 {
@@ -2755,6 +2756,68 @@ namespace Cooperative.Models
                     {
                         PageName = "Cooperative.Models.AuditorModel",
                         FunctionName = "GetAuditAssetClassificationDetailsData()"
+                    },
+                    ex
+                );
+            }
+            finally
+            {
+                objDBAccess.CloseConnection();
+            }
+
+            return ds;
+        }
+
+
+
+
+
+        public DataSet GetAuditAccountHeaderMasterAssestClassificationData(
+     int? tabId,
+     int? kvssId,
+     string financialYear)
+        {
+            DataSet ds = new DataSet();
+
+            try
+            {
+                objDBAccess.OpenConnection();
+
+                SqlCommand cmd = objDBAccess.CreateCommand(
+                    "USP_GetAuditAccountHeaderMasterAssestClassification",
+                    DBFactoryCommandType.PROCEDURE_COMMAND
+                );
+
+                objDBAccess.AddParameterToCommand(
+                    "@TabId",
+                    DBFactoryParameterType.Int,
+                    tabId.HasValue ? (object)tabId.Value : DBNull.Value
+                );
+
+                objDBAccess.AddParameterToCommand(
+                    "@KVSSId",
+                    DBFactoryParameterType.Int,
+                    kvssId.HasValue ? (object)kvssId.Value : DBNull.Value
+                );
+
+                objDBAccess.AddParameterToCommand(
+                    "@FinancialYear",
+                    DBFactoryParameterType.VARCHAR,
+                    string.IsNullOrEmpty(financialYear)
+                        ? (object)DBNull.Value
+                        : financialYear
+                );
+
+                ds = objDBAccess.GetDataSet();
+            }
+            catch (Exception ex)
+            {
+                objILogger.ErrorHandle(
+                    new ErrorLogEntity()
+                    {
+                        PageName = "Cooperative.Models.AuditorModel",
+                        FunctionName =
+                            "GetAuditAccountHeaderMasterAssestClassificationData()"
                     },
                     ex
                 );

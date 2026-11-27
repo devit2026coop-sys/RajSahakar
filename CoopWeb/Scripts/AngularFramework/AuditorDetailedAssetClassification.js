@@ -1,502 +1,401 @@
-﻿var AssetClassificationMod = angular.module('assetClassificationMod', []);
+﻿
+var app = angular.module('assetClassificationMod', []);
 
-AssetClassificationMod.controller(
-    "assetClassificationCtrl",
-    function ($scope, $http) {
+app.controller('assetClassificationCtrl', [
+    '$scope',
+    '$http',
+    '$window',
+    function ($scope, $http, $window, $timeout) {
 
-        // ------------------------------------------------
-        // SCOPE VARIABLES
-        // ------------------------------------------------
-
-        $scope._language = 'en-us';
+        // ============================================
+        // 1. INITIALIZATION
+        // ============================================
 
         $scope.TabList = [];
         $scope.HeaderList = [];
-        $scope.DetailList = [];
+        $scope.SummaryList = [];
 
-        $scope.SelectedTabId = 1;
         $scope.SelectedViewTab = 1;
+        $scope.SelectedTabId = null;
 
-        $scope.KVSSSocietyID = $scope.KVSSSocietyID || 0;
-        $scope.FinancialYear = $scope.FinancialYear || '';
+        $scope.KVSSSocietyID = 128090;//  $scope.KVSSSocietyID || null;
+        $scope.FinancialYear = '2025-26'; //$scope.FinancialYear || '';
 
         $scope.FinancialYearEnd = '';
 
-        $scope.SummaryList = [];
+        $scope.IsLoading = false;
 
-        // ------------------------------------------------
-        // PAGE LOAD
-        // ------------------------------------------------
+        $scope.AssetTypeMap = {
+            'Loans & Advances': 'Loan',
+            'Other Assets including Sundry Debtors': 'Other Assets'
+        };
 
-        $scope.OnPageLoad = function () {
+        // ============================================
+        // 2. FINANCIAL YEAR END
+        // ============================================
 
-            $(".se-pre-con").fadeIn("slow");
-
-            $scope._language = 'en-us';
-
-            var translationUrl =
-                $scope._language == 'en-us'
-                    ? "/Translations/Translation_EN.json"
-                    : "/Translations/Translation_HI.json";
-
-            $http.get(SiteUrl + translationUrl)
-                .success(function (data) {
-                    $scope.translation = data;
-                })
-                .error(function () {
-                    alert("Error while loading translation.");
-                });
-
-            if (!$scope.KVSSSocietyID || $scope.KVSSSocietyID == 0) {
-                alert("Society not selected.");
-                $(".se-pre-con").fadeOut("slow");
-                return;
-            }
+        function setFinancialYearEnd() {
 
             if (!$scope.FinancialYear) {
-                alert("Financial year not found.");
-                $(".se-pre-con").fadeOut("slow");
+                $scope.FinancialYearEnd = '';
                 return;
             }
 
-            var fyParts = $scope.FinancialYear.split('-');
+            var parts = $scope.FinancialYear.split('-');
 
-            if (fyParts.length > 0) {
-                $scope.FinancialYearEnd =
-                    "31 March 20" + fyParts[1];
+            if (parts.length === 2) {
+                $scope.FinancialYearEnd = '31 March 20' + parts[1];
+            }
+        }
+
+        setFinancialYearEnd();
+
+        // ============================================
+        // 3. LOAD TABS AND HEADERS
+        // ============================================
+
+        $scope.GetAuditAssetClassificationDetails = function () {
+
+            console.log('GetAuditAssetClassificationDetails called');
+
+            console.log('KVSS ID:', $scope.KVSSSocietyID);
+            console.log('Financial Year:', $scope.FinancialYear);
+
+            if (!$scope.KVSSSocietyID || !$scope.FinancialYear) {
+                console.error('KVSS ID or Financial Year is missing.');
+                return;
             }
 
-            $scope.GetAuditAccountHeaderMaster(1);
-        };
+            $scope.IsLoading = true;
 
-
-        // ------------------------------------------------
-        // GET HEADERS / TABS
-        // ------------------------------------------------
-
-        $scope.GetAuditAccountHeaderMaster = function (tabId) {
-
-            $(".se-pre-con").fadeIn("slow");
-
-            $http.get(
-                SiteUrl + "/Auditor/GetAuditAccountHeaderMasterAssestClassification",
-                {
-                    params: {
-                        tabId: tabId,
-                        kvssId: $scope.KVSSSocietyID,
-                        financialYear: $scope.FinancialYear
-                    }
+            $http({
+                method: 'GET',
+                url: SiteUrl + 'Auditor/GetAuditAssetClassificationDetails',
+                params: {
+                    kvssId: $scope.KVSSSocietyID,
+                    financialYear: $scope.FinancialYear,
+                    tabId: null
                 }
-            )
-                .success(function (data) {
+            }).then(function (response) {
 
-                    $scope.TabList = data.TabList || [];
-                    $scope.HeaderList = data.HeaderList || [];
+                console.log('API Response:', response.data);
 
-                    if ($scope.TabList.length > 0) {
+                var result = response.data;
 
-                        var selectedTabExists = $scope.TabList.some(function (tab) {
-                            return tab.TabId == tabId;
-                        });
+                $scope.TabList = result.TabList || [];
+                $scope.HeaderList = result.HeaderList || [];
 
-                        $scope.SelectedTabId =
-                            selectedTabExists
-                                ? tabId
-                                : $scope.TabList[0].TabId;
-                    }
+                console.log('TabList:', $scope.TabList);
+                console.log('HeaderList:', $scope.HeaderList);
 
-                    // Load saved classification entries
-                    $scope.GetAssetClassificationDetails();
+                // Select first tab AFTER loading API data
+                if ($scope.TabList.length > 0) {
 
-                })
-                .error(function () {
+                    $scope.SelectedTabId = $scope.TabList[0].TabId;
 
-                    $(".se-pre-con").fadeOut("slow");
+                } else {
 
-                    alert("Error while loading account headings.");
+                    $scope.SelectedTabId = null;
 
-                });
-        };
-
-
-        // ------------------------------------------------
-        // GET SAVED DETAIL RECORDS
-        // ------------------------------------------------
-
-        $scope.GetAssetClassificationDetails = function () {
-
-            $http.get(
-                SiteUrl + "/Auditor/GetAuditAssetClassificationDetails",
-                {
-                    params: {
-                        kvssId: $scope.KVSSSocietyID,
-                        financialYear: $scope.FinancialYear,
-                        tabId: $scope.SelectedTabId
-                    }
                 }
-            )
-                .success(function (data) {
 
-                    $scope.DetailList = data || [];
+                console.log('SelectedTabId:', $scope.SelectedTabId);
 
-                    // Attach saved details to corresponding headings
-                    angular.forEach($scope.HeaderList, function (header) {
+                // Initialize details
+                $scope.InitializeAssetDetails();
 
-                        var saved = $scope.DetailList.find(function (item) {
-                            return item.HeaderId == header.HeaderId;
-                        });
+                // Calculate summary
+                $scope.CalculateSummary();
 
-                        if (saved) {
+            }, function (error) {
 
-                            saved.DateOfAdvance = saved.DateOfAdvance
-                                ? new Date(saved.DateOfAdvance + "T00:00:00")
-                                : null;
+                console.error('API Error:', error);
 
-                            header.AssetDetail = saved;
+                alert('Unable to load asset classification details.');
 
-                        }
-                        else {
+            }).finally(function () {
 
-                            header.AssetDetail = $scope.GetEmptyAssetDetail(
-                                header.HeaderId
-                            );
+                $scope.IsLoading = false;
 
-                        }
-
-                    });
-
-                    $scope.CalculateSummary();
-
-                    $(".se-pre-con").fadeOut("slow");
-
-                })
-                .error(function () {
-
-                    $(".se-pre-con").fadeOut("slow");
-
-                    alert("Error while loading asset classification details.");
-
-                });
-        };
-
-
-        // ------------------------------------------------
-        // EMPTY DETAIL OBJECT
-        // ------------------------------------------------
-
-        $scope.GetEmptyAssetDetail = function (headerId) {
-
-            return {
-                Id: 0,
-                HeaderId: headerId,
-                NatureOfFacility: '',
-                DateOfAdvance: null,
-                Principal: 0,
-                Interest: 0,
-                TotalOverdue: 0,
-                PeriodOfOutstanding: null,
-                StandardAmount: 0,
-                SubStandardAmount: 0,
-                DoubtfulIAmount: 0,
-                DoubtfulIIAmount: 0,
-                DoubtfulIIIAmount: 0,
-                LossAssetAmount: 0
-            };
+            });
 
         };
 
+        // ============================================
+        // 4. INITIALIZE ASSET DETAILS
+        // ============================================
 
-        // ------------------------------------------------
-        // PARENT HEADERS
-        // ------------------------------------------------
+        $scope.InitializeAssetDetails = function () {
+
+            angular.forEach($scope.HeaderList, function (header) {
+
+                header.AssetDetail = {
+
+                    AssetClassificationId:
+                        header.AssetClassificationId || 0,
+
+                    NatureOfFacility:
+                        header.NatureOfFacility || '',
+
+                    DateOfAdvance:
+                        header.DateOfAdvance
+                            ? new Date(header.DateOfAdvance)
+                            : null,
+
+                    Principal:
+                        Number(header.Principal) || 0,
+
+                    Interest:
+                        Number(header.Interest) || 0,
+
+                    TotalOverdue:
+                        Number(header.TotalOverdue) || 0,
+
+                    PeriodOfOutstanding:
+                        Number(header.PeriodOfOutstanding) || 0,
+
+                    StandardAmount:
+                        Number(header.StandardAmount) || 0,
+
+                    SubStandardAmount:
+                        Number(header.SubStandardAmount) || 0,
+
+                    DoubtfulIAmount:
+                        Number(header.DoubtfulIAmount) || 0,
+
+                    DoubtfulIIAmount:
+                        Number(header.DoubtfulIIAmount) || 0,
+
+                    DoubtfulIIIAmount:
+                        Number(header.DoubtfulIIIAmount) || 0,
+
+                    LossAssetAmount:
+                        Number(header.LossAssetAmount) || 0
+                };
+
+            });
+        };
+
+        // ============================================
+        // 5. GET PARENT HEADERS
+        // ============================================
 
         $scope.GetParentHeadersByTab = function (tabId) {
 
-            return $scope.HeaderList.filter(function (item) {
+            console.log('Selected TabId:', tabId);
 
-                return item.TabId == tabId &&
-                    (item.ParentHeaderId == null ||
-                        item.ParentHeaderId == undefined);
+            console.log('HeaderList Count:', $scope.HeaderList.length);
 
-            });
+            angular.forEach($scope.HeaderList, function (header, index) {
 
-        };
-
-
-        // ------------------------------------------------
-        // CHILD HEADERS
-        // ------------------------------------------------
-
-        $scope.GetChildHeaders = function (parentHeaderId) {
-
-            return $scope.HeaderList.filter(function (item) {
-
-                return item.ParentHeaderId == parentHeaderId;
+                console.log('Header ' + index, {
+                    HeaderId: header.HeaderId,
+                    ParentHeaderId: header.ParentHeaderId,
+                    TabId: header.TabId,
+                    HeaderNameEnglish: header.HeaderNameEnglish
+                });
 
             });
 
+            var result = $scope.HeaderList.filter(function (header) {
+
+                return Number(header.TabId) === Number(tabId)
+                    && Number(header.ParentHeaderId || 0) === 0;
+
+            });
+
+            console.log('Parent Headers:', result);
+
+            return result;
         };
 
+        // ============================================
+        // 6. GET LEAF HEADERS
+        // ============================================
 
-        // ------------------------------------------------
-        // ALL DESCENDANTS
-        // ------------------------------------------------
+        $scope.GetLeafHeadersByParent = function (parentId) {
 
-        $scope.GetAllDescendants = function (parentHeaderId) {
+            var result = $scope.HeaderList.filter(function (header) {
 
-            var result = [];
+                return Number(header.ParentHeaderId) === Number(parentId);
 
-            function GetChildren(parentId, level) {
+            }).filter(function (child) {
 
-                var children =
-                    $scope.GetChildHeaders(parentId) || [];
+                var hasChildren = $scope.HeaderList.some(function (header) {
 
-                angular.forEach(children, function (child) {
-
-                    child.Level = level;
-
-                    result.push(child);
-
-                    GetChildren(child.HeaderId, level + 1);
+                    return Number(header.ParentHeaderId) ===
+                        Number(child.HeaderId);
 
                 });
 
-            }
-
-            GetChildren(parentHeaderId, 1);
-
-            return result;
-
-        };
-
-
-        // ------------------------------------------------
-        // LEAF HEADINGS
-        // Only leaf headings are editable
-        // ------------------------------------------------
-
-        $scope.GetLeafHeadersByParent = function (parentHeaderId) {
-
-            var descendants =
-                $scope.GetAllDescendants(parentHeaderId);
-
-            return descendants.filter(function (item) {
-
-                return $scope.GetChildHeaders(item.HeaderId).length == 0;
+                return !hasChildren;
 
             });
 
+            console.log('Leaf Headers for Parent:', parentId, result);
+
+            return result;
         };
 
-
-        // ------------------------------------------------
-        // ASSET TYPE
-        // ------------------------------------------------
+        // ============================================
+        // 7. GET ASSET TYPE
+        // ============================================
 
         $scope.GetAssetType = function (parent) {
 
-            return parent.HeaderNameEnglish || '';
-
-        };
-
-
-        // ------------------------------------------------
-        // CHANGE VIEW TAB
-        // ------------------------------------------------
-
-        $scope.SelectViewTab = function (tabId) {
-
-            $scope.SelectedViewTab = tabId;
-
-            if (tabId == 2) {
-                $scope.CalculateSummary();
+            if (!parent) {
+                return '';
             }
 
+            return $scope.AssetTypeMap[
+                parent.HeaderNameEnglish
+            ] || parent.HeaderNameEnglish;
         };
 
-
-        // ------------------------------------------------
-        // CHANGE DATABASE TAB
-        // ------------------------------------------------
-
-        $scope.SelectAccountTab = function (tabId) {
-
-            $scope.SelectedTabId = tabId;
-
-            $scope.GetAuditAccountHeaderMaster(tabId);
-
-        };
-
-
-        // ------------------------------------------------
-        // CALCULATE ROW
-        // ------------------------------------------------
+        // ============================================
+        // 8. CALCULATE ROW TOTAL
+        // ============================================
 
         $scope.CalculateRow = function (row) {
 
-            if (!row.AssetDetail) {
-                row.AssetDetail =
-                    $scope.GetEmptyAssetDetail(row.HeaderId);
+            if (!row || !row.AssetDetail) {
+                return;
             }
 
-            row.AssetDetail.Principal =
-                parseFloat(row.AssetDetail.Principal) || 0;
+            var detail = row.AssetDetail;
 
-            row.AssetDetail.Interest =
-                parseFloat(row.AssetDetail.Interest) || 0;
+            detail.Principal = Number(detail.Principal) || 0;
+            detail.Interest = Number(detail.Interest) || 0;
+
+            detail.TotalOutstanding =
+                detail.Principal + detail.Interest;
 
             $scope.CalculateSummary();
-
         };
 
+        // ============================================
+        // 9. GET GRAND TOTAL
+        // ============================================
 
-        // ------------------------------------------------
-        // GET ALL EDITABLE LEAF HEADERS
-        // ------------------------------------------------
-
-        $scope.GetAllAssetRows = function () {
-
-            var result = [];
-
-            var parents =
-                $scope.GetParentHeadersByTab($scope.SelectedTabId);
-
-            angular.forEach(parents, function (parent) {
-
-                var rows =
-                    $scope.GetLeafHeadersByParent(parent.HeaderId);
-
-                angular.forEach(rows, function (row) {
-
-                    if (!row.AssetDetail) {
-                        row.AssetDetail =
-                            $scope.GetEmptyAssetDetail(row.HeaderId);
-                    }
-
-                    result.push(row);
-
-                });
-
-            });
-
-            return result;
-
-        };
-
-
-        // ------------------------------------------------
-        // GRAND TOTAL
-        // ------------------------------------------------
-
-        $scope.GetGrandTotal = function (fieldName) {
+        $scope.GetGrandTotal = function (field) {
 
             var total = 0;
 
-            var rows = $scope.GetAllAssetRows();
+            angular.forEach($scope.HeaderList, function (header) {
 
-            angular.forEach(rows, function (row) {
+                if (header.ParentHeaderId &&
+                    Number(header.ParentHeaderId) !== 0 &&
+                    !$scope.HeaderList.some(function (child) {
+                        return Number(child.ParentHeaderId) ===
+                            Number(header.HeaderId);
+                    })) {
 
-                if (row.AssetDetail) {
+                    var detail = header.AssetDetail || {};
 
-                    total +=
-                        parseFloat(row.AssetDetail[fieldName]) || 0;
-
+                    total += Number(detail[field]) || 0;
                 }
 
             });
 
             return total;
-
         };
 
-
-        // ------------------------------------------------
-        // CLASSIFICATION SUMMARY
-        // ------------------------------------------------
+        // ============================================
+        // 10. CALCULATE CLASSIFICATION SUMMARY
+        // ============================================
 
         $scope.CalculateSummary = function () {
 
-            var categories = [
+            var summaryFields = [
 
                 {
-                    Category: 'Standard Assets',
+                    Category: 'Standard',
                     Field: 'StandardAmount',
-                    Rate: 0.25
+                    Rate: 0
                 },
                 {
-                    Category: 'Sub-Standard Assets (<= 12 Months)',
+                    Category: 'Sub-Standard',
                     Field: 'SubStandardAmount',
-                    Rate: 10
+                    Rate: 0
                 },
                 {
-                    Category: 'Doubtful-I (1 to 3 Years NPA)',
+                    Category: 'Doubtful-I',
                     Field: 'DoubtfulIAmount',
-                    Rate: 20
+                    Rate: 0
                 },
                 {
-                    Category: 'Doubtful-II (3 to 5 Years NPA)',
+                    Category: 'Doubtful-II',
                     Field: 'DoubtfulIIAmount',
-                    Rate: 30
+                    Rate: 0
                 },
                 {
-                    Category: 'Doubtful-III (Above 5 Years NPA)',
+                    Category: 'Doubtful-III',
                     Field: 'DoubtfulIIIAmount',
-                    Rate: 100
+                    Rate: 0
                 },
                 {
-                    Category: 'Loss Assets',
+                    Category: 'Loss Asset',
                     Field: 'LossAssetAmount',
-                    Rate: 100
+                    Rate: 0
                 }
 
             ];
 
-            var rows = $scope.GetAllAssetRows();
-
             $scope.SummaryList = [];
 
-            angular.forEach(categories, function (category) {
+            angular.forEach(summaryFields, function (item) {
 
-                var outstanding = 0;
                 var accountCount = 0;
+                var outstanding = 0;
 
-                angular.forEach(rows, function (row) {
+                angular.forEach($scope.HeaderList, function (header) {
 
-                    var amount = 0;
-
-                    if (row.AssetDetail) {
-
-                        amount =
-                            parseFloat(
-                                row.AssetDetail[category.Field]
-                            ) || 0;
-
+                    if (!header.ParentHeaderId ||
+                        Number(header.ParentHeaderId) === 0) {
+                        return;
                     }
 
-                    outstanding += amount;
+                    var hasChildren = $scope.HeaderList.some(
+                        function (child) {
+                            return Number(child.ParentHeaderId) ===
+                                Number(header.HeaderId);
+                        }
+                    );
+
+                    if (hasChildren) {
+                        return;
+                    }
+
+                    var detail = header.AssetDetail || {};
+
+                    var amount = Number(detail[item.Field]) || 0;
 
                     if (amount > 0) {
                         accountCount++;
                     }
 
+                    outstanding += amount;
+
                 });
 
                 var provisionRequired =
-                    outstanding * category.Rate / 100;
-
-                // Old provision is currently not stored in the detail table.
-                var oldProvision = 0;
+                    outstanding * item.Rate / 100;
 
                 $scope.SummaryList.push({
 
-                    Category: category.Category,
+                    Category: item.Category,
+
                     AccountCount: accountCount,
+
                     Outstanding: outstanding,
-                    Rate: category.Rate,
+
+                    Rate: item.Rate,
+
                     ProvisionRequired: provisionRequired,
-                    OldProvision: oldProvision,
-                    RequiredProvision:
-                        Math.max(0, provisionRequired - oldProvision)
+
+                    OldProvision: 0,
+
+                    RequiredProvision: provisionRequired
 
                 });
 
@@ -504,187 +403,222 @@ AssetClassificationMod.controller(
 
         };
 
+        // ============================================
+        // 11. SUMMARY TOTAL
+        // ============================================
 
-        // ------------------------------------------------
-        // SUMMARY TOTAL
-        // ------------------------------------------------
-
-        $scope.GetSummaryTotal = function (fieldName) {
+        $scope.GetSummaryTotal = function (field) {
 
             var total = 0;
 
             angular.forEach($scope.SummaryList, function (item) {
 
-                total += parseFloat(item[fieldName]) || 0;
+                total += Number(item[field]) || 0;
 
             });
 
             return total;
+        };
+
+        // ============================================
+        // 12. SELECT VIEW TAB
+        // ============================================
+
+        $scope.SelectViewTab = function (tabNo) {
+
+            $scope.SelectedViewTab = tabNo;
+
+            $scope.CalculateSummary();
 
         };
 
+        // ============================================
+        // 13. VALIDATE DETAILS
+        // ============================================
 
-        // ------------------------------------------------
-        // PREPARE SAVE DETAILS
-        // ------------------------------------------------
+        $scope.ValidateAssetDetails = function () {
 
-        $scope.GetAssetClassificationSaveDetails = function () {
+            var isValid = true;
+
+            angular.forEach($scope.HeaderList, function (header) {
+
+                if (!header.ParentHeaderId ||
+                    Number(header.ParentHeaderId) === 0) {
+                    return;
+                }
+
+                var hasChildren = $scope.HeaderList.some(
+                    function (child) {
+                        return Number(child.ParentHeaderId) ===
+                            Number(header.HeaderId);
+                    }
+                );
+
+                if (hasChildren) {
+                    return;
+                }
+
+                var detail = header.AssetDetail || {};
+
+                var classifiedTotal =
+                    (Number(detail.StandardAmount) || 0) +
+                    (Number(detail.SubStandardAmount) || 0) +
+                    (Number(detail.DoubtfulIAmount) || 0) +
+                    (Number(detail.DoubtfulIIAmount) || 0) +
+                    (Number(detail.DoubtfulIIIAmount) || 0) +
+                    (Number(detail.LossAssetAmount) || 0);
+
+                var outstanding =
+                    (Number(detail.Principal) || 0) +
+                    (Number(detail.Interest) || 0);
+
+                if (classifiedTotal > outstanding) {
+                    isValid = false;
+                }
+
+            });
+
+            if (!isValid) {
+
+                alert(
+                    'Classification amount cannot be greater than ' +
+                    'Principal + Interest outstanding.'
+                );
+
+            }
+
+            return isValid;
+        };
+
+        // ============================================
+        // 14. PREPARE SAVE DATA
+        // ============================================
+
+        $scope.PrepareSaveData = function () {
 
             var details = [];
 
-            var rows = $scope.GetAllAssetRows();
+            angular.forEach($scope.HeaderList, function (header) {
 
-            angular.forEach(rows, function (row) {
+                if (!header.ParentHeaderId ||
+                    Number(header.ParentHeaderId) === 0) {
+                    return;
+                }
 
-                var item = row.AssetDetail ||
-                    $scope.GetEmptyAssetDetail(row.HeaderId);
+                var hasChildren = $scope.HeaderList.some(
+                    function (child) {
+                        return Number(child.ParentHeaderId) ===
+                            Number(header.HeaderId);
+                    }
+                );
+
+                if (hasChildren) {
+                    return;
+                }
+
+                var detail = header.AssetDetail || {};
 
                 details.push({
 
-                    HeaderId: row.HeaderId,
+                    HeaderId: header.HeaderId,
+
+                    AssetClassificationId:
+                        detail.AssetClassificationId || 0,
 
                     NatureOfFacility:
-                        item.NatureOfFacility || '',
+                        detail.NatureOfFacility || '',
 
-                    DateOfAdvance: item.DateOfAdvance
-                        ? item.DateOfAdvance.toISOString().substring(0, 10)
+                    DateOfAdvance: detail.DateOfAdvance
+                        ? new Date(detail.DateOfAdvance)
+                            .toISOString()
+                            .split('T')[0]
                         : null,
 
-                    Principal:
-                        parseFloat(item.Principal) || 0,
+                    Principal: Number(detail.Principal) || 0,
 
-                    Interest:
-                        parseFloat(item.Interest) || 0,
+                    Interest: Number(detail.Interest) || 0,
 
                     TotalOverdue:
-                        parseFloat(item.TotalOverdue) || 0,
+                        Number(detail.TotalOverdue) || 0,
 
                     PeriodOfOutstanding:
-                        item.PeriodOfOutstanding
-                            ? parseInt(item.PeriodOfOutstanding, 10)
-                            : null,
+                        Number(detail.PeriodOfOutstanding) || 0,
 
                     StandardAmount:
-                        parseFloat(item.StandardAmount) || 0,
+                        Number(detail.StandardAmount) || 0,
 
                     SubStandardAmount:
-                        parseFloat(item.SubStandardAmount) || 0,
+                        Number(detail.SubStandardAmount) || 0,
 
                     DoubtfulIAmount:
-                        parseFloat(item.DoubtfulIAmount) || 0,
+                        Number(detail.DoubtfulIAmount) || 0,
 
                     DoubtfulIIAmount:
-                        parseFloat(item.DoubtfulIIAmount) || 0,
+                        Number(detail.DoubtfulIIAmount) || 0,
 
                     DoubtfulIIIAmount:
-                        parseFloat(item.DoubtfulIIIAmount) || 0,
+                        Number(detail.DoubtfulIIIAmount) || 0,
 
                     LossAssetAmount:
-                        parseFloat(item.LossAssetAmount) || 0
+                        Number(detail.LossAssetAmount) || 0
 
                 });
 
             });
 
-            return details;
-
-        };
-
-
-        // ------------------------------------------------
-        // COMMON SAVE FUNCTION
-        // ------------------------------------------------
-
-        $scope.SaveAssetClassification = function (moveNext) {
-
-            if (!$scope.KVSSSocietyID ||
-                $scope.KVSSSocietyID == 0) {
-
-                alert("Please select society.");
-                return;
-
-            }
-
-            if (!$scope.FinancialYear) {
-
-                alert("Please select financial year.");
-                return;
-
-            }
-
-            var details =
-                $scope.GetAssetClassificationSaveDetails();
-
-            if (!details || details.length == 0) {
-
-                alert("No asset classification headings found.");
-                return;
-
-            }
-
-            var request = {
+            return {
 
                 KVSSId: $scope.KVSSSocietyID,
-                TabId: $scope.SelectedTabId,
+
                 FinancialYear: $scope.FinancialYear,
+
                 Details: details
 
             };
+        };
 
-            $(".se-pre-con").fadeIn("slow");
+        // ============================================
+        // 15. SAVE DATA
+        // ============================================
 
-            $http.post(
-                SiteUrl + "/Auditor/SaveAuditAssetClassificationDetails",
-                request
-            )
-                .success(function (response) {
+        $scope.SaveAssetClassification = function (isFinalSubmit) {
 
-                    $(".se-pre-con").fadeOut("slow");
+            if (!$scope.ValidateAssetDetails()) {
+                return;
+            }
 
-                    if (response.Status == 1) {
+            var saveData = $scope.PrepareSaveData();
 
-                        alert(response.Message);
+            console.log('Asset Classification Save Data:', saveData);
 
-                        $scope.GetAssetClassificationDetails();
+            /*
+                IMPORTANT:
 
-                        if (moveNext) {
-                            $scope.NextStep();
-                        }
+                Connect this function to your actual
+                Save Asset Classification MVC action.
 
-                    }
-                    else {
+                Expected payload:
 
-                        alert(response.Message ||
-                            "Unable to save asset classification.");
+                {
+                    KVSSId: 1,
+                    FinancialYear: '2025-26',
+                    Details: [...]
+                }
 
-                    }
+                The GET action supplied in your question
+                is only for retrieving data.
+            */
 
-                })
-                .error(function () {
-
-                    $(".se-pre-con").fadeOut("slow");
-
-                    alert("Error while saving asset classification.");
-
-                });
+            alert(
+                'Save API is not connected yet. ' +
+                'Please configure the save action.'
+            );
 
         };
 
-
-        // ------------------------------------------------
-        // SAVE & NEXT
-        // ------------------------------------------------
-
-        $scope.SaveAndNext = function () {
-
-            $scope.SaveAssetClassification(true);
-
-        };
-
-
-        // ------------------------------------------------
-        // SAVE AS DRAFT
-        // ------------------------------------------------
+        // ============================================
+        // 16. SAVE AS DRAFT
+        // ============================================
 
         $scope.SaveAsDraft = function () {
 
@@ -692,40 +626,67 @@ AssetClassificationMod.controller(
 
         };
 
+        // ============================================
+        // 17. SAVE & NEXT
+        // ============================================
 
-        // ------------------------------------------------
-        // NEXT PAGE
-        // ------------------------------------------------
+        $scope.SaveAndNext = function () {
 
-        $scope.NextStep = function () {
+            if ($scope.SelectedViewTab === 1) {
 
-            // Replace this URL with the actual next audit form route.
-            // Do not navigate until the save operation succeeds.
+                $scope.SelectedViewTab = 2;
 
-            // window.location.href =
-            //     SiteUrl + "/Auditor/YourNextAuditForm";
+                $scope.CalculateSummary();
+
+            } else {
+
+                $scope.SaveAssetClassification(true);
+
+            }
 
         };
 
-
-        // ------------------------------------------------
-        // BACK
-        // ------------------------------------------------
+        // ============================================
+        // 18. BACK
+        // ============================================
 
         $scope.BackTo = function () {
 
-            // Replace this URL with the actual previous audit form route.
+            if ($scope.SelectedViewTab === 2) {
 
-            window.history.back();
+                $scope.SelectedViewTab = 1;
+
+                return;
+            }
+
+            $window.history.back();
 
         };
 
+        // ============================================
+        // INITIAL LOAD - WATCH NG-INIT VALUES
+        // ============================================
 
-        // ------------------------------------------------
-        // INITIALIZE
-        // ------------------------------------------------
+         
 
-        $scope.OnPageLoad();
+
+        // Initial API call after ng-init values are assigned
+        $timeout(function () {
+
+            console.log('KVSSSocietyID:', $scope.KVSSSocietyID);
+            console.log('FinancialYear:', $scope.FinancialYear);
+
+            if ($scope.KVSSSocietyID && $scope.FinancialYear) {
+
+                $scope.GetAuditAssetClassificationDetails();
+
+            } else {
+
+                console.log('KVSS ID or Financial Year is missing.');
+
+            }
+
+        }, 0);
 
     }
-);
+]);

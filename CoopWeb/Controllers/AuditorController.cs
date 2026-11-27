@@ -1644,80 +1644,85 @@ namespace Cooperative.Controllers
 
 
 
-    //    public JsonResult GetAuditAccountHeaderMasterAssestClassification(
-    //int? tabId,
-    //int? kvssId,
-    //string financialYear)
-    //    {
-    //        try
-    //        {
-    //            // Society session
-    //            if (Session["KVSSId"] == null && kvssId.HasValue && kvssId > 0)
-    //            {
-    //                Session["KVSSId"] = kvssId.Value;
-    //            }
+        public JsonResult GetAuditAssetClassificationDetails(
+            int? kvssId,
+            string financialYear,
+            int? tabId)
+        {
+            try
+            {
+                // KVSS Session
+                if (Session["KVSSId"] == null && kvssId > 0)
+                {
+                    Session["KVSSId"] = kvssId;
+                }
+                else if (Session["KVSSId"] != null)
+                {
+                    kvssId = Convert.ToInt32(Session["KVSSId"]);
+                }
 
-    //            if (Session["KVSSId"] != null)
-    //            {
-    //                kvssId = Convert.ToInt32(Session["KVSSId"]);
-    //            }
+                // Financial Year Session
+                if (Session["FinancialYear"] == null &&
+                    !string.IsNullOrEmpty(financialYear))
+                {
+                    Session["FinancialYear"] = financialYear;
+                }
+                else if (Session["FinancialYear"] != null)
+                {
+                    financialYear = Convert.ToString(Session["FinancialYear"]);
+                }
 
-    //            // Financial year session
-    //            if (Session["FinancialYear"] == null &&
-    //                !string.IsNullOrEmpty(financialYear))
-    //            {
-    //                Session["FinancialYear"] = financialYear;
-    //            }
+                // Pass values to View
+                ViewBag.KVSSId = Convert.ToInt32(Session["KVSSId"]);
+                ViewBag.FinancialYear = Session["FinancialYear"];
 
-    //            if (Session["FinancialYear"] != null)
-    //            {
-    //                financialYear = Convert.ToString(Session["FinancialYear"]);
-    //            }
+                // Validate
+                if (!kvssId.HasValue || kvssId.Value <= 0 ||
+                    string.IsNullOrEmpty(financialYear))
+                {
+                    return Json(new
+                    {
+                        TabList = new List<Dictionary<string, object>>(),
+                        HeaderList = new List<Dictionary<string, object>>()
+                    }, JsonRequestBehavior.AllowGet);
+                }
 
-    //            if (!kvssId.HasValue || kvssId.Value <= 0 ||
-    //                string.IsNullOrEmpty(financialYear))
-    //            {
-    //                return Json(new
-    //                {
-    //                    TabList = new List<Dictionary<string, object>>(),
-    //                    HeaderList = new List<Dictionary<string, object>>(),
-    //                    Message = "Society or financial year not found."
-    //                }, JsonRequestBehavior.AllowGet);
-    //            }
+                // Get Data
+                DataSet ds = new AuditorModel()
+                    .GetAuditAccountHeaderMasterAssestClassificationData(
+                        tabId,
+                        kvssId.Value,
+                        financialYear
+                    );
 
-    //            ViewBag.KVSSId = kvssId.Value;
-    //            ViewBag.FinancialYear = financialYear;
+                // Two Result Sets
+                var result = new
+                {
+                    TabList = ds != null && ds.Tables.Count > 0
+                        ? csCommon.ConvertDataTableToDynamic(ds.Tables[0])
+                        : new List<Dictionary<string, object>>(),
 
-    //            DataSet ds = new AuditorModel()
-    //                .GetAuditAssetClassificationDetailsData(
-    //                    tabId,
-    //                    kvssId,
-    //                    financialYear
-    //                );
+                    HeaderList = ds != null && ds.Tables.Count > 1
+                        ? csCommon.ConvertDataTableToDynamic(ds.Tables[1])
+                        : new List<Dictionary<string, object>>()
+                };
 
-    //            var result = new
-    //            {
-    //                TabList = ds != null && ds.Tables.Count > 0
-    //                    ? csCommon.ConvertDataTableToDynamic(ds.Tables[0])
-    //                    : new List<Dictionary<string, object>>(),
+                return Json(result, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    TabList = new List<Dictionary<string, object>>(),
+                    HeaderList = new List<Dictionary<string, object>>(),
+                    Message = ex.Message
+                }, JsonRequestBehavior.AllowGet);
+            }
+        }
 
-    //                HeaderList = ds != null && ds.Tables.Count > 1
-    //                    ? csCommon.ConvertDataTableToDynamic(ds.Tables[1])
-    //                    : new List<Dictionary<string, object>>()
-    //            };
 
-    //            return Json(result, JsonRequestBehavior.AllowGet);
-    //        }
-    //        catch (Exception ex)
-    //        {
-    //            return Json(new
-    //            {
-    //                TabList = new List<Dictionary<string, object>>(),
-    //                HeaderList = new List<Dictionary<string, object>>(),
-    //                Message = ex.Message
-    //            }, JsonRequestBehavior.AllowGet);
-    //        }
-    //    }
+
+
 
     }
 }
